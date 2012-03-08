@@ -1,0 +1,6 @@
+---
+layout: default
+title: Glimpse Version 1.0.0 (Beta 4) Released
+---
+
+Out GitHub page and Maven repository are accessible again, and a new beta release of Glimpse 1.0.0 is available for download. This minor update contains mostly cosmetic and clean-up fixes and license clarifications.
