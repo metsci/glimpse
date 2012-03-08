@@ -189,11 +189,11 @@
     <distributionManagement>
         <repository>
             <id>metron-maven-server</id>
-            <url>${release-deployment-url}</url>
+            <url>${glimpse-release-deployment-url}</url>
         </repository>
         <snapshotRepository>
             <id>metron-maven-server</id>
-            <url>${snapshot-deployment-url}</url>
+            <url>${glimpse-snapshot-deployment-url}</url>
         </snapshotRepository>
     </distributionManagement>
 
