@@ -5,24 +5,24 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>CURRENT-SNAPSHOT</version>
+        <version>1.0.0-beta4</version>
     </parent>
 
     <artifactId>glimpse-core-assembly</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>1.0.0-beta4</version>
     <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>1.0.0-beta4</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>1.0.0-beta4</version>
         </dependency>
     </dependencies>
 
