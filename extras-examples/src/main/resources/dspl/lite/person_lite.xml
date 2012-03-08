@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dspl-lite targetNamespace="http://www.metsci.com/blah/blah/blah"
+           xmlns="http://schemas.metsci.com/dspl-lite/2011">
+
+	<file>person_table.csv</file>
+
+	<columns>
+		<column id="name" type="string" key="true"/>
+		<column id="height" type="float" unit="METERS" name="Name" description="First and Last Name"/>
+		<column id="fastest_speed" unit="METERS_PER_SECOND" parent="{http://www.google.com/publicdata/dataset/google/quantity}magnitude"/>
+	</columns>
+	
+</dspl-lite>

@@ -1,0 +1,458 @@
+Copyright (c) 2012, Metron, Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of Metron, Inc. nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-----------------------------------------------------------------------------
+
+Glimpse binary releases are bundled with a number of dependency jars with
+a variety of licenses. Most are BSD, LGPL, or Apache 2.0 and all allow
+distribution of binary jars. The following enumerates the various Glimpse 
+dependencies and their licences.
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+extras-charts/src/main/java/com/metsci/glimpse/charts/bathy/Conrec.java
+
+relates to the Conrec contouring routine and is coverd by the following license:
+
+
+
+Conrec.java
+
+Created on 5 August 2001, 15:03
+
+Copyright (c) 1996-1997 Nicholas Yue
+
+This software is copyrighted by Nicholas Yue. This code is base on the work of
+Paul D. Bourke CONREC.F routine
+
+The authors hereby grant permission to use, copy, and distribute this
+software and its documentation for any purpose, provided that existing
+copyright notices are retained in all copies and that this notice is included
+verbatim in any distributions. Additionally, the authors grant permission to
+modify this software and its documentation for any purpose, provided that
+such modifications are not distributed without the explicit consent of the
+authors and that existing copyright notices are retained in all copies. Some
+of the algorithms implemented by this software are patented, observe all
+applicable patent law.
+
+IN NO EVENT SHALL THE AUTHORS OR DISTRIBUTORS BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
+OF THE USE OF THIS SOFTWARE, ITS DOCUMENTATION, OR ANY DERIVATIVES THEREOF,
+EVEN IF THE AUTHORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+THE AUTHORS AND DISTRIBUTORS SPECIFICALLY DISCLAIM ANY WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  THIS SOFTWARE IS PROVIDED ON AN
+"AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE
+MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+
+
+-----------------------------------------------------------------------------
+
+The following directories/files:
+
+util/src/main/java/com/metsci/glimpse/jnlu/**
+
+relate to JNLU native library loading and are based, in part,
+on MX Telecom's mx-native-loader, which is covered by the following license:
+
+
+
+Copyright (c) 2008 MX Telecom
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+-----------------------------------------------------------------------------
+
+The following directories/files:
+
+extras-dspl/src/main/resources/dspl/datatypes.dtd
+extras-dspl/src/main/resources/dspl/dspl.xsd
+extras-dspl/src/main/resources/dspl/canonical/google/**
+
+relate to Google's Data Set Publish Language and are covered by the following license:
+
+
+Copyright 2011, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+extras-charts/src/main/java/com/metsci/glimpse/charts/vector/parser/CsvTokenizer.java
+
+is a modified version of Kasper B. Graversen's org.supercsv.io.Tokenizer,
+which is covered by the following license:
+
+Apache License Version 2.0, January 2004 (http://supercsv.sourceforge.net/price.html)
+
+The original source is available at:
+
+http://bethecoder.com/open-source/csv/supercsv-1.52/org/supercsv/io/Tokenizer.java.html
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+util/src/main/java/com/metsci/glimpse/util/math/stochastic/StochasticEngineMersenne.java
+
+is a modified version of the C-program MT19937 by Takuji Nishimura and Makoto Matsumoto,
+which is covered under the following license:
+
+3-Clause BSD
+
+Original source and full license document available at:
+
+http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/mt19937-64.c
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+util/src/main/java/com/metsci/glimpse/util/primitives/algorithms/GenericSorting.java
+
+is a modified version of cern.colt.GenericSorting, which is covered under the following license:
+
+Copyright (C) 1999 CERN - European Organization for Nuclear Research.
+Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose
+is hereby granted without fee, provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear in supporting documentation.
+CERN makes no representations about the suitability of this software for any purpose.
+It is provided "as is" without expressed or implied warranty.
+
+Information regarding Parallel Colt is available at:
+
+https://sites.google.com/site/piotrwendykier/software/parallelcolt
+
+The originial Parallel Colt source is available at:
+
+http://sourceforge.net/projects/parallelcolt/files/parallelcolt/0.9.4/parallelcolt-0.9.4-src.zip/download
+
+-----------------------------------------------------------------------------
+
+Parts of the following files:
+
+util/src/main/java/com/metsci/glimpse/util/jnlu/FileUtils.java
+util/src/main/java/com/metsci/glimpse/util/jnlu/NativeLibUtils.java
+core/src/main/java/com/metsci/glimpse/gl/Jogular.java
+
+are based on Sun's JOGLAppletLauncher, which is covered under the following license:
+
+    Copyright 2005 Lilian Chamontin.
+    contact lilian.chamontin at f r e e . f r
+
+
+    Portions Copyright (c) 2003 Sun Microsystems, Inc. All Rights Reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+    - Redistribution of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    - Redistribution in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    Neither the name of Sun Microsystems, Inc. or the names of
+    contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
+
+    This software is provided "AS IS," without a warranty of any kind. ALL
+    EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
+    INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
+    PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY EXCLUDED. SUN
+    MICROSYSTEMS, INC. ("SUN") AND ITS LICENSORS SHALL NOT BE LIABLE FOR
+    ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
+    DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES. IN NO EVENT WILL SUN OR
+    ITS LICENSORS BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA, OR FOR
+    DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE
+    DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
+    ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
+    SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+    You acknowledge that this software is not designed or intended for use
+    in the design, construction, operation or maintenance of any nuclear
+    facility.
+
+-----------------------------------------------------------------------------
+
+The following files:
+
+core/src/main/resources/shader/antlr/GlslArg.g
+core/src/main/resources/shader/antlr/GlslArg.tokens
+core/src/main/resources/shader/antlr/GlslEs.g
+core/src/main/resources/shader/antlr/GlslEs.tokens
+
+are covered under the following license:
+
+Copyright 2009, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The original files are available at:
+
+http://code.google.com/p/my-glsl/
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+core/src/main/java/com/metsci/glimpse/support/font/AttributedTextRenderer.java
+
+is a modified version of the JOGL class com.sun.opengl.util.j2d.TextRenderer
+
+which is covered by the following license:
+
+2-clause BSD (http://www.opensource.org/licenses/bsd-license.php)
+             (https://github.com/sgothel/gluegen/blob/1.0b06-maint/LICENSE.txt)
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+extras-dspl/src/main/java/com/metsci/glimpse/dspl/util/MD5Checksum.java
+
+is based on code snippets from the article:
+
+http://www.rgagnon.com/javadetails/java-0416.html
+
+According to the site FAQ (http://www.rgagnon.com/varia/faq-e.htm#license)
+while the site is licensed under CC (http://creativecommons.org/licenses/by-nc-sa/2.0/)
+the individual how-to articles have no restriction on use.
+
+
+-----------------------------------------------------------------------------
+
+The following file:
+
+core-examples/src/main/resources/data/us_inc_civil_pop_2009.zip
+
+is derived from the US Census Bureau, 2000 census data.
+
+The file can be obtained from:
+
+http://www.census.gov/popest/data/datasets.html
+
+The US Census Bureau FAQ (https://ask.census.gov/) indicates that US Census
+Bureau data is not protected by copyright (Title 17 U.S.C., Section 105) and can
+be reproduced without restriction.
+
+
+-----------------------------------------------------------------------------
+
+The following directories/files:
+
+extras-examples/src/main/resources/data/*
+
+are originally provided by NOAA Office of Coast Survey and National Geophysical Data Center.
+They are provided without copyright or redistribution restrictions as specified in the
+following download agreements:
+
+http://www.nauticalcharts.noaa.gov/mcd/Raster/download_agreement.htm
+http://www.nauticalcharts.noaa.gov/mcd/enc/download_agreement.htm
+http://www.ngdc.noaa.gov/ngdcinfo/privacy.html#disclaimer
+
+Relevant sections allowing redistribution include:
+
+"NOAA RNC® data may be redistributed, but redistributed NOAA RNC® files are NOT considered official NOAA RNC® products, and do not meet federal chart carriage regulations for regulated vessels."
+
+"Copying of the NOAA RNC® files to any other server or location for further distribution is discouraged unless the following guidelines are followed: 1) this User Agreement is displayed and accepted by anyone accessing the NOAA RNC® data, and 2) a reference to this Web site is included so that anyone accessing the NOAA RNC® data is advised of their origin."
+
+
+-----------------------------------------------------------------------------
+
+The ANTLR Parser Generator (http://www.antlr.org/) is covered by the following license:
+
+[The BSD License]
+Copyright (c) 2010 Terence Parr
+All rights reserved.
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+Neither the name of the author nor the names of its contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-----------------------------------------------------------------------------
+
+Fast Util (http://fastutil.dsi.unimi.it/) is covered by the following license:
+
+Apache License Version 2.0, January 2004 (http://www.apache.org/licenses/LICENSE-2.0)
+
+The full license text is included in: fastutil-6.4.1.jar
+
+-----------------------------------------------------------------------------
+
+Guava (http://code.google.com/p/guava-libraries/) is covered by the following license:
+
+Apache License Version 2.0, January 2004 (http://www.apache.org/licenses/LICENSE-2.0)
+
+-----------------------------------------------------------------------------
+
+Jetty 7 (http://www.eclipse.org/jetty/licenses.php) is covered by the following license:
+
+Apache License Version 2.0, January 2004 (http://www.apache.org/licenses/LICENSE-2.0)
+
+-----------------------------------------------------------------------------
+
+JInput (http://java.net/projects/jinput/) is covered by the following license:
+
+2-clause BSD (http://www.opensource.org/licenses/bsd-license.php)
+
+-----------------------------------------------------------------------------
+
+Joda Time (http://joda-time.sourceforge.net/) is covered by the following license:
+
+Apache License Version 2.0, January 2004 (http://joda-time.sourceforge.net/license.html)
+
+-----------------------------------------------------------------------------
+
+JOGL (http://java.net/projects/jogl/) and Gluegen are covered by the following license:
+
+2-clause BSD (http://www.opensource.org/licenses/bsd-license.php)
+             (https://github.com/sgothel/gluegen/blob/1.0b06-maint/LICENSE.txt)
+
+-----------------------------------------------------------------------------
+
+FindBugs (jsr305-1.3.9.jar) (http://findbugs.sourceforge.net/) is covered by the following license:
+
+GNU Lesser General Public License (http://www.gnu.org/licenses/lgpl.html)
+
+-----------------------------------------------------------------------------
+
+JTS Topology Suite (jts-1.8.jar) (http://www.vividsolutions.com/jts/JTSHome.htm) is covered by the following license:
+
+GNU Lesser General Public License (http://www.gnu.org/licenses/lgpl.html)
+
+-----------------------------------------------------------------------------
+
+Jutils (http://java.net/projects/jutils) is covered by the following license:
+
+2-clause BSD (http://www.opensource.org/licenses/bsd-license.php)
+
+-----------------------------------------------------------------------------
+
+MigLayout (http://www.miglayout.com/) is covered by the following license:
+
+2-clause BSD (http://www.opensource.org/licenses/bsd-license.php)
+
+-----------------------------------------------------------------------------
+
+SWT (http://www.eclipse.org/swt/) is covered by the Eclipse Public License:
+
+http://www.eclipse.org/legal/
+

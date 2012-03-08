@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<geoskinspec xmlns="http://geo.metsci.com"   xmlns:xs="http://www.w3.org/2001/XMLSchema-instance">
+
+  <feature>
+    <featuretype>BA010</featuretype> <!-- Coastline shoreline -->
+    <featuretype>BA011</featuretype> <!-- Coastline -->
+    <shapespec>
+      <shapetypespec>Linestring</shapetypespec>
+      <painterspec>
+        <trackpainterspec>
+          <showLines>true</showLines>
+          <showPoints>false</showPoints>
+          <lineColor>
+            <r>0</r> <g>0</g> <b>0</b> <a>.5</a>
+          </lineColor>
+        </trackpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>BE015</featuretype> <!-- DepthContour -->
+    <shapespec>
+      <shapetypespec>Linestring</shapetypespec>
+      <painterspec>
+        <trackpainterspec>
+          <showLines>true</showLines>
+          <showPoints>false</showPoints>
+          <lineColor>
+            <r>.5</r> <g>.5</g> <b>.5</b> <a>.25</a>
+          </lineColor>
+        </trackpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>BE019</featuretype> <!-- DepthArea -->
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <showLines>false</showLines>
+          <fillColor>
+            <!--
+            <r>.7461</r> <g>.8555</g> <b>1.</b> <a>.5</a>
+            -->
+            <r>190</r> <g>218</g> <b>255.</b> <a>128</a>
+
+          </fillColor>
+        </polygonpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>BA030</featuretype> <!-- Island -->
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <fillColor>
+            <r>.7930</r> <g>.8711</g> <b>.5234</b> <a>.5</a>
+          </fillColor>
+        </polygonpainterspec>
+        <annotationpainterspec xs:type="DncAnnotationPainterSpec">
+          <color>
+            <r>0.</r> <g>0.</g> <b>0.</b> <a>.75</a>
+          </color>
+          <font>Helvetical_12</font>
+          <attributeKey>NAM</attributeKey>
+        </annotationpainterspec>
+      </painterspec>
+    </shapespec>
+    <shapespec>
+      <shapetypespec>Linestring</shapetypespec>
+      <painterspec>
+        <trackpainterspec>
+          <showLines>true</showLines>
+          <showPoints>false</showPoints>
+          <lineColor>
+            <r>.7930</r> <g>.8711</g> <b>.5234</b> <a>.5</a>
+          </lineColor>
+        </trackpainterspec>
+        <annotationpainterspec xs:type="DncAnnotationPainterSpec">
+          <color>
+            <r>0.</r> <g>0.</g> <b>0.</b> <a>.75</a>
+          </color>
+          <font>Helvetical_12</font>
+          <attributeKey>NAM</attributeKey>
+        </annotationpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>DA030</featuretype> <!-- LandRegion -->
+    <featuretype>DA031</featuretype> <!-- LandArea-->
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <fillColor>
+            <r>.7930</r> <g>.8711</g> <b>.5234</b> <a>.9</a>
+          </fillColor>
+          <showLines>false</showLines>
+        </polygonpainterspec>
+        <annotationpainterspec xs:type="DncAnnotationPainterSpec">
+          <color>
+            <r>0.</r> <g>0.</g> <b>0.</b> <a>.25</a>
+          </color>
+         <font>Helvetical_10</font>
+          <attributeKey>NAM</attributeKey>
+        </annotationpainterspec>
+      </painterspec>
+    </shapespec>
+    <shapespec>
+      <shapetypespec>Point</shapetypespec>
+      <painterspec>
+        <trackpainterspec>
+          <showLines>true</showLines>
+          <pointColor>
+            <r>.7930</r> <g>.8711</g> <b>.5234</b> <a>.9</a>
+          </pointColor>
+        </trackpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>BA040</featuretype> <!-- Water -->
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <showLines>true</showLines>
+          <lineDotted>true</lineDotted>
+          <fillColor>
+            <r>.7461</r> <g>.8555</g> <b>1.</b> <a>.8</a>
+          </fillColor>
+          <lineColor>
+            <r>.7461</r> <g>.8555</g> <b>1.</b> <a>.8</a>
+          </lineColor>
+        </polygonpainterspec>
+        <annotationpainterspec xs:type="DncAnnotationPainterSpec">
+          <color>
+            <r>0.</r> <g>0.</g> <b>0.</b> <a>.75</a>
+          </color>
+          <font>Helvetical_10</font>
+          <attributeKey>NAM</attributeKey>
+        </annotationpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>BH000</featuretype> <!-- Inland water -->
+    <featuretype>BH080</featuretype> <!-- Lake/ Pond -->
+    <featuretype>BH120</featuretype> <!-- Rapids -->
+    <featuretype>BH130</featuretype> <!-- Reservoir -->
+    <featuretype>BH140</featuretype> <!-- River Stream -->
+    <featuretype>BH141</featuretype> <!-- River bank -->
+    <shapespec>
+      <shapetypespec>Linestring</shapetypespec>
+      <painterspec>
+        <trackpainterspec>
+          <showLines>true</showLines>
+          <showPoints>false</showPoints>
+          <lineColor>
+            <r>.7461</r> <g>.8555</g> <b>1.</b> <a>.8</a>
+          </lineColor>
+        </trackpainterspec>
+      </painterspec>
+    </shapespec>
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <fillColor>
+            <r>.7461</r> <g>.8555</g> <b>1.</b> <a>.8</a>
+          </fillColor>
+          <lineColor>
+            <r>.7461</r> <g>.8555</g> <b>1.</b> <a>.8</a>
+          </lineColor>
+        </polygonpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <!-- feature>
+    <featuretype>Coverage</featuretype>
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <lineColor>
+            <r>1.</r> <g>1.</g> <b>0.</b> <a>.8</a>
+          </lineColor>
+          <lineDotted>true</lineDotted>
+        </polygonpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+-->
+  <feature>
+    <featuretype>FC040</featuretype> <!-- Traffic Separation Scheme System -->
+    <featuretype>FC041</featuretype> <!-- Traffic Separation Scheme (TSS) -->
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <lineWidth>1</lineWidth>
+          <showLines>true</showLines>
+          <fillColor>
+            <r>1</r>
+            <g>0.8</g>
+            <b>0.8</b>
+            <a>1</a>
+          </fillColor>
+          <lineColor>
+            <r>1</r>
+            <g>0.8</g>
+            <b>0.8</b>
+            <a>1</a>
+          </lineColor>
+        </polygonpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+<!--
+    <feature>
+    <featuretype>PrecautionaryArea</featuretype>
+
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <lineWidth>1</lineWidth>
+          <showLines>true</showLines>
+          <fillColor>
+            <r>1</r>
+            <g>0.8</g>
+            <b>0.8</b>
+            <a>1</a>
+          </fillColor>
+          <lineColor>
+            <r>1</r>
+            <g>0.8</g>
+            <b>0.8</b>
+            <a>1</a>
+          </lineColor>
+        </polygonpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature>
+
+  <feature>
+    <featuretype>Fairway</featuretype>
+
+    <shapespec>
+      <shapetypespec>Polygon</shapetypespec>
+      <painterspec>
+        <polygonpainterspec>
+          <fill>true</fill>
+          <lineWidth>1</lineWidth>
+          <showLines>true</showLines>
+          <fillColor>
+            <r>1</r>
+            <g>0.8</g>
+            <b>0.8</b>
+            <a>1</a>
+          </fillColor>
+          <lineColor>
+            <r>1</r>
+            <g>0.8</g>
+            <b>0.8</b>
+            <a>1</a>
+          </lineColor>
+        </polygonpainterspec>
+      </painterspec>
+    </shapespec>
+  </feature-->
+</geoskinspec>
+

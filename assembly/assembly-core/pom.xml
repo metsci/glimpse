@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metsci.glimpse</groupId>
+        <artifactId>glimpse-parent</artifactId>
+        <version>CURRENT-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>glimpse-core-assembly</artifactId>
+    <version>CURRENT-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-core</artifactId>
+            <version>CURRENT-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-core-examples</artifactId>
+            <version>CURRENT-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>compile</includeScope>
+                            <classifier>sources</classifier>
+                            <outputDirectory>${project.build.directory}/sources</outputDirectory>
+			    <excludeGroupIds>antlr,com.google.code.findbugs</excludeGroupIds>
+                            <excludeArtifactIds>gluegen-rt-native-all,jogl-native-all</excludeArtifactIds>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <show>public</show>
+                            <subpackages>com.metsci.glimpse</subpackages>
+                            <sourcepath>${project.build.directory}/sources</sourcepath>
+                            <doctitle>Glimpse Data Visualization Library</doctitle>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/dist.xml</descriptor>
+                            </descriptors>
+                            <finalName>glimpse_core_v${project.version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

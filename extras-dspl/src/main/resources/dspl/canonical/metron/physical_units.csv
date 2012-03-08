@@ -1,0 +1,69 @@
+physical_unit,physical_property,physical_unit_system,unit_text,unit_text_singular,symbol,symbol_position
+KILOMETERS,LENGTH,SI,kilometers,kilometer,km,END
+CENTIMETER,LENGTH,SI,centimeters,centimeter,cm,END
+METERS,LENGTH,SI,meters,meter,m,END
+MILES,LENGTH,US,miles,mile,mi,END
+YARDS,LENGTH,US,yards,yard,yd,END
+FEET,LENGTH,US,feet,foot,ft,END
+INCHES,LENGTH,US,inches,inch,in,END
+FURLONG,LENGTH,US,furlongs,furlong,furlong,END
+ANGSTROMS,LENGTH,NONE,angstroms,angstrom,Å,END
+MICRONS,LENGTH,NONE,microns,micron,micron,END
+INTERNATIONAL_NAUTICAL_MILES,LENGTH,NONE,nautical miles,nautical mile,nm,END
+FATHOMS,LENGTH,NONE,fathoms,fathom,ftm,END
+LIGHT_YEARS,LENGTH,NONE,light years, light year,ly,END
+ASTRONOMICAL_UNIT,LENGTH,NONE,astronomical units,astronomical unit,AU,END
+PARSEC,LENGTH,NONE,parsecs,parcec,pc,END
+YEARS,TIME,NONE,years,year,yr,END
+FORTNIGHTS,TIME,NONE,fortnights,fortnight,fortnights,END
+WEEKS,TIME,NONE,weeks,week,weeks,END
+DAYS,TIME,NONE,days,day,d,END
+HOURS,TIME,NONE,hours,hour,hr,END
+MINUTES,TIME,NONE,minutes,minutes,min,END
+SECONDS,TIME,SI,seconds,second,s,END
+MILLISECOND,TIME,SI,milliseconds,millisecond,ms,END
+METERS_PER_SECOND,SPEED,SI,meters per second,meter per second,m/s,END
+KILOMETERS_PER_HOUR,SPEED,NONE,kilometers per hour,kilometer per hour,kph,END
+MILES_PER_HOUR,SPEED,US,miles per hour, mile per hour,mph,END
+KNOTS,SPEED,NONE,knots,knot,kn,END
+FEET_PER_SECOND,SPEED,NONE,feet per second,foot per second,ft/s,END
+RADIANS,PLANAR_ANGLE,SI,radians,radian,rad,END
+STERADIANS,SOLID_ANGLE,SI,steradians,steradian,sr,END
+DEGREES,PLANAR_ANGLE,NONE,degrees,degree,deg,END
+HERTZ,FREQUENCY,SI,hertz,hertz,Hz,END
+ROTATIONS_PER_MINUTE,FREQUENCY,SI,rotations per minute,rotation per minute,rpm,END
+WATT,POWER,SI,watts,watt,W,END
+JOULE,ENERGY,SI,joules,joule,J,END
+ELECTRON_VOLT,ENERGY,NONE,electronvolts,electronvolt,eV,END
+PASCAL,PRESSURE,SI,pascals,pascal,Pa,END
+POUNDS_PER_SQUARE_INCH,PRESSURE,US,pounds per square inch,pound per square inch,psi,END
+BAR,PRESSURE,US,bars,bar,bar,END
+DECIBAR,PRESSURE,US,decibars,decibar,dbar,END
+NEWTON,FORCE,SI,newtons,newton,N,END
+POUND_FORCE,FORCE,US,pounds,pound,lb,END
+POUND_MASS,MASS,US,pounds,pound,lb,END
+SLUG,MASS,US,slugs,slug,slug,END
+GRAM,MASS,SI,grams,gram,g,END
+KILO_GRAMS,MASS,SI,kilograms,kilogram,kg,END
+UNIFIED_ATOMIC_MASS_UNIT,MASS,SI,unified atomic mass units,unified atomic mass unit,u,END
+DALTON,MASS,NONE,daltons,dalton,Da,END
+TONNE,MASS,SI,tonnes,tonne,t,END
+CANDELA,LUMINOUS_INTENSITY,SI,candelas,candela,cd,END
+MOLE,AMOUNT,SI,moles,mole,mol,END
+AMPERE,CURRENT,SI,amps,amp,I,END
+KELVIN,TEMPERATURE,SI,kelvin,kelvin,K,END
+CELSIUS,TEMPERATURE,NONE,degrees celsius,degree celsius,°C,END
+FAHRENHEIT,TEMPERATURE,US,degrees fahrenheit,degree fahrenheit,°F,END
+KILOGRAMS_PER_CUBIC_METER,DENSITY,SI,kilograms per cubic meter,kilogram per cubic meter,kg/m³,END
+KILOGRAMS_PER_LITER,DENSITY,NONE,kilograms per liter,kilogram per liter,kg/L,END
+GRAMS_PER_MILLILITER,DENSITY,NONE,grams per millilitre,gram per milliliter,g/mL,END
+LITER,VOLUME,SI,liters,liter,L,END
+VOLT,ELECTRIC_POTENTIAL,SI,volts,volt,V,END
+SIEMENS,ELECTRIC_CONDUCTANCE,SI,siemens,siemens,S,END
+SIEMENS_PER_METER,ELECTRICAL_CONDUCTIVITY,SI,siemens per meter,siemens per meter,S/m,END
+OHM,ELECTRIC_RESISTANCE,SI,ohms,ohm,Ω,END
+FARAD,CAPACITANCE,SI,farads,farad,F,END
+COULOMB,ELECTRIC_CHARGE,SI,coulombs,coulomb,C,END
+WEBER,MAGNETIC_FLUX,SI,webers,weber,Wb,END
+TESLA,MAGNETIC_FLUX_DENSITY,SI,teslas,tesla,T,END
+HENRY,INDUCTANCE,SI,henries,henry,H,END

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://geo.metsci.com"
+        xmlns="http://geo.metsci.com"
+        elementFormDefault="qualified">
+
+  <xs:include schemaLocation="geoskin.xsd"/>
+
+<!--
+  <xs:element name="dncskinspec" substitutionGroup="geoskinspec"/>
+
+
+  <xs:element name="dncskinspec">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="dncspec" type="GeoSpec" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+-->
+
+
+  <!--
+  <xs:complexType name="DncSpec">
+    <xs:sequence>
+      <xs:element name="dncobjecttypespec" type="xs:string" maxOccurs="unbounded"/>
+      <xs:element name="shapespec" type="ShapeSpec" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  -->
+
+  <xs:complexType name="DncAnnotationPainterSpec">
+    <xs:complexContent>
+      <xs:extension base="AnnotationPainterSpec">
+        <xs:sequence>
+          <xs:element name="attributeKey" type="xs:string" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

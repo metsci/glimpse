@@ -1,0 +1,555 @@
+/*
+ * Copyright (c) 2012, Metron, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Metron, Inc. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.metsci.glimpse.support.texture;
+
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static java.util.logging.Level.WARNING;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
+
+import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.support.projection.InvertibleProjection;
+import com.metsci.glimpse.support.projection.Projection;
+import java.util.logging.Logger;
+import com.sun.opengl.util.BufferUtil;
+
+public abstract class TextureProjected2D implements DrawableTexture
+{
+    public static final int NUM_DIMENSIONS = 2;
+    public static final int VERTICES_PER_QUAD = 4;
+    public static final int BYTES_PER_FLOAT = 4;
+
+    private static final Logger logger = Logger.getLogger( TextureProjected2D.class.getName( ) );
+
+    // projection defining the mapping from texel (texture index) to vertex coordinate
+    protected Projection projection;
+
+    // buffer to store texture data
+    protected ByteBuffer data;
+
+    // buffer to store vertex and texture coordinate data
+    protected FloatBuffer coordBuffer;
+
+    // whether to compute and use a z coordinate for each vertex
+    protected boolean useVertexZCoord;
+
+    // 2 or 3, depending on useVertexZCoord
+    protected int floatsPerVertex;
+
+    // the number of physical OpenGL textures that this logical texture
+    // was split into (because of maximum texture size limits)
+    protected int numTextures;
+
+    // OpenGL texture data handles (length numTextures)
+    protected int[] textureHandles;
+    // OpenGL vertex coordinate buffer handles (length numTextures)
+    protected int[] vertexCoordHandles;
+    // OpenGL texture coordinate buffer handles (length numTextures)
+    protected int[] texCoordHandles;
+
+    // the X index into data of the bottom left corner of the ith texture
+    protected int[] texStartsX;
+    // the Y index into data of the bottom left corner of the ith texture
+    protected int[] texStartsY;
+
+    // the X size of the data for the ith texture
+    protected int[] texSizesX;
+    // the Y size of the data for the ith texture
+    protected int[] texSizesY;
+
+    // the total number of quads to draw for the ith texture
+    protected int[] texQuadCounts;
+
+    protected ReentrantLock lock = new ReentrantLock( );
+
+    protected boolean glAllocated;
+
+    protected boolean dirty;
+
+    protected boolean projectionDirty;
+
+    protected int dataSizeX;
+    protected int dataSizeY;
+
+    public TextureProjected2D( int dataSizeX, int dataSizeY, boolean useVertexZCoord )
+    {
+        this.useVertexZCoord = useVertexZCoord;
+        this.floatsPerVertex = ( useVertexZCoord ? 3 : 2 );
+
+        this.dataSizeX = dataSizeX;
+        this.dataSizeY = dataSizeY;
+        this.data = newByteBuffer( );
+    }
+
+    protected abstract void prepare_setData( GL gl );
+
+    protected abstract int getRequiredCapacityBytes( );
+
+    protected abstract float getData( int index );
+
+    public double getDataValue( double coordX, double coordY )
+    {
+        lock.lock( );
+        try
+        {
+            Projection projection = getProjection( );
+
+            if ( projection == null ) return 0.0;
+
+            if ( projection instanceof InvertibleProjection )
+            {
+                InvertibleProjection invProjection = ( InvertibleProjection ) projection;
+
+                double fracX = invProjection.getTextureFractionX( coordX, coordY );
+                double fracY = invProjection.getTextureFractionY( coordX, coordY );
+
+                int x = ( int ) Math.floor( fracX * dataSizeX );
+                int y = ( int ) Math.floor( fracY * dataSizeY );
+
+                return getDataValue( x, y );
+            }
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+
+        return 0.0;
+    }
+
+    public float getDataValue( int indexX, int indexY )
+    {
+        lock.lock( );
+        try
+        {
+            if ( indexX < 0 || indexY < 0 || indexX >= dataSizeX || indexY >= dataSizeY ) return 0.0f;
+
+            return getData( indexY * dataSizeX + indexX );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void makeProjectionDirty( )
+    {
+        this.projectionDirty = true;
+    }
+
+    @Override
+    public void makeDirty( )
+    {
+        this.dirty = true;
+    }
+
+    @Override
+    public boolean isDirty( )
+    {
+        return dirty || projectionDirty;
+    }
+
+    @Override
+    public int getNumDimension( )
+    {
+        return NUM_DIMENSIONS;
+    }
+
+    @Override
+    public int getDimensionSize( int n )
+    {
+        switch ( n )
+        {
+        case 0:
+            return dataSizeX;
+        case 1:
+            return dataSizeY;
+        default:
+            return 0;
+        }
+    }
+
+    @Override
+    public boolean prepare( GL gl, int texUnit )
+    {
+        // should we check for dirtiness and allocation before lock to speed up?
+        lock.lock( );
+        try
+        {
+            if ( !glAllocated )
+            {
+                allocate_genHandles( gl );
+            }
+
+            gl.glActiveTexture( getGLTextureUnit( texUnit ) );
+
+            gl.glEnable( GL.GL_TEXTURE_2D );
+            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL.GL_BLEND );
+
+            if ( glAllocated && dirty )
+            {
+                prepare_setData( gl );
+                dirty = false;
+            }
+
+            if ( glAllocated && projectionDirty )
+            {
+                prepare_setCoords( gl );
+                projectionDirty = false;
+
+            }
+
+            return !isDirty( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    @Override
+    public void draw( GL gl, int texUnit )
+    {
+        boolean ready = prepare( gl, texUnit );
+
+        if ( !ready )
+        {
+            logger.log( WARNING, "Unable to make ready." );
+            return;
+        }
+
+        gl.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
+        gl.glPolygonMode( GL.GL_FRONT, GL.GL_FILL );
+
+        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL.GL_TEXTURE_COORD_ARRAY );
+
+        try
+        {
+            for ( int i = 0; i < numTextures; i++ )
+            {
+                gl.glBindTexture( getGLTextureDim( NUM_DIMENSIONS ), textureHandles[i] );
+
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
+                gl.glVertexPointer( floatsPerVertex, GL.GL_FLOAT, 0, 0 );
+
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, texCoordHandles[i] );
+                gl.glTexCoordPointer( 2, GL.GL_FLOAT, 0, 0 );
+
+                int vertexCount = VERTICES_PER_QUAD * texQuadCounts[i];
+                gl.glDrawArrays( GL.GL_QUADS, 0, vertexCount );
+            }
+        }
+        finally
+        {
+            gl.glDisableClientState( GL.GL_VERTEX_ARRAY );
+            gl.glDisableClientState( GL.GL_TEXTURE_COORD_ARRAY );
+        }
+    }
+
+    @Override
+    public void dispose( GLContext context )
+    {
+        GL gl = context.getGL( );
+
+        if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
+
+        if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
+
+        if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
+    }
+
+    protected void allocate_genHandles( GL gl )
+    {
+        if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
+
+        if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
+
+        if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
+
+        int maxTextureSize = getMaxGLTextureSize( gl );
+
+        int textureCountX = dataSizeX / maxTextureSize;
+        int textureCountY = dataSizeY / maxTextureSize;
+
+        if ( dataSizeX % maxTextureSize != 0 ) textureCountX++;
+        if ( dataSizeY % maxTextureSize != 0 ) textureCountY++;
+
+        numTextures = textureCountX * textureCountY;
+
+        if ( numTextures == 0 || projection == null ) return;
+
+        textureHandles = new int[numTextures];
+        gl.glGenTextures( numTextures, textureHandles, 0 );
+
+        vertexCoordHandles = new int[numTextures];
+        gl.glGenBuffers( numTextures, vertexCoordHandles, 0 );
+
+        texCoordHandles = new int[numTextures];
+        gl.glGenBuffers( numTextures, texCoordHandles, 0 );
+
+        texStartsX = new int[numTextures];
+        texStartsY = new int[numTextures];
+        texSizesX = new int[numTextures];
+        texSizesY = new int[numTextures];
+        texQuadCounts = new int[numTextures];
+
+        int index = 0;
+        for ( int x = 0; x < textureCountX; x++ )
+        {
+            for ( int y = 0; y < textureCountY; y++ )
+            {
+                int startX = x * maxTextureSize;
+                int startY = y * maxTextureSize;
+                int endX = Math.min( startX + maxTextureSize, dataSizeX );
+                int endY = Math.min( startY + maxTextureSize, dataSizeY );
+                int sizeX = endX - startX;
+                int sizeY = endY - startY;
+
+                texStartsX[index] = startX;
+                texStartsY[index] = startY;
+
+                texSizesX[index] = sizeX;
+                texSizesY[index] = sizeY;
+
+                texQuadCounts[index] = getQuadCountForTexture( index, startX, startY, sizeX, sizeY );
+
+                index++;
+            }
+        }
+
+        glAllocated = true;
+
+        makeDirty( );
+        makeProjectionDirty( );
+    }
+
+    public static int getMaxGLTextureSize( GL gl )
+    {
+        int[] result = new int[1];
+        gl.glGetIntegerv( GL.GL_MAX_TEXTURE_SIZE, result, 0 );
+        return result[0];
+    }
+
+    protected int getQuadCountForTexture( int texIndex, int texStartX, int texStartY, int texSizeX, int texSizeY )
+    {
+        int quadCountX = projection.getSizeX( texSizeX );
+        int quadCountY = projection.getSizeY( texSizeY );
+        return quadCountX * quadCountY;
+    }
+
+    protected void prepare_setCoords( GL gl )
+    {
+        float[] temp = new float[floatsPerVertex];
+
+        for ( int i = 0; i < numTextures; i++ )
+        {
+            int projectFloats = texQuadCounts[i] * VERTICES_PER_QUAD * floatsPerVertex;
+            if ( coordBuffer == null || coordBuffer.capacity( ) < projectFloats ) coordBuffer = BufferUtil.newFloatBuffer( projectFloats );
+
+            coordBuffer.rewind( );
+            putVerticesCoords( i, texStartsX[i], texStartsY[i], texSizesX[i], texSizesY[i], temp );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, coordBuffer.rewind( ), GL.GL_STATIC_DRAW );
+
+            coordBuffer.rewind( );
+            putVerticesTexCoords( i, texStartsX[i], texStartsY[i], texSizesX[i], texSizesY[i] );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, texCoordHandles[i] );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, coordBuffer.rewind( ), GL.GL_STATIC_DRAW );
+        }
+    }
+
+    protected void putVerticesCoords( int texIndex, int texStartX, int texStartY, int texSizeX, int texSizeY, float[] temp )
+    {
+        int quadCountX = projection.getSizeX( texSizeX );
+        int quadCountY = projection.getSizeY( texSizeY );
+
+        for ( int x = 0; x < quadCountX; x++ )
+        {
+            double texFracX0 = x / ( double ) quadCountX;
+            double texFracX1 = ( x + 1 ) / ( double ) quadCountX;
+
+            for ( int y = 0; y < quadCountY; y++ )
+            {
+                double texFracY0 = y / ( double ) quadCountY;
+                double texFracY1 = ( y + 1 ) / ( double ) quadCountY;
+
+                putVertexCoords( texIndex, texFracX0, texFracY0, temp );
+                putVertexCoords( texIndex, texFracX1, texFracY0, temp );
+                putVertexCoords( texIndex, texFracX1, texFracY1, temp );
+                putVertexCoords( texIndex, texFracX0, texFracY1, temp );
+            }
+        }
+    }
+
+    protected void putVertexCoords( int texIndex, double texFracX, double texFracY, float[] temp )
+    {
+        double dataFracX = ( texStartsX[texIndex] + texSizesX[texIndex] * texFracX ) / dataSizeX;
+        double dataFracY = ( texStartsY[texIndex] + texSizesY[texIndex] * texFracY ) / dataSizeY;
+
+        if ( useVertexZCoord )
+        {
+            projection.getVertexXYZ( dataFracX, dataFracY, temp );
+            coordBuffer.put( temp[0] ).put( temp[1] ).put( temp[2] );
+        }
+        else
+        {
+            projection.getVertexXY( dataFracX, dataFracY, temp );
+            coordBuffer.put( temp[0] ).put( temp[1] );
+        }
+    }
+
+    protected void putVerticesTexCoords( int texIndex, int texStartX, int texStartY, int texSizeX, int texSizeY )
+    {
+        int quadCountX = projection.getSizeX( texSizeX );
+        int quadCountY = projection.getSizeY( texSizeY );
+
+        for ( int x = 0; x < quadCountX; x++ )
+        {
+            double texFracX0 = x / ( double ) quadCountX;
+            double texFracX1 = ( x + 1 ) / ( double ) quadCountX;
+
+            for ( int y = 0; y < quadCountY; y++ )
+            {
+                double texFracY0 = y / ( double ) quadCountY;
+                double texFracY1 = ( y + 1 ) / ( double ) quadCountY;
+
+                putVertexTexCoords( texIndex, texFracX0, texFracY0 );
+                putVertexTexCoords( texIndex, texFracX1, texFracY0 );
+                putVertexTexCoords( texIndex, texFracX1, texFracY1 );
+                putVertexTexCoords( texIndex, texFracX0, texFracY1 );
+            }
+        }
+    }
+
+    protected void putVertexTexCoords( int texIndex, double texFracX, double texFracY )
+    {
+        coordBuffer.put( ( float ) texFracX ).put( ( float ) texFracY );
+    }
+
+    protected void prepare_setTexParameters( GL gl )
+    {
+        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
+        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+
+        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP );
+        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP );
+    }
+
+    protected ByteBuffer newByteBuffer( )
+    {
+        return BufferUtil.newByteBuffer( getRequiredCapacityBytes( ) );
+    }
+
+    public boolean isResident( GL gl )
+    {
+        lock.lock( );
+        try
+        {
+            if ( !glAllocated ) return false;
+
+            byte[] resident = new byte[textureHandles.length];
+            gl.glAreTexturesResident( 1, textureHandles, 0, resident, 0 );
+
+            for ( int i = 0; i < resident.length; i++ )
+            {
+                if ( resident[i] <= 0 ) return false;
+            }
+
+            return true;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    /**
+     * Resizes this two dimensional texture to the given new size. This deallocates
+     * any data stored on the graphics card and dirties the texture.
+     *
+     * If the texture size has been made larger, setData( ) or mutate( ) should be
+     * used to provide data for the new larger sections of the data. The dimensions
+     * of the data array argument to set data should be float[dataSizeX][dataSizeY].
+     *
+     * @param dataSizeX the number of texture elements in the 1st, or x, dimension
+     * @param dataSizeY the number of texture elements in the 2nd, or y, dimension
+     */
+    public void resize( int dataSizeX, int dataSizeY )
+    {
+        lock.lock( );
+        try
+        {
+            this.dataSizeX = dataSizeX;
+            this.dataSizeY = dataSizeY;
+
+            this.glAllocated = false;
+
+            if ( this.data == null || this.data.capacity( ) < getRequiredCapacityBytes( ) ) this.data = newByteBuffer( );
+
+            makeDirty( );
+            makeProjectionDirty( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void setProjection( Projection projection )
+    {
+        lock.lock( );
+        try
+        {
+            this.projection = projection;
+            makeProjectionDirty( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public Projection getProjection( )
+    {
+        lock.lock( );
+        try
+        {
+            return this.projection;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+}

@@ -1,0 +1,273 @@
+/*
+ * Copyright (c) 2012, Metron, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Metron, Inc. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.metsci.glimpse.painter.texture;
+
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_TEXTURE_1D;
+import static javax.media.opengl.GL.GL_TEXTURE_2D;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
+
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.shader.Pipeline;
+import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.gl.texture.Texture;
+import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+
+/**
+ * A painter which applies shaders to textures in order to display
+ * dynamically adjustable representations of 2D gridded data.
+ *
+ * @author ulman
+ *
+ */
+public class ShadedTexturePainter extends GlimpsePainter2D
+{
+    protected static final int DEFAULT_DRAWABLE_TEXTURE_UNIT = 0;
+    protected static final int DEFAULT_NONDRAWABLE_TEXTURE_UNIT = 1;
+
+    protected final ReentrantLock lock = new ReentrantLock( );
+
+    protected Set<TextureUnit<Texture>> nonDrawableTextures;
+    protected Set<TextureUnit<DrawableTexture>> drawableTextures;
+
+    // the shader pipeline
+    protected Pipeline pipeline;
+
+    public ShadedTexturePainter( )
+    {
+        this.nonDrawableTextures = new HashSet<TextureUnit<Texture>>( );
+        this.drawableTextures = new HashSet<TextureUnit<DrawableTexture>>( );
+    }
+
+    public void setPipeline( Pipeline pipeline )
+    {
+        lock.lock( );
+        try
+        {
+            this.pipeline = pipeline;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void addDrawableTexture( DrawableTexture texture )
+    {
+        addDrawableTexture( texture, DEFAULT_DRAWABLE_TEXTURE_UNIT );
+    }
+
+    public void addDrawableTexture( DrawableTexture texture, int textureUnit )
+    {
+        lock.lock( );
+        try
+        {
+            this.drawableTextures.add( new TextureUnit<DrawableTexture>( textureUnit, texture ) );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void removeDrawableTexture( DrawableTexture texture )
+    {
+        lock.lock( );
+        try
+        {
+            this.drawableTextures.remove( new TextureUnit<DrawableTexture>( texture ) );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void removeAllDrawableTextures( )
+    {
+        lock.lock( );
+        try
+        {
+            this.drawableTextures.clear( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void addNonDrawableTexture( Texture texture )
+    {
+        addNonDrawableTexture( texture, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+    }
+
+    public void addNonDrawableTexture( Texture texture, int textureUnit )
+    {
+        lock.lock( );
+        try
+        {
+            this.nonDrawableTextures.add( new TextureUnit<Texture>( textureUnit, texture ) );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void removeNonDrawableTexture( Texture texture )
+    {
+        lock.lock( );
+        try
+        {
+            this.nonDrawableTextures.remove( new TextureUnit<Texture>( texture ) );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void removeAllNonDrawableTextures( )
+    {
+        lock.lock( );
+        try
+        {
+            this.nonDrawableTextures.clear( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    @Override
+    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    {
+        GL gl = context.getGL( );
+
+        lock.lock( );
+        try
+        {
+            gl.glLoadIdentity( );
+            gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
+
+            if ( pipeline != null ) pipeline.beginUse( gl );
+
+            for ( TextureUnit<Texture> textureUnit : nonDrawableTextures )
+            {
+                prepare( textureUnit, gl );
+            }
+
+            for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures )
+            {
+                draw( textureUnit, gl );
+            }
+        }
+        finally
+        {
+            try
+            {
+                gl.glDisable( GL_BLEND );
+                gl.glDisable( GL_TEXTURE_2D );
+                gl.glDisable( GL_TEXTURE_1D );
+                if ( pipeline != null ) pipeline.endUse( gl );
+            }
+            finally
+            {
+                lock.unlock( );
+            }
+        }
+    }
+
+    protected void draw( TextureUnit<DrawableTexture> textureUnit, GL gl )
+    {
+        textureUnit.texture.draw( gl, textureUnit.textureUnit );
+    }
+
+    protected void prepare( TextureUnit<Texture> textureUnit, GL gl )
+    {
+        textureUnit.texture.prepare( gl, textureUnit.textureUnit );
+    }
+
+    static class TextureUnit<D extends Texture>
+    {
+        protected int textureUnit;
+        protected D texture;
+
+        public TextureUnit( D texture )
+        {
+            this( 0, texture );
+        }
+
+        public TextureUnit( int textureUnit, D texture )
+        {
+            this.textureUnit = textureUnit;
+            this.texture = texture;
+        }
+
+        public int getTextureUnit( )
+        {
+            return textureUnit;
+        }
+
+        public D getTexture( )
+        {
+            return texture;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            return 31 + ( ( texture == null ) ? 0 : texture.hashCode( ) );
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            TextureUnit<?> other = ( TextureUnit<?> ) obj;
+            if ( texture == null ) return other.texture == null;
+            return texture.equals( other.texture );
+        }
+    }
+
+    @Override
+    public void dispose( GLContext context )
+    {
+        if ( pipeline != null ) pipeline.dispose( context );
+    }
+}

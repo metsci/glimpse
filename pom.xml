@@ -1,0 +1,214 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.metsci.glimpse</groupId>
+    <artifactId>glimpse-parent</artifactId>
+    <version>CURRENT-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Glimpse</name>
+    <description>Glimpse is a library for building dynamic, interactive Java applications for visualizing Big Data.</description>
+    <url>http://glimpse.metsci.com/</url>
+    <licenses>
+        <license>
+            <name>The BSD 3-Clause License</name>
+            <url>http://glimpse.metsci.com/licenses/glimpse-license.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git@github.com:metsci/glimpse.git</connection>
+        <developerConnection>scm:git:git@github.com:metsci/glimpse.git</developerConnection>
+        <url>git@github.com:metsci/glimpse.git</url>
+    </scm>
+    <organization>
+        <name>Metron, Inc.</name>
+        <url>http://www.metsci.com</url>
+    </organization>
+    <developers>
+        <developer>
+            <id>ulman</id>
+            <name>Geoff Ulman</name>
+            <email>ulman@metsci.com</email>
+        </developer>
+        <developer>
+            <id>osborn</id>
+            <name>Bryan Osborn</name>
+            <email>osborn@metsci.com</email>
+        </developer>
+        <developer>
+            <id>hogye</id>
+            <name>Mike Hogye</name>
+            <email>hogye@metsci.com</email>
+        </developer>
+    </developers>
+
+    <modules>
+
+        <module>util</module>
+
+        <module>core</module>
+        <module>core-examples</module>
+
+        <module>extras-charts</module>
+        <module>extras-dspl</module>
+        <module>extras-spacenav</module>
+        <module>extras-swt</module>
+        <module>extras-examples</module>
+
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <configuration>
+                    <basedir>${basedir}</basedir>
+                    <header>${basedir}/LICENSE</header>
+                    <quiet>false</quiet>
+                    <strictCheck>true</strictCheck>
+                    <failIfMissing>false</failIfMissing>
+                    <aggregate>true</aggregate>
+                    <includes>
+                        <include>src/main/java/**</include>
+                    </includes>
+		    <mapping>
+                        <!-- using JAVADOC_STYLE can sometimes cause the license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <excludes>
+                        <exclude>target/**</exclude>
+                        <!-- don't put license header on package descriptions. If no other
+                             javadoc is provided, the first line of the license header
+                             ends up in the javadoc.-->
+                        <exclude>**/package-info.java</exclude>
+                        <!-- these classes have their own license headers -->
+                        <exclude>**/charts/bathy/Conrec.java</exclude>
+                        <exclude>**/charts/bathy/Render.java</exclude>
+                        <exclude>**/CsvTokenizer.java</exclude>
+                        <exclude>**/GenericSorting.java</exclude>
+                        <exclude>**/AttributedTextRenderer.java</exclude>
+                        <exclude>**/MD5Checksum.java</exclude>
+                    </excludes>
+                    <useDefaultExcludes>true</useDefaultExcludes>
+                    <useDefaultMapping>true</useDefaultMapping>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse 
+                    m2e settings only. It has no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <versionRange>[2.1,)</versionRange>
+                                        <goals>
+                                            <goal>resolve</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.1</version>
+            </extension>
+        </extensions>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>metron-maven-server</id>
+            <url>${release-deployment-url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>metron-maven-server</id>
+            <url>${snapshot-deployment-url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>glimpse-releases</id>
+            <url>http://glimpse.metsci.com/maven2/metsci-releases</url>
+        </repository>
+        <repository>
+            <id>glimpse-snapshots</id>
+            <url>http://glimpse.metsci.com/maven2/metsci-snapshots</url>
+        </repository>
+        <repository>
+            <id>glimpse-thirdparty</id>
+            <url>http://glimpse.metsci.com/maven2/thirdparty</url>
+        </repository>
+    </repositories>
+</project>

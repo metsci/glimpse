@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<dspl targetNamespace="http://www.metsci.com/dspl/physical_units" xmlns="http://schemas.google.com/dspl/2010"
+	xmlns:geo="http://www.google.com/publicdata/dataset/google/geo"
+	xmlns:time="http://www.google.com/publicdata/dataset/google/time"
+	xmlns:quantity="http://www.google.com/publicdata/dataset/google/quantity"
+	xmlns:entity="http://www.google.com/publicdata/dataset/google/entity"
+	xmlns:unit="http://www.google.com/publicdata/dataset/google/unit">
+
+	<import namespace="http://www.google.com/publicdata/dataset/google/time" />
+	<import namespace="http://www.google.com/publicdata/dataset/google/quantity" />
+	<import namespace="http://www.google.com/publicdata/dataset/google/entity" />
+	<import namespace="http://www.google.com/publicdata/dataset/google/geo" />
+	<import namespace="http://www.google.com/publicdata/dataset/google/unit" />
+
+	<info>
+		<name>
+			<value xml:lang="en">Physical magnitudes and units</value>
+		</name>
+		<description>
+			<value xml:lang="en">Concepts for describing continuous physical quantities such as length and mass.</value>
+		</description>
+	</info>
+
+	<provider>
+		<name>
+			<value xml:lang="en">Metron Inc.</value>
+		</name>
+		<description>
+			<value xml:lang="en">Metron Inc.</value>
+		</description>
+		<url>
+			<value xml:lang="en">http://www.metsci.com</value>
+		</url>
+	</provider>
+
+	<concepts>
+        <concept id="physical_property" extends="entity:entity">
+            <info>
+                <name>
+                    <value xml:lang="en">Physical property</value>
+                </name>
+                <description>
+                    <value xml:lang="en">Quantifiable physical properties</value>
+                </description>
+            </info>
+            <type ref="concept" />
+            <property id="property_text" type="string"></property>
+            <property id="is_fundamental" type="boolean"></property>
+            <property id="length_dimension" type="integer"></property>
+            <property id="mass_dimension" type="integer"></property>
+            <property id="time_dimension" type="integer"></property>
+            <property id="current_dimension" type="integer"></property>
+            <property id="amount_dimension" type="integer"></property>
+            <property id="luminous_intensity_dimension" type="integer"></property>
+            <property id="planar_angle_dimension" type="integer"></property>
+            <property id="solid_angle_dimension" type="integer"></property>
+            <table ref="physical_properties"/>
+        </concept>
+
+        <concept id="physical_unit_system" extends="entity:entity">
+            <info>
+                <name>Physical unit system</name>
+            </info>
+            <type ref="concept"/>
+            <property id="unit_system_text" type="string"></property>
+            <table ref="physical_unit_systems"/>
+        </concept>
+
+        <concept id="physical_unit" extends="unit:unit">
+            <info>
+                <name>
+                    <value>Physical unit</value>
+                </name>
+            </info>
+            <type ref="concept"/>
+            <property concept="physical_property" isParent="true"></property>
+            <property id="unit_text_singular" type="string"></property>
+            <property concept="physical_unit_system"></property>
+            <table ref="physical_units"/>
+        </concept>
+
+        <concept id="physical_magnitude" extends="quantity:magnitude">
+            <info>
+                <name>
+                    <value>Physical magnitude</value>
+                </name>
+            </info>
+            <type ref="float"/>
+            <attribute id="unit" concept="physical_unit" />
+        </concept>
+	</concepts>
+
+	<tables>
+		<table id="physical_properties">
+		    <column id="physical_property" type="concept" />
+			<column id="property_text" type="string" />
+			<column id="is_fundamental" type="boolean" />
+			<column id="length_dimension" type="integer" />
+			<column id="mass_dimension" type="integer" />
+			<column id="time_dimension" type="integer" />
+			<column id="current_dimension" type="integer" />
+			<column id="amount_dimension" type="integer" />
+			<column id="luminous_intensity_dimension" type="integer" />
+			<column id="planar_angle_dimension" type="integer" />
+			<column id="solid_angle_dimension" type="integer" />
+			<data>
+				<file format="csv" encoding="utf-8">physical_properties.csv</file>
+			</data>
+		</table>
+
+        <table id="physical_unit_systems">
+            <column id="physical_unit_system" type="concept" />
+            <column id="unit_system_text" type="string" />
+            <data>
+                <file format="csv" encoding="utf-8">physical_unit_systems.csv</file>
+            </data>
+        </table>
+
+		<table id="physical_units">
+		    <column id="physical_unit" type="concept" />
+            <column id="physical_property" type="concept" />
+            <column id="physical_unit_system" type="concept" />
+            <column id="unit_text" type="string" />
+            <column id="unit_text_singular" type="string" />
+            <column id="symbol" type="string" />
+            <column id="symbol_position" type="string" />
+            <data>
+                <file format="csv" encoding="utf-8">physical_units.csv</file>
+            </data>
+        </table>
+	</tables>
+
+</dspl>

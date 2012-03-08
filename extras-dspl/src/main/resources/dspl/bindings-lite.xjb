@@ -1,0 +1,13 @@
+<jxb:bindings version="1.0" 
+  xmlns:jxb="http://java.sun.com/xml/ns/jaxb" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+  xmlns:ci="http://jaxb.dev.java.net/plugin/code-injector"
+  jxb:extensionBindingPrefixes="ci">
+    <jxb:bindings schemaLocation="dspl-lite.xsd" node="/xs:schema">
+
+        <jxb:schemaBindings>
+            <jxb:package name="com.metsci.glimpse.support.dspl.lite.schema"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+</jxb:bindings>

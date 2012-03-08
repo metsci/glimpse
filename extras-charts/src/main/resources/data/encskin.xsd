@@ -1,0 +1,442 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://geo.metsci.com"
+        xmlns="http://geo.metsci.com"
+        elementFormDefault="qualified">
+
+  <xs:include schemaLocation="geoskin.xsd"/>
+
+<!--
+  <xs:element name="encskinspec" substitutionGroup="geoskinspec"/>
+
+
+  <xs:element name="encskinspec">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="encspec" type="GeoSpec" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+-->
+
+  <!--
+  for reasons not understood, jaxb does not like starting out the root element this way
+  <xs:element name="skinspec" type="SkinSpec"/>
+
+  <xs:complexType name="SkinSpec">
+    <xs:sequence>
+      <xs:element name="encspec" type="EncSpec" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  -->
+
+<!--
+  <xs:complexType name="EncSpec">
+    <xs:sequence>
+      <xs:element name="encobjecttypespec" type="EncObjectTypeSpec" maxOccurs="unbounded"/>
+      <xs:element name="shapespec" type="ShapeSpec" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+-->
+
+  <xs:complexType name="EncAnnotationPainterSpec">
+    <xs:complexContent>
+      <xs:extension base="AnnotationPainterSpec">
+        <xs:sequence>
+          <xs:element name="attributeKey" type="EncAttributeTypeSpec" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+<!--
+  <xs:simpleType name="EncObjectTypeSpec">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AdministrationAreaNamed"/>
+      <xs:enumeration value="AirportAirfield"/>
+      <xs:enumeration value="AnchorBerth"/>
+      <xs:enumeration value="AnchorageArea"/>
+      <xs:enumeration value="Beacon_Cardinal"/>
+      <xs:enumeration value="Beacon_IsolatedDanger"/>
+      <xs:enumeration value="Beacon_Lateral"/>
+      <xs:enumeration value="Beacon_SafeWater"/>
+      <xs:enumeration value="Beacon_SpecialPurposeGeneral"/>
+      <xs:enumeration value="Berth"/>
+      <xs:enumeration value="Bridge"/>
+      <xs:enumeration value="Building_Single"/>
+      <xs:enumeration value="BuiltUpArea"/>
+      <xs:enumeration value="Buoy_Cardinal"/>
+      <xs:enumeration value="Buoy_Installation"/>
+      <xs:enumeration value="Buoy_Lateral"/>
+      <xs:enumeration value="Buoy_IsolatedDanger"/>
+      <xs:enumeration value="Buoy_SpecialPurposeGeneral"/>
+      <xs:enumeration value="Buoy_SafeWater"/>
+      <xs:enumeration value="Cable_Overhead"/>
+      <xs:enumeration value="CableArea"/>
+      <xs:enumeration value="Canal"/>
+      <xs:enumeration value="Cable_Submarine"/>
+      <xs:enumeration value="CargoTransshipmentArea"/>
+      <xs:enumeration value="CanalBank"/>
+      <xs:enumeration value="CautionArea"/>
+      <xs:enumeration value="Causeway"/>
+      <xs:enumeration value="CoastguardStation"/>
+      <xs:enumeration value="Checkpoint"/>
+      <xs:enumeration value="ContiguousZone"/>
+      <xs:enumeration value="Coastline"/>
+      <xs:enumeration value="NauticalPublicationInformation"/>
+      <xs:enumeration value="Conveyor"/>
+      <xs:enumeration value="HorizontalDatumShiftParameters"/>
+      <xs:enumeration value="Crane"/>
+      <xs:enumeration value="ProductionInformation"/>
+      <xs:enumeration value="ContinentalShelfArea"/>
+      <xs:enumeration value="NavigationalSystemOfMarks"/>
+      <xs:enumeration value="ControlPoint"/>
+      <xs:enumeration value="SoundingDatum"/>
+      <xs:enumeration value="Dam"/>
+      <xs:enumeration value="QualityOfData"/>
+      <xs:enumeration value="Daymark"/>
+      <xs:enumeration value="UnitsOfMeasurementOfData"/>
+      <xs:enumeration value="CurrentNonGravitational"/>
+      <xs:enumeration value="SurveyReliability"/>
+      <xs:enumeration value="CustomZone"/>
+      <xs:enumeration value="DepthArea"/>
+      <xs:enumeration value="VerticalDatumOfData"/>
+      <xs:enumeration value="DepthContour"/>
+      <xs:enumeration value="DeepWaterRouteCenterline"/>
+      <xs:enumeration value="DeepWaterRoutePart"/>
+      <xs:enumeration value="DredgedArea"/>
+      <xs:enumeration value="DryDock"/>
+      <xs:enumeration value="DistanceMark"/>
+      <xs:enumeration value="DockArea"/>
+      <xs:enumeration value="Fairway"/>
+      <xs:enumeration value="ExclusiveEconomicZone"/>
+      <xs:enumeration value="Dyke"/>
+      <xs:enumeration value="DumpingGround"/>
+      <xs:enumeration value="FishingFacility"/>
+      <xs:enumeration value="FisheryZone"/>
+      <xs:enumeration value="FerryRoute"/>
+      <xs:enumeration value="FenceWall"/>
+      <xs:enumeration value="FortifiedStructure"/>
+      <xs:enumeration value="FogSignal"/>
+      <xs:enumeration value="FloatingDock"/>
+      <xs:enumeration value="FishingGround"/>
+      <xs:enumeration value="AccuracyOfData"/>
+      <xs:enumeration value="HarbourAreaAdministrative"/>
+      <xs:enumeration value="CompilationScaleOfData"/>
+      <xs:enumeration value="Gridiron"/>
+      <xs:enumeration value="Coverage"/>
+      <xs:enumeration value="Gate"/>
+      <xs:enumeration value="HorizontalDatumOfData"/>
+      <xs:enumeration value="FreePortArea"/>
+      <xs:enumeration value="InshoreTrafficZone"/>
+      <xs:enumeration value="Lake"/>
+      <xs:enumeration value="LakeShore"/>
+      <xs:enumeration value="LandArea"/>
+      <xs:enumeration value="HarbourFacility"/>
+      <xs:enumeration value="Hulk"/>
+      <xs:enumeration value="IceArea"/>
+      <xs:enumeration value="IncinerationArea"/>
+      <xs:enumeration value="LightFloat"/>
+      <xs:enumeration value="LightVessel"/>
+      <xs:enumeration value="LocalMagneticAnomaly"/>
+      <xs:enumeration value="LockBasin"/>
+      <xs:enumeration value="LandElevation"/>
+      <xs:enumeration value="LandRegion"/>
+      <xs:enumeration value="Landmark"/>
+      <xs:enumeration value="Light"/>
+      <xs:enumeration value="NavigationLine"/>
+      <xs:enumeration value="MooringWarpingFacility"/>
+      <xs:enumeration value="OffshorePlatform"/>
+      <xs:enumeration value="Obstruction"/>
+      <xs:enumeration value="MagneticVariation"/>
+      <xs:enumeration value="LogPond"/>
+      <xs:enumeration value="MilitaryPracticeArea"/>
+      <xs:enumeration value="MarineFarmCulture"/>
+      <xs:enumeration value="Pipeline_Overhead"/>
+      <xs:enumeration value="PipelineArea"/>
+      <xs:enumeration value="Pontoon"/>
+      <xs:enumeration value="Pipeline_SubmarineOnLand"/>
+      <xs:enumeration value="OilBarrier"/>
+      <xs:enumeration value="OffshoreProductionArea"/>
+      <xs:enumeration value="PilotBoardingPlace"/>
+      <xs:enumeration value="Pile"/>
+      <xs:enumeration value="RadarStation"/>
+      <xs:enumeration value="RadarTransponderBeacon"/>
+      <xs:enumeration value="RadarRange"/>
+      <xs:enumeration value="RadarReflector"/>
+      <xs:enumeration value="PylonBridgeSupport"/>
+      <xs:enumeration value="RadarLine"/>
+      <xs:enumeration value="PrecautionaryArea"/>
+      <xs:enumeration value="ProductionStorageArea"/>
+      <xs:enumeration value="RecommendedTrafficLanePart"/>
+      <xs:enumeration value="RescueStation"/>
+      <xs:enumeration value="RecommendedRouteCenterline"/>
+      <xs:enumeration value="RecommendedTrack"/>
+      <xs:enumeration value="Railway"/>
+      <xs:enumeration value="Rapids"/>
+      <xs:enumeration value="RadioCallingInPoint"/>
+      <xs:enumeration value="RadioStation"/>
+      <xs:enumeration value="SeaAreaNamedWaterArea"/>
+      <xs:enumeration value="SandWaves"/>
+      <xs:enumeration value="Runway"/>
+      <xs:enumeration value="Road"/>
+      <xs:enumeration value="RiverBank"/>
+      <xs:enumeration value="River"/>
+      <xs:enumeration value="RetroReflector"/>
+      <xs:enumeration value="RestrictedArea"/>
+      <xs:enumeration value="SlopingGround"/>
+      <xs:enumeration value="SlopeTopline"/>
+      <xs:enumeration value="SiloTank"/>
+      <xs:enumeration value="SignalStation_Warning"/>
+      <xs:enumeration value="SignalStation_Traffic"/>
+      <xs:enumeration value="ShorelineConstruction"/>
+      <xs:enumeration value="SeabedArea"/>
+      <xs:enumeration value="SeaPlaneLandingArea"/>
+      <xs:enumeration value="TidalStreamNonHarmonicPrediction"/>
+      <xs:enumeration value="TidalStreamHarmonicPrediction"/>
+      <xs:enumeration value="TidalStreamTimeSeries"/>
+      <xs:enumeration value="TidalStreamPanelData"/>
+      <xs:enumeration value="TideNonHarmonicPrediction"/>
+      <xs:enumeration value="TideHarmonicPrediction"/>
+      <xs:enumeration value="Tideway"/>
+      <xs:enumeration value="TideTimeSeries"/>
+      <xs:enumeration value="StackedOnStackedUnder"/>
+      <xs:enumeration value="Sounding"/>
+      <xs:enumeration value="SmallCraftFacility"/>
+      <xs:enumeration value="Aggregation"/>
+      <xs:enumeration value="Square"/>
+      <xs:enumeration value="Association"/>
+      <xs:enumeration value="Spring"/>
+      <xs:enumeration value="SubmarineTransitLane"/>
+      <xs:enumeration value="StraightTerritorialSeaBaseline"/>
+      <xs:enumeration value="TerritorialSeaArea"/>
+      <xs:enumeration value="SweptArea"/>
+      <xs:enumeration value="TwoWayRoutePart"/>
+      <xs:enumeration value="UnderwaterRockAwashRock"/>
+      <xs:enumeration value="UnsurveyedArea"/>
+      <xs:enumeration value="Vegetation"/>
+      <xs:enumeration value="WaterTurbulence"/>
+      <xs:enumeration value="Waterfall"/>
+      <xs:enumeration value="WeedKelp"/>
+      <xs:enumeration value="Wreck"/>
+      <xs:enumeration value="TopMark"/>
+      <xs:enumeration value="TrafficSeparationLine"/>
+      <xs:enumeration value="TrafficSeparationSchemeBoundary"/>
+      <xs:enumeration value="TrafficSeparationSchemeCrossing"/>
+      <xs:enumeration value="TrafficSeparationSchemeLanePart"/>
+      <xs:enumeration value="TrafficSeparationSchemeRoundabout"/>
+      <xs:enumeration value="TrafficSeparationZone"/>
+      <xs:enumeration value="Tunnel"/>
+      <xs:enumeration value="TidalStreamFloodEbb"/>
+      <xs:enumeration value="Text"/>
+      <xs:enumeration value="CartographicArea"/>
+      <xs:enumeration value="CartographicLine"/>
+      <xs:enumeration value="CartographicSymbol"/>
+      <xs:enumeration value="Compass"/>
+    </xs:restriction>
+  </xs:simpleType>
+  -->
+  <xs:simpleType name="EncAttributeTypeSpec">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AgencyResponsibleForProduction"/>
+      <xs:enumeration value="BeaconShape"/>
+      <xs:enumeration value="BuildingShape"/>
+      <xs:enumeration value="BuoyShape"/>
+      <xs:enumeration value="BuriedDepth"/>
+      <xs:enumeration value="CallSign"/>
+      <xs:enumeration value="CategoryOfAirportAirfield"/>
+      <xs:enumeration value="CategoryOfAnchorage"/>
+      <xs:enumeration value="CategoryOfBridge"/>
+      <xs:enumeration value="CategoryOfBuiltUpArea"/>
+      <xs:enumeration value="CategoryOfCable"/>
+      <xs:enumeration value="CategoryOfCanal"/>
+      <xs:enumeration value="CategoryOfCardinalMark"/>
+      <xs:enumeration value="CategoryOfCheckpoint"/>
+      <xs:enumeration value="CategoryOfCoastline"/>
+      <xs:enumeration value="CategoryOfConveyor"/>
+      <xs:enumeration value="CategoryOfControlPoint"/>
+      <xs:enumeration value="CategoryOfCrane"/>
+      <xs:enumeration value="CategoryOfCoverage"/>
+      <xs:enumeration value="CategoryOfDistanceMark"/>
+      <xs:enumeration value="CategoryOfDam"/>
+      <xs:enumeration value="CategoryOfDumpingGround"/>
+      <xs:enumeration value="CategoryOfDock"/>
+      <xs:enumeration value="CategoryOfFerry"/>
+      <xs:enumeration value="CategoryOfFenceWall"/>
+      <xs:enumeration value="CategoryOfFogSignal"/>
+      <xs:enumeration value="CategoryOfFishingFacility"/>
+      <xs:enumeration value="CategoryOfGate"/>
+      <xs:enumeration value="CategoryOfFortifiedStructure"/>
+      <xs:enumeration value="CategoryOfHulk"/>
+      <xs:enumeration value="CategoryOfHarbourFacility"/>
+      <xs:enumeration value="CategoryOfLandRegion"/>
+      <xs:enumeration value="CategoryOfLandmark"/>
+      <xs:enumeration value="CategoryOfIce"/>
+      <xs:enumeration value="CategoryOfInstallationBuoy"/>
+      <xs:enumeration value="CategoryOfMarineFarmCulture"/>
+      <xs:enumeration value="CategoryOfMilitaryPracticeArea"/>
+      <xs:enumeration value="CategoryOfLateralMark"/>
+      <xs:enumeration value="CategoryOfLight"/>
+      <xs:enumeration value="CategoryOfObstruction"/>
+      <xs:enumeration value="CategoryOfOffshorePlatform"/>
+      <xs:enumeration value="CategoryOfMooringWarpingFacility"/>
+      <xs:enumeration value="CategoryOfNavigationLine"/>
+      <xs:enumeration value="CategoryOfPilotBoardingPlace"/>
+      <xs:enumeration value="CategoryOfPipelinePipe"/>
+      <xs:enumeration value="CategoryOfOilBarrier"/>
+      <xs:enumeration value="CategoryOfPile"/>
+      <xs:enumeration value="CategoryOfRadarStation"/>
+      <xs:enumeration value="CategoryOfQualityOfData"/>
+      <xs:enumeration value="CategoryOfPylon"/>
+      <xs:enumeration value="CategoryOfProductionArea"/>
+      <xs:enumeration value="CategoryOfRescueStation"/>
+      <xs:enumeration value="CategoryOfRecommendedTrack"/>
+      <xs:enumeration value="CategoryOfRadioStation"/>
+      <xs:enumeration value="CategoryOfRadarTransponderBeacon"/>
+      <xs:enumeration value="CategoryOfSeaArea"/>
+      <xs:enumeration value="CategoryOfRunway"/>
+      <xs:enumeration value="CategoryOfRoad"/>
+      <xs:enumeration value="CategoryOfRestrictedArea"/>
+      <xs:enumeration value="CategoryOfSiloTank"/>
+      <xs:enumeration value="CategoryOfSignalStationWarning"/>
+      <xs:enumeration value="CategoryOfSignalStationTraffic"/>
+      <xs:enumeration value="CategoryOfShorelineConstruction"/>
+      <xs:enumeration value="CategoryOfVegetation"/>
+      <xs:enumeration value="CategoryOfWaterTurbulence"/>
+      <xs:enumeration value="CategoryOfWeedKelp"/>
+      <xs:enumeration value="CategoryOfWreck"/>
+      <xs:enumeration value="CategoryOfSlope"/>
+      <xs:enumeration value="CategoryOfSmallCraftFacility"/>
+      <xs:enumeration value="CategoryOfSpecialPurposeMark"/>
+      <xs:enumeration value="CategoryOfTrafficSeparationScheme"/>
+      <xs:enumeration value="ColourPattern"/>
+      <xs:enumeration value="CommunicationChannel"/>
+      <xs:enumeration value="CompassSize"/>
+      <xs:enumeration value="CompilationDate"/>
+      <xs:enumeration value="CategoryOfZoneOfConfidenceData"/>
+      <xs:enumeration value="CharacterSpacing"/>
+      <xs:enumeration value="CharacterSpecification"/>
+      <xs:enumeration value="Colour"/>
+      <xs:enumeration value="DateEnd"/>
+      <xs:enumeration value="CurrentVelocity"/>
+      <xs:enumeration value="DepthRangeValue1"/>
+      <xs:enumeration value="DateStart"/>
+      <xs:enumeration value="Condition"/>
+      <xs:enumeration value="CompilationScale"/>
+      <xs:enumeration value="ConspicuousVisual"/>
+      <xs:enumeration value="ConspicuousRadar"/>
+      <xs:enumeration value="ExpositionOfSounding"/>
+      <xs:enumeration value="ExhibitionConditionOfLight"/>
+      <xs:enumeration value="Height"/>
+      <xs:enumeration value="Function"/>
+      <xs:enumeration value="DepthUnits"/>
+      <xs:enumeration value="DepthRangeValue2"/>
+      <xs:enumeration value="EstimatedRangeOfTransmission"/>
+      <xs:enumeration value="Elevation"/>
+      <xs:enumeration value="Information"/>
+      <xs:enumeration value="Jurisdiction"/>
+      <xs:enumeration value="HorizontalWidth"/>
+      <xs:enumeration value="IceFactor"/>
+      <xs:enumeration value="HorizontalClearance"/>
+      <xs:enumeration value="HorizontalLength"/>
+      <xs:enumeration value="HeightLengthUnits"/>
+      <xs:enumeration value="HorizontalAccuracy"/>
+      <xs:enumeration value="MultiplicityOfLights"/>
+      <xs:enumeration value="Nationality"/>
+      <xs:enumeration value="LightVisibility"/>
+      <xs:enumeration value="MarksNavigationalSystemOf"/>
+      <xs:enumeration value="LiftingCapacity"/>
+      <xs:enumeration value="LightCharacteristic"/>
+      <xs:enumeration value="JustificationHorizontal"/>
+      <xs:enumeration value="JustificationVertical"/>
+      <xs:enumeration value="PeriodicDateStart"/>
+      <xs:enumeration value="PeriodicDateEnd"/>
+      <xs:enumeration value="Orientation"/>
+      <xs:enumeration value="ObjectName"/>
+      <xs:enumeration value="NoticeToMarinersDate"/>
+      <xs:enumeration value="NatureOfSurfaceQualifyingTerms"/>
+      <xs:enumeration value="NatureOfSurface"/>
+      <xs:enumeration value="NatureOfConstruction"/>
+      <xs:enumeration value="Radius"/>
+      <xs:enumeration value="RadarWaveLength"/>
+      <xs:enumeration value="QualityOfSoundingMeasurement"/>
+      <xs:enumeration value="PublicationReference"/>
+      <xs:enumeration value="Product"/>
+      <xs:enumeration value="ProducingCountry"/>
+      <xs:enumeration value="PilotDistrict"/>
+      <xs:enumeration value="PictorialRepresentation"/>
+      <xs:enumeration value="SectorLimitTwo"/>
+      <xs:enumeration value="SectorLimitOne"/>
+      <xs:enumeration value="SignalFrequency"/>
+      <xs:enumeration value="ShiftParameters"/>
+      <xs:enumeration value="SignalGroup"/>
+      <xs:enumeration value="SignalGeneration"/>
+      <xs:enumeration value="SignalSequence"/>
+      <xs:enumeration value="SignalPeriod"/>
+      <xs:enumeration value="RecordingIndication"/>
+      <xs:enumeration value="RecordingDate"/>
+      <xs:enumeration value="Restriction"/>
+      <xs:enumeration value="ReferenceYearForMagneticVariation"/>
+      <xs:enumeration value="ScaleMinimum"/>
+      <xs:enumeration value="ScaleMaximum"/>
+      <xs:enumeration value="ScaleValueTwo"/>
+      <xs:enumeration value="ScaleValueOne"/>
+      <xs:enumeration value="SurveyDateStart"/>
+      <xs:enumeration value="SurveyType"/>
+      <xs:enumeration value="SymbolScalingFactor"/>
+      <xs:enumeration value="SymbolizationCode"/>
+      <xs:enumeration value="TechniqueOfSoundingMeasurement"/>
+      <xs:enumeration value="TextString"/>
+      <xs:enumeration value="TextualDescription"/>
+      <xs:enumeration value="TidalStreamPanelValues"/>
+      <xs:enumeration value="SoundingAccuracy"/>
+      <xs:enumeration value="SoundingDistanceMaximum"/>
+      <xs:enumeration value="SoundingDistanceMinimum"/>
+      <xs:enumeration value="SourceDate"/>
+      <xs:enumeration value="SourceIndication"/>
+      <xs:enumeration value="Status"/>
+      <xs:enumeration value="SurveyAuthority"/>
+      <xs:enumeration value="SurveyDateEnd"/>
+      <xs:enumeration value="TopmarkDaymarkShape"/>
+      <xs:enumeration value="Tint"/>
+      <xs:enumeration value="TimeStart"/>
+      <xs:enumeration value="TimeEnd"/>
+      <xs:enumeration value="ValueOfLocalMagneticAnomaly"/>
+      <xs:enumeration value="ValueOfDepthContour"/>
+      <xs:enumeration value="ValueOfAnnualChangeInMagneticVariation"/>
+      <xs:enumeration value="TrafficFlow"/>
+      <xs:enumeration value="TideMethodOfTidalPrediction"/>
+      <xs:enumeration value="TideHighAndLowWaterValues"/>
+      <xs:enumeration value="TideAccuracyOfWaterLevel"/>
+      <xs:enumeration value="TidalStreamCurrentTimeSeriesValues"/>
+      <xs:enumeration value="TideValueOfHarmonicConstituents"/>
+      <xs:enumeration value="TideTimeSeriesValues"/>
+      <xs:enumeration value="TideCurrentTimeIntervalOfValues"/>
+      <xs:enumeration value="TideTimeAndHeightDifferences"/>
+      <xs:enumeration value="VerticalLength"/>
+      <xs:enumeration value="WaterLevelEffect"/>
+      <xs:enumeration value="VerticalClearanceSafe"/>
+      <xs:enumeration value="VerticalDatum"/>
+      <xs:enumeration value="CategoryOfTidalStream"/>
+      <xs:enumeration value="PositionalAccuracyUnits"/>
+      <xs:enumeration value="ValueOfNominalRange"/>
+      <xs:enumeration value="ValueOfSounding"/>
+      <xs:enumeration value="ValueOfMagneticVariation"/>
+      <xs:enumeration value="ValueOfMaximumRange"/>
+      <xs:enumeration value="VerticalClearanceClosed"/>
+      <xs:enumeration value="VerticalClearanceOpen"/>
+      <xs:enumeration value="VerticalAccuracy"/>
+      <xs:enumeration value="VerticalClearance"/>
+      <xs:enumeration value="TextualDescriptionInNationalLanguage"/>
+      <xs:enumeration value="InformationInNationalLanguage"/>
+      <xs:enumeration value="ObjectNameInNationalLanguage"/>
+      <xs:enumeration value="PilotDistrictInNationalLanguage"/>
+      <xs:enumeration value="TextStringInNationalLanguage"/>
+      <xs:enumeration value="QualityOfPosition"/>
+      <xs:enumeration value="HorizontalDatum"/>
+      <xs:enumeration value="PositionalAccuracy"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+
