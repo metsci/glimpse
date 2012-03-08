@@ -1,0 +1,7 @@
+---
+layout: default
+title: Welcome to the Glimpse Blog!
+---
+The plan for this blog is to post Glimpse tips, plans for future development, thoughts on OpenGL or Java, and anything else which might be relevant to users of Glimpse.
+
+More coming soon!

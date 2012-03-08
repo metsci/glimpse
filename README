@@ -1,0 +1,12 @@
+=== Installing Jekyll on Ubuntu 10.04
+
+http://help.rubygems.org/discussions/problems/350-installing-rubygems-137-and-jekyll-on-ubuntu-1004
+
+=== To Test Locally
+
+jekyll --server --no-auto --safe
+
+=== Browse
+
+http://localhost:4000
+

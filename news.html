@@ -1,0 +1,27 @@
+---
+layout: default
+title: News
+---
+
+<link href="css/blog.css" rel="stylesheet" type="text/css">
+
+<ul class="posts">
+  {% for post in site.categories.news limit: 15 %}
+    <div class="front">
+      {% capture post_date %}{{ post.date | date: "%Y%m%d" }}{% endcapture %}
+      {% if post_date != prev_post_date %}
+        <div align="right" class="date-container">{{ post.date | date:"%A, %e %B %Y" | upcase }}</div>
+      {% endif %}
+      {% capture prev_post_date %}{{ post.date | date: "%Y%m%d" }}{% endcapture %}
+        <h2><a href={{ post.url }}>{{ post.title }}</a></h2>
+        {{ post.content }}
+    </div>
+    {% if forloop.last == false %}
+      </br>
+      <hr class="front">
+      </br>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<div class="moreinfo"><a href="news_archive.html">Archive</a> - <a href="atom.xml">RSS Feed</a></div>

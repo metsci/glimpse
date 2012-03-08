@@ -1,0 +1,115 @@
+<!-- ############### #### Navigation Bar #### ############### -->
+
+<!-- Link to styles used for our Navigation Bar -->
+<link href="css/navbar.css" rel="stylesheet" type="text/css">
+
+<!-- Link to a file with couple simple JavaScript functions used for our Navigation Bar -->
+<script src="js/navbar.js" language="JavaScript" type="text/javascript"></script>
+
+
+<!-- main nav bar titles -->
+<!-- Note how the the closing angle bracket of each </a> tag runs up against the next <a> tag,
+      to avoid leaving a gap between each menu title and the next one. -->
+      
+<!-- REPLACE each "placeholder.html" URL below with the specific page you want the user
+      to go to when the given menu title is clicked. For example, the first link below
+      is for the "Home" menu title, so you'd probably replace the first URL with index.html. -->
+
+<div class="mynavbar">
+
+<a class="navbartitle" id="home" href="index.html"
+      onMouseOut="HideItem('home_submenu');" 
+      onMouseOver="ShowItem('home_submenu');"
+    >Home</a
+><a class="navbartitle" id="media" href="screenshots.html"
+      onMouseOut="HideItem('media_submenu');" 
+      onMouseOver="ShowItem('media_submenu');"
+    >Media</a
+><a class="navbartitle" id="download" href="download.html"
+      onMouseOut="HideItem('download_submenu');" 
+      onMouseOver="ShowItem('download_submenu');"
+    >Download</a
+><a class="navbartitle" id="help" href="guide.html"
+      onMouseOut="HideItem('help_submenu');" 
+      onMouseOver="ShowItem('help_submenu');"
+    >Help</a
+><a class="navbartitle" id="contribute" href="contribute.html"
+      onMouseOut="HideItem('contribute_submenu');" 
+      onMouseOver="ShowItem('contribute_submenu');"
+    >Contribute</a
+><a class="navbartitle" id="about" href="aboutus.html"
+      onMouseOut="HideItem('about_submenu');" 
+      onMouseOver="ShowItem('about_submenu');"
+    >About Us</a>
+
+<div class="submenu" id="home_submenu" 
+    onMouseOver="ShowItem('home_submenu');" 
+    onMouseOut="HideItem('home_submenu');">
+  <div class="submenubox">
+    <ul>
+      <li><a href="news.html" class="submenlink">News</a></li>
+      <li><a href="blog.html" class="submenlink">Blog</a></li>
+      <li><a href="license.html" class="submenlink">License</a></li>
+  </div>
+</div>
+
+<div class="submenu" id="media_submenu" 
+    onMouseOver="ShowItem('media_submenu');" 
+    onMouseOut="HideItem('media_submenu');">
+  <div class="submenubox">
+    <ul>
+      <li><a href="screenshots.html" class="submenlink">Screenshots</a></li>
+      <li><a href="videos.html" class="submenlink">Videos</a></li>
+  </div>
+</div>
+
+<div class="submenu" id="download_submenu" 
+    onMouseOver="ShowItem('download_submenu');" 
+    onMouseOut="HideItem('download_submenu');">
+  <div class="submenubox">
+    <ul>
+      <li><a href="https://github.com/metsci/glimpse/downloads" class="submenlink">GitHub</a></li>
+      <li><a href="maven.html" class="submenlink">Maven</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="submenu" id="help_submenu" 
+    onMouseOver="ShowItem('help_submenu');" 
+    onMouseOut="HideItem('help_submenu');">
+  <div class="submenubox">
+    <ul>
+      <li><a href="guide.html" class="submenlink">Guide</a></li>
+      <li><a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse" class="submenlink">Forum</a></li>
+      <li><a href="https://github.com/metsci/glimpse/wiki" class="submenlink">Wiki</a></li>
+      <li><a href="apidocs/1.0.x/index.html" class="submenlink">Javadoc</a></li>
+      <li><a href="requirements.html" class="submenlink">Requirements</a></li>
+     </ul>
+  </div>
+</div>
+
+<div class="submenu" id="contribute_submenu" 
+    onMouseOver="ShowItem('contribute_submenu');" 
+    onMouseOut="HideItem('contribute_submenu');">
+  <div class="submenubox">
+    <ul>
+      <li><a href="https://github.com/metsci/glimpse" class="submenlink">GitHub</a></li>
+      <li><a href="https://github.com/metsci/glimpse/issues" class="submenlink">Bug Reports</a></li>
+   </ul>
+  </div>
+</div>
+
+<div class="submenu" id="about_submenu" 
+    onMouseOver="ShowItem('about_submenu');" 
+    onMouseOut="HideItem('about_submenu');">
+  <div class="submenubox">
+    <ul>
+      <li><a href="contributors.html" class="submenlink">Contributors</a></li>
+      <li><a href="http://www.metsci.com" class="submenlink">Metron</a></li>
+   </ul>
+  </div>
+</div>
+
+</div>
+<!-- ################## end of Navigation Bar ################### -->
+

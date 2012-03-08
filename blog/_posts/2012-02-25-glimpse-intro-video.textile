@@ -1,0 +1,12 @@
+---
+layout: default
+title: Glimpse Introduction Video Posted
+---
+<iframe src="http://player.vimeo.com/video/37437090" width="656" height="369" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+<div class="videodetail">(<a href="https://vimeo.com/37437090">Vimeo HD</a> <a href="http://www.youtube.com/watch?v=vgb2NC0KOQk">You Tube</a> <a href="http://glimpse.metsci.com/video/Glimpse_v3.mp4">MP4 Download</a> <a href="videos.html">More Video</a>)</div>
+
+<p>The first Glimpse video is up on Vimeo, You Tube, and the Glimpse website! It is intended to provide a quick (under five minutes) overview of the capabilities Glimpse provides to a Java developer.</p>
+
+<p>For this video, I avoided showing any code, or going into implementation details, in order to keep it short. That said, I would love to put together another video with a more developer oriented walkthrough demonstrating how to build a simple Glimpse application. However, these things aren't quick to put together, so I'm not sure when a developer introduction video will be ready.</p>
+
+<p>In the mean time there are lots of other resources on the site. There's a <a href="guide.html">Getting Started Guide</a> which is incomplete, but growing. The <a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse"> Discussion Forum</a> is a great place to get your questions answered. Finally, hands down the best way to learn about Glimpse is to <a href="download.html">download</a> the source code or fork us on <a href="https://github.com/metsci/glimpse">GitHub</a> and run the <b>over forty</b> simple examples which provide samples of everything you need to know to include Glimpse in your Java application.</p>

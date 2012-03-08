@@ -1,0 +1,46 @@
+---
+layout: default
+title: Maven
+---
+<h2>Maven</h2>
+
+<p>You can use Glimpse with maven by adding the following to your <strong>pom.xml</strong>:</p>
+  <pre>&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.metsci.glimpse&lt;/groupId&gt;
+        &lt;artifactId&gt;glimpse-core&lt;/artifactId&gt;
+        &lt;version&gt;1.0.0-beta3&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</pre>
+
+<p>If you'd like to get the daily build of the development branch (master), use version:</p>
+<pre>        &lt;version&gt;CURRENT-SNAPSHOT&lt;/version&gt;</pre>
+
+<p>The <i>full</i> Glimpse release contains a number of modules which add additional features (and usually additional third-party dependencies) to Glimpse. Each has its own Maven artifact:<p>
+<pre>        &lt;artifactId&gt;glimpse-extras-charts&lt;/artifactId&gt;</pre>
+<pre>        &lt;artifactId&gt;glimpse-extras-dspl&lt;/artifactId&gt;</pre>
+<pre>        &lt;artifactId&gt;glimpse-extras-spacenav&lt;/artifactId&gt;</pre>
+<pre>        &lt;artifactId&gt;glimpse-extras-swt&lt;/artifactId&gt;</pre>
+<pre>        &lt;artifactId&gt;glimpse-extras-examples&lt;/artifactId&gt;</pre>
+
+<p>To browse all available Glimpse Maven artifacts directly: <a href="http://glimpse.metsci.com/maven2/metsci-releases/com/metsci/glimpse/">Releases</a>, <a href="http://glimpse.metsci.com/maven2/metsci-snapshots/com/metsci/glimpse/">Snapshots</a>.
+
+<p>Glimpse is not yet in <a href="http://search.maven.org">Maven Central</a> so you must add <a href="http://glimpse.metsci.com/maven2/">Metron's Maven repository</a> to your project's <strong>pom.xml</strong> or your <strong>settings.xml</strong> in order to download Glimpse artifacts:</p>
+
+
+  <pre>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;glimpse-releases&lt;/id&gt;
+        &lt;url&gt;http://glimpse.metsci.com/maven2/metsci-releases&lt;/url&gt;
+    &lt;/repository&gt;
+    &lt;repository&gt;
+        &lt;id&gt;glimpse-snapshots&lt;/id&gt;
+        &lt;url&gt;http://glimpse.metsci.com/maven2/metsci-snapshots&lt;/url&gt;
+    &lt;/repository&gt;
+    &lt;repository&gt;
+        &lt;id&gt;glimpse-thirdparty&lt;/id&gt;
+        &lt;url&gt;http://glimpse.metsci.com/maven2/thirdparty&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;</pre>
+
+<p>For more information, see the Maven documentation on <a href="http://maven.apache.org/guides/mini/guide-multiple-repositories.html">Setting up Multiple Repositories</a>.

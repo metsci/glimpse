@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
+    {% if page.description %}
+    <meta name="description" content="{{ page.description }}" />
+    {% endif %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="css/root.css" rel="stylesheet" type="text/css">  
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for glimpse.metsci.com" href="atom.xml" />
+    <link href='favicon.ico' rel='icon' type='image/x-icon'/>
+    {% include google_analytics.html %}
+  </head>
+  <body>
+    {% include forkme.html %}
+    <div id="container">
+      {% include navbar.html %}
+      {{ content }}
+   </div>
+   {% include footer.html %}
+  </body>
+</html>
