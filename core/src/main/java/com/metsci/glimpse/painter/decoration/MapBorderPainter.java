@@ -63,6 +63,11 @@ public class MapBorderPainter extends GlimpsePainter2D
         this.ticksY = ticksY;
     }
 
+    public int getBorderSize( )
+    {
+        return borderSize;
+    }
+
     public void setBorderSize( int size )
     {
         borderSize = size;
