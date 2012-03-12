@@ -33,8 +33,10 @@ import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
+import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
@@ -51,10 +53,16 @@ public class TimePlotInfo implements PlotInfo
     protected SimpleTextPainter labelPainter;
     protected BorderPainter borderPainter;
 
+    protected DelegatePainter dataPainter;
+    
     protected StackedTimePlot2D parent;
     protected PlotInfo child;
 
-    public TimePlotInfo( StackedTimePlot2D parent, PlotInfo child, GridPainter gridPainter, NumericXYAxisPainter axisPainter, SimpleTextPainter labelPainter, BorderPainter borderPainter )
+    //@formatter:off
+    public TimePlotInfo( StackedTimePlot2D parent, PlotInfo child,
+                         GridPainter gridPainter, NumericXYAxisPainter axisPainter,
+                         SimpleTextPainter labelPainter, BorderPainter borderPainter,
+                         DelegatePainter dataPainter )
     {
         this.parent = parent;
         this.child = child;
@@ -62,7 +70,9 @@ public class TimePlotInfo implements PlotInfo
         this.axisPainter = axisPainter;
         this.labelPainter = labelPainter;
         this.borderPainter = borderPainter;
+        this.dataPainter = dataPainter;
     }
+    //@formatter:on
 
     public void setBorderColor( float[] rgba )
     {
@@ -118,6 +128,21 @@ public class TimePlotInfo implements PlotInfo
     public StackedTimePlot2D getStackedTimePlot( )
     {
         return parent;
+    }
+   
+    public DelegatePainter getDataPainter( )
+    {
+        return dataPainter;
+    }
+    
+    public void addPainter( GlimpsePainter painter )
+    {
+        this.dataPainter.addPainter( painter );
+    }
+    
+    public void removePainter( GlimpsePainter painter )
+    {
+        this.dataPainter.removePainter( painter );
     }
 
     @Override

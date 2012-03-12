@@ -203,7 +203,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         }
 
         // add the painter to the layout
-        chart.getLayout( ).addPainter( painter );
+        chart.addPainter( painter );
 
         // adjust the axis bounds to fit the data
         setBounds( chart );
