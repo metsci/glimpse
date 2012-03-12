@@ -382,6 +382,10 @@ public class StackedTimePlot2D extends GlimpseLayout
         GridPainter gridPainter = new GridPainter( labelHandler, labelHandler );
         gridPainter.setShowMinorGrid( false );
         layoutInfo.getLayout( ).addPainter( gridPainter );
+        
+        // add a painter for user data
+        DelegatePainter dataPainter = new DelegatePainter( );
+        layoutInfo.getLayout( ).addPainter( dataPainter );
 
         // create a painter to display Y axis tick marks along the left edge of
         // the graph
@@ -404,7 +408,7 @@ public class StackedTimePlot2D extends GlimpseLayout
         BorderPainter borderPainter = new BorderPainter( );
         layoutInfo.getLayout( ).addPainter( borderPainter );
 
-        TimePlotInfo chartLayoutInfo = new TimePlotInfo( this, layoutInfo, gridPainter, axisPainter, labelPainter, borderPainter );
+        TimePlotInfo chartLayoutInfo = new TimePlotInfo( this, layoutInfo, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
 
         if ( timeIsX( ) )
         {
