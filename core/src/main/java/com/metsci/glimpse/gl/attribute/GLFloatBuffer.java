@@ -26,176 +26,53 @@
  */
 package com.metsci.glimpse.gl.attribute;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-
 import java.nio.FloatBuffer;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
 
 import com.sun.opengl.util.BufferUtil;
 
-
-public class GLFloatBuffer
+public class GLFloatBuffer extends GLBuffer
 {
-    protected ReentrantLock lock = new ReentrantLock();
-
-    protected int elementSize; // 1, 2, 3, or 4
-    protected FloatBuffer data;
-
-    protected int glHandle;
-    protected boolean dirty;
-
-    protected GLVertexAttribute boundType;
-    protected int boundGenericIndex;
-
     public GLFloatBuffer( int length, int elementSize )
     {
-        if( elementSize > 4 || elementSize < 1 )
-            throw new IllegalArgumentException( "length must be 1, 2, 3, or 4" );
-
-        this.glHandle = -1;
-        this.dirty = true;
-
-        this.elementSize = elementSize;
-        this.data = BufferUtil.newFloatBuffer( length * elementSize );
-
-        this.boundType = null;
-        this.boundGenericIndex = -1;
+        super( length, elementSize );
     }
 
-    public boolean isDirty( )
+    @Override
+    public final int getGlType( )
     {
-        return dirty;
+        return GL.GL_FLOAT;
     }
 
-    public void makeDirty( )
+    @Override
+    public int getBytesPerElement( )
     {
-        dirty = true;
-    }
-
-    public int getNumVertices( )
-    {
-        return data.limit() / elementSize;
-    }
-
-    public int getMaxVertices( )
-    {
-        return data.capacity() / elementSize;
-    }
-
-    public void bind( GLVertexAttribute type, GL gl )
-    {
-        lock.lock();
-        try
-        {
-            prepare( gl );
-            type.bind( gl, 0, 0 );
-            boundType = type;
-        }
-        finally
-        {
-            lock.unlock();
-        }
-    }
-
-    public void bind( int genericIndex, GL gl )
-    {
-        lock.lock();
-        try
-        {
-            prepare( gl );
-            GLVertexAttribute.bind( gl, genericIndex, elementSize, 0, 0 );
-            boundGenericIndex = genericIndex;
-        }
-        finally
-        {
-            lock.unlock();
-        }
-    }
-
-    public void unbind( GL gl )
-    {
-        lock.lock();
-        try
-        {
-            if( boundType != null )
-            {
-                boundType.unbind( gl );
-                boundType = null;
-            }
-            else if( boundGenericIndex > 0 )
-            {
-                GLVertexAttribute.unbind( gl, boundGenericIndex );
-                boundGenericIndex = -1;
-            }
-        }
-        finally
-        {
-            lock.unlock();
-        }
-    }
-
-    public boolean prepare( GL gl )
-    {
-        lock.lock();
-        try
-        {
-            if( glHandle == -1 )
-            {
-                glHandle = genBuffer( gl );
-                makeDirty();
-            }
-
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, glHandle );
-
-            if( isDirty() )
-            {
-                gl.glBufferData( GL.GL_ARRAY_BUFFER, data.limit() * BufferUtil.SIZEOF_FLOAT, data.rewind(),
-                                 GL.GL_STATIC_DRAW );
-                dirty = false;
-            }
-
-            return !isDirty();
-        }
-        finally
-        {
-            lock.unlock();
-        }
-    }
-
-    public boolean dispose( GL gl )
-    {
-        lock.lock();
-        try
-        {
-            if( glHandle != -1 )
-            {
-                gl.glDeleteBuffers( 1, new int[] { glHandle }, 0 );
-                glHandle = -1;
-            }
-        }
-        finally
-        {
-            lock.unlock();
-        }
-
-        lock = null;
-        return true;
+        return BufferUtil.SIZEOF_FLOAT;
     }
 
     public void mutate( Mutator mutator )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            mutator.mutate( data, elementSize );
-            data.flip();
-            makeDirty();
+            // asFloatBuffer( ) only creates a view of the remaining data
+            // between position and limit, we want a view of the whole
+            data.clear( );
+            FloatBuffer floatData = data.asFloatBuffer( );
+            
+            mutator.mutate( floatData, elementSize );
+
+            // the limit/position of floatData and data are independent
+            // update data.limit() to reflect changes made to floatData
+            data.position( 0 );
+            data.limit( floatData.limit( ) * getBytesPerElement( ) );
+            
+            makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
