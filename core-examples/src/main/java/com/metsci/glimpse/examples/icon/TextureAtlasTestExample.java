@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2012, Metron, Inc.
  * All rights reserved.
  *
@@ -50,8 +50,17 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
+ * Demonstrates basic usage of the Glimpse TextureAtlas utility class. TextureAtlas
+ * allows icons and images to be defined once using Swing Graphics2D drawing (or
+ * via a BufferedImage). The image or icon is then packed onto an OpenGL texture
+ * and can be efficiently painted onto the screen.
+ * 
+ * TextureAtlas provides basic methods for drawing a single icon from the atlas.
+ * However, when large numbers of icons must be drawn, using
+ * {@link com.metsci.glimpse.support.atlas.painter.IconPainter} is often much
+ * more efficient.
+ * 
  * @author ulman
- *
  */
 public class TextureAtlasTestExample implements GlimpseLayoutProvider
 {
