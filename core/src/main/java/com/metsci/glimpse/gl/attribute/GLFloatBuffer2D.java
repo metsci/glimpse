@@ -40,7 +40,6 @@ public class GLFloatBuffer2D extends GLFloatBuffer
     protected QuadTreeInts xyIndex;
     protected boolean indexEnabled;
 
-
     public GLFloatBuffer2D( int length, boolean indexEnabled )
     {
         super( length, 2 );
@@ -63,13 +62,13 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 return;
             }
 
-            if ( xyIndex == null || updateIndex > data.limit( )/2 )
+            if ( xyIndex == null || updateIndex > getNumVertices( ) )
             {
                 xyIndex = null;
             }
             else
             {
-                for ( int i = updateIndex ; i < data.limit()/2 ;i++ )
+                for ( int i = updateIndex ; i < getNumVertices( ) ;i++ )
                 {
                     xyIndex.remove( i );
                 }
@@ -94,6 +93,8 @@ public class GLFloatBuffer2D extends GLFloatBuffer
 
             if ( xyIndex == null )
             {
+                final FloatBuffer floatData = data.asFloatBuffer( );
+                
                 // mutators should optionally return a list of changed
                 // points to speed this up when only a few points change
                 xyIndex = new QuadTreeInts( MAX_BUCKET_SIZE )
@@ -101,24 +102,24 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                     @Override
                     protected final float x( int i )
                     {
-                        return data.get( i*2 );
+                        return floatData.get( i*2 );
                     }
 
                     @Override
                     protected final float y( int i )
                     {
-                        return data.get( i*2+1 );
+                        return floatData.get( i*2+1 );
                     }
                 };
 
-                  for ( int i = 0 ; i < data.limit()/2 ;i++ )
+                  for ( int i = 0 ; i < getNumVertices( ) ;i++ )
                 {
                     xyIndex.add( i );
                 }
             }
             else
             {
-                  for ( int i = updateIndex ; i < data.limit()/2 ;i++ )
+                  for ( int i = updateIndex ; i < getNumVertices( ) ;i++ )
                 {
                     xyIndex.add( i );
                 }
@@ -140,6 +141,8 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 xyIndex = null;
                 return;
             }
+            
+            final FloatBuffer floatData = data.asFloatBuffer( );
 
             // mutators should optionally return a list of changed
             // points to speed this up when only a few points change
@@ -148,17 +151,17 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 @Override
                 protected final float x( int i )
                 {
-                    return data.get( i*2 );
+                    return floatData.get( i*2 );
                 }
 
                 @Override
                 protected final float y( int i )
                 {
-                    return data.get( i*2+1 );
+                    return floatData.get( i*2+1 );
                 }
             };
 
-            for( int i = 0; i < data.limit()/2; i++ )
+            for( int i = 0; i < getNumVertices( ); i++ )
             {
                 xyIndex.add( i );
             }
@@ -229,9 +232,19 @@ public class GLFloatBuffer2D extends GLFloatBuffer
         try
         {
             pruneIndex( mutator.getUpdateIndex( ) );
-            mutator.mutate( data, elementSize );
+            
+            data.clear( );
+            FloatBuffer floatData = data.asFloatBuffer( );
+            
+            mutator.mutate( floatData, elementSize );
+            
             updateIndex( mutator.getUpdateIndex( ) );
-            data.flip();
+            
+            // the limit/position of floatData and data are independent
+            // update data.limit() to reflect changes made to floatData
+            data.position( 0 );
+            data.limit( floatData.limit( ) * getBytesPerElement( ) );
+            
             makeDirty();
         }
         finally
@@ -245,8 +258,16 @@ public class GLFloatBuffer2D extends GLFloatBuffer
         lock.lock();
         try
         {
-            mutator.mutate( data, elementSize );
-            data.flip();
+            data.clear( );
+            FloatBuffer floatData = data.asFloatBuffer( );
+            
+            mutator.mutate( floatData, elementSize );
+            
+            // the limit/position of floatData and data are independent
+            // update data.limit() to reflect changes made to floatData
+            data.position( 0 );
+            data.limit( floatData.limit( ) * getBytesPerElement( ) );
+            
             createIndex();
 
             makeDirty();
