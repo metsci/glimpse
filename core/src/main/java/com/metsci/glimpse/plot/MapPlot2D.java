@@ -28,6 +28,7 @@ package com.metsci.glimpse.plot;
 
 import java.awt.Font;
 
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.NumericAxisPainter;
 import com.metsci.glimpse.axis.painter.NumericRotatedRightYAxisPainter;
@@ -36,6 +37,7 @@ import com.metsci.glimpse.axis.painter.NumericTopXAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.LatLonAxisLabelHandler;
+import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -57,8 +59,16 @@ public class MapPlot2D extends Plot2D
     protected MapBorderPainter borderPainter;
     protected BackgroundPainter plotBackgroundPainter;
     protected GridPainter gridPainter;
-    protected DelegatePainter contentPainter;
+    protected DelegatePainter mapContentPainter;
     protected CrosshairPainter crosshairPainter;
+
+    /*
+     * In order to have a nice thick map border painter and have it not hide
+     * the content, we'll use the actual axes for the inner map content, but
+     * we'll use linked axes for the outside border.
+     */
+    protected Axis2D outerContentAxis;
+    protected DelegatePainter outerContentPainter;
 
     protected GeoProjection geoProjection;
 
@@ -67,6 +77,7 @@ public class MapPlot2D extends Plot2D
 
     protected GlimpseLayout axisLayoutRightY;
     protected GlimpseLayout axisLayoutTopX;
+    protected GlimpseAxisLayout2D mapContentLayout;
 
     protected NumericAxisPainter painterTopX;
     protected NumericAxisPainter painterRightY;
@@ -81,14 +92,25 @@ public class MapPlot2D extends Plot2D
     }
 
     @Override
+    protected void initializeAxes( )
+    {
+        super.initializeAxes( );
+
+        this.outerContentAxis = getAxis( ).clone( );
+    }
+
+    @Override
     protected void initializePainters( )
     {
-        this.axisLayoutTopX = new GlimpseAxisLayoutX( this, "AxisTopX" );
-        this.axisLayoutRightY = new GlimpseAxisLayoutY( this, "AxisRightX" );
+        this.axisLayoutTopX = new GlimpseAxisLayoutX( this, "AxisTopX", outerContentAxis.getAxisX( ) );
+        this.axisLayoutRightY = new GlimpseAxisLayoutY( this, "AxisRightX", outerContentAxis.getAxisY( ) );
 
-        this.contentPainter = new DelegatePainter( );
+        this.outerContentPainter = new DelegatePainter( );
 
         super.initializePainters( );
+
+        // reset the outer content painter to use the right axes
+        this.axisLayoutXY.setAxis( outerContentAxis );
 
         this.tickTopX = createLabelHandlerTopX( );
         this.tickRightY = createLabelHandlerRightY( );
@@ -108,13 +130,23 @@ public class MapPlot2D extends Plot2D
         this.gridPainter = new GridPainter( tickX, tickY );
         this.axisLayoutXY.addPainter( gridPainter );
 
-        this.axisLayoutXY.addPainter( contentPainter );
-
-        this.crosshairPainter = new CrosshairPainter( );
-        this.axisLayoutXY.addPainter( crosshairPainter );
-
         this.borderPainter = new MapBorderPainter( tickX, tickY );
         this.axisLayoutXY.addPainter( borderPainter );
+
+        /*
+         * Here we'll create a new layout for the map content.
+         */
+        this.mapContentPainter = new DelegatePainter( );
+
+        this.mapContentLayout = new GlimpseAxisLayout2D( axisLayoutXY, getAxis( ) );
+        this.mapContentLayout.setName( "Map" );
+        this.mapContentLayout.addPainter( mapContentPainter );
+
+        this.outerContentPainter.addPainter( mapContentLayout );
+        this.axisLayoutXY.addPainter( outerContentPainter );
+
+        this.crosshairPainter = new CrosshairPainter( );
+        this.outerContentPainter.addPainter( crosshairPainter );
 
         this.setShowAxisMarkerX( false );
         this.setShowAxisMarkerY( false );
@@ -134,6 +166,8 @@ public class MapPlot2D extends Plot2D
 
         attachAxisMouseListener( axisLayoutTopX, listenerTopX );
         attachAxisMouseListener( axisLayoutRightY, listenerRightY );
+
+        attachAxisMouseListener( mapContentLayout, mouseListenerXY );
     }
 
     @Override
@@ -154,6 +188,16 @@ public class MapPlot2D extends Plot2D
         axisLayoutXY.setLayoutData( "cell 1 2 1 1, push, grow" );
 
         axisLayoutZ.setLayoutData( String.format( "cell 3 2 1 1, pushy, growy, width %d!", axisThicknessZ ) );
+
+        /*
+         * This is where the content will be painted. We'll make a gap the size
+         * of the map border. This layout painter is not in the same group as
+         * the layout painters above - it lives inside the axisLayoutXY painter.
+         *
+         * TODO how do we reset this layout each time someone calls
+         * borderPainter.setBorderSize(int)?
+         */
+        mapContentLayout.setLayoutData( String.format("gap %1$d %1$d %1$d %1$d, push, grow", borderPainter.getBorderSize( ) ) );
     }
 
     protected GridAxisLabelHandler createLabelHandlerTopX( )
@@ -354,14 +398,22 @@ public class MapPlot2D extends Plot2D
         tickRightY.setMinorTickCount( count );
     }
 
+    @Override
     public void addPainter( GlimpsePainter painter )
     {
-        contentPainter.addPainter( painter );
+        mapContentPainter.addPainter( painter );
     }
 
+    @Override
     public void removePainter( GlimpsePainter painter )
     {
-        contentPainter.removePainter( painter );
+        mapContentPainter.removePainter( painter );
+    }
+
+    @Override
+    public GlimpseAxisLayout2D getLayoutCenter( )
+    {
+        return mapContentLayout;
     }
 
     public void setPlotBackgroundColor( float[] color )
@@ -369,6 +421,7 @@ public class MapPlot2D extends Plot2D
         plotBackgroundPainter.setColor( color );
     }
 
+    @Override
     public void setBackgroundColor( float[] color )
     {
         backgroundPainter.setColor( color );
