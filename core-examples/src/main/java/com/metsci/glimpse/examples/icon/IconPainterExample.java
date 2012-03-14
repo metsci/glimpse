@@ -97,15 +97,6 @@ public class IconPainterExample implements GlimpseLayoutProvider
                 {
                     iconPainter.addIcon( "group2", "image9", x, y );
                 }
-
-                if ( event.getClickCount( ) > 2 )
-                {
-                    iconPainter.showIconGroup( "group2", false );
-                }
-                else
-                {
-                    iconPainter.showIconGroup( "group2", true );
-                }
             }
 
             @Override
