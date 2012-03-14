@@ -90,6 +90,24 @@ public class CursorTextPainter extends GlimpsePainter2D
     }
 
     /**
+     * Gets the x position that will be annotated. Can be either the selection
+     * center, the mouse or something else entirely.
+     */
+    protected float getPositionX( Axis2D axis )
+    {
+        return ( float) axis.getAxisX( ).getSelectionCenter( );
+    }
+
+    /**
+     * Gets the y position that will be annotated. Can be either the selection
+     * center, the mouse or something else entirely.
+     */
+    protected float getPositionY( Axis2D axis )
+    {
+        return ( float) axis.getAxisY( ).getSelectionCenter( );
+    }
+
+    /**
      * Gets the bounds for the text background.  Just adds a little bit of
      * padding and aligns the rectangles.
      */
@@ -110,8 +128,8 @@ public class CursorTextPainter extends GlimpsePainter2D
         int widthPixels = axis.getAxisX( ).valueToScreenPixel( axis.getMaxX( ) );
         int heightPixels = axis.getAxisY( ).valueToScreenPixel( axis.getMaxY( ) );
 
-        float centerX = ( float ) axis.getAxisX( ).getSelectionCenter( );
-        float centerY = ( float ) axis.getAxisY( ).getSelectionCenter( );
+        float centerX = getPositionX( axis );
+        float centerY = getPositionY( axis );
 
         int centerPixelsX = axis.getAxisX( ).valueToScreenPixel( centerX );
         int centerPixelsY = axis.getAxisY( ).valueToScreenPixel( centerY );
@@ -160,12 +178,12 @@ public class CursorTextPainter extends GlimpsePainter2D
 
     protected String getTextX( Axis2D axis )
     {
-        return String.format( "x: %.2f", axis.getAxisX( ).getSelectionCenter( ) );
+        return String.format( "x: %.2f", getPositionX( axis ) );
     }
 
     protected String getTextY( Axis2D axis )
     {
-        return String.format( "y: %.2f", axis.getAxisY( ).getSelectionCenter( ) );
+        return String.format( "y: %.2f", getPositionY( axis ) );
     }
 
     protected String getTextZ( Axis2D axis )
