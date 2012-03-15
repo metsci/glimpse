@@ -401,7 +401,9 @@ public class StackedTimePlot2D extends GlimpseLayout
         labelPainter.setVerticalPosition( VerticalPosition.Top );
         labelPainter.setFont( FontUtils.getDefaultBold( 9 ), false );
         labelPainter.setPadding( 2 );
-        labelPainter.setText( name );
+        // don't use the plot unique identifier as the label by default, this makes
+        // it too easy to think that the String argument to createPlot() is supposed to be the label
+        labelPainter.setText( "" );
         layoutInfo.getLayout( ).addPainter( labelPainter );
 
         // add a border
