@@ -125,7 +125,7 @@ public class TreeMapExample implements GlimpseLayoutProvider
         Map<String, Integer> stateIdMap = new TreeMap<String, Integer>( );
         Map<String, Integer> countyIdMap = new TreeMap<String, Integer>( );
 
-        InputStream fileStream = StreamOpener.fileThenResource.openForRead( "src/main/resources/data/us_inc_civil_pop_2009.zip" );
+        InputStream fileStream = StreamOpener.resource.openForRead( "data/us_inc_civil_pop_2009.zip" );
 
         ZipInputStream zipStream = new ZipInputStream( fileStream );
         // advance to the first entry

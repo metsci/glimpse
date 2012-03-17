@@ -1,7 +1,6 @@
 package com.metsci.glimpse.examples.webstart;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,28 +17,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 @SuppressWarnings( "serial" )
 public class ExampleRunner extends JSplitPane
 {
-    private JList exampleList;
+    private JTree exampleTree;
     private JTextArea codeArea;
     private JButton runExampleButton;
 
@@ -49,7 +52,7 @@ public class ExampleRunner extends JSplitPane
     {
         setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
-        exampleList = new JList( );
+        exampleTree = new JTree( new DefaultTreeModel( new DefaultMutableTreeNode( "Loading ..." ) ) );
 
         codeArea = new JTextArea( );
         codeArea.setFont( Font.decode( "COURIER" ) );
@@ -58,24 +61,26 @@ public class ExampleRunner extends JSplitPane
         runExampleButton = new JButton( "Run Example" );
         runExampleButton.setEnabled( false );
 
-        exampleList.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
-        exampleList.addListSelectionListener( new ListSelectionListener( )
+        exampleTree.getSelectionModel( ).setSelectionMode( TreeSelectionModel.SINGLE_TREE_SELECTION );
+        exampleTree.addTreeSelectionListener( new TreeSelectionListener( )
         {
             @Override
-            public void valueChanged( ListSelectionEvent e )
+            public void valueChanged( TreeSelectionEvent e )
             {
-                selectClass( ( Class<?> ) exampleList.getSelectedValue( ) );
-            }
-        } );
-        exampleList.setCellRenderer( new DefaultListCellRenderer( )
-        {
-            @Override
-            public Component getListCellRendererComponent( JList list, Object value, int index, boolean isSelected, boolean cellHasFocus )
-            {
-                Class<?> clazz = ( Class<?> ) value;
-                value = clazz.getSimpleName( );
-
-                return super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+                if ( exampleTree.getSelectionCount( ) > 0 )
+                {
+                    TreePath selectionPath = exampleTree.getSelectionPath( );
+                    DefaultMutableTreeNode node = ( DefaultMutableTreeNode ) selectionPath.getLastPathComponent( );
+                    if ( node.getUserObject( ) instanceof Class<?> )
+                    {
+                        Class<?> clazz = ( Class<?> ) node.getUserObject( );
+                        selectClass( clazz );
+                    }
+                    else
+                    {
+                        selectClass( null );
+                    }
+                }
             }
         } );
 
@@ -96,8 +101,9 @@ public class ExampleRunner extends JSplitPane
 
         rightPanel.add( buttonPanel, BorderLayout.SOUTH );
 
-        setLeftComponent( new JScrollPane( exampleList ) );
+        setLeftComponent( new JScrollPane( exampleTree ) );
         setRightComponent( rightPanel );
+        setDividerLocation( 300 );
     }
 
     public void populateExamples( )
@@ -116,14 +122,7 @@ public class ExampleRunner extends JSplitPane
                 try
                 {
                     Collection<Class<?>> classes = get( );
-
-                    DefaultListModel model = new DefaultListModel( );
-                    for ( Class<?> exampleClass : classes )
-                    {
-                        model.addElement( exampleClass );
-                    }
-
-                    exampleList.setModel( model );
+                    exampleTree.setModel( createTreeModel( classes ) );
                 }
                 catch ( Exception e )
                 {
@@ -141,7 +140,7 @@ public class ExampleRunner extends JSplitPane
             protected Void doInBackground( ) throws Exception
             {
                 Method mainMethod = exampleClass.getMethod( "main", String[].class );
-                mainMethod.invoke( null, new Object[] { new String[ 0 ] } );
+                mainMethod.invoke( null, new Object[] { new String[0] } );
                 return null;
             }
 
@@ -160,9 +159,56 @@ public class ExampleRunner extends JSplitPane
         }.execute( );
     }
 
+    private TreeModel createTreeModel( Collection<Class<?>> examples )
+    {
+        Package rootPackage = Package.getPackage( "com.metsci.glimpse.examples" );
+        SimpleNode root = new SimpleNode( rootPackage );
+
+        Map<String, SimpleNode> packageNodes = new TreeMap<String, SimpleNode>( );
+        packageNodes.put( rootPackage.getName( ), root );
+
+        for ( Class<?> example : examples )
+        {
+            Package p = example.getPackage( );
+            SimpleNode packageNode = getPackageNode( p, packageNodes );
+            packageNode.add( new SimpleNode( example ) );
+        }
+
+        return new DefaultTreeModel( root );
+    }
+
+    private SimpleNode getPackageNode( Package p, Map<String, SimpleNode> packageNodes )
+    {
+        SimpleNode node = packageNodes.get( p.getName( ) );
+        if ( node == null )
+        {
+            Package pp = getParentPackage( p );
+            SimpleNode parentNode = getPackageNode( pp, packageNodes );
+            node = new SimpleNode( p );
+            parentNode.add( node );
+
+            packageNodes.put( p.getName( ), node );
+        }
+
+        return node;
+    }
+
+    private Package getParentPackage( Package child )
+    {
+        String name = child.getName( );
+        String parentName = name.substring( 0, name.lastIndexOf( '.' ) );
+        return Package.getPackage( parentName );
+    }
+
     private void selectClass( final Class<?> clazz )
     {
         runExampleButton.setEnabled( false );
+        if ( clazz == null )
+        {
+            codeArea.setText( null );
+            return;
+        }
+
         new SwingWorker<String, Void>( )
         {
             @Override
@@ -177,6 +223,10 @@ public class ExampleRunner extends JSplitPane
                 try
                 {
                     codeArea.setText( get( ) );
+
+                    // scroll to top
+                    codeArea.setCaretPosition( 0 );
+
                     exampleClass = clazz;
                     runExampleButton.setEnabled( true );
                 }
@@ -231,7 +281,16 @@ public class ExampleRunner extends JSplitPane
                 {
                     String className = name.replace( '/', '.' ).substring( 0, name.length( ) - ".class".length( ) );
                     Class<?> clazz = Class.forName( className );
-                    exampleClasses.add( clazz );
+
+                    // special case
+                    if ( clazz.getSimpleName( ).equals( "Example" ) )
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        exampleClasses.add( clazz );
+                    }
                 }
             }
         }
@@ -241,5 +300,32 @@ public class ExampleRunner extends JSplitPane
         }
 
         return exampleClasses;
+    }
+
+    private static class SimpleNode extends DefaultMutableTreeNode
+    {
+        SimpleNode( Object object )
+        {
+            super( object );
+        }
+
+        @Override
+        public String toString( )
+        {
+            Object o = getUserObject( );
+            if ( o instanceof Package )
+            {
+                String name = ( ( Package ) o ).getName( );
+                return name.substring( name.lastIndexOf( '.' ) + 1 );
+            }
+            else if ( o instanceof Class )
+            {
+                return ( ( Class<?> ) o ).getSimpleName( );
+            }
+            else
+            {
+                return String.valueOf( o );
+            }
+        }
     }
 }
