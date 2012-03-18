@@ -231,41 +231,125 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
 
     public void setAllowSelectionLockX( boolean b )
     {
-        delegateListener.setAllowSelectionLock( b );
+        if ( this.timeIsX )
+        {
+            this.delegateListener.setAllowSelectionLock( b );
+        }
+        else
+        {
+            this.allowSelectionLock = b;
+        }
     }
 
     public void setAllowSelectionZoomX( boolean b )
     {
-        delegateListener.setAllowSelectionZoom( b );
+        if ( this.timeIsX )
+        {
+            this.delegateListener.setAllowSelectionZoom( b );
+        }
+        else
+        {
+            this.allowSelectionZoom = b;
+        }
     }
 
     public void setAllowZoomX( boolean b )
     {
-        delegateListener.setAllowZoom( b );
+        if ( this.timeIsX )
+        {
+            this.delegateListener.setAllowZoom( b );
+        }
+        else
+        {
+            this.allowZoom = b;
+        }
     }
 
     public void setAllowPanX( boolean b )
     {
-        delegateListener.setAllowPan( b );
+        if ( this.timeIsX )
+        {
+            this.delegateListener.setAllowPan( b );
+        }
+        else
+        {
+            this.allowPan = b;
+        }
     }
 
     public void setAllowSelectionLockY( boolean b )
     {
-        allowSelectionLock = b;
+        if ( !this.timeIsX )
+        {
+            this.delegateListener.setAllowSelectionLock( b );
+        }
+        else
+        {
+            this.allowSelectionLock = b;
+        }
     }
 
     public void setAllowSelectionZoomY( boolean b )
     {
-        allowSelectionZoom = b;
+        if ( !this.timeIsX )
+        {
+            this.delegateListener.setAllowSelectionZoom( b );
+        }
+        else
+        {
+            this.allowSelectionZoom = b;
+        }
     }
 
     public void setAllowZoomY( boolean b )
     {
-        allowZoom = b;
+        if ( !this.timeIsX )
+        {
+            this.delegateListener.setAllowZoom( b );
+        }
+        else
+        {
+            this.allowZoom = b;
+        }
     }
 
     public void setAllowPanY( boolean b )
     {
-        allowPan = b;
+        if ( !this.timeIsX )
+        {
+            this.delegateListener.setAllowPan( b );
+        }
+        else
+        {
+            this.allowPan = b;
+        }
+    }
+    
+    @Override
+    public void setAllowSelectionLock( boolean b )
+    {
+        this.delegateListener.setAllowSelectionLock( b );
+        this.allowSelectionLock = b;
+    }
+
+    @Override
+    public void setAllowSelectionZoom( boolean b )
+    {
+        this.delegateListener.setAllowSelectionZoom( b );
+        this.allowSelectionZoom = b;
+    }
+
+    @Override
+    public void setAllowZoom( boolean b )
+    {
+        this.delegateListener.setAllowZoom( b );
+        this.allowZoom = b;
+    }
+
+    @Override
+    public void setAllowPan( boolean b )
+    {
+        this.delegateListener.setAllowPan( b );
+        this.allowPan = b;
     }
 }

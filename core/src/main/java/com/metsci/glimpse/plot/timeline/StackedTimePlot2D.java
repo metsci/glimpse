@@ -26,8 +26,14 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+
 import java.awt.Font;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
@@ -39,6 +45,7 @@ import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -61,8 +68,6 @@ import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
-
 /**
  * A {@link StackedPlot2D} which automatically creates a timeline axis at the
  * bottom of the stack and uses a
@@ -80,24 +85,35 @@ public class StackedTimePlot2D extends GlimpseLayout
     public static final String BACKGROUND = "Timeline Background";
     public static final String TIMELINE = "Timeline";
 
-    // tags representing the minimum and maximum bounds of the selected time
-    // window
+    // tags representing the minimum and maximum bounds of the selected time window
     protected Tag minTag;
     protected Tag maxTag;
     // tag representing the currently selected time
     protected Tag currentTag;
 
-    // timeline painter
-    protected GlimpseLayout timeLayout;
+    protected GlimpseAxisLayout1D overlayLayout;
+
+    // time layout painters and listeners
+    protected GlimpseAxisLayout1D timeLayout;
     protected DelegatePainter timeAxisDelegate;
     protected TimeAxisPainter timeAxisPainter;
     protected StackedPlot2D delegatePlot;
     protected PlotInfo selectedLayout;
 
+    protected TimelineMouseListener1D timelineMouseListener;
     protected SimpleTextPainter timeUnitsPainter;
+
+    // default settings for TimelineMouseListeners of new plots
+    protected boolean allowPanX = true;
+    protected boolean allowPanY = true;
+    protected boolean allowZoomX = true;
+    protected boolean allowZoomY = true;
+    protected boolean allowSelectionLock = true;
 
     protected boolean currentTimeLock;
     protected Epoch epoch;
+
+    protected Map<String, TimePlotInfo> stackedTimePlots;
 
     public StackedTimePlot2D( )
     {
@@ -129,6 +145,8 @@ public class StackedTimePlot2D extends GlimpseLayout
 
         this.epoch = epoch;
 
+        this.stackedTimePlots = new HashMap<String, TimePlotInfo>( );
+
         this.delegatePlot = new StackedPlot2D( orientation )
         {
             @Override
@@ -141,19 +159,52 @@ public class StackedTimePlot2D extends GlimpseLayout
         this.initialize( );
     }
 
+    /**
+     * StackedTimePlot2D provides a GlimpseAxisLayout1D which stretches over
+     * all the underlying plots and timeline. By default, it passes through mouse
+     * events to the underlying GlimpseLayouts and is used to display the blue
+     * time selection interval box.
+     * 
+     * However, it can be used to perform arbitrary drawing on the timeline which
+     * must stretch across multiple plots.
+     */
+    public GlimpseAxisLayout1D getOverlayLayout( )
+    {
+        return this.overlayLayout;
+    }
+
+    /**
+     * The layout on which the time axis markings are painted.
+     */
+    public GlimpseAxisLayout1D getTimelineLayout( )
+    {
+        return this.timeLayout;
+    }
+
     public Collection<PlotInfo> getAllPlots( )
     {
         return this.delegatePlot.getAllPlots( );
     }
 
+    public Collection<TimePlotInfo> getAllTimePlots( )
+    {
+        return Collections.unmodifiableCollection( this.stackedTimePlots.values( ) );
+    }
+
     public void deletePlot( String name )
     {
         this.delegatePlot.deletePlot( name );
+        this.stackedTimePlots.remove( name );
     }
 
     public PlotInfo getPlot( String name )
     {
         return this.delegatePlot.getPlot( name );
+    }
+
+    public TimePlotInfo getTimePlot( String name )
+    {
+        return this.stackedTimePlots.get( name );
     }
 
     public void setSelectedPlot( String name )
@@ -169,6 +220,78 @@ public class StackedTimePlot2D extends GlimpseLayout
     public PlotInfo getSelectedPlot( )
     {
         return this.selectedLayout;
+    }
+
+    public void setAllowSelectionLock( boolean lock )
+    {
+        this.allowSelectionLock = lock;
+
+        this.timelineMouseListener.setAllowSelectionLock( lock );
+
+        for ( TimePlotInfo info : getAllTimePlots( ) )
+        {
+            info.getTimelineMouseListener( ).setAllowSelectionLock( lock );
+        }
+    }
+
+    public void setAllowZoomY( boolean lock )
+    {
+        this.allowZoomY = lock;
+
+        if ( this.getOrientation( ) == Orientation.HORIZONTAL )
+        {
+            this.timelineMouseListener.setAllowZoom( lock );
+        }
+
+        for ( TimePlotInfo info : getAllTimePlots( ) )
+        {
+            info.getTimelineMouseListener( ).setAllowZoomY( lock );
+        }
+    }
+
+    public void setAllowZoomX( boolean lock )
+    {
+        this.allowZoomX = lock;
+
+        if ( this.getOrientation( ) == Orientation.VERTICAL )
+        {
+            this.timelineMouseListener.setAllowZoom( lock );
+        }
+
+        for ( TimePlotInfo info : getAllTimePlots( ) )
+        {
+            info.getTimelineMouseListener( ).setAllowZoomX( lock );
+        }
+    }
+
+    public void setAllowPanY( boolean lock )
+    {
+        this.allowPanY = lock;
+
+        if ( this.getOrientation( ) == Orientation.HORIZONTAL )
+        {
+            this.timelineMouseListener.setAllowPan( lock );
+        }
+
+        for ( TimePlotInfo info : getAllTimePlots( ) )
+        {
+            info.getTimelineMouseListener( ).setAllowPanY( lock );
+        }
+    }
+
+    public void setAllowPanX( boolean lock )
+    {
+        this.allowPanX = lock;
+
+        if ( this.getOrientation( ) == Orientation.VERTICAL )
+        {
+            this.timelineMouseListener.setAllowPan( lock );
+        }
+
+        for ( TimePlotInfo info : getAllTimePlots( ) )
+        {
+            info.getTimelineMouseListener( ).setAllowPanX( lock );
+        }
     }
 
     /**
@@ -313,6 +436,9 @@ public class StackedTimePlot2D extends GlimpseLayout
         return stack;
     }
 
+    /**
+     * @see #createPlot( String, Axis1D )
+     */
     public PlotInfo createPlot( String name )
     {
         return this.createPlot( name, new Axis1D( ) );
@@ -324,21 +450,15 @@ public class StackedTimePlot2D extends GlimpseLayout
      * axis. Returns a handle which may be used for adding GlimpsePainter to the
      * plot or adjusting its size, order, and other display characteristics.
      *
-     * @param name
-     *            the unique identifier of the plot to create
-     * @param axis
-     *            the non-shared / non-time data axis for the plot
+     * @param name the unique identifier of the plot to create
+     * @param axis the non-shared / non-time data axis for the plot
      * @return a handle to the newly created plot
      */
     public PlotInfo createPlot( String name, Axis1D axis )
     {
         PlotInfo layoutInfo = delegatePlot.createPlot( name, axis );
 
-        boolean timeIsX = delegatePlot.getOrientation( ) == Orientation.VERTICAL;
-
-        TimelineMouseListener2D mouseListener = new TimelineMouseListener2D( this, layoutInfo, timeIsX );
-
-        layoutInfo.getLayout( ).addGlimpseMouseAllListener( mouseListener );
+        attachTimelineMouseListener( layoutInfo );
 
         return layoutInfo;
     }
@@ -348,7 +468,7 @@ public class StackedTimePlot2D extends GlimpseLayout
      */
     public TimePlotInfo createTimePlot( String name )
     {
-        return this.createTimePlot( name, new Axis1D( ) );
+        return createTimePlot( name, new Axis1D( ) );
     }
 
     /**
@@ -360,7 +480,7 @@ public class StackedTimePlot2D extends GlimpseLayout
      */
     public TimePlotInfo createTimePlot( String name, Axis1D axis )
     {
-        PlotInfo layoutInfo = createPlot( name, axis );
+        PlotInfo layoutInfo = delegatePlot.createPlot( name, axis );
 
         // create a tick handler to calculate Y axis tick marks
         GridAxisLabelHandler labelHandler = new GridAxisLabelHandler( )
@@ -378,14 +498,14 @@ public class StackedTimePlot2D extends GlimpseLayout
             }
         };
 
+        // add a painter for user data
+        DelegatePainter dataPainter = new DelegatePainter( );
+        layoutInfo.getLayout( ).addPainter( dataPainter );
+
         // create a painter to display Y axis grid lines
         GridPainter gridPainter = new GridPainter( labelHandler, labelHandler );
         gridPainter.setShowMinorGrid( false );
         layoutInfo.getLayout( ).addPainter( gridPainter );
-        
-        // add a painter for user data
-        DelegatePainter dataPainter = new DelegatePainter( );
-        layoutInfo.getLayout( ).addPainter( dataPainter );
 
         // create a painter to display Y axis tick marks along the left edge of
         // the graph
@@ -410,7 +530,9 @@ public class StackedTimePlot2D extends GlimpseLayout
         BorderPainter borderPainter = new BorderPainter( );
         layoutInfo.getLayout( ).addPainter( borderPainter );
 
-        TimePlotInfo chartLayoutInfo = new TimePlotInfo( this, layoutInfo, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
+        TimelineMouseListener2D listener = attachTimelineMouseListener( layoutInfo );
+
+        TimePlotInfo timePlotInfo = new TimePlotInfo( this, layoutInfo, listener, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
 
         if ( timeIsX( ) )
         {
@@ -433,7 +555,9 @@ public class StackedTimePlot2D extends GlimpseLayout
             labelPainter.setVerticalPosition( VerticalPosition.Bottom );
         }
 
-        return chartLayoutInfo;
+        this.stackedTimePlots.put( name, timePlotInfo );
+
+        return timePlotInfo;
     }
 
     public boolean isLocked( )
@@ -579,7 +703,8 @@ public class StackedTimePlot2D extends GlimpseLayout
             this.timeLayout = new GlimpseAxisLayoutY( timelineInfo.getLayout( ) );
         }
 
-        this.timeLayout.addGlimpseMouseAllListener( new TimelineMouseListener1D( this ) );
+        this.timelineMouseListener = new TimelineMouseListener1D( this );
+        this.timeLayout.addGlimpseMouseAllListener( timelineMouseListener );
 
         this.timeAxisPainter = createTimeAxisPainter( timeIsX( ) );
 
@@ -608,19 +733,33 @@ public class StackedTimePlot2D extends GlimpseLayout
 
         this.addLayout( this.delegatePlot );
 
-        GlimpseLayout overlayLayout;
         if ( timeIsX( ) )
         {
-            overlayLayout = new GlimpseAxisLayoutX( this, "Overlay", timeAxis );
+            this.overlayLayout = new GlimpseAxisLayoutX( this, "Overlay", timeAxis );
         }
         else
         {
-            overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", timeAxis );
+            this.overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", timeAxis );
         }
 
-        overlayLayout.setEventConsumer( false );
-        overlayLayout.addPainter( new SelectedTimeRegionPainter( this ) );
-        overlayLayout.setLayoutData( "pos 0 0 container.w container.h" );
+        this.overlayLayout.setEventConsumer( false );
+        this.overlayLayout.addPainter( new SelectedTimeRegionPainter( this ) );
+        this.overlayLayout.setLayoutData( "pos 0 0 container.w container.h" );
+    }
+
+    protected TimelineMouseListener2D attachTimelineMouseListener( PlotInfo layoutInfo )
+    {
+        boolean timeIsX = delegatePlot.getOrientation( ) == Orientation.VERTICAL;
+
+        TimelineMouseListener2D mouseListener = new TimelineMouseListener2D( this, layoutInfo, timeIsX );
+        mouseListener.setAllowPanX( this.allowPanX );
+        mouseListener.setAllowPanY( this.allowPanY );
+        mouseListener.setAllowZoomX( this.allowZoomX );
+        mouseListener.setAllowZoomY( this.allowZoomY );
+        mouseListener.setAllowSelectionLock( this.allowSelectionLock );
+
+        layoutInfo.getLayout( ).addGlimpseMouseAllListener( mouseListener );
+        return mouseListener;
     }
 
     protected TimeAxisPainter createTimeAxisPainter( boolean timeIsX )
