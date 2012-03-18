@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="$encoding"?>
 <jnlp
     spec="$jnlpspec"
-    codebase="$project.Url/jnlp"
+    codebase="$webstartUrl/jnlp"
     href="$outputFile">
   <information>
 #if($project.Name)
@@ -11,7 +11,7 @@
     <vendor>$project.Organization.Name</vendor>
 #end
 #if($project.Url)
-    <homepage href="$project.Url"/>
+    <homepage href="$webstartUrl"/>
 #end
 #if($project.Description)
     <description>$project.Description</description>

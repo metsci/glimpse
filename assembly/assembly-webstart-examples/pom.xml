@@ -1,91 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.metsci.glimpse</groupId>
-    <artifactId>glimpse-parent</artifactId>
+    <parent>
+        <groupId>com.metsci.glimpse</groupId>
+        <artifactId>glimpse-parent</artifactId>
+        <version>CURRENT-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>glimpse-webstart-examples-assembly</artifactId>
     <version>CURRENT-SNAPSHOT</version>
-  </parent>
+    <name>Glimpse Examples</name>
+    <packaging>pom</packaging>
 
-  <artifactId>glimpse-webstart-examples-assembly</artifactId>
-  <version>CURRENT-SNAPSHOT</version>
-  <name>Glimpse Examples</name>
-  <packaging>pom</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-core-examples</artifactId>
+            <version>CURRENT-SNAPSHOT</version>
+        </dependency>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.metsci.glimpse</groupId>
-      <artifactId>glimpse-core-examples</artifactId>
-      <version>CURRENT-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-core-examples</artifactId>
+            <version>CURRENT-SNAPSHOT</version>
+            <classifier>sources</classifier>
+        </dependency>
+    </dependencies>
 
-    <dependency>
-      <groupId>com.metsci.glimpse</groupId>
-      <artifactId>glimpse-core-examples</artifactId>
-      <version>CURRENT-SNAPSHOT</version>
-      <classifier>sources</classifier>
-    </dependency>
-  </dependencies>
+    <properties>
+        <webstartUrl>http://glimpse.metsci.com/</webstartUrl>
+    </properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>webstart-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>jnlp-single</goal>
-            </goals>
-            <phase>package</phase>
-          </execution>
-        </executions>
-        <configuration>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>webstart-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jnlp-single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
 
-          <unsignAlreadySignedJars>true</unsignAlreadySignedJars>
-          <canUnsign>true</canUnsign>
-          <makeArchive>false</makeArchive>
-          <attachArchive>false</attachArchive>
+                    <unsignAlreadySignedJars>true</unsignAlreadySignedJars>
+                    <canUnsign>true</canUnsign>
+                    <makeArchive>false</makeArchive>
+                    <attachArchive>false</attachArchive>
 
-          <jnlp>
-            <mainClass>com.metsci.glimpse.examples.webstart.WebstartMain</mainClass>
-          </jnlp>
+                    <jnlp>
+                        <mainClass>com.metsci.glimpse.examples.webstart.WebstartMain</mainClass>
+                    </jnlp>
 
-          <jnlpExtensions>
-            <!-- we bundle our own JOGL -->
-          </jnlpExtensions>
+                    <jnlpExtensions>
+                        <!-- we bundle our own JOGL -->
+                    </jnlpExtensions>
 
-          <libPath>lib</libPath>
+                    <libPath>lib</libPath>
 
-          <sign>
-            <keystore>keystore</keystore>
-            <keypass>m2m2m2</keypass>
-            <storepass>m2m2m2</storepass>
-            <alias>glimpsewebstart</alias>
-            <validity>365</validity>
+                    <sign>
+                        <keystore>keystore</keystore>
+                        <keypass>m2m2m2</keypass>
+                        <storepass>m2m2m2</storepass>
+                        <alias>glimpsewebstart</alias>
+                        <validity>365</validity>
 
-            <dnameCn>glimpse.metsci.com</dnameCn>
-            <dnameOu>Glimpse</dnameOu>
-            <dnameO>Metron</dnameO>
-            <dnameL>Reston</dnameL>
-            <dnameSt>Virginia</dnameSt>
-            <dnameC>US</dnameC>
+                        <dnameCn>glimpse.metsci.com</dnameCn>
+                        <dnameOu>Glimpse</dnameOu>
+                        <dnameO>Metron</dnameO>
+                        <dnameL>Reston</dnameL>
+                        <dnameSt>Virginia</dnameSt>
+                        <dnameC>US</dnameC>
 
-            <verify>true</verify>
+                        <verify>true</verify>
 
-            <keystoreConfig>
-              <gen>true</gen>
-            </keystoreConfig>
-          </sign>
+                        <keystoreConfig>
+                            <gen>true</gen>
+                        </keystoreConfig>
+                    </sign>
 
-          <verbose>false</verbose>
-          <outputJarVersions>false</outputJarVersions>
-        </configuration>
-      </plugin>
+                    <verbose>false</verbose>
+                    <outputJarVersions>false</outputJarVersions>
+                </configuration>
+            </plugin>
 
-    </plugins>
-  </build>
+        </plugins>
+    </build>
 
 </project>
