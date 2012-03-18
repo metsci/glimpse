@@ -44,66 +44,68 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.atlas.painter.IconPainter;
 import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-/**
- * Demonstrates basic usage of the Glimpse TextureAtlas utility class. TextureAtlas
- * allows icons and images to be defined once using Swing Graphics2D drawing (or
- * via a BufferedImage). The image or icon is then packed onto an OpenGL texture
- * and can be efficiently painted onto the screen.
- * 
- * TextureAtlas provides basic methods for drawing a single icon from the atlas.
- * However, when large numbers of icons must be drawn, using
- * {@link com.metsci.glimpse.support.atlas.painter.IconPainter} is often much
- * more efficient.
- * 
- * @author ulman
- */
-public class TextureAtlasTestExample implements GlimpseLayoutProvider
+public class TextureAtlasExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new TextureAtlasTestExample( ) );
+        Example.showWithSwing( new TextureAtlasExample( ) );
     }
 
     @Override
     public GlimpseLayout getLayout( ) throws Exception
     {
+        // create a texture atlas
         TextureAtlas atlas = new TextureAtlas( 512, 512 );
+
+        // load an images into the atlas
         loadTextureAtlas( atlas );
 
-        GlimpseLayout layout = new GlimpseLayout( );
+        // create a simple GlimpseLayout
+        GlimpseLayout layout = new GlimpseAxisLayout2D( new Axis2D( ) );
 
-        GlimpseLayout child1 = new GlimpseAxisLayout2D( new Axis2D( ) );
-        child1.setLayoutData( "cell 1 1, grow, push" );
-        child1.addGlimpseMouseAllListener( new AxisMouseListener2D( ) );
+        // add an AxisMouseListener2D so we can pan/zoom around the layout with the mouse
+        layout.addGlimpseMouseAllListener( new AxisMouseListener2D( ) );
 
-        GlimpseLayout child2 = new GlimpseAxisLayout2D( new Axis2D( ) );
-        child1.setLayoutData( "cell 1 2, grow, push" );
-        child2.addGlimpseMouseAllListener( new AxisMouseListener2D( ) );
-
-        TextureAtlasAllPainter painter1 = new TextureAtlasAllPainter( atlas );
-        painter1.init( );
-
-        child1.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getWhite( ) ) );
-        child1.addPainter( painter1 );
-
-        TextureAtlasTestPainter painter2 = new TextureAtlasTestPainter( atlas );
-        painter2.init( );
-
-        child2.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getGray( ) ) );
-        child2.addPainter( new NumericXYAxisPainter( ) );
-        child2.addPainter( painter2 );
-
-        layout.addLayout( child1 );
-        layout.addLayout( child2 );
+        // add a simple painter which uses the TexureAtlas to draw some icons
+        layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getWhite( ) ) );
+        layout.addPainter( new NumericXYAxisPainter( ) );
+        layout.addPainter( new SimpleIconPainter( atlas ) );
 
         return layout;
     }
 
+    public class SimpleIconPainter extends GlimpseDataPainter2D
+    {
+        protected TextureAtlas atlas;
+
+        public SimpleIconPainter( TextureAtlas atlas )
+        {
+            this.atlas = atlas;
+        }
+
+        @Override
+        public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+        {
+            this.atlas.beginRendering( );
+            try
+            {
+                this.atlas.drawImage( gl, "image1", axis, 0, 0, 0.5f, 1.0f );
+                this.atlas.drawImage( gl, "glimpse", axis, 0, 0, 0.5f );
+                this.atlas.drawImage( gl, "glimpse", axis, 5, 4, 0.5f );
+                this.atlas.drawImageAxisX( gl, "glimpse", axis.getAxisX( ), 0, 0 );
+            }
+            finally
+            {
+                this.atlas.endRendering( );
+            }
+
+        }
+    }
+    
     public static void loadTextureAtlas( TextureAtlas atlas ) throws IOException
     {
         atlas.loadImage( "image1", 30, 30, new ImageDrawer( )
@@ -220,124 +222,5 @@ public class TextureAtlasTestExample implements GlimpseLayoutProvider
         } );
 
         atlas.loadImage( "glimpse", ImageIO.read( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) ) );
-    }
-
-    public class TextureAtlasAllPainter extends GlimpseDataPainter2D
-    {
-        protected TextureAtlas atlas;
-        protected int i = 10;
-
-        public TextureAtlasAllPainter( TextureAtlas atlas )
-        {
-            this.atlas = atlas;
-        }
-
-        public void init( ) throws IOException
-        {
-            ( new Thread( )
-            {
-                public void run( )
-                {
-                    while ( true )
-                    {
-                        int x = ( int ) ( Math.random( ) * 100 + 10 );
-                        int y = ( int ) ( Math.random( ) * 100 + 10 );
-
-                        atlas.loadImage( "image" + i, x, y, new ImageDrawer( )
-                        {
-                            @Override
-                            public void drawImage( Graphics2D g, int width, int height )
-                            {
-                                g.setColor( GlimpseColor.toColorAwt( GlimpseColor.fromColorRgb( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) ) ) );
-                                g.fillRect( 0, 0, width, height );
-                            }
-                        } );
-
-                        i = i + 1;
-
-                        try
-                        {
-                            Thread.sleep( 50 );
-                        }
-                        catch ( InterruptedException e )
-                        {
-                        }
-                    }
-                }
-            } ).start( );
-        }
-
-        protected void drawAll( GL gl, Axis2D axis )
-        {
-            drawAll( gl, 0, 10, 0, 10 );
-        }
-
-        protected void drawAll( GL gl, double minX, double maxX, double minY, double maxY )
-        {
-            gl.glBegin( GL.GL_QUADS );
-            try
-            {
-                gl.glTexCoord2f( 0, 1 );
-                gl.glVertex2d( minX, minY );
-                gl.glTexCoord2f( 1, 1 );
-                gl.glVertex2d( maxX, minY );
-                gl.glTexCoord2f( 1, 0 );
-                gl.glVertex2d( maxX, maxY );
-                gl.glTexCoord2f( 0, 0 );
-                gl.glVertex2d( minX, maxY );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-        }
-
-        @Override
-        public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
-        {
-            this.atlas.beginRendering( );
-            try
-            {
-                drawAll( gl, axis );
-            }
-            finally
-            {
-                this.atlas.endRendering( );
-            }
-        }
-    }
-
-    public class TextureAtlasTestPainter extends GlimpseDataPainter2D
-    {
-        protected TextureAtlas atlas;
-        protected IconPainter iconPainter;
-
-        public TextureAtlasTestPainter( TextureAtlas atlas )
-        {
-            this.atlas = atlas;
-            this.iconPainter = new IconPainter( atlas );
-        }
-
-        public void init( ) throws IOException
-        {
-            this.iconPainter.addIcon( "group1", "image4", 0, 5 );
-        }
-
-        @Override
-        public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
-        {
-            this.atlas.beginRendering( );
-            try
-            {
-                this.atlas.drawImage( gl, "image5", axis, 0, 0 );
-                this.atlas.drawImage( gl, "glimpse", axis, 5, 2 );
-            }
-            finally
-            {
-                this.atlas.endRendering( );
-            }
-
-            this.iconPainter.paintTo( gl, bounds, axis );
-        }
     }
 }

@@ -98,7 +98,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
         } );
 
         // load some icons into the TextureAtlas
-        TextureAtlasTestExample.loadTextureAtlas( atlas );
+        TextureAtlasExample.loadTextureAtlas( atlas );
 
         // use the IconPainter to draw the icon "image7" from the TextureAtlas
         // four times at four different positions on the screen: (0,0), (20,20), (30,30), and (40,40)
