@@ -519,31 +519,6 @@ public class TextureAtlas
         }
     }
 
-    /*
-     * Rendering in pixel space is not supported 
-     * 
-     * @see com.sun.opengl.util.j2d.TextRenderer#beginRendering( int, int )
-     */
-    /*
-    public void beginRendering( int width, int height ) throws GLException
-    {
-        beginRendering( width, height, true );
-    }
-    */
-
-    /*
-     * Rendering in pixel space is not supported
-     */
-    /**
-     * @see com.sun.opengl.util.j2d.TextRenderer#beginRendering( int, int, boolean )
-     */
-    /*
-    public void beginRendering( int width, int height, boolean disableDepthTest ) throws GLException
-    {
-        beginRendering( true, width, height, disableDepthTest );
-    }
-    */
-
     /**
      * Readies the TextureAtlas for drawing. The backing texture is bound and OpenGL
      * state is configured for textured quad rendering. {@link drawImage( GL, Object, Axis2D, float, float )}
@@ -555,18 +530,6 @@ public class TextureAtlas
     {
         beginRendering( false, 0, 0, false );
     }
-
-    /*
-     * Rendering in pixel space is not supported 
-     * 
-     * @see com.sun.opengl.util.j2d.TextRenderer#endRendering( )
-     */
-    /*
-    public void endRendering( ) throws GLException
-    {
-        endRendering( true );
-    }
-    */
 
     /**
      * Resets OpenGL state. Every call to {@beginRendering()} should be followed by
