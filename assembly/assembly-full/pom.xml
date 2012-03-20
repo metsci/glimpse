@@ -9,50 +9,50 @@
     </parent>
 
     <artifactId>glimpse-full-assembly</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>${parent.version}</version>
     <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-examples</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-charts</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-dspl</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-spacenav</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-swt</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
     </dependencies>
 

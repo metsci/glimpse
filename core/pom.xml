@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-util</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
     </dependencies>
