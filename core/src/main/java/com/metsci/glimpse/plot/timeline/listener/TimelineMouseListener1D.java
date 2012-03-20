@@ -51,7 +51,6 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
 
         this.timeIsX = plot.getOrientation( ) == Orientation.VERTICAL;
         this.plot = plot;
-        this.allowSelectionLock = false;
     }
 
     public Tag getSelectedTag( )
@@ -65,7 +64,7 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         super.mousePressed( e, axis, horizontal );
 
         // right clicks toggle selection locking
-        if ( e.isButtonDown( MouseButton.Button3 ) )
+        if ( this.allowSelectionLock && e.isButtonDown( MouseButton.Button3 ) )
         {
             if ( plot.isCurrentTimeLocked( ) || plot.isSelectionLocked( ) )
             {

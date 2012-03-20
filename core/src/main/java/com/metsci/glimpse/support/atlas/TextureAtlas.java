@@ -63,6 +63,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.atlas.support.ImageDataExternal;
@@ -361,6 +362,33 @@ public class TextureAtlas
     //////////////////////////////////////////////////////////////
 
     /**
+     * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
+     */
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY )
+    {
+        drawImage( gl, id, axis, positionX, positionY, 1.0 );
+    }
+
+    /**
+     * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
+     */
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scale )
+    {
+        drawImage( gl, id, axis, positionX, positionY, scale, scale );
+    }
+
+    /**
+     * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
+     */
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvX = axis.getAxisX( ).getPixelsPerValue( );
+        double ppvY = axis.getAxisY( ).getPixelsPerValue( );
+        drawImage( gl, id, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
+    }
+
+    /**
      * Draws an image from the TextureAtlas using the given GL handle. The icon is
      * centered on the provided positionX, positionY in axis space.
      * 
@@ -369,37 +397,108 @@ public class TextureAtlas
      * icons (thousands or more). For those cases, see
      * {@link com.metsci.glimpse.support.atlas.painter.IconPainter}. For even more
      * specific use cases, custom painters may be required.
+     * 
+     * @param gl handle from the current OpenGL context
+     * @param id an icon loaded into the atlas using a loadImage() method
+     * @param axis
+     * @param positionX the x position in axis space of the center pixel in the image
+     * @param positionY the y position in axis space of the center pixel in the image
+     * @param scaleX the scale factor in the x direction
+     * @param scaleY the scale factor in the y direction
+     * @param offsetX overrides the image x offset specified when the image was loaded
+     * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, float positionX, float positionY )
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
-        double vppX = 1.0 / axis.getAxisX( ).getPixelsPerValue( );
-        double vppY = 1.0 / axis.getAxisY( ).getPixelsPerValue( );
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvX = axis.getAxisX( ).getPixelsPerValue( );
+        double ppvY = axis.getAxisY( ).getPixelsPerValue( );
+        drawImage( gl, id, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+    }
+    
+    /**
+     * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
+     */
+    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvX = axis.getPixelsPerValue( );
+        drawImage( gl, id, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+    }
+    
+    /**
+     * Draws an image from the TextureAtlas with the x position specified in axis space
+     * and the y position specified in pixel space.
+     * 
+     * This is most often used by a {@link com.metsci.glimpse.painter.base.GlimpseDataPainter1D}
+     * to paint onto a {@link com.metsci.glimpse.layout.GlimpseAxisLayoutX}.
+     * 
+     * @param gl handle from the current OpenGL context
+     * @param id an icon loaded into the atlas using a loadImage() method
+     * @param axis the 1D horizontal axis
+     * @param positionX the x position along the axis of the image center
+     * @param positionY the y position in pixel space of the image center
+     * @param scaleX the scale factor in the x direction
+     * @param scaleY the scale factor in the y direction
+     * @param offsetX overrides the image x offset specified when the image was loaded
+     * @param offsetY overrides the image y offset specified when the image was loaded
+     */
+    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvX = axis.getPixelsPerValue( );
+        drawImage( gl, id, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+    }
+    
+    /**
+     * Draws an image from the TextureAtlas with the y position specified in axis space
+     * and the x position specified in pixel space.
+     * 
+     * This is most often used by a {@link com.metsci.glimpse.painter.base.GlimpseDataPainter1D}
+     * to paint onto a {@link com.metsci.glimpse.layout.GlimpseAxisLayoutY}.
+     * 
+     * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
+     */
+    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvY = axis.getPixelsPerValue( );
+        drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+    }
+    
+    /**
+     * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
+     */
+    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvY = axis.getPixelsPerValue( );
+        drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+    }
 
-        Rect rect = imageMap.get( id );
-        if ( rect == null )
-        {
-            throw new IllegalArgumentException( String.format( "Image id \"%s\" does not exist.", id ) );
-        }
+    protected void drawImage( GL gl, Object id, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    {
+        double vppX = 1.0 / ppvX;
+        double vppY = 1.0 / ppvY;
 
         // NOTE: the rectangles managed by the packer have their
         // origin at the upper-left but the TextureRenderer's origin is
         // at its lower left!!!
 
-        // NOTE: we use the buffered with because that is how the texture coordinates
+        // NOTE: we use the buffered width because that is how the texture coordinates
         // are returned (with the buffer included, to ensure we get the whole image)
         // we're still protected from adjacent images by their buffers
 
-        ImageDataInternal data = ( ImageDataInternal ) rect.getUserData( );
         int width = data.getBufferedWidth( );
         int height = data.getBufferedHeight( );
         TextureCoords texCoords = data.getTextureCoordinates( );
 
         // Align the leftmost point of the baseline to the (x, y, z) coordinate requested
-        float minX = positionX - ( float ) ( ( data.getCenterX( ) + data.getBufferX( ) ) * vppX );
-        float minY = positionY - ( float ) ( ( height - data.getCenterY( ) - data.getBufferY( ) ) * vppY );
+        float minX = ( float ) ( positionX - ( centerX + data.getBufferX( ) ) * vppX * scaleX );
+        float minY = ( float ) ( positionY - ( height - centerY - data.getBufferY( ) ) * vppY * scaleY );
 
-        float maxX = minX + ( float ) ( width * vppX );
-        float maxY = minY + ( float ) ( height * vppY );
+        float maxX = minX + ( float ) ( width * vppX * scaleX );
+        float maxY = minY + ( float ) ( height * vppY * scaleY );
 
         // copied from com.sun.opengl.util.j2d.TextureRenderer#draw3DRect
         gl.glBegin( GL.GL_QUADS );
@@ -420,31 +519,6 @@ public class TextureAtlas
         }
     }
 
-    /*
-     * Rendering in pixel space is not supported 
-     * 
-     * @see com.sun.opengl.util.j2d.TextRenderer#beginRendering( int, int )
-     */
-    /*
-    public void beginRendering( int width, int height ) throws GLException
-    {
-        beginRendering( width, height, true );
-    }
-    */
-
-    /*
-     * Rendering in pixel space is not supported
-     */
-    /**
-     * @see com.sun.opengl.util.j2d.TextRenderer#beginRendering( int, int, boolean )
-     */
-    /*
-    public void beginRendering( int width, int height, boolean disableDepthTest ) throws GLException
-    {
-        beginRendering( true, width, height, disableDepthTest );
-    }
-    */
-
     /**
      * Readies the TextureAtlas for drawing. The backing texture is bound and OpenGL
      * state is configured for textured quad rendering. {@link drawImage( GL, Object, Axis2D, float, float )}
@@ -456,18 +530,6 @@ public class TextureAtlas
     {
         beginRendering( false, 0, 0, false );
     }
-
-    /*
-     * Rendering in pixel space is not supported 
-     * 
-     * @see com.sun.opengl.util.j2d.TextRenderer#endRendering( )
-     */
-    /*
-    public void endRendering( ) throws GLException
-    {
-        endRendering( true );
-    }
-    */
 
     /**
      * Resets OpenGL state. Every call to {@beginRendering()} should be followed by
@@ -497,6 +559,17 @@ public class TextureAtlas
     ///           Internals Only Beyond This Point             ///
     //////////////////////////////////////////////////////////////
 
+    private ImageDataInternal getImageDataInternal( Object id )
+    {
+        Rect rect = imageMap.get( id );
+        if ( rect == null )
+        {
+            throw new IllegalArgumentException( String.format( "Image id \"%s\" does not exist.", id ) );
+        }
+
+        return ( ImageDataInternal ) rect.getUserData( );
+    }
+    
     private Graphics2D getGraphics2D( )
     {
         TextureRenderer renderer = getBackingStore( );

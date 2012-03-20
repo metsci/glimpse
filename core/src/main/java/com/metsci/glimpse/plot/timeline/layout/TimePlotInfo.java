@@ -41,6 +41,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
 
 /**
  *
@@ -48,24 +49,27 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
  */
 public class TimePlotInfo implements PlotInfo
 {
+
     protected GridPainter gridPainter;
     protected NumericXYAxisPainter axisPainter;
     protected SimpleTextPainter labelPainter;
     protected BorderPainter borderPainter;
-
     protected DelegatePainter dataPainter;
-    
+
     protected StackedTimePlot2D parent;
     protected PlotInfo child;
 
+    protected TimelineMouseListener2D listener;
+
     //@formatter:off
-    public TimePlotInfo( StackedTimePlot2D parent, PlotInfo child,
+    public TimePlotInfo( StackedTimePlot2D parent, PlotInfo child, TimelineMouseListener2D listener,
                          GridPainter gridPainter, NumericXYAxisPainter axisPainter,
                          SimpleTextPainter labelPainter, BorderPainter borderPainter,
                          DelegatePainter dataPainter )
     {
         this.parent = parent;
         this.child = child;
+        this.listener = listener;
         this.gridPainter = gridPainter;
         this.axisPainter = axisPainter;
         this.labelPainter = labelPainter;
@@ -73,6 +77,11 @@ public class TimePlotInfo implements PlotInfo
         this.dataPainter = dataPainter;
     }
     //@formatter:on
+
+    public TimelineMouseListener2D getTimelineMouseListener( )
+    {
+        return listener;
+    }
 
     public void setBorderColor( float[] rgba )
     {
@@ -129,17 +138,17 @@ public class TimePlotInfo implements PlotInfo
     {
         return parent;
     }
-   
+
     public DelegatePainter getDataPainter( )
     {
         return dataPainter;
     }
-    
+
     public void addPainter( GlimpsePainter painter )
     {
         this.dataPainter.addPainter( painter );
     }
-    
+
     public void removePainter( GlimpsePainter painter )
     {
         this.dataPainter.removePainter( painter );
@@ -208,12 +217,12 @@ public class TimePlotInfo implements PlotInfo
     @Override
     public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack )
     {
-        return (TaggedAxis1D) child.getCommonAxis( stack );
+        return ( TaggedAxis1D ) child.getCommonAxis( stack );
     }
 
     @Override
     public TaggedAxis1D getCommonAxis( )
     {
-        return (TaggedAxis1D) child.getCommonAxis( );
+        return ( TaggedAxis1D ) child.getCommonAxis( );
     }
 }
