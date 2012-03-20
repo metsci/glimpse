@@ -364,15 +364,15 @@ public class TextureAtlas
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, float positionX, float positionY )
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY )
     {
-        drawImage( gl, id, axis, positionX, positionY, 1.0f );
+        drawImage( gl, id, axis, positionX, positionY, 1.0 );
     }
 
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, float positionX, float positionY, float scale )
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scale )
     {
         drawImage( gl, id, axis, positionX, positionY, scale, scale );
     }
@@ -380,7 +380,7 @@ public class TextureAtlas
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, float positionX, float positionY, float scaleX, float scaleY )
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
@@ -408,7 +408,7 @@ public class TextureAtlas
      * @param offsetX overrides the image x offset specified when the image was loaded
      * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, float positionX, float positionY, float scaleX, float scaleY, int centerX, int centerY )
+    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
@@ -419,11 +419,11 @@ public class TextureAtlas
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisX( GL gl, Object id, Axis1D axis, float positionX, float positionY )
+    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
-        drawImage( gl, id, ppvX, 1.0, data, positionX, positionY, 1.0f, 1.0f, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( gl, id, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
     
     /**
@@ -443,7 +443,7 @@ public class TextureAtlas
      * @param offsetX overrides the image x offset specified when the image was loaded
      * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImageAxisX( GL gl, Object id, Axis1D axis, float positionX, float positionY, float scaleX, float scaleY, int centerX, int centerY )
+    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
@@ -459,24 +459,24 @@ public class TextureAtlas
      * 
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisY( GL gl, Object id, Axis1D axis, float positionX, float positionY )
+    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
-        drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, 1.0f, 1.0f, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
     
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisY( GL gl, Object id, Axis1D axis, float positionX, float positionY, float scaleX, float scaleY, int centerX, int centerY )
+    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
         drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
 
-    protected void drawImage( GL gl, Object id, double ppvX, double ppvY, ImageDataInternal data, float positionX, float positionY, float scaleX, float scaleY, int centerX, int centerY )
+    protected void drawImage( GL gl, Object id, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         double vppX = 1.0 / ppvX;
         double vppY = 1.0 / ppvY;
@@ -494,8 +494,8 @@ public class TextureAtlas
         TextureCoords texCoords = data.getTextureCoordinates( );
 
         // Align the leftmost point of the baseline to the (x, y, z) coordinate requested
-        float minX = positionX - ( float ) ( ( centerX + data.getBufferX( ) ) * vppX * scaleX );
-        float minY = positionY - ( float ) ( ( height - centerY - data.getBufferY( ) ) * vppY * scaleY );
+        float minX = ( float ) ( positionX - ( centerX + data.getBufferX( ) ) * vppX * scaleX );
+        float minY = ( float ) ( positionY - ( height - centerY - data.getBufferY( ) ) * vppY * scaleY );
 
         float maxX = minX + ( float ) ( width * vppX * scaleX );
         float maxY = minY + ( float ) ( height * vppY * scaleY );
