@@ -64,23 +64,15 @@
                     <libPath>lib</libPath>
 
                     <sign>
-                        <keystore>keystore</keystore>
-                        <keypass>m2m2m2</keypass>
-                        <storepass>m2m2m2</storepass>
+                        <keystore>${basedir}/glimpse.keystore</keystore>
+                        <keypass>${glimpseKeystorePassword}</keypass>
+                        <storepass>${glimpseKeystorePassword}</storepass>
                         <alias>glimpsewebstart</alias>
-                        <validity>365</validity>
-
-                        <dnameCn>glimpse.metsci.com</dnameCn>
-                        <dnameOu>Glimpse</dnameOu>
-                        <dnameO>Metron</dnameO>
-                        <dnameL>Reston</dnameL>
-                        <dnameSt>Virginia</dnameSt>
-                        <dnameC>US</dnameC>
 
                         <verify>true</verify>
 
                         <keystoreConfig>
-                            <gen>true</gen>
+                            <gen>false</gen>
                         </keystoreConfig>
                     </sign>
 

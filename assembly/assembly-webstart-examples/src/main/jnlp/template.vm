@@ -16,9 +16,7 @@
 #if($project.Description)
     <description>$project.Description</description>
 #end
-#if($offlineAllowed)
     <offline-allowed/>
-#end
   </information>
 #if($allPermissions)
   <security>
