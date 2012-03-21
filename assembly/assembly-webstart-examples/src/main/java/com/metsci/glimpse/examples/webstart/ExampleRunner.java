@@ -1,7 +1,6 @@
 package com.metsci.glimpse.examples.webstart;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -41,6 +40,11 @@ import javax.swing.tree.TreeSelectionModel;
 
 import jsyntaxpane.DefaultSyntaxKit;
 
+<<<<<<< HEAD
+import com.metsci.glimpse.examples.Example;
+
+=======
+>>>>>>> enhancement to Brandon's webstart Glimpse examples to include line numbering and syntax highlighting
 @SuppressWarnings( "serial" )
 public class ExampleRunner extends JSplitPane
 {
@@ -58,11 +62,18 @@ public class ExampleRunner extends JSplitPane
         setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
         exampleTree = new JTree( new DefaultTreeModel( new DefaultMutableTreeNode( "Loading ..." ) ) );
+<<<<<<< HEAD
+
+        DefaultSyntaxKit.initKit( );
+
+        codeArea = new JEditorPane( );
+=======
         
         codeArea = new JEditorPane( );
         JScrollPane scrollPane = new JScrollPane( codeArea );
         codeArea.setContentType("text/java");
         codeArea.setFont( Font.decode( "COURIER" ) );
+>>>>>>> enhancement to Brandon's webstart Glimpse examples to include line numbering and syntax highlighting
         codeArea.setEditable( false );
 
         runExampleButton = new JButton( "Run Example" );
@@ -104,13 +115,15 @@ public class ExampleRunner extends JSplitPane
         rightPanel.add( scrollPane, BorderLayout.CENTER );
 
         JPanel buttonPanel = new JPanel( new BorderLayout( ) );
-        buttonPanel.add( runExampleButton, BorderLayout.EAST );
+        buttonPanel.add( runExampleButton, BorderLayout.WEST );
 
         rightPanel.add( buttonPanel, BorderLayout.SOUTH );
 
         setLeftComponent( new JScrollPane( exampleTree ) );
         setRightComponent( rightPanel );
         setDividerLocation( 300 );
+
+        codeArea.setContentType( "text/java" );
     }
 
     public void populateExamples( )
@@ -212,7 +225,7 @@ public class ExampleRunner extends JSplitPane
         runExampleButton.setEnabled( false );
         if ( clazz == null )
         {
-            codeArea.setText( null );
+            codeArea.setText( "" );
             return;
         }
 
@@ -252,7 +265,7 @@ public class ExampleRunner extends JSplitPane
         StringBuilder builder = new StringBuilder( );
 
         String line = null;
-        InputStream in = ExampleRunner.class.getClassLoader( ).getResourceAsStream( file );
+        InputStream in = Example.class.getClassLoader( ).getResourceAsStream( file );
         if ( in == null )
         {
             throw new FileNotFoundException( "Source file not found for " + clazz.getName( ) );
@@ -273,7 +286,7 @@ public class ExampleRunner extends JSplitPane
     {
         List<Class<?>> exampleClasses = new ArrayList<Class<?>>( );
 
-        URL url = ExampleRunner.class.getResource( ExampleRunner.class.getSimpleName( ) + ".class" );
+        URL url = Example.class.getResource( Example.class.getSimpleName( ) + ".class" );
         URLConnection connection = url.openConnection( );
         if ( connection instanceof JarURLConnection )
         {

@@ -12,7 +12,7 @@
     <artifactId>glimpse-webstart-examples-assembly</artifactId>
     <version>CURRENT-SNAPSHOT</version>
     <name>Glimpse Examples</name>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -27,11 +27,25 @@
             <version>CURRENT-SNAPSHOT</version>
             <classifier>sources</classifier>
         </dependency>
+
+        <dependency>
+            <groupId>jsyntaxpane</groupId>
+            <artifactId>jsyntaxpane</artifactId>
+            <version>0.9.5-b29</version>
+        </dependency>
+
     </dependencies>
 
     <properties>
         <webstartUrl>http://glimpse.metsci.com/</webstartUrl>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>clojars.org</id>
+            <url>http://clojars.org/repo</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
