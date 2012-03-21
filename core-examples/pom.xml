@@ -16,6 +16,12 @@
             <artifactId>glimpse-core</artifactId>
             <version>${parent.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>jsyntaxpane</groupId>
+            <artifactId>jsyntaxpane</artifactId>
+            <version>0.9.5</version>
+        </dependency>
 
     </dependencies>
 

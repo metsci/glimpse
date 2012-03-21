@@ -23,11 +23,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -39,22 +39,29 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import jsyntaxpane.DefaultSyntaxKit;
+
 @SuppressWarnings( "serial" )
 public class ExampleRunner extends JSplitPane
 {
     private JTree exampleTree;
-    private JTextArea codeArea;
+    private JEditorPane codeArea;
     private JButton runExampleButton;
 
     private Class<?> exampleClass;
 
     public ExampleRunner( )
     {
+        // initialize jsyntaxpane syntax highlighting
+        DefaultSyntaxKit.initKit();
+        
         setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
         exampleTree = new JTree( new DefaultTreeModel( new DefaultMutableTreeNode( "Loading ..." ) ) );
-
-        codeArea = new JTextArea( );
+        
+        codeArea = new JEditorPane( );
+        JScrollPane scrollPane = new JScrollPane( codeArea );
+        codeArea.setContentType("text/java");
         codeArea.setFont( Font.decode( "COURIER" ) );
         codeArea.setEditable( false );
 
@@ -94,7 +101,7 @@ public class ExampleRunner extends JSplitPane
         } );
 
         JPanel rightPanel = new JPanel( new BorderLayout( ) );
-        rightPanel.add( new JScrollPane( codeArea ), BorderLayout.CENTER );
+        rightPanel.add( scrollPane, BorderLayout.CENTER );
 
         JPanel buttonPanel = new JPanel( new BorderLayout( ) );
         buttonPanel.add( runExampleButton, BorderLayout.EAST );
