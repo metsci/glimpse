@@ -40,11 +40,8 @@ import javax.swing.tree.TreeSelectionModel;
 
 import jsyntaxpane.DefaultSyntaxKit;
 
-<<<<<<< HEAD
 import com.metsci.glimpse.examples.Example;
 
-=======
->>>>>>> enhancement to Brandon's webstart Glimpse examples to include line numbering and syntax highlighting
 @SuppressWarnings( "serial" )
 public class ExampleRunner extends JSplitPane
 {
@@ -58,22 +55,13 @@ public class ExampleRunner extends JSplitPane
     {
         // initialize jsyntaxpane syntax highlighting
         DefaultSyntaxKit.initKit();
-        
+
         setOrientation( JSplitPane.HORIZONTAL_SPLIT );
 
         exampleTree = new JTree( new DefaultTreeModel( new DefaultMutableTreeNode( "Loading ..." ) ) );
-<<<<<<< HEAD
-
-        DefaultSyntaxKit.initKit( );
-
-        codeArea = new JEditorPane( );
-=======
-        
         codeArea = new JEditorPane( );
         JScrollPane scrollPane = new JScrollPane( codeArea );
         codeArea.setContentType("text/java");
-        codeArea.setFont( Font.decode( "COURIER" ) );
->>>>>>> enhancement to Brandon's webstart Glimpse examples to include line numbering and syntax highlighting
         codeArea.setEditable( false );
 
         runExampleButton = new JButton( "Run Example" );
