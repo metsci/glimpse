@@ -50,7 +50,7 @@
 
                     <unsignAlreadySignedJars>true</unsignAlreadySignedJars>
                     <canUnsign>true</canUnsign>
-                    <makeArchive>false</makeArchive>
+                    <makeArchive>true</makeArchive>
                     <attachArchive>false</attachArchive>
 
                     <jnlp>
@@ -64,10 +64,11 @@
                     <libPath>lib</libPath>
 
                     <sign>
-                        <keystore>${basedir}/glimpse.keystore</keystore>
+                        <keystore>${basedir}/glimpse-server-keystore.pkcs12</keystore>
                         <keypass>${glimpseKeystorePassword}</keypass>
                         <storepass>${glimpseKeystorePassword}</storepass>
-                        <alias>glimpsewebstart</alias>
+                        <alias>1</alias>
+                        <storetype>pkcs12</storetype>
 
                         <verify>true</verify>
 
