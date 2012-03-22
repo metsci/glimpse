@@ -66,15 +66,20 @@ public class ScalePainter extends GlimpsePainterImpl
 
     protected String unitLabel;
 
-    protected TextRenderer textRenderer;
+    protected TextRenderer tickTextRenderer;
+    protected TextRenderer overallTextRenderer;
 
     protected NumberFormat formatter;
+    
+    protected boolean showTickLength = true;
+    protected boolean showOverallLength = true;
 
     public ScalePainter( Axis1D axis )
     {
         this.axis = axis;
 
-        this.textRenderer = createTextRenderer( );
+        this.tickTextRenderer = createTickTextRenderer( );
+        this.overallTextRenderer = createOverallTextRenderer( );
 
         this.converter = new AxisUnitConverter( )
         {
@@ -103,7 +108,12 @@ public class ScalePainter extends GlimpsePainterImpl
         this.pixelWidth = 300;
     }
 
-    protected TextRenderer createTextRenderer( )
+    protected TextRenderer createTickTextRenderer( )
+    {
+        return new TextRenderer( getDefaultBold( 11 ), false, false );
+    }
+    
+    protected TextRenderer createOverallTextRenderer( )
     {
         return new TextRenderer( getDefaultBold( 16 ), false, false );
     }
@@ -207,12 +217,25 @@ public class ScalePainter extends GlimpsePainterImpl
     {
         this.unitLabel = unitLabel;
     }
+    
+    public void setShowTickLength( boolean show )
+    {
+        this.showTickLength = show;
+    }
+    
+    public void setShowOverallLength( boolean show )
+    {
+        this.showOverallLength = show;
+    }
 
     @Override
     public void dispose( GLContext context )
     {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
+        if ( tickTextRenderer != null ) tickTextRenderer.dispose( );
+        if ( overallTextRenderer != null ) overallTextRenderer.dispose( );
+        
+        overallTextRenderer = null;
+        tickTextRenderer = null;
     }
 
     @Override
@@ -305,22 +328,47 @@ public class ScalePainter extends GlimpsePainterImpl
             formatter.setMaximumFractionDigits( 0 );
         }
 
-        String text = formatter.format( scaleValueSize ) + " " + unitLabel;
-
-        Rectangle2D textBounds = textRenderer.getBounds( text );
-
-        int posX = ( int ) ( width - 1 - bufferX - textBounds.getWidth( ) - 1 );
-        int posY = ( int ) ( bufferY + pixelHeight / 2 - textBounds.getHeight( ) / 2 );
-
-        textRenderer.beginRendering( width, height );
-        try
+        if ( showTickLength )
         {
-            GlimpseColor.setColor( textRenderer, textColor );
-            textRenderer.draw( text, posX, posY );
+            String tickText = formatter.format( scaleValueSize ) + " " + unitLabel;
+    
+            Rectangle2D textBounds = tickTextRenderer.getBounds( tickText );
+    
+            int posX = ( int ) ( width - 1 - bufferX - textBounds.getWidth( ) - 1 );
+            int posY = ( int ) ( bufferY + pixelHeight / 2 - textBounds.getHeight( ) / 2 );
+    
+            tickTextRenderer.beginRendering( width, height );
+            try
+            {
+                GlimpseColor.setColor( tickTextRenderer, textColor );
+                tickTextRenderer.draw( tickText, posX, posY );
+            }
+            finally
+            {
+                tickTextRenderer.endRendering( );
+            }
         }
-        finally
+        
+        
+        if ( showOverallLength )
         {
-            textRenderer.endRendering( );
+            String overallText = formatter.format( scaleValueSize * tickCount ) + " " + unitLabel;
+            
+            Rectangle2D overallTextBounds = overallTextRenderer.getBounds( overallText );
+    
+            int posX = ( int ) ( width - pixelWidth / 2 - overallTextBounds.getWidth( ) / 2 );
+            int posY = ( int ) ( bufferY + pixelHeight / 2 - overallTextBounds.getHeight( ) / 2 );
+    
+            overallTextRenderer.beginRendering( width, height );
+            try
+            {
+                GlimpseColor.setColor( overallTextRenderer, textColor );
+                overallTextRenderer.draw( overallText, posX, posY );
+            }
+            finally
+            {
+                overallTextRenderer.endRendering( );
+            }
         }
     }
 }
