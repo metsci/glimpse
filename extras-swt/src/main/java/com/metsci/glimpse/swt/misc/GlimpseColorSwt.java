@@ -57,6 +57,20 @@ public class GlimpseColorSwt
 
         return fromColorRgb( r, g, b );
     }
+    
+    public static float[] fromColorSwt( RGB color, float alpha )
+    {
+        float[] out = fromColorSwt( color );
+        out[3] = alpha;
+        return out;
+    }
+
+    public static float[] fromColorSwt( org.eclipse.swt.graphics.Color color, float alpha )
+    {
+        float[] out = fromColorSwt( color );
+        out[3] = alpha;
+        return out;
+    }
 
     public static float[] fromColorSwtSystemColor( int color )
     {
