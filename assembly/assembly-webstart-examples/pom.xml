@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>glimpse-webstart-examples-assembly</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>${parent.version}</version>
     <name>Glimpse Examples</name>
     <packaging>jar</packaging>
 
@@ -18,13 +18,13 @@
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
-            <version>CURRENT-SNAPSHOT</version>
+            <version>${parent.version}</version>
             <classifier>sources</classifier>
         </dependency>
 
