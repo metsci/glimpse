@@ -9,6 +9,7 @@ There's lots of information available at http://glimpse.metsci.com including:
 * [Javadoc](http://metsci.github.com/glimpse/apidocs/1.0.x/index.html)
 * [Screenshots](http://metsci.github.com/glimpse/screenshots.html)
 * [Video](http://metsci.github.com/glimpse/videos.html)
+* [Web Start Demo](http://metsci.github.com/glimpse/webstart.html)
 * [Getting Started Guide](http://metsci.github.com/glimpse/guide.html)
 * [Discussion Forums](https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse)
 * [Wiki](https://github.com/metsci/glimpse/wiki)
