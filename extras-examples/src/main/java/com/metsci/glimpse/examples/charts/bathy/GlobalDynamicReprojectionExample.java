@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
+import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static java.lang.Math.PI;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,12 +66,6 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.vector.Vector2d;
-import com.sun.opengl.util.j2d.TextRenderer;
-
-import static com.metsci.glimpse.axis.UpdateMode.*;
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static com.metsci.glimpse.support.font.FontUtils.*;
-import static java.lang.Math.*;
 
 /**
  * Data displayed was downloaded from the NOAA/NGDC Bathymetry
@@ -254,12 +252,7 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
         crosshairs.setCursorColor( GlimpseColor.getGreen( 0.3f ) );
         plot.addPainter( crosshairs );
 
-        ScalePainter scale = new ScalePainter( plot.getCenterAxisX( ) )
-        {
-            {
-                textRenderer = new TextRenderer( getDefaultBold( 14 ), true, false );
-            }
-        };
+        ScalePainter scale = new ScalePainter( plot.getCenterAxisX( ) );
         scale.setUnitConverter( unitConverter );
         scale.setPixelBufferX( 5 );
         scale.setPixelBufferY( 5 );

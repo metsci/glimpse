@@ -85,9 +85,13 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // create two plots (which by default will appear to the right of the timeline)
         // the returned ChartLayoutInfo reference can be used to add GlimpsePainters to
         // the plot area or customize its coloring and appearance
-        TimePlotInfo plot1 = plot.createTimePlot( "Snail Speed (furlongs per fornight)" );
-        TimePlotInfo plot2 = plot.createTimePlot( "Snail Slime Viscosity (pascal-seconds)" );
+        TimePlotInfo plot1 = plot.createTimePlot( "speed-plot-1-id" );
+        TimePlotInfo plot2 = plot.createTimePlot( "viscosity-plot-2-id" );
 
+        // give the plots custom text labels indicating value being plotted and units
+        plot1.setLabelText( "Snail Speed (furlongs per fornight)" );
+        plot2.setLabelText( "Snail Slime Viscosity (pascal-seconds)" );
+        
         // set custom coloring for the plots
         setChartLookAndFeel( plot1 );
         setChartData( plot1, epoch, axisMinTime, axisMaxTime );
