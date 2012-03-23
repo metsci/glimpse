@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>CURRENT-SNAPSHOT</version>
     </parent>
 
     <artifactId>glimpse-extras-swt</artifactId>
