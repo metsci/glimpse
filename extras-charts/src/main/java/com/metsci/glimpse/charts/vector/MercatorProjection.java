@@ -41,11 +41,11 @@ import static java.lang.Math.*;
  */
 public class MercatorProjection implements GeoProjection
 {
-    protected final double centerLon;
+    protected final double originLon;
 
-    public MercatorProjection( double centerLongitudeDeg )
+    public MercatorProjection( double originLongitudeDeg )
     {
-        this.centerLon = Angle.degreesToRadians( centerLongitudeDeg );
+        this.originLon = Angle.degreesToRadians( originLongitudeDeg );
     }
 
     public MercatorProjection( )
@@ -59,7 +59,7 @@ public class MercatorProjection implements GeoProjection
         double lon = latLon.getLonRad( );
         double lat = latLon.getLatRad( );
 
-        double x = Angle.normalizeAnglePi( lon - centerLon );
+        double x = Angle.normalizeAnglePi( lon - originLon );
         double y = log( ( sin( lat ) + 1 ) / cos( lat ) );
 
         return new Vector2d( x, y );
@@ -69,7 +69,7 @@ public class MercatorProjection implements GeoProjection
     public LatLonGeo unproject( double x, double y )
     {
         double lat = 2 * atan( exp( y ) ) - PI / 2;
-        double lon = x + centerLon;
+        double lon = x + originLon;
 
         return LatLonGeo.fromRad( lat, lon );
     }
