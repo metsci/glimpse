@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +64,7 @@ public class StackedPlot2D extends GlimpseLayout
 
     public enum Orientation
     {
-        HORIZONTAL,
-        VERTICAL;
+        HORIZONTAL, VERTICAL;
     }
 
     public static interface PlotInfo
@@ -302,7 +301,7 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected void initializeArrays( )
     {
-        this.stackedPlots = new HashMap<String, PlotInfo>( );
+        this.stackedPlots = new LinkedHashMap<String, PlotInfo>( );
     }
 
     protected void initializeLayout( )
@@ -387,12 +386,28 @@ public class StackedPlot2D extends GlimpseLayout
 
         sortedList.addAll( unsorted );
 
+        // this sort is guaranteed to be stable
+        // LinkedHashMap ensures that the unsorted array will
+        // be in the order that plots were added
+        // this means that plots with the same order constant
+        // will be displayed in the order they were added
         Collections.sort( sortedList, new Comparator<PlotInfo>( )
         {
             @Override
             public int compare( PlotInfo axis0, PlotInfo axis1 )
             {
-                return axis0.getOrder( ) - axis1.getOrder( );
+                if ( axis0.getOrder( ) < axis1.getOrder( ) )
+                {
+                    return -1;
+                }
+                else if ( axis0.getOrder( ) > axis1.getOrder( ) )
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
             }
         } );
 
@@ -467,16 +482,16 @@ public class StackedPlot2D extends GlimpseLayout
         // avoid potential "flicker" (displaying the new layout with the wrong constraints)
         // by hiding it until the layout is updated
         layout.setVisible( false );
-        
+
         this.addLayout( layout );
-        
+
         PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
         stackedPlots.put( name, info );
 
         updatePainterLayout( );
         validate( );
-        
-        layout.setVisible(true );
+
+        layout.setVisible( true );
 
         return info;
     }

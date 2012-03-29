@@ -29,13 +29,13 @@ package com.metsci.glimpse.plot.timeline.listener;
 import java.util.List;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 
 public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
@@ -49,7 +49,7 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
     {
         super( 25 );
 
-        this.timeIsX = plot.getOrientation( ) == Orientation.VERTICAL;
+        this.timeIsX = plot.isTimeAxisHorizontal( );
         this.plot = plot;
     }
 
@@ -116,44 +116,66 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
     {
         TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
-        Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
-        Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
-        Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
-
         if ( e.isKeyDown( ModifierKey.Ctrl ) && e.isButtonDown( MouseButton.Button1 ) && selectedTag != null )
         {
-            anchor( axis, horizontal, e.getX( ), e.getY( ) );
-
-            int mousePosPixels = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
-            int panPixels = getDim( horizontal, anchorPixelsX, anchorPixelsY ) - mousePosPixels;
-            double panValue = panPixels / taggedAxis.getPixelsPerValue( );
-            double newTagValue = tagAnchor - panValue;
-
-            this.selectedTag.setValue( newTagValue );
+            tagDragged( e, taggedAxis, horizontal );
         }
         else if ( e.isButtonDown( MouseButton.Button1 ) && !plot.isCurrentTimeLocked( ) )
         {
-            pan( axis, horizontal, e.getX( ), e.getY( ) );
+            mouseDragged( e, taggedAxis, horizontal );
         }
         else if ( !plot.isSelectionLocked( ) && !plot.isCurrentTimeLocked( ) )
         {
-            int mousePosPixels = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
-            double mousePosValue = taggedAxis.screenPixelToValue( mousePosPixels );
-
-            double minDiff = minTag.getValue( ) - currentTag.getValue( );
-            double maxDiff = maxTag.getValue( ) - currentTag.getValue( );
-
-            minTag.setValue( mousePosValue + minDiff );
-            maxTag.setValue( mousePosValue + maxDiff );
-            currentTag.setValue( mousePosValue );
+            mouseHovered( e, taggedAxis, horizontal );
         }
+
+        mouseMoved0( e, taggedAxis, horizontal );
 
         taggedAxis.validateTags( );
         taggedAxis.validate( );
 
         notifyTagsUpdated( taggedAxis );
     }
+    
+    protected void mouseMoved0( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
+    {
+        // subclasses can add additional mouseMoved behaviors here, do nothing by default
+    }
+    
+    protected void tagDragged( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
+    {
+        anchor( taggedAxis, horizontal, e.getX( ), e.getY( ) );
 
+        int mousePosPixels = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
+        int panPixels = getDim( horizontal, anchorPixelsX, anchorPixelsY ) - mousePosPixels;
+        double panValue = panPixels / taggedAxis.getPixelsPerValue( );
+        double newTagValue = tagAnchor - panValue;
+
+        this.selectedTag.setValue( newTagValue );
+    }
+    
+    protected void mouseDragged( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
+    {
+        pan( taggedAxis, horizontal, e.getX( ), e.getY( ) );
+    }
+    
+    protected void mouseHovered( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
+    {
+        Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
+        Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
+        Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
+        
+        int mousePosPixels = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
+        double mousePosValue = taggedAxis.screenPixelToValue( mousePosPixels );
+
+        double minDiff = minTag.getValue( ) - currentTag.getValue( );
+        double maxDiff = maxTag.getValue( ) - currentTag.getValue( );
+
+        minTag.setValue( mousePosValue + minDiff );
+        maxTag.setValue( mousePosValue + maxDiff );
+        currentTag.setValue( mousePosValue );
+    }
+    
     @Override
     public void mouseWheelMoved( GlimpseMouseEvent e )
     {
@@ -188,25 +210,17 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         TaggedAxis1D taggedAxis = getTaggedAxis1D( e );
 
         if ( taggedAxis == null ) return;
+        
+        int zoomIncrements = e.getWheelIncrement( );
 
+        double newSelectionSize = calculateNewSelectionSize( taggedAxis, zoomIncrements );
+        
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
         Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
-
-        double minValue = minTag.getValue( );
+        
         double maxValue = maxTag.getValue( );
-        double selectionSize = maxValue - minValue;
-
-        int zoomIncrements = e.getWheelIncrement( );
-
-        double zoomPercentDbl = 1.0f;
-        for ( int i = 0; i < Math.abs( zoomIncrements ); i++ )
-        {
-            zoomPercentDbl *= 1.0 + zoomConstant;
-        }
-        zoomPercentDbl = zoomIncrements > 0 ? 1.0 / zoomPercentDbl : zoomPercentDbl;
-        double newSelectionSize = selectionSize * zoomPercentDbl;
-
+        
         minTag.setValue( maxValue - newSelectionSize );
         maxTag.setValue( maxValue );
         currentTag.setValue( maxValue );
@@ -216,10 +230,52 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
 
         notifyTagsUpdated( minTag.getValue( ), maxTag.getValue( ), currentTag.getValue( ) );
     }
+    
+    protected double calculateNewSelectionSize( TaggedAxis1D taggedAxis, int zoomIncrements )
+    {
+        Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
+        Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
 
+        double minValue = minTag.getValue( );
+        double maxValue = maxTag.getValue( );
+        double selectionSize = maxValue - minValue;
+
+        double zoomPercentDbl = 1.0f;
+        for ( int i = 0; i < Math.abs( zoomIncrements ); i++ )
+        {
+            zoomPercentDbl *= 1.0 + zoomConstant;
+        }
+        zoomPercentDbl = zoomIncrements > 0 ? 1.0 / zoomPercentDbl : zoomPercentDbl;
+        double newSelectionSize = selectionSize * zoomPercentDbl;
+        
+        return newSelectionSize;
+    }
+
+    // TimelineMouseListener1D is used as a delegate for TimelineMouseListener2D, which
+    // means it is sometimes passed GlimpseMouseEvents from GlimpseAxisLayout2D. This
+    // method gets the correct Axis1D based on whether the time axis is X or Y for this timeline plot
     protected TaggedAxis1D getTaggedAxis1D( GlimpseMouseEvent e )
     {
-        return ( TaggedAxis1D ) e.getAxis1D( );
+        Axis1D axis = e.getAxis1D( );
+
+        if ( axis != null )
+        {
+            return ( TaggedAxis1D ) e.getAxis1D( );
+        }
+        else
+        {
+            Axis2D axis2D = e.getAxis2D( );
+            if ( axis2D == null ) return null;
+
+            if ( timeIsX )
+            {
+                return ( TaggedAxis1D ) axis2D.getAxisX( );
+            }
+            else
+            {
+                return ( TaggedAxis1D ) axis2D.getAxisY( );
+            }   
+        }
     }
 
     protected void moveAllTags( TaggedAxis1D taggedAxis, double deltaTagValue )
