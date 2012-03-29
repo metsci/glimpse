@@ -32,7 +32,7 @@ import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 import java.awt.Font;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -149,7 +149,7 @@ public class StackedTimePlot2D extends GlimpseLayout
 
         this.epoch = epoch;
 
-        this.stackedTimePlots = new HashMap<String, TimePlotInfo>( );
+        this.stackedTimePlots = new LinkedHashMap<String, TimePlotInfo>( );
 
         this.delegatePlot = new StackedPlot2D( orientation )
         {
@@ -253,22 +253,22 @@ public class StackedTimePlot2D extends GlimpseLayout
     {
         return this.selectedLayout;
     }
-    
+
     public void setTimelineMouseListener1D( AxisMouseListener1D listener )
     {
         if ( this.timelineMouseListener != null )
         {
             this.timeLayout.removeGlimpseMouseAllListener( this.timelineMouseListener );
         }
-        
+
         this.timelineMouseListener = listener;
-        
+
         if ( this.timelineMouseListener != null )
         {
             this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
         }
     }
-    
+
     public AxisMouseListener1D getTimelineMouseListener1D( )
     {
         return this.timelineMouseListener;
@@ -507,7 +507,6 @@ public class StackedTimePlot2D extends GlimpseLayout
     {
         this.delegatePlot.validate( );
     }
-    
 
     public boolean isTimeAxisHorizontal( )
     {
@@ -796,17 +795,17 @@ public class StackedTimePlot2D extends GlimpseLayout
         {
             this.timelineInfo.setSize( 45 );
             this.timelineInfo.setOrder( Integer.MAX_VALUE );
-            
+
             this.timeLayout = new GlimpseAxisLayoutX( this.timelineInfo.getLayout( ) );
         }
         else
         {
             this.timelineInfo.setSize( 60 );
             this.timelineInfo.setOrder( Integer.MIN_VALUE );
-            
+
             this.timeLayout = new GlimpseAxisLayoutY( this.timelineInfo.getLayout( ) );
         }
-        
+
         this.timelineMouseListener = new TimelineMouseListener1D( this );
         this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
 
