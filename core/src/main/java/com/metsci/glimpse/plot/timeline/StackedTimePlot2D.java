@@ -276,7 +276,7 @@ public class StackedTimePlot2D extends GlimpseLayout
 
     /**
      * Sets whether or not locking of the selected region is allowed for all
-     * timeline and plot axes. This setting will also effect newly created plots.
+     * timeline and plot axes. This setting will also affect newly created plots.
      * 
      * @param lock whether to allow locking of the selected region
      * @see AxisMouseListener#setAllowSelectionLock(boolean)
@@ -295,7 +295,7 @@ public class StackedTimePlot2D extends GlimpseLayout
 
     /**
      * Sets whether or not zooming of the Y axis is allowed for all
-     * timeline and plot axes. This setting will also effect newly created plots.
+     * timeline and plot axes. This setting will also affect newly created plots.
      * 
      * @param lock whether to allow zooming of the Y axis
      * @see AxisMouseListener#setAllowZoomY(boolean)
@@ -317,7 +317,7 @@ public class StackedTimePlot2D extends GlimpseLayout
 
     /**
      * Sets whether or not zooming of the X axis is allowed for all
-     * timeline and plot axes. This setting will also effect newly created plots.
+     * timeline and plot axes. This setting will also affect newly created plots.
      * 
      * @param lock whether to allow zooming of the X axis
      * @see AxisMouseListener#setAllowZoomX(boolean)
@@ -339,7 +339,7 @@ public class StackedTimePlot2D extends GlimpseLayout
 
     /**
      * Sets whether or not panning of the Y axis is allowed for all
-     * timeline and plot axes. This setting will also effect newly created plots.
+     * timeline and plot axes. This setting will also affect newly created plots.
      * 
      * @param lock whether to allow panning of the Y axis
      * @see AxisMouseListener#setAllowPanY(boolean)
@@ -361,7 +361,7 @@ public class StackedTimePlot2D extends GlimpseLayout
 
     /**
      * Sets whether or not panning of the X axis is allowed for all
-     * timeline and plot axes. This setting will also effect newly created plots.
+     * timeline and plot axes. This setting will also affect newly created plots.
      * 
      * @param lock whether to allow panning of the X axis
      * @see AxisMouseListener#setAllowPanX(boolean)
