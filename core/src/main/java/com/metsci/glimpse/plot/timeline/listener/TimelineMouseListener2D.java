@@ -28,8 +28,8 @@ package com.metsci.glimpse.plot.timeline.listener;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
@@ -41,35 +41,18 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
     public static final int TIMELINE_WIDTH = 28;
 
     protected StackedTimePlot2D plot;
-    protected TimelineMouseListener1D delegateListener;
+    protected AxisMouseListener1D delegateListener;
     protected PlotInfo info;
 
     protected boolean axisSelected;
     protected boolean timeIsX;
 
-    public TimelineMouseListener2D( StackedTimePlot2D plot, PlotInfo info, final boolean timeIsX )
+    public TimelineMouseListener2D( StackedTimePlot2D plot, PlotInfo info )
     {
         this.info = info;
         this.plot = plot;
-        this.timeIsX = timeIsX;
-        this.delegateListener = new TimelineMouseListener1D( plot )
-        {
-            @Override
-            protected TaggedAxis1D getTaggedAxis1D( GlimpseMouseEvent e )
-            {
-                Axis2D axis = e.getAxis2D( );
-                if ( axis == null ) return null;
-
-                if ( timeIsX )
-                {
-                    return ( TaggedAxis1D ) axis.getAxisX( );
-                }
-                else
-                {
-                    return ( TaggedAxis1D ) axis.getAxisY( );
-                }
-            }
-        };
+        this.timeIsX = plot.isTimeAxisHorizontal( );
+        this.delegateListener = new TimelineMouseListener1D( plot );
 
         // we handle these ourselves
         if ( this.timeIsX )
@@ -324,7 +307,7 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
             this.allowPan = b;
         }
     }
-    
+
     @Override
     public void setAllowSelectionLock( boolean b )
     {
@@ -351,5 +334,19 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
     {
         this.delegateListener.setAllowPan( b );
         this.allowPan = b;
+    }
+
+    /**
+     * TimelineMouseListener2D delegates its timeline update behavior to
+     * the provided AxisMouseListener1D.
+     */
+    public void setTimelineMouseListener1D( AxisMouseListener1D mouseListener )
+    {
+        this.delegateListener = mouseListener;
+    }
+
+    public AxisMouseListener1D getTimeMouseListener1D( )
+    {
+        return this.delegateListener;
     }
 }
