@@ -392,7 +392,18 @@ public class StackedPlot2D extends GlimpseLayout
             @Override
             public int compare( PlotInfo axis0, PlotInfo axis1 )
             {
-                return axis0.getOrder( ) - axis1.getOrder( );
+                if ( axis0.getOrder( ) < axis1.getOrder( ) )
+                {
+                    return -1;
+                }
+                else if ( axis0.getOrder( ) > axis1.getOrder( ) )
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
             }
         } );
 
