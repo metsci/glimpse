@@ -810,7 +810,7 @@ public class StackedTimePlot2D extends GlimpseLayout
         this.timelineMouseListener = new TimelineMouseListener1D( this );
         this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
 
-        this.timeAxisPainter = createTimeAxisPainter( isTimeAxisHorizontal( ) );
+        this.timeAxisPainter = createTimeAxisPainter( );
         this.timeAxisPainter.setFont( getDefaultPlain( 12 ), false );
         this.timeAxisPainter.showCurrentTimeLabel( false );
         this.timeAxisPainter.setCurrentTimeTickColor( GlimpseColor.getGreen( ) );
@@ -866,7 +866,7 @@ public class StackedTimePlot2D extends GlimpseLayout
         return mouseListener;
     }
 
-    protected TimeAxisPainter createTimeAxisPainter( boolean timeIsX )
+    protected TimeAxisPainter createTimeAxisPainter( )
     {
         TimeAxisPainter painter;
         if ( isTimeAxisHorizontal( ) )
