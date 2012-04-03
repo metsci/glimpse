@@ -470,6 +470,11 @@ public class StackedPlot2D extends GlimpseLayout
 
     public PlotInfo createPlot( String name, Axis1D axis )
     {
+        if ( stackedPlots.containsKey( name ) )
+        {
+            throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
+        }
+
         int order = 0;
         int size = -1;
 
