@@ -61,7 +61,7 @@ public class StackedPlot2D extends GlimpseLayout
     protected BackgroundPainter backgroundPainter;
 
     protected Orientation orientation = Orientation.VERTICAL;
-    
+
     public enum Orientation
     {
         HORIZONTAL, VERTICAL;
@@ -325,12 +325,12 @@ public class StackedPlot2D extends GlimpseLayout
         try
         {
             this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
-        
+
             List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
             for ( int i = 0; i < axisList.size( ); i++ )
             {
                 PlotInfo info = axisList.get( i );
-        
+
                 if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
                 {
                     String format = "cell %d %d 1 1, push, grow";
@@ -353,7 +353,7 @@ public class StackedPlot2D extends GlimpseLayout
                     }
                 }
             }
-        
+
             this.invalidateLayout( );
         }
         finally
@@ -383,7 +383,15 @@ public class StackedPlot2D extends GlimpseLayout
 
     public Collection<PlotInfo> getAllPlots( )
     {
-        return Collections.unmodifiableCollection( this.stackedPlots.values( ) );
+        this.lock.lock( );
+        try
+        {
+            return Collections.unmodifiableCollection( this.stackedPlots.values( ) );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
     }
 
     protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
@@ -444,7 +452,7 @@ public class StackedPlot2D extends GlimpseLayout
         this.outerBorder = size;
         this.validate( );
     }
-    
+
     public void validate( )
     {
         this.validateLayout( );
@@ -453,14 +461,22 @@ public class StackedPlot2D extends GlimpseLayout
 
     public void validateAxes( )
     {
-        commonAxis.validate( );
-        for ( PlotInfo info : stackedPlots.values( ) )
+        this.lock.lock( );
+        try
         {
-            info.getLayout( ).getAxis( ).getAxisX( ).validate( );
-            info.getLayout( ).getAxis( ).getAxisY( ).validate( );
+            commonAxis.validate( );
+            for ( PlotInfo info : stackedPlots.values( ) )
+            {
+                info.getLayout( ).getAxis( ).getAxisX( ).validate( );
+                info.getLayout( ).getAxis( ).getAxisY( ).validate( );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
     }
-    
+
     public void validateLayout( )
     {
         updatePainterLayout( );
@@ -468,14 +484,22 @@ public class StackedPlot2D extends GlimpseLayout
 
     public void deletePlot( String name )
     {
-        PlotInfo info = stackedPlots.get( name );
+        this.lock.lock( );
+        try
+        {
+            PlotInfo info = stackedPlots.get( name );
 
-        if ( info == null ) return;
+            if ( info == null ) return;
 
-        this.removeLayout( info.getLayout( ) );
-        stackedPlots.remove( name );
+            this.removeLayout( info.getLayout( ) );
+            stackedPlots.remove( name );
 
-        validate( );
+            validate( );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
     }
 
     public PlotInfo createPlot( String name )
@@ -485,34 +509,36 @@ public class StackedPlot2D extends GlimpseLayout
 
     public PlotInfo createPlot( String name, Axis1D axis )
     {
-        if ( stackedPlots.containsKey( name ) )
+        this.lock.lock( );
+        try
         {
-            throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
+            if ( stackedPlots.containsKey( name ) )
+            {
+                throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
+            }
+    
+            int order = 0;
+            int size = -1;
+    
+            Axis1D commonChildAxis = commonAxis.clone( );
+    
+            Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
+    
+            GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
+
+            this.addLayout( layout );
+    
+            PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
+            stackedPlots.put( name, info );
+    
+            validate( );
+    
+            return info;
         }
-
-        int order = 0;
-        int size = -1;
-
-        Axis1D commonChildAxis = commonAxis.clone( );
-
-        Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
-
-        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
-
-        // avoid potential "flicker" (displaying the new layout with the wrong constraints)
-        // by hiding it until the layout is updated
-        layout.setVisible( false );
-
-        this.addLayout( layout );
-
-        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
-        stackedPlots.put( name, info );
-
-        validate( );
-
-        layout.setVisible( true );
-
-        return info;
+        finally
+        {
+            this.lock.unlock( );
+        }
     }
 
     @Override
