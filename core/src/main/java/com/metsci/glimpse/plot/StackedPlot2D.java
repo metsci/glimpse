@@ -61,7 +61,7 @@ public class StackedPlot2D extends GlimpseLayout
     protected BackgroundPainter backgroundPainter;
 
     protected Orientation orientation = Orientation.VERTICAL;
-
+    
     public enum Orientation
     {
         HORIZONTAL, VERTICAL;
@@ -207,7 +207,6 @@ public class StackedPlot2D extends GlimpseLayout
         public void setOrder( int order )
         {
             this.order = order;
-            this.parent.updatePainterLayout( );
             this.parent.validate( );
         }
 
@@ -215,7 +214,6 @@ public class StackedPlot2D extends GlimpseLayout
         public void setSize( int size )
         {
             this.size = size;
-            this.parent.updatePainterLayout( );
             this.parent.validate( );
         }
 
@@ -323,37 +321,45 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected void updatePainterLayout( )
     {
-        this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
-
-        List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
-        for ( int i = 0; i < axisList.size( ); i++ )
+        this.lock.lock( );
+        try
         {
-            PlotInfo info = axisList.get( i );
-
-            if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+            this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
+        
+            List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
+            for ( int i = 0; i < axisList.size( ); i++ )
             {
-                String format = "cell %d %d 1 1, push, grow";
-                String layout = orientation == Orientation.HORIZONTAL ? String.format( format, i, 0 ) : String.format( format, 0, i );
-                info.getLayout( ).setLayoutData( layout );
-            }
-            else
-            {
-                if ( orientation == Orientation.HORIZONTAL )
+                PlotInfo info = axisList.get( i );
+        
+                if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
                 {
-                    String format = "cell %d %d 1 1, pushy, growy, width %d!";
-                    String layout = String.format( format, i, 0, info.getSize( ) );
+                    String format = "cell %d %d 1 1, push, grow";
+                    String layout = orientation == Orientation.HORIZONTAL ? String.format( format, i, 0 ) : String.format( format, 0, i );
                     info.getLayout( ).setLayoutData( layout );
                 }
-                else if ( orientation == Orientation.VERTICAL )
+                else
                 {
-                    String format = "cell %d %d 1 1, pushx, growx, height %d!";
-                    String layout = String.format( format, 0, i, info.getSize( ) );
-                    info.getLayout( ).setLayoutData( layout );
+                    if ( orientation == Orientation.HORIZONTAL )
+                    {
+                        String format = "cell %d %d 1 1, pushy, growy, width %d!";
+                        String layout = String.format( format, i, 0, info.getSize( ) );
+                        info.getLayout( ).setLayoutData( layout );
+                    }
+                    else if ( orientation == Orientation.VERTICAL )
+                    {
+                        String format = "cell %d %d 1 1, pushx, growx, height %d!";
+                        String layout = String.format( format, 0, i, info.getSize( ) );
+                        info.getLayout( ).setLayoutData( layout );
+                    }
                 }
             }
+        
+            this.invalidateLayout( );
         }
-
-        this.invalidateLayout( );
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     //////////////////////////////////////
@@ -436,11 +442,16 @@ public class StackedPlot2D extends GlimpseLayout
     public void setBorderSize( int size )
     {
         this.outerBorder = size;
-        this.updatePainterLayout( );
         this.validate( );
     }
-
+    
     public void validate( )
+    {
+        this.validateLayout( );
+        this.validateAxes( );
+    }
+
+    public void validateAxes( )
     {
         commonAxis.validate( );
         for ( PlotInfo info : stackedPlots.values( ) )
@@ -448,6 +459,11 @@ public class StackedPlot2D extends GlimpseLayout
             info.getLayout( ).getAxis( ).getAxisX( ).validate( );
             info.getLayout( ).getAxis( ).getAxisY( ).validate( );
         }
+    }
+    
+    public void validateLayout( )
+    {
+        updatePainterLayout( );
     }
 
     public void deletePlot( String name )
@@ -459,7 +475,6 @@ public class StackedPlot2D extends GlimpseLayout
         this.removeLayout( info.getLayout( ) );
         stackedPlots.remove( name );
 
-        updatePainterLayout( );
         validate( );
     }
 
@@ -493,7 +508,6 @@ public class StackedPlot2D extends GlimpseLayout
         PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
         stackedPlots.put( name, info );
 
-        updatePainterLayout( );
         validate( );
 
         layout.setVisible( true );

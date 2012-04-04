@@ -33,6 +33,7 @@ import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
@@ -60,15 +61,23 @@ public class TimePlotInfo implements PlotInfo
     protected PlotInfo child;
 
     protected TimelineMouseListener2D listener;
+    
+    protected GlimpseLayout labelLayout;
 
     //@formatter:off
-    public TimePlotInfo( StackedTimePlot2D parent, PlotInfo child, TimelineMouseListener2D listener,
-                         GridPainter gridPainter, NumericXYAxisPainter axisPainter,
-                         SimpleTextPainter labelPainter, BorderPainter borderPainter,
+    public TimePlotInfo( StackedTimePlot2D parent,
+                         PlotInfo child,
+                         GlimpseLayout labelLayout,
+                         TimelineMouseListener2D listener,
+                         GridPainter gridPainter,
+                         NumericXYAxisPainter axisPainter,
+                         SimpleTextPainter labelPainter,
+                         BorderPainter borderPainter,
                          DelegatePainter dataPainter )
     {
         this.parent = parent;
         this.child = child;
+        this.labelLayout = labelLayout;
         this.listener = listener;
         this.gridPainter = gridPainter;
         this.axisPainter = axisPainter;
@@ -112,6 +121,11 @@ public class TimePlotInfo implements PlotInfo
     public void setAxisFont( Font font )
     {
         this.axisPainter.setFont( font );
+    }
+    
+    public GlimpseLayout getLabelLayout( )
+    {
+        return labelLayout;
     }
 
     public GridPainter getGridPainter( )

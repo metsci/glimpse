@@ -325,20 +325,28 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     // (the GlimseTarget which we are "painting onto")
     public void paintTo( GlimpseContext context )
     {
-        // ensure that we have been laid out properly
-        GlimpseBounds bounds = layoutTo( context );
-
-        if ( !isVisible ) return;
-
-        // push our bounds onto the layout stack
-        context.getTargetStack( ).push( this, bounds );
-
-        // paint our children with our bounds on top of the layout stack
-        layoutDelegate.paintTo( context );
-
-        // once our children (and their children recursively) have finished
-        // painting remove our bounds from the layout stack
-        context.getTargetStack( ).pop( );
+        lock.lock( );
+        try
+        {
+            // ensure that we have been laid out properly
+            GlimpseBounds bounds = layoutTo( context );
+    
+            if ( !isVisible ) return;
+    
+            // push our bounds onto the layout stack
+            context.getTargetStack( ).push( this, bounds );
+    
+            // paint our children with our bounds on top of the layout stack
+            layoutDelegate.paintTo( context );
+    
+            // once our children (and their children recursively) have finished
+            // painting remove our bounds from the layout stack
+            context.getTargetStack( ).pop( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     @Override

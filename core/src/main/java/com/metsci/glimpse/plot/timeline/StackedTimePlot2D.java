@@ -93,6 +93,11 @@ public class StackedTimePlot2D extends GlimpseLayout
     // tag representing the currently selected time
     protected Tag currentTag;
 
+    // epoch encapsulating the absolute time which maps to value 0 on the timeline
+    protected Epoch epoch;
+    
+    // layout covering all plots and timeline (for drawing
+    // which must span multiple plots)
     protected GlimpseAxisLayout1D overlayLayout;
 
     // time layout painters and listeners
@@ -103,6 +108,7 @@ public class StackedTimePlot2D extends GlimpseLayout
     protected StackedPlot2D delegatePlot;
     protected PlotInfo selectedLayout;
 
+    // timeline painters and listeners
     protected AxisMouseListener1D timelineMouseListener;
     protected SimpleTextPainter timeUnitsPainter;
     protected BorderPainter timeAxisBorderPainter;
@@ -113,11 +119,13 @@ public class StackedTimePlot2D extends GlimpseLayout
     protected boolean allowZoomX = true;
     protected boolean allowZoomY = true;
     protected boolean allowSelectionLock = true;
-
     protected boolean currentTimeLock;
-    protected Epoch epoch;
 
+    // a map of TimePlotInfo organized by their unique id
     protected Map<String, TimePlotInfo> stackedTimePlots;
+    
+    // the size of the label layout area in pixels
+    protected int labelLayoutSize;
 
     public StackedTimePlot2D( )
     {
@@ -502,6 +510,13 @@ public class StackedTimePlot2D extends GlimpseLayout
     {
         this.delegatePlot.setBorderSize( size );
     }
+    
+    public void setLabelLayoutSize( int size )
+    {
+        this.labelLayoutSize = size;
+        
+        this.delegatePlot.validateLayout( );
+    }
 
     public void validate( )
     {
@@ -637,9 +652,13 @@ public class StackedTimePlot2D extends GlimpseLayout
         BorderPainter borderPainter = new BorderPainter( );
         layoutInfo.getLayout( ).addPainter( borderPainter );
 
+        // create a custom mouse listener
         TimelineMouseListener2D listener = attachTimelineMouseListener( layoutInfo );
 
-        TimePlotInfo timePlotInfo = new TimePlotInfo( this, layoutInfo, listener, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
+        // create a GlimpseLayout which will appear to the side of the timeline and contain labels/controls
+        GlimpseLayout labelLayout = new GlimpseLayout( );
+        
+        TimePlotInfo timePlotInfo = new TimePlotInfo( this, layoutInfo, labelLayout, listener, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
 
         if ( isTimeAxisHorizontal( ) )
         {
@@ -797,6 +816,8 @@ public class StackedTimePlot2D extends GlimpseLayout
             this.timelineInfo.setOrder( Integer.MAX_VALUE );
 
             this.timeLayout = new GlimpseAxisLayoutX( this.timelineInfo.getLayout( ) );
+            
+            this.labelLayoutSize = 60;
         }
         else
         {
@@ -804,6 +825,8 @@ public class StackedTimePlot2D extends GlimpseLayout
             this.timelineInfo.setOrder( Integer.MIN_VALUE );
 
             this.timeLayout = new GlimpseAxisLayoutY( this.timelineInfo.getLayout( ) );
+        
+            this.labelLayoutSize = 30;
         }
 
         this.timelineMouseListener = new TimelineMouseListener1D( this );
