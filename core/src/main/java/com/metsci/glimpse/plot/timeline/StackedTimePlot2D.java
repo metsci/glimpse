@@ -119,6 +119,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     // the size of the label layout area in pixels
     protected int labelLayoutSize;
+    protected boolean showLabelLayout = true;
 
     public StackedTimePlot2D( )
     {
@@ -464,10 +465,15 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.timeAxisPainter.setCurrentTimeTickColor( rgba );
     }
 
-    public void setLabelLayoutSize( int size )
+    public void setLabelSize( int size )
     {
         this.labelLayoutSize = size;
-
+        this.validateLayout( );
+    }
+    
+    public void showLabels( boolean show )
+    {
+        this.showLabelLayout = show;
         this.validateLayout( );
     }
 
@@ -696,7 +702,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
             this.timeLayout = new GlimpseAxisLayoutX( this.timelineInfo.getLayout( ) );
 
-            this.labelLayoutSize = 60;
+            this.labelLayoutSize = 30;
         }
         else
         {
@@ -945,10 +951,11 @@ public class StackedTimePlot2D extends StackedPlot2D
                         if ( info instanceof TimePlotInfo )
                         {
                             TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
+                            
                             format = "cell %d %d 1 1, pushy, growy, width %d!";
-                            layout = String.format( format, 0, i, labelLayoutSize );
+                            layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0 );
                             timeInfo.getLabelLayout( ).setLayoutData( layout );
+                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
                         }
                     }
                     else
@@ -962,8 +969,9 @@ public class StackedTimePlot2D extends StackedPlot2D
                             TimePlotInfo timeInfo = ( TimePlotInfo ) info;
 
                             format = "cell %d %d 1 1, width %d!, height %d!";
-                            layout = String.format( format, 0, i, labelLayoutSize, info.getSize( ) );
+                            layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ) );
                             timeInfo.getLabelLayout( ).setLayoutData( layout );
+                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
                         }
                     }
                 }
@@ -979,9 +987,10 @@ public class StackedTimePlot2D extends StackedPlot2D
                         {
                             TimePlotInfo timeInfo = ( TimePlotInfo ) info;
 
-                            format = "cell %d %d 1 1, pushy, growy, height %d!";
-                            layout = String.format( format, i, 0, labelLayoutSize );
+                            format = "cell %d %d 1 1, pushx, growx, height %d!";
+                            layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0 );
                             timeInfo.getLabelLayout( ).setLayoutData( layout );
+                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
                         }
                     }
                     else
@@ -995,8 +1004,9 @@ public class StackedTimePlot2D extends StackedPlot2D
                             TimePlotInfo timeInfo = ( TimePlotInfo ) info;
 
                             format = "cell %d %d 1 1, height %d!, width %d!";
-                            layout = String.format( format, i, 0, labelLayoutSize, info.getSize( ) );
+                            layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, info.getSize( ) );
                             timeInfo.getLabelLayout( ).setLayoutData( layout );
+                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
                         }
                     }
                 }

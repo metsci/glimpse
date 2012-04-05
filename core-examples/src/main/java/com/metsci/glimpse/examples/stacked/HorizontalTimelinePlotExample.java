@@ -64,7 +64,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
     }
 
     @Override
-    public GlimpseLayout getLayout( )
+    public StackedTimePlot2D getLayout( )
     {
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
