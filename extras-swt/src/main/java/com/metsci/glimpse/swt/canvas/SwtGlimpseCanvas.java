@@ -27,8 +27,6 @@
 package com.metsci.glimpse.swt.canvas;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GLContext;
@@ -42,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.canvas.LayoutManager;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
@@ -60,8 +59,7 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
 
     protected Cursor canvasCursor;
 
-    protected List<GlimpseTarget> unmodifiableList;
-    protected List<GlimpseLayout> layoutList;
+    protected LayoutManager layoutManager;
 
     protected MouseWrapperSWT mouseHelper;
     protected boolean isEventConsumer = true;
@@ -77,18 +75,13 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
         this( _parent, _context, SWT.NO_BACKGROUND );
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public SwtGlimpseCanvas( Composite _parent, GLContext _context, int options )
     {
         super( _parent, _context, options );
 
         this.parent = _parent;
 
-        this.layoutList = new ArrayList<GlimpseLayout>( );
-
-        // this is typesafe because unmodifiableList is unmodifiable, so it's not
-        // possible to corrupt layoutList with non GlimpseLayouts
-        this.unmodifiableList = (List) Collections.unmodifiableList( this.layoutList );
+        this.layoutManager = new LayoutManager( );
 
         this.mouseHelper = new MouseWrapperSWT( this );
         this.addMouseListener( this.mouseHelper );
@@ -111,7 +104,7 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
             @Override
             public void display( GLContext context )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.paintTo( getGlimpseContext( ) );
                 }
@@ -120,7 +113,7 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
             @Override
             public void reshape( GLContext context, int x, int y, int width, int height )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.layoutTo( getGlimpseContext( ) );
                 }
@@ -163,28 +156,44 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
-        for ( GlimpseLayout layout : layoutList )
+        for ( GlimpseTarget target : this.layoutManager.getLayoutList( ) )
         {
-            layout.setLookAndFeel( laf );
+            target.setLookAndFeel( laf );
         }
     }
 
     @Override
     public void addLayout( GlimpseLayout layout )
     {
-        this.layoutList.add( layout );
+        this.layoutManager.addLayout( layout );
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.addLayout( layout, zOrder );
+    }
+
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.setZOrder( layout, zOrder );
     }
 
     @Override
     public void removeLayout( GlimpseLayout layout )
     {
-        this.layoutList.remove( layout );
+        this.layoutManager.removeLayout( layout );
     }
 
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override
     public List<GlimpseTarget> getTargetChildren( )
     {
-        return this.unmodifiableList;
+        // layoutManager returns an unmodifiable list, thus this cast is typesafe
+        // (there is no way for the recipient of the List<GlimpseTarget> view to
+        // add GlimpseTargets which are not GlimpseLayouts to the list)
+        return ( List ) this.layoutManager.getLayoutList( );
     }
 
     public Dimension getDimension( )

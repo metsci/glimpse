@@ -197,15 +197,46 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             lock.unlock( );
         }
     }
+    
 
-    public void addLayout( GlimpseLayout layout )
+    /**
+     * @see {@link #setZOrder(GlimpseLayout, int)}
+     */
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
     {
         lock.lock( );
         try
         {
-            layoutChildren.add( layout );
-            layoutDelegate.addLayout( layout );
-            invalidateLayout( );
+            layoutDelegate.setZOrder( layout, zOrder );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    /**
+     * <p>Sets the relative ordering constant for this painter. Painters with low
+     * z order will be painter first (in the back) and those with high z order
+     * will be painted last (in the front).</p>
+     * 
+     * <p>The value itself has no meaning; it is relative to the z orders
+     * of the other painters in the GlimpseLayout.
+     * For {@link com.metsci.glimpse.layout.com.metsciGlimpseLayout} instances,
+     * the z order also affects the order in which mouse events are delivered to
+     * overlapping components.</p>
+     * 
+     * <p>The z order is set to 0 by default. GlimpsePainters with the same z order
+     * are painted in the order they were added to the GlimpseLayout. This means the
+     * first painters added will be obscured by later painters.</p>
+     */
+    public void setZOrder( GlimpsePainter painter, int zOrder )
+    {
+        lock.lock( );
+        try
+        {
+            layoutDelegate.setZOrder( painter, zOrder );
         }
         finally
         {
@@ -213,13 +244,30 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
+    @Override
+    public void addLayout( GlimpseLayout layout )
+    {
+        addLayout( layout, null, 0 );
+    }
+    
     public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback )
+    {
+        addLayout( layout, callback, 0 );
+    }
+    
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        addLayout( layout, null, zOrder );
+    }
+
+    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
     {
         lock.lock( );
         try
         {
             layoutChildren.add( layout );
-            layoutDelegate.addLayout( layout, callback );
+            layoutDelegate.addLayout( layout, callback, zOrder );
             invalidateLayout( );
         }
         finally
@@ -230,24 +278,25 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
 
     public void addPainter( GlimpsePainter painter )
     {
-        lock.lock( );
-        try
-        {
-            layoutDelegate.addPainter( painter );
-            invalidateLayout( );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        addPainter( painter, null, 0 );
+    }
+    
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
+    {
+        addPainter( painter, callback, 0 );
+    }
+    
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        addPainter( painter, null, zOrder );
     }
 
-    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
         lock.lock( );
         try
         {
-            layoutDelegate.addPainter( painter, callback );
+            layoutDelegate.addPainter( painter, callback, zOrder );
             invalidateLayout( );
         }
         finally
@@ -330,15 +379,15 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         {
             // ensure that we have been laid out properly
             GlimpseBounds bounds = layoutTo( context );
-    
+
             if ( !isVisible ) return;
-    
+
             // push our bounds onto the layout stack
             context.getTargetStack( ).push( this, bounds );
-    
+
             // paint our children with our bounds on top of the layout stack
             layoutDelegate.paintTo( context );
-    
+
             // once our children (and their children recursively) have finished
             // painting remove our bounds from the layout stack
             context.getTargetStack( ).pop( );
@@ -665,11 +714,6 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         lock.lock( );
         try
         {
-            for ( GlimpseTarget layout : layoutChildren )
-            {
-                layout.setLookAndFeel( laf );
-            }
-
             layoutDelegate.setLookAndFeel( laf );
         }
         finally

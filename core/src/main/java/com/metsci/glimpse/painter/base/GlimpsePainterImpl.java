@@ -49,12 +49,24 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     protected boolean disposed = false;
     protected boolean displayOn = true;
     protected boolean doErrorHandling = true;
+    
+    protected int zOrder = 0;
 
     protected abstract void paintTo( GlimpseContext context, GlimpseBounds bounds );
 
     public void setErrorHandling( boolean doErrorHandling )
     {
         this.doErrorHandling = doErrorHandling;
+    }
+    
+    public void setZOrder( int zOrder )
+    {
+        this.zOrder = zOrder;
+    }
+    
+    public int getZOrder( )
+    {
+        return this.zOrder;
     }
 
     public void setVisible( boolean show )

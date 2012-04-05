@@ -26,11 +26,9 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GLContext;
@@ -60,8 +58,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 {
     protected GLSimpleFrameBufferObject fbo;
 
-    protected List<GlimpseTarget> unmodifiableList;
-    protected List<GlimpseLayout> layoutList;
+    protected LayoutManager layoutManager;
 
     protected int width;
     protected int height;
@@ -73,7 +70,6 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
         public void run( GlimpseContext context );
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public FrameBufferGlimpseCanvas( int width, int height, GLContext context )
     {
         GLContext newContext = createPixelBuffer( 1, 1, context ).getContext( );
@@ -83,11 +79,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 
         this.fbo = new GLSimpleFrameBufferObject( width, height, newContext );
 
-        this.layoutList = new ArrayList<GlimpseLayout>( );
-
-        // this is typesafe because unmodifiableList is unmodifiable, so it's not
-        // possible to corrupt layoutList with non GlimpseLayouts
-        this.unmodifiableList = (List) Collections.unmodifiableList( this.layoutList );
+        this.layoutManager = new LayoutManager( );
 
         this.fbo.addListener( new GLSimpleListener( )
         {
@@ -100,7 +92,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
             @Override
             public void display( GLContext context )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.paintTo( getGlimpseContext( ) );
                 }
@@ -143,7 +135,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 
     protected void resize0( )
     {
-        for ( GlimpseLayout layout : layoutList )
+        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
         {
             layout.layoutTo( getGlimpseContext( ) );
         }
@@ -201,15 +193,6 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void setLookAndFeel( LookAndFeel laf )
-    {
-        for ( GlimpseLayout layout : layoutList )
-        {
-            layout.setLookAndFeel( laf );
-        }
-    }
-
-    @Override
     public GLContext getGLContext( )
     {
         return fbo.getGLContext( );
@@ -230,26 +213,46 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     @Override
     public void addLayout( GlimpseLayout layout )
     {
-        this.layoutList.add( layout );
+        this.layoutManager.addLayout( layout );
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.addLayout( layout, zOrder );
+    }
+
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.setZOrder( layout, zOrder );
     }
 
     @Override
     public void removeLayout( GlimpseLayout layout )
     {
-        this.layoutList.remove( layout );
+        this.layoutManager.removeLayout( layout );
     }
 
-    public void removeAllLayouts( )
-    {
-        this.layoutList.clear( );
-    }
-
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override
     public List<GlimpseTarget> getTargetChildren( )
     {
-        return this.unmodifiableList;
+        // layoutManager returns an unmodifiable list, thus this cast is typesafe
+        // (there is no way for the recipient of the List<GlimpseTarget> view to
+        // add GlimpseTargets which are not GlimpseLayouts to the list)
+        return ( List ) this.layoutManager.getLayoutList( );
     }
 
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+        {
+            layout.setLookAndFeel( laf );
+        }
+    }
+    
     @Override
     public void paint( )
     {

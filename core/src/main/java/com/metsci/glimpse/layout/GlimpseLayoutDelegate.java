@@ -27,8 +27,11 @@
 package com.metsci.glimpse.layout;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.media.opengl.GL;
 
@@ -72,17 +75,30 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     private GlimpseLayoutDelegate layoutParent;
     private List<GlimpseLayoutDelegate> layoutChildren;
 
-    private List<Member> members;
+    private LinkedHashMap<GlimpsePainter, Member> memberMap;
+    private List<Member> memberList;
 
     private static class Member
     {
         public GlimpsePainter painter;
         public GlimpsePainterCallback callback;
+        public int zOrder = 0;
 
-        public Member( GlimpsePainter painter, GlimpsePainterCallback callback )
+        public Member( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
         {
             this.painter = painter;
             this.callback = callback;
+            this.zOrder = zOrder;
+        }
+
+        public void setZOrder( int zOrder )
+        {
+            this.zOrder = zOrder;
+        }
+
+        public int getZOrder( )
+        {
+            return this.zOrder;
         }
 
         @Override
@@ -109,9 +125,9 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     {
         this.layout = layout;
 
-        this.layoutChildren = new CopyOnWriteArrayList<GlimpseLayoutDelegate>( );
-
-        this.members = new CopyOnWriteArrayList<Member>( );
+        this.layoutChildren = new ArrayList<GlimpseLayoutDelegate>( );
+        this.memberList = new ArrayList<Member>( );
+        this.memberMap = new LinkedHashMap<GlimpsePainter,Member>( );
     }
 
     protected GlimpseBounds getClippedBounds( GlimpseContext context )
@@ -141,7 +157,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
         if ( !clippedBounds.isValid( ) ) return;
 
-        for ( Member m : members )
+        for ( Member m : memberList )
         {
             try
             {
@@ -173,10 +189,10 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     public void layoutTo( GlimpseTargetStack stack, GlimpseBounds bounds )
     {
         // push ourself onto the stack in preparation for laying out our children
-        stack.push( layout, bounds );
+        stack.push( this.layout, bounds );
 
         // update the size of our axes
-        layout.preLayout( stack, bounds );
+        this.layout.preLayout( stack, bounds );
 
         // fields in GlimpseLayoutDelegate are temporary and are reset for each new Context
         // which the GlimpseLayout is laid out to (the fields are used by the GlimpseLayoutManager)
@@ -185,17 +201,17 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         setBounds( bounds );
 
         // set temporary parent fields
-        for ( GlimpseLayoutDelegate child : layoutChildren )
+        for ( GlimpseLayoutDelegate child : this.layoutChildren )
         {
             child.setParent( this );
         }
 
         // run the GlimpseLayoutManager to set the bounds of our children
-        layoutManager.layout( this );
+        this.layoutManager.layout( this );
 
         // retrieve the bounds set by the previous call and store them in the
         // GlimpseLayout cache for the current context
-        for ( GlimpseLayoutDelegate child : layoutChildren )
+        for ( GlimpseLayoutDelegate child : this.layoutChildren )
         {
             GlimpseBounds childBounds = child.getBounds( );
 
@@ -210,7 +226,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void setLookAndFeel( LookAndFeel laf )
     {
-        for ( Member m : members )
+        for ( Member m : memberList )
         {
             m.painter.setLookAndFeel( laf );
         }
@@ -226,7 +242,8 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void removeLayout( GlimpseLayout layout )
     {
-        members.remove( new Member( layout, null ) );
+        Member member = memberMap.remove( layout );
+        memberList.remove( member );
 
         GlimpseLayoutDelegate delegate = layout.getDelegate( );
         layoutChildren.remove( delegate );
@@ -234,12 +251,15 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void addLayout( GlimpseLayout layout )
     {
-        addLayout( layout, null );
+        addLayout( layout, null, 0 );
     }
 
-    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback )
+    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
     {
-        members.add( new Member( layout, callback ) );
+        Member member = new Member( layout, callback, zOrder );
+        memberMap.put( layout, member );
+        memberList.add( member );
+        updateMemeberList( );
 
         GlimpseLayoutDelegate delegate = layout.getDelegate( );
         layoutChildren.add( delegate );
@@ -247,32 +267,70 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void addPainter( GlimpsePainter painter )
     {
-        addPainter( painter, null );
+        addPainter( painter, null, 0 );
     }
 
-    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
-        members.add( new Member( painter, callback ) );
+        Member member = new Member( painter, callback, zOrder );
+        memberMap.put( painter, member );
+        memberList.add( member );
+        updateMemeberList( );
     }
 
     public void removePainter( GlimpsePainter painter )
     {
-        members.remove( new Member( painter, null ) );
+        Member member = memberMap.remove( painter );
+        memberList.remove( member );
+    }
+    
+    public void setZOrder( GlimpsePainter painter, int zOrder )
+    {
+        Member member = memberMap.get( painter );
+        
+        if ( member != null )
+        {
+            member.setZOrder( zOrder );
+            updateMemeberList( );
+        }
+    }
+
+    public void updateMemeberList( )
+    {
+        Collections.sort( memberList, new Comparator<Member>( )
+        {
+            @Override
+            public int compare( Member arg0, Member arg1 )
+            {
+                if ( arg0.getZOrder( ) < arg1.getZOrder( ) )
+                {
+                    return -1;
+                }
+                else if ( arg0.getZOrder( ) > arg1.getZOrder( ) )
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        } );
     }
 
     public GlimpseBounds getCachedBounds( GlimpseContext context )
     {
-        return layout.getBounds( context );
+        return this.layout.getBounds( context );
     }
 
     public void cacheBounds( GlimpseContext context, GlimpseBounds bounds )
     {
-        layout.cacheBounds( context, bounds );
+        this.layout.cacheBounds( context, bounds );
     }
 
     public void cacheBounds( GlimpseTargetStack stack, GlimpseBounds bounds )
     {
-        layout.cacheBounds( stack, bounds );
+        this.layout.cacheBounds( stack, bounds );
     }
 
     public GlimpseBounds getBounds( )
@@ -309,7 +367,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     {
         if ( !isDisposed )
         {
-            for ( Member member : members )
+            for ( Member member : memberList )
             {
                 member.painter.dispose( context );
             }

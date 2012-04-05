@@ -117,5 +117,4 @@ public class DelegatePainter implements GlimpsePainter
             painter.setLookAndFeel( laf );
         }
     }
-
 }

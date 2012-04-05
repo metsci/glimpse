@@ -46,7 +46,7 @@ public class GLSimpleListenerPainter implements GlimpsePainter
 
     private boolean init = false;
     private boolean dispose = false;
-
+    
     private GlimpseBounds lastBounds;
 
     public GLSimpleListenerPainter( GLSimpleListenerAbstract listener )

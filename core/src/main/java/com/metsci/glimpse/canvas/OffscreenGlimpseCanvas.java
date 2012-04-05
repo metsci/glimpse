@@ -28,8 +28,6 @@ package com.metsci.glimpse.canvas;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GLContext;
@@ -64,25 +62,19 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
 
     protected boolean isDisposed;
 
-    protected List<GlimpseTarget> unmodifiableList;
-    protected List<GlimpseLayout> layoutList;
+    protected LayoutManager layoutManager;
 
     public OffscreenGlimpseCanvas( int width, int height )
     {
         this( width, height, null );
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public OffscreenGlimpseCanvas( int width, int height, GLContext _context )
     {
         this.pixelBuffer = new GLSimplePixelBuffer( width, height, _context );
         this.isDisposed = false;
 
-        this.layoutList = new ArrayList<GlimpseLayout>( );
-
-        // this is typesafe because unmodifiableList is unmodifiable, so it's not
-        // possible to corrupt layoutList with non GlimpseLayouts
-        this.unmodifiableList = (List) Collections.unmodifiableList( this.layoutList );
+        this.layoutManager = new LayoutManager( );
 
         this.pixelBuffer.addListener( new GLSimpleListener( )
         {
@@ -95,7 +87,7 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
             @Override
             public void display( GLContext context )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.paintTo( getGlimpseContext( ) );
                 }
@@ -104,7 +96,7 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
             @Override
             public void reshape( GLContext context, int x, int y, int width, int height )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.layoutTo( getGlimpseContext( ) );
                 }
@@ -166,15 +158,6 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void setLookAndFeel( LookAndFeel laf )
-    {
-        for ( GlimpseLayout layout : layoutList )
-        {
-            layout.setLookAndFeel( laf );
-        }
-    }
-
-    @Override
     public GlimpseBounds getTargetBounds( GlimpseTargetStack stack )
     {
         return new GlimpseBounds( getDimension( ) );
@@ -189,19 +172,44 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
     @Override
     public void addLayout( GlimpseLayout layout )
     {
-        this.layoutList.add( layout );
+        this.layoutManager.addLayout( layout );
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.addLayout( layout, zOrder );
+    }
+
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.setZOrder( layout, zOrder );
     }
 
     @Override
     public void removeLayout( GlimpseLayout layout )
     {
-        this.layoutList.remove( layout );
+        this.layoutManager.removeLayout( layout );
     }
 
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override
     public List<GlimpseTarget> getTargetChildren( )
     {
-        return this.unmodifiableList;
+        // layoutManager returns an unmodifiable list, thus this cast is typesafe
+        // (there is no way for the recipient of the List<GlimpseTarget> view to
+        // add GlimpseTargets which are not GlimpseLayouts to the list)
+        return ( List ) this.layoutManager.getLayoutList( );
+    }
+
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+        {
+            layout.setLookAndFeel( laf );
+        }
     }
 
     @Override

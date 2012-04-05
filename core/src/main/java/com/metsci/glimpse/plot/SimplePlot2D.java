@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.plot;
 
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
@@ -52,7 +51,6 @@ public class SimplePlot2D extends Plot2D
     protected BorderPainter borderPainter;
     protected BackgroundPainter plotBackgroundPainter;
     protected GridPainter gridPainter;
-    protected GlimpseAxisLayout2D contentLayout;
     protected CrosshairPainter crosshairPainter;
 
     public SimplePlot2D( )
@@ -73,27 +71,27 @@ public class SimplePlot2D extends Plot2D
 
         // add a painter to display a solid background on the plot area
         plotBackgroundPainter = new BackgroundPainter( false );
-        axisLayoutXY.addPainter( plotBackgroundPainter );
+        axisLayoutXY.addPainter( plotBackgroundPainter, Integer.MIN_VALUE );
 
         // add a painter to display grid lines
         gridPainter = new GridPainter( tickX, tickY );
-        axisLayoutXY.addPainter( gridPainter );
-
-        // add a delegate painter to hold data painters
-        contentLayout = new GlimpseAxisLayout2D( "Plot" );
-        contentLayout.setEventConsumer( false );
-        axisLayoutXY.addLayout( contentLayout );
+        axisLayoutXY.addPainter( gridPainter, Plot2D.BACKGROUND_LAYER );
 
         // add a painter to display x and y crosshairs
         crosshairPainter = new CrosshairPainter( );
-        axisLayoutXY.addPainter( crosshairPainter );
+        axisLayoutXY.addPainter( crosshairPainter, Plot2D.FOREGROUND_LAYER );
 
         // add a painter to display a thin line border around the plot area
         borderPainter = new BorderPainter( );
-        axisLayoutXY.addPainter( borderPainter );
+        axisLayoutXY.addPainter( borderPainter, Plot2D.FOREGROUND_LAYER );
 
         // hide the Z axis by default
         setAxisSizeZ( 0 );
+    }
+
+    public void setZOrderOuter( GlimpsePainter painter, int zOrder )
+    {
+        super.setZOrder( painter, zOrder );
     }
 
     public void addPainterOuter( GlimpsePainter painter )
@@ -106,14 +104,38 @@ public class SimplePlot2D extends Plot2D
         super.removePainter( painter );
     }
 
-    public void addPainter( GlimpsePainter painter )
+    public void addPainterBackground( GlimpsePainter painter )
     {
-        contentLayout.addPainter( painter );
+        axisLayoutXY.addPainter( painter, Plot2D.BACKGROUND_LAYER );
     }
 
+    public void addPainterForeground( GlimpsePainter painter )
+    {
+        axisLayoutXY.addPainter( painter, Plot2D.FOREGROUND_LAYER );
+    }
+
+    @Override
+    public void setZOrder( GlimpsePainter painter, int zOrder )
+    {
+        axisLayoutXY.setZOrder( painter, zOrder );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, zOrder );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter )
+    {
+        axisLayoutXY.addPainter( painter );
+    }
+
+    @Override
     public void removePainter( GlimpsePainter painter )
     {
-        contentLayout.removePainter( painter );
+        axisLayoutXY.removePainter( painter );
     }
 
     public void setPlotBackgroundColor( float[] color )
@@ -139,12 +161,6 @@ public class SimplePlot2D extends Plot2D
     public GridPainter getGridPainter( )
     {
         return gridPainter;
-    }
-
-    @Override
-    public GlimpseAxisLayout2D getLayoutCenter( )
-    {
-        return contentLayout;
     }
 
     @Override
