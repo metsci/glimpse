@@ -62,6 +62,316 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected Orientation orientation = Orientation.VERTICAL;
 
+    public StackedPlot2D( Orientation orientation )
+    {
+        this.orientation = orientation;
+
+        this.initializePlot( );
+    }
+
+    public StackedPlot2D( )
+    {
+        this( Orientation.VERTICAL );
+    }
+
+    
+    //////////////////////////////////////
+    //     Initialization Methods       //
+    //////////////////////////////////////
+
+    
+    protected void initializePlot( )
+    {
+        initializeAxes( );
+        initializeArrays( );
+        initializeLayout( );
+        initializePainters( );
+        initializeLookAndFeel( );
+        updatePainterLayout( );
+    }
+
+    protected void initializeAxes( )
+    {
+        this.commonAxis = createCommonAxis( );
+    }
+
+    protected Axis1D createCommonAxis( )
+    {
+        return new Axis1D( );
+    }
+
+    protected void initializeArrays( )
+    {
+        this.stackedPlots = new LinkedHashMap<String, PlotInfo>( );
+    }
+
+    protected void initializeLayout( )
+    {
+        this.layout = new GlimpseLayoutManagerMig( );
+        this.setLayoutManager( layout );
+    }
+
+    protected void initializePainters( )
+    {
+        this.backgroundPainter = new BackgroundPainter( false );
+        this.addPainter( this.backgroundPainter );
+    }
+
+    protected void initializeLookAndFeel( )
+    {
+        setLookAndFeel( new DefaultLookAndFeel( ) );
+    }
+
+    protected void updatePainterLayout( )
+    {
+        this.lock.lock( );
+        try
+        {
+            this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
+
+            List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
+            for ( int i = 0; i < axisList.size( ); i++ )
+            {
+                PlotInfo info = axisList.get( i );
+
+                if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                {
+                    String format = "cell %d %d 1 1, push, grow";
+                    String layout = orientation == Orientation.HORIZONTAL ? String.format( format, i, 0 ) : String.format( format, 0, i );
+                    info.getLayout( ).setLayoutData( layout );
+                }
+                else
+                {
+                    if ( orientation == Orientation.HORIZONTAL )
+                    {
+                        String format = "cell %d %d 1 1, pushy, growy, width %d!";
+                        String layout = String.format( format, i, 0, info.getSize( ) );
+                        info.getLayout( ).setLayoutData( layout );
+                    }
+                    else if ( orientation == Orientation.VERTICAL )
+                    {
+                        String format = "cell %d %d 1 1, pushx, growx, height %d!";
+                        String layout = String.format( format, 0, i, info.getSize( ) );
+                        info.getLayout( ).setLayoutData( layout );
+                    }
+                }
+            }
+
+            this.invalidateLayout( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    
+    //////////////////////////////////////
+    //          Getter Methods          //
+    //////////////////////////////////////
+
+    
+    public Orientation getOrientation( )
+    {
+        return orientation;
+    }
+
+    public Axis1D getCommonAxis( )
+    {
+        return commonAxis;
+    }
+
+    public PlotInfo getPlot( String name )
+    {
+        return this.stackedPlots.get( name );
+    }
+
+    public Collection<PlotInfo> getAllPlots( )
+    {
+        this.lock.lock( );
+        try
+        {
+            return Collections.unmodifiableCollection( this.stackedPlots.values( ) );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+
+    //////////////////////////////////////
+    //      Customization Methods       //
+    //////////////////////////////////////
+
+    
+    public void setBackgroundColor( float[] color )
+    {
+        this.backgroundPainter.setColor( color );
+    }
+
+    public void setBorderSize( int size )
+    {
+        this.outerBorder = size;
+        this.validate( );
+    }
+
+    public void validate( )
+    {
+        this.validateLayout( );
+        this.validateAxes( );
+    }
+
+    public void validateAxes( )
+    {
+        this.lock.lock( );
+        try
+        {
+            commonAxis.validate( );
+            for ( PlotInfo info : stackedPlots.values( ) )
+            {
+                info.getLayout( ).getAxis( ).getAxisX( ).validate( );
+                info.getLayout( ).getAxis( ).getAxisY( ).validate( );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    public void validateLayout( )
+    {
+        updatePainterLayout( );
+    }
+
+    public void deletePlot( String name )
+    {
+        this.lock.lock( );
+        try
+        {
+            PlotInfo info = stackedPlots.get( name );
+
+            if ( info == null ) return;
+
+            this.removeLayout( info.getLayout( ) );
+            stackedPlots.remove( name );
+
+            validate( );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    public PlotInfo createPlot( String name )
+    {
+        return createPlot( name, new Axis1D( ) );
+    }
+
+    public PlotInfo createPlot( String name, Axis1D axis )
+    {
+        this.lock.lock( );
+        try
+        {
+            PlotInfo info = createPlot0( name, axis );
+            stackedPlots.put( name, info );
+            validate( );
+            return info;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+    @Override
+    public String toString( )
+    {
+        return StackedPlot2D.class.getSimpleName( );
+    }
+    
+    
+    //////////////////////////////////////
+    //              Internals           //
+    //////////////////////////////////////
+    
+
+    protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
+    {
+        List<PlotInfo> sortedList = new ArrayList<PlotInfo>( );
+
+        sortedList.addAll( unsorted );
+
+        // this sort is guaranteed to be stable
+        // LinkedHashMap ensures that the unsorted array will
+        // be in the order that plots were added
+        // this means that plots with the same order constant
+        // will be displayed in the order they were added
+        Collections.sort( sortedList, new Comparator<PlotInfo>( )
+        {
+            @Override
+            public int compare( PlotInfo axis0, PlotInfo axis1 )
+            {
+                if ( axis0.getOrder( ) < axis1.getOrder( ) )
+                {
+                    return -1;
+                }
+                else if ( axis0.getOrder( ) > axis1.getOrder( ) )
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        } );
+
+        return sortedList;
+    }
+
+    protected Axis1D getCommonAxis( Axis2D axis )
+    {
+        return orientation == Orientation.HORIZONTAL ? axis.getAxisY( ) : axis.getAxisX( );
+    }
+
+    protected Axis1D getOrthogonalAxis( Axis2D axis )
+    {
+        return orientation == Orientation.HORIZONTAL ? axis.getAxisX( ) : axis.getAxisY( );
+    }
+    
+    // must be called while holding lock
+    protected PlotInfo createPlot0( String name, Axis1D axis )
+    {
+        if ( stackedPlots.containsKey( name ) )
+        {
+            throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
+        }
+
+        int order = 0;
+        int size = -1;
+
+        Axis1D commonChildAxis = commonAxis.clone( );
+
+        Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
+
+        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
+
+        this.addLayout( layout );
+
+        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
+        
+        return info;
+    }
+    
+    
+    //////////////////////////////////////
+    //           Inner Classes          //
+    //////////////////////////////////////
+    
+    
     public enum Orientation
     {
         HORIZONTAL, VERTICAL;
@@ -259,291 +569,5 @@ public class StackedPlot2D extends GlimpseLayout
 
             this.layout.addLayout( childLayout );
         }
-    }
-
-    public StackedPlot2D( Orientation orientation )
-    {
-        this.orientation = orientation;
-
-        this.initialize( );
-    }
-
-    public StackedPlot2D( )
-    {
-        this( Orientation.VERTICAL );
-    }
-
-    //////////////////////////////////////
-    //     Initialization Methods       //
-    //////////////////////////////////////
-
-    protected void initialize( )
-    {
-        initializeAxes( );
-        initializeArrays( );
-        initializeLayout( );
-        initializePainters( );
-        initializeLookAndFeel( );
-        updatePainterLayout( );
-    }
-
-    protected void initializeAxes( )
-    {
-        this.commonAxis = createCommonAxis( );
-    }
-
-    protected Axis1D createCommonAxis( )
-    {
-        return new Axis1D( );
-    }
-
-    protected void initializeArrays( )
-    {
-        this.stackedPlots = new LinkedHashMap<String, PlotInfo>( );
-    }
-
-    protected void initializeLayout( )
-    {
-        this.layout = new GlimpseLayoutManagerMig( );
-        this.setLayoutManager( layout );
-    }
-
-    protected void initializePainters( )
-    {
-        this.backgroundPainter = new BackgroundPainter( false );
-        this.addPainter( this.backgroundPainter );
-    }
-
-    protected void initializeLookAndFeel( )
-    {
-        setLookAndFeel( new DefaultLookAndFeel( ) );
-    }
-
-    protected void updatePainterLayout( )
-    {
-        this.lock.lock( );
-        try
-        {
-            this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
-
-            List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
-            for ( int i = 0; i < axisList.size( ); i++ )
-            {
-                PlotInfo info = axisList.get( i );
-
-                if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
-                {
-                    String format = "cell %d %d 1 1, push, grow";
-                    String layout = orientation == Orientation.HORIZONTAL ? String.format( format, i, 0 ) : String.format( format, 0, i );
-                    info.getLayout( ).setLayoutData( layout );
-                }
-                else
-                {
-                    if ( orientation == Orientation.HORIZONTAL )
-                    {
-                        String format = "cell %d %d 1 1, pushy, growy, width %d!";
-                        String layout = String.format( format, i, 0, info.getSize( ) );
-                        info.getLayout( ).setLayoutData( layout );
-                    }
-                    else if ( orientation == Orientation.VERTICAL )
-                    {
-                        String format = "cell %d %d 1 1, pushx, growx, height %d!";
-                        String layout = String.format( format, 0, i, info.getSize( ) );
-                        info.getLayout( ).setLayoutData( layout );
-                    }
-                }
-            }
-
-            this.invalidateLayout( );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-
-    //////////////////////////////////////
-    //          Getter Methods          //
-    //////////////////////////////////////
-
-    public Orientation getOrientation( )
-    {
-        return orientation;
-    }
-
-    public Axis1D getCommonAxis( )
-    {
-        return commonAxis;
-    }
-
-    public PlotInfo getPlot( String name )
-    {
-        return this.stackedPlots.get( name );
-    }
-
-    public Collection<PlotInfo> getAllPlots( )
-    {
-        this.lock.lock( );
-        try
-        {
-            return Collections.unmodifiableCollection( this.stackedPlots.values( ) );
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
-    {
-        List<PlotInfo> sortedList = new ArrayList<PlotInfo>( );
-
-        sortedList.addAll( unsorted );
-
-        // this sort is guaranteed to be stable
-        // LinkedHashMap ensures that the unsorted array will
-        // be in the order that plots were added
-        // this means that plots with the same order constant
-        // will be displayed in the order they were added
-        Collections.sort( sortedList, new Comparator<PlotInfo>( )
-        {
-            @Override
-            public int compare( PlotInfo axis0, PlotInfo axis1 )
-            {
-                if ( axis0.getOrder( ) < axis1.getOrder( ) )
-                {
-                    return -1;
-                }
-                else if ( axis0.getOrder( ) > axis1.getOrder( ) )
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        } );
-
-        return sortedList;
-    }
-
-    protected Axis1D getCommonAxis( Axis2D axis )
-    {
-        return orientation == Orientation.HORIZONTAL ? axis.getAxisY( ) : axis.getAxisX( );
-    }
-
-    protected Axis1D getOrthogonalAxis( Axis2D axis )
-    {
-        return orientation == Orientation.HORIZONTAL ? axis.getAxisX( ) : axis.getAxisY( );
-    }
-
-    //////////////////////////////////////
-    //      Customization Methods       //
-    //////////////////////////////////////
-
-    public void setBackgroundColor( float[] color )
-    {
-        this.backgroundPainter.setColor( color );
-    }
-
-    public void setBorderSize( int size )
-    {
-        this.outerBorder = size;
-        this.validate( );
-    }
-
-    public void validate( )
-    {
-        this.validateLayout( );
-        this.validateAxes( );
-    }
-
-    public void validateAxes( )
-    {
-        this.lock.lock( );
-        try
-        {
-            commonAxis.validate( );
-            for ( PlotInfo info : stackedPlots.values( ) )
-            {
-                info.getLayout( ).getAxis( ).getAxisX( ).validate( );
-                info.getLayout( ).getAxis( ).getAxisY( ).validate( );
-            }
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    public void validateLayout( )
-    {
-        updatePainterLayout( );
-    }
-
-    public void deletePlot( String name )
-    {
-        this.lock.lock( );
-        try
-        {
-            PlotInfo info = stackedPlots.get( name );
-
-            if ( info == null ) return;
-
-            this.removeLayout( info.getLayout( ) );
-            stackedPlots.remove( name );
-
-            validate( );
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    public PlotInfo createPlot( String name )
-    {
-        return createPlot( name, new Axis1D( ) );
-    }
-
-    public PlotInfo createPlot( String name, Axis1D axis )
-    {
-        this.lock.lock( );
-        try
-        {
-            if ( stackedPlots.containsKey( name ) )
-            {
-                throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
-            }
-    
-            int order = 0;
-            int size = -1;
-    
-            Axis1D commonChildAxis = commonAxis.clone( );
-    
-            Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
-    
-            GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
-
-            this.addLayout( layout );
-    
-            PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
-            stackedPlots.put( name, info );
-    
-            validate( );
-    
-            return info;
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    @Override
-    public String toString( )
-    {
-        return StackedPlot2D.class.getSimpleName( );
     }
 }
