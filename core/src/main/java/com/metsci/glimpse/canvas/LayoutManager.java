@@ -32,6 +32,12 @@ public class LayoutManager
         LayoutOrder layoutOrder = this.layoutMap.remove( layout );
         this.layoutList.remove( layoutOrder );
     }
+    
+    public void removeAllLayouts( )
+    {
+        this.layoutMap.clear( );
+        this.layoutList.clear( );
+    }
 
     public void addLayout( GlimpseLayout layout )
     {

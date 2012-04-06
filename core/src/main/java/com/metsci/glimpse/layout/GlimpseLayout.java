@@ -183,6 +183,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
+    @Override
     public void removeLayout( GlimpseLayout layout )
     {
         lock.lock( );
@@ -198,6 +199,20 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
     
+    public void removeAll( )
+    {
+        lock.lock( );
+        try
+        {
+            layoutChildren.clear( );
+            layoutDelegate.removeAll( );
+            invalidateLayout( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
 
     /**
      * @see {@link #setZOrder(GlimpseLayout, int)}

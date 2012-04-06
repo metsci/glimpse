@@ -233,6 +233,12 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     {
         this.layoutManager.removeLayout( layout );
     }
+    
+    @Override
+    public void removeAllLayouts( )
+    {
+        this.layoutManager.removeAllLayouts( );
+    }
 
     @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override

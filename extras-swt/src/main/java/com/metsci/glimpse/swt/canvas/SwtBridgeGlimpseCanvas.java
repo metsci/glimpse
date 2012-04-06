@@ -163,6 +163,12 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     {
         this.layoutManager.removeLayout( layout );
     }
+    
+    @Override
+    public void removeAllLayouts( )
+    {
+        this.layoutManager.removeAllLayouts( );
+    }
 
     @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override

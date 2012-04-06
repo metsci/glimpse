@@ -67,14 +67,15 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     private GlimpseLayoutManager layoutManager = new GlimpseLayoutManagerMig( "bottomtotop, gapx 0, gapy 0, insets 0", null, null );
     private Object layoutData = "push, grow";
 
+    // the GlimpseLayout associated with this GlimpseLayoutDelegate
     private GlimpseLayout layout;
 
     // GlimpseLayouts may be part of multiple hierarchies and thus may have
     // multiple parents. This pointer is temporarily set whenever the layout
     // algorithm is run
     private GlimpseLayoutDelegate layoutParent;
-    private List<GlimpseLayoutDelegate> layoutChildren;
 
+    private List<GlimpseLayoutDelegate> layoutChildren;
     private LinkedHashMap<GlimpsePainter, Member> memberMap;
     private List<Member> memberList;
 
@@ -127,7 +128,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
         this.layoutChildren = new ArrayList<GlimpseLayoutDelegate>( );
         this.memberList = new ArrayList<Member>( );
-        this.memberMap = new LinkedHashMap<GlimpsePainter,Member>( );
+        this.memberMap = new LinkedHashMap<GlimpsePainter, Member>( );
     }
 
     protected GlimpseBounds getClippedBounds( GlimpseContext context )
@@ -249,6 +250,13 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         layoutChildren.remove( delegate );
     }
 
+    public void removeAll( )
+    {
+        layoutChildren.clear( );
+        memberList.clear( );
+        memberMap.clear( );
+    }
+
     public void addLayout( GlimpseLayout layout )
     {
         addLayout( layout, null, 0 );
@@ -283,11 +291,11 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         Member member = memberMap.remove( painter );
         memberList.remove( member );
     }
-    
+
     public void setZOrder( GlimpsePainter painter, int zOrder )
     {
         Member member = memberMap.get( painter );
-        
+
         if ( member != null )
         {
             member.setZOrder( zOrder );
