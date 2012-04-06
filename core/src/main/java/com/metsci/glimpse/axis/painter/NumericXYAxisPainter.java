@@ -38,6 +38,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisExponentLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -85,7 +86,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     protected boolean lockRight = false;
     protected boolean lockTop = false;
     protected boolean lockBottom = false;
-
+    
     public NumericXYAxisPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
@@ -204,36 +205,14 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
 
-        double[] xPositions = ticksX.getTickPositions( axis.getAxisX( ) );
-        double[] yPositions = ticksY.getTickPositions( axis.getAxisY( ) );
+        double[] positionsX = ticksX.getTickPositions( axis.getAxisX( ) );
+        double[] positionsY = ticksY.getTickPositions( axis.getAxisY( ) );
 
         AxisUnitConverter convX = ticksX.getAxisUnitConverter( );
-        convX = convX == null ? new AxisUnitConverter( )
-        {
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-        } : convX;
+        convX = convX == null ? AxisUnitConverters.identity : convX;
 
         AxisUnitConverter convY = ticksY.getAxisUnitConverter( );
-        convY = convY == null ? new AxisUnitConverter( )
-        {
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-        } : convY;
+        convY = convY == null ? AxisUnitConverters.identity : convY;
 
         // a small half pixel fudge-factor to make things look good
         double onePixelX = 0.5 / axisX.getPixelsPerValue( );
@@ -281,13 +260,16 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         boolean labelRight = width - originX > rightBuffer;
         boolean labelTop = height - originY > topBuffer;
 
+        boolean[] paintLabelsX = new boolean[ positionsX.length ];
+        boolean[] paintLabelsY = new boolean[ positionsY.length ];
+        
         GlimpseColor.setColor( textRenderer, textColor );
         textRenderer.beginRendering( width, height );
         try
         {
             if ( showHorizontal )
             {
-                String[] xLabels = ticksX.getTickLabels( axis.getAxisX( ), xPositions );
+                String[] labelsX = ticksX.getTickLabels( axis.getAxisX( ), positionsX );
 
                 // the y offset of the x axis labels is different depending on whether
                 // the labels are being drawn above or below the axis
@@ -298,33 +280,34 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
                 }
                 else
                 {
-                    Rectangle2D textBounds = textRenderer.getBounds( xLabels[0] );
+                    Rectangle2D textBounds = textRenderer.getBounds( labelsX[0] );
                     offsetY = ( int ) - ( textBounds.getHeight( ) + tickWidth + labelBuffer );
                 }
 
-                for ( int i = 0; i < xPositions.length; i++ )
+                for ( int i = 0; i < positionsX.length; i++ )
                 {
-                    String label = xLabels[i];
-                    double valueX = xPositions[i];
+                    String label = labelsX[i];
+                    double valueX = positionsX[i];
 
                     if ( valueX == 0.0 && !showZero ) continue;
 
                     int posX = axisX.valueToScreenPixel( valueX );
 
-                    if ( shouldPaintLabel( rightCornerX, leftCornerX, posX, width, rightBuffer ) ) textRenderer.draw( label, posX + labelBuffer, originY + offsetY );
+                    paintLabelsX[i] = shouldPaintLabel( rightCornerX, leftCornerX, posX, width, rightBuffer );
+                    if ( paintLabelsX[i] ) textRenderer.draw( label, posX + labelBuffer, originY + offsetY );
                 }
             }
 
             if ( showVertical )
             {
-                String[] yLabels = ticksY.getTickLabels( axis.getAxisY( ), yPositions );
+                String[] labelsY = ticksY.getTickLabels( axis.getAxisY( ), positionsY );
 
-                for ( int i = 0; i < yPositions.length; i++ )
+                for ( int i = 0; i < positionsY.length; i++ )
                 {
-                    String label = yLabels[i];
+                    String label = labelsY[i];
                     Rectangle2D textBounds = textRenderer.getBounds( label );
 
-                    double valueY = yPositions[i];
+                    double valueY = positionsY[i];
 
                     if ( valueY == 0.0 && !showZero ) continue;
 
@@ -342,7 +325,8 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
                     int posY = axisY.valueToScreenPixel( valueY );
 
-                    if ( shouldPaintLabel( bottomCornerY, topCornerY, posY, height, topBuffer ) ) textRenderer.draw( label, originX + offsetX, posY + labelBuffer );
+                    paintLabelsY[i] = shouldPaintLabel( bottomCornerY, topCornerY, posY, height, topBuffer );
+                    if ( paintLabelsY[i] ) textRenderer.draw( label, originX + offsetX, posY + labelBuffer );
                 }
             }
         }
@@ -353,73 +337,80 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
         gl.glMatrixMode( GL.GL_PROJECTION );
         gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-
+        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
+        
         GlimpseColor.glColor( gl, lineColor );
-
+        
+        double labelBufferX = labelBuffer / axisX.getPixelsPerValue( );
+        double labelBufferY = labelBuffer / axisY.getPixelsPerValue( );
+        
         gl.glBegin( GL.GL_LINES );
         try
         {
             if ( showHorizontal )
             {
-                double tickWidthX = tickWidth / axisY.getPixelsPerValue( );
+                double tickWidthY = tickWidth / axisY.getPixelsPerValue( );
 
-                for ( int i = 0; i < xPositions.length; i++ )
+                for ( int i = 0; i < positionsX.length; i++ )
                 {
-                    double valueX = xPositions[i];
-                    int tick = axisX.valueToScreenPixel( convX.fromAxisUnits( valueX ) );
-
-                    gl.glVertex2d( tick, axisY.valueToScreenPixelUnits( doriginY - tickWidthX ) );
-                    gl.glVertex2d( tick, axisY.valueToScreenPixelUnits( doriginY + tickWidthX ) );
-
-                    if ( labelTop )
+                    if ( paintLabelsX[i] )
                     {
-                        gl.glVertex2d( tick, axisY.valueToScreenPixelUnits( doriginY + tickWidthX ) );
-                        gl.glVertex2d( tick + labelBuffer - 1, axisY.valueToScreenPixelUnits( doriginY + tickWidthX ) + labelBuffer - 1 );
-                    }
-                    else
-                    {
-                        gl.glVertex2d( tick, axisY.valueToScreenPixelUnits( doriginY - tickWidthX ) );
-                        gl.glVertex2d( tick + labelBuffer - 1, axisY.valueToScreenPixelUnits( doriginY - tickWidthX ) - labelBuffer + 1 );
+                        double valueX = convX.fromAxisUnits( positionsX[i] );
+    
+                        gl.glVertex2d( valueX, doriginY - tickWidthY );
+                        gl.glVertex2d( valueX, doriginY + tickWidthY );
+    
+                        if ( labelTop )
+                        {
+                            gl.glVertex2d( valueX, doriginY + tickWidthY );
+                            gl.glVertex2d( valueX + labelBufferX, doriginY + tickWidthY + labelBufferY );
+                        }
+                        else
+                        {
+                            gl.glVertex2d( valueX, doriginY - tickWidthY );
+                            gl.glVertex2d( valueX + labelBufferX, doriginY - tickWidthY - labelBufferY );
+                        }
                     }
                 }
             }
 
             if ( showVertical )
             {
-                double tickWidthY = tickWidth / axisX.getPixelsPerValue( );
+                double tickWidthX = tickWidth / axisX.getPixelsPerValue( );
 
-                for ( int i = 0; i < yPositions.length; i++ )
+                for ( int i = 0; i < positionsY.length; i++ )
                 {
-                    double valueY = yPositions[i];
-                    int tick = axisY.valueToScreenPixel( convY.fromAxisUnits( valueY ) );
-
-                    gl.glVertex2d( axisX.valueToScreenPixelUnits( doriginX - tickWidthY ), tick );
-                    gl.glVertex2d( axisX.valueToScreenPixelUnits( doriginX + tickWidthY ), tick );
-
-                    if ( labelRight )
+                    if ( paintLabelsY[i] )
                     {
-                        gl.glVertex2d( axisX.valueToScreenPixelUnits( doriginX + tickWidthY ), tick );
-                        gl.glVertex2d( axisX.valueToScreenPixelUnits( doriginX + tickWidthY ) + labelBuffer - 1, tick + labelBuffer - 1 );
-                    }
-                    else
-                    {
-                        gl.glVertex2d( axisX.valueToScreenPixelUnits( doriginX - tickWidthY ), tick );
-                        gl.glVertex2d( axisX.valueToScreenPixelUnits( doriginX - tickWidthY ) - labelBuffer + 1, tick + labelBuffer - 1 );
+                        double valueY = convY.fromAxisUnits( positionsY[i] );
+    
+                        gl.glVertex2d( doriginX - tickWidthX, valueY );
+                        gl.glVertex2d( doriginX + tickWidthX, valueY );
+    
+                        if ( labelRight )
+                        {
+                            gl.glVertex2d( doriginX + tickWidthX, valueY );
+                            gl.glVertex2d( doriginX + tickWidthX + labelBufferX, valueY + labelBufferY );
+                        }
+                        else
+                        {
+                            gl.glVertex2d( doriginX - tickWidthX, valueY );
+                            gl.glVertex2d( doriginX - tickWidthX - labelBufferX, valueY + labelBufferY );
+                        }
                     }
                 }
             }
-
+            
             if ( showHorizontal && showOrigin )
             {
-                gl.glVertex2d( axisX.valueToScreenPixel( convX.fromAxisUnits( axis.getMinX( ) ) ), axisY.valueToScreenPixel( convY.fromAxisUnits( doriginY ) ) );
-                gl.glVertex2d( axisX.valueToScreenPixel( convX.fromAxisUnits( axis.getMaxX( ) ) ), axisY.valueToScreenPixel( convY.fromAxisUnits( doriginY ) ) );
+                gl.glVertex2d( convX.fromAxisUnits( axis.getMinX( ) ), convY.fromAxisUnits( doriginY ) );
+                gl.glVertex2d( convX.fromAxisUnits( axis.getMaxX( ) ), convY.fromAxisUnits( doriginY ) );
             }
-
+    
             if ( showVertical && showOrigin )
             {
-                gl.glVertex2d( axisX.valueToScreenPixel( convX.fromAxisUnits( doriginX ) ), axisY.valueToScreenPixel( convY.fromAxisUnits( axis.getMinY( ) ) ) );
-                gl.glVertex2d( axisX.valueToScreenPixel( convX.fromAxisUnits( doriginX ) ), axisY.valueToScreenPixel( convY.fromAxisUnits( axis.getMaxY( ) ) ) );
+                gl.glVertex2d( convX.fromAxisUnits( doriginX ), convY.fromAxisUnits( axis.getMinY( ) ) );
+                gl.glVertex2d( convX.fromAxisUnits( doriginX ), convY.fromAxisUnits( axis.getMaxY( ) ) );
             }
         }
         finally

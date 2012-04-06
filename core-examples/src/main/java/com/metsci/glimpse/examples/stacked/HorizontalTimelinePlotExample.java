@@ -32,7 +32,6 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
@@ -91,7 +90,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // give the plots custom text labels indicating value being plotted and units
         plot1.setLabelText( "Snail Speed (furlongs per fornight)" );
         plot2.setLabelText( "Snail Slime Viscosity (pascal-seconds)" );
-        
+
         // set custom coloring for the plots
         setChartLookAndFeel( plot1 );
         setChartData( plot1, epoch, axisMinTime, axisMaxTime );
