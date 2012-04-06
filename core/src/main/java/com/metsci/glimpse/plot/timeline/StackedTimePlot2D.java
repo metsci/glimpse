@@ -119,7 +119,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     // the size of the label layout area in pixels
     protected int labelLayoutSize;
-    protected boolean showLabelLayout = true;
+    protected boolean showLabelLayout = false;
 
     public StackedTimePlot2D( )
     {
