@@ -74,7 +74,7 @@ public class FontUtils
 
         if ( !foundVerdanaTemp )
         {
-            logger.warning( "Verdana font is not installed. Falling back to Bitstream Vera Sans. Verdana looks *much* nicer but cannot be packaged with Glimpse due to licensing restrictions. For information on installing Verdana see: https://github.com/metsci/glimpse/wiki/Verdana-Font" );
+            logger.info( "Verdana font is not installed. Falling back to Bitstream Vera Sans. Verdana looks *much* nicer but cannot be packaged with Glimpse due to licensing restrictions. For information on installing Verdana see: https://github.com/metsci/glimpse/wiki/Verdana-Font" );
         }
 
         foundVerdana = foundVerdanaTemp;
