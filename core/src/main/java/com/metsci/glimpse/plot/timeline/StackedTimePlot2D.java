@@ -186,14 +186,22 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public Collection<TimePlotInfo> getAllTimePlots( )
     {
-        List<TimePlotInfo> list = new LinkedList<TimePlotInfo>( );
-
-        for ( PlotInfo plot : getAllPlots( ) )
+        this.lock.lock( );
+        try
         {
-            if ( plot instanceof TimePlotInfo ) list.add( ( TimePlotInfo ) plot );
-        }
+            List<TimePlotInfo> list = new LinkedList<TimePlotInfo>( );
 
-        return list;
+            for ( PlotInfo plot : getAllPlots( ) )
+            {
+                if ( plot instanceof TimePlotInfo ) list.add( ( TimePlotInfo ) plot );
+            }
+
+            return list;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
     }
 
     /**
@@ -204,15 +212,23 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public TimePlotInfo getTimePlot( String name )
     {
-        PlotInfo plot = getPlot( name );
+        this.lock.lock( );
+        try
+        {
+            PlotInfo plot = getPlot( name );
 
-        if ( plot instanceof TimePlotInfo )
-        {
-            return ( TimePlotInfo ) plot;
+            if ( plot instanceof TimePlotInfo )
+            {
+                return ( TimePlotInfo ) plot;
+            }
+            else
+            {
+                return null;
+            }
         }
-        else
+        finally
         {
-            return null;
+            this.lock.unlock( );
         }
     }
 
@@ -233,16 +249,24 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     public void setTimelineMouseListener1D( AxisMouseListener1D listener )
     {
-        if ( this.timelineMouseListener != null )
+        this.lock.lock( );
+        try
         {
-            this.timeLayout.removeGlimpseMouseAllListener( this.timelineMouseListener );
+            if ( this.timelineMouseListener != null )
+            {
+                this.timeLayout.removeGlimpseMouseAllListener( this.timelineMouseListener );
+            }
+
+            this.timelineMouseListener = listener;
+
+            if ( this.timelineMouseListener != null )
+            {
+                this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
+            }
         }
-
-        this.timelineMouseListener = listener;
-
-        if ( this.timelineMouseListener != null )
+        finally
         {
-            this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
+            this.lock.unlock( );
         }
     }
 
@@ -260,13 +284,21 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public void setAllowSelectionLock( boolean lock )
     {
-        this.allowSelectionLock = lock;
-
-        this.timelineMouseListener.setAllowSelectionLock( lock );
-
-        for ( TimePlotInfo info : getAllTimePlots( ) )
+        this.lock.lock( );
+        try
         {
-            info.getTimelineMouseListener( ).setAllowSelectionLock( lock );
+            this.allowSelectionLock = lock;
+
+            this.timelineMouseListener.setAllowSelectionLock( lock );
+
+            for ( TimePlotInfo info : getAllTimePlots( ) )
+            {
+                info.getTimelineMouseListener( ).setAllowSelectionLock( lock );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
     }
 
@@ -279,17 +311,26 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public void setAllowZoomY( boolean lock )
     {
-        this.allowZoomY = lock;
-
-        if ( this.getOrientation( ) == Orientation.HORIZONTAL )
+        this.lock.lock( );
+        try
         {
-            this.timelineMouseListener.setAllowZoom( lock );
+            this.allowZoomY = lock;
+
+            if ( this.getOrientation( ) == Orientation.HORIZONTAL )
+            {
+                this.timelineMouseListener.setAllowZoom( lock );
+            }
+
+            for ( TimePlotInfo info : getAllTimePlots( ) )
+            {
+                info.getTimelineMouseListener( ).setAllowZoomY( lock );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
 
-        for ( TimePlotInfo info : getAllTimePlots( ) )
-        {
-            info.getTimelineMouseListener( ).setAllowZoomY( lock );
-        }
     }
 
     /**
@@ -301,17 +342,26 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public void setAllowZoomX( boolean lock )
     {
-        this.allowZoomX = lock;
-
-        if ( this.getOrientation( ) == Orientation.VERTICAL )
+        this.lock.lock( );
+        try
         {
-            this.timelineMouseListener.setAllowZoom( lock );
+            this.allowZoomX = lock;
+
+            if ( this.getOrientation( ) == Orientation.VERTICAL )
+            {
+                this.timelineMouseListener.setAllowZoom( lock );
+            }
+
+            for ( TimePlotInfo info : getAllTimePlots( ) )
+            {
+                info.getTimelineMouseListener( ).setAllowZoomX( lock );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
 
-        for ( TimePlotInfo info : getAllTimePlots( ) )
-        {
-            info.getTimelineMouseListener( ).setAllowZoomX( lock );
-        }
     }
 
     /**
@@ -323,17 +373,26 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public void setAllowPanY( boolean lock )
     {
-        this.allowPanY = lock;
-
-        if ( this.getOrientation( ) == Orientation.HORIZONTAL )
+        this.lock.lock( );
+        try
         {
-            this.timelineMouseListener.setAllowPan( lock );
+            this.allowPanY = lock;
+
+            if ( this.getOrientation( ) == Orientation.HORIZONTAL )
+            {
+                this.timelineMouseListener.setAllowPan( lock );
+            }
+
+            for ( TimePlotInfo info : getAllTimePlots( ) )
+            {
+                info.getTimelineMouseListener( ).setAllowPanY( lock );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
 
-        for ( TimePlotInfo info : getAllTimePlots( ) )
-        {
-            info.getTimelineMouseListener( ).setAllowPanY( lock );
-        }
     }
 
     /**
@@ -345,17 +404,42 @@ public class StackedTimePlot2D extends StackedPlot2D
      */
     public void setAllowPanX( boolean lock )
     {
-        this.allowPanX = lock;
-
-        if ( this.getOrientation( ) == Orientation.VERTICAL )
+        this.lock.lock( );
+        try
         {
-            this.timelineMouseListener.setAllowPan( lock );
+            this.allowPanX = lock;
+
+            if ( this.getOrientation( ) == Orientation.VERTICAL )
+            {
+                this.timelineMouseListener.setAllowPan( lock );
+            }
+
+            for ( TimePlotInfo info : getAllTimePlots( ) )
+            {
+                info.getTimelineMouseListener( ).setAllowPanX( lock );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
 
-        for ( TimePlotInfo info : getAllTimePlots( ) )
+    }
+
+    public void setTimeAxisPainter( TimeAxisPainter painter )
+    {
+        this.lock.lock( );
+        try
         {
-            info.getTimelineMouseListener( ).setAllowPanX( lock );
+            this.timeAxisDelegate.removePainter( this.timeAxisPainter );
+            this.timeAxisPainter = painter;
+            this.timeAxisDelegate.addPainter( this.timeAxisPainter );
         }
+        finally
+        {
+            this.lock.unlock( );
+        }
+
     }
 
     /**
@@ -416,13 +500,6 @@ public class StackedTimePlot2D extends StackedPlot2D
         return ( TaggedAxis1D ) this.commonAxis;
     }
 
-    public void setTimeAxisPainter( TimeAxisPainter painter )
-    {
-        this.timeAxisDelegate.removePainter( this.timeAxisPainter );
-        this.timeAxisPainter = painter;
-        this.timeAxisDelegate.addPainter( this.timeAxisPainter );
-    }
-
     public TimeAxisPainter getTimeAxisPainter( )
     {
         return this.timeAxisPainter;
@@ -470,7 +547,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.labelLayoutSize = size;
         this.validateLayout( );
     }
-    
+
     public void showLabels( boolean show )
     {
         this.showLabelLayout = show;
@@ -509,6 +586,40 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         stack.push( this );
         return stack;
+    }
+
+    /**
+     * @see com.metsci.glimpse.plot.StackedPlot2D#deletePlot(String)
+     */
+    @Override
+    public void deletePlot( String name )
+    {
+        this.lock.lock( );
+        try
+        {
+            PlotInfo info = this.stackedPlots.get( name );
+            if ( info == null ) return;
+            
+            if ( info instanceof TimePlotInfo )
+            {
+                TimePlotInfo timeInfo = (TimePlotInfo) info;
+                
+                this.removeLayout( info.getLayout( ) );
+                this.removeLayout( timeInfo.getLabelLayout( ) );
+                this.stackedPlots.remove( name );
+                this.validate( );
+            }
+            else
+            {
+                this.removeLayout( info.getLayout( ) );
+                this.stackedPlots.remove( name );
+                this.validate( );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
     }
 
     /**
@@ -951,7 +1062,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                         if ( info instanceof TimePlotInfo )
                         {
                             TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-                            
+
                             format = "cell %d %d 1 1, pushy, growy, width %d!";
                             layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0 );
                             timeInfo.getLabelLayout( ).setLayoutData( layout );
@@ -1011,18 +1122,18 @@ public class StackedTimePlot2D extends StackedPlot2D
                     }
                 }
             }
-            
+
             // position the overlay in absolute coordinates based on the position of the plots
             // which are given miglayout ids: i0, i1, etc...
             if ( this.overlayLayout != null )
             {
                 if ( this.isTimeAxisHorizontal( ) )
                 {
-                    this.overlayLayout.setLayoutData( String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", (axisList.size( )-1) ) );
+                    this.overlayLayout.setLayoutData( String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( axisList.size( ) - 1 ) ) );
                 }
                 else
                 {
-                    this.overlayLayout.setLayoutData( String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", (axisList.size( )-1) ) );
+                    this.overlayLayout.setLayoutData( String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( axisList.size( ) - 1 ) ) );
                 }
             }
 
