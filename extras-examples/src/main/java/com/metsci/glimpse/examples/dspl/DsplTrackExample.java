@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
@@ -165,7 +166,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                 {
                     trackId = nextTrackId++;
                     trackIdMap.put( identifier, trackId );
-                    initializeTrack( trackPainter, trackId );
+                    initializeGeoTrack( trackPainter, trackId );
                 }
 
                 // add the point from the dspl data set to the track painter
@@ -301,22 +302,34 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                 // we only display FLOAT and INTEGER type data on the lineplot
                 if ( type != DataType.FLOAT && type == DataType.INTEGER ) continue;
 
+                // we will create a timeline plot for each additional concept in the data set
                 Pair<TrackPainter, TimePlotInfo> pair = plotMap.get( id );
                 if ( pair == null )
                 {
                     TimePlotInfo plotInfo = timePlot.createTimePlot( id );
                     TrackPainter plotPainter = new TrackPainter( );
+                    
+                    for ( Integer trackId : trackIdMap.values( ) )
+                    {
+                        initializeTimelinePlot( plotPainter, trackId );
+                    }
+                    
                     plotInfo.addPainter( plotPainter );
 
-                    plotInfo.setLabelText( concept.getNameEnglish( ) );
-                    plotInfo.setAxisColor( GlimpseColor.getWhite( ) );
+                    initializePlot( concept.getNameEnglish( ), plotInfo );
 
                     pair = new Pair<TrackPainter, TimePlotInfo>( plotPainter, plotInfo );
+                    
+                    plotMap.put( id, pair );
                 }
 
-                TimePlotInfo plotInfo = pair.second( );
                 TrackPainter plotPainter = pair.first( );
-
+                TimePlotInfo plotInfo = pair.second( );
+                
+                minY = Double.POSITIVE_INFINITY;
+                maxY = Double.NEGATIVE_INFINITY;
+                
+                // iterate through the data set rows
                 for ( int i = 0; i < data.getNumRows( ); i++ )
                 {
                     String identifier = identifierColumn.getStringData( i );
@@ -333,19 +346,52 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                         dataY = column.getFloatData( i );
                     }
                     
-                    TimeStamp timestamp = TimeStamp.fromPosixMillis( timeColumn.getDateData( i ) );
+                    if ( minY > dataY ) minY = dataY;
+                    if ( maxY < dataY ) maxY = dataY;
+                    
+                    long time = timeColumn.getDateData( i );
+                    TimeStamp timestamp = TimeStamp.fromPosixMillis( time );
                     double timeX = epoch.fromTimeStamp( timestamp );
+                    
+                    plotPainter.addPoint( trackId, 0, timeX, dataY, time );
                 }
+                
+                Axis1D axisY = plotInfo.getOrthogonalAxis( );
+                axisY.setMin( minY );
+                axisY.setMax( maxY );
             }
+        }
+        
+        // if there were no additional data columns, create an empty timeline plot anyway
+        if ( plotMap.isEmpty( ) )
+        {
+            TimePlotInfo plot = timePlot.createTimePlot( "default" );
+            initializePlot( "default", plot );
         }
 
         return parentLayout;
     }
+    
+    protected void initializePlot( String name, TimePlotInfo plot )
+    {
+        plot.setLabelText( name );
+        plot.setAxisColor( GlimpseColor.getWhite( ) );
+        plot.setLabelColor( GlimpseColor.getWhite( ) );
+    }
 
     // setup the visual characteristics (color, thickness, etc...) of the track
-    protected void initializeTrack( TrackPainter trackPainter, int trackId )
+    protected void initializeGeoTrack( TrackPainter trackPainter, int trackId )
     {
         trackPainter.setLineColor( trackId, GlimpseColor.getBlue( ) );
+        trackPainter.setLineWidth( trackId, 2.0f );
+        trackPainter.setShowLines( trackId, true );
+        trackPainter.setShowPoints( trackId, false );
+        trackPainter.setShowHeadPoint( trackId, false );
+    }
+    
+    protected void initializeTimelinePlot( TrackPainter trackPainter, int trackId )
+    {
+        trackPainter.setLineColor( trackId, GlimpseColor.getRed( ) );
         trackPainter.setLineWidth( trackId, 2.0f );
         trackPainter.setShowLines( trackId, true );
         trackPainter.setShowPoints( trackId, false );
