@@ -1007,7 +1007,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         TimelineMouseListener2D listener = attachTimelineMouseListener( layoutInfo );
 
         // create a GlimpseLayout which will appear to the side of the timeline and contain labels/controls
-        GlimpseLayout labelLayout = new GlimpseLayout( );
+        GlimpseLayout labelLayout = new GlimpseLayout( layoutInfo.getId( ) + "-label" );
         this.addLayout( labelLayout );
 
         TimePlotInfo timePlotInfo = new TimePlotInfo( StackedTimePlot2D.this, layoutInfo, labelLayout, listener, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
