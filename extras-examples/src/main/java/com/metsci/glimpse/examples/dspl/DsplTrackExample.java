@@ -185,7 +185,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         trackPainter.displayTimeRange( minTime, maxTime );
 
         // create a layout to draw the geographic data
-        GlimpseAxisLayout2D geoPlot = new GlimpseAxisLayout2D( axis );
+        GlimpseAxisLayout2D geoPlot = new GlimpseAxisLayout2D( "DsplTrackExampleGeo", axis );
 
         // add an axis mouse listener to the layout so that it responds to user pans/zooms
         geoPlot.addGlimpseMouseAllListener( new AxisMouseListener2D( ) );
@@ -248,7 +248,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         {
             @Override
             public void mouseMoved( GlimpseMouseEvent e )
-            {
+            {                
                 Tag minTag = timePlot.getTimeSelectionMin( );
                 Tag maxTag = timePlot.getTimeSelectionMax( );
 
@@ -260,7 +260,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         } );
 
         // create a parent plot to contain the geographic and time plots
-        GlimpseLayout parentLayout = new GlimpseLayout( );
+        GlimpseLayout parentLayout = new GlimpseLayout( "DsplTrackExampleParent" );
 
         // add the geographic and time plots to the parent
         parentLayout.addLayout( geoPlot );
