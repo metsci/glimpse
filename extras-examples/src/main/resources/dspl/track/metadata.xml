@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dspl targetNamespace="http://www.metsci.com/example/track"
+      xmlns="http://schemas.google.com/dspl/2010"
+      xmlns:track="http://www.metsci.com/dspl/track"
+	  xmlns:time="http://www.metsci.com/dspl/time"
+	  xmlns:quantity="http://www.google.com/publicdata/dataset/google/quantity">
+
+	<import namespace="http://www.metsci.com/dspl/track" />
+	<import namespace="http://www.metsci.com/dspl/time" />
+	<import namespace="http://www.google.com/publicdata/dataset/google/quantity" />
+
+	<info>
+		<name>
+			<value>Example Track Dataset</value>
+		</name>
+		<description>
+			<value></value>
+		</description>
+		<url>
+			<value></value>
+		</url>
+	</info>
+
+	<provider>
+		<name>
+			<value>Metron Inc.</value>
+		</name>
+		<url>
+			<value>http://www.metsci.com</value>
+		</url>
+	</provider>
+
+	<concepts>
+		<!-- The required concepts (time,latitude,longitude) are all defined in 
+			the DSPL files which we import. However, if we wish to include additional 
+			data, we must define concepts describing it. -->
+		<concept id="elevation" extends="quantity:magnitude">
+			<info>
+				<name>
+					<value>Elevation</value>
+				</name>
+				<description>
+					<value>Elevation above sea level in feet.</value>
+				</description>
+			</info>
+			<type ref="float" />
+		</concept>
+	</concepts>
+
+	<slices>
+		<slice id="track_slice">
+			<dimension concept="track:identifier" />
+			<dimension concept="time:millisecond" />
+			<metric concept="track:latitude_degrees" />
+			<metric concept="track:longitude_degrees" />
+			<metric concept="elevation" />
+			<table ref="track_slice_table">
+				<mapDimension concept="time:millisecond" toColumn="time"/>
+				<mapMetric concept="track:latitude_degrees" toColumn="latitude"/>
+				<mapMetric concept="track:longitude_degrees" toColumn="longitude"/>	
+			</table>
+		</slice>
+	</slices>
+
+	<tables>
+		<table id="track_slice_table">
+			<column id="identifier">
+				<value>track1</value>
+			</column>
+			<column id="time" format="yyyy-MM-dd HH:mm:ss Z" />
+			<column id="latitude" />
+			<column id="longitude" />
+			<column id="elevation" />
+			<data>
+				<file format="csv" encoding="utf-8">track.csv</file>
+			</data>
+		</table>
+	</tables>
+</dspl>
