@@ -96,7 +96,6 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
                 this.atlas.drawImage( gl, "image1", axis, 0, 0, 0.5f, 1.0f );
                 this.atlas.drawImage( gl, "glimpse", axis, 0, 0, 0.5f );
                 this.atlas.drawImage( gl, "glimpse", axis, 5, 4, 0.5f );
-                this.atlas.drawImageAxisX( gl, "glimpse", axis.getAxisX( ), 0, 0 );
             }
             finally
             {
