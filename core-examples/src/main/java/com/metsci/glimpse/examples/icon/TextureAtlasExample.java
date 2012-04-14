@@ -200,7 +200,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
             }
         } );
         
-        atlas.loadImage( "image9", 100, 100, 10, 10, new ImageDrawer( )
+        atlas.loadImage( "image9", 100, 100, 0, 0, new ImageDrawer( )
         {
             @Override
             public void drawImage( Graphics2D g, int width, int height )

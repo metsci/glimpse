@@ -59,7 +59,6 @@ import com.metsci.glimpse.gl.attribute.GLBuffer;
 import com.metsci.glimpse.gl.attribute.GLByteBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -381,11 +380,11 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     /**
-     * @see #addIcon( Object, Object, float, float, float )
+     * @see #addIcon( Object, Object, float, float, float, float, float )
      */
-    public void addIcon( Object iconGroupId, Object iconId, float positionX, float positionY )
+    public void addIcon( Object iconGroupId, Object iconId, float positionX, float positionY, float rotation )
     {
-        addIcon( iconGroupId, iconId, 1.0f, positionX, positionY );
+        addIcon( iconGroupId, iconId, positionX, positionY, rotation, 1.0f );
     }
 
     /**
@@ -400,17 +399,45 @@ public class IconPainter extends GlimpseDataPainter2D
      *  
      * @param iconGroupId an arbitrary string creating an association between this icon and others in the same group
      * @param iconId the identifier of an icon in the underlying texture atlas loaded using loadIcon()
-     * @param scale a scake adjustment to the icon size
      * @param positionX a position in axis space to place the icon at
      * @param positionY a position in axis space to place the icon at
+     * @param rotation rotation around center point of icon (CCW radians; 0 implies no rotation)
+     * @param scale a scale adjustment to the icon size
      */
-    public void addIcon( Object iconGroupId, Object iconId, float scale, float positionX, float positionY )
+    public void addIcon( Object iconGroupId, Object iconId, float positionX, float positionY, float rotation, float scale )
     {
         this.lock.lock( );
         try
         {
             IconGroup group = getIconGroup( iconGroupId );
-            group.addIcon( iconId, scale, positionX, positionY );
+            group.addIcon( iconId, positionX, positionY, rotation, scale );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+//    /**
+//     * A bulk load method for adding many of the same type of icon at different locations simultaneously.
+//     * 
+//     * @see addIcon( Object, Object, float, float, float )
+//     */
+//    public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY, float[] rotations )
+//    {
+//        addIcons( iconGroupId, iconId, 1.0f, positionX, positionY, rotations );
+//    }
+
+    /**
+     * @see #addIcon( Object, Object, float[], float[], float[] )
+     */
+    public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY, float[] rotation, float[] scale )
+    {
+        this.lock.lock( );
+        try
+        {
+            IconGroup group = getIconGroup( iconGroupId );
+            group.addIcons( iconId, positionX, positionY, rotation, scale );
         }
         finally
         {
@@ -419,46 +446,17 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     /**
-     * A bulk load method for adding many of the same type of icon at different locations simultaneously.
-     * 
-     * @see addIcon( Object, Object, float, float )
-     */
-    public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY )
-    {
-        addIcons( iconGroupId, iconId, 1.0f, positionX, positionY );
-    }
-
-    /**
-     * @see #addIcon( Object, Object, float[], float[] )
-     */
-    public void addIcons( Object iconGroupId, Object iconId, float scale, float[] positionX, float[] positionY )
-    {
-        this.lock.lock( );
-        try
-        {
-            IconGroup group = getIconGroup( iconGroupId );
-            group.addIcons( iconId, scale, positionX, positionY );
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    /**
-     * Loads icons into the IconPainter with x/y positions stored interleaved in a single float[] array.
-     * The provided array must be of even length, and have x positions stored in even numbered indices
-     * and corresponding y positions stored in adjacent even numbered indices.
+     * Loads icons into the IconPainter with x/y/rotation/scale quadruplets (one per icon) packed into a single float[] array.
      * 
      * @see #addIcon( Object, Object, float[] )
      */
-    public void addIcons( Object iconGroupId, Object iconId, float scale, float[] positions )
+    public void addIcons( Object iconGroupId, Object iconId, float[] positions )
     {
         this.lock.lock( );
         try
         {
             IconGroup group = getIconGroup( iconGroupId );
-            group.addIcons( iconId, scale, positions );
+            group.addIcons( iconId, positions );
         }
         finally
         {
@@ -467,18 +465,18 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     /**
-     * Loads icons into the IconPainter with x/y positions stored interleaved in a single FloatBuffer in the same
+     * Loads icons into the IconPainter with x/y/rot/scale interleaved in a single FloatBuffer in the same
      * manner as {@link #addIcons( Object, Object, float, float[] )}. The vertexOffset provides the index of the first
-     * x coordinate to load into the painter and the vertex count provides the total number of x/y coordinate pairs
+     * x coordinate to load into the painter and the vertex count provides the total number of x/y/rot/scale quadruplets
      * to read from the FloatBuffer.
      */
-    public void addIcons( Object iconGroupId, Object iconId, float scale, FloatBuffer positions, int vertexOffset, int vertexCount )
+    public void addIcons( Object iconGroupId, Object iconId, FloatBuffer positions, int vertexOffset, int vertexCount )
     {
         this.lock.lock( );
         try
         {
             IconGroup group = getIconGroup( iconGroupId );
-            group.addIcons( iconId, scale, positions, vertexOffset, vertexCount );
+            group.addIcons( iconId, positions, vertexOffset, vertexCount );
         }
         finally
         {
@@ -627,7 +625,7 @@ public class IconPainter extends GlimpseDataPainter2D
                 group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
                 group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
                 group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                group.getBufferXY( ).bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
+                group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
 
                 gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
             }
@@ -670,7 +668,7 @@ public class IconPainter extends GlimpseDataPainter2D
                 group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
                 group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
                 group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                group.getBufferXY( ).bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
+                group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
 
                 resetPickFrameBuffer( glContext );
 
@@ -927,12 +925,11 @@ public class IconPainter extends GlimpseDataPainter2D
 
     private abstract class AddIcons
     {
-        protected float scale;
         protected Object iconId;
 
         public abstract int getSize( );
 
-        public abstract void addPosition( IconGroup group );
+        public abstract void addPlacementValues( IconGroup group );
 
         public void addIcons( IconGroup group )
         {
@@ -945,7 +942,7 @@ public class IconPainter extends GlimpseDataPainter2D
             final ImageData imageData = atlas.getImageData( iconId );
             final TextureCoords texData = imageData.getTextureCoordinates( );
 
-            addPosition( group );
+            addPlacementValues( group );
 
             for ( int i = 0; i < size; i++ )
             {
@@ -960,10 +957,10 @@ public class IconPainter extends GlimpseDataPainter2D
                     data.limit( currentSize * length );
                     data.position( ( currentSize - size ) * length );
 
-                    float width = ( imageData.getWidth( ) + imageData.getBufferX( ) * 2 ) * scale;
-                    float height = ( imageData.getHeight( ) + imageData.getBufferY( ) * 2 ) * scale;
-                    float offsetX = ( imageData.getCenterX( ) + imageData.getBufferX( ) ) * scale;
-                    float offsetY = ( imageData.getCenterY( ) + imageData.getBufferY( ) ) * scale;
+                    float width = ( imageData.getWidth( ) + imageData.getBufferX( ) * 2 );
+                    float height = ( imageData.getHeight( ) + imageData.getBufferY( ) * 2 );
+                    float offsetX = ( imageData.getCenterX( ) + imageData.getBufferX( ) );
+                    float offsetY = ( imageData.getCenterY( ) + imageData.getBufferY( ) );
 
                     for ( int i = 0; i < size; i++ )
                     {
@@ -1025,15 +1022,19 @@ public class IconPainter extends GlimpseDataPainter2D
     {
         float[] positionX;
         float[] positionY;
+        float[] rotation;
+        float[] scale;
         int size;
 
-        public AddIconsSeparate( Object iconId, float scale, float[] positionX, float[] positionY )
+        public AddIconsSeparate( Object iconId, float[] positionX, float[] positionY, float[] rotation, float[] scale )
         {
             this.iconId = iconId;
             this.positionX = positionX;
             this.positionY = positionY;
+            this.rotation = rotation;
             this.scale = scale;
 
+            //XXX: Check length of rotation and scale arrays as well
             if ( positionX.length != positionY.length ) throw new IllegalArgumentException( String.format( "Size of positionX and positionY arrays must be identical. Found: %d and %d.", positionX.length, positionY.length ) );
 
             this.size = positionX.length;
@@ -1044,9 +1045,9 @@ public class IconPainter extends GlimpseDataPainter2D
             return size;
         }
 
-        public void addPosition( final IconGroup group )
+        public void addPlacementValues( final IconGroup group )
         {
-            group.xyValues.mutate( new Mutator( )
+            group.iconPlacementValues.mutate( new Mutator( )
             {
                 @Override
                 public void mutate( FloatBuffer data, int length )
@@ -1059,6 +1060,8 @@ public class IconPainter extends GlimpseDataPainter2D
                     {
                         data.put( positionX[i] );
                         data.put( positionY[i] );
+                        data.put( rotation[i] );
+                        data.put( scale[i] );
                     }
                 }
             } );
@@ -1070,15 +1073,14 @@ public class IconPainter extends GlimpseDataPainter2D
         float[] positions;
         int size;
 
-        public AddIconsInterleaved( Object iconId, float scale, float[] positions )
+        public AddIconsInterleaved( Object iconId, float[] positions )
         {
             this.iconId = iconId;
             this.positions = positions;
-            this.scale = scale;
 
-            if ( positions.length % 2 != 0 ) throw new IllegalArgumentException( String.format( "Size of position array must be even. Found: %d.", positions.length ) );
+            if ( positions.length % 4 != 0 ) throw new IllegalArgumentException( String.format( "Size of position array must be a multiple of 4. Found: %d.", positions.length ) );
 
-            this.size = positions.length / 2;
+            this.size = positions.length / 4;
         }
 
         public int getSize( )
@@ -1086,9 +1088,9 @@ public class IconPainter extends GlimpseDataPainter2D
             return size;
         }
 
-        public void addPosition( final IconGroup group )
+        public void addPlacementValues( final IconGroup group )
         {
-            group.xyValues.mutate( new Mutator( )
+            group.iconPlacementValues.mutate( new Mutator( )
             {
                 @Override
                 public void mutate( FloatBuffer data, int length )
@@ -1109,11 +1111,10 @@ public class IconPainter extends GlimpseDataPainter2D
         int vertexOffset;
         int vertexCount;
 
-        public AddIconsBuffer( Object iconId, float scale, FloatBuffer positions, int vertexOffset, int vertexCount )
+        public AddIconsBuffer( Object iconId, FloatBuffer positions, int vertexOffset, int vertexCount )
         {
             this.iconId = iconId;
             this.positions = positions;
-            this.scale = scale;
             this.vertexOffset = vertexOffset;
             this.vertexCount = vertexCount;
         }
@@ -1123,9 +1124,9 @@ public class IconPainter extends GlimpseDataPainter2D
             return vertexCount;
         }
 
-        public void addPosition( final IconGroup group )
+        public void addPlacementValues( final IconGroup group )
         {
-            group.xyValues.mutate( new Mutator( )
+            group.iconPlacementValues.mutate( new Mutator( )
             {
                 @Override
                 public void mutate( FloatBuffer data, int length )
@@ -1156,7 +1157,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
         private List<Object> iconIds;
 
-        private GLFloatBuffer2D xyValues;
+        private GLFloatBuffer iconPlacementValues;
         private GLFloatBuffer pixelCoordsValues;
         private GLFloatBuffer texCoordsValues;
 
@@ -1172,7 +1173,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
             this.iconIds = new ArrayList<Object>( );
 
-            this.xyValues = new GLFloatBuffer2D( initialIconSpace );
+            this.iconPlacementValues = new GLFloatBuffer( initialIconSpace, 4 );
             this.pixelCoordsValues = new GLFloatBuffer( initialIconSpace, 4 );
             this.texCoordsValues = new GLFloatBuffer( initialIconSpace, 4 );
             this.pickColorValues = new GLByteBuffer( initialIconSpace, 3 );
@@ -1213,9 +1214,9 @@ public class IconPainter extends GlimpseDataPainter2D
             return this.iconIds.get( index );
         }
 
-        public final GLFloatBuffer2D getBufferXY( )
+        public final GLFloatBuffer getBufferIconPlacement( )
         {
-            return this.xyValues;
+            return this.iconPlacementValues;
         }
 
         public final GLFloatBuffer getBufferPixelCoords( )
@@ -1233,24 +1234,24 @@ public class IconPainter extends GlimpseDataPainter2D
             return this.pickColorValues;
         }
 
-        public void addIcons( Object iconId, float scale, float[] positionX, float[] positionY )
+        public void addIcons( Object iconId, float[] positionX, float[] positionY, float rotation[], float[] scale )
         {
-            this.addQueue.add( new AddIconsSeparate( iconId, scale, positionX, positionY ) );
+            this.addQueue.add( new AddIconsSeparate( iconId, positionX, positionY, rotation, scale ) );
         }
 
-        public void addIcons( Object iconId, float scale, float[] positions )
+        public void addIcons( Object iconId, float[] positions )
         {
-            this.addQueue.add( new AddIconsInterleaved( iconId, scale, positions ) );
+            this.addQueue.add( new AddIconsInterleaved( iconId, positions ) );
         }
 
-        public void addIcons( Object iconId, float scale, FloatBuffer positions, int vertexOffset, int vertexCount )
+        public void addIcons( Object iconId, FloatBuffer positions, int vertexOffset, int vertexCount )
         {
-            this.addQueue.add( new AddIconsBuffer( iconId, scale, positions, vertexOffset, vertexCount ) );
+            this.addQueue.add( new AddIconsBuffer( iconId, positions, vertexOffset, vertexCount ) );
         }
 
-        public void addIcon( Object iconId, float scale, final float positionX, final float positionY )
+        public void addIcon( Object iconId, final float positionX, final float positionY, final float rotation, float scale )
         {
-            addIcons( iconId, scale, new float[] { positionX }, new float[] { positionY } );
+            addIcons( iconId, new float[] { positionX }, new float[] { positionY }, new float[] { rotation }, new float[]{ scale } );
         }
 
         public void addQueuedIcons( )
@@ -1283,13 +1284,13 @@ public class IconPainter extends GlimpseDataPainter2D
             }
 
             // create new buffers of the new size
-            GLFloatBuffer2D xyValues_temp = new GLFloatBuffer2D( newSize );
+            GLFloatBuffer placementValues_temp = new GLFloatBuffer( newSize, 4 );
             GLFloatBuffer pixelCoordsValues_temp = new GLFloatBuffer( newSize, 4 );
             GLFloatBuffer texCoordsValues_temp = new GLFloatBuffer( newSize, 4 );
             GLByteBuffer pickColorValues_temp = new GLByteBuffer( newSize, 3 );
 
             // copy existing data to the new buffers
-            copy( this.xyValues, xyValues_temp );
+            copy( this.iconPlacementValues, placementValues_temp );
             copy( this.pixelCoordsValues, pixelCoordsValues_temp );
             copy( this.texCoordsValues, texCoordsValues_temp );
             copy( this.pickColorValues, pickColorValues_temp );
@@ -1298,7 +1299,7 @@ public class IconPainter extends GlimpseDataPainter2D
             this.dispose( );
 
             // use the new buffers in place of the old ones
-            this.xyValues = xyValues_temp;
+            this.iconPlacementValues = placementValues_temp;
             this.pixelCoordsValues = pixelCoordsValues_temp;
             this.texCoordsValues = texCoordsValues_temp;
             this.pickColorValues = pickColorValues_temp;
@@ -1345,7 +1346,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void dispose( )
         {
-            oldBuffers.add( this.xyValues );
+            oldBuffers.add( this.iconPlacementValues );
             oldBuffers.add( this.pixelCoordsValues );
             oldBuffers.add( this.texCoordsValues );
             oldBuffers.add( this.pickColorValues );
