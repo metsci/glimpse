@@ -466,17 +466,17 @@ public class IconPainter extends GlimpseDataPainter2D
 
     /**
      * Loads icons into the IconPainter with x/y/rot/scale interleaved in a single FloatBuffer in the same
-     * manner as {@link #addIcons( Object, Object, float, float[] )}. The vertexOffset provides the index of the first
+     * manner as {@link #addIcons( Object, Object, float, float[] )}. The offset provides the index of the first
      * x coordinate to load into the painter and the vertex count provides the total number of x/y/rot/scale quadruplets
      * to read from the FloatBuffer.
      */
-    public void addIcons( Object iconGroupId, Object iconId, FloatBuffer positions, int vertexOffset, int vertexCount )
+    public void addIcons( Object iconGroupId, Object iconId, FloatBuffer positions, int offset, int vertexCount )
     {
         this.lock.lock( );
         try
         {
             IconGroup group = getIconGroup( iconGroupId );
-            group.addIcons( iconId, positions, vertexOffset, vertexCount );
+            group.addIcons( iconId, positions, offset, vertexCount );
         }
         finally
         {
@@ -1108,14 +1108,14 @@ public class IconPainter extends GlimpseDataPainter2D
     private final class AddIconsBuffer extends AddIcons
     {
         FloatBuffer positions;
-        int vertexOffset;
+        int offset;
         int vertexCount;
 
-        public AddIconsBuffer( Object iconId, FloatBuffer positions, int vertexOffset, int vertexCount )
+        public AddIconsBuffer( Object iconId, FloatBuffer positions, int offset, int vertexCount )
         {
             this.iconId = iconId;
             this.positions = positions;
-            this.vertexOffset = vertexOffset;
+            this.offset = offset;
             this.vertexCount = vertexCount;
         }
 
@@ -1137,10 +1137,10 @@ public class IconPainter extends GlimpseDataPainter2D
                     data.position( ( currentSize - vertexCount ) * length );
 
                     int limit = positions.limit( );
-                    positions.position( vertexOffset * length );
-                    positions.limit( ( vertexOffset + vertexCount ) * length );
+                    positions.position( offset );
+                    positions.limit( offset + vertexCount * length );
                     data.put( positions );
-                    positions.limit( limit ); // reset the limit
+                    positions.limit( limit );
                 }
             } );
         }
@@ -1244,9 +1244,9 @@ public class IconPainter extends GlimpseDataPainter2D
             this.addQueue.add( new AddIconsInterleaved( iconId, positions ) );
         }
 
-        public void addIcons( Object iconId, FloatBuffer positions, int vertexOffset, int vertexCount )
+        public void addIcons( Object iconId, FloatBuffer positions, int offset, int vertexCount )
         {
-            this.addQueue.add( new AddIconsBuffer( iconId, positions, vertexOffset, vertexCount ) );
+            this.addQueue.add( new AddIconsBuffer( iconId, positions, offset, vertexCount ) );
         }
 
         public void addIcon( Object iconId, final float positionX, final float positionY, final float rotation, float scale )

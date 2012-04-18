@@ -37,6 +37,21 @@ import com.metsci.glimpse.axis.Axis1D;
  */
 public abstract class RateLimitedAxisListener1D extends RateLimitedEventDispatcher<Axis1D> implements AxisListener1D
 {
+    public RateLimitedAxisListener1D( )
+    {
+        super( 1000l / 60l );
+    }
+
+    public RateLimitedAxisListener1D( double maxFreqHz )
+    {
+        super( ( long ) ( 1000 / maxFreqHz ) );
+    }
+
+    public RateLimitedAxisListener1D( long _idleTimeMillis )
+    {
+        super( _idleTimeMillis );
+    }
+    
     public abstract void axisUpdatedRateLimited( Axis1D axis );
 
     @Override
