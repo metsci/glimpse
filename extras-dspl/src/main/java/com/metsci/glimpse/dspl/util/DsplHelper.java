@@ -78,7 +78,7 @@ public class DsplHelper
     public static final String dsplSchema = "com.metsci.glimpse.dspl.schema";
     public static final String objectFactoryProp = "com.sun.xml.bind.ObjectFactory";
     
-    public static JAXBContext jc;
+    private static JAXBContext jc;
 
     static
     {
