@@ -108,6 +108,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected AxisMouseListener1D timelineMouseListener;
     protected SimpleTextPainter timeUnitsPainter;
     protected BorderPainter timeAxisBorderPainter;
+    protected SelectedTimeRegionPainter selectedTimePainter;
 
     // default settings for TimelineMouseListeners of new plots
     protected boolean allowPanX = true;
@@ -514,6 +515,11 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return this.timeAxisBorderPainter;
     }
+    
+    public SelectedTimeRegionPainter getSelectedTimePainter( ) 
+    {
+        return this.selectedTimePainter;
+    }
 
     public PlotInfo getTimelinePlotInfo( )
     {
@@ -863,9 +869,11 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", timeAxis );
         }
 
+        this.selectedTimePainter = new SelectedTimeRegionPainter( this );
+        
         this.overlayLayout.setEventGenerator( true );
         this.overlayLayout.setEventConsumer( false );
-        this.overlayLayout.addPainter( new SelectedTimeRegionPainter( this ) );
+        this.overlayLayout.addPainter( this.selectedTimePainter );
 
         // nothing should be placed in front of the overlayLayout
         this.setZOrder( this.overlayLayout, Integer.MAX_VALUE );
