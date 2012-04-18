@@ -77,7 +77,21 @@ public class DsplHelper
 
     public static final String dsplSchema = "com.metsci.glimpse.dspl.schema";
     public static final String objectFactoryProp = "com.sun.xml.bind.ObjectFactory";
+    
+    public static JAXBContext jc;
 
+    static
+    {
+        try
+        {
+            jc = JAXBContext.newInstance( dsplSchema );
+        }
+        catch ( JAXBException e )
+        {
+            logWarning( logger, "Unable to initialize JAXB Context", e );
+        }
+    }
+    
     ///////////////////////////////////////////////////////////////////////
     //////                 DataSet utility methods                   //////
     ///////////////////////////////////////////////////////////////////////
@@ -238,7 +252,6 @@ public class DsplHelper
     {
         try
         {
-            JAXBContext jc = JAXBContext.newInstance( dsplSchema );
             Unmarshaller unmarshaller = jc.createUnmarshaller( );
 
             DataSet dataset = ( DataSet ) unmarshaller.unmarshal( stream );
