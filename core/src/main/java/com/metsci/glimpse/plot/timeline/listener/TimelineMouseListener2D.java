@@ -47,12 +47,12 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
     protected boolean axisSelected;
     protected boolean timeIsX;
 
-    public TimelineMouseListener2D( StackedTimePlot2D plot, PlotInfo info )
+    public TimelineMouseListener2D( StackedTimePlot2D plot, PlotInfo info, AxisMouseListener1D timeMouseListener )
     {
         this.info = info;
         this.plot = plot;
         this.timeIsX = plot.isTimeAxisHorizontal( );
-        this.delegateListener = new TimelineMouseListener1D( plot );
+        this.delegateListener = timeMouseListener;
 
         // we handle these ourselves
         if ( this.timeIsX )
@@ -65,6 +65,11 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
         }
 
         setAllowSelectionLock( false );
+    }
+    
+    public TimelineMouseListener2D( StackedTimePlot2D plot, PlotInfo info )
+    {
+        this( plot, info, new TimelineMouseListener1D( plot ) );
     }
 
     @Override

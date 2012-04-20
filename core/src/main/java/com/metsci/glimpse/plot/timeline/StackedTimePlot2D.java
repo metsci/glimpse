@@ -810,6 +810,8 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         TaggedAxis1D timeAxis = getTimeAxis( );
 
+        this.timelineMouseListener = new TimelineMouseListener1D( this );
+        
         this.addTimeTags( getTimeAxis( ) );
 
         this.minTag = timeAxis.getTag( MIN_TIME );
@@ -837,7 +839,6 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.labelLayoutSize = 30;
         }
 
-        this.timelineMouseListener = new TimelineMouseListener1D( this );
         this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
 
         this.timeAxisPainter = createTimeAxisPainter( );
@@ -892,7 +893,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     protected TimelineMouseListener2D attachTimelineMouseListener( PlotInfo layoutInfo )
     {
-        TimelineMouseListener2D mouseListener = new TimelineMouseListener2D( this, layoutInfo );
+        TimelineMouseListener2D mouseListener = new TimelineMouseListener2D( this, layoutInfo, this.timelineMouseListener );
         mouseListener.setAllowPanX( this.allowPanX );
         mouseListener.setAllowPanY( this.allowPanY );
         mouseListener.setAllowZoomX( this.allowZoomX );
