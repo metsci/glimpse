@@ -96,6 +96,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     // layout covering all plots and timeline (for drawing
     // which must span multiple plots)
     protected GlimpseAxisLayout1D overlayLayout;
+    protected GlimpseAxisLayout1D underlayLayout;
 
     // time layout painters and listeners
     protected PlotInfo timelineInfo;
@@ -167,6 +168,11 @@ public class StackedTimePlot2D extends StackedPlot2D
     public GlimpseAxisLayout1D getOverlayLayout( )
     {
         return this.overlayLayout;
+    }
+    
+    public GlimpseAxisLayout1D getUnderlayLayout( )
+    {
+        return this.underlayLayout;
     }
 
     /**
@@ -863,10 +869,12 @@ public class StackedTimePlot2D extends StackedPlot2D
         if ( isTimeAxisHorizontal( ) )
         {
             this.overlayLayout = new GlimpseAxisLayoutX( this, "Overlay", timeAxis );
+            this.underlayLayout = new GlimpseAxisLayoutX( this, "Underlay", timeAxis );
         }
         else
         {
             this.overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", timeAxis );
+            this.underlayLayout = new GlimpseAxisLayoutX( this, "Underlay", timeAxis );
         }
 
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
@@ -877,6 +885,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         // nothing should be placed in front of the overlayLayout
         this.setZOrder( this.overlayLayout, Integer.MAX_VALUE );
+        this.setZOrder( this.underlayLayout, Integer.MIN_VALUE );
 
         this.validate( );
     }
@@ -1137,11 +1146,15 @@ public class StackedTimePlot2D extends StackedPlot2D
             {
                 if ( this.isTimeAxisHorizontal( ) )
                 {
-                    this.overlayLayout.setLayoutData( String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( axisList.size( ) - 1 ) ) );
+                    String layout = String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( axisList.size( ) - 1 ) );
+                    this.overlayLayout.setLayoutData( layout );
+                    this.underlayLayout.setLayoutData( layout );
                 }
                 else
                 {
-                    this.overlayLayout.setLayoutData( String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( axisList.size( ) - 1 ) ) );
+                    String layout = String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( axisList.size( ) - 1 ) );
+                    this.overlayLayout.setLayoutData( layout );
+                    this.underlayLayout.setLayoutData( layout );
                 }
             }
 
