@@ -114,7 +114,7 @@ public class StackedPlot2D extends GlimpseLayout
     protected void initializePainters( )
     {
         this.backgroundPainter = new BackgroundPainter( false );
-        this.addPainter( this.backgroundPainter );
+        this.addPainter( this.backgroundPainter, Integer.MIN_VALUE );
     }
 
     protected void initializeLookAndFeel( )

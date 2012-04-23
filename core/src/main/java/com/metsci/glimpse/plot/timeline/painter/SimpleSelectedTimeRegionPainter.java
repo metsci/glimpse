@@ -47,7 +47,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
 {
     protected float[] selectionFillColor = GlimpseColor.fromColorRgba( 0, 153, 204, 40 );
     protected float[] selectionBorderColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 );
-
+    protected float[] currentTimeMarkerColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 ); 
+    
+    protected boolean showCurrenTimeMarker = true;
+    protected float currentTimeMarkerWidth = 3.0f;
+    
     protected TextRenderer textRenderer;
     protected Font font;
 
@@ -70,6 +74,21 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
     public void setSelectionBorderColor( float[] color )
     {
         this.selectionBorderColor = color;
+    }
+    
+    public void setCurrenTimeMarkerColor( float[] color )
+    {
+        this.currentTimeMarkerColor = color;
+    }
+    
+    public void setShowCurrentTimeMarker( boolean show )
+    {
+        this.showCurrenTimeMarker = show;
+    }
+    
+    public void setCurrenTimeMarkerWidth( float width )
+    {
+        this.currentTimeMarkerWidth = width;
     }
 
     protected void paint( GL gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
@@ -124,25 +143,29 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             gl.glEnd( );
         }
 
-        gl.glLineWidth( 3.0f );
-
-        gl.glBegin( GL.GL_LINES );
-        try
+        if ( this.showCurrenTimeMarker )
         {
-            if ( orientation == Orientation.VERTICAL )
+            GlimpseColor.glColor( gl, currentTimeMarkerColor );
+            gl.glLineWidth( currentTimeMarkerWidth );
+    
+            gl.glBegin( GL.GL_LINES );
+            try
             {
-                gl.glVertex2f( current, 0 );
-                gl.glVertex2f( current, height );
+                if ( orientation == Orientation.VERTICAL )
+                {
+                    gl.glVertex2f( current, 0 );
+                    gl.glVertex2f( current, height );
+                }
+                else
+                {
+                    gl.glVertex2f( 0, current );
+                    gl.glVertex2f( width, current );
+                }
             }
-            else
+            finally
             {
-                gl.glVertex2f( 0, current );
-                gl.glVertex2f( width, current );
+                gl.glEnd( );
             }
-        }
-        finally
-        {
-            gl.glEnd( );
         }
     }
 

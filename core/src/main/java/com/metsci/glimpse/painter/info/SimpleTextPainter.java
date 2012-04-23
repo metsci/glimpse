@@ -60,7 +60,6 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         Bottom, Center, Top;
     }
 
-    private Font textFont;
     private float[] textColor = GlimpseColor.getBlack( );
 
     private boolean paintBackground = false;
@@ -78,6 +77,9 @@ public class SimpleTextPainter extends GlimpsePainterImpl
 
     private boolean fontSet = false;
 
+    private volatile Font newFont = null;
+    private volatile boolean antialias = false;
+    
     public SimpleTextPainter( )
     {
         setFont( 12, true, false );
@@ -115,14 +117,9 @@ public class SimpleTextPainter extends GlimpsePainterImpl
 
     public SimpleTextPainter setFont( Font font, boolean antialias )
     {
-        this.textFont = font;
-
-        if ( this.textRenderer != null ) this.textRenderer.dispose( );
-
-        this.textRenderer = new TextRenderer( this.textFont, antialias, false );
-
+        this.newFont = font;
+        this.antialias = antialias;
         this.fontSet = true;
-
         return this;
     }
 
@@ -205,6 +202,12 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
+        if ( newFont != null )
+        {
+            if ( textRenderer != null ) textRenderer.dispose( );
+            this.textRenderer = new TextRenderer( newFont, antialias, false );
+        }
+        
         if ( text == null ) return;
 
         GL gl = context.getGL( );
