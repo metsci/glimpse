@@ -1009,7 +1009,7 @@ public class IconPainter extends GlimpseDataPainter2D
                         byte g = ( byte ) ( ( index & 0x0000ff00 ) >> 8 );
                         byte b = ( byte ) ( ( index & 0x000000ff ) );
 
-                        System.out.printf( "%d %d %d%n", r, g, b );
+                        //System.out.printf( "%d %d %d%n", r, g, b );
 
                         data.put( r ).put( g ).put( b );
                     }
