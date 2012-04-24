@@ -385,7 +385,7 @@ public class TextureAtlas
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
         double ppvY = axis.getAxisY( ).getPixelsPerValue( );
-        drawImage( gl, id, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( gl, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
     }
 
     /**
@@ -413,7 +413,7 @@ public class TextureAtlas
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
         double ppvY = axis.getAxisY( ).getPixelsPerValue( );
-        drawImage( gl, id, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( gl, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
     
     /**
@@ -423,7 +423,7 @@ public class TextureAtlas
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
-        drawImage( gl, id, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( gl, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
     
     /**
@@ -447,7 +447,7 @@ public class TextureAtlas
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
-        drawImage( gl, id, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( gl, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
     
     /**
@@ -463,7 +463,7 @@ public class TextureAtlas
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
-        drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( gl, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
     
     /**
@@ -473,10 +473,10 @@ public class TextureAtlas
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
-        drawImage( gl, id, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( gl, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
 
-    protected void drawImage( GL gl, Object id, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    protected void drawImage( GL gl, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         double vppX = 1.0 / ppvX;
         double vppY = 1.0 / ppvY;
