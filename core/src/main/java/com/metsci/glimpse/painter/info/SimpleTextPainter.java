@@ -206,6 +206,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         {
             if ( textRenderer != null ) textRenderer.dispose( );
             this.textRenderer = new TextRenderer( newFont, antialias, false );
+            this.newFont = null;
         }
         
         if ( text == null ) return;
