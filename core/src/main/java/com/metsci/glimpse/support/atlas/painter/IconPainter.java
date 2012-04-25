@@ -1137,8 +1137,8 @@ public class IconPainter extends GlimpseDataPainter2D
                     data.position( ( currentSize - vertexCount ) * length );
 
                     int limit = positions.limit( );
-                    positions.position( offset );
                     positions.limit( offset + vertexCount * length );
+                    positions.position( offset );
                     data.put( positions );
                     positions.limit( limit );
                 }
