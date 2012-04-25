@@ -49,6 +49,7 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     protected boolean disposed = false;
     protected boolean displayOn = true;
     protected boolean doErrorHandling = true;
+    protected final String errorPrefix = "GL ERROR: " + getClass( ).getName( );
 
     protected abstract void paintTo( GlimpseContext context, GlimpseBounds bounds );
 
@@ -99,7 +100,7 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         try
         {
             paintTo( context, bounds );
-            if ( doErrorHandling ) glHandleError( gl, "GL ERROR: " + getClass( ).getName( ) );
+            if ( doErrorHandling ) glHandleError( gl, errorPrefix );
         }
         finally
         {
