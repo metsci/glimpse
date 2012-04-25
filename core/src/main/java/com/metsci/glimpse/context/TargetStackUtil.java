@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.context;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Utility method for manipulating {@link GlimpseTargetStack} instances.
@@ -72,18 +74,21 @@ public class TargetStackUtil
         int suffixSize = suffix.getSize( );
         int querySize = query.getSize( );
 
-        List<GlimpseTarget> suffixList = suffix.getTargetList( );
-        List<GlimpseTarget> queryList = query.getTargetList( );
-
         if ( suffixSize > querySize )
             return false;
 
-        for ( int i = 0 ; i < suffixSize ; i++ )
-        {
-            GlimpseTarget prefixTarget = suffixList.get( suffixSize - i - 1 );
-            GlimpseTarget queryTarget = queryList.get( querySize - i - 1 );
+        List<GlimpseTarget> suffixList = suffix.getTargetList( );
+        ListIterator<GlimpseTarget> suffixIter = suffixList.listIterator( suffixList.size( ) );
 
-            if ( !queryTarget.equals( prefixTarget ) )
+        List<GlimpseTarget> queryList = query.getTargetList( );
+        ListIterator<GlimpseTarget> queryIter = queryList.listIterator( queryList.size( ) );
+
+        while ( suffixIter.hasPrevious( ) )
+        {
+            GlimpseTarget suffixTarget = suffixIter.previous( );
+            GlimpseTarget queryTarget = queryIter.previous( );
+
+            if ( !queryTarget.equals( suffixTarget ) )
                 return false;
         }
 
@@ -103,16 +108,16 @@ public class TargetStackUtil
         int prefixSize = prefix.getSize( );
         int querySize = query.getSize( );
 
-        List<GlimpseTarget> prefixList = prefix.getTargetList( );
-        List<GlimpseTarget> queryList = query.getTargetList( );
-
         if ( prefixSize > querySize )
             return false;
 
-        for ( int i = 0 ; i < prefixSize ; i++ )
+        Iterator<GlimpseTarget> prefixIter = prefix.getTargetList( ).iterator( );
+        Iterator<GlimpseTarget> queryIter = query.getTargetList( ).iterator( );
+
+        while ( prefixIter.hasNext( ) )
         {
-            GlimpseTarget prefixTarget = prefixList.get( i );
-            GlimpseTarget queryTarget = queryList.get( i );
+            GlimpseTarget prefixTarget = prefixIter.next( );
+            GlimpseTarget queryTarget = queryIter.next( );
 
             if ( !queryTarget.equals( prefixTarget ) )
                 return false;
