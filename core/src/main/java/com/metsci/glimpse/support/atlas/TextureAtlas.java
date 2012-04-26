@@ -129,7 +129,7 @@ public class TextureAtlas
     private boolean beginRenderingDepthTestDisabled;
 
     // Whether GL_LINEAR filtering is enabled for the backing store
-    private boolean smoothing = true;
+    private boolean smoothing;
     private boolean isExtensionAvailable_GL_VERSION_1_5;
     private boolean checkFor_isExtensionAvailable_GL_VERSION_1_5;
     private boolean mipmap;
@@ -141,28 +141,47 @@ public class TextureAtlas
      * to the maximum texture size supported by the graphics hardware.
      * 
      * Note: the TextureAtlas will not currently grow in width.
-     * 
+     *
+     * If the smoothing parameter is true, rendered pixel colors will be interpolated
+     * among adjacent texels. Otherwise, pixel colors will be assigned from the nearest
+     * texel.
+     *
      * @param initalWidth
      * @param initialHeight
+     * @param smoothing
      */
-    public TextureAtlas( int initalWidth, int initialHeight )
+    public TextureAtlas( int initialWidth, int initialHeight, boolean smoothing )
     {
-        this.packer = new RectanglePacker( new Manager( ), initalWidth, initialHeight );
+        this.packer = new RectanglePacker( new Manager( ), initialWidth, initialHeight );
         this.additionQueue = new HashMap<Object, ImageDataExternal>( );
         this.deletionQueue = new HashSet<Object>( );
         this.imageMap = new HashMap<Object, Rect>( );
         this.updateListeners = new CopyOnWriteArrayList<TextureAtlasUpdateListener>( );
         this.lock = new ReentrantLock( );
+        this.smoothing = smoothing;
     }
 
     /**
-     * Constructs a new TextureAtlas with default initial width and height.
-     * 
-     * @see #TextureAtlas( int, int )
+     * Constructs a new TextureAtlas with the provided initial width and height
+     * in pixels, with smoothing enabled.
+     *
+     * @see #TextureAtlas( int, int, boolean )
+     */
+    public TextureAtlas( int initialWidth, int initialHeight )
+    {
+        this( initialWidth, initialHeight, true );
+
+    }
+
+    /**
+     * Constructs a new TextureAtlas with default initial width and height, with
+     * smoothing enabled.
+     *
+     * @see #TextureAtlas( int, int, boolean )
      */
     public TextureAtlas( )
     {
-        this( INITIAL_WIDTH, INITIAL_HEIGHT );
+        this( INITIAL_WIDTH, INITIAL_HEIGHT, true );
     }
 
     /**
