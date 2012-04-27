@@ -32,6 +32,7 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -173,7 +174,19 @@ public class FontUtils
     {
         try
         {
-            return createFont( Font.TRUETYPE_FONT, StreamOpener.fileThenResource.openForRead( filename ) ).deriveFont( style, size );
+            InputStream stream = null;
+            try
+            {
+                stream = StreamOpener.fileThenResource.openForRead( filename );
+                return createFont( Font.TRUETYPE_FONT, stream ).deriveFont( style, size );
+            }
+            finally
+            {
+                if ( stream != null )
+                {
+                    stream.close( );
+                }
+            }
         }
         catch ( FontFormatException e )
         {

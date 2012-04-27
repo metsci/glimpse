@@ -53,7 +53,17 @@ public class ShaderSource
 
     public ShaderSource( String location, StreamOpener opener ) throws IOException
     {
-        lines = readSource( opener.openForRead( location ) );
+        InputStream in = null;
+        try
+        {
+            in = opener.openForRead( location );
+            lines = readSource( in );
+        }
+        finally
+        {
+            if ( in != null )
+                in.close( );
+        }
     }
 
     public String[] getSourceLines( )
