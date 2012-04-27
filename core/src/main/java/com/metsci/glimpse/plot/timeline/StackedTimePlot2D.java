@@ -875,7 +875,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         else
         {
             this.overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", timeAxis );
-            this.underlayLayout = new GlimpseAxisLayoutX( this, "Underlay", timeAxis );
+            this.underlayLayout = new GlimpseAxisLayoutY( this, "Underlay", timeAxis );
         }
 
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
