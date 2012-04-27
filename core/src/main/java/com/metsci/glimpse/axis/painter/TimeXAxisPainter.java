@@ -160,8 +160,8 @@ public class TimeXAxisPainter extends TimeAxisPainter
         double textHeight = fixedBounds.getHeight( );
 
         // Date labels
-        List<TimeStruct> timeStruts = timeStructs( axis, tickTimes, factory );
-        for ( TimeStruct time : timeStruts )
+        List<TimeStruct> timeStructs = timeStructs( axis, tickTimes, factory );
+        for ( TimeStruct time : timeStructs )
         {
             String text = time.textCenter.toString( format );
             Rectangle2D textBounds = textRenderer.getBounds( text );
