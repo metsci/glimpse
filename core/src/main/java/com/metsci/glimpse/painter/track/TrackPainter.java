@@ -94,6 +94,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     // the overall start and end times set by displayTimeRange
     // when new tracks are created, they inherit these time bounds
     protected Point startTimeRange = getStartPoint( Long.MIN_VALUE );
+    protected Point selectedTimeRange = getEndPoint( Long.MAX_VALUE );
     protected Point endTimeRange = getEndPoint( Long.MAX_VALUE );
 
     protected Collection<TemporalSelectionListener<Point>> temporalSelectionListeners;
@@ -605,18 +606,24 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         displayTimeRange( ( long ) Math.ceil( startTime ), ( long ) Math.floor( endTime ) );
     }
-
+    
     public void displayTimeRange( int trackId, long startTime, long endTime )
+    {
+        displayTimeRange( trackId, startTime, endTime, endTime );
+    }
+    
+    public void displayTimeRange( int trackId, long startTime, long endTime, long selectedTime )
     {
         Point startPoint = getStartPoint( startTime );
         Point endPoint = getEndPoint( endTime );
+        Point selectedPoint = getEndPoint( selectedTime );
 
         this.trackUpdateLock.lock( );
         try
         {
             Track track = getOrCreateTrack( trackId );
 
-            track.setTimeRange( startPoint, endPoint );
+            track.setTimeRange( startPoint, endPoint, selectedPoint );
 
             this.updatedTracks.add( track );
             this.newData = true;
@@ -629,15 +636,21 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     public void displayTimeRange( long startTime, long endTime )
     {
+        displayTimeRange( startTime, endTime, endTime );
+    }
+    
+    public void displayTimeRange( long startTime, long endTime, long selectedTime )
+    {
         startTimeRange = getStartPoint( startTime );
         endTimeRange = getEndPoint( endTime );
+        selectedTimeRange = getEndPoint( selectedTime );
 
         this.trackUpdateLock.lock( );
         try
         {
             for ( Track track : tracks.values( ) )
             {
-                track.setTimeRange( startTimeRange, endTimeRange );
+                track.setTimeRange( startTimeRange, endTimeRange, selectedTimeRange );
             }
 
             this.updatedTracks.addAll( tracks.values( ) );
@@ -821,7 +834,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         if ( track == null )
         {
             track = new Track( trackId );
-            track.setTimeRange( startTimeRange, endTimeRange );
+            track.setTimeRange( startTimeRange, endTimeRange, selectedTimeRange );
             this.tracks.put( trackId, track );
         }
 
@@ -1268,6 +1281,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         Point selectionStart;
         Point selectionEnd;
+        Point selectionCurrent;
 
         Point trackHead;
 
@@ -1301,10 +1315,11 @@ public class TrackPainter extends GlimpseDataPainter2D
             this.points = new ArrayList<Point>( TRACK_SIZE_ESTIMATE );
         }
 
-        public void setTimeRange( Point startPoint, Point endPoint )
+        public void setTimeRange( Point startPoint, Point endPoint, Point selectedPoint )
         {
             selectionStart = startPoint;
             selectionEnd = endPoint;
+            selectionCurrent = selectedPoint;
 
             checkTimeRange( );
         }
@@ -1315,6 +1330,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
             int startIndex = firstIndexAfter( selectionStart );
             int endIndex = firstIndexBefore( selectionEnd );
+            int selectedIndex = firstIndexBefore( selectionCurrent );
 
             Point previousTrackHead = trackHead;
 
@@ -1332,7 +1348,10 @@ public class TrackPainter extends GlimpseDataPainter2D
                 selectedOffset = startIndex;
                 selectedSize = endIndex - startIndex + 1;
 
-                trackHead = points.get( endIndex );
+                if ( selectedIndex > endIndex ) selectedIndex = endIndex;
+                if ( selectedIndex < 0 ) selectedIndex = 0;
+                
+                trackHead = points.get( selectedIndex );
                 headPosX = trackHead.getX( );
                 headPosY = trackHead.getY( );
 

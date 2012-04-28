@@ -111,6 +111,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         // add a custom listener to the z axis which changes the selected time range for
         // all GeoPlot tracks based on the min and max values of the z axis
         plot.getAxisZ( ).addAxisListener( new TimeAxisListener( trackPainter ) );
+        plot.getAxisPainterZ( ).setShowMarker( true );
 
         // add a custom listener which is notified when the track points inside the plot's selection box change
         trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
@@ -127,6 +128,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
     {
         private long prevMinTime = -1;
         private long prevMaxTime = -1;
+        private long prevSelectedTime = -1;
         private TrackPainter trackPainter;
         
         public TimeAxisListener( TrackPainter trackPainter )
@@ -135,17 +137,19 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         }
         
         @Override
-        public void axisUpdatedRateLimited( Axis1D handler )
+        public void axisUpdatedRateLimited( Axis1D axis )
         {
-            long minTime = ( long ) handler.getMin( );
-            long maxTime = ( long ) handler.getMax( );
-
-            if ( prevMinTime != minTime || prevMaxTime != maxTime )
+            long minTime = ( long ) axis.getMin( );
+            long maxTime = ( long ) axis.getMax( );
+            long selectedTime = ( long ) axis.getSelectionCenter( );
+            
+            if ( prevMinTime != minTime || prevMaxTime != maxTime || prevSelectedTime != selectedTime )
             {
-                trackPainter.displayTimeRange( minTime, maxTime );
+                trackPainter.displayTimeRange( minTime, maxTime, selectedTime );
 
                 prevMinTime = minTime;
                 prevMaxTime = maxTime;
+                prevSelectedTime = selectedTime;
             }
         }
     }
