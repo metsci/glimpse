@@ -67,3 +67,4 @@ COULOMB,ELECTRIC_CHARGE,SI,coulombs,coulomb,C,END
 WEBER,MAGNETIC_FLUX,SI,webers,weber,Wb,END
 TESLA,MAGNETIC_FLUX_DENSITY,SI,teslas,tesla,T,END
 HENRY,INDUCTANCE,SI,henries,henry,H,END
+DEGREES_PER_SECOND,ANGULAR_VELOCITY,SI,degrees per second,degree per second,°/s,END
