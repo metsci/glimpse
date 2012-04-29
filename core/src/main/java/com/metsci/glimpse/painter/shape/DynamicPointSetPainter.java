@@ -56,9 +56,9 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.pointSize = DEFAULT_POINT_SIZE;
         this.bufferSize = initialSize;
         this.lock = new ReentrantLock( );
-        
-        this.idMap = new LinkedHashMap<Object,Integer>( );
-        this.indexMap = new LinkedHashMap<Integer,Object>( );
+
+        this.idMap = new LinkedHashMap<Object, Integer>( );
+        this.indexMap = new LinkedHashMap<Integer, Object>( );
 
         this.pointBuffer = new GLFloatBuffer2D( initialSize, true );
         this.colorBuffer = new GLFloatBuffer( initialSize, 4 );
@@ -66,7 +66,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.searchResults = new IntsArray( );
     }
 
-    public Collection<Object> getGeoRange( double minX, double maxX, double minY, double maxY )
+    public Collection<Point> getGeoRange( double minX, double maxX, double minY, double maxY )
     {
         lock.lock( );
         try
@@ -74,15 +74,29 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             this.searchResults.n = 0; // clear the search results
             this.pointBuffer.search( ( float ) minX, ( float ) maxX, ( float ) minY, ( float ) maxY, searchResults );
 
-            List<Object> resultList = new LinkedList<Object>( );
+            final List<Point> resultList = new LinkedList<Point>( );
             for ( int i = 0; i < this.searchResults.n; i++ )
             {
-                Object id = this.indexMap.get( this.searchResults.a[i] );
+                int index = this.searchResults.a[i];
+                Object id = this.indexMap.get( index );
                 if ( id != null )
                 {
-                    resultList.add( id );
+                    resultList.add( new Point( id, index ) );
                 }
             }
+
+            this.pointBuffer.mutate( new Mutator( )
+            {
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    for ( Point point : resultList )
+                    {
+                        point.x = data.get( point.index * length );
+                        point.y = data.get( point.index * length + 1 );
+                    }
+                }
+            } );
 
             return resultList;
         }
@@ -312,5 +326,53 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
         this.pointBuffer.ensureCapacity( bufferSize );
         this.colorBuffer.ensureCapacity( bufferSize );
+    }
+
+    public class Point
+    {
+        private Object id;
+        private double x;
+        private double y;
+        private int index;
+
+        Point( Object id, int index )
+        {
+            this.id = id;
+            this.index = index;
+        }
+
+        Point( Object id, double x, double y, int index )
+        {
+            this.id = id;
+            this.x = x;
+            this.y = y;
+            this.index = index;
+        }
+
+        public Object getId( )
+        {
+            return id;
+        }
+
+        public double getX( )
+        {
+            return x;
+        }
+
+        public double getY( )
+        {
+            return y;
+        }
+
+        public int getIndex( )
+        {
+            return index;
+        }
+
+        @Override
+        public String toString( )
+        {
+            return String.format( "id: %s index: %d x: %f y: %f", id, index, x, y );
+        }
     }
 }

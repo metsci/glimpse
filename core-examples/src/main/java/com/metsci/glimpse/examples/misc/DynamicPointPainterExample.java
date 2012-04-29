@@ -6,10 +6,12 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener2D;
+import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter;
+import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.Point;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
@@ -32,6 +34,7 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
         final DynamicPointSetPainter painter = new DynamicPointSetPainter( );
 
         plot.addPainter( painter );
+        plot.addPainter( new FpsPainter( ) );
 
         ( new Thread( )
         {
@@ -41,14 +44,15 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
             {
                 try
                 {
+                    int size = 500;
 
-                    while ( true )
+                    Object[] ids = new Object[size];
+                    float[] x = new float[size];
+                    float[] y = new float[size];
+
+                    while ( count < 50000 )
                     {
-                        Object[] ids = new Object[20];
-                        float[] x = new float[20];
-                        float[] y = new float[20];
-
-                        for ( int i = 0; i < 20; i++ )
+                        for ( int i = 0; i < size; i++ )
                         {
                             ids[i] = count++;
                             x[i] = ( float ) Math.random( );
@@ -66,8 +70,9 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
                         catch ( InterruptedException e )
                         {
                         }
-                    }
 
+                        System.out.println( "Total Points: " + count );
+                    }
                 }
                 catch ( Exception e )
                 {
@@ -76,10 +81,10 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
             }
         } ).start( );
 
-        plot.addAxisListener( new AxisListener2D( )
+        plot.addAxisListener( new RateLimitedAxisListener2D( )
         {
             @Override
-            public void axisUpdated( Axis2D axis )
+            public void axisUpdatedRateLimited( Axis2D axis )
             {
                 double centerX = axis.getAxisX( ).getSelectionCenter( );
                 double sizeX = axis.getAxisX( ).getSelectionSize( );
@@ -87,7 +92,7 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
                 double centerY = axis.getAxisY( ).getSelectionCenter( );
                 double sizeY = axis.getAxisY( ).getSelectionSize( );
 
-                Collection<Object> selection = painter.getGeoRange( centerX - sizeX / 2.0, centerX + sizeX / 2.0, centerY - sizeY / 2.0, centerY + sizeY / 2.0 );
+                Collection<Point> selection = painter.getGeoRange( centerX - sizeX / 2.0, centerX + sizeX / 2.0, centerY - sizeY / 2.0, centerY + sizeY / 2.0 );
 
                 logInfo( logger, "Selected Ids: %s", selection );
             }
