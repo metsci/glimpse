@@ -1198,7 +1198,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
             this.glBufferCurrentSize = track.getSize( );
 
-            if ( glBufferCurrentSize == 0 || track.selectedSize == 0 )
+            if ( glBufferCurrentSize == 0 || track.selectedSize == 0 || track.trackHead == null )
             {
                 this.headPointOn = false;
                 this.labelOn = false;
@@ -1326,7 +1326,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         public void checkTimeRange( )
         {
-            if ( selectionStart == null || selectionEnd == null ) return;
+            if ( selectionStart == null || selectionEnd == null || selectionCurrent == null ) return;
 
             int startIndex = firstIndexAfter( selectionStart );
             int endIndex = firstIndexBefore( selectionEnd );
@@ -1349,7 +1349,7 @@ public class TrackPainter extends GlimpseDataPainter2D
                 selectedSize = endIndex - startIndex + 1;
 
                 if ( selectedIndex > endIndex ) selectedIndex = endIndex;
-                if ( selectedIndex < 0 ) selectedIndex = 0;
+                if ( selectedIndex < startIndex ) selectedIndex = startIndex;
                 
                 trackHead = points.get( selectedIndex );
                 headPosX = trackHead.getX( );
