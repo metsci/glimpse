@@ -161,8 +161,6 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             pointBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
             try
             {
-                System.out.println( idMap.size( ) + " " + this.bufferSize );
-                
                 gl.glLineWidth( lineWidth );
                 gl.glDrawArrays( GL.GL_LINES, 0, idMap.size( ) * 2 );
             }
