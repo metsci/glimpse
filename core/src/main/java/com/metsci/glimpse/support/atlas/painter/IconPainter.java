@@ -210,7 +210,15 @@ public class IconPainter extends GlimpseDataPainter2D
      */
     public boolean isPickingEnabled( )
     {
-        return this.pickSupportEnabled;
+        this.lock.lock( );
+        try
+        {
+            return this.pickSupportEnabled;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
     }
 
     /**
