@@ -2,6 +2,7 @@ package com.metsci.glimpse.painter.shape;
 
 import java.nio.FloatBuffer;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -76,24 +77,19 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void putLines( Object[] listIds, float[] listPosX1, float[] listPosY1, float[] listPosX2, float[] listPosY2 )
-    {
-        putLines( listIds, listPosX1, listPosY1, listPosX2, listPosY2, DEFAULT_COLOR );
-    }
-
-    public void putLines( Object[] listIds, float[] listPosX1, float[] listPosY1, float[] listPosX2, float[] listPosY2, float[] color )
+    public void putLines( List<BulkLoadLine> lines )
     {
         lock.lock( );
         try
         {
-            int newPoints = listIds.length;
+            int newPoints = lines.size( );
             int currentSize = idMap.size( );
             if ( bufferSize < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
 
-            mutatePositionsColors( listIds, listPosX1, listPosY1, listPosX2, listPosY2, color );
+            mutatePositionsColors( lines );
         }
         finally
         {
@@ -218,15 +214,15 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected void mutatePositionsColors( final Object[] listIds, final float[] listPosX1, final float[] listPosY1, final float[] listPosX2, final float[] listPosY2, final float[] color )
+    protected void mutatePositionsColors( final List<BulkLoadLine> lines )
     {
-        final int size = listIds.length;
+        final int size = lines.size( );
         final int[] listIndex = new int[size];
         int minIndex = size;
 
         for ( int i = 0; i < size; i++ )
         {
-            int index = getIndex( listIds[i] );
+            int index = getIndex( lines.get( i ).getId( ) );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
@@ -246,11 +242,13 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             {
                 for ( int i = 0; i < size; i++ )
                 {
+                    BulkLoadLine line = lines.get( i );
+                    
                     data.position( listIndex[i] * 2 * length );
-                    data.put( listPosX1[i] );
-                    data.put( listPosY1[i] );
-                    data.put( listPosX2[i] );
-                    data.put( listPosY2[i] );
+                    data.put( line.x1 );
+                    data.put( line.y1 );
+                    data.put( line.x2 );
+                    data.put( line.y2 );
                 }
             }
         } );
@@ -263,8 +261,13 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
                 for ( int i = 0; i < size; i++ )
                 {
                     data.position( listIndex[i] * 2 * length );
+                    
+                    BulkLoadLine line = lines.get( i );
+                    
                     for ( int j = 0; j < 2; j++ )
                     {
+                        float[] color = line.color;
+                        
                         data.put( color[0] );
                         data.put( color[1] );
                         data.put( color[2] );
@@ -295,4 +298,81 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         this.pointBuffer.ensureCapacity( bufferSize * 2 );
         this.colorBuffer.ensureCapacity( bufferSize * 2 );
     }
+    
+    public static class BulkLoadLine
+    {
+        private Object id;
+        private float x1, x2, y1, y2;
+        private float[] color;
+        
+        public BulkLoadLine( Object id, float x1, float y1, float x2, float y2 )
+        {
+            this( id, x1, y1, x2, y2, DEFAULT_COLOR );
+        }
+        
+        public BulkLoadLine( Object id, float x1, float y1, float x2, float y2, float[] color  )
+        {
+            this.id = id;
+            this.x1 = x1;
+            this.y1 = y1;
+            this.x2 = x2;
+            this.y2 = y2;
+            this.color = color;
+        }
+
+        public Object getId( )
+        {
+            return id;
+        }
+
+        public float getX1( )
+        {
+            return x1;
+        }
+
+        public float getX2( )
+        {
+            return x2;
+        }
+
+        public float getY1( )
+        {
+            return y1;
+        }
+
+        public float getY2( )
+        {
+            return y2;
+        }
+
+        public float[] getColor( )
+        {
+            return color;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            BulkLoadLine other = ( BulkLoadLine ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
+        }
+    }
+        
 }

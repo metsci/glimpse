@@ -3,6 +3,8 @@ package com.metsci.glimpse.examples.misc;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -11,6 +13,7 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter;
+import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkLoadPoint;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.Point;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -44,24 +47,18 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
             {
                 try
                 {
-                    int size = 500;
-
-                    Object[] ids = new Object[size];
-                    float[] x = new float[size];
-                    float[] y = new float[size];
-
                     while ( count < 50000 )
                     {
-                        for ( int i = 0; i < size; i++ )
-                        {
-                            ids[i] = count++;
-                            x[i] = ( float ) Math.random( );
-                            y[i] = ( float ) Math.random( );
-                        }
+                        List<BulkLoadPoint> load = new LinkedList<BulkLoadPoint>( );
 
                         float[] color = GlimpseColor.fromColorRgba( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) );
 
-                        painter.putPoints( ids, x, y, color );
+                        for ( int i = 0; i < 500; i++ )
+                        {
+                            load.add( new BulkLoadPoint( count++, ( float ) Math.random( ), ( float ) Math.random( ), color ) );
+                        }
+
+                        painter.putPoints( load );
 
                         try
                         {
@@ -71,7 +68,7 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
                         {
                         }
 
-                        System.out.println( "Total Points: " + count );
+                        logger.info( "Total Points: " + count );
                     }
                 }
                 catch ( Exception e )

@@ -155,24 +155,19 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void putPoints( Object[] listIds, float[] listPosX, float[] listPosY )
-    {
-        putPoints( listIds, listPosX, listPosY, DEFAULT_COLOR );
-    }
-
-    public void putPoints( Object[] listIds, float[] listPosX, float[] listPosY, float[] color )
+    public void putPoints( List<BulkLoadPoint> points )
     {
         lock.lock( );
         try
         {
-            int newPoints = listIds.length;
+            int newPoints = points.size();
             int currentSize = idMap.size( );
             if ( bufferSize < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
 
-            mutatePositionsColors( listIds, listPosX, listPosY, color );
+            mutatePositionsColors( points );
         }
         finally
         {
@@ -291,15 +286,15 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected void mutatePositionsColors( final Object[] listIds, final float[] listPosX, final float[] listPosY, final float[] color )
+    protected void mutatePositionsColors( final List<BulkLoadPoint> points )
     {
-        final int size = listIds.length;
+        final int size = points.size();
         final int[] listIndex = new int[size];
         int minIndex = size;
 
-        for ( int i = 0; i < size; i++ )
+        for ( int i = 0 ; i < size ; i++ )
         {
-            int index = getIndex( listIds[i] );
+            int index = getIndex( points.get( i ).getId( ) );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
@@ -317,11 +312,13 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                for ( int i = 0; i < size; i++ )
+                for ( int i = 0 ; i < size ; i++ )
                 {
+                    BulkLoadPoint point = points.get( i );
+                    
                     data.position( listIndex[i] * length );
-                    data.put( listPosX[i] );
-                    data.put( listPosY[i] );
+                    data.put( point.x );
+                    data.put( point.y );
                 }
             }
         } );
@@ -331,13 +328,18 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                for ( int i = 0; i < size; i++ )
+                int i = 0;
+                for ( BulkLoadPoint point : points )
                 {
                     data.position( listIndex[i] * length );
+                    
+                    float[] color = point.color;
                     data.put( color[0] );
                     data.put( color[1] );
                     data.put( color[2] );
                     data.put( color.length == 4 ? color[3] : 1.0f );
+                    
+                    i += 1;
                 }
             }
         } );
@@ -363,14 +365,79 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.pointBuffer.ensureCapacity( bufferSize );
         this.colorBuffer.ensureCapacity( bufferSize );
     }
+    
+    public static class BulkLoadPoint
+    {
+        private Object id;
+        private float x;
+        private float y;
+        private float[] color;
+        
+        public BulkLoadPoint( Object id, float x, float y )
+        {
+            this( id, x, y, DEFAULT_COLOR );
+        }
+        
+        public BulkLoadPoint( Object id, float x, float y, float[] color  )
+        {
+            this.id = id;
+            this.x = x;
+            this.y = y;
+            this.color = color;
+        }
 
-    public class Point
+        public Object getId( )
+        {
+            return id;
+        }
+
+        public float getX( )
+        {
+            return x;
+        }
+
+        public float getY( )
+        {
+            return y;
+        }
+
+        public float[] getColor( )
+        {
+            return color;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            BulkLoadPoint other = ( BulkLoadPoint ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
+        }
+    }
+
+    public static class Point
     {
         private Object id;
         private double x;
         private double y;
         private int index;
-
+        
         Point( Object id, int index )
         {
             this.id = id;
@@ -409,6 +476,30 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         public String toString( )
         {
             return String.format( "id: %s index: %d x: %f y: %f", id, index, x, y );
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            Point other = ( Point ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
         }
     }
 }
