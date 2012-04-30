@@ -89,7 +89,20 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
                 growBuffers( currentSize + newPoints );
             }
 
-            mutatePositionsColors( lines );
+            mutatePositionsColors( lines, true, true );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void putColors( List<BulkLoadLine> colors )
+    {
+        lock.lock( );
+        try
+        {
+            mutatePositionsColors( colors, false, true );
         }
         finally
         {
@@ -113,7 +126,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
                 growBuffers( currentSize + 1 );
             }
 
-            int index = getIndex( id );
+            int index = getIndex( id, true );
             mutatePosition( index, posX1, posY1, posX2, posY2 );
             mutateColor( index, color );
         }
@@ -128,12 +141,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            Integer index = this.idMap.get( id );
-            if ( index == null )
-            {
-                throw new IllegalArgumentException( String.format( "Id %s does not exist", id ) );
-            }
-
+            int index = getIndex( id, false );
             mutateColor( index, color );
         }
         finally
@@ -214,7 +222,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected void mutatePositionsColors( final List<BulkLoadLine> lines )
+    protected void mutatePositionsColors( final List<BulkLoadLine> lines, boolean position, boolean color )
     {
         final int size = lines.size( );
         final int[] listIndex = new int[size];
@@ -222,70 +230,83 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
         for ( int i = 0; i < size; i++ )
         {
-            int index = getIndex( lines.get( i ).getId( ) );
+            int index = getIndex( lines.get( i ).getId( ), position );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
 
         final int finalMinIndex = minIndex * 2;
 
-        this.pointBuffer.mutateIndexed( new IndexedMutator( )
+        if ( position )
         {
-            @Override
-            public int getUpdateIndex( )
+            this.pointBuffer.mutateIndexed( new IndexedMutator( )
             {
-                return finalMinIndex;
-            }
-
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0; i < size; i++ )
+                @Override
+                public int getUpdateIndex( )
                 {
-                    BulkLoadLine line = lines.get( i );
-                    
-                    data.position( listIndex[i] * 2 * length );
-                    data.put( line.x1 );
-                    data.put( line.y1 );
-                    data.put( line.x2 );
-                    data.put( line.y2 );
+                    return finalMinIndex;
                 }
-            }
-        } );
 
-        this.colorBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0; i < size; i++ )
+                @Override
+                public void mutate( FloatBuffer data, int length )
                 {
-                    data.position( listIndex[i] * 2 * length );
-                    
-                    BulkLoadLine line = lines.get( i );
-                    
-                    for ( int j = 0; j < 2; j++ )
+                    for ( int i = 0; i < size; i++ )
                     {
-                        float[] color = line.color;
-                        
-                        data.put( color[0] );
-                        data.put( color[1] );
-                        data.put( color[2] );
-                        data.put( color.length == 4 ? color[3] : 1.0f );
+                        BulkLoadLine line = lines.get( i );
+
+                        data.position( listIndex[i] * 2 * length );
+                        data.put( line.x1 );
+                        data.put( line.y1 );
+                        data.put( line.x2 );
+                        data.put( line.y2 );
                     }
                 }
-            }
-        } );
+            } );
+        }
+
+        if ( color )
+        {
+            this.colorBuffer.mutate( new Mutator( )
+            {
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    for ( int i = 0; i < size; i++ )
+                    {
+                        data.position( listIndex[i] * 2 * length );
+
+                        BulkLoadLine line = lines.get( i );
+
+                        for ( int j = 0; j < 2; j++ )
+                        {
+                            float[] color = line.color;
+
+                            data.put( color[0] );
+                            data.put( color[1] );
+                            data.put( color[2] );
+                            data.put( color.length == 4 ? color[3] : 1.0f );
+                        }
+                    }
+                }
+            } );
+        }
     }
 
-    protected int getIndex( Object id )
+    protected int getIndex( Object id, boolean grow )
     {
         Integer index = this.idMap.get( id );
         if ( index == null )
         {
-            index = idMap.size( );
-            idMap.put( id, index );
-            indexMap.put( index, id );
+            if ( grow )
+            {
+                index = idMap.size( );
+                idMap.put( id, index );
+                indexMap.put( index, id );
+            }
+            else
+            {
+                throw new IllegalArgumentException( String.format(  "Id %s does not exist.", id ) );
+            }
         }
 
         return index;
@@ -298,19 +319,24 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         this.pointBuffer.ensureCapacity( bufferSize * 2 );
         this.colorBuffer.ensureCapacity( bufferSize * 2 );
     }
-    
+
     public static class BulkLoadLine
     {
         private Object id;
         private float x1, x2, y1, y2;
         private float[] color;
-        
+
+        public BulkLoadLine( Object id, float[] color )
+        {
+            this( id, 0, 0, 0, 0, color );
+        }
+
         public BulkLoadLine( Object id, float x1, float y1, float x2, float y2 )
         {
             this( id, x1, y1, x2, y2, DEFAULT_COLOR );
         }
-        
-        public BulkLoadLine( Object id, float x1, float y1, float x2, float y2, float[] color  )
+
+        public BulkLoadLine( Object id, float x1, float y1, float x2, float y2, float[] color )
         {
             this.id = id;
             this.x1 = x1;
@@ -374,5 +400,5 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             return true;
         }
     }
-        
+
 }

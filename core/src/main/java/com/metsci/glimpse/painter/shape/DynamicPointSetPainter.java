@@ -167,7 +167,20 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 growBuffers( currentSize + newPoints );
             }
 
-            mutatePositionsColors( points );
+            mutatePositionsColors( points, true, true );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public void putColors( List<BulkLoadPoint> points )
+    {
+        lock.lock( );
+        try
+        {
+            mutatePositionsColors( points, false, true );
         }
         finally
         {
@@ -191,7 +204,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 growBuffers( currentSize + 1 );
             }
 
-            int index = getIndex( id );
+            int index = getIndex( id, true );
             mutatePosition( index, posX, posY );
             mutateColor( index, color );
         }
@@ -206,12 +219,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            Integer index = this.idMap.get( id );
-            if ( index == null )
-            {
-                throw new IllegalArgumentException( String.format( "Id %s does not exist", id ) );
-            }
-
+            int index = getIndex( id, false );
             mutateColor( index, color );
         }
         finally
@@ -286,7 +294,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected void mutatePositionsColors( final List<BulkLoadPoint> points )
+    protected void mutatePositionsColors( final List<BulkLoadPoint> points, boolean position, boolean color )
     {
         final int size = points.size();
         final int[] listIndex = new int[size];
@@ -294,65 +302,78 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
         for ( int i = 0 ; i < size ; i++ )
         {
-            int index = getIndex( points.get( i ).getId( ) );
+            int index = getIndex( points.get( i ).getId( ), position );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
 
         final int finalMinIndex = minIndex;
 
-        this.pointBuffer.mutateIndexed( new IndexedMutator( )
+        if ( position )
         {
-            @Override
-            public int getUpdateIndex( )
+            this.pointBuffer.mutateIndexed( new IndexedMutator( )
             {
-                return finalMinIndex;
-            }
-
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0 ; i < size ; i++ )
+                @Override
+                public int getUpdateIndex( )
                 {
-                    BulkLoadPoint point = points.get( i );
-                    
-                    data.position( listIndex[i] * length );
-                    data.put( point.x );
-                    data.put( point.y );
+                    return finalMinIndex;
                 }
-            }
-        } );
+    
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    for ( int i = 0 ; i < size ; i++ )
+                    {
+                        BulkLoadPoint point = points.get( i );
+                        
+                        data.position( listIndex[i] * length );
+                        data.put( point.x );
+                        data.put( point.y );
+                    }
+                }
+            } );
+        }
 
-        this.colorBuffer.mutate( new Mutator( )
+        if ( color )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
+            this.colorBuffer.mutate( new Mutator( )
             {
-                int i = 0;
-                for ( BulkLoadPoint point : points )
+                @Override
+                public void mutate( FloatBuffer data, int length )
                 {
-                    data.position( listIndex[i] * length );
-                    
-                    float[] color = point.color;
-                    data.put( color[0] );
-                    data.put( color[1] );
-                    data.put( color[2] );
-                    data.put( color.length == 4 ? color[3] : 1.0f );
-                    
-                    i += 1;
+                    int i = 0;
+                    for ( BulkLoadPoint point : points )
+                    {
+                        data.position( listIndex[i] * length );
+                        
+                        float[] color = point.color;
+                        data.put( color[0] );
+                        data.put( color[1] );
+                        data.put( color[2] );
+                        data.put( color.length == 4 ? color[3] : 1.0f );
+                        
+                        i += 1;
+                    }
                 }
-            }
-        } );
+            } );
+        }
     }
 
-    protected int getIndex( Object id )
+    protected int getIndex( Object id, boolean grow )
     {
         Integer index = this.idMap.get( id );
         if ( index == null )
         {
-            index = idMap.size( );
-            idMap.put( id, index );
-            indexMap.put( index, id );
+            if ( grow )
+            {
+                index = idMap.size( );
+                idMap.put( id, index );
+                indexMap.put( index, id );
+            }
+            else
+            {
+                throw new IllegalArgumentException( String.format(  "Id %s does not exist.", id ) );
+            }
         }
 
         return index;
@@ -376,6 +397,11 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         public BulkLoadPoint( Object id, float x, float y )
         {
             this( id, x, y, DEFAULT_COLOR );
+        }
+        
+        public BulkLoadPoint( Object id, float[] color )
+        {
+            this( id, 0, 0, color );
         }
         
         public BulkLoadPoint( Object id, float x, float y, float[] color  )
