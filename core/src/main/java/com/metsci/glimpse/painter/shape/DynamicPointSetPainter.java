@@ -66,6 +66,42 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.searchResults = new IntsArray( );
     }
 
+    public Collection<Point> get( final Collection<Object> ids )
+    {
+        lock.lock( );
+        try
+        {
+            final List<Point> returnList = new LinkedList<Point>( );
+
+            this.pointBuffer.mutate( new Mutator( )
+            {
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    for ( Object id : ids )
+                    {
+                        Integer index = idMap.get( id );
+                        if ( index != null )
+                        {
+                            Point point = new Point( id, index );
+                            
+                            point.x = data.get( index * length );
+                            point.y = data.get( index * length + 1 );
+                        
+                            returnList.add( point );
+                        }
+                    }
+                }
+            } );
+
+            return returnList;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
     public Collection<Point> getGeoRange( double minX, double maxX, double minY, double maxY )
     {
         lock.lock( );
