@@ -66,7 +66,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.searchResults = new IntsArray( );
     }
 
-    public Collection<Point> get( final Collection<Object> ids )
+    public Collection<Point> get( final Collection<? extends Object> ids )
     {
         lock.lock( );
         try
