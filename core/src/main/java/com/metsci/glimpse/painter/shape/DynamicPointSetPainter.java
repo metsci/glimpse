@@ -155,24 +155,32 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void putPoints( Object[] listIds, float[] listPosX, float[] listPosY )
-    {
-        putPoints( listIds, listPosX, listPosY, DEFAULT_COLOR );
-    }
-
-    public void putPoints( Object[] listIds, float[] listPosX, float[] listPosY, float[] color )
+    public void putPoints( List<BulkLoadPoint> points )
     {
         lock.lock( );
         try
         {
-            int newPoints = listIds.length;
+            int newPoints = points.size();
             int currentSize = idMap.size( );
             if ( bufferSize < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
 
-            mutatePositionsColors( listIds, listPosX, listPosY, color );
+            mutatePositionsColors( points, true, true );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public void putColors( List<BulkLoadPoint> points )
+    {
+        lock.lock( );
+        try
+        {
+            mutatePositionsColors( points, false, true );
         }
         finally
         {
@@ -196,7 +204,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 growBuffers( currentSize + 1 );
             }
 
-            int index = getIndex( id );
+            int index = getIndex( id, true );
             mutatePosition( index, posX, posY );
             mutateColor( index, color );
         }
@@ -211,12 +219,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            Integer index = this.idMap.get( id );
-            if ( index == null )
-            {
-                throw new IllegalArgumentException( String.format( "Id %s does not exist", id ) );
-            }
-
+            int index = getIndex( id, false );
             mutateColor( index, color );
         }
         finally
@@ -291,66 +294,86 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected void mutatePositionsColors( final Object[] listIds, final float[] listPosX, final float[] listPosY, final float[] color )
+    protected void mutatePositionsColors( final List<BulkLoadPoint> points, boolean position, boolean color )
     {
-        final int size = listIds.length;
+        final int size = points.size();
         final int[] listIndex = new int[size];
         int minIndex = size;
 
-        for ( int i = 0; i < size; i++ )
+        for ( int i = 0 ; i < size ; i++ )
         {
-            int index = getIndex( listIds[i] );
+            int index = getIndex( points.get( i ).getId( ), position );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
 
         final int finalMinIndex = minIndex;
 
-        this.pointBuffer.mutateIndexed( new IndexedMutator( )
+        if ( position )
         {
-            @Override
-            public int getUpdateIndex( )
+            this.pointBuffer.mutateIndexed( new IndexedMutator( )
             {
-                return finalMinIndex;
-            }
-
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0; i < size; i++ )
+                @Override
+                public int getUpdateIndex( )
                 {
-                    data.position( listIndex[i] * length );
-                    data.put( listPosX[i] );
-                    data.put( listPosY[i] );
+                    return finalMinIndex;
                 }
-            }
-        } );
+    
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    for ( int i = 0 ; i < size ; i++ )
+                    {
+                        BulkLoadPoint point = points.get( i );
+                        
+                        data.position( listIndex[i] * length );
+                        data.put( point.x );
+                        data.put( point.y );
+                    }
+                }
+            } );
+        }
 
-        this.colorBuffer.mutate( new Mutator( )
+        if ( color )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
+            this.colorBuffer.mutate( new Mutator( )
             {
-                for ( int i = 0; i < size; i++ )
+                @Override
+                public void mutate( FloatBuffer data, int length )
                 {
-                    data.position( listIndex[i] * length );
-                    data.put( color[0] );
-                    data.put( color[1] );
-                    data.put( color[2] );
-                    data.put( color.length == 4 ? color[3] : 1.0f );
+                    int i = 0;
+                    for ( BulkLoadPoint point : points )
+                    {
+                        data.position( listIndex[i] * length );
+                        
+                        float[] color = point.color;
+                        data.put( color[0] );
+                        data.put( color[1] );
+                        data.put( color[2] );
+                        data.put( color.length == 4 ? color[3] : 1.0f );
+                        
+                        i += 1;
+                    }
                 }
-            }
-        } );
+            } );
+        }
     }
 
-    protected int getIndex( Object id )
+    protected int getIndex( Object id, boolean grow )
     {
         Integer index = this.idMap.get( id );
         if ( index == null )
         {
-            index = idMap.size( );
-            idMap.put( id, index );
-            indexMap.put( index, id );
+            if ( grow )
+            {
+                index = idMap.size( );
+                idMap.put( id, index );
+                indexMap.put( index, id );
+            }
+            else
+            {
+                throw new IllegalArgumentException( String.format(  "Id %s does not exist.", id ) );
+            }
         }
 
         return index;
@@ -363,14 +386,84 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.pointBuffer.ensureCapacity( bufferSize );
         this.colorBuffer.ensureCapacity( bufferSize );
     }
+    
+    public static class BulkLoadPoint
+    {
+        private Object id;
+        private float x;
+        private float y;
+        private float[] color;
+        
+        public BulkLoadPoint( Object id, float x, float y )
+        {
+            this( id, x, y, DEFAULT_COLOR );
+        }
+        
+        public BulkLoadPoint( Object id, float[] color )
+        {
+            this( id, 0, 0, color );
+        }
+        
+        public BulkLoadPoint( Object id, float x, float y, float[] color  )
+        {
+            this.id = id;
+            this.x = x;
+            this.y = y;
+            this.color = color;
+        }
 
-    public class Point
+        public Object getId( )
+        {
+            return id;
+        }
+
+        public float getX( )
+        {
+            return x;
+        }
+
+        public float getY( )
+        {
+            return y;
+        }
+
+        public float[] getColor( )
+        {
+            return color;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            BulkLoadPoint other = ( BulkLoadPoint ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
+        }
+    }
+
+    public static class Point
     {
         private Object id;
         private double x;
         private double y;
         private int index;
-
+        
         Point( Object id, int index )
         {
             this.id = id;
@@ -409,6 +502,30 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         public String toString( )
         {
             return String.format( "id: %s index: %d x: %f y: %f", id, index, x, y );
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            Point other = ( Point ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
         }
     }
 }

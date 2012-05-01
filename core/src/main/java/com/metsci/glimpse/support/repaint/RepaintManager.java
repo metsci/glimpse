@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.support.repaint;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -64,6 +65,8 @@ public class RepaintManager
     }
 
     protected ScheduledExecutorService executor;
+    protected Thread thread;
+    
     protected boolean started;
     protected boolean shutdown;
     protected boolean paused;
@@ -95,7 +98,7 @@ public class RepaintManager
             @Override
             public Thread newThread( Runnable runnable )
             {
-                Thread thread = new Thread( runnable );
+                thread = new Thread( runnable );
                 thread.setName( "repaint-manager" );
                 thread.setDaemon( true );
                 return thread;
@@ -173,9 +176,30 @@ public class RepaintManager
         }
     }
 
-    public void execute( Runnable runnable )
+    public void asyncExec( Runnable runnable )
     {
         executor.execute( runnable );
+    }
+
+    public void syncExec( Runnable runnable )
+    {
+        try
+        {
+            executor.submit( runnable ).get( );
+        }
+        catch ( InterruptedException e )
+        {
+            logWarning( logger, "Trouble in RepaintManager", e );
+        }
+        catch ( ExecutionException e )
+        {
+            logWarning( logger, "Trouble in RepaintManager", e );
+        }
+    }
+
+    public boolean checkThread( )
+    {
+        return Thread.currentThread( ).equals( thread );
     }
 
     public class RepaintRunnable implements Runnable
