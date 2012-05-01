@@ -111,6 +111,8 @@ public class MapPlot2D extends Plot2D
 
         // reset the outer content painter to use the right axes
         this.axisLayoutXY.setAxis( outerContentAxis );
+        this.axisLayoutX.setAxis( outerContentAxis.getAxisX() );
+        this.axisLayoutY.setAxis( outerContentAxis.getAxisY() );
 
         this.tickTopX = createLabelHandlerTopX( );
         this.tickRightY = createLabelHandlerRightY( );
