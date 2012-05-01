@@ -158,6 +158,20 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
+    
+    public void setShowAllTimeRange( )
+    {
+        lock.lock( );
+        try
+        {
+            startTime = Long.MIN_VALUE;
+            endTime = Long.MAX_VALUE;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
 
     public void clear( )
     {
@@ -166,8 +180,6 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         {
             polyByTime.clear( );
             polyById.clear( );
-            startTime = Long.MIN_VALUE;
-            endTime = Long.MAX_VALUE;
             nextPolyId = 0;
         }
         finally
