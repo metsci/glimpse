@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.support.atlas.painter;
 
-import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,6 @@ import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderFragment;
 import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderGeometry;
 import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderVertex;
 import com.metsci.glimpse.support.atlas.support.ImageData;
-import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.atlas.support.TextureAtlasUpdateListener;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.sun.opengl.util.BufferUtil;
@@ -77,7 +77,7 @@ import com.sun.opengl.util.texture.TextureCoords;
 /**
  * A painter for efficiently painting large numbers of fixed pixel size icons at
  * fixed locations in data (axis) space.
- * 
+ *
  * @author ulman
  */
 //TODO: GLFloatBuffer dirties the entire array whenever a change is made, this means that
@@ -97,17 +97,14 @@ public class IconPainter extends GlimpseDataPainter2D
 {
     private static final Logger logger = Logger.getLogger( IconPainter.class.getSimpleName( ) );
 
-    private static final int DEFAULT_INITIAL_SIZE = 10;
+    private static final int DEFAULT_INITIAL_GROUP_SIZE = 10;
     private static final float DEFAULT_GROWTH_FACTOR = 1.6f;
 
     private static final int COMPONENTS_PER_COLOR = 4;
     private static final int WIDTH_BUFFER = 5;
     private static final int HEIGHT_BUFFER = 5;
 
-    protected int initialSize;
-
-    // texture atlas handle (which can be shared with other painters)
-    protected TextureAtlas atlas;
+    protected int initialGroupSize;
 
     // shader fields
     protected TextureAtlasIconShaderVertex vertexShader;
@@ -122,6 +119,9 @@ public class IconPainter extends GlimpseDataPainter2D
 
     // map from group key (which can be anything) to internal icon group data
     protected Map<Object, IconGroup> iconGroupMap;
+
+    protected Map<TextureAtlas, Set<IconGroup>> iconGroupsByAtlas;
+    protected Map<TextureAtlas, TextureAtlasUpdateListener> atlasListeners;
 
     // buffers ready to be disposed of next time we're in paintTo()
     protected Collection<GLBuffer> oldBuffers;
@@ -140,7 +140,7 @@ public class IconPainter extends GlimpseDataPainter2D
     protected ReentrantLock lock;
 
     //@formatter:off
-    public IconPainter( TextureAtlas atlas, int initialSize, boolean enablePicking )
+    public IconPainter( int initialGroupSize, boolean enablePicking )
     {
         this.vertexShader = new TextureAtlasIconShaderVertex( pixelCoordsAttributeIndex, texCoordsAttributeIndex, colorCoordsAttributeIndex );
         this.fragmentShader = new TextureAtlasIconShaderFragment( 0, enablePicking );
@@ -149,49 +149,22 @@ public class IconPainter extends GlimpseDataPainter2D
 
         this.lock = new ReentrantLock( );
         this.iconGroupMap = new HashMap<Object,IconGroup>( );
+        this.iconGroupsByAtlas = new LinkedHashMap<TextureAtlas,Set<IconGroup>>( );
+        this.atlasListeners = new HashMap<TextureAtlas,TextureAtlasUpdateListener>( );
         this.oldBuffers = new LinkedList<GLBuffer>( );
-        
+
         this.pickSupportEnabled = enablePicking;
         this.pickResultBuffer = BufferUtil.newByteBuffer( BufferUtil.SIZEOF_BYTE * COMPONENTS_PER_COLOR * ( WIDTH_BUFFER * 2 + 1 ) * ( HEIGHT_BUFFER * 2 + 1 ) );
         this.pickListeners = new CopyOnWriteArrayList<SpatialSelectionListener<PickResult>>( );
         this.pickNotificationThread = Executors.newSingleThreadExecutor( );
-        
-        this.atlas = atlas;
-        
-        this.atlas.addListener( new TextureAtlasUpdateListener( )
-        {
-            @Override
-            public void reorganized( )
-            {
-                lock.lock( );
-                try
-                {
-                    logger.info( "Texture Atlas was reorganized. Adjusting IconPainter with new texture coordinates." );
-                    
-                    for ( IconGroup group : iconGroupMap.values( ) )
-                    {
-                        group.reloadTextureCoordinates( );
-                    }
-                }
-                finally
-                {
-                    lock.unlock( );
-                }
-            }
-        });
-        
-        this.initialSize = initialSize;
+
+        this.initialGroupSize = initialGroupSize;
     }
     //@formatter:on
 
-    public IconPainter( TextureAtlas atlas )
-    {
-        this( atlas, DEFAULT_INITIAL_SIZE, false );
-    }
-
     public IconPainter( )
     {
-        this( new TextureAtlas( ), DEFAULT_INITIAL_SIZE, false );
+        this( DEFAULT_INITIAL_GROUP_SIZE, false );
     }
 
     public void addSpatialSelectionListener( SpatialSelectionListener<PickResult> listener )
@@ -224,7 +197,7 @@ public class IconPainter extends GlimpseDataPainter2D
     /**
      * Enables or disables picking support. If enabled, registered
      * SpatialSelectionListener will be notified when the mouse is near an icon.
-     * 
+     *
      * @param enable
      */
     //TODO: allowing picking against only a single GlimpseLayout at a time runs counter
@@ -284,51 +257,9 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     /**
-     * Returns the thread-safe texture atlas associated with this painter. Any number of threads
-     * may make queries or add data to the atlas, however TextureAtlas.beginRendering() should
-     * only be called from a single thread (usually the RepaintManager/graphics thread).
-     */
-    public TextureAtlas getTextureAtlas( )
-    {
-        return this.atlas;
-    }
-
-    /**
-     * @see com.metsci.glimpse.support.atlas.TextureAtlas.loadImage( Object, BufferedImage )
-     */
-    public void loadIcon( Object iconId, BufferedImage image )
-    {
-        this.atlas.loadImage( iconId, image );
-    }
-
-    /**
-     * @see com.metsci.glimpse.support.atlas.TextureAtlas.loadImage( Object, BufferedImage, int, int )
-     */
-    public void loadIcon( Object iconId, BufferedImage image, int centerX, int centerY )
-    {
-        this.atlas.loadImage( iconId, image, centerX, centerY );
-    }
-
-    /**
-     * @see com.metsci.glimpse.support.atlas.TextureAtlas.loadImage( Object, int, int, ImageDrawer )
-     */
-    public void loadIcon( Object iconId, int width, int height, ImageDrawer drawer )
-    {
-        this.atlas.loadImage( iconId, width, height, drawer );
-    }
-
-    /**
-     * @see com.metsci.glimpse.support.atlas.TextureAtlas.loadImage( Object, int, int, int, int, ImageDrawer )
-     */
-    public void loadIcon( Object iconId, int width, int height, int centerX, int centerY, ImageDrawer drawer )
-    {
-        this.atlas.loadImage( iconId, width, height, centerX, centerY, drawer );
-    }
-
-    /**
      * Sets the global scale factor for all icons (across all groups) rendered by this IconPainter.
      * A scale of 1.0 indicates that icons should be draw at their true width and height in pixels.
-     * 
+     *
      * @param scale the scale factor to apply to the width and height of icons
      */
     public void setGlobalScale( float scale )
@@ -337,25 +268,11 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     /**
-     * @return the number of icons currently being painted
+     * @see #addIconGroup( Object, TextureAtlas, int )
      */
-    public int getSize( )
+    public void addIconGroup( Object iconGroupId, TextureAtlas atlas )
     {
-        this.lock.lock( );
-        try
-        {
-            int count = 0;
-            for ( IconGroup group : iconGroupMap.values( ) )
-            {
-                count += group.getCurrentSize( );
-            }
-
-            return count;
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
+        addIconGroup( iconGroupId, atlas, initialGroupSize );
     }
 
     /**
@@ -365,7 +282,7 @@ public class IconPainter extends GlimpseDataPainter2D
      * @param iconGroupId
      * @param initialSize
      */
-    public void addIconGroup( Object iconGroupId, int initialSize )
+    public void addIconGroup( Object iconGroupId, TextureAtlas atlas, int initialSize )
     {
         this.lock.lock( );
         try
@@ -373,13 +290,72 @@ public class IconPainter extends GlimpseDataPainter2D
             IconGroup group = this.iconGroupMap.get( iconGroupId );
             if ( group == null )
             {
-                group = new IconGroup( iconGroupId, initialSize );
+                group = new IconGroup( iconGroupId, atlas, initialSize );
                 this.iconGroupMap.put( iconGroupId, group );
             }
             else
             {
+                if ( atlas != group.getAtlas( ) )
+                {
+                    throw new RuntimeException( "An icon-group already exists for this id, but it is associated with a different atlas: icon-group-id = " + iconGroupId + ", existing-atlas = " + group.getAtlas( ) + ", new-atlas = " + atlas );
+                }
+
                 group.resize( initialSize, false );
             }
+
+            Set<IconGroup> groups = this.iconGroupsByAtlas.get( atlas );
+            if ( groups == null )
+            {
+                groups = new LinkedHashSet<IconGroup>( );
+                this.iconGroupsByAtlas.put( atlas, groups );
+
+                TextureAtlasUpdateListener atlasListener = createAtlasListener( atlas );
+                atlas.addListener( atlasListener );
+                atlasListeners.put( atlas, atlasListener );
+            }
+            groups.add( group );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    protected TextureAtlasUpdateListener createAtlasListener( final TextureAtlas atlas )
+    {
+        return new TextureAtlasUpdateListener( )
+        {
+            public void reorganized( )
+            {
+                lock.lock( );
+                try
+                {
+                    logger.info( "Texture Atlas was reorganized. Adjusting IconPainter with new texture coordinates." );
+
+                    Set<IconGroup> groups = iconGroupsByAtlas.get( atlas );
+                    if ( groups != null )
+                    {
+                        for ( IconGroup group : groups )
+                        {
+                            group.reloadTextureCoordinates( );
+                        }
+                    }
+                }
+                finally
+                {
+                    lock.unlock( );
+                }
+            }
+        };
+    }
+
+    public void ensureIconGroupSize( Object iconGroupId, int minSize )
+    {
+        this.lock.lock( );
+        try
+        {
+            IconGroup group = this.iconGroupMap.get( iconGroupId );
+            group.resize( minSize, false );
         }
         finally
         {
@@ -397,14 +373,17 @@ public class IconPainter extends GlimpseDataPainter2D
 
     /**
      * Adds the icon in the TextureAtlas referred to by iconId to iconGroupId at the provided coordinates.
-     * 
+     *
      * The icon must first be loaded using loadIcon( ). The iconGroupId can be any string, but efficient performance
      * from this painter will only be achieved with a small number of groups. Entire groups of icons can be
      * deleted or made invisible, but individual icons within groups cannot be removed or hidden.
-     *  
+     *
      * The scale parameter adjusts the size of the painted icon from the size stored in the TextureAtlas. A scale of
      * 1.0 indicates that the pixel size stored in the texture atlas should bed used unchanged.
-     *  
+     *
+     * The iconGroupId must correspond to a group that has already been added with {@link #addIconGroup(Object, TextureAtlas, int)}
+     * or {@link #addIconGroup(Object, TextureAtlas)}.
+     *
      * @param iconGroupId an arbitrary string creating an association between this icon and others in the same group
      * @param iconId the identifier of an icon in the underlying texture atlas loaded using loadIcon()
      * @param positionX a position in axis space to place the icon at
@@ -417,7 +396,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            IconGroup group = getIconGroup( iconGroupId );
+            IconGroup group = this.iconGroupMap.get( iconGroupId );
             group.addIcon( iconId, positionX, positionY, rotation, scale );
         }
         finally
@@ -428,7 +407,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
 //    /**
 //     * A bulk load method for adding many of the same type of icon at different locations simultaneously.
-//     * 
+//     *
 //     * @see addIcon( Object, Object, float, float, float )
 //     */
 //    public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY, float[] rotations )
@@ -444,7 +423,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            IconGroup group = getIconGroup( iconGroupId );
+            IconGroup group = this.iconGroupMap.get( iconGroupId );
             group.addIcons( iconId, positionX, positionY, rotation, scale );
         }
         finally
@@ -455,7 +434,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
     /**
      * Loads icons into the IconPainter with x/y/rotation/scale quadruplets (one per icon) packed into a single float[] array.
-     * 
+     *
      * @see #addIcon( Object, Object, float[] )
      */
     public void addIcons( Object iconGroupId, Object iconId, float[] positions )
@@ -463,7 +442,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            IconGroup group = getIconGroup( iconGroupId );
+            IconGroup group = this.iconGroupMap.get( iconGroupId );
             group.addIcons( iconId, positions );
         }
         finally
@@ -483,7 +462,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            IconGroup group = getIconGroup( iconGroupId );
+            IconGroup group = this.iconGroupMap.get( iconGroupId );
             group.addIcons( iconId, positions, offset, vertexCount );
         }
         finally
@@ -494,7 +473,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
     /**
      * Remove all the icons from the provided group.
-     * 
+     *
      * @param iconGroupId
      */
     public void removeIconGroup( Object iconGroupId )
@@ -503,9 +482,20 @@ public class IconPainter extends GlimpseDataPainter2D
         try
         {
             IconGroup group = this.iconGroupMap.remove( iconGroupId );
-            if ( group != null )
+            if ( group == null ) return;
+
+            group.dispose( );
+
+            TextureAtlas atlas = group.atlas;
+            Set<IconGroup> groups = this.iconGroupsByAtlas.get( atlas );
+            if ( groups == null ) return;
+
+            groups.remove( group );
+            if ( groups.isEmpty( ) )
             {
-                group.dispose( );
+                this.iconGroupsByAtlas.remove( atlas );
+                TextureAtlasUpdateListener atlasListener = atlasListeners.remove( atlas );
+                atlas.removeListener( atlasListener );
             }
         }
         finally
@@ -517,7 +507,7 @@ public class IconPainter extends GlimpseDataPainter2D
     /**
      * Toggles whether or not a particular icon group is displayed. Hiding an icon group will not remove
      * its underlying data.
-     * 
+     *
      * @param iconGroupId
      * @param show
      */
@@ -526,7 +516,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            IconGroup group = getIconGroup( iconGroupId );
+            IconGroup group = this.iconGroupMap.get( iconGroupId );
             group.setVisible( show );
         }
         finally
@@ -616,32 +606,45 @@ public class IconPainter extends GlimpseDataPainter2D
         // update geometry shader uniform variables
         this.geometryShader.updateViewport( bounds );
 
-        this.atlas.beginRendering( );
         this.pipeline.beginUse( gl );
         try
         {
-            // draw each icon group, if it is visible
-            for ( IconGroup group : iconGroupMap.values( ) )
+            for ( Map.Entry<TextureAtlas,Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
             {
-                // add any icons waiting to be added to the group
-                // we do this here because texture coordinates might not
-                // be known until the atlas.beginRendering( ) call
-                group.addQueuedIcons( );
+                Set<IconGroup> groups = entry.getValue( );
+                if ( groups.isEmpty( ) ) continue;
 
-                if ( !group.isVisible( ) ) continue;
+                TextureAtlas atlas = entry.getKey( );
+                atlas.beginRendering( );
+                try
+                {
+                    // draw each icon group, if it is visible
+                    for ( IconGroup group : groups )
+                    {
+                        // add any icons waiting to be added to the group
+                        // we do this here because texture coordinates might not
+                        // be known until the atlas.beginRendering( ) call
+                        group.addQueuedIcons( );
 
-                group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
-                group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
-                group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
+                        if ( !group.isVisible( ) ) continue;
 
-                gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
+                        group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
+                        group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
+                        group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
+                        group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
+
+                        gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
+                    }
+                }
+                finally
+                {
+                    atlas.endRendering( );
+                }
             }
         }
         finally
         {
             this.pipeline.endUse( gl );
-            this.atlas.endRendering( );
         }
     }
 
@@ -664,31 +667,44 @@ public class IconPainter extends GlimpseDataPainter2D
         this.geometryShader.updateViewport( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
 
         this.pickFrameBuffer.bind( glContext );
-        this.atlas.beginRendering( );
         this.pipeline.beginUse( gl );
         try
         {
-            // draw each icon group, if it is visible
-            for ( IconGroup group : iconGroupMap.values( ) )
+            for ( Map.Entry<TextureAtlas,Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
             {
-                if ( !group.isVisible( ) ) continue;
+                Set<IconGroup> groups = entry.getValue( );
+                if ( groups.isEmpty( ) ) continue;
 
-                group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
-                group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
-                group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
+                TextureAtlas atlas = entry.getKey( );
+                atlas.beginRendering( );
+                try
+                {
+                    // draw each icon group, if it is visible
+                    for ( IconGroup group : groups )
+                    {
+                        if ( !group.isVisible( ) ) continue;
 
-                resetPickFrameBuffer( glContext );
+                        group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
+                        group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
+                        group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
+                        group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
 
-                gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
+                        resetPickFrameBuffer( glContext );
 
-                checkPickFrameBuffer( context, group, pickedIcons );
+                        gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
+
+                        checkPickFrameBuffer( context, group, pickedIcons );
+                    }
+                }
+                finally
+                {
+                    atlas.endRendering( );
+                }
             }
         }
         finally
         {
             this.pipeline.endUse( gl );
-            this.atlas.endRendering( );
             this.pickFrameBuffer.unbind( glContext );
             // restore the scissor and viewport
             gl.glEnable( GL.GL_SCISSOR_TEST );
@@ -783,7 +799,7 @@ public class IconPainter extends GlimpseDataPainter2D
             }
         } );
     }
-    
+
     protected void copy( final GLBuffer from, final GLBuffer to )
     {
         from.mutate( new GLBuffer.Mutator( )
@@ -806,25 +822,13 @@ public class IconPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected IconGroup getIconGroup( Object iconGroupId )
-    {
-        IconGroup group = this.iconGroupMap.get( iconGroupId );
-        if ( group == null )
-        {
-            group = new IconGroup( iconGroupId );
-            this.iconGroupMap.put( iconGroupId, group );
-        }
-
-        return group;
-    }
-
     protected void disposeOldBuffers( GL gl )
     {
         for ( GLBuffer oldBuffer : this.oldBuffers )
         {
             oldBuffer.dispose( gl );
         }
-        
+
         this.oldBuffers.clear( );
     }
 
@@ -880,7 +884,7 @@ public class IconPainter extends GlimpseDataPainter2D
          * PickResults report a GlimpseTargetStack because they may be generated from
          * instances of the painter draw to different GlimpseTargets. A particular
          * listener might only care about icon selections from one of those GlimpseTargets.
-         * 
+         *
          * Other painters like {@link com.metsci.glimpse.painter.track.TrackPainter} have
          * similar issues. There is not a Glimpse-wide solution to this general problem
          * which was introduced as an ugly side-effect of the painter retargeting
@@ -947,7 +951,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
             final int currentSize = group.getCurrentSize( );
 
-            final ImageData imageData = atlas.getImageData( iconId );
+            final ImageData imageData = group.getAtlas( ).getImageData( iconId );
             final TextureCoords texData = imageData.getTextureCoordinates( );
 
             addPlacementValues( group );
@@ -1163,6 +1167,7 @@ public class IconPainter extends GlimpseDataPainter2D
         private int currentSize;
         private int maxSize;
 
+        private TextureAtlas atlas;
         private List<Object> iconIds;
 
         private GLFloatBuffer iconPlacementValues;
@@ -1173,12 +1178,13 @@ public class IconPainter extends GlimpseDataPainter2D
 
         private Collection<AddIcons> addQueue;
 
-        public IconGroup( Object id, int initialIconSpace )
+        public IconGroup( Object id, TextureAtlas atlas, int initialIconSpace )
         {
             this.id = id;
 
             this.visible = true;
 
+            this.atlas = atlas;
             this.iconIds = new ArrayList<Object>( );
 
             this.iconPlacementValues = new GLFloatBuffer( initialIconSpace, 4 );
@@ -1190,11 +1196,6 @@ public class IconPainter extends GlimpseDataPainter2D
 
             this.currentSize = 0;
             this.maxSize = initialIconSpace;
-        }
-
-        public IconGroup( Object id )
-        {
-            this( id, initialSize );
         }
 
         public final Object getId( )
@@ -1215,6 +1216,11 @@ public class IconPainter extends GlimpseDataPainter2D
         public final boolean isVisible( )
         {
             return this.visible;
+        }
+
+        public final TextureAtlas getAtlas( )
+        {
+            return this.atlas;
         }
 
         public final Object getIconId( int index )

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.icon;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -47,19 +49,17 @@ import com.metsci.glimpse.support.atlas.painter.IconPainter.PickResult;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-
 /**
  * Demonstrates usage of IconPainter, which provides the capability to display
  * large quantities of icons in fixed locations in data space pulled from an
  * underlying TextureAtlas.
- * 
+ *
  * Picking support is also provided, which allows the IconPainter to report on
  * the identity of icons under the current mouse location.
- * 
+ *
  * Tested with 100,000 individual icons on Nvidia GTX 480. Less with a large number
  * of icon groups.
- * 
+ *
  * @author ulman
  */
 public class IconPainterExample implements GlimpseLayoutProvider
@@ -82,7 +82,8 @@ public class IconPainterExample implements GlimpseLayoutProvider
         // create a TextureAtlas and an IconPainter which uses the
         // TextureAtlas as its store of icon images
         TextureAtlas atlas = new TextureAtlas( 256, 256 );
-        final IconPainter iconPainter = new IconPainter( atlas );
+        final IconPainter iconPainter = new IconPainter( );
+        iconPainter.addIconGroup( "group1", atlas );
 
         // enable picking support on the IconPainter
         // picking support is currently limited to a single GlimpseLayout
@@ -109,7 +110,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
         layout.addGlimpseMouseListener( new GlimpseMouseListener( )
         {
             float rot = 0;
-            
+
             @Override
             public void mouseEntered( GlimpseMouseEvent event )
             {
@@ -139,7 +140,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
                 {
                     iconPainter.addIcon( "group2", "image9", x, y, rot, 1 );
                 }
-                
+
                 rot += Math.PI/12;
             }
 
