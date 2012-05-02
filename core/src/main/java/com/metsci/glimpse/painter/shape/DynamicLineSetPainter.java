@@ -264,7 +264,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
                 for ( int i = 0; i < size; i++ )
                 {
                     data.position( indexList[i] * 2 * length );
-                    data.put( v, i * stride, 4 );
+                    data.put( v, i * stride, 2 * length );
                 }
             }
         } );
@@ -280,7 +280,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
                     for ( int j = 0; j < 2; j++ )
                     {
-                        data.put( v, i * stride + 4, 4 );
+                        data.put( v, i * stride + 4, length );
                     }
                 }
             }
@@ -308,7 +308,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
                     for ( int j = 0; j < 2; j++ )
                     {
-                        data.put( v, i * stride + 4, 4 );
+                        data.put( v, i * stride, length );
                     }
                 }
             }
@@ -356,6 +356,11 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
         public void add( Object id, float x1, float y1, float x2, float y2, float[] color )
         {
+            if ( color.length != 3 && color.length != 4 )
+            {
+                throw new IllegalArgumentException( "Color array must be size 3 or 4" );
+            }
+            
             // grow the FloatsArray if necessary (4 for x/y and 4 for color)
             if ( v.n == v.a.length )
             {

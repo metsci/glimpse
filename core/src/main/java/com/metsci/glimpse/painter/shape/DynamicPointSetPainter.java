@@ -247,14 +247,14 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         } );
     }
     
-    protected int getIndexArray( List<Object> ids, int[] listIndex )
+    protected int getIndexArray( List<Object> ids, boolean grow, int[] listIndex )
     {
         int size = ids.size();
         int minIndex = size;
 
         for ( int i = 0 ; i < size ; i++ )
         {
-            int index = getIndex( ids.get( i ), true );
+            int index = getIndex( ids.get( i ), grow );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
@@ -270,7 +270,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         final int size = accumulator.getSize();
         
         final int[] indexList = new int[size];
-        final int minIndex = getIndexArray( ids, indexList );
+        final int minIndex = getIndexArray( ids, true, indexList );
 
         this.pointBuffer.mutateIndexed( new IndexedMutator( )
         {
@@ -286,7 +286,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 for ( int i = 0 ; i < size ; i++ )
                 {
                     data.position( indexList[i] * length );
-                    data.put( v, i*stride, 2 );
+                    data.put( v, i*stride, length );
                 }
             }
         } );
@@ -299,7 +299,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 for ( int i = 0 ; i < size ; i++ )
                 {
                     data.position( indexList[i] * length );
-                    data.put( v, i*stride+2, 4 );
+                    data.put( v, i*stride+2, length );
                 }
             }
         } );
@@ -313,7 +313,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         final int size = accumulator.getSize();
         
         final int[] indexList = new int[size];
-        getIndexArray( ids, indexList );
+        getIndexArray( ids, false, indexList );
         
         this.colorBuffer.mutate( new Mutator( )
         {
@@ -323,11 +323,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 for ( int i = 0 ; i < size ; i++ )
                 {
                     data.position( indexList[i] * length );
-                    
-                    data.put( v[i] * stride );
-                    data.put( v[i] * stride + 1 );
-                    data.put( v[i] * stride + 2 );
-                    data.put( v[i] * stride + 3 );
+                    data.put( v, i*stride, length );
                 }
             }
         } );
@@ -374,6 +370,11 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         
         public void add( Object id, float[] color )
         {
+            if ( color.length != 3 && color.length != 4 )
+            {
+                throw new IllegalArgumentException( "Color array must be size 3 or 4" );
+            }
+            
             // grow the FloatsArray if necessary (4 for color)
             if ( v.n == v.a.length )
             {
@@ -381,7 +382,6 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
             
             ids.add( id );
-            
             v.append( color );
             if ( color.length == 3 ) v.append( 1.0f );
         }
@@ -420,6 +420,11 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         
         public void add( Object id, float x, float y, float[] color )
         {
+            if ( color.length != 3 && color.length != 4 )
+            {
+                throw new IllegalArgumentException( "Color array must be size 3 or 4" );
+            }
+            
             // grow the FloatsArray if necessary (2 for x/y and 4 for color)
             if ( v.n == v.a.length )
             {
@@ -427,7 +432,6 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
             
             ids.add( id );
-            
             v.append( x );
             v.append( y );
             v.append( color );
