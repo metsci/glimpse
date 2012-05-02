@@ -1,12 +1,9 @@
 package com.metsci.glimpse.examples.misc;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLoadLine;
+import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
@@ -39,16 +36,16 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
 
                     while ( true )
                     {
-                        List<BulkLoadLine> lines = new LinkedList<BulkLoadLine>( );
+                        BulkLineAccumulator accum = new BulkLineAccumulator( );
 
                         float[] color = GlimpseColor.fromColorRgba( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) );
 
                         for ( int i = 0; i < 20; i++ )
                         {
-                            lines.add( new BulkLoadLine( count++, ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), color ) );
+                            accum.add( count++, ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), color );
                         }
 
-                        painter.putLines( lines );
+                        painter.putLines( accum );
 
                         try
                         {

@@ -3,8 +3,6 @@ package com.metsci.glimpse.examples.misc;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -13,8 +11,7 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter;
-import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkLoadPoint;
-import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.Point;
+import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkPointAccumulator;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
@@ -49,16 +46,16 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
                 {
                     while ( count < 50000 )
                     {
-                        List<BulkLoadPoint> load = new LinkedList<BulkLoadPoint>( );
+                        BulkPointAccumulator accum = new BulkPointAccumulator( );
 
                         float[] color = GlimpseColor.fromColorRgba( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) );
 
                         for ( int i = 0; i < 500; i++ )
                         {
-                            load.add( new BulkLoadPoint( count++, ( float ) Math.random( ), ( float ) Math.random( ), color ) );
+                            accum.add( count++, ( float ) Math.random( ), ( float ) Math.random( ), color );
                         }
 
-                        painter.putPoints( load );
+                        painter.putPoints( accum );
 
                         try
                         {
@@ -89,7 +86,7 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
                 double centerY = axis.getAxisY( ).getSelectionCenter( );
                 double sizeY = axis.getAxisY( ).getSelectionSize( );
 
-                Collection<Point> selection = painter.getGeoRange( centerX - sizeX / 2.0, centerX + sizeX / 2.0, centerY - sizeY / 2.0, centerY + sizeY / 2.0 );
+                Collection<Object> selection = painter.getGeoRange( centerX - sizeX / 2.0, centerX + sizeX / 2.0, centerY - sizeY / 2.0, centerY + sizeY / 2.0 );
 
                 logInfo( logger, "Selected Ids: %s", selection );
             }

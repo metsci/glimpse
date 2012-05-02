@@ -1,6 +1,7 @@
 package com.metsci.glimpse.painter.shape;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D.IndexedMutator;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
 public class DynamicLineSetPainter extends GlimpseDataPainter2D
@@ -77,19 +79,19 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void putLines( List<BulkLoadLine> lines )
+    public void putLines( BulkLineAccumulator accumulator )
     {
         lock.lock( );
         try
         {
-            int newPoints = lines.size( );
+            int newPoints = accumulator.getSize( );
             int currentSize = idMap.size( );
             if ( bufferSize < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
 
-            mutatePositionsColors( lines, true, true );
+            mutatePositions( accumulator );
         }
         finally
         {
@@ -97,12 +99,12 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void putColors( List<BulkLoadLine> colors )
+    public void putColors( BulkColorAccumulator accumulator )
     {
         lock.lock( );
         try
         {
-            mutatePositionsColors( colors, false, true );
+            mutateColors( accumulator );
         }
         finally
         {
@@ -221,75 +223,95 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             }
         } );
     }
-
-    protected void mutatePositionsColors( final List<BulkLoadLine> lines, boolean position, boolean color )
+    
+    protected int getIndexArray( List<Object> ids, int[] listIndex )
     {
-        final int size = lines.size( );
-        final int[] listIndex = new int[size];
+        int size = ids.size();
         int minIndex = size;
 
-        for ( int i = 0; i < size; i++ )
+        for ( int i = 0 ; i < size ; i++ )
         {
-            int index = getIndex( lines.get( i ).getId( ), position );
+            int index = getIndex( ids.get( i ), true );
             listIndex[i] = index;
             if ( minIndex > index ) minIndex = index;
         }
 
-        final int finalMinIndex = minIndex * 2;
+        return minIndex;
+    }
 
-        if ( position )
+    protected void mutatePositions( BulkLineAccumulator accumulator )
+    {
+        final List<Object> ids = accumulator.getIds( );
+        final float[] v = accumulator.getVertices( );
+        final int stride = accumulator.getStride( );
+        final int size = accumulator.getSize();
+        
+        final int[] indexList = new int[size];
+        final int minIndex = getIndexArray( ids, indexList );
+
+        this.pointBuffer.mutateIndexed( new IndexedMutator( )
         {
-            this.pointBuffer.mutateIndexed( new IndexedMutator( )
+            @Override
+            public int getUpdateIndex( )
             {
-                @Override
-                public int getUpdateIndex( )
+                return minIndex * 2;
+            }
+
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                for ( int i = 0; i < size; i++ )
                 {
-                    return finalMinIndex;
+                    data.position( indexList[i] * 2 * length );
+                    data.put( v, i*stride, 4 );
                 }
+            }
+        } );
 
-                @Override
-                public void mutate( FloatBuffer data, int length )
+        this.colorBuffer.mutate( new Mutator( )
+        {
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                for ( int i = 0; i < size; i++ )
                 {
-                    for ( int i = 0; i < size; i++ )
+                    data.position( indexList[i] * 2 * length );
+                    
+                    for ( int j = 0; j < 2; j++ )
                     {
-                        BulkLoadLine line = lines.get( i );
-
-                        data.position( listIndex[i] * 2 * length );
-                        data.put( line.x1 );
-                        data.put( line.y1 );
-                        data.put( line.x2 );
-                        data.put( line.y2 );
+                        data.put( v, i*stride+4, 4 );
                     }
                 }
-            } );
-        }
-
-        if ( color )
+            }
+        } );
+    }
+    
+    protected void mutateColors( BulkColorAccumulator accumulator )
+    {
+        final List<Object> ids = accumulator.getIds( );
+        final float[] v = accumulator.getVertices( );
+        final int stride = accumulator.getStride( );
+        final int size = accumulator.getSize();
+        
+        final int[] indexList = new int[size];
+        getIndexArray( ids, indexList );
+        
+        this.colorBuffer.mutate( new Mutator( )
         {
-            this.colorBuffer.mutate( new Mutator( )
+            @Override
+            public void mutate( FloatBuffer data, int length )
             {
-                @Override
-                public void mutate( FloatBuffer data, int length )
+                for ( int i = 0; i < size; i++ )
                 {
-                    for ( int i = 0; i < size; i++ )
+                    data.position( indexList[i] * 2 * length );
+                    
+                    for ( int j = 0; j < 2; j++ )
                     {
-                        data.position( listIndex[i] * 2 * length );
-
-                        BulkLoadLine line = lines.get( i );
-
-                        for ( int j = 0; j < 2; j++ )
-                        {
-                            float[] color = line.color;
-
-                            data.put( color[0] );
-                            data.put( color[1] );
-                            data.put( color[2] );
-                            data.put( color.length == 4 ? color[3] : 1.0f );
-                        }
+                        data.put( v, i*stride+4, 4 );
                     }
                 }
-            } );
-        }
+            }
+        } );
     }
 
     protected int getIndex( Object id, boolean grow )
@@ -320,85 +342,104 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         this.colorBuffer.ensureCapacity( bufferSize * 2 );
     }
 
-    public static class BulkLoadLine
+    public static class BulkColorAccumulator
     {
-        private Object id;
-        private float x1, x2, y1, y2;
-        private float[] color;
-
-        public BulkLoadLine( Object id, float[] color )
+        List<Object> ids;
+        FloatsArray v;
+        
+        public BulkColorAccumulator( )
         {
-            this( id, 0, 0, 0, 0, color );
+            ids = new ArrayList<Object>( );
+            v = new FloatsArray( );
         }
-
-        public BulkLoadLine( Object id, float x1, float y1, float x2, float y2 )
+        
+        public void add( Object id, float[] color )
         {
-            this( id, x1, y1, x2, y2, DEFAULT_COLOR );
-        }
-
-        public BulkLoadLine( Object id, float x1, float y1, float x2, float y2, float[] color )
-        {
-            this.id = id;
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
-            this.color = color;
-        }
-
-        public Object getId( )
-        {
-            return id;
-        }
-
-        public float getX1( )
-        {
-            return x1;
-        }
-
-        public float getX2( )
-        {
-            return x2;
-        }
-
-        public float getY1( )
-        {
-            return y1;
-        }
-
-        public float getY2( )
-        {
-            return y2;
-        }
-
-        public float[] getColor( )
-        {
-            return color;
-        }
-
-        @Override
-        public int hashCode( )
-        {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
-            return result;
-        }
-
-        @Override
-        public boolean equals( Object obj )
-        {
-            if ( this == obj ) return true;
-            if ( obj == null ) return false;
-            if ( getClass( ) != obj.getClass( ) ) return false;
-            BulkLoadLine other = ( BulkLoadLine ) obj;
-            if ( id == null )
+            // grow the FloatsArray if necessary (4 for color)
+            if ( v.n == v.a.length )
             {
-                if ( other.id != null ) return false;
+                v.ensureCapacity( (int) Math.max( v.n + getStride( ) , v.n * GROWTH_FACTOR ) );
             }
-            else if ( !id.equals( other.id ) ) return false;
-            return true;
+            
+            ids.add( id );
+            
+            v.append( color );
+            if ( color.length == 3 ) v.append( 1.0f );
+        }
+        
+        int getStride( )
+        {
+            return 4;
+        }
+        
+        List<Object> getIds( )
+        {
+            return ids;
+        }
+        
+        float[] getVertices( )
+        {
+            return v.a;
+        }
+        
+        int getSize( )
+        {
+            return ids.size( );
         }
     }
-
+    
+    public static class BulkLineAccumulator
+    {
+        List<Object> ids;
+        FloatsArray v;
+        
+        public BulkLineAccumulator( )
+        {
+            ids = new ArrayList<Object>( );
+            v = new FloatsArray( );
+        }
+        
+        public void add( Object id, float x1, float y1, float x2, float y2, float[] color )
+        {
+            // grow the FloatsArray if necessary (4 for x/y and 4 for color)
+            if ( v.n == v.a.length )
+            {
+                v.ensureCapacity( (int) Math.max( v.n + getStride( ) , v.n * GROWTH_FACTOR ) );
+            }
+            
+            ids.add( id );
+            
+            v.append( x1 );
+            v.append( y1 );
+            v.append( x2 );
+            v.append( y2 );
+            v.append( color );
+            if ( color.length == 3 ) v.append( 1.0f );
+        }
+        
+        public void add( Object id, float x1, float y1, float x2, float y2 )
+        {
+            add( id, x1, y1, x2, y2, DEFAULT_COLOR );
+        }
+        
+        int getStride( )
+        {
+            return 8;
+        }
+        
+        List<Object> getIds( )
+        {
+            return ids;
+        }
+        
+        float[] getVertices( )
+        {
+            return v.a;
+        }
+        
+        int getSize( )
+        {
+            return ids.size( );
+        }
+    }
 }
