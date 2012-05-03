@@ -547,7 +547,10 @@ public class IconPainter extends GlimpseDataPainter2D
             for ( Object groupId : iconGroupIds )
             {
                 IconGroup group = this.iconGroupMap.get( groupId );
-                group.setVisible( true );
+                if ( group != null )
+                {
+                    group.setVisible( true );
+                }
             }
         }
         finally
