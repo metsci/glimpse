@@ -525,6 +525,37 @@ public class IconPainter extends GlimpseDataPainter2D
         }
     }
 
+    /**
+     * Sets the visibility of all of this painter's icon-groups, so that a group is visible if and
+     * only if its ID is in the specified collection.
+     *
+     * Hiding an icon group will not remove its underlying data.
+     *
+     * @param iconGroupId
+     * @param show
+     */
+    public void showOnlyIconGroups( Collection<? extends Object> iconGroupIds )
+    {
+        this.lock.lock( );
+        try
+        {
+            for ( IconGroup group : iconGroupMap.values( ) )
+            {
+                group.setVisible( false );
+            }
+
+            for ( Object groupId : iconGroupIds )
+            {
+                IconGroup group = this.iconGroupMap.get( groupId );
+                group.setVisible( true );
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
