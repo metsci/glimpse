@@ -22,7 +22,8 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
         plot.getAxis( ).set( -1, 2, -1, 2 );
 
         final DynamicLineSetPainter painter = new DynamicLineSetPainter( );
-
+        painter.setDotted( 2, (short) 0xAAAA );
+        
         plot.addPainter( painter );
 
         ( new Thread( )

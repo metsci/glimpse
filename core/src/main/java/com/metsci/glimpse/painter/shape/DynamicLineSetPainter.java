@@ -30,6 +30,10 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected static final int DEFAULT_INITIAL_SIZE = 2000;
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
 
+    protected boolean lineStipple = false;
+    int stippleFactor = 1;
+    short stipplePattern = ( short ) 0x00FF;
+    
     protected float lineWidth;
 
     // number of floats in pointBuffer
@@ -65,6 +69,34 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         this.colorBuffer = new GLFloatBuffer( initialSize * 2, 4 );
 
         this.searchResults = new IntsArray( );
+    }
+    
+    public void setDotted( boolean dotted )
+    {
+        lock.lock( );
+        try
+        {
+            this.lineStipple = dotted;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void setDotted( int stippleFactor, short stipplePattern )
+    {
+        lock.lock( );
+        try
+        {
+            this.lineStipple = true;
+            this.stippleFactor = stippleFactor;
+            this.stipplePattern = stipplePattern;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     public void setLineWidth( float size )
@@ -168,6 +200,12 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             pointBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
             try
             {
+                if ( lineStipple )
+                {
+                    gl.glEnable( GL.GL_LINE_STIPPLE );
+                    gl.glLineStipple( stippleFactor, stipplePattern );
+                }
+                
                 gl.glLineWidth( lineWidth );
                 gl.glDrawArrays( GL.GL_LINES, 0, idMap.size( ) * 2 );
             }
