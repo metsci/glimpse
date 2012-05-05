@@ -1006,17 +1006,6 @@ public class StackedTimePlot2D extends StackedPlot2D
         axisPainter.setShowOriginLabel( true );
         layoutInfo.getLayout( ).addPainter( axisPainter );
 
-        // add a label to display the concept and units being displayed
-        SimpleTextPainter labelPainter = new SimpleTextPainter( );
-        labelPainter.setHorizontalPosition( HorizontalPosition.Center );
-        labelPainter.setVerticalPosition( VerticalPosition.Top );
-        labelPainter.setFont( FontUtils.getDefaultBold( 9 ), false );
-        labelPainter.setPadding( 2 );
-        // don't use the plot unique identifier as the label by default, this makes
-        // it too easy to think that the String argument to createPlot() is supposed to be the label
-        labelPainter.setText( "" );
-        layoutInfo.getLayout( ).addPainter( labelPainter );
-
         // add a border
         BorderPainter borderPainter = new BorderPainter( );
         layoutInfo.getLayout( ).addPainter( borderPainter );
@@ -1028,8 +1017,35 @@ public class StackedTimePlot2D extends StackedPlot2D
         GlimpseLayout labelLayout = new GlimpseLayout( layoutInfo.getId( ) + "-label" );
         this.addLayout( labelLayout );
 
-        TimePlotInfo timePlotInfo = new TimePlotInfo( StackedTimePlot2D.this, layoutInfo, labelLayout, listener, gridPainter, axisPainter, labelPainter, borderPainter, dataPainter );
-
+        // add a label to display the plot title
+        SimpleTextPainter labelPainter = new SimpleTextPainter( );
+        labelPainter.setHorizontalPosition( HorizontalPosition.Center );
+        labelPainter.setVerticalPosition( VerticalPosition.Center );
+        labelPainter.setFont( FontUtils.getDefaultBold( 9 ), false );
+        labelPainter.setPadding( 2 );
+        // don't use the plot unique identifier as the label by default, this makes
+        // it too easy to think that the String argument to createPlot() is supposed to be the label
+        labelPainter.setText( "" );
+        labelPainter.setHorizontalLabels( false );
+        labelLayout.addPainter( labelPainter );
+        
+        // add a border
+        BorderPainter labelBorderPainter = new BorderPainter( );
+        labelLayout.addPainter( labelBorderPainter );
+        
+        //@formatter:off
+        TimePlotInfo timePlotInfo = new TimePlotInfo( StackedTimePlot2D.this,
+                                                      layoutInfo,
+                                                      labelLayout,
+                                                      listener,
+                                                      gridPainter,
+                                                      axisPainter,
+                                                      labelPainter,
+                                                      borderPainter,
+                                                      labelBorderPainter,
+                                                      dataPainter );
+        //@formatter:on
+        
         if ( isTimeAxisHorizontal( ) )
         {
             gridPainter.setShowVerticalLines( false );
@@ -1037,8 +1053,6 @@ public class StackedTimePlot2D extends StackedPlot2D
             axisPainter.setShowVerticalTicks( true );
             axisPainter.setShowHorizontalTicks( false );
             axisPainter.setLockLeft( true );
-            labelPainter.setHorizontalPosition( HorizontalPosition.Center );
-            labelPainter.setVerticalPosition( VerticalPosition.Top );
         }
         else
         {
@@ -1047,8 +1061,6 @@ public class StackedTimePlot2D extends StackedPlot2D
             axisPainter.setShowVerticalTicks( false );
             axisPainter.setShowHorizontalTicks( true );
             axisPainter.setLockTop( true );
-            labelPainter.setHorizontalPosition( HorizontalPosition.Center );
-            labelPainter.setVerticalPosition( VerticalPosition.Bottom );
         }
 
         return timePlotInfo;
