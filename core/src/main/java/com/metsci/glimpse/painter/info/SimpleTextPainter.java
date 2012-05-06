@@ -296,8 +296,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         double textWidth = textBounds.getWidth( );
         double textHeight = textBounds.getHeight( );
         
-        double halfTextWidth = textWidth / 2d;
-        double halfTextHeight = textHeight / 2d;
+        int halfTextWidth = (int) ( textWidth / 2d );
+        int halfTextHeight = (int) ( textHeight / 2d );
 
         switch ( hPos )
         {
