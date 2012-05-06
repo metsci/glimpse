@@ -31,8 +31,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
 
     protected boolean lineStipple = false;
-    int stippleFactor = 1;
-    short stipplePattern = ( short ) 0x00FF;
+    protected int stippleFactor = 1;
+    protected short stipplePattern = ( short ) 0x00FF;
     
     protected float lineWidth;
 

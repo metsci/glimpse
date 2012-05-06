@@ -54,6 +54,20 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     }
 
     @Override
+    public StackedTimePlot2D getLayout( )
+    {
+        StackedTimePlot2D plot = super.getLayout( );
+        
+        // display horizontal labels
+        for ( TimePlotInfo info : plot.getAllTimePlots( ) )
+        {
+            info.getLabelPainter( ).setHorizontalLabels( true );
+        }
+        
+        return plot;
+    }
+    
+    @Override
     protected StackedTimePlot2D createPlot( )
     {
         return new StackedTimePlot2D( Orientation.HORIZONTAL, Epoch.currentTime( ) );
