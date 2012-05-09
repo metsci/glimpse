@@ -171,6 +171,28 @@ public class GlimpseColor
 
         return s.toString( );
     }
+    
+    public static float[] addRgb( float[] color, float value )
+    {
+    	return add( color, fromColorRgba( value, value, value, 0.0f ) );
+    }
+    
+    public static float[] add( float[] color1, float[] color2 )
+    {
+    	float[] newColor = new float[4];
+    	
+    	for ( int i = 0 ; i < 4 ; i++ )
+    	{
+        	float color = color1[i] + color2[i];
+        	
+        	if ( color < 0.0f ) color = 0.0f;
+        	if ( color > 1.0f ) color = 1.0f;
+        	
+        	newColor[i] = color;
+    	}
+    	
+    	return newColor;
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////
     //                                    GET methods                                      //

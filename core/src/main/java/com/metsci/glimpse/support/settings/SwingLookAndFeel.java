@@ -36,7 +36,7 @@ public class SwingLookAndFeel extends AbstractLookAndFeel
     public SwingLookAndFeel( )
     {
         map.put( CROSSHAIR_COLOR, getBlack( ) );
-        map.put( PLOT_BACKGROUND_COLOR, fromColorAwt( SystemColor.windowBorder ) );
+        map.put( PLOT_BACKGROUND_COLOR, addRgb( fromColorAwt( SystemColor.window ), -0.1f ) );
         map.put( FRAME_BACKGROUND_COLOR, fromColorAwt( SystemColor.window ) );
 
         map.put( AXIS_FONT, getDefaultPlain( 11 ) );
