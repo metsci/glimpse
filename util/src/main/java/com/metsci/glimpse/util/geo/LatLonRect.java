@@ -51,7 +51,7 @@ public class LatLonRect
         zUnit = z * invLen;
     }
 
-    protected LatLonRect( double xUnit, double yUnit, double zUnit, double length )
+    private LatLonRect( double xUnit, double yUnit, double zUnit, double length )
     {
         this.xUnit = xUnit;
         this.yUnit = yUnit;
@@ -59,6 +59,11 @@ public class LatLonRect
         this.length = length;
     }
 
+    public static final LatLonRect fromUnitVectorAndLength( double xUnit, double yUnit, double zUnit, double length )
+    {
+        return new LatLonRect( xUnit, yUnit, xUnit, length );
+    }
+    
     public static final LatLonRect fromEnu( Vector3d enuPoint, LatLonGeo refPoint, Datum datum )
     {
         return datum.fromEnu( enuPoint, refPoint );
