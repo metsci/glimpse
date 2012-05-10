@@ -77,7 +77,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
         // calculate some TimeStamps representing the selected time range and initial extents of the timeline
         Epoch epoch = plot.getEpoch( );
-        TimeStamp selectionMaxTime = TimeStamp.fromCalendar( c );//epoch.getTimeStamp( );
+        TimeStamp selectionMaxTime = epoch.getTimeStamp( );
         TimeStamp selectionMinTime = selectionMaxTime.subtract( Time.fromHours( 3 ) );
         TimeStamp axisMaxTime = selectionMaxTime.add( Time.fromHours( 1 ) );
         TimeStamp axisMinTime = selectionMaxTime.subtract( Time.fromHours( 20 ) );
