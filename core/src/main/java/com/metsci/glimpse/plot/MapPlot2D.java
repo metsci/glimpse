@@ -148,7 +148,7 @@ public class MapPlot2D extends Plot2D
         this.axisLayoutXY.addPainter( outerContentPainter );
 
         this.crosshairPainter = new CrosshairPainter( );
-        this.outerContentPainter.addPainter( crosshairPainter );
+        this.mapContentLayout.addPainter( crosshairPainter, FOREGROUND_LAYER );
 
         this.setShowAxisMarkerX( false );
         this.setShowAxisMarkerY( false );
