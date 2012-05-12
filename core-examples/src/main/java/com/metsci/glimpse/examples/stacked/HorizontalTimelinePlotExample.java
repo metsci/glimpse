@@ -71,10 +71,6 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
 
-        Calendar c = new GregorianCalendar( );
-        c.clear( );
-        c.set( 2012, 4, 1, 0, 0, 0 );
-
         // calculate some TimeStamps representing the selected time range and initial extents of the timeline
         Epoch epoch = plot.getEpoch( );
         TimeStamp selectionMaxTime = epoch.getTimeStamp( );

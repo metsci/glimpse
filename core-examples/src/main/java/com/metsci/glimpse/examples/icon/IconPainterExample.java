@@ -50,11 +50,12 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 
 /**
- * Demonstrates usage of IconPainter, which provides the capability to display
- * large quantities of icons in fixed locations in data space pulled from an
- * underlying TextureAtlas.
+ * Demonstrates how to use IconPainter.
+ * 
+ * IconPainter can efficiently render large numbers of icons in fixed 
+ * locations in data space by leveraging a TextureAtlas to store the icon images.
  *
- * Picking support is also provided, which allows the IconPainter to report on
+ * Picking support is also provided, allowing the IconPainter to report on
  * the identity of icons under the current mouse location.
  *
  * Tested with 100,000 individual icons on Nvidia GTX 480. Less with a large number

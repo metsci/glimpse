@@ -33,13 +33,13 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * <p>GlimpseTarget represents a location to which GlimpsePainters may be drawn. GlimpseTargets may either
- * be heavy weight instances of GlimpseCanvas or light weight instances of GlimpseLayout representing
+ * be heavyweight instances of GlimpseCanvas or lightweight instances of GlimpseLayout representing
  * a subsection of a parent GlimpseLayout or GlimpseCanvas.</p>
  *
  * <p>GlimpseTargets may be nested (child GlimpseTargets are retrieved via getTargetChildren()). A single GlimpseTarget
  * may have multiple parents, thus no getParent() method is provided. Because of this, a GlimpseTarget
  * does not have a single size. Instead, it maintains a size for every parent hierarchy which it is
- * part of. Therefore, in order to get the GlimpseBoudns of a GlimpseTarget, a GlimpseLayoutStack must
+ * part of. Therefore, in order to get the GlimpseBounds of a GlimpseTarget, a GlimpseLayoutStack must
  * be provided. The GlimpseLayoutStack specifies the parent hierarchy to provide a size for.</p>
  *
  * @author ulman

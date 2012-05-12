@@ -106,7 +106,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         // tell the parser not to grab canonical concept files from the web
         parser.setNetworkMode( false );
 
-        // tell the parser not to created cached copies of the csv data files it loads
+        // tell the parser not to create cached copies of the csv data files it loads
         // if true, loaded dspl files will be converted behind the scenes to an efficient
         // binary file format and will load much faster the second time they are loaded
         parser.setCacheMode( false );
