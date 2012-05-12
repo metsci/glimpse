@@ -167,7 +167,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                 float lat_deg = latColumn.getFloatData( i );
                 float lon_deg = lonColumn.getFloatData( i );
 
-                // project the lat/lon point using the Mercator projection
+                // project track point lat/lon onto a TangentPlane
                 LatLonGeo latlon = LatLonGeo.fromDeg( lat_deg, lon_deg );
 
                 if ( projection == null )
