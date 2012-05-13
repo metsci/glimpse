@@ -32,15 +32,15 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
- * GlimpseTarget represents a location to which GlimpsePainters may be drawn. GlimpseTargets may either
- * be heavy weight instances of GlimpseCanvas or light weight instances of GlimpseLayout representing
- * a subsection of a parent GlimpseLayout or GlimpseCanvas.<p>
+ * <p>GlimpseTarget represents a location to which GlimpsePainters may be drawn. GlimpseTargets may either
+ * be heavyweight instances of GlimpseCanvas or lightweight instances of GlimpseLayout representing
+ * a subsection of a parent GlimpseLayout or GlimpseCanvas.</p>
  *
- * GlimpseTargets may be nested (child GlimpseTargets are retrieved via getTargetChildren()). A single GlimpseTarget
+ * <p>GlimpseTargets may be nested (child GlimpseTargets are retrieved via getTargetChildren()). A single GlimpseTarget
  * may have multiple parents, thus no getParent() method is provided. Because of this, a GlimpseTarget
  * does not have a single size. Instead, it maintains a size for every parent hierarchy which it is
- * part of. Therefore, in order to get the GlimpseBoudns of a GlimpseTarget, a GlimpseLayoutStack must
- * be provided. The GlimpseLayoutStack specifies the parent hierarchy to provide a size for.
+ * part of. Therefore, in order to get the GlimpseBounds of a GlimpseTarget, a GlimpseLayoutStack must
+ * be provided. The GlimpseLayoutStack specifies the parent hierarchy to provide a size for.</p>
  *
  * @author ulman
  */
@@ -86,7 +86,9 @@ public interface GlimpseTarget
      * @param layout
      */
     public void addLayout( GlimpseLayout layout );
-
+    public void addLayout( GlimpseLayout layout, int zOrder );
+    public void setZOrder( GlimpseLayout layout, int zOrder );
+    
     /**
      * Removes a previously added layout from this GlimpseTarget.
      * @param layout
@@ -106,5 +108,10 @@ public interface GlimpseTarget
      */
     public GlimpseBounds getTargetBounds( GlimpseTargetStack stack );
 
+    /**
+     * Sets the LookAndFeel for this GlimpseTarget and all child GlimpseTargets.
+     */
     public void setLookAndFeel( LookAndFeel laf );
+    
+    
 }

@@ -214,7 +214,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         crosshairs.setCursorColor( GlimpseColor.getGreen( 0.3f ) );
         plot.addPainter( crosshairs );
 
-        ScalePainter scale = new ScalePainter( plot.getCenterAxisX( ) );
+        ScalePainter scale = new ScalePainter( );
         scale.setUnitConverter( unitConverter );
         scale.setPixelBufferX( 5 );
         scale.setPixelBufferY( 5 );

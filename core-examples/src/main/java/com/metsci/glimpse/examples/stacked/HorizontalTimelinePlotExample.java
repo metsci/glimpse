@@ -26,13 +26,15 @@
  */
 package com.metsci.glimpse.examples.stacked;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
@@ -64,7 +66,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
     }
 
     @Override
-    public GlimpseLayout getLayout( )
+    public StackedTimePlot2D getLayout( )
     {
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
@@ -91,7 +93,15 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // give the plots custom text labels indicating value being plotted and units
         plot1.setLabelText( "Snail Speed (furlongs per fornight)" );
         plot2.setLabelText( "Snail Slime Viscosity (pascal-seconds)" );
-        
+
+        // turn on timeline labels
+        plot.setLabelSize( 30 );
+        plot.showLabels( true );
+
+        // display vertical labels
+        plot1.getLabelPainter( ).setHorizontalLabels( false );
+        plot2.getLabelPainter( ).setHorizontalLabels( false );
+
         // set custom coloring for the plots
         setChartLookAndFeel( plot1 );
         setChartData( plot1, epoch, axisMinTime, axisMaxTime );
@@ -234,9 +244,9 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
     protected void setChartLookAndFeel( TimePlotInfo chart )
     {
-        chart.setBorderColor( GlimpseColor.getGray( 0.8f ) );
         chart.setAxisColor( GlimpseColor.getWhite( ) );
         chart.setLabelColor( GlimpseColor.getWhite( ) );
+        chart.setLabelBorderColor( GlimpseColor.fromColorRgba( 0.8f, 0.8f, 0.8f, 1.0f ) );
         chart.setBorderColor( GlimpseColor.fromColorRgba( 0.8f, 0.8f, 0.8f, 1.0f ) );
     }
 }

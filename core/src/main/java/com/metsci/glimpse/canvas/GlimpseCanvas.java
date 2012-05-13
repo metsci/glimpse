@@ -45,11 +45,15 @@ import com.metsci.glimpse.context.GlimpseContext;
  */
 public interface GlimpseCanvas extends GlimpseTarget
 {
-
     public GLContext getGLContext( );
     public GlimpseContext getGlimpseContext( );
     public GlimpseBounds getTargetBounds( );
 
+    /**
+     * Clears the canvas, removing all attached GlimpseLayouts.
+     */
+    public void removeAllLayouts( );
+    
     /**
      * Lays out any {@link com.metsci.glimpse.layout.GlimpseLayout} instances
      * attached to the GlimpseCanvas and paints all

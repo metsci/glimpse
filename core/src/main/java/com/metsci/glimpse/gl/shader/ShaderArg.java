@@ -150,8 +150,21 @@ public class ShaderArg
                     gl.glUniform1i( glArgHandle, getBooleanValue() ? 1 : 0 );
                     break;
                 }
+                case VEC2:
+                    gl.glUniform2fv( glArgHandle, 1, getFloatArrayValue(), 0 );
+                    break;
+                case VEC3:
+                    gl.glUniform3fv( glArgHandle, 1, getFloatArrayValue(), 0 );
+                    break;
+                case VEC4:
+                    gl.glUniform4fv( glArgHandle, 1, getFloatArrayValue(), 0 );
+                    break;
                 case MAT2:
+                    gl.glUniformMatrix2fv( glArgHandle, 1, false, getFloatArrayValue( ), 0 );
+                    break;
                 case MAT3:
+                    gl.glUniformMatrix3fv( glArgHandle, 1, false, getFloatArrayValue( ), 0 );
+                    break;
                 case MAT4:
                     gl.glUniformMatrix4fv( glArgHandle, 1, false, getFloatArrayValue( ), 0 );
                     break;
@@ -182,7 +195,7 @@ public class ShaderArg
     {
         return (Boolean) currentValue;
     }
-    
+
     private float[] getFloatArrayValue( )
     {
         return (float[]) currentValue;

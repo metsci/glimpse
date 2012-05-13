@@ -103,7 +103,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
                 return new TaggedPartialColorYAxisPainter( tickHandler );
             }
         };
-
+        
         TaggedAxis1D axisZ = ( TaggedAxis1D ) plot.getAxisZ( );
 
         final Tag maxTag = axisZ.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
@@ -219,7 +219,10 @@ public class BathymetryExample implements GlimpseLayoutProvider
         annotationPainter.addAnnotation( "buoy 125B-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 19.80, -79.08, 0 );
 
-        plot.addPainter( new ScalePainter( plot.getAxisX( ) ) );
+        ScalePainter scale = new ScalePainter( );
+        scale.setPixelBufferX( 8 );
+        scale.setPixelBufferY( 8 );
+        plot.addPainter( scale );
 
         return plot;
     }

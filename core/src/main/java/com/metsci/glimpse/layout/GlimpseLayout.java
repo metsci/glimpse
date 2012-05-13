@@ -29,11 +29,11 @@ package com.metsci.glimpse.layout;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.metsci.glimpse.canvas.LayoutManager;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
@@ -72,8 +72,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     protected GlimpseLayoutCache<GlimpseBounds> layoutCache;
     protected GlimpseLayoutDelegate layoutDelegate;
 
-    protected List<GlimpseTarget> layoutChildren;
-    protected List<GlimpseTarget> unmodifiableLayoutChildren;
+    protected LayoutManager manager;
 
     protected ReentrantLock lock = new ReentrantLock( );
 
@@ -93,8 +92,8 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     {
         this.layoutCache = new GlimpseLayoutCache<GlimpseBounds>( );
         this.layoutDelegate = new GlimpseLayoutDelegate( this );
-        this.layoutChildren = new LinkedList<GlimpseTarget>( );
-        this.unmodifiableLayoutChildren = Collections.unmodifiableList( layoutChildren );
+
+        this.manager = new LayoutManager( );
 
         this.lock = new ReentrantLock( );
 
@@ -183,12 +182,13 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
+    @Override
     public void removeLayout( GlimpseLayout layout )
     {
         lock.lock( );
         try
         {
-            layoutChildren.remove( layout );
+            manager.removeLayout( layout );
             layoutDelegate.removeLayout( layout );
             invalidateLayout( );
         }
@@ -198,13 +198,13 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
-    public void addLayout( GlimpseLayout layout )
+    public void removeAll( )
     {
         lock.lock( );
         try
         {
-            layoutChildren.add( layout );
-            layoutDelegate.addLayout( layout );
+            manager.removeAllLayouts( );
+            layoutDelegate.removeAll( );
             invalidateLayout( );
         }
         finally
@@ -213,13 +213,83 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
-    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback )
+    /**
+     * @see {@link #setZOrder(GlimpseLayout, int)}
+     */
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
     {
         lock.lock( );
         try
         {
-            layoutChildren.add( layout );
-            layoutDelegate.addLayout( layout, callback );
+            manager.setZOrder( layout, zOrder );
+            layoutDelegate.setZOrder( layout, zOrder );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    /**
+     * <p>Sets the relative ordering constant for this painter. Painters with low
+     * z order will be painter first (in the back) and those with high z order
+     * will be painted last (in the front).</p>
+     * 
+     * <p>The value itself has no meaning; it is relative to the z orders
+     * of the other painters in the GlimpseLayout.
+     * For {@link com.metsci.glimpse.layout.com.metsciGlimpseLayout} instances,
+     * the z order also affects the order in which mouse events are delivered to
+     * overlapping components.</p>
+     * 
+     * <p>The z order is set to 0 by default. GlimpsePainters with the same z order
+     * are painted in the order they were added to the GlimpseLayout. This means the
+     * first painters added will be obscured by later painters.</p>
+     */
+    public void setZOrder( GlimpsePainter painter, int zOrder )
+    {
+        if ( painter instanceof GlimpseLayout )
+        {
+            setZOrder( (GlimpseLayout) painter, zOrder );
+        }
+        else
+        {
+            lock.lock( );
+            try
+            {
+                layoutDelegate.setZOrder( painter, zOrder );
+            }
+            finally
+            {
+                lock.unlock( );
+            }
+        }
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout )
+    {
+        addLayout( layout, null, 0 );
+    }
+
+    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback )
+    {
+        addLayout( layout, callback, 0 );
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        addLayout( layout, null, zOrder );
+    }
+
+    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
+    {
+        lock.lock( );
+        try
+        {
+            manager.addLayout( layout, zOrder );
+            layoutDelegate.addLayout( layout, callback, zOrder );
             invalidateLayout( );
         }
         finally
@@ -230,29 +300,37 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
 
     public void addPainter( GlimpsePainter painter )
     {
-        lock.lock( );
-        try
-        {
-            layoutDelegate.addPainter( painter );
-            invalidateLayout( );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        addPainter( painter, null, 0 );
     }
 
     public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
     {
-        lock.lock( );
-        try
+        addPainter( painter, callback, 0 );
+    }
+
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        addPainter( painter, null, zOrder );
+    }
+
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        if ( painter instanceof GlimpseLayout )
         {
-            layoutDelegate.addPainter( painter, callback );
-            invalidateLayout( );
+            addLayout( (GlimpseLayout) painter, callback, zOrder );
         }
-        finally
+        else
         {
-            lock.unlock( );
+            lock.lock( );
+            try
+            {
+                layoutDelegate.addPainter( painter, callback, zOrder );
+                invalidateLayout( );
+            }
+            finally
+            {
+                lock.unlock( );
+            }
         }
     }
 
@@ -325,20 +403,28 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     // (the GlimseTarget which we are "painting onto")
     public void paintTo( GlimpseContext context )
     {
-        // ensure that we have been laid out properly
-        GlimpseBounds bounds = layoutTo( context );
+        lock.lock( );
+        try
+        {
+            // ensure that we have been laid out properly
+            GlimpseBounds bounds = layoutTo( context );
 
-        if ( !isVisible ) return;
+            if ( !isVisible ) return;
 
-        // push our bounds onto the layout stack
-        context.getTargetStack( ).push( this, bounds );
+            // push our bounds onto the layout stack
+            context.getTargetStack( ).push( this, bounds );
 
-        // paint our children with our bounds on top of the layout stack
-        layoutDelegate.paintTo( context );
+            // paint our children with our bounds on top of the layout stack
+            layoutDelegate.paintTo( context );
 
-        // once our children (and their children recursively) have finished
-        // painting remove our bounds from the layout stack
-        context.getTargetStack( ).pop( );
+            // once our children (and their children recursively) have finished
+            // painting remove our bounds from the layout stack
+            context.getTargetStack( ).pop( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     @Override
@@ -364,10 +450,14 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override
     public List<GlimpseTarget> getTargetChildren( )
     {
-        return unmodifiableLayoutChildren;
+        // layoutManager returns an unmodifiable list, thus this cast is typesafe
+        // (there is no way for the recipient of the List<GlimpseTarget> view to
+        // add GlimpseTargets which are not GlimpseLayouts to the list)
+        return ( List ) manager.getLayoutList( );
     }
 
     @Override
@@ -657,11 +747,6 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         lock.lock( );
         try
         {
-            for ( GlimpseTarget layout : layoutChildren )
-            {
-                layout.setLookAndFeel( laf );
-            }
-
             layoutDelegate.setLookAndFeel( laf );
         }
         finally

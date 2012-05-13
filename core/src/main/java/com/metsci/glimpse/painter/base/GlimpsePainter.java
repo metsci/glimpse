@@ -46,10 +46,9 @@ public interface GlimpsePainter
 
     /**
      * Sets display options for the painter based on the provided LookAndFeel.
-     * @param laf
      */
     public void setLookAndFeel( LookAndFeel laf );
-
+    
     /**
      * Free GPU and CPU memory associated with this this GlimpsePainter.
      * After this call returns, the results of calling other GlimpsePainter

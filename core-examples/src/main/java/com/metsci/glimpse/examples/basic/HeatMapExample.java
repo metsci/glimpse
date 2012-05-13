@@ -101,8 +101,10 @@ public class HeatMapExample implements GlimpseLayoutProvider
         plot.setColorScale( heatmapPainter.getColorScale( ) );
 
         // create a painter which displays the cursor position and data value under the cursor
+        // add it to the foreground layer so that it draws on top of the plot data
+        // this is equivalent to: plot.addPainter( cursorPainter, Plot2D.FOREGROUND_LAYER )
         cursorPainter = new CursorTextZPainter( );
-        plot.addPainter( cursorPainter );
+        plot.addPainterForeground( cursorPainter );
 
         // tell the cursor painter what texture to report data values from
         cursorPainter.setTexture( heatmapPainter.getData( ) );

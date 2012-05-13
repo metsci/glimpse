@@ -111,6 +111,8 @@ public class MapPlot2D extends Plot2D
 
         // reset the outer content painter to use the right axes
         this.axisLayoutXY.setAxis( outerContentAxis );
+        this.axisLayoutX.setAxis( outerContentAxis.getAxisX() );
+        this.axisLayoutY.setAxis( outerContentAxis.getAxisY() );
 
         this.tickTopX = createLabelHandlerTopX( );
         this.tickRightY = createLabelHandlerRightY( );
@@ -125,10 +127,10 @@ public class MapPlot2D extends Plot2D
         this.listenerRightY = createAxisMouseListenerY( );
 
         this.plotBackgroundPainter = new BackgroundPainter( false );
-        this.axisLayoutXY.addPainter( plotBackgroundPainter );
+        this.axisLayoutXY.addPainter( plotBackgroundPainter, Integer.MIN_VALUE );
 
         this.gridPainter = new GridPainter( tickX, tickY );
-        this.axisLayoutXY.addPainter( gridPainter );
+        this.axisLayoutXY.addPainter( gridPainter, Plot2D.BACKGROUND_LAYER );
 
         this.borderPainter = new MapBorderPainter( tickX, tickY );
         this.axisLayoutXY.addPainter( borderPainter );
@@ -146,7 +148,7 @@ public class MapPlot2D extends Plot2D
         this.axisLayoutXY.addPainter( outerContentPainter );
 
         this.crosshairPainter = new CrosshairPainter( );
-        this.outerContentPainter.addPainter( crosshairPainter );
+        this.mapContentLayout.addPainter( crosshairPainter, FOREGROUND_LAYER );
 
         this.setShowAxisMarkerX( false );
         this.setShowAxisMarkerY( false );
@@ -173,7 +175,7 @@ public class MapPlot2D extends Plot2D
     @Override
     protected void updatePainterLayout( )
     {
-        getLayoutManager( ).setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", getTopInset( ), outerBorder, outerBorder, outerBorder ) );
+        getLayoutManager( ).setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %2$d %2$d %2$d", getTopInset( ), outerBorder ) );
 
         titleLayout.setLayoutData( String.format( "cell 1 0 1 1, pushx, growx, height %d!", showTitle ? titleSpacing : 0 ) );
 

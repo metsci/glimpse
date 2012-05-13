@@ -33,6 +33,11 @@ import com.metsci.glimpse.util.units.time.Time;
 public class AxisUnitConverters
 {
 
+    public static final AxisUnitConverter identity = new AxisUnitConverter()
+    {
+        public double fromAxisUnits(double value) { return value; }
+        public double toAxisUnits(double value) { return value; }
+    };
 
     // Length
 

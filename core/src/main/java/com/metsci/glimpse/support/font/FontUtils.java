@@ -32,6 +32,7 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -74,7 +75,7 @@ public class FontUtils
 
         if ( !foundVerdanaTemp )
         {
-            logger.warning( "Verdana font is not installed. Falling back to Bitstream Vera Sans. Verdana looks *much* nicer but cannot be packaged with Glimpse due to licensing restrictions. For information on installing Verdana see: https://github.com/metsci/glimpse/wiki/Verdana-Font" );
+            logger.info( "Verdana font is not installed. Falling back to Bitstream Vera Sans. Verdana looks *much* nicer but cannot be packaged with Glimpse due to licensing restrictions. For information on installing Verdana see: https://github.com/metsci/glimpse/wiki/Verdana-Font" );
         }
 
         foundVerdana = foundVerdanaTemp;
@@ -173,7 +174,19 @@ public class FontUtils
     {
         try
         {
-            return createFont( Font.TRUETYPE_FONT, StreamOpener.fileThenResource.openForRead( filename ) ).deriveFont( style, size );
+            InputStream stream = null;
+            try
+            {
+                stream = StreamOpener.fileThenResource.openForRead( filename );
+                return createFont( Font.TRUETYPE_FONT, stream ).deriveFont( style, size );
+            }
+            finally
+            {
+                if ( stream != null )
+                {
+                    stream.close( );
+                }
+            }
         }
         catch ( FontFormatException e )
         {

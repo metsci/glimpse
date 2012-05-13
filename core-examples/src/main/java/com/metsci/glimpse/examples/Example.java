@@ -43,9 +43,36 @@ import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
  *
  * @author ulman
  */
-public abstract class Example
+public class Example
 {
-    public static void showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
+    private SwingGlimpseCanvas canvas;
+    private RepaintManager manager;
+    private JFrame frame;
+    
+    public Example( SwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame )
+    {
+        super( );
+        this.canvas = canvas;
+        this.manager = manager;
+        this.frame = frame;
+    }
+    
+    public SwingGlimpseCanvas getCanvas( )
+    {
+        return canvas;
+    }
+
+    public RepaintManager getManager( )
+    {
+        return manager;
+    }
+    
+    public JFrame getFrame( )
+    {
+        return frame;
+    }
+
+    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
         Jogular.initJogl( );
 
@@ -55,7 +82,7 @@ public abstract class Example
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvas );
+        RepaintManager manager = RepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example" );
         frame.add( canvas );
@@ -74,7 +101,7 @@ public abstract class Example
             }
         } );
 
-        return;
+        return new Example( canvas, manager, frame );
     }
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception

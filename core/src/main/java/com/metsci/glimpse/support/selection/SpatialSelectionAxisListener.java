@@ -37,8 +37,8 @@ import com.metsci.glimpse.painter.track.TrackPainter;
 
 public class SpatialSelectionAxisListener extends RateLimitedAxisListener2D
 {
-    private TrackPainter painter;
-    private SpatialSelectionListener<Point> listener;
+    protected TrackPainter painter;
+    protected SpatialSelectionListener<Point> listener;
     
     public SpatialSelectionAxisListener( TrackPainter painter, SpatialSelectionListener<Point> listener )
     {

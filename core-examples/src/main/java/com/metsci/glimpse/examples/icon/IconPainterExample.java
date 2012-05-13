@@ -42,6 +42,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.painter.IconPainter;
 import com.metsci.glimpse.support.atlas.painter.IconPainter.PickResult;
@@ -49,16 +50,17 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 
 /**
- * Demonstrates usage of IconPainter, which provides the capability to display
- * large quantities of icons in fixed locations in data space pulled from an
- * underlying TextureAtlas.
+ * Demonstrates how to use IconPainter.
  * 
- * Picking support is also provided, which allows the IconPainter to report on
+ * IconPainter can efficiently render large numbers of icons in fixed 
+ * locations in data space by leveraging a TextureAtlas to store the icon images.
+ *
+ * Picking support is also provided, allowing the IconPainter to report on
  * the identity of icons under the current mouse location.
- * 
+ *
  * Tested with 100,000 individual icons on Nvidia GTX 480. Less with a large number
  * of icon groups.
- * 
+ *
  * @author ulman
  */
 public class IconPainterExample implements GlimpseLayoutProvider
@@ -81,7 +83,8 @@ public class IconPainterExample implements GlimpseLayoutProvider
         // create a TextureAtlas and an IconPainter which uses the
         // TextureAtlas as its store of icon images
         TextureAtlas atlas = new TextureAtlas( 256, 256 );
-        final IconPainter iconPainter = new IconPainter( atlas );
+        final IconPainter iconPainter = new IconPainter( );
+        iconPainter.addIconGroup( "group1", atlas );
 
         // enable picking support on the IconPainter
         // picking support is currently limited to a single GlimpseLayout
@@ -102,11 +105,13 @@ public class IconPainterExample implements GlimpseLayoutProvider
 
         // use the IconPainter to draw the icon "image7" from the TextureAtlas
         // four times at four different positions on the screen: (0,0), (20,20), (30,30), and (40,40)
-        iconPainter.addIcons( "group1", "image9", new float[] { 0, 20, 30, 40 }, new float[] { 0, 20, 30, 40 } );
+        iconPainter.addIcons( "group1", "image9", new float[] { 0, 20, 30, 40 }, new float[] { 0, 20, 30, 40 }, new float[] { (float) Math.PI/3, (float) -Math.PI/3, 0, 0 }, new float[] { 1, 1, 1, 1 } );
 
         // respond to mouse clicks by adding new icons
         layout.addGlimpseMouseListener( new GlimpseMouseListener( )
         {
+            float rot = 0;
+
             @Override
             public void mouseEntered( GlimpseMouseEvent event )
             {
@@ -126,16 +131,18 @@ public class IconPainterExample implements GlimpseLayoutProvider
 
                 if ( event.isButtonDown( MouseButton.Button1 ) )
                 {
-                    iconPainter.addIcon( "group2", "image7", 0.5f, x, y );
+                    iconPainter.addIcon( "group2", "image7", x, y, rot, 0.5f );
                 }
                 else if ( event.isButtonDown( MouseButton.Button2 ) )
                 {
-                    iconPainter.addIcon( "group2", "glimpse", 0.5f, x, y );
+                    iconPainter.addIcon( "group2", "glimpse", x, y, rot, 0.5f );
                 }
                 else if ( event.isButtonDown( MouseButton.Button3 ) )
                 {
-                    iconPainter.addIcon( "group2", "image9", x, y );
+                    iconPainter.addIcon( "group2", "image9", x, y, rot, 1 );
                 }
+
+                rot += Math.PI/12;
             }
 
             @Override
@@ -148,6 +155,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
         layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getWhite( ) ) );
         layout.addPainter( new NumericXYAxisPainter( ) );
         layout.addPainter( iconPainter );
+        layout.addPainter( new FpsPainter( ) );
 
         return layout;
     }

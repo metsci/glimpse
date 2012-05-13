@@ -35,9 +35,14 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
+import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.Length;
@@ -60,8 +65,6 @@ public class ScalePainter extends GlimpsePainterImpl
     protected int pixelHeight;
     protected int pixelWidth;
 
-    protected Axis1D axis;
-
     protected AxisUnitConverter converter;
 
     protected String unitLabel;
@@ -70,14 +73,12 @@ public class ScalePainter extends GlimpsePainterImpl
     protected TextRenderer overallTextRenderer;
 
     protected NumberFormat formatter;
-    
+
     protected boolean showTickLength = true;
     protected boolean showOverallLength = true;
 
-    public ScalePainter( Axis1D axis )
+    public ScalePainter( )
     {
-        this.axis = axis;
-
         this.tickTextRenderer = createTickTextRenderer( );
         this.overallTextRenderer = createOverallTextRenderer( );
 
@@ -112,7 +113,7 @@ public class ScalePainter extends GlimpsePainterImpl
     {
         return new TextRenderer( getDefaultBold( 11 ), false, false );
     }
-    
+
     protected TextRenderer createOverallTextRenderer( )
     {
         return new TextRenderer( getDefaultBold( 16 ), false, false );
@@ -217,12 +218,12 @@ public class ScalePainter extends GlimpsePainterImpl
     {
         this.unitLabel = unitLabel;
     }
-    
+
     public void setShowTickLength( boolean show )
     {
         this.showTickLength = show;
     }
-    
+
     public void setShowOverallLength( boolean show )
     {
         this.showOverallLength = show;
@@ -233,7 +234,7 @@ public class ScalePainter extends GlimpsePainterImpl
     {
         if ( tickTextRenderer != null ) tickTextRenderer.dispose( );
         if ( overallTextRenderer != null ) overallTextRenderer.dispose( );
-        
+
         overallTextRenderer = null;
         tickTextRenderer = null;
     }
@@ -241,9 +242,31 @@ public class ScalePainter extends GlimpsePainterImpl
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
+        Axis1D axis = null;
+        
+        GlimpseTarget target = context.getTargetStack( ).getTarget( );
+        if ( target instanceof GlimpseAxisLayout2D )
+        {
+            GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+            axis = getAxis( layout.getAxis( context ) );
+        }
+        else if ( target instanceof GlimpseAxisLayout1D )
+        {
+            GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+            axis = layout.getAxis( context );
+        }
+        
+        if ( axis == null )
+        {
+            // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
+            throw new AxisNotSetException( this, context );
+        }
+        
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
+        context.getTargetStack( );
+        
         double diff = axis.getMax( ) - axis.getMin( );
         double ratio = axis.getSizePixels( ) / converter.toAxisUnits( diff );
 
@@ -369,6 +392,18 @@ public class ScalePainter extends GlimpsePainterImpl
             {
                 overallTextRenderer.endRendering( );
             }
+        }
+    }
+
+    protected Axis1D getAxis( Axis2D axis )
+    {
+        if ( axis != null )
+        {
+            return axis.getAxisX( );
+        }
+        else
+        {
+            return null;
         }
     }
 }

@@ -34,10 +34,10 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -45,8 +45,13 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class GridPainter extends GlimpsePainter2D
+public class GridPainter extends GlimpseDataPainter2D
 {
+    protected static final short CASE3 = ( short ) parseInt( "1100110011001100", 2 );
+    protected static final short CASE2 = ( short ) parseInt( "0110011001100110", 2 );
+    protected static final short CASE1 = ( short ) parseInt( "0011001100110011", 2 );
+    protected static final short CASE0 = ( short ) parseInt( "1001100110011001", 2 );
+    
     protected float[] majorLineColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
     protected int majorLineThickness = 1;
 
@@ -130,56 +135,55 @@ public class GridPainter extends GlimpsePainter2D
 
         return this;
     }
+    
+    // make the stipple look like it's translating during drags
+    protected void glLineStipple( GL gl, Axis1D axis, AxisUnitConverter converter )
+    {
+        int stipplePhase = ( int ) ( axis.valueToScreenPixelUnits( converter.fromAxisUnits( 0 ) ) ) % 4;
+        stipplePhase = stipplePhase < 0 ? stipplePhase + 4 : stipplePhase;
+        glLineStipple( gl, stipplePhase );
+    }
+    
+    protected void glLineStipple( GL gl, int stipplePhase )
+    {
+        switch ( stipplePhase )
+        {
+            case 3:
+                gl.glLineStipple( 1, CASE3 );
+                break;
+            case 2:
+                gl.glLineStipple( 1, CASE2 );
+                break;
+            case 1:
+                gl.glLineStipple( 1, CASE1 );
+                break;
+            case 0:
+                gl.glLineStipple( 1, CASE0 );
+                break;
+            default:
+                break;
+        }
+    }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
     {
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
-
-        if ( ticksX == null || ticksY == null || axis == null || axis.getAxisX( ) == null || axis.getAxisY( ) == null || width <= 0 || height <= 0 ) return;
-
-        GL gl = context.getGL( );
-
-        gl.glMatrixMode( GL.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-
+        // we want crisp lines
+        gl.glDisable( GL.GL_LINE_SMOOTH );
+        gl.glDisable( GL.GL_POINT_SMOOTH );
         gl.glEnable( GL.GL_LINE_STIPPLE );
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+
+        if ( ticksX == null || ticksY == null ) return;
 
         double[] xTicks = ticksX.getTickPositions( axis.getAxisX( ) );
 
         AxisUnitConverter converterX = ticksX.getAxisUnitConverter( );
-        converterX = converterX == null ? new AxisUnitConverter( )
-        {
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-        } : converterX;
+        converterX = converterX == null ? AxisUnitConverters.identity : converterX;
         Axis1D axisX = axis.getAxisX( );
 
         double[] yTicks = ticksY.getTickPositions( axis.getAxisY( ) );
         AxisUnitConverter converterY = ticksY.getAxisUnitConverter( );
-        converterY = converterY == null ? new AxisUnitConverter( )
-        {
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-        } : converterY;
+        converterY = converterY == null ? AxisUnitConverters.identity : converterY;
         Axis1D axisY = axis.getAxisY( );
 
         //////////////
@@ -190,49 +194,20 @@ public class GridPainter extends GlimpsePainter2D
         {
             gl.glLineWidth( majorLineThickness );
             gl.glColor4fv( majorLineColor, 0 );
+            glLineStipple( gl, axisY, converterY );
 
-            // make the stipple look like it's translating during drags
-            int stipplePhase = ( int ) ( axisY.valueToScreenPixelUnits( converterY.fromAxisUnits( 0 ) ) ) % 4;
-            stipplePhase = stipplePhase < 0 ? stipplePhase + 4 : stipplePhase;
-
-            switch ( stipplePhase )
+            gl.glBegin( GL.GL_LINES );
+            try
             {
-            case 3:
-                gl.glLineStipple( 1, ( short ) parseInt( "1100110011001100", 2 ) );
-                break;
-            case 2:
-                gl.glLineStipple( 1, ( short ) parseInt( "0110011001100110", 2 ) );
-                break;
-            case 1:
-                gl.glLineStipple( 1, ( short ) parseInt( "0011001100110011", 2 ) );
-                break;
-            case 0:
-                gl.glLineStipple( 1, ( short ) parseInt( "1001100110011001", 2 ) );
-                break;
-            default:
-                break;
+                for ( int i = 0; i < xTicks.length; i++ )
+                {
+                    double iTick = converterX.fromAxisUnits( xTicks[i] );
+                    gl.glVertex2d( iTick, axis.getMinY( ) );
+                    gl.glVertex2d( iTick, axis.getMaxY( ) );
+                }
             }
-
-            for ( int i = 0; i < xTicks.length; i++ )
+            finally
             {
-                int iTick = axisX.valueToScreenPixel( converterX.fromAxisUnits( xTicks[i] ) );
-
-                // keep the last tick on the screen
-                if ( iTick == width ) iTick -= 1;
-
-                // don't draw ticks off the screen
-                if ( iTick < 0 )
-                {
-                    continue;
-                }
-                else if ( iTick > width )
-                {
-                    break;
-                }
-
-                gl.glBegin( GL.GL_LINES );
-                gl.glVertex2f( iTick, ( float ) 0 );
-                gl.glVertex2f( iTick, ( float ) height );
                 gl.glEnd( );
             }
 
@@ -241,13 +216,20 @@ public class GridPainter extends GlimpsePainter2D
                 GlimpseColor.glColor( gl, majorLineColor, 0.1f );
                 double[] xMinor = ticksX.getMinorTickPositions( xTicks );
 
-                for ( int i = 0; i < xMinor.length; i++ )
+                gl.glBegin( GL.GL_LINES );
+                try
                 {
-                    int iTick = axisX.valueToScreenPixel( converterX.fromAxisUnits( xMinor[i] ) );
 
-                    gl.glBegin( GL.GL_LINES );
-                    gl.glVertex2f( iTick, ( float ) 0 );
-                    gl.glVertex2f( iTick, ( float ) height );
+                    for ( int i = 0; i < xMinor.length; i++ )
+                    {
+                        double iTick = converterX.fromAxisUnits( xMinor[i] );
+                        gl.glVertex2d( iTick, axis.getMinY( ) );
+                        gl.glVertex2d( iTick, axis.getMaxY( ) );
+                    }
+
+                }
+                finally
+                {
                     gl.glEnd( );
                 }
             }
@@ -261,49 +243,20 @@ public class GridPainter extends GlimpsePainter2D
         {
             gl.glLineWidth( majorLineThickness );
             gl.glColor4fv( majorLineColor, 0 );
+            glLineStipple( gl, axisX, converterX );
 
-            // make the stipple look like it's translating during drags
-            int stipplePhase = ( int ) ( axisX.valueToScreenPixelUnits( converterX.fromAxisUnits( 0 ) ) ) % 4;
-            stipplePhase = stipplePhase < 0 ? stipplePhase + 4 : stipplePhase;
-
-            switch ( stipplePhase )
+            gl.glBegin( GL.GL_LINES );
+            try
             {
-            case 3:
-                gl.glLineStipple( 1, ( short ) parseInt( "1100110011001100", 2 ) );
-                break;
-            case 2:
-                gl.glLineStipple( 1, ( short ) parseInt( "0110011001100110", 2 ) );
-                break;
-            case 1:
-                gl.glLineStipple( 1, ( short ) parseInt( "0011001100110011", 2 ) );
-                break;
-            case 0:
-                gl.glLineStipple( 1, ( short ) parseInt( "1001100110011001", 2 ) );
-                break;
-            default:
-                break;
+                for ( int i = 0; i < yTicks.length; i++ )
+                {
+                    double jTick = converterY.fromAxisUnits( yTicks[i] );
+                    gl.glVertex2d( axis.getMinX( ), jTick );
+                    gl.glVertex2d( axis.getMaxX( ), jTick );
+                }
             }
-
-            for ( int i = 0; i < yTicks.length; i++ )
+            finally
             {
-                int jTick = axisY.valueToScreenPixel( converterY.fromAxisUnits( yTicks[i] ) );
-
-                // keep the last tick on the screen
-                if ( jTick == height ) jTick -= 1;
-
-                // don't draw ticks off the screen
-                if ( jTick < 0 )
-                {
-                    continue;
-                }
-                else if ( jTick > height )
-                {
-                    break;
-                }
-
-                gl.glBegin( GL.GL_LINES );
-                gl.glVertex2f( ( float ) 0, jTick );
-                gl.glVertex2f( ( float ) width, jTick );
                 gl.glEnd( );
             }
 
@@ -312,13 +265,18 @@ public class GridPainter extends GlimpsePainter2D
                 GlimpseColor.glColor( gl, majorLineColor, 0.1f );
                 double[] yMinor = ticksY.getMinorTickPositions( yTicks );
 
-                for ( int i = 0; i < yMinor.length; i++ )
+                gl.glBegin( GL.GL_LINES );
+                try
                 {
-                    int jTick = axisY.valueToScreenPixel( converterY.fromAxisUnits( yMinor[i] ) );
-
-                    gl.glBegin( GL.GL_LINES );
-                    gl.glVertex2f( ( float ) 0, jTick );
-                    gl.glVertex2f( ( float ) width, jTick );
+                    for ( int i = 0; i < yMinor.length; i++ )
+                    {
+                        double jTick = converterY.fromAxisUnits( yMinor[i] );
+                        gl.glVertex2d( axis.getMinX( ), jTick );
+                        gl.glVertex2d( axis.getMaxX( ), jTick );
+                    }
+                }
+                finally
+                {
                     gl.glEnd( );
                 }
             }

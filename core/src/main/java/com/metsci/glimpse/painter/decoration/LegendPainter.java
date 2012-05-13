@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -36,14 +39,14 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
@@ -62,7 +65,6 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
     //TODO add locks?
 
-    private Font textFont = FontUtils.getDefaultBold( 15.0f );
     private float[] textColor = GlimpseColor.getBlack( );
 
     //The width of the color item next to the legend.
@@ -88,6 +90,11 @@ public abstract class LegendPainter extends GlimpsePainter2D
      */
     private int offsetX = 10;
     private int offsetY = 10;
+    
+    private boolean fontSet = false;
+    
+    private volatile Font newFont = null;
+    private volatile boolean antialias = false;
 
     public LegendPainter( LegendPlacement placement )
     {
@@ -97,24 +104,44 @@ public abstract class LegendPainter extends GlimpsePainter2D
         setFont( 15, false );
     }
 
-    public void setFont( Font font )
+    public LegendPainter setFont( Font font )
     {
-        textFont = font;
-        if ( textRenderer != null )
+        setFont( font, false );
+        return this;
+    }
+
+    public LegendPainter setFont( Font font, boolean antialias )
+    {
+        this.newFont = font;
+        this.antialias = antialias;
+        this.fontSet = true;
+        return this;
+    }
+
+    public LegendPainter setFont( int size, boolean bold )
+    {
+        setFont( size, bold, false );
+        return this;
+    }
+
+    public LegendPainter setFont( int size, boolean bold, boolean antialias )
+    {
+        if ( bold )
         {
-            textRenderer.dispose( );
+            setFont( getDefaultBold( size ), antialias );
         }
-        textRenderer = new TextRenderer( textFont, true, false );
-    }
+        else
+        {
+            setFont( getDefaultPlain( size ), antialias );
+        }
 
-    public void setFont( float size, boolean bold )
-    {
-        setFont( bold ? FontUtils.getDefaultBold( size ) : FontUtils.getDefaultPlain( size ) );
+        return this;
     }
-
-    public void setTextColor( float[] rgba )
+    
+    public LegendPainter setTextColor( float[] rgba )
     {
         textColor = rgba;
+        return this;
     }
 
     public void setTextColor( float r, float g, float b, float a )
@@ -325,13 +352,6 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
     protected abstract void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height );
 
-    @Override
-    public void dispose( GLContext context )
-    {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
-    }
-
     public static class BlockLegendPainter extends LegendPainter
     {
         public BlockLegendPainter( LegendPlacement placement )
@@ -450,6 +470,13 @@ public abstract class LegendPainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
+        if ( newFont != null )
+        {
+            if ( textRenderer != null ) textRenderer.dispose( );
+            textRenderer = new TextRenderer( newFont, antialias, false );
+            newFont = null;
+        }
+    	
         GL gl = context.getGL( );
 
         int width = bounds.getWidth( );
@@ -471,4 +498,23 @@ public abstract class LegendPainter extends GlimpsePainter2D
             displayLegend( gl, width, height );
         }
     }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        // ignore the look and feel if a font has been manually set
+        if ( !fontSet )
+        {
+            setFont( laf.getFont( AbstractLookAndFeel.TITLE_FONT ), false );
+            fontSet = false;
+        }
+    }
+    
+    @Override
+    public void dispose( GlimpseContext context )
+    {
+        if ( textRenderer != null ) textRenderer.dispose( );
+        textRenderer = null;
+    }
+
 }

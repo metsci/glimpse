@@ -78,7 +78,10 @@ public abstract class MouseWrapper<E>
         List<GlimpseTarget> list = layout.getTargetChildren( );
         int size = list.size( );
 
-        // run though the list backwards -- GlimpseLayouts added later are considered "on top"
+        // run though the list backwards. GlimpseTarget.getTargetChildren() returns
+        // a list sorted by zOrder. GlimpseTargets with larger zOrder (or those added
+        // later among GlimpseTargets with the same zOrder) are considered "on top"
+        // and should have events delivered to them first
         for ( int i = size - 1; i >= 0; i-- )
         {
             GlimpseTarget childLayout = list.get( i );

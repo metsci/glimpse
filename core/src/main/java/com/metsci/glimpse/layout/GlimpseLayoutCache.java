@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.layout;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +101,10 @@ public class GlimpseLayoutCache<D>
 
     public void setValue( GlimpseTargetStack stack, D value )
     {
-        map.put( stack.getTargetList( ), new Pair<List<GlimpseBounds>, D>( stack.getBoundsList( ), value ) );
+        List<GlimpseTarget> targetList = Collections.unmodifiableList( new ArrayList<GlimpseTarget>( stack.getTargetList( ) ) );
+        List<GlimpseBounds> boundsList = Collections.unmodifiableList( new ArrayList<GlimpseBounds>( stack.getBoundsList( ) ) );
+
+        map.put( targetList, new Pair<List<GlimpseBounds>, D>( boundsList, value ) );
     }
 
     public void setValue( GlimpseContext context, D value )
@@ -120,12 +126,15 @@ public class GlimpseLayoutCache<D>
         if ( list1 == null || list2 == null ) return false;
         if ( list1.size( ) != list2.size( ) ) return false;
 
-        for ( int i = 0; i < list1.size( ); i++ )
-        {
-            GlimpseBounds ourBounds = list1.get( i );
-            GlimpseBounds otherBounds = list2.get( i );
+        Iterator<GlimpseBounds> iter1 = list1.iterator( );
+        Iterator<GlimpseBounds> iter2 = list2.iterator( );
 
-            if ( !ourBounds.equals( otherBounds ) ) return false;
+        while ( iter1.hasNext( ) )
+        {
+            GlimpseBounds bounds1 = iter1.next( );
+            GlimpseBounds bounds2 = iter2.next( );
+
+            if ( !bounds1.equals( bounds2 ) ) return false;
         }
 
         return true;

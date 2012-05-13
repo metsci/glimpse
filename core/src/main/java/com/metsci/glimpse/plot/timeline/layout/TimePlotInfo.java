@@ -33,6 +33,7 @@ import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
@@ -44,36 +45,45 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
 
 /**
- *
  * @author ulman
  */
 public class TimePlotInfo implements PlotInfo
 {
-
     protected GridPainter gridPainter;
     protected NumericXYAxisPainter axisPainter;
     protected SimpleTextPainter labelPainter;
     protected BorderPainter borderPainter;
+    protected BorderPainter labelBorderPainter;
     protected DelegatePainter dataPainter;
 
     protected StackedTimePlot2D parent;
     protected PlotInfo child;
 
     protected TimelineMouseListener2D listener;
+    
+    protected GlimpseLayout labelLayout;
 
     //@formatter:off
-    public TimePlotInfo( StackedTimePlot2D parent, PlotInfo child, TimelineMouseListener2D listener,
-                         GridPainter gridPainter, NumericXYAxisPainter axisPainter,
-                         SimpleTextPainter labelPainter, BorderPainter borderPainter,
+    public TimePlotInfo( StackedTimePlot2D parent,
+                         PlotInfo child,
+                         GlimpseLayout labelLayout,
+                         TimelineMouseListener2D listener,
+                         GridPainter gridPainter,
+                         NumericXYAxisPainter axisPainter,
+                         SimpleTextPainter labelPainter,
+                         BorderPainter borderPainter,
+                         BorderPainter labelBorderPainter,
                          DelegatePainter dataPainter )
     {
         this.parent = parent;
         this.child = child;
+        this.labelLayout = labelLayout;
         this.listener = listener;
         this.gridPainter = gridPainter;
         this.axisPainter = axisPainter;
         this.labelPainter = labelPainter;
         this.borderPainter = borderPainter;
+        this.labelBorderPainter = labelBorderPainter;
         this.dataPainter = dataPainter;
     }
     //@formatter:on
@@ -91,6 +101,16 @@ public class TimePlotInfo implements PlotInfo
     public void setBorderWidth( float width )
     {
         this.borderPainter.setLineWidth( width );
+    }
+    
+    public void setLabelBorderColor( float[] rgba )
+    {
+        this.labelBorderPainter.setColor( rgba );
+    }
+
+    public void setLabelBorderWidth( float width )
+    {
+        this.labelBorderPainter.setLineWidth( width );
     }
 
     public void setLabelText( String text )
@@ -113,6 +133,11 @@ public class TimePlotInfo implements PlotInfo
     {
         this.axisPainter.setFont( font );
     }
+    
+    public GlimpseLayout getLabelLayout( )
+    {
+        return labelLayout;
+    }
 
     public GridPainter getGridPainter( )
     {
@@ -132,6 +157,11 @@ public class TimePlotInfo implements PlotInfo
     public BorderPainter getBorderPainter( )
     {
         return borderPainter;
+    }
+    
+    public BorderPainter getLabelBorderPainter( )
+    {
+        return labelBorderPainter;
     }
 
     public StackedTimePlot2D getStackedTimePlot( )

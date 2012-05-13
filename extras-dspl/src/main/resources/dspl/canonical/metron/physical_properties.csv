@@ -3,11 +3,11 @@ LENGTH,length,TRUE,1,0,0,0,0,0,0,0,0
 MASS,mass,TRUE,0,1,0,0,0,0,0,0,0
 TIME,time,TRUE,0,0,1,0,0,0,0,0,0
 CURRENT,current,TRUE,0,0,0,1,0,0,0,0,0
-AMOUNT,"amount of substance",TRUE,0,0,0,0,1,0,0,0,0
-LUMINOUS_INTENSITY,"luminous intensity",TRUE,0,0,0,0,0,1,0,0,0
-PLANAR_ANGLE,"planar angle",TRUE,0,0,0,0,0,0,1,0,0
-SOLID_ANGLE,"solid angle",TRUE,0,0,0,0,0,0,0,1,0
-TEMPERATURE,"temperature",TRUE,0,0,0,0,0,0,0,0,1
+AMOUNT,amount of substance,TRUE,0,0,0,0,1,0,0,0,0
+LUMINOUS_INTENSITY,luminous intensity,TRUE,0,0,0,0,0,1,0,0,0
+PLANAR_ANGLE,planar angle,TRUE,0,0,0,0,0,0,1,0,0
+SOLID_ANGLE,solid angle,TRUE,0,0,0,0,0,0,0,1,0
+TEMPERATURE,temperature,TRUE,0,0,0,0,0,0,0,0,1
 SPEED,speed,FALSE,1,0,-1,0,0,0,0,0,0
 FREQUENCY,frequency,FALSE,0,0,-1,0,0,0,0,0,0
 ENERGY,energy,FALSE,2,1,-2,0,0,0,0,0,0
@@ -26,3 +26,4 @@ ELECTRIC_CHARGE,electric charge,FALSE,0,0,1,1,0,0,0,0,0
 MAGNETIC_FLUX,magnetic flux,FALSE,2,1,-2,-1,0,0,0,0,0
 MAGNETIC_FLUX_DENSITY,magnetic flux density,FALSE,0,1,-2,-1,0,0,0,0,0
 INDUCTANCE,inductance,FALSE,2,1,-2,-2,0,0,0,0,0
+ANGULAR_VELOCITY,angular velocity,FALSE,0,0,-1,0,0,0,1,0,0

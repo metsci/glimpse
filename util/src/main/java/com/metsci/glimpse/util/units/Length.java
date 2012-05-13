@@ -40,23 +40,38 @@ public class Length
     public static final double yardsToFeet              = 3.0;
     public static final double feetToMeters             = 0.3048;
     public static final double kiloyardsToYards         = 1.0e3;
+    public static final double feetToInches             = 12.0;
+    public static final double metersToMillimeters      = 1.0e3;
     public static final double yardsToMeters            = yardsToFeet * feetToMeters;
     public static final double kiloyardsToMeters        = kiloyardsToYards * yardsToMeters;
     public static final double kiloyardsToFeet          = kiloyardsToYards * yardsToFeet;
     public static final double nauticalMilesToFeet      = nauticalMilesToMeters / feetToMeters;
     public static final double nauticalMilesToYards     = nauticalMilesToMeters / yardsToMeters;
     public static final double nauticalMilesToKiloyards = nauticalMilesToMeters / kiloyardsToMeters;
+    public static final double inchesToMillimeters      = feetToMeters * metersToMillimeters / feetToInches;
+    public static final double metersToInches           = feetToInches / feetToMeters;
+    public static final double feetToMillimeters        = feetToMeters * metersToMillimeters;
+    public static final double yardsToMillimeters       = yardsToFeet * feetToMillimeters;
+    public static final double yardsToInches            = yardsToFeet * feetToInches;
+
 
     public static final double metersToNauticalMiles    = 1.0 / nauticalMilesToMeters;
     public static final double feetToYards              = 1.0 / yardsToFeet;
     public static final double metersToFeet             = 1.0 / feetToMeters;
     public static final double yardsToKiloyards         = 1.0 / kiloyardsToYards;
+    public static final double inchesToFeet             = 1.0 / feetToInches;
+    public static final double millimetersToMeters      = 1.0 / metersToMillimeters;
     public static final double metersToYards            = 1.0 / yardsToMeters;
     public static final double metersToKiloyards        = 1.0 / kiloyardsToMeters;
     public static final double feetToKiloyards          = 1.0 / kiloyardsToFeet;
     public static final double feetToNauticalMiles      = 1.0 / nauticalMilesToFeet;
     public static final double yardsToNauticalMiles     = 1.0 / nauticalMilesToYards;
     public static final double kiloyardsToNauticalMiles = 1.0 / nauticalMilesToKiloyards;
+    public static final double millimetersToInches      = 1.0 / inchesToMillimeters;
+    public static final double inchesToMeters           = 1.0 / metersToInches;
+    public static final double millimetersToFeet        = 1.0 / feetToMillimeters;
+    public static final double millimetersToYards       = 1.0 / yardsToMillimeters;
+    public static final double inchesToYards            = 1.0 / yardsToInches;
 
 
     /**
@@ -259,6 +274,139 @@ public class Length
      */
     public static double[] kiloyardsToYards(double... lengths_KILOYARDS) { return multiply(lengths_KILOYARDS, kiloyardsToYards); }
 
+    /**
+     * Converts length from feet to inches.
+     */
+    public static double feetToInches(double length_FEET) { return length_FEET * feetToInches; }
+
+    /**
+     * Converts length from feet to inches.
+     */
+    public static double[] feetToInches(double... length_FEET) { return multiply(length_FEET, feetToInches); }
+
+    /**
+     * Converts length from meters to millimeters.
+     */
+    public static double metersToMillimeters(double length_METERS) { return length_METERS * metersToMillimeters; }
+
+    /**
+     * Converts length from meters to millimeters.
+     */
+    public static double[] metersToMillimeters(double... length_METERS) { return multiply(length_METERS, metersToMillimeters); }
+
+    /**
+     * Converts length from millimeters to meters.
+     */
+    public static double millimetersToMeters(double length_MILLIMETERS) { return length_MILLIMETERS * millimetersToMeters; }
+
+    /**
+     * Converts length from millimeters to meters.
+     */
+    public static double[] millimetersToMeters(double... length_MILLIMETERS) { return multiply(length_MILLIMETERS, millimetersToMeters); }
+
+    /**
+     * Converts length from inches to millimeters.
+     */
+    public static double inchesToMillimeters(double length_INCHES) { return length_INCHES * inchesToMillimeters; }
+
+    /**
+     * Converts length from inches to millimeters.
+     */
+    public static double[] inchesToMillimeters(double... length_INCHES) { return multiply(length_INCHES, inchesToMillimeters); }
+
+    /**
+     * Converts length from millimeters to inches.
+     */
+    public static double millimetersToInches(double length_MILLIMETERS) { return length_MILLIMETERS * millimetersToInches; }
+
+    /**
+     * Converts length from millimeters to inches.
+     */
+    public static double[] millimetersToInches(double... length_MILLIMETERS) { return multiply(length_MILLIMETERS, millimetersToInches); }
+
+    /**
+     * Converts length from inches to meters.
+     */
+    public static double inchesToMeters(double length_INCHES) { return length_INCHES * inchesToMeters; }
+
+    /**
+     * Converts length from inches to meters.
+     */
+    public static double[] inchesToMeters(double... length_INCHES) { return multiply(length_INCHES, inchesToMeters); }
+
+    /**
+     * Converts length from meters to inches.
+     */
+    public static double metersToInches(double length_METERS) { return length_METERS * metersToInches; }
+
+    /**
+     * Converts length from meters to inches.
+     */
+    public static double[] metersToInches(double... length_METERS) { return multiply(length_METERS, metersToInches); }
+
+    /**
+     * Converts length from feet to millimeters.
+     */
+    public static double feetToMillimeters(double length_FEET) { return length_FEET * feetToMillimeters; }
+
+    /**
+     * Converts length from feet to millimeters.
+     */
+    public static double[] feetToMillimeters(double... length_FEET) { return multiply(length_FEET, feetToMillimeters); }
+
+    /**
+     * Converts length from millimeters to feet.
+     */
+    public static double millimetersToFeet(double length_MILLIMETERS) { return length_MILLIMETERS * millimetersToFeet; }
+
+    /**
+     * Converts length from millimeters to feet.
+     */
+    public static double[] millimetersToFeet(double... length_MILLIMETERS) { return multiply(length_MILLIMETERS, millimetersToFeet); }
+
+    /**
+     * Converts length from yards to millimeters.
+     */
+    public static double yardsToMillimeters(double length_YARDS) { return length_YARDS * yardsToMillimeters; }
+
+    /**
+     * Converts length from yards to millimeters.
+     */
+    public static double[] yardsToMillimeters(double... length_YARDS) { return multiply(length_YARDS, yardsToMillimeters); }
+
+    /**
+     * Converts length from millimeters to yards.
+     */
+    public static double millimetersToYards(double length_MILLIMETERS) { return length_MILLIMETERS * millimetersToYards; }
+
+    /**
+     * Converts length from millimeters to yards.
+     */
+    public static double[] millimetersToYards(double... length_MILLIMETERS) { return multiply(length_MILLIMETERS, millimetersToYards); }
+
+    /**
+     * Converts length from yards to inches.
+     */
+    public static double yardsToInches(double length_YARDS) { return length_YARDS * yardsToInches; }
+
+    /**
+     * Converts length from yards to inches.
+     */
+    public static double[] yardsToInches(double... length_YARDS) { return multiply(length_YARDS, yardsToInches); }
+
+    /**
+     * Converts length from inches to yards.
+     */
+    public static double inchesToYards(double length_INCHES) { return length_INCHES * inchesToYards; }
+
+    /**
+     * Converts length from inches to yards.
+     */
+    public static double[] inchesToYards(double... length_INCHES) { return multiply(length_INCHES, inchesToYards); }
+
+
+
+
 
     // System units for length are meters.
     //
@@ -267,12 +415,16 @@ public class Length
     public static final double feetToSu          = feetToMeters;
     public static final double yardsToSu         = yardsToMeters;
     public static final double kiloyardsToSu     = kiloyardsToMeters;
+    public static final double inchesToSu        = inchesToMeters;
+    public static final double millimetersToSu   = millimetersToMeters;
 
     public static final double suToMeters        = 1.0 / metersToSu;
     public static final double suToNauticalMiles = 1.0 / nauticalMilesToSu;
     public static final double suToFeet          = 1.0 / feetToSu;
     public static final double suToYards         = 1.0 / yardsToSu;
     public static final double suToKiloyards     = 1.0 / kiloyardsToSu;
+    public static final double suToInches        = 1.0 / inchesToSu;
+    public static final double suToMillimeters   = 1.0 / millimetersToSu;
 
 
     /**
@@ -374,6 +526,46 @@ public class Length
      * Converts length from system-units to kiloyards.
      */
     public static double[] toKiloyards(double... lengths_SU) { return multiply(lengths_SU, suToKiloyards); }
+
+    /**
+     * Converts length from inches to system-units.
+     */
+    public static double fromInches(double length_INCHES) { return length_INCHES * inchesToSu; }
+
+    /**
+     * Converts length from inches to system-units.
+     */
+    public static double[] fromInches(double... length_INCHES) { return multiply(length_INCHES, inchesToSu); }
+
+    /**
+     * Converts length from system-units to inches.
+     */
+    public static double toInches(double length_SU) { return length_SU * suToInches; }
+
+    /**
+     * Converts length from system-units to inches.
+     */
+    public static double[] toInches(double... lengths_SU) { return multiply(lengths_SU, suToInches); }
+
+    /**
+     * Converts length from millimeters to system-units.
+     */
+    public static double fromMillimeters(double length_MILLIMETERS) { return length_MILLIMETERS * millimetersToSu; }
+
+    /**
+     * Converts length from millimeters to system-units.
+     */
+    public static double[] fromMillimeters(double... length_MILLIMETERS) { return multiply(length_MILLIMETERS, millimetersToSu); }
+
+    /**
+     * Converts length from system-units to millimeters.
+     */
+    public static double toMillimeters(double length_SU) { return length_SU * suToMillimeters; }
+
+    /**
+     * Converts length from system-units to millimeters.
+     */
+    public static double[] toMillimeters(double... lengths_SU) { return multiply(lengths_SU, suToMillimeters); }
 
 
     private static double[] multiply(double[] array, double factor)

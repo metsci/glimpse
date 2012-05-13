@@ -63,7 +63,7 @@ import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 
 /**
- * A simple, blank plotting area which divides itself into five regions:
+ * <p>A simple, blank plotting area which divides itself into five regions:</p>
  * <ul>
  *  <li> a central plotting area
  *  <li> a title area above the plot
@@ -72,17 +72,35 @@ import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
  *  <li> a labeled vertical z axis to the right of the plot
  * </ul>
  *
- * Any of the areas above may be shown or hidden (the z axis area is commonly hidden).<p>
+ * <p>Any of the areas above may be shown or hidden (the z axis area is commonly hidden).</p>
  *
- * This plot is commonly used as a template for building new plots, however
+ * <p>This plot is commonly used as a template for building new plots, however
  * for most use cases {@link SimplePlot2D} is more useful. It automatically
- * provides useful painters such as grid lines and mouse cursors.
+ * provides useful painters such as grid lines and mouse cursors.</p>
  *
  * @author ulman
  * @see SimplePlot2D
  */
 public class Plot2D extends GlimpseAxisLayout2D
 {
+    /**
+     * A constant for use with {@link com.metsci.glimpse.layout.GlimpseLayout#setZOrder(com.metsci.glimpse.painter.base.GlimpsePainter, int)}.
+     * GlimpsePainters which should appear behind the plot data should be given this z order value.
+     */
+    public static int BACKGROUND_LAYER = -100;
+    
+    /**
+     * A constant for use with {@link com.metsci.glimpse.layout.GlimpseLayout#setZOrder(com.metsci.glimpse.painter.base.GlimpsePainter, int)}.
+     * GlimpsePainters which contain plot data should generally be given this z order value. Note, this is the default z order.
+     */
+    public static int DATA_LAYER = 0;
+    
+    /**
+     * A constant for use with {@link com.metsci.glimpse.layout.GlimpseLayout#setZOrder(com.metsci.glimpse.painter.base.GlimpsePainter, int)}.
+     * GlimpsePainters which contain overlays that should appear in front of plot data should be given this z order value.
+     */
+    public static int FOREGROUND_LAYER = 100;   
+    
     protected int outerBorder = 10;
     protected int axisThicknessX = 40;
     protected int axisThicknessY = 60;

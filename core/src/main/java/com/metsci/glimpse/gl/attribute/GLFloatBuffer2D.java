@@ -93,8 +93,6 @@ public class GLFloatBuffer2D extends GLFloatBuffer
 
             if ( xyIndex == null )
             {
-                final FloatBuffer floatData = data.asFloatBuffer( );
-                
                 // mutators should optionally return a list of changed
                 // points to speed this up when only a few points change
                 xyIndex = new QuadTreeInts( MAX_BUCKET_SIZE )
@@ -102,13 +100,13 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                     @Override
                     protected final float x( int i )
                     {
-                        return floatData.get( i*2 );
+                        return data.asFloatBuffer( ).get( i*2 );
                     }
 
                     @Override
                     protected final float y( int i )
                     {
-                        return floatData.get( i*2+1 );
+                        return data.asFloatBuffer( ).get( i*2+1 );
                     }
                 };
 
@@ -142,8 +140,6 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 return;
             }
             
-            final FloatBuffer floatData = data.asFloatBuffer( );
-
             // mutators should optionally return a list of changed
             // points to speed this up when only a few points change
             xyIndex = new QuadTreeInts( MAX_BUCKET_SIZE )
@@ -151,13 +147,13 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 @Override
                 protected final float x( int i )
                 {
-                    return floatData.get( i*2 );
+                    return data.asFloatBuffer( ).get( i*2 );
                 }
 
                 @Override
                 protected final float y( int i )
                 {
-                    return floatData.get( i*2+1 );
+                    return data.asFloatBuffer( ).get( i*2+1 );
                 }
             };
 
@@ -286,6 +282,6 @@ public class GLFloatBuffer2D extends GLFloatBuffer
          * @return the lowest changed index in the buffer
          */
         public int getUpdateIndex( );
-        public void mutate( FloatBuffer data, int length );
+        public void mutate( FloatBuffer data, int elementSize );
     }
 }

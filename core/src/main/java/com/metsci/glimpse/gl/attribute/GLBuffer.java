@@ -68,6 +68,26 @@ public abstract class GLBuffer
     
     public abstract int getBytesPerElement( );
 
+    public void ensureCapacity( int length )
+    {
+        lock.lock( );
+        try
+        {
+            if ( length > getNumVertices( ) )
+            {
+                ByteBuffer newByteBuffer = createBuffer( length, elementSize );
+                data.rewind( );
+                newByteBuffer.put( data ).rewind( );
+                data = newByteBuffer;
+                dirty = true;
+            }
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
     public ByteBuffer createBuffer( int length, int elementSize )
     {
         return BufferUtil.newByteBuffer( length * elementSize * getBytesPerElement( ) );

@@ -193,31 +193,29 @@ public class TimeYAxisPainter extends TimeAxisPainter
 
     private double printTickLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, int width, int height )
     {
-
         int iTimeText = Integer.MAX_VALUE;
         textRenderer.beginRendering( width, height );
         try
         {
+            for ( TimeStamp t : tickTimes )
+            {
+                String string = t.toString( format );
+                Rectangle2D textBounds = textRenderer.getBounds( string );
 
-        for ( TimeStamp t : tickTimes )
-        {
-            String string = t.toString( format );
-            Rectangle2D textBounds = textRenderer.getBounds( string );
+                double textHeight = textBounds.getHeight( );
+                int j = ( int ) Math.round( axis.valueToScreenPixel( fromTimeStamp( t ) ) - 0.5 * Math.max( 1, textHeight - 2 ) );
+                if ( j < 0 || j + textHeight > height ) continue;
 
-            double textHeight = textBounds.getHeight( );
-            int j = ( int ) Math.round( axis.valueToScreenPixel( fromTimeStamp( t ) ) - 0.5 * Math.max( 1, textHeight - 2 ) );
-            if ( j < 0 || j + textHeight > height ) continue;
+                int i = ( int ) Math.round( width - tickLineLength - textBounds.getWidth( ) )-1;
+                iTimeText = Math.min( iTimeText, i );
 
-            int i = ( int ) Math.round( width - tickLineLength - textBounds.getWidth( ) )-1;
-            iTimeText = Math.min( iTimeText, i );
-
-            textRenderer.draw( string, i, j );
+                textRenderer.draw( string, i, j );
+            }
         }
-    }
-    finally
-    {
-        textRenderer.endRendering( );
-    }
+        finally
+        {
+            textRenderer.endRendering( );
+        }
 
         return iTimeText;
     }

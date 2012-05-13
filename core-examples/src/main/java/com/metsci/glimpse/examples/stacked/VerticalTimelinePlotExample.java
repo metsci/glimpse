@@ -27,6 +27,10 @@
 package com.metsci.glimpse.examples.stacked;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.Tag;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
@@ -50,6 +54,20 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     }
 
     @Override
+    public StackedTimePlot2D getLayout( )
+    {
+        StackedTimePlot2D plot = super.getLayout( );
+        
+        // display horizontal labels
+        for ( TimePlotInfo info : plot.getAllTimePlots( ) )
+        {
+            info.getLabelPainter( ).setHorizontalLabels( true );
+        }
+        
+        return plot;
+    }
+    
+    @Override
     protected StackedTimePlot2D createPlot( )
     {
         return new StackedTimePlot2D( Orientation.HORIZONTAL, Epoch.currentTime( ) );
@@ -67,5 +85,78 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
         Axis1D axis = chart.getLayout( ).getAxis( ).getAxisX( );
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
+    }
+    
+    @Override
+    protected void addMouseListener( final Epoch epoch, final TimePlotInfo plot1 )
+    {
+        plot1.getLayout( ).addGlimpseMouseListener( new GlimpseMouseListener( )
+        {
+            @Override
+            public void mouseEntered( GlimpseMouseEvent event )
+            {
+            }
+
+            @Override
+            public void mouseExited( GlimpseMouseEvent event )
+            {
+            }
+
+            @SuppressWarnings( "unused" )
+            @Override
+            public void mousePressed( GlimpseMouseEvent event )
+            {
+                // get the pixel location of the click (relative to the
+                // upper left corner of the GlimpseLayout in which the
+                // mouse event occurred)
+                int pixelX = event.getX( );
+                int pixelY = event.getY( );
+
+                // get the y axes of the GlimpseLayout in which the mouse event occurred
+                Axis1D axisTime = event.getAxis2D( ).getAxisY( );
+
+                // another way to get the same time axis, getting the time axis from the
+                // TimePlotInfo has the advantage of automatically casting to a TaggedAxis1D,
+                // which allows us to access the selected time range
+                TaggedAxis1D axisTaggedTime = plot1.getCommonAxis( event.getTargetStack( ) );
+
+                if ( axisTaggedTime != axisTime ) System.out.println( "Axis: this should never print!" );
+
+                // the StackedTimePlot2D allows access to the time selection region
+                StackedTimePlot2D parent = plot1.getStackedTimePlot( );
+                Tag timeSelectionMin = parent.getTimeSelectionMin( );
+                Tag timeSelectionMax = parent.getTimeSelectionMax( );
+
+                // alternatively, we can get the tags directly from the TaggedAxis1D if we know
+                // their String identifiers, which StackedTimePlot2D provides as public fields
+                Tag timeSelectionAlternateMin = axisTaggedTime.getTag( StackedTimePlot2D.MIN_TIME );
+                Tag timeSelectionAlternateMax = axisTaggedTime.getTag( StackedTimePlot2D.MAX_TIME );
+
+                // use the StackedTimePlot2D Epoch to convert the Tag values into absolute TimeStamps
+                TimeStamp timeSelectionMinTime = epoch.toTimeStamp( timeSelectionMin.getValue( ) );
+                TimeStamp timeSelectionMaxTime = epoch.toTimeStamp( timeSelectionMax.getValue( ) );
+
+                // get the x axes of the GlimpseLayout in which the mouse event occurred
+                Axis1D axisX = event.getAxis2D( ).getAxisX( );
+
+                // convert from pixel space to axis value space using the axis
+                double axisValueY = axisTime.screenPixelToValue( pixelY );
+
+                // use the StackedTimePlot2D Epoch to further convert the axis
+                // value into an absolute TimeStamp
+                TimeStamp axisValueTime = epoch.toTimeStamp( axisValueY );
+
+                // convert from pixel space to axis value space using the axis
+                double axisValueX = axisX.screenPixelToValue( axisX.getSizePixels( ) - pixelX );
+
+                // print the values calculated above
+                System.out.printf( "PixelX: %d PixelY: %d ValueX: %f ValueY: %f Time: %s Selection Min: %s Selection Max: %s %n", pixelX, pixelY, axisValueX, axisValueY, axisValueTime, timeSelectionMinTime, timeSelectionMaxTime );
+            }
+
+            @Override
+            public void mouseReleased( GlimpseMouseEvent event )
+            {
+            }
+        } );
     }
 }

@@ -30,8 +30,6 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GLAutoDrawable;
@@ -45,6 +43,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.canvas.LayoutManager;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
@@ -61,8 +60,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
 
     protected Composite parent;
 
-    protected List<GlimpseTarget> unmodifiableList;
-    protected List<GlimpseLayout> layoutList;
+    protected LayoutManager layoutManager;
 
     protected MouseWrapperSWTBridge mouseHelper;
     protected boolean isEventConsumer = true;
@@ -78,7 +76,6 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
         this( parent, context, SWT.EMBEDDED );
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public SwtBridgeGlimpseCanvas( Composite parent, GLContext context, int style )
     {
         super( parent, style | SWT.EMBEDDED );
@@ -103,11 +100,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
             this.glCanvas = new GLCanvas( null, null, context, null );
         }
 
-        this.layoutList = new ArrayList<GlimpseLayout>( );
-
-        // this is typesafe because unmodifiableList is unmodifiable, so it's not
-        // possible to corrupt layoutList with non GlimpseLayouts
-        this.unmodifiableList = ( List ) Collections.unmodifiableList( this.layoutList );
+        this.layoutManager = new LayoutManager( );
 
         this.mouseHelper = new MouseWrapperSWTBridge( this );
         this.glCanvas.addMouseListener( this.mouseHelper );
@@ -141,28 +134,50 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
-        for ( GlimpseLayout layout : layoutList )
+        for ( GlimpseTarget target : this.layoutManager.getLayoutList( ) )
         {
-            layout.setLookAndFeel( laf );
+            target.setLookAndFeel( laf );
         }
     }
 
     @Override
     public void addLayout( GlimpseLayout layout )
     {
-        this.layoutList.add( layout );
+        this.layoutManager.addLayout( layout );
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.addLayout( layout, zOrder );
+    }
+
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.setZOrder( layout, zOrder );
     }
 
     @Override
     public void removeLayout( GlimpseLayout layout )
     {
-        this.layoutList.remove( layout );
+        this.layoutManager.removeLayout( layout );
+    }
+    
+    @Override
+    public void removeAllLayouts( )
+    {
+        this.layoutManager.removeAllLayouts( );
     }
 
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override
     public List<GlimpseTarget> getTargetChildren( )
     {
-        return this.unmodifiableList;
+        // layoutManager returns an unmodifiable list, thus this cast is typesafe
+        // (there is no way for the recipient of the List<GlimpseTarget> view to
+        // add GlimpseTargets which are not GlimpseLayouts to the list)
+        return ( List ) this.layoutManager.getLayoutList( );
     }
 
     @Override
@@ -313,7 +328,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
             @Override
             public void display( GLAutoDrawable drawable )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.paintTo( getGlimpseContext( ) );
                 }
@@ -322,7 +337,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.layoutTo( getGlimpseContext( ) );
                 }

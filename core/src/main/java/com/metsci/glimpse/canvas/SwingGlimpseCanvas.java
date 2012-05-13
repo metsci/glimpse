@@ -32,8 +32,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelListener;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GLAutoDrawable;
@@ -62,13 +60,12 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 {
     private static final long serialVersionUID = -5279064113986688397L;
 
-    private GLCanvas glCanvas;
-    private GLAutoDrawable tempDrawable;
+    protected GLCanvas glCanvas;
+    protected GLAutoDrawable tempDrawable;
+
+    protected LayoutManager layoutManager;
 
     protected boolean isDisposed;
-
-    protected List<GlimpseTarget> unmodifiableList;
-    protected List<GlimpseLayout> layoutList;
 
     protected MouseWrapperSwing mouseHelper;
     protected boolean isEventConsumer = true;
@@ -89,7 +86,6 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         this( setNoEraseBackgroundProperty, null );
     }
 
-    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public SwingGlimpseCanvas( boolean setNoEraseBackgroundProperty, GLContext _context )
     {
         if ( setNoEraseBackgroundProperty )
@@ -111,11 +107,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         this.addMouseMotionListener( this.mouseHelper );
         this.addMouseWheelListener( this.mouseHelper );
 
-        this.layoutList = new ArrayList<GlimpseLayout>( );
-
-        // this is typesafe because unmodifiableList is unmodifiable, so it's not
-        // possible to corrupt layoutList with non GlimpseLayouts
-        this.unmodifiableList = ( List ) Collections.unmodifiableList( this.layoutList );
+        this.layoutManager = new LayoutManager( );
 
         this.setLayout( new BorderLayout( ) );
         this.add( this.glCanvas, BorderLayout.CENTER );
@@ -137,28 +129,50 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
-        for ( GlimpseLayout layout : layoutList )
+        for ( GlimpseTarget target : this.layoutManager.getLayoutList( ) )
         {
-            layout.setLookAndFeel( laf );
+            target.setLookAndFeel( laf );
         }
     }
 
     @Override
     public void addLayout( GlimpseLayout layout )
     {
-        this.layoutList.add( layout );
+        this.layoutManager.addLayout( layout );
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.addLayout( layout, zOrder );
+    }
+
+    @Override
+    public void setZOrder( GlimpseLayout layout, int zOrder )
+    {
+        this.layoutManager.setZOrder( layout, zOrder );
     }
 
     @Override
     public void removeLayout( GlimpseLayout layout )
     {
-        this.layoutList.remove( layout );
+        this.layoutManager.removeLayout( layout );
+    }
+    
+    @Override
+    public void removeAllLayouts( )
+    {
+        this.layoutManager.removeAllLayouts( );
     }
 
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     @Override
     public List<GlimpseTarget> getTargetChildren( )
     {
-        return this.unmodifiableList;
+        // layoutManager returns an unmodifiable list, thus this cast is typesafe
+        // (there is no way for the recipient of the List<GlimpseTarget> view to
+        // add GlimpseTargets which are not GlimpseLayouts to the list)
+        return ( List ) this.layoutManager.getLayoutList( );
     }
 
     @Override
@@ -357,7 +371,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             @Override
             public void display( GLAutoDrawable drawable )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.paintTo( getGlimpseContext( ) );
                 }
@@ -366,7 +380,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                for ( GlimpseLayout layout : layoutList )
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.layoutTo( getGlimpseContext( ) );
                 }

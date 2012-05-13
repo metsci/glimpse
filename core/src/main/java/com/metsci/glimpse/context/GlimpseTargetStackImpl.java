@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.context;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 
@@ -40,13 +41,19 @@ import com.metsci.glimpse.canvas.GlimpseCanvas;
  */
 public class GlimpseTargetStackImpl implements GlimpseTargetStack
 {
-    private LinkedList<GlimpseTarget> targetStack;
-    private LinkedList<GlimpseBounds> boundStack;
+    private final LinkedList<GlimpseTarget> targetStack;
+    private final List<GlimpseTarget> targetStackUnmod;
+
+    private final LinkedList<GlimpseBounds> boundStack;
+    private final List<GlimpseBounds> boundStackUnmod;
 
     public GlimpseTargetStackImpl( GlimpseTarget... targets )
     {
         this.targetStack = new LinkedList<GlimpseTarget>( );
+        this.targetStackUnmod = Collections.unmodifiableList( targetStack );
+
         this.boundStack = new LinkedList<GlimpseBounds>( );
+        this.boundStackUnmod = Collections.unmodifiableList( boundStack );
 
         for ( GlimpseTarget target : targets )
         {
@@ -57,7 +64,10 @@ public class GlimpseTargetStackImpl implements GlimpseTargetStack
     public GlimpseTargetStackImpl( GlimpseCanvas canvas )
     {
         this.targetStack = new LinkedList<GlimpseTarget>( );
+        this.targetStackUnmod = Collections.unmodifiableList( targetStack );
+
         this.boundStack = new LinkedList<GlimpseBounds>( );
+        this.boundStackUnmod = Collections.unmodifiableList( boundStack );
 
         this.push( canvas, canvas.getTargetBounds( ) );
     }
@@ -91,11 +101,14 @@ public class GlimpseTargetStackImpl implements GlimpseTargetStack
     public GlimpseTargetStack push( GlimpseTargetStack stack )
     {
         List<GlimpseTarget> targetList = stack.getTargetList( );
-        List<GlimpseBounds> boundsList = stack.getBoundsList( );
+        ListIterator<GlimpseTarget> targetIter = targetList.listIterator( targetList.size( ) );
 
-        for ( int i = targetList.size( ) - 1 ; i >= 0 ; i-- )
+        List<GlimpseBounds> boundsList = stack.getBoundsList( );
+        ListIterator<GlimpseBounds> boundsIter = boundsList.listIterator( boundsList.size( ) );
+
+        while ( targetIter.hasPrevious( ) )
         {
-            push( targetList.get( i ), boundsList.get( i ) );
+            push( targetIter.previous( ), boundsIter.previous( ) );
         }
 
         return this;
@@ -124,17 +137,13 @@ public class GlimpseTargetStackImpl implements GlimpseTargetStack
     @Override
     public List<GlimpseTarget> getTargetList( )
     {
-        List<GlimpseTarget> copy = new ArrayList<GlimpseTarget>( targetStack.size( ) );
-        copy.addAll( targetStack );
-        return Collections.unmodifiableList( copy );
+        return targetStackUnmod;
     }
 
     @Override
     public List<GlimpseBounds> getBoundsList( )
     {
-        List<GlimpseBounds> copy = new ArrayList<GlimpseBounds>( boundStack.size( ) );
-        copy.addAll( boundStack );
-        return Collections.unmodifiableList( copy );
+        return boundStackUnmod;
     }
 
     @Override
@@ -173,14 +182,24 @@ public class GlimpseTargetStackImpl implements GlimpseTargetStack
     public String toString( )
     {
         StringBuilder b = new StringBuilder( );
-        int size = getSize( );
 
         b.append( "[" );
 
-        for ( int i = 0 ; i < size ; i++ )
+        Iterator<GlimpseTarget> targetIter = targetStack.iterator( );
+        Iterator<GlimpseBounds> boundsIter = boundStack.iterator( );
+
+        while ( targetIter.hasNext( ) )
         {
-            b.append( String.format( "[%s,%s]", targetStack.get( i ), boundStack.get( i ) ) );
-            if ( i < size-1 ) b.append( "," );
+            GlimpseTarget target = targetIter.next( );
+            GlimpseBounds bounds = boundsIter.next( );
+
+            b.append( String.format( "[%s,%s],", target, bounds ) );
+        }
+
+        if ( targetStack.isEmpty( ) )
+        {
+            // Drop the trailing comma
+            b.setLength( b.length() - 1 );
         }
 
         b.append( "]" );
