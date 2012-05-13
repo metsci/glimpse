@@ -8,16 +8,9 @@ Glimpse version 1.1.0 is now available for <a href="https://github.com/metsci/gl
 <div class="list">
 <ul>
 <li>StackedTimePlot2D enhancements</li>
-  <ul>
-    <li>Plot labels</li>
-    <li>Plot ordering fixes</li>
-  </ul>
 <li>Explicit control of painter/layout z-ordering</li>
-<li>Better default plot coloring, especially on Mac platform</li>
+<li>Better default plot coloring</li>
 <li>TextureAtlas and IconPainter</li>
-  <ul>  
-    <li>Rendering of images or Java2D defined icons</li>
-  </ul>
 <li>DynamicPointSetPainter and DynamicLineSetPainter</li>
 <li>Improved DSPL data plotting example</li>
 </ul>
