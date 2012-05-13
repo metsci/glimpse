@@ -12,12 +12,16 @@ Glimpse is a Java library which enables developers to easily construct interacti
 
 There is lots of other information available at <a href="http://glimpse.metsci.com">glimpse.metsci.com</a> including:
 
-* <a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html">Javadoc</a>
-* <a href="http://metsci.github.com/glimpse/screenshots.html">Screenshots</a>
-* <a href="http://metsci.github.com/glimpse/videos.html">Video</a>
-* <a href="http://metsci.github.com/glimpse/guide.html">Getting Started Guide</a>
-* <a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">Mailing List / Forum</a>
-* <a href="https://github.com/metsci/glimpse/wiki">Wiki</a>
-* <a href="http://metsci.github.com/glimpse/blog.html">Blog</a>
+<div class="list">
+<ul>
+<li><a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html">Javadoc</a>
+<li><a href="http://metsci.github.com/glimpse/screenshots.html">Screenshots</a>
+<li><a href="http://metsci.github.com/glimpse/videos.html">Video</a>
+<li><a href="http://metsci.github.com/glimpse/guide.html">Getting Started Guide</a>
+<li><a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">Mailing List / Forum</a>
+<li><a href="https://github.com/metsci/glimpse/wiki">Wiki</a>
+<li><a href="http://metsci.github.com/glimpse/blog.html">Blog</a>
+</ul>
+</div>
 
 Let us know what you think on the <a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">forum</a> or contact us at <a href="mailto:github@metsci.com">github@metsci.com</a>.

@@ -6,6 +6,17 @@
       color: #000000; /* black text */
     }
 
+    .list ul li
+    {
+      border-left:10px;
+      margin-left:10px;
+      margin-bottom:3px;
+      padding-left:5px;
+      color: #000000;
+      list-style: circle;
+      list-style-type: circle;
+    }
+
     #container
     {
       width: 800px; /* text box width */
