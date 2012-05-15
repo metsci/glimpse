@@ -1003,9 +1003,7 @@ public class TrackPainter extends GlimpseDataPainter2D
                     gl.glLineStipple( loaded.stippleFactor, loaded.stipplePattern );
                 }
 
-                gl.glEnable( GL.GL_LINE_SMOOTH );
                 gl.glDrawArrays( GL.GL_LINE_STRIP, glOffset, glSize );
-                gl.glDisable( GL.GL_LINE_SMOOTH );
 
                 if ( loaded.stippleOn )
                 {
@@ -1017,16 +1015,13 @@ public class TrackPainter extends GlimpseDataPainter2D
             {
                 gl.glColor4fv( loaded.pointColor, 0 );
                 gl.glPointSize( loaded.pointSize );
-                gl.glEnable( GL.GL_POINT_SMOOTH );
                 gl.glDrawArrays( GL.GL_POINTS, glOffset, glSize );
-                gl.glDisable( GL.GL_POINT_SMOOTH );
             }
 
             if ( loaded.headPointOn )
             {
                 gl.glColor4fv( loaded.headPointColor, 0 );
                 gl.glPointSize( loaded.headPointSize );
-                gl.glEnable( GL.GL_POINT_SMOOTH );
                 gl.glBegin( GL.GL_POINTS );
                 try
                 {
@@ -1036,7 +1031,6 @@ public class TrackPainter extends GlimpseDataPainter2D
                 {
                     gl.glEnd( );
                 }
-                gl.glDisable( GL.GL_POINT_SMOOTH );
             }
 
             if ( loaded.labelOn ) labelOn = true;
