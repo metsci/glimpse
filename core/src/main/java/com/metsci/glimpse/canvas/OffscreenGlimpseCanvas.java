@@ -26,10 +26,14 @@
  */
 package com.metsci.glimpse.canvas;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -58,6 +62,8 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class OffscreenGlimpseCanvas implements GlimpseCanvas
 {
+    private static final Logger logger = Logger.getLogger( OffscreenGlimpseCanvas.class.getSimpleName( ) );
+
     protected GLSimplePixelBuffer pixelBuffer;
 
     protected boolean isDisposed;
@@ -81,7 +87,18 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
             @Override
             public void init( GLContext context )
             {
-                // do nothing
+                try
+                {
+                    GL gl = context.getGL( );
+                    gl.setSwapInterval( 0 );
+                }
+                catch ( Exception e )
+                {
+                    // without this, repaint rate is tied to screen refresh rate on some systems
+                    // this doesn't work on some machines (Mac OSX in particular)
+                    // but it's not a big deal if it fails
+                    logWarning( logger, "Trouble in init.", e );
+                }
             }
 
             @Override
@@ -192,7 +209,7 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
     {
         this.layoutManager.removeLayout( layout );
     }
-    
+
     @Override
     public void removeAllLayouts( )
     {

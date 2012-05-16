@@ -27,10 +27,13 @@
 package com.metsci.glimpse.canvas;
 
 import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -56,6 +59,8 @@ import com.sun.opengl.util.texture.Texture;
  */
 public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 {
+    private static final Logger logger = Logger.getLogger( FrameBufferGlimpseCanvas.class.getSimpleName( ) );
+
     protected GLSimpleFrameBufferObject fbo;
 
     protected LayoutManager layoutManager;
@@ -86,7 +91,18 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
             @Override
             public void init( GLContext context )
             {
-                // do nothing
+                try
+                {
+                    GL gl = context.getGL( );
+                    gl.setSwapInterval( 0 );
+                }
+                catch ( Exception e )
+                {
+                    // without this, repaint rate is tied to screen refresh rate on some systems
+                    // this doesn't work on some machines (Mac OSX in particular)
+                    // but it's not a big deal if it fails
+                    logWarning( logger, "Trouble in init.", e );
+                }
             }
 
             @Override
@@ -233,7 +249,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     {
         this.layoutManager.removeLayout( layout );
     }
-    
+
     @Override
     public void removeAllLayouts( )
     {
@@ -258,7 +274,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
             layout.setLookAndFeel( laf );
         }
     }
-    
+
     @Override
     public void paint( )
     {
