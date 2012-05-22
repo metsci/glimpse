@@ -58,7 +58,7 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.TangentPlaneProjection;
+import com.metsci.glimpse.support.projection.LatLonProjection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -203,7 +203,7 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
 
             public void run( TangentPlane plane )
             {
-                TangentPlaneProjection newProjection = new TangentPlaneProjection( plane, startLat, endLat, startLon, endLon, false )
+                LatLonProjection newProjection = new LatLonProjection( plane, startLat, endLat, startLon, endLon, false )
                 {
                     public void getVertexXYZ( double textureFractionX, double textureFractionY, float[] resultXYZ )
                     {

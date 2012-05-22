@@ -56,7 +56,7 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.projection.TangentPlaneProjection;
+import com.metsci.glimpse.support.projection.LatLonProjection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -184,7 +184,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         {
             public void run( TangentPlane plane )
             {
-                Projection projection = new TangentPlaneProjection( plane, startLat, endLat, startLon, endLon, false );
+                Projection projection = new LatLonProjection( plane, startLat, endLat, startLon, endLon, false );
                 texture.setProjection( projection );
                 heatmap.setData( texture );
             }
