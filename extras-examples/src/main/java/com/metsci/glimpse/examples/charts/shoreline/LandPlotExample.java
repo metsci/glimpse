@@ -30,28 +30,13 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener2D;
-import com.metsci.glimpse.axis.painter.NumericAxisPainter;
-import com.metsci.glimpse.axis.painter.NumericRotatedYAxisPainter;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.charts.shoreline.LandShapePainter;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.LinePlotExample;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CopyrightPainter;
-import com.metsci.glimpse.painter.decoration.LegendPainter.LegendPlacement;
-import com.metsci.glimpse.painter.decoration.LegendPainter.LineLegendPainter;
 import com.metsci.glimpse.painter.info.MeasurementPainter;
-import com.metsci.glimpse.painter.plot.XYLinePainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 
@@ -73,157 +58,40 @@ public class LandPlotExample implements GlimpseLayoutProvider
     {
         Example.showWithSwing( new LandPlotExample( ) );
     }
-    
-    protected int plotHeight = 200;
-    protected int plotWidth = 200;
-
-    protected double plotMinX = 0.0;
-    protected double plotMinY = 0.0;
-
 
     @Override
-    public SimplePlot2D getLayout( ) throws ParseException
+    public SimplePlot2D getLayout( ) throws ParseException, IOException
     {
         // create a tangent plane
         // land coordinates are specified as lat lons and must be converted
         // into flat rectangular coordinates to be displayed by glimpse
-        final TangentPlane tangentPlane = new TangentPlane( LatLonGeo.fromDeg( 20.000067, -155 ) );
+        final TangentPlane tangentPlane = new TangentPlane( LatLonGeo.fromDeg( 20, -155 ) );
 
-        // create a GeoPlot
-        // here we just display land, but the GeoPlot could be used to display
-        // tracks or other objects on top of the land
-        //MapPlot2D geoplot = new MapPlot2D( tangentPlane );
+        // create a plot, which automatically provides axes, mouse interation, and
+        // plot decorations like grid lines and mouse crosshairs
         final SimplePlot2D plot = new SimplePlot2D( );
 
-        
-        // create a new plot for the floating layout area
-        // it uses a vertical text orientation for its y axis painter to save space
-        final SimplePlot2D floatingPlot = new SimplePlot2D( )
-        {
-            @Override
-            protected NumericAxisPainter createAxisPainterY( AxisLabelHandler tickHandler )
-            {
-                return new NumericRotatedYAxisPainter( tickHandler );
-            }
-        };
-
-        // add an axis listener which adjusts the position of the floating layout painter as the axis changes
-        // (the layout painter is tied to a fixed axis value)
-        plot.addAxisListener( new AxisListener2D( )
-        {
-            @Override
-            public void axisUpdated( Axis2D axis )
-            {
-                int minX = plot.getAxisX( ).valueToScreenPixel( plotMinX );
-                int minY = plot.getAxisY( ).valueToScreenPixel( plotMinY );
-
-                floatingPlot.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
-                plot.invalidateLayout( );
-            }
-        } );
-
-        // add a mouse listener which listens for middle mouse button (mouse wheel) clicks
-        // and moves the floating plot in response
-        plot.getLayoutCenter( ).addGlimpseMouseListener( new GlimpseMouseListener( )
-        {
-            @Override
-            public void mousePressed( GlimpseMouseEvent event )
-            {
-                if ( event.isButtonDown( MouseButton.Button2 ) )
-                {
-                    plotMinX = plot.getAxisX( ).screenPixelToValue( event.getX( ) );
-                    plotMinY = plot.getAxisY( ).screenPixelToValue( plot.getAxisY( ).getSizePixels( ) - event.getY( ) );
-                }
-            }
-
-            @Override
-            public void mouseEntered( GlimpseMouseEvent event )
-            {
-            }
-
-            @Override
-            public void mouseExited( GlimpseMouseEvent event )
-            {
-            }
-
-            @Override
-            public void mouseReleased( GlimpseMouseEvent event )
-            {
-            }
-        } );
-
-        // the floating plot is quite small, so use a smaller font, tighter tick spacing, and smaller bounds for the axes
-        floatingPlot.setAxisFont( FontUtils.getSilkscreen( ), false );
-        floatingPlot.setAxisSizeX( 25 );
-        floatingPlot.setAxisSizeY( 25 );
-        floatingPlot.setTickSpacingX( 35 );
-        floatingPlot.setTickSpacingY( 35 );
-        floatingPlot.setBorderSize( 4 );
-
-        // don't show crosshairs in the floating plot or the main plot
-        floatingPlot.getCrosshairPainter( ).setVisible( false );
+        // don't show crosshairs
         plot.getCrosshairPainter( ).setVisible( false );
 
-        // don't provide any space for a title in the floating plot
-        floatingPlot.setTitleHeight( 0 );
+        // hide the plot title and the x and y axes
+        plot.showTitle( false );
+        plot.setTitleHeight( 0 );
+        plot.setAxisSizeX( 0 );
+        plot.setAxisSizeY( 0 );
 
-        // add a border to the outside of the floating plot
-        floatingPlot.addPainterOuter( new BorderPainter( ).setLineWidth( 4 ) );
+        // set a 10 pixel border around the edge of the plot
+        plot.setBorderSize( 10 );
 
-        // create a color scale axis for the heat maps created below
-        Axis1D colorAxis = new Axis1D( );
-        colorAxis.setMin( 0.0 );
-        colorAxis.setMax( 1000.0 );
-
-//        // add a heat map painter to the floating plot
-//        floatingPlot.addPainter( HeatMapExample.newHeatMapPainter( colorAxis ) );
-//        floatingPlot.getAxis( ).set( 0, 1000, 0, 1000 );
-//
-//        // add a heat map painter to the outer plot
-//        plot.addPainter( HeatMapExample.newHeatMapPainter( colorAxis ) );
-//        plot.getAxis( ).set( 0, 1000, 0, 1000 );
-
-        
-        
-        // creating a data series painter, passing it the lineplot frame
-        // this constructor will have the painter draw according to the lineplot x and y axis
-        XYLinePainter series1 = LinePlotExample.createXYLinePainter1( );
-        floatingPlot.addPainter( series1 );
-
-        // in order for our second data series to use the right hand
-        // axis as its y axis, we must manually specify the axes which it should use
-        XYLinePainter series2 = LinePlotExample.createXYLinePainter2( );
-        floatingPlot.addPainter( series2 );
-
-        LineLegendPainter legend = new LineLegendPainter( LegendPlacement.NW );
-
-        //Move the legend further away from the right side;
-        legend.setOffsetY( 10 );
-        legend.setOffsetX( 10 );
-        legend.addItem( "Series 1", GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 0.8f ) );
-        legend.addItem( "Series 2", GlimpseColor.fromColorRgba( 0.0f, 0.0f, 1.0f, 0.8f ), true );
-        
-        plot.addPainter( legend );
-        
-       
-        
-        
         // create a custom layer to display land and load data into it
         // the data file used was created using the NOAA/NGDC Coastline Extractor
         // tool at http://www.ngdc.noaa.gov/mgg_coastline/
         LandShapePainter landLayer = new LandShapePainter( );
-        try
-        {
-            landLayer.loadNgdcLandFileAndCenterAxis( new File( "src/main/resources/data/Okinawa.land" ), tangentPlane, plot.getAxis( ) );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
+        landLayer.loadNgdcLandFileAndCenterAxis( new File( "src/main/resources/data/Okinawa.land" ), tangentPlane, plot.getAxis( ) );
 
+        // customize the background color of the plot
         plot.setPlotBackgroundColor( GlimpseColor.fromColorHex( "#bbc2c7" ) );
-        
+
         // add a Metron copywrite notice to the plot
         plot.addPainter( new CopyrightPainter( ) );
 
@@ -235,26 +103,9 @@ public class LandPlotExample implements GlimpseLayoutProvider
 
         // lock the plot to a 1 to 1 aspect ratio
         plot.lockAspectRatioXY( 1.0f );
-
-        // set the plot title
-        plot.setTitle( "Okinawa" );
-
         // don't show horizontal/vertical bars marking the cursor position
         plot.getCrosshairPainter( ).setVisible( false );
 
-        
-        // add the floating plot to the main plot
-        plot.getLayoutCenter( ).addLayout( floatingPlot );
-        plot.getLayoutCenter( ).invalidateLayout( );
-        
-        
-
-        
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
-        plot.setTitleHeight( 0 );
-        plot.setBorderSize( 10 );
-        
         return plot;
     }
 }
