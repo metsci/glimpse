@@ -230,6 +230,26 @@ public class GlimpseColor
         return new float[] { 1.0f, 1.0f, 0.0f, alpha };
     }
 
+    public static float[] getCyan( )
+    {
+        return new float[] { 0.0f, 1.0f, 1.0f, 1.0f };
+    }
+
+    public static float[] getCyan( float alpha )
+    {
+        return new float[] { 0.0f, 1.0f, 1.0f, alpha };
+    }
+
+    public static float[] getMagenta( )
+    {
+        return new float[] { 1.0f, 0.0f, 1.0f, 1.0f };
+    }
+
+    public static float[] getMagenta( float alpha )
+    {
+        return new float[] { 1.0f, 0.0f, 1.0f, alpha };
+    }
+
     public static float[] getBlue( )
     {
         return new float[] { 0.0f, 0.0f, 1.0f, 1.0f };
