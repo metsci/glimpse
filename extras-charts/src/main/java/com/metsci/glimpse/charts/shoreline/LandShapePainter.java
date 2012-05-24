@@ -86,118 +86,131 @@ public class LandShapePainter extends GlimpsePainter2D
     }
 
     /**
-     * Deprecated in favor of loadNdgcLandFile( InputStream in, GeoProjection tangentPlane )
+     * Deprecated in favor of loadNdgcLandFile( InputStream in, GeoProjection geoProjection )
      *  
      * @param in
-     * @param tangentPlane
+     * @param geoProjection
      * @throws IOException    
      */
     @Deprecated
-    public void loadLandFile( InputStream in, GeoProjection tangentPlane ) throws IOException
+    public void loadLandFile( InputStream in, GeoProjection geoProjection ) throws IOException
     {
-    	loadNdgcLandFile( in, tangentPlane );
+    	loadNdgcLandFile( in, geoProjection );
     }
     
-    public void loadNdgcLandFile( InputStream in, GeoProjection tangentPlane ) throws IOException
+    public void loadNdgcLandFile( InputStream in, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile0( in, tangentPlane );
+    	loadNgdcLandFile0( in, geoProjection );
     }
     
     /**
-     * Deprecated in favor of loadNgdcLandFile( String file, GeoProjection tangentPlane )
+     * Deprecated in favor of loadNgdcLandFile( String file, GeoProjection geoProjection )
      * 
      * @param file
-     * @param tangentPlane
+     * @param geoProjection
      * @throws IOException
      */
     @Deprecated
-    public void loadLandFile( String file, GeoProjection tangentPlane ) throws IOException
+    public void loadLandFile( String file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile( file, tangentPlane );
+    	loadNgdcLandFile( file, geoProjection );
     }
     
-    public void loadNgdcLandFile( String file, GeoProjection tangentPlane ) throws IOException
+    public void loadNgdcLandFile( String file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile0( new FileInputStream( file ), tangentPlane );
+    	loadNgdcLandFile0( new FileInputStream( file ), geoProjection );
     }
 
     /**
-     * Deprecated in favor of loadNgdcLandFile( File file, GeoProjection tangentPlane )
+     * Deprecated in favor of loadNgdcLandFile( File file, GeoProjection geoProjection )
      * @param file
-     * @param tangentPlane
+     * @param geoProjection
      * @throws IOException
      */
     @Deprecated
-    public void loadLandFile( File file, GeoProjection tangentPlane ) throws IOException
+    public void loadLandFile( File file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile( file, tangentPlane );
+    	loadNgdcLandFile( file, geoProjection );
     }
     
-    public void loadNgdcLandFile( File file, GeoProjection tangentPlane ) throws IOException
+    public void loadNgdcLandFile( File file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile0( new FileInputStream( file ), tangentPlane );
+    	loadNgdcLandFile0( new FileInputStream( file ), geoProjection );
     }
 
     /**
-     * Deprecated in favor of loadNgdcLandFileAndCenterAxis( File file, GeoProjection tangentPlane, Axis2D axis )
+     * Deprecated in favor of loadNgdcLandFileAndCenterAxis( File file, GeoProjection geoProjection, Axis2D axis )
      * @param file
-     * @param tangentPlane
+     * @param geoProjection
      * @param axis
      * @throws IOException
      */
     @Deprecated
-    public void loadLandFileAndCenterAxis( File file, GeoProjection tangentPlane, Axis2D axis ) throws IOException
+    public void loadLandFileAndCenterAxis( File file, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
-    	loadNgdcLandFileAndCenterAxis( file, tangentPlane, axis );
+    	loadNgdcLandFileAndCenterAxis( file, geoProjection, axis );
     }
     
-    public void loadNgdcLandFileAndCenterAxis( File file, GeoProjection tangentPlane, Axis2D axis ) throws IOException
+    public void loadNgdcLandFileAndCenterAxis( InputStream in, GeoProjection geoProjection, Axis2D axis ) throws IOException
+    {
+        NgdcFile2 ngdcFile = new NgdcFile2( in );
+        Shape shape = loadLandFile0( ngdcFile.toShape( ), geoProjection );
+        centerAxesOnShape( shape, axis );
+    }
+    
+    public void loadNgdcLandFileAndCenterAxis( File file, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
         NgdcFile2 ngdcFile = new NgdcFile2(  new FileInputStream( file ) );
-        loadLandFileAndCenterAxis( ngdcFile, tangentPlane, axis );
+        loadLandFileAndCenterAxis( ngdcFile, geoProjection, axis );
     }
 
-    public void loadLandFileAndCenterAxis( LandShapeCapable landFile, GeoProjection projection, Axis2D axis ) throws IOException
+    public void loadLandFileAndCenterAxis( LandShapeCapable landFile, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
-    	loadLandFileAndCenterAxis(landFile.toShape( ), projection, axis);
+    	loadLandFileAndCenterAxis(landFile.toShape( ), geoProjection, axis);
     }
 
-    public void loadLandFileAndCenterAxis( LandShape landShape, GeoProjection projection, Axis2D axis ) throws IOException
+    public void loadLandFileAndCenterAxis( LandShape landShape, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
-        Shape shape = loadLandFile0( landShape, projection );
+        Shape shape = loadLandFile0( landShape, geoProjection );
+        centerAxesOnShape( shape, axis );
+    }
+    
+    public void centerAxesOnShape( Shape shape, Axis2D axis )
+    {
         Rectangle2D localBounds = shape.getBounds2D( );
+        
         if (bounds == null) {
-        	bounds = new Rectangle2D.Double();
-        	bounds.setRect(localBounds);
+            bounds = new Rectangle2D.Double();
+            bounds.setRect(localBounds);
         } else { 
-        	bounds.add(localBounds);
+            bounds.add(localBounds);
         }
-		
+        
         axis.getAxisX( ).setMin( bounds.getMinX( ) );
         axis.getAxisX( ).setMax( bounds.getMaxX( ) );
         axis.getAxisY( ).setMin( bounds.getMinY( ) );
         axis.getAxisY( ).setMax( bounds.getMaxY( ) );
     }
 
-    protected Shape loadNgdcLandFile0( InputStream in, final GeoProjection tangentPlane ) throws IOException
+    protected Shape loadNgdcLandFile0( InputStream in, final GeoProjection geoProjection ) throws IOException
     {
     	NgdcFile2 ngdcFile = new NgdcFile2( in );
-    	return loadLandFile0( ngdcFile.toShape(), tangentPlane );
+    	return loadLandFile0( ngdcFile.toShape(), geoProjection );
     }
     
-    protected Shape loadLandFile0( LandFile landFile, final GeoProjection tangentPlane ) throws IOException 
+    protected Shape loadLandFile0( LandFile landFile, final GeoProjection geoProjection ) throws IOException 
     {
-    	return loadLandFile0( landFile.toShape( ), tangentPlane);
+    	return loadLandFile0( landFile.toShape( ), geoProjection);
     }
     
-    protected Shape loadLandFile0( LandShape landShape, final GeoProjection tangentPlane ) 
+    protected Shape loadLandFile0( LandShape landShape, final GeoProjection geoProjection ) 
     {
         Shape shape = landShape.getFillShape( new VertexConverter( )
         {
             @Override
             public void toXY( double lat, double lon, Double xy )
             {
-                Vector2d vector = tangentPlane.project( LatLonGeo.fromDeg( lat, lon ) );
+                Vector2d vector = geoProjection.project( LatLonGeo.fromDeg( lat, lon ) );
                 xy.x = vector.getX( );
                 xy.y = vector.getY( );
             }

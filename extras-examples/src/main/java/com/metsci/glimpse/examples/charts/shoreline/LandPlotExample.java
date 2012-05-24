@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.examples.charts.shoreline;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 
 import com.metsci.glimpse.charts.shoreline.LandShapePainter;
@@ -39,6 +39,7 @@ import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
+import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * Displays shoreline data available from the NOAA/NGDC Coastline Extractor
@@ -87,7 +88,8 @@ public class LandPlotExample implements GlimpseLayoutProvider
         // the data file used was created using the NOAA/NGDC Coastline Extractor
         // tool at http://www.ngdc.noaa.gov/mgg_coastline/
         LandShapePainter landLayer = new LandShapePainter( );
-        landLayer.loadNgdcLandFileAndCenterAxis( new File( "src/main/resources/data/Okinawa.land" ), tangentPlane, plot.getAxis( ) );
+        InputStream in = StreamOpener.fileThenResource.openForRead( "data/Okinawa.land" );
+        landLayer.loadNgdcLandFileAndCenterAxis( in, tangentPlane, plot.getAxis( ) );
 
         // customize the background color of the plot
         plot.setPlotBackgroundColor( GlimpseColor.fromColorHex( "#bbc2c7" ) );
