@@ -85,6 +85,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
         TextureAtlas atlas = new TextureAtlas( 256, 256 );
         final IconPainter iconPainter = new IconPainter( );
         iconPainter.addIconGroup( "group1", atlas );
+        iconPainter.addIconGroup( "group2", atlas );
 
         // enable picking support on the IconPainter
         // picking support is currently limited to a single GlimpseLayout
