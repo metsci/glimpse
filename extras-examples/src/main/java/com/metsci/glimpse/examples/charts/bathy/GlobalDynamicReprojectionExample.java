@@ -215,7 +215,7 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
                         // easier, and gives the same effect because ShadedTexturePainter sets
                         // the z-clipping plane at 1
                         //
-                        Vector2d xyTangent = ( ( TangentPlane ) plane ).getTangentPointOnPlane( );
+                        Vector2d xyTangent = ( ( TangentPlane ) projection ).getTangentPointOnPlane( );
                         resultXYZ[2] = ( float ) ( xy.minus( xyTangent ).norm( ) * oneOverDistanceThreshold );
                     }
                 };

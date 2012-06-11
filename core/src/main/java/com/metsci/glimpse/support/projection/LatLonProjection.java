@@ -47,15 +47,15 @@ public class LatLonProjection implements Projection, InvertibleProjection
 
     protected double diffLat, diffLon;
 
-    protected GeoProjection plane;
+    protected GeoProjection projection;
 
     protected boolean latIsX;
 
-    public LatLonProjection( GeoProjection plane, double minLat, double maxLat, double minLon, double maxLon, boolean latIsX )
+    public LatLonProjection( GeoProjection projection, double minLat, double maxLat, double minLon, double maxLon, boolean latIsX )
     {
         this.latIsX = latIsX;
 
-        this.plane = plane;
+        this.projection = projection;
         this.minLat = minLat;
         this.maxLat = maxLat;
         this.minLon = minLon;
@@ -95,7 +95,7 @@ public class LatLonProjection implements Projection, InvertibleProjection
         double lat = ( latWrapped ? -1 : 1 ) * ( lat0 - 180*poleCrosses );
         double lon = ( latWrapped ? 180 : 0 ) + lon0;
 
-        return plane.project( LatLonGeo.fromDeg( lat, lon ) );
+        return projection.project( LatLonGeo.fromDeg( lat, lon ) );
     }
 
     @Override
@@ -124,7 +124,7 @@ public class LatLonProjection implements Projection, InvertibleProjection
 
     protected double getTextureFraction( double vertexX, double vertexY, boolean getX )
     {
-        LatLonGeo latLon = plane.unproject( vertexX, vertexY );
+        LatLonGeo latLon = projection.unproject( vertexX, vertexY );
 
         if ( latIsX ^ getX )
         {
