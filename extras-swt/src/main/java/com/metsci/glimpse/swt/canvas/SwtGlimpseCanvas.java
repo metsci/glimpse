@@ -26,9 +26,13 @@
  */
 package com.metsci.glimpse.swt.canvas;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+
 import java.awt.Dimension;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
 import org.eclipse.swt.SWT;
@@ -55,6 +59,8 @@ import com.metsci.glimpse.swt.misc.CursorUtil;
 
 public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
 {
+    private static final Logger logger = Logger.getLogger( SwtGlimpseCanvas.class.getName( ) );
+    
     protected Composite parent;
 
     protected Cursor canvasCursor;
@@ -98,7 +104,18 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
             @Override
             public void init( GLContext context )
             {
-                // do nothing
+                try
+                {
+                    GL gl = context.getGL( );
+                    gl.setSwapInterval( 0 );
+                }
+                catch ( Exception e )
+                {
+                    // without this, repaint rate is tied to screen refresh rate on some systems
+                    // this doesn't work on some machines (Mac OSX in particular)
+                    // but it's not a big deal if it fails
+                    logWarning( logger, "Trouble in init.", e );
+                }
             }
 
             @Override

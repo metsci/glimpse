@@ -94,6 +94,8 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         gl.glPushAttrib( GL.GL_ALL_ATTRIB_BITS );
         gl.glMatrixMode( GL.GL_MODELVIEW );
         gl.glPushMatrix( );
+        gl.glMatrixMode( GL.GL_TEXTURE );
+        gl.glPushMatrix( );
         gl.glMatrixMode( GL.GL_PROJECTION );
         gl.glPushMatrix( );
 
@@ -105,6 +107,8 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         finally
         {
             gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glPopMatrix( );
+            gl.glMatrixMode( GL.GL_TEXTURE );
             gl.glPopMatrix( );
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glPopMatrix( );

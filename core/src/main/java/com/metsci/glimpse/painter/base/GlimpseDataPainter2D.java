@@ -49,6 +49,40 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
 {
     public abstract void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis );
 
+    protected volatile boolean pointSmooth = true;
+    protected volatile boolean lineSmooth = true;
+    protected volatile boolean blend = true;
+    
+    public boolean isPointSmooth( )
+    {
+        return pointSmooth;
+    }
+
+    public void setPointSmooth( boolean pointSmooth )
+    {
+        this.pointSmooth = pointSmooth;
+    }
+
+    public boolean isLineSmooth( )
+    {
+        return lineSmooth;
+    }
+
+    public void setLineSmooth( boolean lineSmooth )
+    {
+        this.lineSmooth = lineSmooth;
+    }
+
+    public boolean isAlphaBlend( )
+    {
+        return blend;
+    }
+
+    public void setAlphaBlend( boolean blend )
+    {
+        this.blend = blend;
+    }
+
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
@@ -60,10 +94,14 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
-        gl.glEnable( GL.GL_POINT_SMOOTH );
+        if ( blend )
+        {
+            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL.GL_BLEND );
+        }
+        
+        if ( lineSmooth ) gl.glEnable( GL.GL_LINE_SMOOTH );
+        if ( pointSmooth ) gl.glEnable( GL.GL_POINT_SMOOTH );
 
         paintTo( context.getGL( ), bounds, axis );
     }

@@ -40,7 +40,7 @@ public interface StreamOpener
     InputStream openForRead(String location) throws IOException;
 
 
-    public static final StreamOpener file = new StreamOpener()
+    public static final StreamOpener fileOpener = new StreamOpener()
     {
         public InputStream openForRead(String location) throws IOException
         {
@@ -49,7 +49,7 @@ public interface StreamOpener
     };
 
 
-    public static final StreamOpener resource = new StreamOpener()
+    public static final StreamOpener resourceOpener = new StreamOpener()
     {
         public InputStream openForRead(String location) throws IOException
         {
@@ -60,7 +60,7 @@ public interface StreamOpener
     };
 
 
-    public static final StreamOpener fileThenResource = new StreamOpener()
+    public static final StreamOpener fileThenResourceOpener = new StreamOpener()
     {
         public InputStream openForRead(String location) throws IOException
         {
@@ -83,5 +83,14 @@ public interface StreamOpener
             throw new FileNotFoundException("File is not available as a local file or as a classpath resource: " + location);
         }
     };
+
+
+    // Here for compatibility; will soon be deprecated
+
+    public static final StreamOpener file = fileOpener;
+
+    public static final StreamOpener resource = resourceOpener;
+
+    public static final StreamOpener fileThenResource = fileThenResourceOpener;
 
 }

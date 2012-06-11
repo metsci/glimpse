@@ -36,7 +36,7 @@ import java.util.TreeSet;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.projection.TangentPlaneProjection;
+import com.metsci.glimpse.support.projection.LatLonProjection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -201,12 +201,12 @@ public class BathymetryData
         return texture;
     }
 
-    public TangentPlaneProjection getProjection( )
+    public LatLonProjection getProjection( )
     {
         double endLat = startLat + heightStep * imageHeight;
         double endLon = startLon + widthStep * imageWidth;
 
-        return new TangentPlaneProjection( projection, startLat, endLat, startLon, endLon, false );
+        return new LatLonProjection( projection, startLat, endLat, startLon, endLon, false );
     }
 
     public void setAxisBounds( Axis2D axis )

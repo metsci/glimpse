@@ -146,48 +146,41 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
     @Override
     public void mouseEntered( MouseEvent event )
     {
-        List<GlimpseTargetStack> list = getContainingTargets( event );
-        if ( list == null ) return;
-
-        // stacks with low indices are on top in the layout, and
-        // have their mouse events generated first
-        for ( GlimpseTargetStack stack : list )
-        {
-            Mouseable mouseTarget = getMouseTarget( stack );
-            if ( mouseTarget == null ) return;
-
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
-
-            mouseTarget.mouseEntered( glimpseEvent );
-        }
+        // save the old hovered stacks
+        Set<GlimpseTargetStack> oldHovered = clearHovered( );
+        
+        // update hovered stacks
+        getContainingTargets( event );
+        
+        // get the new hovered stacks
+        Set<GlimpseTargetStack> newHovered = getHovered( );
+        
+        // send mouseExited and mouseEntered events based on the old/new hovered stacks
+        notifyMouseEnteredExited( event, oldHovered, newHovered );
     }
 
     @Override
     public void mouseExited( MouseEvent event )
     {
-        List<GlimpseTargetStack> list = getContainingTargets( event );
-        if ( list == null ) return;
-
-        // stacks with low indices are on top in the layout, and
-        // have their mouse events generated first
-        for ( GlimpseTargetStack stack : list )
-        {
-            Mouseable mouseTarget = getMouseTarget( stack );
-            if ( mouseTarget == null ) return;
-
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
-
-            mouseTarget.mouseExited( glimpseEvent );
-        }
+        // save the old hovered stacks
+        Set<GlimpseTargetStack> oldHovered = clearHovered( );
+        
+        // update hovered stacks
+        getContainingTargets( event );
+        
+        // get the new hovered stacks
+        Set<GlimpseTargetStack> newHovered = getHovered( );
+        
+        // send mouseExited and mouseEntered events based on the old/new hovered stacks
+        notifyMouseEnteredExited( event, oldHovered, newHovered );
     }
 
     @Override
     public void mousePressed( MouseEvent event )
     {
         List<GlimpseTargetStack> list = getContainingTargets( event );
-        if ( list == null ) return;
 
-        setHovered( list );
+        setAllHovered( list );
 
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
@@ -207,9 +200,9 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
     {
         // always always deliver the mouseUp event regardless of which
         // component the mouse event occurred inside
-        if ( isHovered( ) )
+        if ( isDragHovered( ) )
         {
-            Set<GlimpseTargetStack> hoveredList = getHovered( );
+            Set<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseTarget = getMouseTarget( hoveredStack );
@@ -229,12 +222,21 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
     @Override
     public void mouseDragged( MouseEvent event )
     {
+        // save the old hovered stacks
+        Set<GlimpseTargetStack> oldHovered = clearHovered( );
+        
         // call getContainingTarget to setHovered correctly
         getContainingTargets( event );
 
-        if ( isHovered( ) )
+        // get the new hovered stacks
+        Set<GlimpseTargetStack> newHovered = getHovered( );
+        
+        // send mouseExited and mouseEntered events based on the old/new hovered stacks
+        notifyMouseEnteredExited( event, oldHovered, newHovered );
+        
+        if ( isDragHovered( ) )
         {
-            Set<GlimpseTargetStack> hoveredList = getHovered( );
+            Set<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
@@ -251,15 +253,21 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
         // if the mouse is hovering, recalculate hovered components every event
         // isButtonDown check isn't necessary like it is for MouseWrapperSWT.mouseMove(),
         // since this event would be a mouseDragged if it was
-        clearHovered( );
+        Set<GlimpseTargetStack> oldHovered = clearAllHovered( );
 
         // call getContainingTarget to setHovered correctly
         getContainingTargets( event );
 
-        if ( isHovered( ) )
+        // get the new hovered stacks
+        Set<GlimpseTargetStack> newHovered = getHovered( );
+        
+        // send mouseExited and mouseEntered events based on the old/new hovered stacks
+        notifyMouseEnteredExited( event, oldHovered, newHovered );
+        
+        // if we have something hovered, send mouseMoved events
+        if ( isDragHovered( ) )
         {
-            Set<GlimpseTargetStack> hoveredList = getHovered( );
-            for ( GlimpseTargetStack hoveredStack : hoveredList )
+            for ( GlimpseTargetStack hoveredStack : newHovered )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
                 GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
@@ -272,12 +280,9 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
     @Override
     public void mouseWheelMoved( MouseWheelEvent event )
     {
-        List<GlimpseTargetStack> list = getContainingTargets( event );
-        if ( list == null ) return;
-
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
-        for ( GlimpseTargetStack stack : list )
+        for ( GlimpseTargetStack stack : getContainingTargets( event ) )
         {
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return;

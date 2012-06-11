@@ -43,7 +43,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class DynamicPointPainterExample implements GlimpseLayoutProvider
 {
-    private static final Logger logger = Logger.getLogger( DynamicPointPainterExample.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( DynamicPointPainterExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
     {

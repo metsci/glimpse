@@ -81,6 +81,8 @@ public class HeatMapExample implements GlimpseLayoutProvider
         plot.setMinZ( 0.0f );
         plot.setMaxZ( 1000.0f );
 
+        plot.setAbsoluteMinY( 0 );
+        
         // lock the aspect ratio of the x and y axis to 1 to 1
         plot.lockAspectRatioXY( 1.0f );
 
