@@ -59,7 +59,7 @@ import com.metsci.glimpse.swt.misc.CursorUtil;
 
 public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
 {
-    private static final Logger logger = Logger.getLogger( SwtGlimpseCanvas.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( SwtGlimpseCanvas.class.getName( ) );
     
     protected Composite parent;
 

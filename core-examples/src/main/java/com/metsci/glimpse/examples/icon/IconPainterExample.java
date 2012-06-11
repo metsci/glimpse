@@ -65,7 +65,7 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
  */
 public class IconPainterExample implements GlimpseLayoutProvider
 {
-    private static final Logger logger = Logger.getLogger( IconPainterExample.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( IconPainterExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
     {

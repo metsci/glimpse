@@ -62,7 +62,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 {
-    private static final Logger logger = Logger.getLogger( SwingGlimpseCanvas.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( SwingGlimpseCanvas.class.getName( ) );
 
     private static final long serialVersionUID = -5279064113986688397L;
 

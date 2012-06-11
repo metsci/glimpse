@@ -59,7 +59,7 @@ import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWTBridge;
 
 public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
 {
-    private static final Logger logger = Logger.getLogger( SwtBridgeGlimpseCanvas.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( SwtBridgeGlimpseCanvas.class.getName( ) );
 
     protected java.awt.Frame glFrame;
     protected GLCanvas glCanvas;

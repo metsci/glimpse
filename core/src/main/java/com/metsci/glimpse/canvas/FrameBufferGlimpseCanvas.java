@@ -59,7 +59,7 @@ import com.sun.opengl.util.texture.Texture;
  */
 public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 {
-    private static final Logger logger = Logger.getLogger( FrameBufferGlimpseCanvas.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( FrameBufferGlimpseCanvas.class.getName( ) );
 
     protected GLSimpleFrameBufferObject fbo;
 

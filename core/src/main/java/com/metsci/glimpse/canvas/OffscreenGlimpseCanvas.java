@@ -62,7 +62,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class OffscreenGlimpseCanvas implements GlimpseCanvas
 {
-    private static final Logger logger = Logger.getLogger( OffscreenGlimpseCanvas.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( OffscreenGlimpseCanvas.class.getName( ) );
 
     protected GLSimplePixelBuffer pixelBuffer;
 
