@@ -114,6 +114,16 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
 
     public void setData( final BufferedImage image )
     {
+        setData0( image, false, -1 );
+    }
+
+    public void setData( final BufferedImage image, final float alpha )
+    {
+        setData0( image, true, alpha );
+    }
+    
+    protected void setData0( final BufferedImage image, final boolean alphaOverride, final float alpha )
+    {
         resize( image.getWidth( ), image.getHeight( ) );
 
         mutate( new MutatorFloat2D( )
@@ -128,18 +138,32 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
                     for ( int x = 0; x < dataSizeX; x++ )
                     {
                         int rgb = image.getRGB( x, image.getHeight( ) - y - 1 );
-                        float f = r == null ? 1.0f : r.getSample( x, image.getHeight( ) - y - 1, 0 ) / 255f;
-
+                        
+                        float a;
+                        
+                        if ( alphaOverride )
+                        {
+                            a = alpha;
+                        }
+                        else if ( r == null )
+                        {
+                            a = 1.0f;
+                        }
+                        else
+                        {
+                            a = r.getSample( x, image.getHeight( ) - y - 1, 0 ) / 255f;
+                        }
+                        
                         data.put( ( ( rgb >> 16 ) & 0x000000FF ) / 255f );
                         data.put( ( ( rgb >> 8 ) & 0x000000FF ) / 255f );
                         data.put( ( ( rgb ) & 0x000000FF ) / 255f );
-                        data.put( f );
+                        data.put( a );
                     }
                 }
             }
         } );
     }
-
+    
     public void setData( float[][][] data )
     {
         mutate( new SetDataMutator( data ) );

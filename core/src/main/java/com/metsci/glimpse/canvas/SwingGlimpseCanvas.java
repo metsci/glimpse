@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.canvas;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.KeyListener;
@@ -33,7 +35,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelListener;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLContext;
@@ -58,6 +62,8 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 {
+    private static final Logger logger = Logger.getLogger( SwingGlimpseCanvas.class.getName( ) );
+
     private static final long serialVersionUID = -5279064113986688397L;
 
     protected GLCanvas glCanvas;
@@ -158,7 +164,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         this.layoutManager.removeLayout( layout );
     }
-    
+
     @Override
     public void removeAllLayouts( )
     {
@@ -365,7 +371,18 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             @Override
             public void init( GLAutoDrawable drawable )
             {
-                // do nothing
+                try
+                {
+                    GL gl = drawable.getGL( );
+                    gl.setSwapInterval( 0 );
+                }
+                catch ( Exception e )
+                {
+                    // without this, repaint rate is tied to screen refresh rate on some systems
+                    // this doesn't work on some machines (Mac OSX in particular)
+                    // but it's not a big deal if it fails
+                    logWarning( logger, "Trouble in init.", e );
+                }
             }
 
             @Override

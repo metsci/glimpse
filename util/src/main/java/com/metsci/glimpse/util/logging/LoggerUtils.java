@@ -52,6 +52,16 @@ public class LoggerUtils
 {
 
     /**
+     * Convenience wrapper around {@link Logger#getLogger(String)}. Uses
+     * the fully qualified classname of the specified class as the logger
+     * name.
+     */
+    public static Logger getLogger( Class<?> clazz )
+    {
+        return Logger.getLogger( clazz.getName( ) );
+    }
+
+    /**
      * Traverses parents to find effective log level.
      */
     public static Level getLevelRecursive( Logger logger )

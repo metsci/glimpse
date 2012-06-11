@@ -52,7 +52,7 @@ import com.metsci.glimpse.util.io.StreamOpener;
  */
 public class FontUtils
 {
-    private static final Logger logger = Logger.getLogger( FontUtils.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( FontUtils.class.getName( ) );
 
     private static final boolean foundVerdana;
 

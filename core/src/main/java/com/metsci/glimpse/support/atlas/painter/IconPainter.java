@@ -95,7 +95,7 @@ import com.sun.opengl.util.texture.TextureCoords;
 //      Most of the complications spring from the possibility of painter retargeting.
 public class IconPainter extends GlimpseDataPainter2D
 {
-    private static final Logger logger = Logger.getLogger( IconPainter.class.getSimpleName( ) );
+    private static final Logger logger = Logger.getLogger( IconPainter.class.getName( ) );
 
     private static final int DEFAULT_INITIAL_GROUP_SIZE = 10;
     private static final float DEFAULT_GROWTH_FACTOR = 1.6f;

@@ -41,7 +41,7 @@ import com.metsci.glimpse.gl.shader.ShaderType;
  */
 public class TextureAtlasIconShaderVertex extends Shader
 {
-    protected static final Logger logger = Logger.getLogger( TextureAtlasIconShaderVertex.class.getSimpleName( ) );
+    protected static final Logger logger = Logger.getLogger( TextureAtlasIconShaderVertex.class.getName( ) );
 
     protected int pixelCoordsAttributeIndex;
     protected int texCoordsAttributeIndex;

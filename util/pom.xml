@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>glimpse-util</artifactId>
@@ -15,6 +15,12 @@
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
             <version>6.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>12.0</version>
         </dependency>
 
     </dependencies>
