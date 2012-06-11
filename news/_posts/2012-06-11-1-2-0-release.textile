@@ -1,0 +1,16 @@
+---
+layout: default
+title: Glimpse 1.1.1 Release
+---
+
+Glimpse version 1.1.1 is now available for <a href="https://github.com/metsci/glimpse/downloads">download</a>. This is a minor bug fix release:
+
+<div class="list">
+<ul>
+<li>Glimpse MouseEntered and MouseExited now work properly</li>
+<li>Fixed glSwapInterval() bug which caused poor performance on Windows XP</li>
+<li>Cleanup and bug fixes in a number of Examples</li>
+<li>Added Google Guava dependency</li>
+<li>New WatermarkPainter</li>
+</ul>
+</div>
