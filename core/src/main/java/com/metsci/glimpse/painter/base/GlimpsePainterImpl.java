@@ -92,10 +92,15 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
         gl.glPushClientAttrib( ( int ) GL.GL_CLIENT_ALL_ATTRIB_BITS );
         gl.glPushAttrib( GL.GL_ALL_ATTRIB_BITS );
+        
         gl.glMatrixMode( GL.GL_MODELVIEW );
         gl.glPushMatrix( );
+        
+        // only texture unit 0's matrix is automatically saved and restored
         gl.glMatrixMode( GL.GL_TEXTURE );
+        gl.glActiveTexture( GL.GL_TEXTURE0 );
         gl.glPushMatrix( );
+        
         gl.glMatrixMode( GL.GL_PROJECTION );
         gl.glPushMatrix( );
 
@@ -108,10 +113,15 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         {
             gl.glMatrixMode( GL.GL_MODELVIEW );
             gl.glPopMatrix( );
+            
+            // only texture unit 0's matrix is automatically saved and restored
             gl.glMatrixMode( GL.GL_TEXTURE );
+            gl.glActiveTexture( GL.GL_TEXTURE0 );
             gl.glPopMatrix( );
+            
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glPopMatrix( );
+            
             gl.glPopAttrib( );
             gl.glPopClientAttrib( );
         }
