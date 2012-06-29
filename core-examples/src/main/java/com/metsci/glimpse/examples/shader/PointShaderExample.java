@@ -113,7 +113,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         }
         catch ( IOException e )
         {
-            e.printStackTrace();
+            e.printStackTrace( );
             throw new RuntimeException( e );
         }
         plot.addPainter( dp );
@@ -262,15 +262,18 @@ public class PointShaderExample implements GlimpseLayoutProvider
             @Override
             public void run( )
             {
-                try
+                while ( true )
                 {
-                    positions.mutate( positionMutator );
-                    colorValues.mutate( colorValueMutator );
-                    sizeValues.mutate( sizeValueMutator );
-                    Thread.sleep( 10 );
-                }
-                catch ( InterruptedException e )
-                {
+                    try
+                    {
+                        positions.mutate( positionMutator );
+                        colorValues.mutate( colorValueMutator );
+                        sizeValues.mutate( sizeValueMutator );
+                        Thread.sleep( 10 );
+                    }
+                    catch ( InterruptedException e )
+                    {
+                    }
                 }
             }
         } ).start( );
