@@ -61,6 +61,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -432,9 +433,28 @@ public class MultiAxisPlot2D extends GlimpseLayout
         axisLayoutXY.addPainter( painter );
     }
 
+    @Override
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
+    {
+        axisLayoutXY.addPainter( painter, callback, 0 );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, null, zOrder );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, callback, zOrder );
+    }
+
+    @Override
     public void removePainter( GlimpsePainter painter )
     {
-        axisLayoutXY.addPainter( painter );
+        axisLayoutXY.removePainter( painter );
     }
 
     public GlimpseAxisLayout2D getLayoutCenter( )
