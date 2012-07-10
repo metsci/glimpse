@@ -4,7 +4,7 @@ http://help.rubygems.org/discussions/problems/350-installing-rubygems-137-and-je
 
 === To Test Locally
 
-jekyll --server --no-auto --safe
+jekyll --server --no-auto --safe --base-url '/glimpse'
 
 === Browse
 

@@ -3,6 +3,6 @@ layout: default
 title: Glimpse Examples Available Via Web Start
 ---
 
-Glimpse now offers a Web Start application for interactively experimenting with all of Glimpse's over 40 runnable examples. Head over to the <a href="/webstart.html">glimpse.metsci.com web start page</a> to run the examples from your browser.
+Glimpse now offers a Web Start application for interactively experimenting with all of Glimpse's over 40 runnable examples. Head over to the <a href="/glimpse/webstart.html">glimpse.metsci.com web start page</a> to run the examples from your browser.
 
 Glimpse examples are single, runnable Java files which highlight a Glimpse feature or demonstrate how to perform a specific task. They're one of the best ways to get started using Glimpse.
