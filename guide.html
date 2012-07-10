@@ -21,11 +21,11 @@ title: Guide
 
 <p>The easiest way to get familiar with what Glimpse offers and how it works is to check out the large library of examples in the <a href="https://github.com/metsci/glimpse/tree/master/core-examples/src/main/java/com/metsci/glimpse/examples">core-examples</a> and <a href="https://github.com/metsci/glimpse/tree/master/extras-examples/src/main/java/com/metsci/glimpse/examples">extras-examples</a> modules. Each example consists of a single runnable java class that demonstrates a feature of Glimpse. Here's the output of <a href="https://github.com/metsci/glimpse/blob/master/core-examples/src/main/java/com/metsci/glimpse/examples/basic/HeatMapExample.java">HeatMapExample.java</a>:</p>
 
-<img src="images/guide/Heatmap_empty.png" border="1" width="600px"/>
+<img src="/images/guide/Heatmap_empty.png" border="1" width="600px"/>
 
 <h3>Glimpse Canvas</h3>
 
-<p>All Glimpse applications start with a <a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">Glimpse Canvas</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/canvas/GlimpseCanvas.java">(source)</a> which represents something onto which OpenGL rendering can take place. For Swing applications, this is a SwingGlimpseCanvas, which is also a JPanel and can be directly incorporated into an existing Swing application. SWTGlimpseCanvas provides the analogous capability for SWT applications. Other GlimpseCanvas implementations exist for drawing to off-screen buffers.</p>
+<p>All Glimpse applications start with a <a href="http://glimpse.metsci.com/apidocs/1.0.x/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">Glimpse Canvas</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/canvas/GlimpseCanvas.java">(source)</a> which represents something onto which OpenGL rendering can take place. For Swing applications, this is a SwingGlimpseCanvas, which is also a JPanel and can be directly incorporated into an existing Swing application. SWTGlimpseCanvas provides the analogous capability for SWT applications. Other GlimpseCanvas implementations exist for drawing to off-screen buffers.</p>
 
 <p>The following code snippit is all that is necessary to bring up a Swing JFrame containing a GlimpseCanvas:</p>
 
@@ -48,15 +48,15 @@ title: Guide
 
 <h3>Glimpse Layout and Glimpse Painter</h3>
 
-<p>Glimpse provides tools to break up a single GlimpseCanvas into many (possibly nested) logical plotting areas which can each be painted on and receive mouse events. Each plotting area is defined by a <a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">GlimpseLayout</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/layout/GlimpseLayout.java">(source)</a> and arranged using <a href="http://www.miglayout.com/">Mig Layout</a>. The next image outlines the GlimpseLayouts from HeatMapExample. Although everything is rendered in a single OpenGL canvas, Glimpse allows mouse listeners to be attached to any GlimpseLayout and allows painting to be performed inside a GlimpseLayout without bleeding into adjacent layouts.</p>
+<p>Glimpse provides tools to break up a single GlimpseCanvas into many (possibly nested) logical plotting areas which can each be painted on and receive mouse events. Each plotting area is defined by a <a href="http://glimpse.metsci.com/apidocs/1.0.x/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">GlimpseLayout</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/layout/GlimpseLayout.java">(source)</a> and arranged using <a href="http://www.miglayout.com/">Mig Layout</a>. The next image outlines the GlimpseLayouts from HeatMapExample. Although everything is rendered in a single OpenGL canvas, Glimpse allows mouse listeners to be attached to any GlimpseLayout and allows painting to be performed inside a GlimpseLayout without bleeding into adjacent layouts.</p>
 
-<img src="images/guide/Heatmap_red_layout_bounds.png" border="1" width="600px"/>
+<img src="/images/guide/Heatmap_red_layout_bounds.png" border="1" width="600px"/>
 
 <p>Even better, GlimpseLayouts can be nested, allowing easy construction of very complicated plots. For example, three simple heat map plots could be nested into a single hybrid plot. In the image below the GlimpseLayouts are again outlined in red. The example class <a href="https://github.com/metsci/glimpse/blob/master/core-examples/src/main/java/com/metsci/glimpse/examples/layout/SimpleLayoutExample.java">SimpleLayoutExample.java</a> demonstrates how Mig Layout is used to achieve this arrangement.</p>
 
-<img src="images/guide/Multi_Heatmap_red_layout.png" border="1" width="600px"/>
+<img src="/images/guide/Multi_Heatmap_red_layout.png" border="1" width="600px"/>
 
-<p>Once the plotting areas have been defined, OpenGL rendering inside GlimpseLayouts is performed by GlimpsePainters. Multiple GlimpsePainters can be added to a GlimpseLayout and act like layers. Glimpse provides lots of pre-built painter in the <code><a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/package-summary.html">com.metsci.glimpse.painter</a></code> package. However, most applications also want to perform custom rendering. The <code><a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/base/package-summary.html">com.metsci.glimpse.painter.base</a></code> package contains the <a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/base/GlimpsePainter.html">GlimpsePainter</a> interface, as well as a number of abstract helper implementations. In most cases, <a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/base/GlimpseDataPainter2D.html">GlimpseDataPainter2D</a> is a good place to start. It handles setting up the OpenGL viewport and scissor regions and projection matrix so that <code>glVertex( )</code> calls will draw to the correct screen location based on the GlimpseLayout being painted into and the bounds of the data axes.
+<p>Once the plotting areas have been defined, OpenGL rendering inside GlimpseLayouts is performed by GlimpsePainters. Multiple GlimpsePainters can be added to a GlimpseLayout and act like layers. Glimpse provides lots of pre-built painter in the <code><a href="http://glimpse.metsci.com/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/package-summary.html">com.metsci.glimpse.painter</a></code> package. However, most applications also want to perform custom rendering. The <code><a href="http://glimpse.metsci.com/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/base/package-summary.html">com.metsci.glimpse.painter.base</a></code> package contains the <a href="http://glimpse.metsci.com/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/base/GlimpsePainter.html">GlimpsePainter</a> interface, as well as a number of abstract helper implementations. In most cases, <a href="http://glimpse.metsci.com/apidocs/1.0.x/index.html?com/metsci/glimpse/painter/base/GlimpseDataPainter2D.html">GlimpseDataPainter2D</a> is a good place to start. It handles setting up the OpenGL viewport and scissor regions and projection matrix so that <code>glVertex( )</code> calls will draw to the correct screen location based on the GlimpseLayout being painted into and the bounds of the data axes.
 
 <p>The following example demonstrates a very simple GlimpsePainter which draws a blue diagonal line from <code>(5.0,5.0)</code> to <code>(10.0,10.0)</code> in data space. When axes are drawn onto the same GlimpseLayout, the line will be at those coordinates, regardless of how the plot is panned or zoomed.</p>
 
@@ -84,5 +84,5 @@ public class SimplePainter extends GlimpseDataPainter2D
 {% endhighlight %}
 
 
-<img src="images/guide/Simple_Painter.png" border="1" width="600px"/>
+<img src="/images/guide/Simple_Painter.png" border="1" width="600px"/>
 

@@ -2,25 +2,25 @@
 layout: default
 title: Glimpse Version 1.0.0 (Beta 3) Released!
 ---
-<a href="http://metsci.github.com/glimpse"><img src="images/GlimpseLogo.png" style="margin-left: auto; margin-right:auto; display: block; margin-top: 20px; margin-bottom: 10px"/></a>
+<a href="/glimpse"><img src="/glimpse/images/GlimpseLogo.png" style="margin-left: auto; margin-right:auto; display: block; margin-top: 20px; margin-bottom: 10px"/></a>
 
-We're excited to announce the open source launch of the Glimpse data visualization library! You can fork the code on <a href="https://github.com/metsci/glimpse">GitHub</a> or check out the <a href="download.html">Download</a> page for binary releases.
+We're excited to announce the open source launch of the Glimpse data visualization library! You can fork the code on <a href="https://github.com/metsci/glimpse">GitHub</a> or check out the <a href="/download.hatml">Download</a> page for binary releases.
 
 Glimpse is a Java library which enables developers to easily construct interactive applications which take advantage of OpenGL and GPU hardware like programmable shader pipelines and cached texture memory to display large quantities of data at interactive speeds.
 
-<img src="images/Minimap.png" border="1" width="600px" style="display:block;margin-left:auto;margin-right:auto;"/>
+<img src="/glimpse/images/Minimap.png" border="1" width="600px" style="display:block;margin-left:auto;margin-right:auto;"/>
 
 There is lots of other information available at <a href="http://glimpse.metsci.com">glimpse.metsci.com</a> including:
 
 <div class="list">
 <ul>
-<li><a href="http://metsci.github.com/glimpse/apidocs/1.0.x/index.html">Javadoc</a>
-<li><a href="http://metsci.github.com/glimpse/screenshots.html">Screenshots</a>
-<li><a href="http://metsci.github.com/glimpse/videos.html">Video</a>
-<li><a href="http://metsci.github.com/glimpse/guide.html">Getting Started Guide</a>
+<li><a href="/apidocs/1.0.x/index.html">Javadoc</a>
+<li><a href="/screenshots.html">Screenshots</a>
+<li><a href="/videos.html">Video</a>
+<li><a href="/guide.html">Getting Started Guide</a>
 <li><a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">Mailing List / Forum</a>
 <li><a href="https://github.com/metsci/glimpse/wiki">Wiki</a>
-<li><a href="http://metsci.github.com/glimpse/blog.html">Blog</a>
+<li><a href="/blog.html">Blog</a>
 </ul>
 </div>
 
