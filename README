@@ -8,5 +8,5 @@ jekyll --server --no-auto --safe --base-url '/glimpse'
 
 === Browse
 
-http://localhost:4000
+http://localhost:4000/glimpse/index.html
 

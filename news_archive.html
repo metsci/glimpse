@@ -18,7 +18,7 @@ title: News Archives
       {% endif %}
     {% endunless %}
 
-    <li><span class="post_date">{{ post.date | date_to_string }}</span> &raquo; <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+    <li><span class="post_date">{{ post.date | date_to_string }}</span> &raquo; <a href="{{ site.baseurl }}/{{ post.url }}">{{ post.title }}</a></li>
   {% endfor %}
 </ul>
 </div>
