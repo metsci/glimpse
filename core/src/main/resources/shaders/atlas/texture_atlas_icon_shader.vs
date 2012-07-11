@@ -4,9 +4,9 @@ attribute vec4 pixelCoords;
 attribute vec4 texCoords;
 attribute vec3 pickColor;
 
-varying out vec4 vpixelCoords;
-varying out vec4 vtexCoords;
-varying out vec3 vpickColor; 
+varying vec4 vpixelCoords;
+varying vec4 vtexCoords;
+varying vec3 vpickColor; 
 
 void main( )
 {

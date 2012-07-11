@@ -26,10 +26,6 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static javax.media.opengl.GL.GL_BLEND;
-import static javax.media.opengl.GL.GL_TEXTURE_1D;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
@@ -180,34 +176,31 @@ public class ShadedTexturePainter extends GlimpsePainter2D
         lock.lock( );
         try
         {
+            gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
 
             if ( pipeline != null ) pipeline.beginUse( gl );
-
-            for ( TextureUnit<Texture> textureUnit : nonDrawableTextures )
+            try
             {
-                prepare( textureUnit, gl );
+                for ( TextureUnit<Texture> textureUnit : nonDrawableTextures )
+                {
+                    prepare( textureUnit, gl );
+                }
+
+                for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures )
+                {
+                    draw( textureUnit, gl );
+                }
             }
-
-            for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures )
+            finally
             {
-                draw( textureUnit, gl );
+                if ( pipeline != null ) pipeline.endUse( gl );
             }
         }
         finally
         {
-            try
-            {
-                gl.glDisable( GL_BLEND );
-                gl.glDisable( GL_TEXTURE_2D );
-                gl.glDisable( GL_TEXTURE_1D );
-                if ( pipeline != null ) pipeline.endUse( gl );
-            }
-            finally
-            {
-                lock.unlock( );
-            }
+            lock.unlock( );
         }
     }
 
