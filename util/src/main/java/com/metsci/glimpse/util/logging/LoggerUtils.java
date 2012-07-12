@@ -26,12 +26,14 @@
  */
 package com.metsci.glimpse.util.logging;
 
-import static java.lang.String.format;
+import static com.metsci.glimpse.util.io.StreamOpener.*;
+import static java.lang.String.*;
 import static java.util.logging.Level.*;
+import static java.util.logging.LogManager.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
@@ -39,9 +41,9 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.logging.format.Formatter;
 import com.metsci.glimpse.util.logging.format.TimestampingMethodNameLogFormatter;
 
@@ -132,27 +134,42 @@ public class LoggerUtils
      */
     public static void initializeLogging( String configurationFilename )
     {
+        initializeLogging( configurationFilename, fileThenResourceOpener );
+    }
+
+    /**
+     * Initialize Java logging to use given configuration file and re-read the
+     * logging configuration from this file.
+     * <p>
+     * Note: Similar to setting
+     * -Djava.util.logging.config.file=configurationFilename on java command
+     * line.
+     * </p>
+     */
+    public static void initializeLogging( String configurationFilename, StreamOpener streamOpener )
+    {
         try
         {
-            System.setProperty( "java.util.logging.config.file", configurationFilename );
-            if( ( new File( configurationFilename ) ).canRead() )
+            InputStream stream = null;
+            try
             {
-                LogManager.getLogManager().readConfiguration();
-                Logger logger = Logger.getLogger( LoggerUtils.class.toString() );
-                logger.info( "completed initialization with file " + configurationFilename );
+                stream = streamOpener.openForRead( configurationFilename );
+                getLogManager( ).readConfiguration( stream );
+
+                System.setProperty( "java.util.logging.config.file", configurationFilename );
+
+                Logger logger = getLogger( LoggerUtils.class );
+                logger.info( "Loaded logging configuration from " + configurationFilename );
             }
-            else
+            finally
             {
-                System.out.println( "JavaLoggerUtils.initializeLogging: missing file " + configurationFilename );
+                if ( stream != null ) stream.close( );
             }
         }
-        catch( SecurityException se )
+        catch ( IOException e )
         {
-            System.err.println( "JavaLoggerUtils.initializeLogging: security exception - " + se.toString() );
-        }
-        catch( IOException ioe )
-        {
-            System.err.println( "JavaLoggerUtils.initializeLogging: IO exception - " + ioe.toString() );
+            System.err.println( LoggerUtils.class.getSimpleName( ) + ".initializeLogging: IO exception - " + e.toString( ) );
+            e.printStackTrace( System.err );
         }
     }
 

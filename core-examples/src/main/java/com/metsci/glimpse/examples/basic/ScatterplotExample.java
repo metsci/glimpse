@@ -26,10 +26,9 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.Random;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -55,11 +54,8 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.util.math.stochastic.Generator;
-import com.metsci.glimpse.util.math.stochastic.StochasticEngineMersenne;
-import com.metsci.glimpse.util.math.stochastic.pdfcont.PdfCont;
-import com.metsci.glimpse.util.math.stochastic.pdfcont.PdfContGaussianZiggurat;
-import com.metsci.glimpse.util.math.stochastic.pdfcont.PdfContUniform;
+
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 /**
  * A scatter plot with adjustable point size and color. Usage of GLSL
@@ -99,12 +95,12 @@ public class ScatterplotExample implements GlimpseLayoutProvider
 
         plot.getAxis( "y_axis" ).setMin( -200.0 );
         plot.getAxis( "y_axis" ).setMax( 1000.0 );
-        
+
         // validate propagates the axis bounds set above to all linked axes
         // this should be called whenever axis bounds are set programmatically
         plot.getAxis( "x_axis" ).validate( );
         plot.getAxis( "y_axis" ).validate( );
-        
+
         // create an axis with a custom Axis1D and AxisMouseListener (which support tags)
         TaggedAxis1D colorAxis = new TaggedAxis1D( );
         AxisMouseListener colorMouseListener = new TaggedAxisMouseListener1D( );
@@ -124,7 +120,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // set the bounds of the color axis
         colorAxis.setMin( -2000.0 );
         colorAxis.setMax( 6000.0 );
-        
+
         // set the label and size of the color axis
         colorAxisInfo.getAxisPainter( ).setAxisLabel( "Color Axis" );
         colorAxisInfo.setSize( 80 );
@@ -148,14 +144,14 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // set the bounds of the size axis
         sizeAxis.setMin( -2.0 );
         sizeAxis.setMax( 5.0 );
-        
+
         // set the label and size of the size axis
         as.getAxisPainter( ).setAxisLabel( "Size Axis" );
         as.setSize( 65 );
 
         // setup the color map for the painter and axis
         ColorTexture1D colorMapTexture = new ColorTexture1D( 1024 );
-        
+
         // use the predefined bathymetry color gradient (which is a dark
         // blue to light blue color gradient) but set the alpha value
         // to a constant 0.6
@@ -167,7 +163,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
                 ColorGradients.bathymetry.toColor( fraction, rgba );
                 rgba[3] = 0.6f;
             }
-            
+
         } );
 
         // tell the color axis painter to use the color scale we just created
@@ -205,7 +201,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
                 data.clear( );
                 for ( int i = 0; i < data.capacity( ); i++ )
                 {
-                    data.put( ( float ) ( minSize + dSize * ( (float) i / (float) data.capacity( )) ) );
+                    data.put( ( float ) ( minSize + dSize * ( ( float ) i / ( float ) data.capacity( ) ) ) );
                 }
             }
         };
@@ -233,7 +229,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         }
         catch ( IOException e )
         {
-            e.printStackTrace();
+            e.printStackTrace( );
             throw new RuntimeException( e );
         }
 
@@ -243,8 +239,8 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // add a simple border painter to the main plot area
         plot.addPainter( new BorderPainter( ) );
 
-        // generate a fast source of randomness for generating data
-        final Generator g = StochasticEngineMersenne.createEngine( 1234567890 ).getGenerator( );
+        // random number generator for points
+        final Random r = new Random( );
 
         // setup the x y position data for the points
         GLFloatBuffer2D xyValues = new GLFloatBuffer2D( NUM_POINTS );
@@ -253,22 +249,15 @@ public class ScatterplotExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContGaussianZiggurat( 15, 20 );
-
                 data.clear( );
                 for ( int i = 0; i < NUM_POINTS; i++ )
                 {
-                    float x = 6.0f * i / (float) NUM_POINTS;
-                    float y = f( x, dist );
-                    
+                    float x = 6.0f * i / ( float ) NUM_POINTS;
+                    float y = ( float ) ( Math.exp( x ) * 10.0 + 15 + 20 * r.nextGaussian( ) * x );
+
                     data.put( x );
                     data.put( y );
                 }
-            }
-            
-            public float f( float x, PdfCont rand )
-            {
-                return (float) ( Math.exp( x ) * 10.0 + rand.draw( g ) * x );
             }
         } );
 
@@ -279,21 +268,14 @@ public class ScatterplotExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContUniform( 0, 500 );
-
                 data.clear( );
                 for ( int i = 0; i < NUM_POINTS; i++ )
                 {
-                    float x = 6.0f * i / (float) NUM_POINTS;
-                    float y = f( x, dist );
-                    
-                    data.put( (float) ( x * ( y + dist.draw( g ) ) ) );
+                    float x = 6.0f * i / ( float ) NUM_POINTS;
+                    float y = ( float ) ( Math.exp( x ) * 10.0 + r.nextDouble( ) * 500 );
+
+                    data.put( ( float ) ( x * ( y + r.nextDouble( ) * 500 ) ) );
                 }
-            }
-            
-            public float f( float x, PdfCont rand )
-            {
-                return (float) ( Math.exp( x ) * 10.0 + rand.draw( g ) );
             }
         } );
 
@@ -304,12 +286,10 @@ public class ScatterplotExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContUniform( 0, 1 );
-
                 data.clear( );
                 for ( int i = 0; i < NUM_POINTS; i++ )
                 {
-                    data.put( (float) dist.draw( g ) );
+                    data.put( r.nextFloat( ) );
                 }
             }
         } );

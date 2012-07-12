@@ -65,7 +65,7 @@ public abstract class TaggedAxisListener1D implements AxisListener1D
     protected List<Tag> copyTags( List<Tag> list )
     {
         List<Tag> newList = new ArrayList<Tag>( list.size( ) );
-        for ( Tag tag : newList )
+        for ( Tag tag : list )
         {
             newList.add( new Tag( tag ) );
         }

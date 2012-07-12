@@ -26,15 +26,11 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.painter.NumericAxisPainter;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+
 import com.metsci.glimpse.axis.tagged.NamedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -42,12 +38,11 @@ import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.plot.TaggedColorAxisPlot2D;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
-
-import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 /**
  * A variant of the basic HeatMapExample with tagged axes for controlling the color scale.
@@ -63,7 +58,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
     }
 
     TaggedHeatMapPainter heatmap;
-    
+
     @Override
     public ColorAxisPlot2D getLayout( )
     {
@@ -71,29 +66,10 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         // 1) Use a TaggedAxis1D for the z axis, allowing the addition of custom, draggable tag points
         // 2) Use a MouseAdapter which knows about tagged axes for the z axis
         // 3) Use a painter which knows about tagged axes for the z axis painter
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( )
-        {
-            @Override
-            protected Axis1D createAxisZ( )
-            {
-                return new TaggedAxis1D( );
-            }
-
-            @Override
-            protected AxisMouseListener createAxisMouseListenerZ( )
-            {
-                return new TaggedAxisMouseListener1D( );
-            }
-
-            @Override
-            protected NumericAxisPainter createAxisPainterZ( AxisLabelHandler tickHandler )
-            {
-                return new TaggedPartialColorYAxisPainter( tickHandler );
-            }
-        };
+        TaggedColorAxisPlot2D plot = new TaggedColorAxisPlot2D( );
 
         // get the tagged z axis
-        TaggedAxis1D axisZ = ( TaggedAxis1D ) plot.getAxisZ( );
+        TaggedAxis1D axisZ = plot.getAxisZ( );
 
         // add some named tags at specific points along the axis
         // also add a custom "attribute" to each tag which specifies the relative (0 to 1)
@@ -127,7 +103,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         plot.setAxisSizeX( 30 );
         plot.setAxisSizeY( 40 );
         plot.setTitleHeight( 0 );
-        
+
         // set the x, y, and z initial axis bounds
         plot.setMinX( 0.0f );
         plot.setMaxX( 1000.0f );
@@ -185,13 +161,13 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         plot.addPainter( cursorPainter );
 
         cursorPainter.setOffsetBySelectionSize( false );
-        
+
         // tell the cursor painter what texture to report data values from
         cursorPainter.setTexture( texture );
 
         return plot;
     }
-    
+
     public GlimpsePainter getPainter( )
     {
         return heatmap;

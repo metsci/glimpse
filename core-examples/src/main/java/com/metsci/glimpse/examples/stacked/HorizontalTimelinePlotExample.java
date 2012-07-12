@@ -26,9 +26,6 @@
  */
 package com.metsci.glimpse.examples.stacked;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;

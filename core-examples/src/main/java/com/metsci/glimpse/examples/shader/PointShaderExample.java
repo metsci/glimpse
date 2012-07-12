@@ -28,6 +28,7 @@ package com.metsci.glimpse.examples.shader;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.Random;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.GLCapabilityLogger;
@@ -47,11 +48,6 @@ import com.metsci.glimpse.painter.shape.ShadedPointPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.util.math.stochastic.Generator;
-import com.metsci.glimpse.util.math.stochastic.StochasticEngineMersenne;
-import com.metsci.glimpse.util.math.stochastic.pdfcont.PdfCont;
-import com.metsci.glimpse.util.math.stochastic.pdfcont.PdfContGaussianZiggurat;
-import com.metsci.glimpse.util.math.stochastic.pdfcont.PdfContUniform;
 
 import static java.lang.Math.*;
 
@@ -70,8 +66,8 @@ public class PointShaderExample implements GlimpseLayoutProvider
     @Override
     public GlimpseAxisLayout2D getLayout( )
     {
-        // generate a fast source of randomness to use later for making points
-        final Generator g = StochasticEngineMersenne.createEngine( 1234567890 ).getGenerator( );
+        // random number generator
+        final Random r = new Random();
 
         // create a premade heat map window
         ColorAxisPlot2D plot = new ColorAxisPlot2D( );
@@ -113,7 +109,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         }
         catch ( IOException e )
         {
-            e.printStackTrace();
+            e.printStackTrace( );
             throw new RuntimeException( e );
         }
         plot.addPainter( dp );
@@ -175,13 +171,11 @@ public class PointShaderExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContGaussianZiggurat( 0, 1 );
-
                 data.clear( );
                 for ( int i = 0; i < NPOINTS; i++ )
                 {
-                    data.put( ( float ) dist.draw( g ) ); // x
-                    data.put( ( float ) dist.draw( g ) ); // y
+                    data.put( ( float ) r.nextGaussian( ) ); // x
+                    data.put( ( float ) r.nextGaussian( ) ); // y
                 }
             }
         } );
@@ -192,13 +186,11 @@ public class PointShaderExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContGaussianZiggurat( 0, 0.001 );
-
                 data.clear( );
                 for ( int i = 0; i < NPOINTS; i++ )
                 {
-                    data.put( ( float ) ( data.get( 2 * i ) + dist.draw( g ) ) );
-                    data.put( ( float ) ( data.get( 2 * i + 1 ) + dist.draw( g ) ) );
+                    data.put( ( float ) ( data.get( 2 * i ) + .001 * r.nextGaussian( ) ) );
+                    data.put( ( float ) ( data.get( 2 * i + 1 ) + .001 * r.nextGaussian( ) ) );
                 }
             }
         };
@@ -211,14 +203,12 @@ public class PointShaderExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContUniform( 0, 10 );
-
                 data.clear( );
                 for ( int i = 0; i < NPOINTS; i++ )
                 {
-                    if ( g.nextDouble( ) > 0.999 )
+                    if ( r.nextDouble( ) > 0.999 )
                     {
-                        data.put( ( float ) dist.draw( g ) );
+                        data.put( ( float ) ( 10 * r.nextFloat( ) ) );
                     }
                     else
                     {
@@ -237,14 +227,12 @@ public class PointShaderExample implements GlimpseLayoutProvider
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                PdfCont dist = new PdfContUniform( 0, 10 );
-
                 data.clear( );
                 for ( int i = 0; i < NPOINTS; i++ )
                 {
-                    if ( g.nextDouble( ) > 0.999 )
+                    if ( r.nextDouble( ) > 0.999 )
                     {
-                        data.put( ( float ) dist.draw( g ) );
+                        data.put( ( float ) 10 * r.nextFloat( ) );
                     }
                     else
                     {
@@ -262,15 +250,18 @@ public class PointShaderExample implements GlimpseLayoutProvider
             @Override
             public void run( )
             {
-                try
+                while ( true )
                 {
-                    positions.mutate( positionMutator );
-                    colorValues.mutate( colorValueMutator );
-                    sizeValues.mutate( sizeValueMutator );
-                    Thread.sleep( 10 );
-                }
-                catch ( InterruptedException e )
-                {
+                    try
+                    {
+                        positions.mutate( positionMutator );
+                        colorValues.mutate( colorValueMutator );
+                        sizeValues.mutate( sizeValueMutator );
+                        Thread.sleep( 10 );
+                    }
+                    catch ( InterruptedException e )
+                    {
+                    }
                 }
             }
         } ).start( );

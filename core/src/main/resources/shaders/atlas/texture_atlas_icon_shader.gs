@@ -1,4 +1,3 @@
-
 #version 120
 #extension GL_EXT_geometry_shader4 : enable
 
@@ -12,13 +11,13 @@ uniform float globalScale;
 // height should include any border around the image
 // and offset should also move to the edge of the image+border
 // order in vector: width, height, offsetX, offsetY
-in vec4 vpixelCoords[];
+varying in vec4 vpixelCoords[];
 
 // order in vector: minX, maxX, minY, maxY
-in vec4 vtexCoords[];
+varying in vec4 vtexCoords[];
 
 // vector containing picking color
-in vec3 vpickColor[];
+varying in vec3 vpickColor[];
 
 varying out vec2 TexCoord;
 

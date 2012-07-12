@@ -291,7 +291,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
         if ( min >= max )
         {
-            throw new IllegalArgumentException( String.format( "Axis min value (%.3f) greater than axis max value (%.3f). Are you setting axis min/max bounds incorrectly?", min, max ) );
+            return new double[0];
         }
 
         int minTickNumber = ( int ) floor( min / tickInterval );

@@ -164,6 +164,7 @@ public class WatermarkPainter extends GlimpsePainterImpl
         gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
 
         gl.glMatrixMode( GL_TEXTURE );
+        gl.glActiveTexture( GL.GL_TEXTURE0 );
         gl.glLoadIdentity( );
 
         gl.glMatrixMode( GL_MODELVIEW );

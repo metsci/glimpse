@@ -4,9 +4,9 @@ uniform sampler2D tex;
 
 uniform bool isPickMode;
 
-in vec2 TexCoord;
+varying vec2 TexCoord;
 
-in vec3 pickColor;
+varying vec3 pickColor;
 
 void main()
 {

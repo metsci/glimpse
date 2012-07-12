@@ -153,7 +153,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             lock.unlock( );
         }
     }
-
+    
     public void setLayoutManager( GlimpseLayoutManager manager )
     {
         lock.lock( );
@@ -741,6 +741,32 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
+    public void setBackgroundColor( float[] color )
+    {
+        lock.lock( );
+        try
+        {
+            layoutDelegate.setBackgroundColor( color );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public void setBackgroundPainterEnabled( boolean enabled )
+    {
+        lock.lock( );
+        try
+        {
+            layoutDelegate.setBackgroundPainterEnabled( enabled );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
