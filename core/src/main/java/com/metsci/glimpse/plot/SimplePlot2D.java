@@ -27,6 +27,7 @@
 package com.metsci.glimpse.plot;
 
 import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -121,15 +122,27 @@ public class SimplePlot2D extends Plot2D
     }
 
     @Override
-    public void addPainter( GlimpsePainter painter, int zOrder )
-    {
-        axisLayoutXY.addPainter( painter, zOrder );
-    }
-
-    @Override
     public void addPainter( GlimpsePainter painter )
     {
         axisLayoutXY.addPainter( painter );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
+    {
+        axisLayoutXY.addPainter( painter, callback, 0 );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, null, zOrder );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, callback, zOrder );
     }
 
     @Override
@@ -141,11 +154,6 @@ public class SimplePlot2D extends Plot2D
     public void setPlotBackgroundColor( float[] color )
     {
         plotBackgroundPainter.setColor( color );
-    }
-
-    public void setBackgroundColor( float[] color )
-    {
-        backgroundPainter.setColor( color );
     }
 
     public CrosshairPainter getCrosshairPainter( )

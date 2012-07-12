@@ -30,7 +30,6 @@ import static java.lang.Math.floor;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
@@ -65,9 +64,9 @@ public class LatLonProjection implements Projection, InvertibleProjection
         this.diffLon = ( this.maxLon - this.minLon );
     }
 
-    public LatLonProjection( TangentPlane plane, double minLat, double maxLat, double minLon, double maxLon )
+    public LatLonProjection( GeoProjection projection, double minLat, double maxLat, double minLon, double maxLon )
     {
-        this( plane, minLat, maxLat, minLon, maxLon, true );
+        this( projection, minLat, maxLat, minLon, maxLon, true );
     }
 
     @Override
@@ -90,9 +89,9 @@ public class LatLonProjection implements Projection, InvertibleProjection
         double lat0 = minLat + diffLat * ( latIsX ? textureFractionX : textureFractionY );
         double lon0 = minLon + diffLon * ( !latIsX ? textureFractionX : textureFractionY );
 
-        int poleCrosses = (int) floor( ( lat0 + 90 ) / 180 );
+        int poleCrosses = ( int ) floor( ( lat0 + 90 ) / 180 );
         boolean latWrapped = ( poleCrosses % 2 != 0 );
-        double lat = ( latWrapped ? -1 : 1 ) * ( lat0 - 180*poleCrosses );
+        double lat = ( latWrapped ? -1 : 1 ) * ( lat0 - 180 * poleCrosses );
         double lon = ( latWrapped ? 180 : 0 ) + lon0;
 
         return projection.project( LatLonGeo.fromDeg( lat, lon ) );

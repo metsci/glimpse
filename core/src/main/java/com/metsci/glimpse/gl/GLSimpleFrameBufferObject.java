@@ -350,7 +350,6 @@ public class GLSimpleFrameBufferObject
                     }
                     finally
                     {
-                        gl.glDisable( GL_TEXTURE_2D );
                         gl.glEnd( );
                     }
                 }

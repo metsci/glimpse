@@ -272,6 +272,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
         finally
         {
+        	gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0);
             gl.glDisableClientState( GL.GL_VERTEX_ARRAY );
             gl.glDisableClientState( GL.GL_TEXTURE_COORD_ARRAY );
         }

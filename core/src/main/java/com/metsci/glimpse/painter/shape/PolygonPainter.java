@@ -554,6 +554,26 @@ public class PolygonPainter extends GlimpsePainter2D
             this.updateLock.unlock( );
         }
     }
+    
+    public void deleteGroups( )
+    {
+        this.updateLock.lock( );
+        try
+        {
+            for ( Group group : groups.values( ) )
+            {
+                group.delete( );
+    
+                this.updatedGroups.add( group );
+            }
+            
+            this.newData = true;
+        }
+        finally
+        {
+            this.updateLock.unlock( );
+        }
+    }
 
     /**
      * Deletes an individual Polygon group, removing its display settings and reclaiming memory.

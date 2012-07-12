@@ -61,6 +61,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -359,12 +360,9 @@ public class MultiAxisPlot2D extends GlimpseLayout
 
     protected void initializePainters( )
     {
-        this.backgroundPainter = new BackgroundPainter( true );
-        super.addPainter( this.backgroundPainter );
-
         this.titleLayout = new GlimpseLayout( this, "Title" );
         this.axisLayoutXY = new GlimpseAxisLayout2D( this, "Center", new Axis2D( centerAxisX, centerAxisY ) );
-
+        
         this.titlePainter = createTitlePainter( );
 
         if ( titlePainter != null ) titleLayout.addPainter( titlePainter );
@@ -421,20 +419,34 @@ public class MultiAxisPlot2D extends GlimpseLayout
         plotBackgroundPainter.setColor( color );
     }
 
-    public void setBackgroundColor( float[] color )
-    {
-        backgroundPainter.setColor( color );
-    }
-
     @Override
     public void addPainter( GlimpsePainter painter )
     {
         axisLayoutXY.addPainter( painter );
     }
 
+    @Override
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
+    {
+        axisLayoutXY.addPainter( painter, callback );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, null, zOrder );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        axisLayoutXY.addPainter( painter, callback, zOrder );
+    }
+
+    @Override
     public void removePainter( GlimpsePainter painter )
     {
-        axisLayoutXY.addPainter( painter );
+        axisLayoutXY.removePainter( painter );
     }
 
     public GlimpseAxisLayout2D getLayoutCenter( )
