@@ -24,39 +24,59 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot;
+package com.metsci.glimpse.util.primitives;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.painter.NumericAxisPainter;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 
-public class TaggedColorAxisPlot2D extends ColorAxisPlot2D
+/**
+ * @author hogye
+ */
+public interface ObjectsModifiable extends Objects
 {
-    @Override
-    protected Axis1D createAxisZ( )
-    {
-        return new TaggedAxis1D( );
-    }
 
-    @Override
-    protected AxisMouseListener createAxisMouseListenerZ( )
-    {
-        return new TaggedAxisMouseListener1D( );
-    }
+    void set(int i, Object v);
 
-    @Override
-    protected NumericAxisPainter createAxisPainterZ( AxisLabelHandler tickHandler )
-    {
-        return new TaggedPartialColorYAxisPainter( tickHandler );
-    }
-    
-    @Override
-    public TaggedAxis1D getAxisZ( )
-    {
-        return (TaggedAxis1D) axisZ;
-    }
+
+
+    void insert(int i, Object v);
+
+    void insert(int i, Object[] vs);
+    void insert(int i, Objects vs);
+
+    void insert(int i, Object[] vs, int from, int to);
+    void insert(int i, Objects vs, int from, int to);
+
+
+
+    void append(Object v);
+
+    void append(Object[] vs);
+    void append(Objects vs);
+
+    void append(Object[] vs, int from, int to);
+    void append(Objects vs, int from, int to);
+
+
+
+    void prepend(Object v);
+
+    void prepend(Object[] vs);
+    void prepend(Objects vs);
+
+    void prepend(Object[] vs, int from, int to);
+    void prepend(Objects vs, int from, int to);
+
+
+
+    /**
+     * Removes a single copy of the specified value. If multiple copies
+     * are present, there is no guarantee which one will be removed.
+     */
+    void remove(Object v);
+
+
+
+    void ensureCapacity(int minCapacity);
+
+    void compact();
+
 }

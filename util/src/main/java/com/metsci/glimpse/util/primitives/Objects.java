@@ -24,39 +24,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot;
+package com.metsci.glimpse.util.primitives;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.painter.NumericAxisPainter;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-
-public class TaggedColorAxisPlot2D extends ColorAxisPlot2D
+/**
+ * @author hogye
+ */
+public interface Objects
 {
-    @Override
-    protected Axis1D createAxisZ( )
-    {
-        return new TaggedAxis1D( );
-    }
 
-    @Override
-    protected AxisMouseListener createAxisMouseListenerZ( )
-    {
-        return new TaggedAxisMouseListener1D( );
-    }
+    /**
+     * Value at index i
+     */
+    Object v(int i);
 
-    @Override
-    protected NumericAxisPainter createAxisPainterZ( AxisLabelHandler tickHandler )
-    {
-        return new TaggedPartialColorYAxisPainter( tickHandler );
-    }
-    
-    @Override
-    public TaggedAxis1D getAxisZ( )
-    {
-        return (TaggedAxis1D) axisZ;
-    }
+    /**
+     * Length of the sequence
+     */
+    int n();
+
+    void copyTo(int i, Object[] dest, int iDest, int c);
+
+
+    // Convenience Methods
+
+    boolean isEmpty();
+
+    Object first();
+
+    Object last();
+
+    Object[] copyOf(int i, int c);
+
+    Object[] copyOf();
+
 }
