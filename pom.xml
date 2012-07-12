@@ -3,7 +3,7 @@
 
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
 
     <name>Glimpse</name>
@@ -190,11 +190,11 @@
     <distributionManagement>
         <repository>
             <id>metron-maven-server</id>
-            <url>${release-deployment-url}</url>
+            <url>${glimpse-release-deployment-url}</url>
         </repository>
         <snapshotRepository>
             <id>metron-maven-server</id>
-            <url>${snapshot-deployment-url}</url>
+            <url>${glimpse-snapshot-deployment-url}</url>
         </snapshotRepository>
     </distributionManagement>
 
