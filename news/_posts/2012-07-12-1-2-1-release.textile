@@ -1,0 +1,16 @@
+---
+layout: default
+title: Glimpse 1.2.1 Release
+---
+
+Glimpse version 1.2.1 is now available for <a href="https://github.com/metsci/glimpse/downloads">download</a>. This is a minor bug fix release:
+
+<div class="list">
+<ul>
+<li>New TaggedColorAxisPlot2D makes it easier to use HeatMapPainters with tagged axes.</li>
+<li>Fixed bugs in ShadedTexturePainter, TextureProjected2D, and GlimpsePainterImpl which could cause GLStackUnderflow exceptions.</li>
+<li>Improved Mac compatibility in GLSL shader code.</li>
+<li>Fixed TaggedAxisLister bug which would cause changed tags to be incorrectly reported.</li>
+<li>Enhanced com.metsci.glimpse.util.primitives package to include Object array support.</li>
+</ul>
+</div>
