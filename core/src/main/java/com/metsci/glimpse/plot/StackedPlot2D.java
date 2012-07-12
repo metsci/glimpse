@@ -41,6 +41,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 
 /**
@@ -57,8 +58,6 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected GlimpseLayoutManagerMig layout;
     protected Map<String, PlotInfo> stackedPlots;
-
-    protected BackgroundPainter backgroundPainter;
 
     protected Orientation orientation = Orientation.VERTICAL;
 
@@ -113,8 +112,6 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected void initializePainters( )
     {
-        this.backgroundPainter = new BackgroundPainter( false );
-        this.addPainter( this.backgroundPainter, Integer.MIN_VALUE );
     }
 
     protected void initializeLookAndFeel( )
@@ -203,12 +200,7 @@ public class StackedPlot2D extends GlimpseLayout
     //////////////////////////////////////
     //      Customization Methods       //
     //////////////////////////////////////
-
     
-    public void setBackgroundColor( float[] color )
-    {
-        this.backgroundPainter.setColor( color );
-    }
 
     public void setBorderSize( int size )
     {

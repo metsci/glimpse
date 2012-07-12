@@ -156,11 +156,6 @@ public class SimplePlot2D extends Plot2D
         plotBackgroundPainter.setColor( color );
     }
 
-    public void setBackgroundColor( float[] color )
-    {
-        backgroundPainter.setColor( color );
-    }
-
     public CrosshairPainter getCrosshairPainter( )
     {
         return crosshairPainter;
