@@ -360,9 +360,12 @@ public class MultiAxisPlot2D extends GlimpseLayout
 
     protected void initializePainters( )
     {
+        this.backgroundPainter = new BackgroundPainter( true );
+        super.addPainter0( backgroundPainter, null, Integer.MIN_VALUE );
+
         this.titleLayout = new GlimpseLayout( this, "Title" );
         this.axisLayoutXY = new GlimpseAxisLayout2D( this, "Center", new Axis2D( centerAxisX, centerAxisY ) );
-        
+
         this.titlePainter = createTitlePainter( );
 
         if ( titlePainter != null ) titleLayout.addPainter( titlePainter );
@@ -419,6 +422,11 @@ public class MultiAxisPlot2D extends GlimpseLayout
         plotBackgroundPainter.setColor( color );
     }
 
+    public void setBackgroundColor( float[] color )
+    {
+        backgroundPainter.setColor( color );
+    }
+
     @Override
     public void addPainter( GlimpsePainter painter )
     {
@@ -434,7 +442,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
     @Override
     public void addPainter( GlimpsePainter painter, int zOrder )
     {
-        axisLayoutXY.addPainter( painter, null, zOrder );
+        axisLayoutXY.addPainter( painter, zOrder );
     }
 
     @Override

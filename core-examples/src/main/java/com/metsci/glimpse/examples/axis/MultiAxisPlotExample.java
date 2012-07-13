@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.axis;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.ColorRightYAxisPainter;
 import com.metsci.glimpse.axis.painter.ColorXAxisPainter;
@@ -39,9 +40,11 @@ import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorXAxisPainter;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
+import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.colormap.ColorGradients;
@@ -173,13 +176,22 @@ public class MultiAxisPlotExample implements GlimpseLayoutProvider
         // set a title for the overall plot
         plot.setTitle( "Multi Axis Plot" );
 
-        //TODO this behavior is currently broken, we need to be able to add another GlimpseAxisLayout2D ontop of the existing one with different axes
-        // create a grid painter and have the grid lines follow the "axisB1" and "axisR1" axes
-        //TODO should these resize listeners get added automatically when the axes are used in this context?
-        //        plot.getCenterLayout( ).addAxis( plot.getAxis( axisB1 ) );
-        //        plot.getCenterLayout( ).addAxis( plot.getAxis( axisR1 ) );
-        //        plot.addPainter( new GridPainter( plot.getAxisInfo( axisB1 ).getTickHandler( ), plot.getAxisInfo( axisR1 ).getTickHandler( ) ) );
-
+        // create grid lines which are linked to two specific axes (different than those
+        // two linked to the central plot mouse controls)
+        
+        // to accomplish this, we need to create a new Axis2D from the two Axis1D we wish to use
+        Axis2D gridAxis = new Axis2D( plot.getAxis( axisB1 ), plot.getAxis( axisR1 ) );
+        // then create a GlimpseAxisLayout2D using the Axis2D
+        GlimpseAxisLayout2D gridLayout = new GlimpseAxisLayout2D( gridAxis );
+        // this GlimpseAxisLayout2D will sit on top of the plot.getLayoutCenter( )
+        // but we want it to be transparent to events, since events are handled by the
+        // underlying plot.getLayoutCenter( ) Layout
+        gridLayout.setEventConsumer( false );
+        gridLayout.setEventGenerator( false );
+        // finally, add the GridPainter and add the new GlimpseAxisLayout2D to the plot layout
+        gridLayout.addPainter( new GridPainter( ) );
+        plot.getLayoutCenter( ).addLayout( gridLayout );        
+        
         // add a simple border painter to the main plot area
         plot.addPainter( new BorderPainter( ) );
 

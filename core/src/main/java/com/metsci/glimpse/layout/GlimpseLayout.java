@@ -153,7 +153,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             lock.unlock( );
         }
     }
-    
+
     public void setLayoutManager( GlimpseLayoutManager manager )
     {
         lock.lock( );
@@ -321,16 +321,21 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
         else
         {
-            lock.lock( );
-            try
-            {
-                layoutDelegate.addPainter( painter, callback, zOrder );
-                invalidateLayout( );
-            }
-            finally
-            {
-                lock.unlock( );
-            }
+            addPainter0( painter, callback, zOrder );
+        }
+    }
+    
+    protected void addPainter0( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        lock.lock( );
+        try
+        {
+            layoutDelegate.addPainter( painter, callback, zOrder );
+            invalidateLayout( );
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
 
@@ -741,32 +746,6 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
-    public void setBackgroundColor( float[] color )
-    {
-        lock.lock( );
-        try
-        {
-            layoutDelegate.setBackgroundColor( color );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-    
-    public void setBackgroundPainterEnabled( boolean enabled )
-    {
-        lock.lock( );
-        try
-        {
-            layoutDelegate.setBackgroundPainterEnabled( enabled );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-    
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
