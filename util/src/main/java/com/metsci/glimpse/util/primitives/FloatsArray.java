@@ -55,7 +55,7 @@ public class FloatsArray implements FloatsModifiable
 
     public FloatsArray(int n)
     {
-        this(new float[n], n);
+        this(new float[n], 0);
     }
 
     public FloatsArray()

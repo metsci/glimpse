@@ -61,7 +61,7 @@ public class BytesArray implements BytesModifiable
 
     public BytesArray(int n)
     {
-        this(new byte[n], n);
+        this(new byte[n], 0);
     }
 
     public BytesArray()

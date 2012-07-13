@@ -53,7 +53,7 @@ public class BooleansArray implements BooleansModifiable
 
     public BooleansArray(int n)
     {
-        this(new boolean[n], n);
+        this(new boolean[n], 0);
     }
 
     public BooleansArray()

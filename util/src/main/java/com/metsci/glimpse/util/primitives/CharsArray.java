@@ -55,7 +55,7 @@ public class CharsArray implements CharsModifiable
 
     public CharsArray(int n)
     {
-        this(new char[n], n);
+        this(new char[n], 0);
     }
 
     public CharsArray()

@@ -55,7 +55,7 @@ public class DoublesArray implements DoublesModifiable
 
     public DoublesArray(int n)
     {
-        this(new double[n], n);
+        this(new double[n], 0);
     }
 
     public DoublesArray()
