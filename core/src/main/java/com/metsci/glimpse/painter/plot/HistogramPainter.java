@@ -76,7 +76,6 @@ public class HistogramPainter extends GlimpseDataPainter2D
     {
         dataBufferLock = new ReentrantLock( );
         this.asDensity = asDensity;
-        System.out.println("foo");
     }
     
     public HistogramPainter( )
