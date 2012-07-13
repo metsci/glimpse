@@ -423,6 +423,12 @@ public class MapPlot2D extends Plot2D
         plotBackgroundPainter.setColor( color );
     }
 
+    @Override
+    public void setBackgroundColor( float[] color )
+    {
+        backgroundPainter.setColor( color );
+    }
+
     public CrosshairPainter getCrosshairPainter( )
     {
         return crosshairPainter;

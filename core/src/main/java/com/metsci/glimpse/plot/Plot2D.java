@@ -54,6 +54,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
@@ -109,6 +110,8 @@ public class Plot2D extends GlimpseAxisLayout2D
     protected String title = null;
     protected boolean showTitle = false;
 
+    protected BackgroundPainter backgroundPainter;
+
     protected GlimpseLayout titleLayout;
     protected GlimpseAxisLayout1D axisLayoutX;
     protected GlimpseAxisLayout1D axisLayoutY;
@@ -149,6 +152,7 @@ public class Plot2D extends GlimpseAxisLayout2D
     protected void initialize( )
     {
         initializeAxes( );
+        initializeParentLayout( );
         initializePainters( );
         attachAxisMouseListeners( );
         initializeLookAndFeel( );
@@ -160,7 +164,13 @@ public class Plot2D extends GlimpseAxisLayout2D
         axisXY = new Axis2D( createAxisX( ), createAxisY( ) );
         axisZ = createAxisZ( );
     }
-    
+
+    protected void initializeParentLayout( )
+    {
+        backgroundPainter = new BackgroundPainter( true );
+        super.addPainter( backgroundPainter );
+    }
+
     protected void initializeLookAndFeel( )
     {
         setLookAndFeel( new DefaultLookAndFeel( ) );
@@ -326,6 +336,11 @@ public class Plot2D extends GlimpseAxisLayout2D
     public GlimpseLayoutManagerMig getLayoutManager( )
     {
         return ( GlimpseLayoutManagerMig ) super.getLayoutManager( );
+    }
+
+    public void setBackgroundColor( float[] color )
+    {
+        this.backgroundPainter.setColor( color );
     }
 
     public void addAxisListener( AxisListener2D l )

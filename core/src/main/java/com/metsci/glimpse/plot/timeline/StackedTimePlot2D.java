@@ -839,7 +839,6 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.labelLayoutSize = 30;
         }
 
-        this.timeLayout.setBackgroundPainterEnabled( false );
         this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
 
         this.timeAxisPainter = createTimeAxisPainter( );
@@ -879,9 +878,6 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.underlayLayout = new GlimpseAxisLayoutY( this, "Underlay", timeAxis );
         }
 
-        this.overlayLayout.setBackgroundPainterEnabled( false );
-        this.underlayLayout.setBackgroundPainterEnabled( false );
-        
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
         
         this.overlayLayout.setEventGenerator( true );
@@ -992,7 +988,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                 tickNumberFormatter.setMaximumFractionDigits( Math.abs( orderTick ) );
             }
         };
-        
+
         // add a painter for user data
         DelegatePainter dataPainter = new DelegatePainter( );
         layoutInfo.getLayout( ).addPainter( dataPainter );
