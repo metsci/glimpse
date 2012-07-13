@@ -90,21 +90,6 @@ public class SimplePlot2D extends Plot2D
         setAxisSizeZ( 0 );
     }
 
-    public void setZOrderOuter( GlimpsePainter painter, int zOrder )
-    {
-        super.setZOrder( painter, zOrder );
-    }
-
-    public void addPainterOuter( GlimpsePainter painter )
-    {
-        super.addPainter( painter );
-    }
-
-    public void removePainterOuter( GlimpsePainter painter )
-    {
-        super.removePainter( painter );
-    }
-
     public void addPainterBackground( GlimpsePainter painter )
     {
         axisLayoutXY.addPainter( painter, Plot2D.BACKGROUND_LAYER );
@@ -130,13 +115,13 @@ public class SimplePlot2D extends Plot2D
     @Override
     public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
     {
-        axisLayoutXY.addPainter( painter, callback, 0 );
+        axisLayoutXY.addPainter( painter, callback );
     }
 
     @Override
     public void addPainter( GlimpsePainter painter, int zOrder )
     {
-        axisLayoutXY.addPainter( painter, null, zOrder );
+        axisLayoutXY.addPainter( painter, zOrder );
     }
 
     @Override

@@ -321,16 +321,21 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
         else
         {
-            lock.lock( );
-            try
-            {
-                layoutDelegate.addPainter( painter, callback, zOrder );
-                invalidateLayout( );
-            }
-            finally
-            {
-                lock.unlock( );
-            }
+            addPainter0( painter, callback, zOrder );
+        }
+    }
+    
+    protected void addPainter0( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        lock.lock( );
+        try
+        {
+            layoutDelegate.addPainter( painter, callback, zOrder );
+            invalidateLayout( );
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
 

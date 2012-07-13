@@ -72,6 +72,9 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
         // create the main plot
         final SimplePlot2D plot = new SimplePlot2D( );
 
+        // create a GlimpseLayout to contain the floating plot
+        final GlimpseLayout floatingLayout = new GlimpseLayout( );
+        
         // create a new plot for the floating layout area
         // it uses a vertical text orientation for its y axis painter to save space
         final SimplePlot2D floatingPlot = new SimplePlot2D( )
@@ -93,7 +96,7 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
                 int minX = plot.getAxisX( ).valueToScreenPixel( plotMinX );
                 int minY = plot.getAxisY( ).valueToScreenPixel( plotMinY );
 
-                floatingPlot.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
+                floatingLayout.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
                 plot.invalidateLayout( );
             }
         } );
@@ -143,8 +146,9 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
         // don't provide any space for a title in the floating plot
         floatingPlot.setTitleHeight( 0 );
 
-        // add a border to the outside of the floating plot
-        floatingPlot.addPainterOuter( new BorderPainter( ).setLineWidth( 4 ) );
+        // add a border to the outside of the floating plot, setting its zOrder
+        // to ensure it appears above other plot features
+        floatingLayout.addPainter( new BorderPainter( ).setLineWidth( 2 ), Integer.MAX_VALUE );
 
         // create a color scale axis for the heat maps created below
         Axis1D colorAxis = new Axis1D( );
@@ -160,7 +164,8 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
         plot.getAxis( ).set( 0, 1000, 0, 1000 );
 
         // add the floating plot to the main plot
-        plot.getLayoutCenter( ).addLayout( floatingPlot );
+        floatingLayout.addLayout( floatingPlot );
+        plot.getLayoutCenter( ).addLayout( floatingLayout );
         plot.getLayoutCenter( ).invalidateLayout( );
 
         plot.setAxisSizeY( 45 );

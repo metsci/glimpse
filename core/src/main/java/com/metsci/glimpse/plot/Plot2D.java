@@ -168,7 +168,7 @@ public class Plot2D extends GlimpseAxisLayout2D
     protected void initializeParentLayout( )
     {
         backgroundPainter = new BackgroundPainter( true );
-        super.addPainter( backgroundPainter );
+        super.addPainter0( backgroundPainter, null, Integer.MIN_VALUE );
     }
 
     protected void initializeLookAndFeel( )
