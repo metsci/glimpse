@@ -43,7 +43,6 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
@@ -52,14 +51,15 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     public static final int DEFAULT_WIDTH = 100;
     public static final int DEFAULT_HEIGHT = 100;
 
-    private boolean isDisposed = false;
-    
     private int x, y, width, height;
-    
+
+    private boolean isDisposed = false;
+
     private boolean visible = true;
+
     private boolean visualPadding = false;
     private static final boolean zeroMinSize = true;
-    
+
     //TODO These default constraints make filling all available space the default behavior of a GlimpseLayout
     //     because older code sometimes used GlimpseLayouts in this way. However, with the new setup there
     //     should be no reason to have a GlimpseLayout which completely fills its parent GlimpseLayout (since
@@ -79,9 +79,6 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     private LinkedHashMap<GlimpsePainter, Member> memberMap;
     private List<Member> memberList;
 
-    private BackgroundPainter backgroundPainter;
-    private boolean backgroundPainterEnabled;
-    
     private static class Member
     {
         public GlimpsePainter painter;
@@ -132,11 +129,8 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         this.layoutChildren = new ArrayList<GlimpseLayoutDelegate>( );
         this.memberList = new ArrayList<Member>( );
         this.memberMap = new LinkedHashMap<GlimpsePainter, Member>( );
-        
-        this.backgroundPainter = new BackgroundPainter( true );
-        this.backgroundPainterEnabled = true;
     }
-    
+
     protected GlimpseBounds getClippedBounds( GlimpseContext context )
     {
         int minX = Integer.MIN_VALUE;
@@ -164,25 +158,6 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
         if ( !clippedBounds.isValid( ) ) return;
 
-        // paint background
-        if ( backgroundPainterEnabled )
-        {
-            try
-            {
-                gl.glEnable( GL.GL_SCISSOR_TEST );
-
-                gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
-                gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
-
-                this.backgroundPainter.paintTo( context );
-            }
-            finally
-            {
-                gl.glDisable( GL.GL_SCISSOR_TEST );
-            }
-        }
-
-        // paint members
         for ( Member m : memberList )
         {
             try
@@ -195,6 +170,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
                 if ( m.callback != null ) m.callback.prePaint( m.painter, context );
                 m.painter.paintTo( context );
                 if ( m.callback != null ) m.callback.postPaint( m.painter, context );
+
             }
             finally
             {
@@ -249,27 +225,8 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         stack.pop( );
     }
 
-    public void setBackgroundColor( float[] color )
-    {
-        backgroundPainter.setColor( color );
-        for ( GlimpseLayoutDelegate l : layoutChildren )
-        {
-            l.setBackgroundColor( color );
-        }
-    }
-    
-    public void setBackgroundPainterEnabled( boolean enabled )
-    {
-        this.backgroundPainterEnabled = enabled;
-        for ( GlimpseLayoutDelegate l : layoutChildren )
-        {
-            l.setBackgroundPainterEnabled( enabled );
-        }
-    }
-    
     public void setLookAndFeel( LookAndFeel laf )
     {
-        backgroundPainter.setLookAndFeel( laf );
         for ( Member m : memberList )
         {
             m.painter.setLookAndFeel( laf );

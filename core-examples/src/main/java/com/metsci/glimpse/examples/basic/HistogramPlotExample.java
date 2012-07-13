@@ -51,7 +51,7 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
     {
         // create a premade histogram plot
         SimplePlot2D histogramplot = new SimplePlot2D( );
-
+        
         // set axis labels and chart title
         histogramplot.setTitle( "Histogram Plot Example" );
         histogramplot.setAxisLabelX( "x axis" );
