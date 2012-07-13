@@ -1,0 +1,6 @@
+---
+layout: default
+title: Glimpse 1.2.2 Release
+---
+
+Glimpse version 1.2.2 is now available for <a href="https://github.com/metsci/glimpse/downloads">download</a>. This corrects problems with BackgroundPainters and addPainter() method overrides of Glimpse plot classes introduced in 1.2.1.
