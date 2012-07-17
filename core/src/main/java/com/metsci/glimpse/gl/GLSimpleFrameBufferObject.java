@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.gl;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.util.logging.Level.WARNING;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
 
@@ -142,6 +143,14 @@ public class GLSimpleFrameBufferObject
             if ( textureId != null )
             {
                 gl.glDeleteTextures( 1, textureId, 0 );
+            }
+
+            // check if the video card supports this size of texture
+            int[] maxTextureSize = new int[1];
+            gl.glGetIntegerv( GL.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0 );
+            if ( maxTextureSize[0] < width || maxTextureSize[0] < height )
+            {
+                logWarning( logger, "Texture (%dx%d) has dimensions larger than maximum supported (%d)", width, height, maxTextureSize[0] );
             }
 
             // create a texture object
