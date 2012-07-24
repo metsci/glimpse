@@ -316,10 +316,10 @@ public class MinimapLayout extends GlimpseAxisLayout2D
 
         mainMapAxis.getAxisX( ).setMin( x - width / 2.0 );
         mainMapAxis.getAxisX( ).setMax( x + width / 2.0 );
+        mainMapAxis.getAxisX( ).validate( );
+        
         mainMapAxis.getAxisY( ).setMin( y - height / 2.0 );
         mainMapAxis.getAxisY( ).setMax( y + height / 2.0 );
-
-        mainMapAxis.getAxisX( ).validate( );
         mainMapAxis.getAxisY( ).validate( );
     }
 }
