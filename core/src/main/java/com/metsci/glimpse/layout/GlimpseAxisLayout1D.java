@@ -89,6 +89,11 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     {
         this( parent, null, null );
     }
+    
+    public GlimpseAxisLayout1D( )
+    {
+        this( null, null, null );
+    }
 
     @Override
     protected void preLayout( GlimpseTargetStack stack, GlimpseBounds bounds )

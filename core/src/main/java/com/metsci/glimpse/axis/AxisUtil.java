@@ -31,6 +31,8 @@ import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 
 /**
  * Utility classes for automatically creating axes and assigning
@@ -43,6 +45,31 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
  */
 public class AxisUtil
 {
+    /////////////////////////////////////////////////////////////////////////////////////////
+    //      Methods for automatically creating GlimpseLayouts and associated Axes          //
+    /////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static GlimpseAxisLayout2D createLayout2D( )
+    {
+        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( );
+        createAxis2D( layout );
+        return layout;
+    }
+    
+    public static GlimpseAxisLayout1D createLayoutX( )
+    {
+        GlimpseAxisLayout1D layout = new GlimpseAxisLayoutX( );
+        createHorizontalAxis( layout );
+        return layout;
+    }
+    
+    public static GlimpseAxisLayout1D createLayoutY( )
+    {
+        GlimpseAxisLayout1D layout = new GlimpseAxisLayoutY( );
+        createVerticalAxis( layout );
+        return layout;
+    }
+    
     /////////////////////////////////////////////////////////////////////////////////////////
     // Methods for automatically creating Glimpse Axes and attaching appropriate listeners //
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +155,7 @@ public class AxisUtil
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
-    // Methods for attaching mouse and resize listeners to already created Glimpse axes    //
+    //       Methods for attaching mouse listeners to already created GlimpseLayouts       //
     /////////////////////////////////////////////////////////////////////////////////////////
 
     public static void attachHorizontalMouseListener( GlimpseAxisLayout1D layout )
