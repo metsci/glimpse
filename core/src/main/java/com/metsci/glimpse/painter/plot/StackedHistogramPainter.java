@@ -76,17 +76,9 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
     protected float minX;
     protected float maxX;
 
-    protected final boolean asDensity;
-
-    public StackedHistogramPainter( boolean asDensity )
-    {
-        dataBufferLock = new ReentrantLock( );
-        this.asDensity = asDensity;
-    }
-
     public StackedHistogramPainter( )
     {
-        this( false );
+        dataBufferLock = new ReentrantLock( );
     }
 
     public void setDefaultSeriesColor( float[] rgba )
@@ -240,7 +232,7 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
                     float bin = entry.getFloatKey( );
                     int count = entry.getIntValue( );
 
-                    float height = getBarHeight( count, totalNumValues );
+                    float height = getBarHeight( bin, count, totalNumValues );
                     float lastHeight = lastBarHeights.get( bin );
 
                     float top = lastHeight + height;
@@ -269,10 +261,9 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
         }
     }
 
-    protected float getBarHeight( int count, int totalValues )
+    protected float getBarHeight( float bin, int count, int totalValues )
     {
-        float denom = asDensity ? totalValues * binSize : totalValues;
-        return count / denom;
+        return count;
     }
 
     public float getBinSize( )
