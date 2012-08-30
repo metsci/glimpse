@@ -33,6 +33,10 @@ import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulato
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
+/**
+ * @author ulman
+ * @see com.metsci.glimpse.examples.misc.DynamicPointPainterExample
+ */
 public class DynamicLinePainterExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
