@@ -48,6 +48,14 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
+/**
+ * Efficiently paints dynamically changing groups of colored lines. Support is provided
+ * for very efficiently changing the color of existing lines, as well as for adding 
+ * to existing sets of lines.
+ * 
+ * @author ulman
+ * @see com.metsci.glimpse.examples.misc.DynamicLinePainterExample
+ */
 public class DynamicLineSetPainter extends GlimpseDataPainter2D
 {
     protected static final double GROWTH_FACTOR = 1.3;

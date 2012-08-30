@@ -35,11 +35,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.track.Point;
+import com.metsci.glimpse.painter.track.Pulsator;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -67,7 +72,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
 
         // show the z axis and set its width to 50 pixels
         plot.setAxisSizeZ( 50 );
-        
+
         // hide the x and y axes and the plot title
         plot.setAxisSizeX( 0 );
         plot.setAxisSizeY( 0 );
@@ -86,7 +91,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         plot.setMinZ( 0.0 );
         plot.setMaxZ( 1000.0 );
         plot.setAxisSizeZ( 65 );
-        
+
         plot.getAxisX( ).setSelectionCenter( 10 );
         plot.getAxisY( ).setSelectionCenter( 10 );
 
@@ -107,20 +112,102 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
 
         // add a custom manager class to keep track of the tracks
         TrackManager trackManager = new TrackManager( trackPainter, NUMBER_OF_TRACKS );
-        
+
         // add a custom listener to the z axis which changes the selected time range for
         // all GeoPlot tracks based on the min and max values of the z axis
         plot.getAxisZ( ).addAxisListener( new TimeAxisListener( trackPainter ) );
         plot.getAxisPainterZ( ).setShowMarker( true );
 
-        // add a custom listener which is notified when the track points inside the plot's selection box change
-        trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
-        
         // start a thread which manages the animation, continually adding new points to the tracks
         trackManager.start( );
 
+        // add a custom listener which is notified when the track points inside the plot's selection box change
+        trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
+
+        // create a new TrackPainter which will be used to highlight the point closest to the cursor
+        final TrackPainter selectionDotPainter = new TrackPainter( false );
+        plot.addPainter( selectionDotPainter );
+        selectionDotPainter.setShowPoints( 0, true );
+        selectionDotPainter.setPointSize( 0, 10f );
+        selectionDotPainter.setPointColor( 0, GlimpseColor.getYellow( ) );
+
+        // create a painter to display information about the selected point
+        final CustomCursorTextPainter cursorText = new CustomCursorTextPainter( );
+        plot.addPainter( cursorText );
+        
+        // create a pulsator, a threaded convenience class which pulses
+        // the point size of a given set of track ids in a TrackPainter
+        final Pulsator pulsator = new Pulsator( selectionDotPainter );
+        pulsator.addId( 0 );
+        pulsator.start( );
+
+        // add a mouse listener which selects the point closest to the cursor
+        plot.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
+        {
+            @Override
+            public void mouseMoved( GlimpseMouseEvent e )
+            {
+                // find the closest track point to the mouse event which
+                // is within 20 pixels of the cursor
+                Point point = trackPainter.getNearestPoint( e, 20 );
+
+                // update the cursor text painter for the newly selected point
+                cursorText.setPoint( point );
+                
+                // use track id 0 to draw a large dot on the selected point
+                selectionDotPainter.clearTrack( 0 );
+                pulsator.resetSize( );
+
+                if ( point != null )
+                {
+                    selectionDotPainter.addPoint( 0, 0, point.getX( ), point.getY( ), point.getTime( ) );
+                }
+            }
+        } );
+        
         return plot;
     }
+
+    private static class CustomCursorTextPainter extends CursorTextPainter
+    {
+        protected Point point;
+        
+        public void setPoint( Point point )
+        {
+            this.point = point;
+            
+        }
+        
+        @Override
+        public String getTextX( Axis2D axis )
+        {
+            Point temp = point;
+            
+            if ( temp != null )
+            {
+                return String.format( "Track: %d Point: %d", temp.getTrackId( ), temp.getPointId( ) );
+            }
+            else
+            {
+                return "Id: (none)";
+            }
+        }
+        
+        @Override
+        public String getTextY( Axis2D axis )
+        {
+            Point temp = point;
+            
+            if ( temp != null )
+            {
+                return String.format( "(%.2f, %.2f)", temp.getX( ), temp.getY( ) );
+            }
+            else
+            {
+                return "";
+            }
+        }
+    };
     
     // a custom listener which changes the selected time range for
     // all GeoPlot tracks based on the min and max values of the z axis
@@ -130,19 +217,19 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         private long prevMaxTime = -1;
         private long prevSelectedTime = -1;
         private TrackPainter trackPainter;
-        
+
         public TimeAxisListener( TrackPainter trackPainter )
         {
             this.trackPainter = trackPainter;
         }
-        
+
         @Override
         public void axisUpdatedRateLimited( Axis1D axis )
         {
             long minTime = ( long ) axis.getMin( );
             long maxTime = ( long ) axis.getMax( );
             long selectedTime = ( long ) axis.getSelectionCenter( );
-            
+
             if ( prevMinTime != minTime || prevMaxTime != maxTime || prevSelectedTime != selectedTime )
             {
                 trackPainter.displayTimeRange( minTime, maxTime, selectedTime );
@@ -153,7 +240,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
             }
         }
     }
-    
+
     // a custom listener which is notified when the track points inside the plot's selection box change
     private static class TrackSelectionListener implements SpatialSelectionListener<Point>
     {
@@ -161,16 +248,16 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         private IntAVLTreeSet newSelectedTrackIds;
         private TrackPainter trackPainter;
         private TrackManager trackManager;
-        
+
         public TrackSelectionListener( TrackManager trackManager, TrackPainter trackPainter )
         {
             this.selectedTrackIds = new IntAVLTreeSet( );
             this.newSelectedTrackIds = new IntAVLTreeSet( );
-            
+
             this.trackManager = trackManager;
             this.trackPainter = trackPainter;
         }
-        
+
         /**
          * Show the track name and change the color of all the selected tracks. A track
          * is selected if at least one of its points falls within the spatial selection
@@ -181,7 +268,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         {
             // store the track ids of the newly selected track here
             newSelectedTrackIds.clear( );
-            
+
             // iterate over each selected point, adding its track id
             // to the set of newly selected tracks
             for ( Point p : newSelectedPoints )
@@ -191,32 +278,32 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
 
             // change various display characteristics of the selected tracks
             IntBidirectionalIterator iter = newSelectedTrackIds.iterator( );
-            while( iter.hasNext( ) )
+            while ( iter.hasNext( ) )
             {
                 int trackId = iter.nextInt( );
-                
+
                 trackPainter.setPointColor( trackId, 0.0f, 1.0f, 0.0f, 1.0f );
                 trackPainter.setLineColor( trackId, 0.0f, 1.0f, 0.0f, 1.0f );
                 trackPainter.setShowLabel( trackId, true );
                 trackPainter.setHeadPointSize( trackId, 8.0f );
             }
-            
+
             // change back to normal the display characteristics of any tracks
             // which were previously selected, but have become unselected
             iter = selectedTrackIds.iterator( );
-            while( iter.hasNext( ) )
+            while ( iter.hasNext( ) )
             {
                 int trackId = iter.nextInt( );
-                
+
                 if ( newSelectedTrackIds.contains( trackId ) ) continue;
-                
+
                 Track track = trackManager.getTrack( trackId );
-                
+
                 if ( track != null ) track.setColor( trackPainter );
                 trackPainter.setShowLabel( trackId, false );
                 trackPainter.setHeadPointSize( trackId, 4.0f );
             }
-            
+
             // swap the sets storing previously selected and newly selected tracks
             IntAVLTreeSet temp = selectedTrackIds;
             selectedTrackIds = newSelectedTrackIds;
@@ -263,7 +350,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
                 trackPainter.setLabelColor( i, GlimpseColor.getBlack( ) );
                 trackPainter.setShowLabel( i, false );
                 trackPainter.setShowLabelLine( i, false );
-                
+
                 trackPainter.setHeadPointSize( i, 4.0f );
                 trackPainter.setShowHeadPoint( i, true );
             }

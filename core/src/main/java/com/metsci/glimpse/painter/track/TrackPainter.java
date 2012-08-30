@@ -46,8 +46,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.selection.SpatialSelectionAxisListener;
@@ -663,7 +665,14 @@ public class TrackPainter extends GlimpseDataPainter2D
     }
 
     /**
-     * @return all the Points within a specified bounding box.
+     * Returns all Points within the given bounding box in axis coordinates (regardless
+     * of time stamp).
+     * 
+     * @param minX left edge of the bounding box
+     * @param maxX right edge of the bounding box
+     * @param minY bottom edge of the bounding box
+     * @param maxY top edge of the bounding box
+     * @return all Points within the bounding box
      */
     public Collection<Point> getGeoRange( double minX, double maxX, double minY, double maxY )
     {
@@ -683,6 +692,112 @@ public class TrackPainter extends GlimpseDataPainter2D
         {
             return Collections.emptyList( );
         }
+    }
+    
+    /**
+     * <p>Returns all the Points within the bounding box specified with a center in axis coordinates
+     * and width/height specified in pixels.</p>
+     * 
+     * <p>This is useful for querying for points near the cursor. When used in this way, the pixelWidth
+     * and pixelHeight arguments control how close the user must get to a point before it is selected.
+     * The Axis2D argument is usually obtained from a GlimpseMouseListener.</p>
+     * 
+     * @param axis the axis to use to convert pixel values into axis coordinates.
+     * @param centerX the x center of the query box in axis coordinates
+     * @param centerY the y center of the query box in axis coordinates
+     * @param pixelWidth the width of the query box in pixels 
+     * @param pixelHeight the height of the query box in pixels
+     * @return all the Points within the specified bounding box
+     */
+    public Collection<Point> getPixelRange( Axis2D axis, double centerX, double centerY, int pixelWidth, int pixelHeight )
+    {
+        double width = pixelWidth / axis.getAxisX( ).getPixelsPerValue( );
+        double height = pixelHeight / axis.getAxisY( ).getPixelsPerValue( );
+        
+        return getGeoRange( centerX - width / 2, centerX + width / 2, centerY - height / 2, centerY + height / 2 );
+    }
+    
+    /**
+     * Returns the closest point to the cursor position. Distance is measured in pixels, not
+     * in axis units. However, the cursor position is specified in axis coordinates. If the closest
+     * point is further away than maxPixelDistance then null is returned.
+     * 
+     * @param axis the axis to use to convert pixel values into axis coordinates
+     * @param centerX the x center of the query box in axis coordinates
+     * @param centerY the y center of the query box in axis coordinates
+     * @param maxPixelDistance only search for nearby points within this pixel radius
+     * @return the closest point to the given axis coordinates, or null if none exists
+     */
+    public Point getNearestPoint( Axis2D axis, double centerX, double centerY, int maxPixelDistance )
+    {
+        Axis1D axisX = axis.getAxisX( );
+        Axis1D axisY = axis.getAxisY( );
+        
+        int centerPixelX = axisX.valueToScreenPixel( centerX );
+        int centerPixelY = axisY.getSizePixels( ) - axisY.valueToScreenPixel( centerY );
+        
+        return getNearestPoint( axis, centerPixelX, centerPixelY, maxPixelDistance );
+    }
+    
+    /**
+     * Returns the closest Point to the mouse position specified in the given GlimpseMouseEvent.
+     * If the closest point is farther away than maxPixelDistance pixels, then null is returned.
+     *
+     * @param mouseEvent event containing a mouse position
+     * @param maxPixelDistance the farthest point allowed
+     * @return the closest point to the provided mouse position
+     */
+    public Point getNearestPoint( GlimpseMouseEvent mouseEvent, int maxPixelDistance )
+    {
+        Axis2D axis = mouseEvent.getAxis2D( );
+        int centerPixelX = mouseEvent.getX( );
+        int centerPixelY = mouseEvent.getY( );
+    
+        return getNearestPoint( axis, centerPixelX, centerPixelY, maxPixelDistance );
+    }
+    
+    /**
+     * Returns the closest point to the cursor position. Distance is measured in pixels, not
+     * in axis units. The cursor position is specified in pixel/screen coordinates.
+     * If the closest point is further away than maxPixelDistance then null is returned.
+     * 
+     * @param axis the axis to use to convert pixel values into axis coordinates
+     * @param centerPixelX the x center of the query box in pixel coordinates
+     * @param centerPixelY the y center of the query box in pixel coordinates
+     * @param maxPixelDistance only search for nearby points within this pixel radius
+     * @return the closest point to the given axis coordinates, or null if none exists
+     */
+    public Point getNearestPoint( Axis2D axis, int centerPixelX, int centerPixelY, int maxPixelDistance )
+    {
+        Axis1D axisX = axis.getAxisX( );
+        Axis1D axisY = axis.getAxisY( );
+        
+        double centerX = axisX.screenPixelToValue( centerPixelX );
+        double centerY = axisY.screenPixelToValue( axisY.getSizePixels( ) - centerPixelY );
+        
+        Collection<Point> points = getPixelRange( axis, centerX, centerY, maxPixelDistance * 2, maxPixelDistance * 2 );
+        
+        Point minPoint = null;
+        double minDistance = 0;
+        
+        for ( Point point : points )
+        {
+            double pixelX = axisX.valueToScreenPixel( point.x );
+            double pixelY = axisY.getSizePixels( ) - axisY.valueToScreenPixel( point.y );
+            
+            double diffX = pixelX - centerPixelX;
+            double diffY = pixelY - centerPixelY;
+            
+            double dist = Math.sqrt( diffX * diffX + diffY * diffY );
+            
+            if ( minPoint == null || dist < minDistance )
+            {
+                minPoint = point;
+                minDistance = dist;
+            }
+        }
+        
+        return minPoint;
     }
 
     public Collection<Point> getTimeGeoRange( double minTime, double maxTime, double minX, double maxX, double minY, double maxY )
@@ -1044,7 +1159,7 @@ public class TrackPainter extends GlimpseDataPainter2D
             {
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    if ( loaded.labelOn )
+                    if ( loaded.labelOn && loaded.label != null )
                     {
                         int posX = axis.getAxisX( ).valueToScreenPixel( loaded.headPosX );
                         int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
@@ -1066,7 +1181,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
             for ( LoadedTrack loaded : loadedTracks.values( ) )
             {
-                if ( loaded.labelOn && loaded.labelLineOn )
+                if ( loaded.labelOn && loaded.labelLineOn && loaded.label != null )
                 {
                     int posX = axis.getAxisX( ).valueToScreenPixel( loaded.headPosX );
                     int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
