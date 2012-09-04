@@ -69,27 +69,45 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
 {
     protected String name = "";
 
+    // stores true when child GlimpseLayouts have been laid out
+    // for a given GlimpseLayoutStack. A null or false value
+    // indicates that the children must be laid out again
+    protected GlimpseLayoutCache<Boolean> layoutClean;
+
+    // stores the location/bounds of this GlimpseLayout
+    // as laid out inside its parent GlimpseLayout for
+    // a given GlimpseLayoutStack
     protected GlimpseLayoutCache<GlimpseBounds> layoutCache;
+
+    // delegate class which manages actually laying out
+    // child GlimpseLayouts
     protected GlimpseLayoutDelegate layoutDelegate;
 
+    // helper class which handles ordering of GlimpseLayouts
     protected LayoutManager manager;
 
+    // lock controlling access to mutable state of this GlimpseLayout
     protected ReentrantLock lock = new ReentrantLock( );
 
+    // listeners attached to this GlimpseLayout
     protected Set<GlimpseMouseListener> mouseListeners;
     protected Set<GlimpseMouseMotionListener> mouseMotionListeners;
     protected Set<GlimpseMouseWheelListener> mouseWheelListeners;
 
+    // unmodifiable views to the above listeners for passing
+    // to external classes
     protected Collection<GlimpseMouseListener> mouseListenersUnmodifiable;
     protected Collection<GlimpseMouseMotionListener> mouseMotionListenersUnmodifiable;
     protected Collection<GlimpseMouseWheelListener> mouseWheelListenersUnmodifiable;
 
+    // flags indicating event handling and repaint behavior
     protected boolean isEventGenerator = true;
     protected boolean isEventConsumer = true;
     protected boolean isVisible = true;
 
     public GlimpseLayout( GlimpseLayout parent, String name )
     {
+        this.layoutClean = new GlimpseLayoutCache<Boolean>( );
         this.layoutCache = new GlimpseLayoutCache<GlimpseBounds>( );
         this.layoutDelegate = new GlimpseLayoutDelegate( this );
 
@@ -250,7 +268,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     {
         if ( painter instanceof GlimpseLayout )
         {
-            setZOrder( (GlimpseLayout) painter, zOrder );
+            setZOrder( ( GlimpseLayout ) painter, zOrder );
         }
         else
         {
@@ -317,14 +335,14 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     {
         if ( painter instanceof GlimpseLayout )
         {
-            addLayout( (GlimpseLayout) painter, callback, zOrder );
+            addLayout( ( GlimpseLayout ) painter, callback, zOrder );
         }
         else
         {
             addPainter0( painter, callback, zOrder );
         }
     }
-    
+
     protected void addPainter0( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
         lock.lock( );
@@ -358,7 +376,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         lock.lock( );
         try
         {
-            layoutCache.clear( );
+            layoutClean.clear( );
             layoutDelegate.invalidateLayout( );
         }
         finally
@@ -375,18 +393,21 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             // get our cached bounds for the current context
             GlimpseBounds bounds = layoutCache.getValue( stack );
 
-            // if the cache already contains our bounds then we're already laid out
+            // if the cache doesn't contain our bounds then we take our size from
+            // the size of the top GlimpseTarget in the current context
+            // (i.e we fill our parent completely)
             if ( bounds == null )
             {
-                // if the cache doesn't contain our bounds then we take our size from
-                // the size of the top GlimpseTarget in the current context
-                // (i.e we fill our parent completely)
                 bounds = stack.getBounds( );
                 layoutCache.setValue( stack, bounds );
+            }
 
-                // now that we know our size, lay out our children
-                // (and their children, recursively)
+            // now that we know our size, if we are marked as dirty,
+            // lay out our children (and their children, recursively)
+            if ( isDirty( stack ) )
+            {
                 layoutDelegate.layoutTo( stack, bounds );
+                setDirty( stack, false );
             }
 
             return bounds;
@@ -655,6 +676,18 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         {
             lock.unlock( );
         }
+    }
+
+    protected boolean isDirty( GlimpseTargetStack stack )
+    {
+        Boolean isClean = layoutClean.getValue( stack );
+
+        return isClean == null || !isClean;
+    }
+
+    protected void setDirty( GlimpseTargetStack stack, boolean dirty )
+    {
+        layoutClean.setValue( stack, !dirty );
     }
 
     protected void cacheBounds( GlimpseContext context, GlimpseBounds bounds )
