@@ -38,6 +38,14 @@ import java.util.Map;
 
 import com.metsci.glimpse.layout.GlimpseLayout;
 
+/**
+ * GlimpseLayout helper class which manages properly
+ * sorting GlimpseLayouts by their integer ordering constant
+ * (and by order of addition when two layouts have the
+ * same ordering constant).
+ * 
+ * @author ulman
+ */
 public class LayoutManager
 {
     protected LayoutOrderComparator comparator;
