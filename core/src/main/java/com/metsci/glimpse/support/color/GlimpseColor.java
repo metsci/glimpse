@@ -127,6 +127,15 @@ public class GlimpseColor
         return new java.awt.Color( color[0], color[1], color[2], color[3] );
     }
 
+    public static String toColorHex( float[] color )
+    {
+        long value = (int) ( color[0] * 255 );
+        value = value * 256 + (int) ( color[1] * 255 );
+        value = value * 256 + (int) ( color[2] * 255 );
+        value = value * 256 + (int) ( color[3] * 255 );
+        return String.format( "#%08x", value );
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////
     //                            Convenience methods                                      //
     //                                                                                     //
@@ -171,26 +180,26 @@ public class GlimpseColor
 
         return s.toString( );
     }
-    
+
     public static float[] addRgb( float[] color, float value )
     {
     	return add( color, fromColorRgba( value, value, value, 0.0f ) );
     }
-    
+
     public static float[] add( float[] color1, float[] color2 )
     {
     	float[] newColor = new float[4];
-    	
+
     	for ( int i = 0 ; i < 4 ; i++ )
     	{
         	float color = color1[i] + color2[i];
-        	
+
         	if ( color < 0.0f ) color = 0.0f;
         	if ( color > 1.0f ) color = 1.0f;
-        	
+
         	newColor[i] = color;
     	}
-    	
+
     	return newColor;
     }
 
