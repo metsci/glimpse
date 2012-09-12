@@ -241,10 +241,16 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
      */
     protected void displayNode( GL gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
-        // do visibility test
-        Rectangle2D viewport = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
+        // are the node bounds outside the viewport
+        if ( axis.getMinX( ) >= nodeBounds.getMaxX( ) ||
+                axis.getMinY( ) >= nodeBounds.getMaxY( ) ||
+                nodeBounds.getMinX( ) >= axis.getMaxX( ) ||
+                nodeBounds.getMinY( ) >= axis.getMaxY( ) )
+        {
+            return;
+        }
 
-        if ( !nodeBounds.intersects( viewport ) || nodeBounds.getWidth( ) <= 0 || nodeBounds.getHeight( ) <= 0 )
+        if ( nodeBounds.getWidth( ) <= 0 || nodeBounds.getHeight( ) <= 0 )
         {
             return;
         }

@@ -43,9 +43,9 @@ public class SliceAndDiceLayout implements TreeMapLayout
 
         double area = boundary.getWidth( ) * boundary.getHeight( );
         double totalSize = 0;
-        for ( double v : sizes )
+        for ( int i = 0; i < sizes.length; i++ )
         {
-            totalSize += v;
+            totalSize += sizes[i];
         }
 
         Rectangle2D[] rects = new Rectangle2D[sizes.length];
