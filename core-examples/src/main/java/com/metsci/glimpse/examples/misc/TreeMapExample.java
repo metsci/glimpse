@@ -94,8 +94,8 @@ public class TreeMapExample implements GlimpseLayoutProvider
         };
 
         painter.setTreeMapData( tree );
-        plot.getLayoutCenter( ).addPainter( painter );
-        plot.getLayoutCenter( ).addPainter( new TreeMapHoverPainter( painter ) );
+        plot.getLayoutCenter( ).addPainter( painter, Plot2D.DATA_LAYER );
+        plot.getLayoutCenter( ).addPainter( new TreeMapHoverPainter( painter ), Plot2D.FOREGROUND_LAYER );
 
         plot.setAbsoluteMinX( 0 );
         plot.setAbsoluteMaxX( 100 );

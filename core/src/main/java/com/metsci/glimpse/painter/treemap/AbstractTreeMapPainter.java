@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.painter.treemap;
 
+import static java.lang.Math.ceil;
 import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 
 import java.awt.geom.Point2D;
@@ -223,7 +224,9 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
             for ( int i = 0; i < rects.length - 1; i++ )
             {
                 Rectangle2D oldRect = rects[i];
-                Rectangle2D newRect = new Rectangle2D.Double( ( oldRect.getMinX( ) - origBound.getMinX( ) ) * scaleX + boundary.getMinX( ), ( oldRect.getMinY( ) - origBound.getMinY( ) ) * scaleY + boundary.getMinY( ), oldRect.getWidth( ) * scaleX, oldRect.getHeight( ) * scaleY );
+                Rectangle2D newRect = new Rectangle2D.Double( ( oldRect.getMinX( ) - origBound.getMinX( ) ) * scaleX + boundary.getMinX( ),
+                        ( oldRect.getMinY( ) - origBound.getMinY( ) ) * scaleY + boundary.getMinY( ),
+                        oldRect.getWidth( ) * scaleX, oldRect.getHeight( ) * scaleY );
                 newRects[i] = newRect;
             }
 
@@ -258,11 +261,10 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
         // clip so we don't draw text outside the boundary
         int pxX = axis.getAxisX( ).valueToScreenPixel( nodeBounds.getMinX( ) );
         int pxY = axis.getAxisY( ).valueToScreenPixel( nodeBounds.getMinY( ) );
-        int width = ( int ) ( nodeBounds.getWidth( ) * axis.getAxisX( ).getPixelsPerValue( ) );
-        int height = ( int ) ( nodeBounds.getHeight( ) * axis.getAxisY( ).getPixelsPerValue( ) );
+        int width = ( int ) ceil( nodeBounds.getWidth( ) * axis.getAxisX( ).getPixelsPerValue( ) );
+        int height = ( int ) ceil( nodeBounds.getHeight( ) * axis.getAxisY( ).getPixelsPerValue( ) );
 
-        // TODO: why +1? I don't know
-        gl.glScissor( pxX + layoutBounds.getX( ), pxY + layoutBounds.getY( ), width + 1, height + 1 );
+        gl.glScissor( pxX + layoutBounds.getX( ), pxY + layoutBounds.getY( ), width, height );
 
         if ( tree.isLeaf( nodeId ) )
         {

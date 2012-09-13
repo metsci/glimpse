@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.painter.treemap;
 
+import static java.lang.Math.max;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -216,15 +218,11 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         boolean selected = isSelected( axis, boundary );
 
         Rectangle2D rect = titleRenderer.getBounds( title );
-        float[] color = getTitleBackgroundColor( nodeId, selected );
-        gl.glColor4f( color[0], color[1], color[2], color[3] );
 
         // draw title background
         int textBorderPx = 3;
         double borderHeightPx = rect.getHeight( ) + textBorderPx * 2;
         double borderHeight = borderHeightPx / axis.getAxisY( ).getPixelsPerValue( );
-
-        Rectangle2D newBoundary = new Rectangle2D.Double( boundary.getMinX( ), boundary.getMinY( ), boundary.getWidth( ), boundary.getHeight( ) - borderHeight );
 
         // don't draw if the area is too small to draw the title
         if ( boundary.getHeight( ) < borderHeight || boundary.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) )
@@ -232,6 +230,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             return boundary;
         }
 
+        float[] color = getTitleBackgroundColor( nodeId, selected );
+        gl.glColor4f( color[0], color[1], color[2], color[3] );
         gl.glRectd( boundary.getMinX( ), boundary.getMaxY( ) - borderHeight, boundary.getMaxX( ), boundary.getMaxY( ) );
 
         // draw title border
@@ -254,6 +254,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         titleRenderer.draw( title, textPosX + textBorderPx, textPosY + textBorderPx );
         titleRenderer.endRendering( );
 
+        Rectangle2D newBoundary = new Rectangle2D.Double( boundary.getMinX( ), boundary.getMinY( ), boundary.getWidth( ), boundary.getHeight( ) - borderHeight );
         return newBoundary;
     }
 
@@ -275,10 +276,13 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
 
         int paddingTopPx = 10;
         int textPosX = axis.getAxisX( ).valueToScreenPixel( nodeBounds.getCenterX( ) ) - ( int ) ( rect.getWidth( ) / 2 );
+        textPosX = max( textPosX, axis.getAxisX( ).valueToScreenPixel( nodeBounds.getMinX( ) ) );
         int textPosY = axis.getAxisY( ).valueToScreenPixel( nodeBounds.getMaxY( ) ) - ( int ) rect.getHeight( ) - paddingTopPx;
+        textPosY = max( textPosY, axis.getAxisY( ).valueToScreenPixel( nodeBounds.getMinY( ) ) );
 
         // don't draw if the area is too small
-        if ( nodeBounds.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) || nodeBounds.getHeight( ) < rect.getHeight( ) / axis.getAxisY( ).getPixelsPerValue( ) )
+        if ( nodeBounds.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) ||
+                nodeBounds.getHeight( ) - paddingTopPx < rect.getHeight( ) / axis.getAxisY( ).getPixelsPerValue( ) )
         {
             return;
         }
