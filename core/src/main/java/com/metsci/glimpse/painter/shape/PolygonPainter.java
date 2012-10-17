@@ -818,8 +818,6 @@ public class PolygonPainter extends GlimpsePainter2D
                 int[] bufferHandle = new int[1];
                 gl.glGenBuffers( 1, bufferHandle, 0 );
                 handle = bufferHandle[0];
-                
-                if ( fill ) System.out.println( "Expanding " + maxSize );
             }
             
             // copy all the track data into a host buffer
@@ -1642,6 +1640,9 @@ public class PolygonPainter extends GlimpsePainter2D
                 int fillVertexCount = polygon.fillVertexCount;
                 this.totalFillVertexCount -= fillVertexCount;
                 if ( newDeleted ) this.fillInsertVertexCount -= fillVertexCount;
+                
+                this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
+                this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
             }
         }
 
