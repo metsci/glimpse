@@ -71,6 +71,9 @@ import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
  */
 public class PolygonPainter extends GlimpsePainter2D
 {
+    // expand
+    protected static final double DELETE_EXPAND_FACTOR = 1.2;
+    
     protected static final Comparator<IdPolygon> startTimeComparator = new Comparator<IdPolygon>( )
     {
         @Override
@@ -542,7 +545,7 @@ public class PolygonPainter extends GlimpsePainter2D
         {
             for ( Group group : groups.values( ) )
             {
-                group.delete( );
+                group.deleteGroup( );
             }
 
             this.updatedGroups.addAll( groups.values( ) );
@@ -567,7 +570,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             Group group = groups.get( groupId );
 
-            group.delete( );
+            group.deleteGroup( );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -592,7 +595,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             Group group = groups.get( groupId );
 
-            group.clear( );
+            group.clearGroup( );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -628,7 +631,7 @@ public class PolygonPainter extends GlimpsePainter2D
         {
             Group group = getOrCreateGroup( groupId );
 
-            group.add( polygon );
+            group.addPolygon( polygon );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -701,7 +704,7 @@ public class PolygonPainter extends GlimpsePainter2D
                 {
                     int id = group.groupId;
 
-                    if ( group.isDeletePending( ) || group.isClearPending( ) )
+                    if ( group.groupDeleted || group.groupCleared )
                     {
                         // if the corresponding LoadedGroup does not exist, create it
                         LoadedGroup loaded = getOrCreateLoadedGroup( id, group );
@@ -710,7 +713,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
                         // If the group was deleted then recreated in between calls to display0(),
                         // (both isDataInserted() and isDeletePending() are true) then don't remove the group
-                        if ( group.isDeletePending( ) && !group.isDataInserted( ) )
+                        if ( group.groupDeleted && !group.polygonsInserted )
                         {
                             groups.remove( id );
                             continue;
@@ -723,43 +726,51 @@ public class PolygonPainter extends GlimpsePainter2D
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
 
-                    if ( group.isDataInserted( ) )
+                    if ( group.polygonsInserted )
                     {
                         ///////////////////////////////////////
                         //// load polygon outline geometry ////
                         ///////////////////////////////////////
-
-                        if ( !loaded.glLineBufferInitialized || loaded.glLineBufferMaxSize < group.getTotalLineVertices( ) )
+                        
+                        // the size needed is the current buffer location plus new inserts (we cannot use
+                        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
+                        // polygons have been deleted
+                        int lineSizeNeeded = loaded.glLineBufferCurrentSize + group.lineInsertVertexCount;
+                        
+                        if ( !loaded.glLineBufferInitialized || loaded.glLineBufferMaxSize < lineSizeNeeded )
                         {
-                            // if the track doesn't have a gl buffer or it is too small we must
-                            // copy all the track's data into a new, larger buffer
-
-                            // if this is the first time we have allocated memory for this track
-                            // don't allocate any extra, it may never get added to
-                            // however, once a track has been updated once, we assume it is likely
-                            // to be updated again and give it extra memory
-                            if ( loaded.glLineBufferInitialized )
+                            // if we've deleted vertices, but are still close to the max buffer size, then
+                            // go ahead and expand the max buffer size anyway
+                            // if we're far below the max because of deletions, don't expand the array
+                            if ( !loaded.glLineBufferInitialized || loaded.glLineBufferMaxSize < DELETE_EXPAND_FACTOR * group.totalLineVertexCount )
                             {
-                                gl.glDeleteBuffers( 1, new int[] { loaded.glLineBufferHandle }, 0 );
-                                loaded.glLineBufferMaxSize = Math.max( ( int ) ( loaded.glLineBufferMaxSize * 1.5 ), group.getTotalLineVertices( ) );
+                                // if the track doesn't have a gl buffer or it is too small to accommodate new inserts,
+                                // we must copy all the track's data into a new, larger buffer
+    
+                                // if this is the first time we have allocated memory for this track
+                                // don't allocate any extra, it may never get added to
+                                // however, once a track has been updated once, we assume it is likely
+                                // to be updated again and give it extra memory
+                                if ( loaded.glLineBufferInitialized )
+                                {
+                                    gl.glDeleteBuffers( 1, new int[] { loaded.glLineBufferHandle }, 0 );
+                                    loaded.glLineBufferMaxSize = Math.max( ( int ) ( loaded.glLineBufferMaxSize * 1.5 ), group.totalLineVertexCount );
+                                }
+                                else
+                                {
+                                    loaded.glLineBufferMaxSize = group.totalLineVertexCount;
+                                }
+    
+                                // create a new device buffer handle
+                                int[] bufferHandle = new int[1];
+                                gl.glGenBuffers( 1, bufferHandle, 0 );
+                                loaded.glLineBufferHandle = bufferHandle[0];
                             }
-                            else
-                            {
-                                loaded.glLineBufferMaxSize = group.getTotalLineVertices( );
-                            }
-
+                            
                             // copy all the track data into a host buffer
                             ensureDataBufferSize( loaded.glLineBufferMaxSize );
                             loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
-
-                            // create a new device buffer handle
-                            int[] bufferHandle = new int[1];
-                            gl.glGenBuffers( 1, bufferHandle, 0 );
-                            loaded.glLineBufferHandle = bufferHandle[0];
-
-                            // load the offset and count values for all selected polygons
-                            loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
-
+                            
                             // copy data from the host buffer into the device buffer
                             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
                             glHandleError( gl, "glBindBuffer Line Error (Case 1)" );
@@ -767,62 +778,68 @@ public class PolygonPainter extends GlimpsePainter2D
                             glHandleError( gl, "glBufferData Line Error" );
 
                             loaded.glLineBufferInitialized = true;
+                            loaded.glLineBufferCurrentSize = group.totalLineVertexCount;
                         }
                         else
                         {
                             // there is enough empty space in the device buffer to accommodate all the new data
 
                             // copy all the new track data into a host buffer
-                            int insertVertices = group.getLineInsertCountVertices( );
+                            int insertVertices = group.lineInsertVertexCount;
                             ensureDataBufferSize( insertVertices );
                             loaded.loadLineVerticesIntoBuffer( group, dataBuffer, loaded.glLineBufferCurrentSize, group.newPolygons );
-
-                            // load the offset and count values for the newly selected polygons
-                            loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
 
                             // update the device buffer with the new data
                             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
                             glHandleError( gl, "glBindBuffer Line Error  (Case 2)" );
                             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, loaded.glLineBufferCurrentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
                             glHandleError( gl, "glBufferSubData Line Error" );
+                        
+                            loaded.glLineBufferCurrentSize = lineSizeNeeded;
                         }
-
-                        loaded.glLineBufferCurrentSize = group.getTotalLineVertices( );
 
                         ////////////////////////////////////
                         //// load polygon fill geometry ////
                         ////////////////////////////////////
 
-                        if ( !loaded.glFillBufferInitialized || loaded.glFillBufferMaxSize < group.getTotalFillVertices( ) )
+                        // the size needed is the current buffer location plus new inserts (we cannot use
+                        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
+                        // polygons have been deleted
+                        int fillSizeNeeded = loaded.glFillBufferCurrentSize + group.fillInsertVertexCount;
+                        
+                        if ( !loaded.glFillBufferInitialized || loaded.glFillBufferMaxSize < fillSizeNeeded )
                         {
-                            // if the track doesn't have a gl buffer or it is too small we must
-                            // copy all the track's data into a new, larger buffer
-
-                            // if this is the first time we have allocated memory for this track
-                            // don't allocate any extra, it may never get added to
-                            // however, once a track has been updated once, we assume it is likely
-                            // to be updated again and give it extra memory
-                            if ( loaded.glFillBufferInitialized )
+                            // if we've deleted vertices, but are still close to the max buffer size, then
+                            // go ahead and expand the max buffer size anyway
+                            // if we're far below the max because of deletions, don't expand the array
+                            if ( !loaded.glFillBufferInitialized || loaded.glFillBufferMaxSize < DELETE_EXPAND_FACTOR * group.totalFillVertexCount )
                             {
-                                gl.glDeleteBuffers( 1, new int[] { loaded.glFillBufferHandle }, 0 );
-                                loaded.glFillBufferMaxSize = Math.max( ( int ) ( loaded.glFillBufferMaxSize * 1.5 ), group.getTotalFillVertices( ) );
+                                // if the track doesn't have a gl buffer or it is too small we must
+                                // copy all the track's data into a new, larger buffer
+    
+                                // if this is the first time we have allocated memory for this track
+                                // don't allocate any extra, it may never get added to
+                                // however, once a track has been updated once, we assume it is likely
+                                // to be updated again and give it extra memory
+                                if ( loaded.glFillBufferInitialized )
+                                {
+                                    gl.glDeleteBuffers( 1, new int[] { loaded.glFillBufferHandle }, 0 );
+                                    loaded.glFillBufferMaxSize = Math.max( ( int ) ( loaded.glFillBufferMaxSize * 1.5 ), group.totalFillVertexCount );
+                                }
+                                else
+                                {
+                                    loaded.glFillBufferMaxSize = group.totalFillVertexCount;
+                                }
+    
+                                // create a new device buffer handle
+                                int[] bufferHandle = new int[1];
+                                gl.glGenBuffers( 1, bufferHandle, 0 );
+                                loaded.glFillBufferHandle = bufferHandle[0];
                             }
-                            else
-                            {
-                                loaded.glFillBufferMaxSize = group.getTotalFillVertices( );
-                            }
-
+                            
                             // copy all the track data into a host buffer
                             ensureDataBufferSize( loaded.glFillBufferMaxSize );
                             loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
-
-                            // create a new device buffer handle
-                            int[] bufferHandle = new int[1];
-                            gl.glGenBuffers( 1, bufferHandle, 0 );
-                            loaded.glFillBufferHandle = bufferHandle[0];
-
-                            // load the offset and count values for all selected polygons
-                            loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
 
                             // copy data from the host buffer into the device buffer
                             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
@@ -831,33 +848,39 @@ public class PolygonPainter extends GlimpsePainter2D
                             glHandleError( gl, "glBufferData Fill Error" );
 
                             loaded.glFillBufferInitialized = true;
+                            loaded.glFillBufferCurrentSize = group.totalFillVertexCount;
                         }
                         else
                         {
                             // there is enough empty space in the device buffer to accommodate all the new data
 
                             // copy all the new track data into a host buffer
-                            int insertVertices = group.getFillInsertCountVertices( );
+                            int insertVertices = group.fillInsertVertexCount;
                             ensureDataBufferSize( insertVertices );
                             loaded.loadFillVerticesIntoBuffer( group, dataBuffer, loaded.glFillBufferCurrentSize, group.newPolygons );
-
-                            // load the offset and count values for the newly selected polygons
-                            loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
 
                             // update the device buffer with the new data
                             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
                             glHandleError( gl, "glBindBuffer Fill Error  (Case 2)" );
                             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, loaded.glFillBufferCurrentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
                             glHandleError( gl, "glBufferSubData Fill Error" );
+                            
+                            loaded.glFillBufferCurrentSize = fillSizeNeeded;
                         }
-
-                        loaded.glFillBufferCurrentSize = group.getTotalFillVertices( );
                     }
 
-                    if ( group.selectionChanged && loaded.glLineBufferInitialized && loaded.glFillBufferInitialized )
+                    if ( loaded.glLineBufferInitialized && loaded.glFillBufferInitialized )
                     {
-                        loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
-                        loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
+                        if ( group.polygonsSelected )
+                        {
+                            loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
+                            loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
+                        }
+                        else if ( !group.newSelectedPolygons.isEmpty( ) )
+                        {
+                            loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
+                            loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
+                        }
                     }
 
                     group.reset( );
@@ -1558,20 +1581,24 @@ public class PolygonPainter extends GlimpsePainter2D
         int selectedFillPrimitiveCount;
         int selectedLinePrimitiveCount;
 
+        // vertices in the above counts refer to tesselated triangle vertices
+        
+        // current total vertex count
         int totalFillVertexCount;
         int totalLineVertexCount;
 
+        // vertex count of inserts since last display() call
         int fillInsertVertexCount;
         int lineInsertVertexCount;
 
         // if true, the contents of the selectedPolygons set has changed
-        boolean selectionChanged = false;
+        boolean polygonsSelected = false;
         // if true, new polygons have been added to the group
-        boolean dataInserted = false;
+        boolean polygonsInserted = false;
         // if true, this group is waiting to be deleted
-        boolean deletePending = false;
+        boolean groupDeleted = false;
         // if true, this group is waiting to be cleared
-        boolean clearPending = false;
+        boolean groupCleared = false;
 
         public Group( int groupId )
         {
@@ -1586,17 +1613,13 @@ public class PolygonPainter extends GlimpsePainter2D
             this.selectionEnd = createSearchBoundEnd( Long.MAX_VALUE );
         }
 
-        public void deletePolygon( int polygonId )
+        public void deleteGroup( )
         {
+            this.groupDeleted = true;
+            this.clearGroup( );
         }
 
-        public void delete( )
-        {
-            this.deletePending = true;
-            this.clear( );
-        }
-
-        public void clear( )
+        public void clearGroup( )
         {
             this.polygonMap.clear( );
 
@@ -1606,7 +1629,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             this.startTimes.clear( );
             this.endTimes.clear( );
-
+            
             this.totalLineVertexCount = 0;
             this.lineInsertVertexCount = 0;
 
@@ -1616,13 +1639,37 @@ public class PolygonPainter extends GlimpsePainter2D
             this.selectedFillPrimitiveCount = 0;
             this.selectedLinePrimitiveCount = 0;
 
-            this.dataInserted = false;
-            this.selectionChanged = false;
+            this.polygonsInserted = false;
+            this.polygonsSelected = false;
 
-            this.clearPending = true;
+            this.groupCleared = true;
+        }
+        
+        public void deletePolygon( int polygonId )
+        {
+            IdPolygon polygon = this.polygonMap.remove( polygonId );
+            
+            if ( polygon != null )
+            {
+                this.newPolygons.remove( polygon );
+                this.startTimes.remove( polygon );
+                this.endTimes.remove( polygon );
+                
+                // if the polygon was selected when it is deleted, mark the selection changed
+                this.polygonsSelected = this.selectedPolygons.remove( polygon );
+                boolean newDeleted = this.newSelectedPolygons.remove( polygon );
+                
+                int lineVertexCount = polygon.lineVertexCount;
+                this.totalLineVertexCount -= lineVertexCount;
+                if ( newDeleted ) this.lineInsertVertexCount -= lineVertexCount;
+
+                int fillVertexCount = polygon.fillVertexCount;
+                this.totalFillVertexCount -= fillVertexCount;
+                if ( newDeleted ) this.fillInsertVertexCount -= fillVertexCount;
+            }
         }
 
-        public void add( IdPolygon polygon )
+        public void addPolygon( IdPolygon polygon )
         {
             this.polygonMap.put( polygon.polygonId, polygon );
 
@@ -1639,88 +1686,87 @@ public class PolygonPainter extends GlimpsePainter2D
             this.totalFillVertexCount += fillVertexCount;
             this.fillInsertVertexCount += fillVertexCount;
 
-            //TODO using IdPolygons to hold start/end times of window is awkward
             if ( polygon.getStartTime( ) <= selectionEnd.endTime && polygon.getEndTime( ) >= selectionStart.startTime )
             {
-                selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
-                selectedLinePrimitiveCount += polygon.linePrimitiveCount;
-                selectedPolygons.add( polygon );
-                newSelectedPolygons.add( polygon );
+                this.selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
+                this.selectedLinePrimitiveCount += polygon.linePrimitiveCount;
+                this.selectedPolygons.add( polygon );
+                this.newSelectedPolygons.add( polygon );
             }
             
-            this.dataInserted = true;
+            this.polygonsInserted = true;
         }
 
         public void setTimeRange( IdPolygon startPoint, IdPolygon endPoint )
         {
-            selectionStart = startPoint;
-            selectionEnd = endPoint;
+            this.selectionStart = startPoint;
+            this.selectionEnd = endPoint;
 
             checkTimeRange( );
         }
 
         public void checkTimeRange( )
         {
-            if ( selectionStart == null || selectionEnd == null ) return;
+            if ( this.selectionStart == null || this.selectionEnd == null ) return;
 
-            SortedSet<IdPolygon> startSet = startTimes.headSet( selectionEnd, true );
-            SortedSet<IdPolygon> endSet = endTimes.tailSet( selectionStart, true );
+            SortedSet<IdPolygon> startSet = this.startTimes.headSet( this.selectionEnd, true );
+            SortedSet<IdPolygon> endSet = this.endTimes.tailSet( this.selectionStart, true );
 
             // selectedPolys contains the set intersection of startSet and endSet
-            selectedPolygons.clear( );
-            selectedPolygons.addAll( startSet );
-            selectedPolygons.retainAll( endSet );
+            this.selectedPolygons.clear( );
+            this.selectedPolygons.addAll( startSet );
+            this.selectedPolygons.retainAll( endSet );
 
-            selectedFillPrimitiveCount = 0;
-            selectedLinePrimitiveCount = 0;
-            for ( IdPolygon polygon : selectedPolygons )
+            this.selectedFillPrimitiveCount = 0;
+            this.selectedLinePrimitiveCount = 0;
+            for ( IdPolygon polygon : this.selectedPolygons )
             {
-                selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
-                selectedLinePrimitiveCount += polygon.linePrimitiveCount;
+                this.selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
+                this.selectedLinePrimitiveCount += polygon.linePrimitiveCount;
             }
 
-            selectionChanged = true;
+            this.polygonsSelected = true;
         }
 
         public void setLineColor( float[] rgba )
         {
-            lineColor = rgba;
+            this.lineColor = rgba;
         }
 
         public void setLineColor( float r, float g, float b, float a )
         {
-            lineColor[0] = r;
-            lineColor[1] = g;
-            lineColor[2] = b;
-            lineColor[3] = a;
+            this.lineColor[0] = r;
+            this.lineColor[1] = g;
+            this.lineColor[2] = b;
+            this.lineColor[3] = a;
         }
 
         public void setFillColor( float[] rgba )
         {
-            fillColor = rgba;
+            this.fillColor = rgba;
         }
 
         public void setFillColor( float r, float g, float b, float a )
         {
-            fillColor[0] = r;
-            fillColor[1] = g;
-            fillColor[2] = b;
-            fillColor[3] = a;
+            this.fillColor[0] = r;
+            this.fillColor[1] = g;
+            this.fillColor[2] = b;
+            this.fillColor[3] = a;
         }
 
         public void setLineWidth( float width )
         {
-            lineWidth = width;
+            this.lineWidth = width;
         }
 
         public void setShowLines( boolean show )
         {
-            linesOn = show;
+            this.linesOn = show;
         }
 
         public void setShowPoly( boolean show )
         {
-            fillOn = show;
+            this.fillOn = show;
         }
 
         public void setPolyStipple( boolean activate )
@@ -1743,65 +1789,18 @@ public class PolygonPainter extends GlimpsePainter2D
             this.lineStippleFactor = stippleFactor;
             this.lineStipplePattern = stipplePattern;
         }
-
-        public boolean isDataInserted( )
-        {
-            return dataInserted;
-        }
-
-        public boolean isDeletePending( )
-        {
-            return deletePending;
-        }
-
-        public boolean isClearPending( )
-        {
-            return clearPending;
-        }
-
+        
         public void reset( )
         {
-            newSelectedPolygons.clear( );
-            newPolygons.clear( );
+            this.newSelectedPolygons.clear( );
+            this.newPolygons.clear( );
             
-            lineInsertVertexCount = 0;
-            fillInsertVertexCount = 0;
-            dataInserted = false;
-            selectionChanged = false;
-            clearPending = false;
-            deletePending = false;
-        }
-
-        /**
-         * @return the number of vertices making up the polygon outline to insert
-         */
-        public int getLineInsertCountVertices( )
-        {
-            return lineInsertVertexCount;
-        }
-
-        /**
-         * @return the number of vertices making up the polygon fill to insert
-         */
-        public int getFillInsertCountVertices( )
-        {
-            return fillInsertVertexCount;
-        }
-
-        /**
-         * @return the total number of edge vertices for all polygons in the group.
-         */
-        public int getTotalLineVertices( )
-        {
-            return totalLineVertexCount;
-        }
-
-        /**
-         * @return the total number of tesselated triangle vertices for all polygons in the group.
-         */
-        public int getTotalFillVertices( )
-        {
-            return totalFillVertexCount;
+            this.lineInsertVertexCount = 0;
+            this.fillInsertVertexCount = 0;
+            this.polygonsInserted = false;
+            this.polygonsSelected = false;
+            this.groupCleared = false;
+            this.groupDeleted = false;
         }
     }
 }
