@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -36,11 +36,10 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -606,7 +605,20 @@ public class PolygonPainter extends GlimpsePainter2D
 
     public void deletePolygon( int groupId, int polygonId )
     {
-        throw new UnsupportedOperationException( "Deletion of single polygons is not currently supported. Use deleteGroup() to remove an entire group." );
+        this.updateLock.lock( );
+        try
+        {
+            Group group = getOrCreateGroup( groupId );
+
+            group.deletePolygon( polygonId );
+
+            this.updatedGroups.add( group );
+            this.newData = true;
+        }
+        finally
+        {
+            this.updateLock.unlock( );
+        }
     }
 
     protected void addPolygon( int groupId, IdPolygon polygon )
@@ -738,7 +750,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
                             // copy all the track data into a host buffer
                             ensureDataBufferSize( loaded.glLineBufferMaxSize );
-                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, 0, group.getPolygonCount( ) );
+                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
 
                             // create a new device buffer handle
                             int[] bufferHandle = new int[1];
@@ -759,13 +771,11 @@ public class PolygonPainter extends GlimpsePainter2D
                         else
                         {
                             // there is enough empty space in the device buffer to accommodate all the new data
-                            int insertOffset = group.getOffsetInsertPolygons( );
-                            int insertCount = group.getCountInsertPolygons( );
-                            int insertVertices = group.getLineInsertCountVertices( );
 
                             // copy all the new track data into a host buffer
+                            int insertVertices = group.getLineInsertCountVertices( );
                             ensureDataBufferSize( insertVertices );
-                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, loaded.glLineBufferCurrentSize, insertOffset, insertCount );
+                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, loaded.glLineBufferCurrentSize, group.newPolygons );
 
                             // load the offset and count values for the newly selected polygons
                             loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
@@ -804,7 +814,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
                             // copy all the track data into a host buffer
                             ensureDataBufferSize( loaded.glFillBufferMaxSize );
-                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, 0, group.getPolygonCount( ) );
+                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
 
                             // create a new device buffer handle
                             int[] bufferHandle = new int[1];
@@ -825,13 +835,11 @@ public class PolygonPainter extends GlimpsePainter2D
                         else
                         {
                             // there is enough empty space in the device buffer to accommodate all the new data
-                            int insertOffset = group.getOffsetInsertPolygons( );
-                            int insertCount = group.getCountInsertPolygons( );
-                            int insertVertices = group.getFillInsertCountVertices( );
 
                             // copy all the new track data into a host buffer
+                            int insertVertices = group.getFillInsertCountVertices( );
                             ensureDataBufferSize( insertVertices );
-                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, loaded.glFillBufferCurrentSize, insertOffset, insertCount );
+                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, loaded.glFillBufferCurrentSize, group.newPolygons );
 
                             // load the offset and count values for the newly selected polygons
                             loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
@@ -1411,15 +1419,12 @@ public class PolygonPainter extends GlimpsePainter2D
          *
          * @param vertexBuffer the buffer to place polygon vertices into
          * @param offsetVertex the offset of the vertices from the start of the vertexBuffer
-         * @param offset the offset from the start of the buffer array of the first polygon to add
-         * @param size the number of polygons from the polygon array to add
          */
-        public void loadLineVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, int offset, int size )
+        public void loadLineVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
         {
             int vertexCount = 0;
-            for ( int i = 0; i < size; i++ )
+            for ( IdPolygon polygon : polygons )
             {
-                IdPolygon polygon = group.polygonIndices.get( offset + i );
                 vertexCount += polygon.loadLineVerticesIntoBuffer( polygon.depth, vertexBuffer, offsetVertex + vertexCount );
             }
         }
@@ -1451,14 +1456,11 @@ public class PolygonPainter extends GlimpsePainter2D
             }
         }
 
-        public void loadFillVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, int offset, int size )
+        public void loadFillVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
         {
-            if ( size <= 0 ) return;
-
             int vertexCount = 0;
-            for ( int i = 0; i < size; i++ )
+            for ( IdPolygon polygon : polygons )
             {
-                IdPolygon polygon = group.polygonIndices.get( offset + i );
                 vertexCount += polygon.loadFillVerticesIntoBuffer( polygon.depth + 0.5f, vertexBuffer, offsetVertex + vertexCount );
             }
         }
@@ -1520,13 +1522,12 @@ public class PolygonPainter extends GlimpsePainter2D
      */
     private class Group
     {
-        //// group display attributes ////
         float[] lineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
         float lineWidth = 1;
         boolean linesOn = true;
 
         int lineStippleFactor = 1;
-        short lineStipplePattern = ( short ) 0x00FF;;
+        short lineStipplePattern = ( short ) 0x00FF;
         boolean lineStippleOn = false;
 
         byte[] polyStipplePattern = halftone;
@@ -1534,22 +1535,22 @@ public class PolygonPainter extends GlimpsePainter2D
 
         float[] fillColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         boolean fillOn = false;
-        //// group display attributes ////
 
         int groupId;
 
-        //TODO: allow deletions, there is no need to compact the buffer after
-        // each deletion, perhaps wait a configurable number of deletions
-        // before doing it automatically
-        List<IdPolygon> polygonIndices;
+        // mapping from polygonId to IdPolygon object
+        Map<Integer, IdPolygon> polygonMap;
+        // polygons added since last display( ) call 
+        Set<IdPolygon> newPolygons;
+        // polygons selected since the last display( ) call
+        // (always a subset of newPolygons)
+        Set<IdPolygon> newSelectedPolygons;
+        // all selected polygons (based on selectionStart and selectionEnd)
+        Set<IdPolygon> selectedPolygons;
         // view of the IdPolygons in the polygons list sorted by startTime
         NavigableSet<IdPolygon> startTimes;
         // view of the IdPolygons in the polygons list sorted by endTime
         NavigableSet<IdPolygon> endTimes;
-        // the polygons selected based on selectionStart and selectionEnd
-        Set<IdPolygon> selectedPolygons;
-        // polygons selected since the last display( ) call
-        Set<IdPolygon> newSelectedPolygons;
 
         IdPolygon selectionStart;
         IdPolygon selectionEnd;
@@ -1560,13 +1561,8 @@ public class PolygonPainter extends GlimpsePainter2D
         int totalFillVertexCount;
         int totalLineVertexCount;
 
-        //        int totalFillPrimitiveCount;
-        //        int totalLinePrimitiveCount;
-
         int fillInsertVertexCount;
         int lineInsertVertexCount;
-
-        int offsetInsertPolygons;
 
         // if true, the contents of the selectedPolygons set has changed
         boolean selectionChanged = false;
@@ -1582,11 +1578,16 @@ public class PolygonPainter extends GlimpsePainter2D
             this.groupId = groupId;
             this.selectedPolygons = new LinkedHashSet<IdPolygon>( );
             this.newSelectedPolygons = new LinkedHashSet<IdPolygon>( );
-            this.polygonIndices = new LinkedList<IdPolygon>( );
+            this.newPolygons = new LinkedHashSet<IdPolygon>( );
+            this.polygonMap = new HashMap<Integer, IdPolygon>( );
             this.startTimes = new TreeSet<IdPolygon>( startTimeComparator );
             this.endTimes = new TreeSet<IdPolygon>( endTimeComparator );
             this.selectionStart = createSearchBoundStart( -Long.MAX_VALUE );
             this.selectionEnd = createSearchBoundEnd( Long.MAX_VALUE );
+        }
+
+        public void deletePolygon( int polygonId )
+        {
         }
 
         public void delete( )
@@ -1597,25 +1598,24 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void clear( )
         {
-            this.polygonIndices.clear( );
+            this.polygonMap.clear( );
+
+            this.newPolygons.clear( );
+            this.selectedPolygons.clear( );
+            this.newSelectedPolygons.clear( );
+
             this.startTimes.clear( );
             this.endTimes.clear( );
 
             this.totalLineVertexCount = 0;
             this.lineInsertVertexCount = 0;
-            //            this.totalLinePrimitiveCount = 0;
 
             this.totalFillVertexCount = 0;
             this.fillInsertVertexCount = 0;
-            //            this.totalFillPrimitiveCount = 0;
-
-            this.selectedPolygons.clear( );
-            this.newSelectedPolygons.clear( );
 
             this.selectedFillPrimitiveCount = 0;
             this.selectedLinePrimitiveCount = 0;
 
-            this.offsetInsertPolygons = 0;
             this.dataInserted = false;
             this.selectionChanged = false;
 
@@ -1624,23 +1624,20 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void add( IdPolygon polygon )
         {
-            int polygonInsertIndex = this.polygonIndices.size( );
+            this.polygonMap.put( polygon.polygonId, polygon );
 
-            this.polygonIndices.add( polygon );
+            this.newPolygons.add( polygon );
+
             this.startTimes.add( polygon );
             this.endTimes.add( polygon );
 
             int lineVertexCount = polygon.lineVertexCount;
-            //            int linePrimitiveCount = polygon.linePrimitiveCount;
             this.totalLineVertexCount += lineVertexCount;
             this.lineInsertVertexCount += lineVertexCount;
-            //            this.totalLinePrimitiveCount += linePrimitiveCount;
 
             int fillVertexCount = polygon.fillVertexCount;
-            //            int fillPrimitiveCount = polygon.fillPrimitiveCount;
             this.totalFillVertexCount += fillVertexCount;
             this.fillInsertVertexCount += fillVertexCount;
-            //            this.totalFillPrimitiveCount += fillPrimitiveCount;
 
             //TODO using IdPolygons to hold start/end times of window is awkward
             if ( polygon.getStartTime( ) <= selectionEnd.endTime && polygon.getEndTime( ) >= selectionStart.startTime )
@@ -1650,12 +1647,8 @@ public class PolygonPainter extends GlimpsePainter2D
                 selectedPolygons.add( polygon );
                 newSelectedPolygons.add( polygon );
             }
-
-            if ( !dataInserted || polygonInsertIndex < offsetInsertPolygons )
-            {
-                offsetInsertPolygons = polygonInsertIndex;
-                dataInserted = true;
-            }
+            
+            this.dataInserted = true;
         }
 
         public void setTimeRange( IdPolygon startPoint, IdPolygon endPoint )
@@ -1769,6 +1762,8 @@ public class PolygonPainter extends GlimpsePainter2D
         public void reset( )
         {
             newSelectedPolygons.clear( );
+            newPolygons.clear( );
+            
             lineInsertVertexCount = 0;
             fillInsertVertexCount = 0;
             dataInserted = false;
@@ -1794,22 +1789,6 @@ public class PolygonPainter extends GlimpsePainter2D
         }
 
         /**
-         * @return the index of the first polygon in the group to insert
-         */
-        public int getOffsetInsertPolygons( )
-        {
-            return offsetInsertPolygons;
-        }
-
-        /**
-         * @return the number of polygons in the group to insert
-         */
-        public int getCountInsertPolygons( )
-        {
-            return getPolygonCount( ) - getOffsetInsertPolygons( );
-        }
-
-        /**
          * @return the total number of edge vertices for all polygons in the group.
          */
         public int getTotalLineVertices( )
@@ -1823,14 +1802,6 @@ public class PolygonPainter extends GlimpsePainter2D
         public int getTotalFillVertices( )
         {
             return totalFillVertexCount;
-        }
-
-        /**
-         * @return the total number of polygons in the group.
-         */
-        public int getPolygonCount( )
-        {
-            return polygonIndices.size( );
         }
     }
 }
