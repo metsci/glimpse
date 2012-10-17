@@ -118,11 +118,15 @@ public class AnimatedPolygonExample implements GlimpseLayoutProvider
                 while ( true )
                 {
                     polygonPainter.addPolygon( 6, i, i, i + 20, new float[] { 0f, -i, -i, 0f }, new float[] { 0f, 0f, i, i }, 100 );
+                    
+                    int deleteId = (int) ( Math.random( ) * i );
+                    polygonPainter.deletePolygon( 6, deleteId );
+                    
                     i++;
 
                     try
                     {
-                        Thread.sleep( 1000 );
+                        Thread.sleep( 100 );
                     }
                     catch ( InterruptedException e )
                     {
