@@ -728,145 +728,8 @@ public class PolygonPainter extends GlimpsePainter2D
 
                     if ( group.polygonsInserted )
                     {
-                        ///////////////////////////////////////
-                        //// load polygon outline geometry ////
-                        ///////////////////////////////////////
-                        
-                        // the size needed is the current buffer location plus new inserts (we cannot use
-                        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
-                        // polygons have been deleted
-                        int lineSizeNeeded = loaded.glLineBufferCurrentSize + group.lineInsertVertexCount;
-                        
-                        if ( !loaded.glLineBufferInitialized || loaded.glLineBufferMaxSize < lineSizeNeeded )
-                        {
-                            // if we've deleted vertices, but are still close to the max buffer size, then
-                            // go ahead and expand the max buffer size anyway
-                            // if we're far below the max because of deletions, don't expand the array
-                            if ( !loaded.glLineBufferInitialized || loaded.glLineBufferMaxSize < DELETE_EXPAND_FACTOR * group.totalLineVertexCount )
-                            {
-                                // if the track doesn't have a gl buffer or it is too small to accommodate new inserts,
-                                // we must copy all the track's data into a new, larger buffer
-    
-                                // if this is the first time we have allocated memory for this track
-                                // don't allocate any extra, it may never get added to
-                                // however, once a track has been updated once, we assume it is likely
-                                // to be updated again and give it extra memory
-                                if ( loaded.glLineBufferInitialized )
-                                {
-                                    gl.glDeleteBuffers( 1, new int[] { loaded.glLineBufferHandle }, 0 );
-                                    loaded.glLineBufferMaxSize = Math.max( ( int ) ( loaded.glLineBufferMaxSize * 1.5 ), group.totalLineVertexCount );
-                                }
-                                else
-                                {
-                                    loaded.glLineBufferMaxSize = group.totalLineVertexCount;
-                                }
-    
-                                // create a new device buffer handle
-                                int[] bufferHandle = new int[1];
-                                gl.glGenBuffers( 1, bufferHandle, 0 );
-                                loaded.glLineBufferHandle = bufferHandle[0];
-                            }
-                            
-                            // copy all the track data into a host buffer
-                            ensureDataBufferSize( loaded.glLineBufferMaxSize );
-                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
-                            
-                            // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-                            glHandleError( gl, "glBindBuffer Line Error (Case 1)" );
-                            gl.glBufferData( GL.GL_ARRAY_BUFFER, loaded.glLineBufferMaxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-                            glHandleError( gl, "glBufferData Line Error" );
-
-                            loaded.glLineBufferInitialized = true;
-                            loaded.glLineBufferCurrentSize = group.totalLineVertexCount;
-                        }
-                        else
-                        {
-                            // there is enough empty space in the device buffer to accommodate all the new data
-
-                            // copy all the new track data into a host buffer
-                            int insertVertices = group.lineInsertVertexCount;
-                            ensureDataBufferSize( insertVertices );
-                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, loaded.glLineBufferCurrentSize, group.newPolygons );
-
-                            // update the device buffer with the new data
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-                            glHandleError( gl, "glBindBuffer Line Error  (Case 2)" );
-                            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, loaded.glLineBufferCurrentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-                            glHandleError( gl, "glBufferSubData Line Error" );
-                        
-                            loaded.glLineBufferCurrentSize = lineSizeNeeded;
-                        }
-
-                        ////////////////////////////////////
-                        //// load polygon fill geometry ////
-                        ////////////////////////////////////
-
-                        // the size needed is the current buffer location plus new inserts (we cannot use
-                        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
-                        // polygons have been deleted
-                        int fillSizeNeeded = loaded.glFillBufferCurrentSize + group.fillInsertVertexCount;
-                        
-                        if ( !loaded.glFillBufferInitialized || loaded.glFillBufferMaxSize < fillSizeNeeded )
-                        {
-                            // if we've deleted vertices, but are still close to the max buffer size, then
-                            // go ahead and expand the max buffer size anyway
-                            // if we're far below the max because of deletions, don't expand the array
-                            if ( !loaded.glFillBufferInitialized || loaded.glFillBufferMaxSize < DELETE_EXPAND_FACTOR * group.totalFillVertexCount )
-                            {
-                                // if the track doesn't have a gl buffer or it is too small we must
-                                // copy all the track's data into a new, larger buffer
-    
-                                // if this is the first time we have allocated memory for this track
-                                // don't allocate any extra, it may never get added to
-                                // however, once a track has been updated once, we assume it is likely
-                                // to be updated again and give it extra memory
-                                if ( loaded.glFillBufferInitialized )
-                                {
-                                    gl.glDeleteBuffers( 1, new int[] { loaded.glFillBufferHandle }, 0 );
-                                    loaded.glFillBufferMaxSize = Math.max( ( int ) ( loaded.glFillBufferMaxSize * 1.5 ), group.totalFillVertexCount );
-                                }
-                                else
-                                {
-                                    loaded.glFillBufferMaxSize = group.totalFillVertexCount;
-                                }
-    
-                                // create a new device buffer handle
-                                int[] bufferHandle = new int[1];
-                                gl.glGenBuffers( 1, bufferHandle, 0 );
-                                loaded.glFillBufferHandle = bufferHandle[0];
-                            }
-                            
-                            // copy all the track data into a host buffer
-                            ensureDataBufferSize( loaded.glFillBufferMaxSize );
-                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
-
-                            // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-                            glHandleError( gl, "glBindBuffer Fill Error  (Case 1)" );
-                            gl.glBufferData( GL.GL_ARRAY_BUFFER, loaded.glFillBufferMaxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-                            glHandleError( gl, "glBufferData Fill Error" );
-
-                            loaded.glFillBufferInitialized = true;
-                            loaded.glFillBufferCurrentSize = group.totalFillVertexCount;
-                        }
-                        else
-                        {
-                            // there is enough empty space in the device buffer to accommodate all the new data
-
-                            // copy all the new track data into a host buffer
-                            int insertVertices = group.fillInsertVertexCount;
-                            ensureDataBufferSize( insertVertices );
-                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, loaded.glFillBufferCurrentSize, group.newPolygons );
-
-                            // update the device buffer with the new data
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-                            glHandleError( gl, "glBindBuffer Fill Error  (Case 2)" );
-                            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, loaded.glFillBufferCurrentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-                            glHandleError( gl, "glBufferSubData Fill Error" );
-                            
-                            loaded.glFillBufferCurrentSize = fillSizeNeeded;
-                        }
+                        updateVertices( gl, loaded, group, true );
+                        updateVertices( gl, loaded, group, false );
                     }
 
                     if ( loaded.glLineBufferInitialized && loaded.glFillBufferInitialized )
@@ -911,94 +774,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
         for ( LoadedGroup loaded : loadedGroups.values( ) )
         {
-            if ( !loaded.glFillBufferInitialized || !loaded.glLineBufferInitialized ) continue;
-
-            if ( loaded.fillOn )
-            {
-                gl.glColor4fv( loaded.fillColor, 0 );
-
-                if ( loaded.polyStippleOn )
-                {
-                    gl.glEnable( GL.GL_POLYGON_STIPPLE );
-                    gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
-                }
-
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-                gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
-
-                loaded.glFillOffsetBuffer.rewind( );
-                loaded.glFillCountBuffer.rewind( );
-
-                // A count > 65535 causes problems on some ATI cards, so we must loop through the
-                // groups of primitives and split them up where necessary.  An alternate way would be
-                // to construct the count and offset arrays so that groups are less then 65535 in size.
-                // There is some evidence on web forums that this may provide performance benefits as well
-                // when dynamic data is being used.
-                for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
-                {
-                    int fillCountTotal = loaded.glFillCountBuffer.get( i );
-                    int fillCountRemaining = fillCountTotal;
-                    while ( fillCountRemaining > 0 )
-                    {
-                        int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
-                        int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                        gl.glDrawArrays( GL.GL_TRIANGLES, offset, fillCount );
-                        fillCountRemaining -= fillCount;
-                    }
-                }
-
-                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-                // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
-
-                if ( loaded.polyStippleOn )
-                {
-                    gl.glDisable( GL.GL_POLYGON_STIPPLE );
-                }
-            }
-
-            if ( loaded.linesOn )
-            {
-                gl.glColor4fv( loaded.lineColor, 0 );
-                gl.glLineWidth( loaded.lineWidth );
-
-                if ( loaded.lineStippleOn )
-                {
-                    gl.glEnable( GL.GL_LINE_STIPPLE );
-                    gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
-                }
-
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-                gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
-
-                loaded.glLineOffsetBuffer.rewind( );
-                loaded.glLineCountBuffer.rewind( );
-
-                // A count > 65535 causes problems on some ATI cards, so we must loop through the
-                // groups of primitives and split them up where necessary.  An alternate way would be
-                // to construct the count and offset arrays so that groups are less then 65535 in size.
-                // There is some evidence on web forums that this may provide performance benefits as well
-                // when dynamic data is being used.
-                for ( int i = 0; i < loaded.glTotalLinePrimitives; i++ )
-                {
-                    int fillCountTotal = loaded.glLineCountBuffer.get( i );
-                    int fillCountRemaining = fillCountTotal;
-                    while ( fillCountRemaining > 0 )
-                    {
-                        int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 2
-                        int offset = loaded.glLineOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                        gl.glDrawArrays( GL.GL_LINE_LOOP, offset, fillCount );
-                        fillCountRemaining -= fillCount;
-                    }
-                }
-
-                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-                // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
-
-                if ( loaded.lineStippleOn )
-                {
-                    gl.glDisable( GL.GL_LINE_STIPPLE );
-                }
-            }
+            drawGroup( gl, loaded );
         }
 
         glHandleError( gl, "Draw Error" );
@@ -1008,6 +784,209 @@ public class PolygonPainter extends GlimpsePainter2D
         gl.glDisable( GL.GL_LINE_SMOOTH );
     }
 
+    protected void updateVertices( GL gl, LoadedGroup loaded, Group group, boolean fill )
+    {
+        boolean initialized = fill ? loaded.glFillBufferInitialized : loaded.glLineBufferInitialized;
+        int maxSize = fill ? loaded.glFillBufferMaxSize : loaded.glLineBufferMaxSize;
+        int currentSize = fill ? loaded.glFillBufferCurrentSize : loaded.glLineBufferCurrentSize;
+        int insertSize = fill ? group.fillInsertVertexCount : group.lineInsertVertexCount;
+        int totalSize = fill ? group.totalFillVertexCount : group.totalLineVertexCount;
+        int handle = fill ? loaded.glFillBufferHandle : loaded.glLineBufferHandle;
+        
+        // the size needed is the current buffer location plus new inserts (we cannot use
+        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
+        // polygons have been deleted
+        int sizeNeeded = currentSize + insertSize;
+        
+        if ( !initialized || maxSize < sizeNeeded )
+        {
+            // if we've deleted vertices, but are still close to the max buffer size, then
+            // go ahead and expand the max buffer size anyway
+            // if we're far below the max because of deletions, don't expand the array
+            if ( !initialized || maxSize < DELETE_EXPAND_FACTOR * totalSize )
+            {
+                // if the track doesn't have a gl buffer or it is too small we must
+                // copy all the track's data into a new, larger buffer
+
+                // if this is the first time we have allocated memory for this track
+                // don't allocate any extra, it may never get added to
+                // however, once a track has been updated once, we assume it is likely
+                // to be updated again and give it extra memory
+                if ( initialized )
+                {
+                    gl.glDeleteBuffers( 1, new int[] { handle }, 0 );
+                    maxSize = Math.max( ( int ) ( maxSize * 1.5 ), totalSize );
+                }
+                else
+                {
+                    maxSize = totalSize;
+                }
+
+                // create a new device buffer handle
+                int[] bufferHandle = new int[1];
+                gl.glGenBuffers( 1, bufferHandle, 0 );
+                handle = bufferHandle[0];
+            }
+            
+            // copy all the track data into a host buffer
+            ensureDataBufferSize( maxSize );
+            
+            if ( fill )
+            {
+                loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
+            }
+            else
+            {
+                loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
+            }
+
+            // copy data from the host buffer into the device buffer
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            glHandleError( gl, "glBindBuffer Error  (Case 1)" );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+            glHandleError( gl, "glBufferData Error" );
+
+            if ( fill )
+            {
+                loaded.glFillBufferInitialized = true;
+                loaded.glFillBufferCurrentSize = totalSize;
+                loaded.glFillBufferHandle = handle;
+                loaded.glFillBufferMaxSize = maxSize;
+            }
+            else
+            {
+                loaded.glLineBufferInitialized = true;
+                loaded.glLineBufferCurrentSize = totalSize;
+                loaded.glLineBufferHandle = handle;
+                loaded.glLineBufferMaxSize = maxSize;
+            }
+        }
+        else
+        {
+            // there is enough empty space in the device buffer to accommodate all the new data
+
+            // copy all the new track data into a host buffer
+            int insertVertices = insertSize;
+            ensureDataBufferSize( insertVertices );
+            
+            if ( fill )
+            {
+                loaded.loadFillVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
+            }
+            else
+            {
+                loaded.loadLineVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
+            }
+
+            // update the device buffer with the new data
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            glHandleError( gl, "glBindBuffer Error  (Case 2)" );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+            glHandleError( gl, "glBufferSubData Error" );
+            
+            if ( fill )
+            {
+                loaded.glFillBufferCurrentSize = sizeNeeded;
+            }
+            else
+            {
+                loaded.glLineBufferCurrentSize = sizeNeeded;
+            }
+        }
+    }
+    
+    protected void drawGroup( GL gl, LoadedGroup loaded )
+    {
+        if ( !loaded.glFillBufferInitialized || !loaded.glLineBufferInitialized ) return;
+
+        if ( loaded.fillOn )
+        {
+            gl.glColor4fv( loaded.fillColor, 0 );
+
+            if ( loaded.polyStippleOn )
+            {
+                gl.glEnable( GL.GL_POLYGON_STIPPLE );
+                gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
+            }
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
+            gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+
+            loaded.glFillOffsetBuffer.rewind( );
+            loaded.glFillCountBuffer.rewind( );
+
+            // A count > 65535 causes problems on some ATI cards, so we must loop through the
+            // groups of primitives and split them up where necessary.  An alternate way would be
+            // to construct the count and offset arrays so that groups are less then 65535 in size.
+            // There is some evidence on web forums that this may provide performance benefits as well
+            // when dynamic data is being used.
+            for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
+            {
+                int fillCountTotal = loaded.glFillCountBuffer.get( i );
+                int fillCountRemaining = fillCountTotal;
+                while ( fillCountRemaining > 0 )
+                {
+                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
+                    int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
+                    gl.glDrawArrays( GL.GL_TRIANGLES, offset, fillCount );
+                    fillCountRemaining -= fillCount;
+                }
+            }
+
+            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+            // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
+
+            if ( loaded.polyStippleOn )
+            {
+                gl.glDisable( GL.GL_POLYGON_STIPPLE );
+            }
+        }
+
+        if ( loaded.linesOn )
+        {
+            gl.glColor4fv( loaded.lineColor, 0 );
+            gl.glLineWidth( loaded.lineWidth );
+
+            if ( loaded.lineStippleOn )
+            {
+                gl.glEnable( GL.GL_LINE_STIPPLE );
+                gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
+            }
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
+            gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+
+            loaded.glLineOffsetBuffer.rewind( );
+            loaded.glLineCountBuffer.rewind( );
+
+            // A count > 65535 causes problems on some ATI cards, so we must loop through the
+            // groups of primitives and split them up where necessary.  An alternate way would be
+            // to construct the count and offset arrays so that groups are less then 65535 in size.
+            // There is some evidence on web forums that this may provide performance benefits as well
+            // when dynamic data is being used.
+            for ( int i = 0; i < loaded.glTotalLinePrimitives; i++ )
+            {
+                int fillCountTotal = loaded.glLineCountBuffer.get( i );
+                int fillCountRemaining = fillCountTotal;
+                while ( fillCountRemaining > 0 )
+                {
+                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 2
+                    int offset = loaded.glLineOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
+                    gl.glDrawArrays( GL.GL_LINE_LOOP, offset, fillCount );
+                    fillCountRemaining -= fillCount;
+                }
+            }
+
+            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+            // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
+
+            if ( loaded.lineStippleOn )
+            {
+                gl.glDisable( GL.GL_LINE_STIPPLE );
+            }
+        }
+    }
+    
     protected static Polygon buildPolygon( float[] geometryX, float[] geometryY )
     {
         Polygon p = new Polygon( );
