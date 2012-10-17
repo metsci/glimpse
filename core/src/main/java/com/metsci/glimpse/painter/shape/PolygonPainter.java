@@ -725,25 +725,17 @@ public class PolygonPainter extends GlimpsePainter2D
 
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
-
+                    
                     if ( group.polygonsInserted )
                     {
                         updateVertices( gl, loaded, group, true );
                         updateVertices( gl, loaded, group, false );
                     }
-
-                    if ( loaded.glLineBufferInitialized && loaded.glFillBufferInitialized )
+                    
+                    if ( group.polygonsSelected )
                     {
-                        if ( group.polygonsSelected )
-                        {
-                            loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
-                            loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
-                        }
-                        else if ( !group.newSelectedPolygons.isEmpty( ) )
-                        {
-                            loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
-                            loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
-                        }
+                        loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
+                        loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
                     }
 
                     group.reset( );
@@ -826,6 +818,8 @@ public class PolygonPainter extends GlimpsePainter2D
                 int[] bufferHandle = new int[1];
                 gl.glGenBuffers( 1, bufferHandle, 0 );
                 handle = bufferHandle[0];
+                
+                if ( fill ) System.out.println( "Expanding " + maxSize );
             }
             
             // copy all the track data into a host buffer
@@ -834,10 +828,12 @@ public class PolygonPainter extends GlimpsePainter2D
             if ( fill )
             {
                 loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
+                loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
             }
             else
             {
                 loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
+                loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
             }
 
             // copy data from the host buffer into the device buffer
@@ -866,22 +862,23 @@ public class PolygonPainter extends GlimpsePainter2D
             // there is enough empty space in the device buffer to accommodate all the new data
 
             // copy all the new track data into a host buffer
-            int insertVertices = insertSize;
-            ensureDataBufferSize( insertVertices );
+            ensureDataBufferSize( insertSize );
             
             if ( fill )
             {
                 loaded.loadFillVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
+                loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
             }
             else
             {
                 loaded.loadLineVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
+                loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
             }
 
             // update the device buffer with the new data
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
             glHandleError( gl, "glBindBuffer Error  (Case 2)" );
-            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
             glHandleError( gl, "glBufferSubData Error" );
             
             if ( fill )
@@ -1444,11 +1441,11 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void loadLineSelectionIntoBuffer( Collection<IdPolygon> polygons, int size, int offset )
         {
-            ensureLineOffsetBufferSize( size );
-            ensureLineCountBufferSize( size );
-
             if ( size <= 0 || offset < 0 ) return;
 
+            ensureLineOffsetBufferSize( size );
+            ensureLineCountBufferSize( size );
+            
             glLineOffsetBuffer.position( offset );
             glLineCountBuffer.position( offset );
 
