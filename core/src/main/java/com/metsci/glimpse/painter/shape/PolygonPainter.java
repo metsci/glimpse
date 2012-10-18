@@ -892,7 +892,7 @@ public class PolygonPainter extends GlimpsePainter2D
     
     protected void drawGroup( GL gl, LoadedGroup loaded )
     {
-        if ( !loaded.glFillBufferInitialized || !loaded.glLineBufferInitialized ) return;
+        if ( !isGroupReady( loaded ) ) return;
 
         if ( loaded.fillOn )
         {
@@ -980,6 +980,13 @@ public class PolygonPainter extends GlimpsePainter2D
                 gl.glDisable( GL.GL_LINE_STIPPLE );
             }
         }
+    }
+    
+    protected boolean isGroupReady( LoadedGroup loaded )
+    {
+        return  loaded.glFillBufferInitialized    && loaded.glLineBufferInitialized   &&
+                loaded.glLineOffsetBuffer != null && loaded.glLineCountBuffer != null &&
+                loaded.glFillOffsetBuffer != null && loaded.glFillCountBuffer != null;
     }
     
     protected static Polygon buildPolygon( float[] geometryX, float[] geometryY )
