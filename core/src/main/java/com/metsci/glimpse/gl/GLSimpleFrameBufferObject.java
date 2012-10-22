@@ -254,6 +254,11 @@ public class GLSimpleFrameBufferObject
     {
         return context;
     }
+    
+    public int getTextureId( )
+    {
+        return textureId[0];
+    }
 
     public Texture getOpenGLTexture( )
     {
