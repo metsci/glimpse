@@ -65,6 +65,9 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     private boolean paintBackground = false;
     private float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
 
+    private boolean paintBorder = false;
+    private float[] borderColor = GlimpseColor.getWhite( 1f );
+
     private int padding = 5;
 
     private HorizontalPosition hPos;
@@ -105,6 +108,18 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     public SimpleTextPainter setBackgroundColor( float[] backgroundColor )
     {
         this.backgroundColor = backgroundColor;
+        return this;
+    }
+    
+    public SimpleTextPainter setPaintBorder( boolean paintBorder )
+    {
+        this.paintBorder = paintBorder;
+        return this;
+    }
+
+    public SimpleTextPainter setBorderColor( float[] borderColor )
+    {
+        this.borderColor = borderColor;
         return this;
     }
 
@@ -241,7 +256,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             break;
         }
 
-        if ( this.paintBackground )
+        if ( this.paintBackground || this.paintBorder )
         {
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glLoadIdentity( );
@@ -257,20 +272,44 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             int xTextMax = ( int ) ( xText + bound.getWidth( ) + ( bound.getMinX( ) ) - 1 );
             int yTextMax = ( int ) ( yText + bound.getHeight( ) - 3 );
 
-            // Draw Text Background
-            gl.glColor4fv( backgroundColor, 0 );
-
-            gl.glBegin( GL.GL_QUADS );
-            try
+            if(this.paintBackground)
             {
-                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
-                gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
-                gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
-                gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+	            // Draw Text Background
+	            gl.glColor4fv( backgroundColor, 0 );
+	
+	            gl.glBegin( GL.GL_QUADS );
+	            try
+	            {
+	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
+	                gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+	            }
+	            finally
+	            {
+	                gl.glEnd( );
+	            }
             }
-            finally
+            
+            if(this.paintBorder)
             {
-                gl.glEnd( );
+	            // Draw Text Border
+	            gl.glColor4fv( borderColor, 0 );
+            	gl.glEnable(GL.GL_LINE_SMOOTH);
+	
+	            gl.glBegin( GL.GL_LINE_STRIP );
+	            try
+	            {
+	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
+	                gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+	            }
+	            finally
+	            {
+	                gl.glEnd( );
+	            }
             }
         }
         
@@ -325,7 +364,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             break;
         }
         
-        if ( this.paintBackground )
+        if ( this.paintBackground || this.paintBorder )
         {
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glLoadIdentity( );
@@ -344,20 +383,44 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             int xTextMax = ( int ) ( xText + halfTextWidth + halfTextHeight + buffer + 3 );
             int yTextMax = ( int ) ( yText - halfTextWidth + halfTextHeight - buffer );
 
-            // Draw Text Background
-            gl.glColor4fv( backgroundColor, 0 );
-
-            gl.glBegin( GL.GL_QUADS );
-            try
+            if(this.paintBackground)
             {
-                gl.glVertex2f( xTextMin, yTextMin );
-                gl.glVertex2f( xTextMax, yTextMin );
-                gl.glVertex2f( xTextMax, yTextMax );
-                gl.glVertex2f( xTextMin, yTextMax );
+	            // Draw Text Background
+	            gl.glColor4fv( backgroundColor, 0 );
+	
+	            gl.glBegin( GL.GL_QUADS );
+	            try
+	            {
+	                gl.glVertex2f( xTextMin, yTextMin );
+	                gl.glVertex2f( xTextMax, yTextMin );
+	                gl.glVertex2f( xTextMax, yTextMax );
+	                gl.glVertex2f( xTextMin, yTextMax );
+	            }
+	            finally
+	            {
+	                gl.glEnd( );
+	            }
             }
-            finally
+            
+            if(this.paintBorder)
             {
-                gl.glEnd( );
+	            // Draw Text Background
+	            gl.glColor4fv( borderColor, 0 );
+            	gl.glEnable(GL.GL_LINE_SMOOTH);
+            	
+	            gl.glBegin( GL.GL_LINE_STRIP );
+	            try
+	            {
+	                gl.glVertex2f( xTextMin, yTextMin );
+	                gl.glVertex2f( xTextMax, yTextMin );
+	                gl.glVertex2f( xTextMax, yTextMax );
+	                gl.glVertex2f( xTextMin, yTextMax );
+	                gl.glVertex2f( xTextMin, yTextMin );
+	            }
+	            finally
+	            {
+	                gl.glEnd( );
+	            }
             }
         }
         
