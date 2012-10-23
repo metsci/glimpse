@@ -114,9 +114,11 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
         return GlimpseMouseWrapper.fromMouseEvent( event );
     }
 
-    protected GlimpseMouseEvent toLocalGlimpseWheelEvent( MouseEvent e, GlimpseTargetStack stack )
+    protected GlimpseMouseEvent toLocalGlimpseWheelEvent( MouseEvent e, GlimpseTargetStack stack, boolean handled )
     {
-        return GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
+        GlimpseMouseEvent event = GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
+        event.setHandled( handled );
+        return event;
     }
 
     @Override
@@ -174,13 +176,17 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
 
         if ( isDragHovered( ) )
         {
+            boolean handled = false;
+            
             Set<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack, handled );
 
                 if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
+                
+                handled = glimpseHoveredEvent.isHandled( );
             }
         }
     }
@@ -191,6 +197,8 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
         List<GlimpseTargetStack> list = getContainingTargets( event );
         if ( list == null ) return;
 
+        boolean handled = false;
+        
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
         for ( GlimpseTargetStack stack : list )
@@ -198,8 +206,10 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseWheelEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toLocalGlimpseWheelEvent( event, stack, handled );
             mouseTarget.mouseWheelMoved( glimpseEvent );
+            
+            handled = glimpseEvent.isHandled( );
         }
     }
 
@@ -216,6 +226,8 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
 
         setAllHovered( list );
 
+        boolean handled = false;
+        
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
         for ( GlimpseTargetStack stack : list )
@@ -223,9 +235,11 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack, handled );
 
             mouseTarget.mousePressed( glimpseEvent );
+            
+            handled = glimpseEvent.isHandled( );
         }
     }
 
@@ -236,13 +250,17 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
         // component the mouse event occurred inside
         if ( isDragHovered( ) )
         {
+            boolean handled = false;
+         
             Set<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack, handled );
 
                 if ( mouseTarget != null ) mouseTarget.mouseReleased( glimpseEvent );
+                
+                handled = glimpseEvent.isHandled( );
             }
         }
 

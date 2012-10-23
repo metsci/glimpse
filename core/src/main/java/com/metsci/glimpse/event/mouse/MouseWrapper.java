@@ -241,6 +241,13 @@ public abstract class MouseWrapper<E>
     {
         return toGlimpseEvent( toLocalCoords( e, stack ) );
     }
+    
+    protected GlimpseMouseEvent toLocalGlimpseEvent( E e, GlimpseTargetStack stack, boolean handled )
+    {
+        GlimpseMouseEvent event = toLocalGlimpseEvent( e, stack );
+        event.setHandled( handled );
+        return event;
+    }
 
     protected abstract boolean isButtonDown( E e );
 

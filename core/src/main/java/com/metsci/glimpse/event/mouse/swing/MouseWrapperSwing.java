@@ -136,6 +136,13 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
     {
         return GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
     }
+    
+    protected GlimpseMouseEvent toLocalGlimpseEvent( MouseWheelEvent e, GlimpseTargetStack stack, boolean handled )
+    {
+        GlimpseMouseEvent event = GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
+        event.setHandled( handled );
+        return event;
+    }
 
     @Override
     public void mouseClicked( MouseEvent event )
@@ -182,6 +189,8 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
 
         setAllHovered( list );
 
+        boolean handled = false;
+        
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
         for ( GlimpseTargetStack stack : list )
@@ -189,15 +198,19 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack, handled );
 
             mouseTarget.mousePressed( glimpseEvent );
+        
+            handled = glimpseEvent.isHandled( );
         }
     }
 
     @Override
     public void mouseReleased( MouseEvent event )
     {
+        boolean handled = false;
+        
         // always always deliver the mouseUp event regardless of which
         // component the mouse event occurred inside
         if ( isDragHovered( ) )
@@ -206,9 +219,11 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack, handled );
 
                 if ( mouseTarget != null ) mouseTarget.mouseReleased( glimpseEvent );
+                
+                handled = glimpseEvent.isHandled( );
             }
         }
 
@@ -236,13 +251,17 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
         
         if ( isDragHovered( ) )
         {
+            boolean handled = false;
+            
             Set<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack, handled );
 
                 if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
+                
+                handled = glimpseHoveredEvent.isHandled( );
             }
         }
     }
@@ -267,19 +286,25 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
         // if we have something hovered, send mouseMoved events
         if ( isDragHovered( ) )
         {
+            boolean handled = false;
+            
             for ( GlimpseTargetStack hoveredStack : newHovered )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack, handled );
 
                 if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
+                
+                handled = glimpseHoveredEvent.isHandled( );
             }
         }
     }
-
+    
     @Override
     public void mouseWheelMoved( MouseWheelEvent event )
     {
+        boolean handled = false;
+        
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
         for ( GlimpseTargetStack stack : getContainingTargets( event ) )
@@ -287,8 +312,10 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack, handled );
             mouseTarget.mouseWheelMoved( glimpseEvent );
+            
+            handled = glimpseEvent.isHandled( );
         }
     }
 }
