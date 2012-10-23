@@ -49,22 +49,22 @@ public class AxisNotSetException extends RuntimeException
 
     public AxisNotSetException( GlimpseContext context )
     {
-        super( String.format( "Axis2D not set in context: %s", context ) );
+        super( String.format( "Axis not set in context: %s", context ) );
     }
 
     public AxisNotSetException( GlimpsePainter painter, GlimpseContext context )
     {
-        super( String.format( "Axis2D not set for painter: %s in context: %s", painter, context ) );
+        super( String.format( "Axis not set for painter: %s in context: %s", painter, context ) );
     }
 
     public AxisNotSetException( GlimpseTargetStack stack )
     {
-        super( String.format( "Axis2D not set in: %s", stack ) );
+        super( String.format( "Axis not set in: %s", stack ) );
     }
 
     public AxisNotSetException( GlimpsePainter painter, GlimpseTargetStack stack )
     {
-        super( String.format( "Axis2D not set for painter: %s in: %s", painter, stack ) );
+        super( String.format( "Axis not set for painter: %s in: %s", painter, stack ) );
     }
 
     public AxisNotSetException( String message )
