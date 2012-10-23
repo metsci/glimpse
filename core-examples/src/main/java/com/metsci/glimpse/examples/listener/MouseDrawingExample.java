@@ -126,17 +126,13 @@ public class MouseDrawingExample implements GlimpseLayoutProvider
         @Override
         public void mouseMoved( GlimpseMouseEvent event )
         {
-            Axis2D axis = event.getAxis2D( );
-            Axis1D axisX = axis.getAxisX( );
-            Axis1D axisY = axis.getAxisY( );
-
             // if mouse button 1 is down (i.e. this mouseMoved event is a drag with the left mouse button down)
             // and the Shift key is being held down, then perform our custom action, otherwise
             // default to the standard axis interaction
             if ( event.isButtonDown( MouseButton.Button1 ) && event.isKeyDown( ModifierKey.Shift ) )
             {
-                double x = axisX.screenPixelToValue( event.getX( ) );
-                double y = axisY.screenPixelToValue( axisY.getSizePixels( ) - event.getY( ) );
+                double x = event.getAxisCoordinatesX( );
+                double y = event.getAxisCoordinatesY( );
 
                 painter.addPoint( 2, id1++, x, y, 0 );
             }
@@ -158,6 +154,7 @@ public class MouseDrawingExample implements GlimpseLayoutProvider
             // but still also pass through to super.mouseMoved to get the default behavior
             if ( event.isButtonDown( MouseButton.Button3 ) )
             {
+                // instead of using the getAxisCoordinatesX() helper method, we can do the translation manually as well
                 double x = axisX.screenPixelToValue( event.getX( ) );
                 double y = axisY.screenPixelToValue( axisY.getSizePixels( ) - event.getY( ) );
 

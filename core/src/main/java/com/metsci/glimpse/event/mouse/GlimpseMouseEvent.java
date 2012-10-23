@@ -174,7 +174,7 @@ public class GlimpseMouseEvent
         if ( axis != null )
         {
             int height = axis.getSizePixels( );
-            return height - axis.screenPixelToValue( y ); 
+            return axis.screenPixelToValue( height - y ); 
         }
         else
         {

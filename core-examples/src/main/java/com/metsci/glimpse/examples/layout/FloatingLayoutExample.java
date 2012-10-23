@@ -110,8 +110,8 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
             {
                 if ( event.isButtonDown( MouseButton.Button2 ) )
                 {
-                    plotMinX = plot.getAxisX( ).screenPixelToValue( event.getX( ) );
-                    plotMinY = plot.getAxisY( ).screenPixelToValue( plot.getAxisY( ).getSizePixels( ) - event.getY( ) );
+                    plotMinX = event.getAxisCoordinatesX( );
+                    plotMinY = event.getAxisCoordinatesY( );
                 }
             }
 
