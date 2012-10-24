@@ -259,6 +259,11 @@ public class GLSimpleFrameBufferObject
     {
         return textureId[0];
     }
+    
+    public boolean isInitialized( )
+    {
+        return initialized;
+    }
 
     public Texture getOpenGLTexture( )
     {

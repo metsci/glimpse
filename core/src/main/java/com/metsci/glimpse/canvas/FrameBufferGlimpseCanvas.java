@@ -108,9 +108,17 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
             @Override
             public void display( GLContext context )
             {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                fbo.bind( context );
+                try
                 {
-                    layout.paintTo( getGlimpseContext( ) );
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.paintTo( getGlimpseContext( ) );
+                    }
+                }
+                finally
+                {
+                    fbo.unbind( context );
                 }
             }
 
