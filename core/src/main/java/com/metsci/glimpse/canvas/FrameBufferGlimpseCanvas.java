@@ -77,12 +77,17 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 
     public FrameBufferGlimpseCanvas( int width, int height, GLContext context )
     {
+        this( width, height, true, false, context );
+    }
+    
+    public FrameBufferGlimpseCanvas( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
+    {
         GLContext newContext = createPixelBuffer( 1, 1, context ).getContext( );
 
         this.width = width;
         this.height = height;
 
-        this.fbo = new GLSimpleFrameBufferObject( width, height, newContext );
+        this.fbo = new GLSimpleFrameBufferObject( width, height, useDepth, useStencil, newContext );
 
         this.layoutManager = new LayoutManager( );
 

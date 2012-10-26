@@ -57,6 +57,9 @@ public class GLSimpleFrameBufferObject
     private int width;
     private int height;
 
+    private boolean useStencil;
+    private boolean useDepth;
+    
     private int[] textureId;
     private int[] renderBufferId;
     private int[] frameBufferId;
@@ -67,11 +70,18 @@ public class GLSimpleFrameBufferObject
 
     public GLSimpleFrameBufferObject( int width, int height, GLContext context )
     {
+        this( width, height, true, false, context );
+    }
+    
+    public GLSimpleFrameBufferObject( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
+    {
         this.context = context;
         this.width = width;
         this.height = height;
+        this.useDepth = useDepth;
+        this.useStencil = useStencil;
+        
         this.listeners = new CopyOnWriteArrayList<GLSimpleFboListenerEntry>( );
-
         this.lock = new ReentrantLock( );
     }
 
@@ -173,16 +183,25 @@ public class GLSimpleFrameBufferObject
 
             // create a renderbuffer objects
             renderBufferId = new int[2];
-            gl.glGenRenderbuffersEXT( 2, renderBufferId, 0 );
-
+            if ( useDepth || useStencil )
+            {
+                gl.glGenRenderbuffersEXT( 2, renderBufferId, 0 );
+            }
+                
             // initialize renderbuffer storing depth info
-            gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
-            gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT, width, height );
-
+            if ( useDepth )
+            {
+                gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
+                gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT, width, height );
+            }
+            
             // initialize renderbuffer storing stencil info
-            //            gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
-            //            gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_STENCIL_INDEX16_EXT, width, height );
-
+            if ( useStencil )
+            {
+                gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
+                gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_STENCIL_INDEX16_EXT, width, height );
+            }
+            
             gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, 0 );
 
             if ( frameBufferId != null )
@@ -199,11 +218,17 @@ public class GLSimpleFrameBufferObject
             gl.glFramebufferTexture2DEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_TEXTURE_2D, textureId[0], 0 );
 
             // attach the renderbuffer to depth attachment point
-            gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
-
+            if ( useDepth )
+            {
+                gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
+            }
+            
             // attach the renderbuffer to stencil attachment point
-            //            gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_STENCIL_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
-
+            if ( useStencil )
+            {
+                gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_STENCIL_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
+            }
+            
             // check FBO status
             int status = gl.glCheckFramebufferStatusEXT( GL.GL_FRAMEBUFFER_EXT );
             if ( status != GL.GL_FRAMEBUFFER_COMPLETE_EXT )
@@ -254,12 +279,12 @@ public class GLSimpleFrameBufferObject
     {
         return context;
     }
-    
+
     public int getTextureId( )
     {
         return textureId[0];
     }
-    
+
     public boolean isInitialized( )
     {
         return initialized;
@@ -305,12 +330,12 @@ public class GLSimpleFrameBufferObject
             {
                 switch ( n )
                 {
-                case 0:
-                    return width;
-                case 1:
-                    return height;
-                default:
-                    return 0;
+                    case 0:
+                        return width;
+                    case 1:
+                        return height;
+                    default:
+                        return 0;
                 }
             }
 
