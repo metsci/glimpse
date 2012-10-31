@@ -731,6 +731,8 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mouseEntered( event );
+            
+            if ( event.isHandled( ) ) break;
         }
     }
 
@@ -740,6 +742,8 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mouseExited( event );
+            
+            if ( event.isHandled( ) ) break;
         }
     }
 
@@ -749,6 +753,8 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mousePressed( event );
+            
+            if ( event.isHandled( ) ) break;
         }
     }
 
@@ -758,24 +764,30 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mouseReleased( event );
+            
+            if ( event.isHandled( ) ) break;
         }
     }
 
     @Override
-    public void mouseMoved( GlimpseMouseEvent e )
+    public void mouseMoved( GlimpseMouseEvent event )
     {
         for ( GlimpseMouseMotionListener listener : mouseMotionListeners )
         {
-            listener.mouseMoved( e );
+            listener.mouseMoved( event );
+            
+            if ( event.isHandled( ) ) break;
         }
     }
 
     @Override
-    public void mouseWheelMoved( GlimpseMouseEvent e )
+    public void mouseWheelMoved( GlimpseMouseEvent event )
     {
         for ( GlimpseMouseWheelListener listener : mouseWheelListeners )
         {
-            listener.mouseWheelMoved( e );
+            listener.mouseWheelMoved( event );
+            
+            if ( event.isHandled( ) ) break;
         }
     }
 
