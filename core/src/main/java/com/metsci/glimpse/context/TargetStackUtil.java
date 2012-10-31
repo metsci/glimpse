@@ -31,7 +31,12 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * Utility method for manipulating {@link GlimpseTargetStack} instances.
+ * <p>Utility method for manipulating {@link GlimpseTargetStack} instances.</p>
+ *
+ * <p>In order to uniquely name a GlimpseLayout, the stack containing the
+ * GlimpseLayout and all of its parent layouts down to the underlying GlimpseCanvas
+ * must be provided (because the GlimpseLayout may be reused and could have
+ * multiple parents).</p>
  *
  * @author ulman
  */
