@@ -328,6 +328,28 @@ public class Axis1D
         this.lockMax = true;
         this.lockMaxValue = value;
     }
+    
+    /**
+     * Locks the minimum value of this axis to its current min value.
+     *
+     * @param value
+     */
+    public void lockMin( )
+    {
+        this.lockMin = true;
+        this.lockMinValue = this.minValue;
+    }
+    
+    /**
+     * Locks the maximum value of this axis to its current max value.
+     *
+     * @param value
+     */
+    public void lockMax( )
+    {
+        this.lockMax = true;
+        this.lockMaxValue = this.maxValue;
+    }
 
     /**
      * Unlocks the minimum value of this axis.
