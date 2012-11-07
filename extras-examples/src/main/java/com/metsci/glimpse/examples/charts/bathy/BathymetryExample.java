@@ -56,6 +56,7 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -74,16 +75,30 @@ public class BathymetryExample implements GlimpseLayoutProvider
     {
         Example.showWithSwing( new BathymetryExample( ) );
     }
-
+    
+    TaggedHeatMapPainter bathymetryPainter;
+    ContourPainter contourPainter;
+    
+    public TaggedHeatMapPainter getBathymetryPainter( )
+    {
+        return this.bathymetryPainter;
+    }
+    
+    public ContourPainter getContourPainter( )
+    {
+        return this.contourPainter;
+    }
+    
     @Override
     public MapPlot2D getLayout( )
     {
-        // create a tangent plane
-        TangentPlane plane = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
-        ;
-
+        return getLayout( new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) ) );
+    }
+    
+    public MapPlot2D getLayout( GeoProjection projection )
+    {
         // create a premade heat map window
-        MapPlot2D plot = new MapPlot2D( plane )
+        MapPlot2D plot = new MapPlot2D( projection )
         {
             @Override
             protected Axis1D createAxisZ( )
@@ -128,7 +143,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         BathymetryData bathymetryData;
         try
         {
-            bathymetryData = new BathymetryData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ), plane );
+            bathymetryData = new BathymetryData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ), projection );
         }
         catch ( IOException e )
         {
@@ -146,7 +161,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         elevationColors.mutate( new ColorGradientConcatenator( ColorGradients.bathymetry, ColorGradients.topography ) );
 
         // create a painter to display the bathymetry data
-        TaggedHeatMapPainter bathymetryPainter = new TaggedHeatMapPainter( axisZ );
+        bathymetryPainter = new TaggedHeatMapPainter( axisZ );
         bathymetryPainter.setData( texture );
         bathymetryPainter.setColorScale( elevationColors );
 
@@ -157,10 +172,10 @@ public class BathymetryExample implements GlimpseLayoutProvider
         double[] contourLevels = new double[] { -4000, -3000, -2000, -1000, -900, -800, -700, -600, -500, -400, -300, -200, -100, -50, -10 };
 
         // generate a set of contour lines using the bathemetry data set and the contour levels
-        ContourData contourData = new ContourData( bathymetryData, plane, contourLevels );
+        ContourData contourData = new ContourData( bathymetryData, projection, contourLevels );
 
         // create a painter to display the contour lines
-        ContourPainter contourPainter = new ContourPainter( contourData );
+        contourPainter = new ContourPainter( contourData );
         contourPainter.setLineColor( 1.0f, 1.0f, 1.0f, 0.5f );
         contourPainter.setLineWidth( 1.6f );
 
@@ -197,25 +212,25 @@ public class BathymetryExample implements GlimpseLayoutProvider
         plot.addPainter( annotationPainter );
 
         // create a painter to display "buoy" positions
-        LatLonTrackPainter dotPainter = new LatLonTrackPainter( plane );
+        LatLonTrackPainter dotPainter = new LatLonTrackPainter( projection );
         plot.addPainter( dotPainter );
         dotPainter.setShowLines( 1, false );
         dotPainter.setPointSize( 1, 5.0f );
         dotPainter.setPointColor( 1, GlimpseColor.getBlack( ) );
 
-        Vector2d pos = plane.project( LatLonGeo.fromDeg( 19.14, -80.23 ) );
+        Vector2d pos = projection.project( LatLonGeo.fromDeg( 19.14, -80.23 ) );
         annotationPainter.addAnnotation( "buoy 125A-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 19.14, -80.23, 0 );
 
-        pos = plane.project( LatLonGeo.fromDeg( 18.88, -80.83 ) );
+        pos = projection.project( LatLonGeo.fromDeg( 18.88, -80.83 ) );
         annotationPainter.addAnnotation( "buoy 126A-2", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 18.88, -80.83, 0 );
 
-        pos = plane.project( LatLonGeo.fromDeg( 19.64, -79.50 ) );
+        pos = projection.project( LatLonGeo.fromDeg( 19.64, -79.50 ) );
         annotationPainter.addAnnotation( "buoy 126A-1", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getRed( ) );
         dotPainter.addPointGeo( 1, 1, 19.64, -79.50, 0 );
 
-        pos = plane.project( LatLonGeo.fromDeg( 19.80, -79.08 ) );
+        pos = projection.project( LatLonGeo.fromDeg( 19.80, -79.08 ) );
         annotationPainter.addAnnotation( "buoy 125B-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 19.80, -79.08, 0 );
 
