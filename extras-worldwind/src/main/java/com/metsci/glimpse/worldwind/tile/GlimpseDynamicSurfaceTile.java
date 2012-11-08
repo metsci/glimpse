@@ -106,8 +106,13 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         if ( tile == null )
         {
             int textureHandle = offscreenCanvas.getFrameBuffer( ).getTextureId( );
-            tile = new TextureSurfaceTile( textureHandle, corners );
+            tile = newTextureSurfaceTile( textureHandle, corners );
         }
+    }
+    
+    protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
+    {
+        return new TextureSurfaceTile( textureHandle, corners );
     }
 
     protected void updateGeometry( DrawContext dc )

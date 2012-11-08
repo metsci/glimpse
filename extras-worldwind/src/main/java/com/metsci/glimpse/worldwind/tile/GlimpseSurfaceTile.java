@@ -71,10 +71,15 @@ public class GlimpseSurfaceTile extends AbstractLayer implements Renderable, Pre
         if ( tile == null )
         {
             int textureHandle = offscreenCanvas.getFrameBuffer( ).getTextureId( );
-            tile = new TextureSurfaceTile( textureHandle, corners );
+            tile = newTextureSurfaceTile( textureHandle, corners );
         }
     }
-
+    
+    protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
+    {
+        return new TextureSurfaceTile( textureHandle, corners );
+    }
+    
     @Override
     protected void doRender( DrawContext dc )
     {
