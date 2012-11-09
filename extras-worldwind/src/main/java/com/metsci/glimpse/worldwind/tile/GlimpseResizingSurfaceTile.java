@@ -6,6 +6,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import java.util.List;
 
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.listener.RateLimitedEventDispatcher;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
@@ -16,6 +17,11 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     
     protected int previousWidth;
     protected int previousHeight;
+    
+    protected double preferredPixelCount;
+    
+    protected RateLimitedEventDispatcher<?> dispatcher;
+    protected volatile boolean updateSize;
     
     public GlimpseResizingSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int preferredWidth, int preferredHeight, double minLat, double maxLat, double minLon, double maxLon )
     {
@@ -35,6 +41,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
+        this.preferredPixelCount = width * height;
     }
 
     public GlimpseResizingSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int maxWidth, int maxHeight, int preferredWidth, int preferredHeight, List<LatLon> corners )
@@ -43,6 +50,20 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
+        this.preferredPixelCount =  width * height;
+        this.dispatcher = newRateLimitedEventDispatcher( );
+    }
+    
+    protected RateLimitedEventDispatcher<?> newRateLimitedEventDispatcher( )
+    {
+        return new RateLimitedEventDispatcher<Object>( 200 )
+        {
+            @Override
+            public void eventDispatch( Object data )
+            {
+                updateSize = true;
+            }
+        };
     }
     
     // modify the pixel dimensions of the canvas so that they approximately match the
@@ -54,35 +75,40 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     {
         super.updateGeometry( dc );
         
-        double latSpan = bounds.maxLat - bounds.minLat;
-        double lonSpan = bounds.maxLon - bounds.minLon;
+        dispatcher.eventOccurred( null );
         
-        int calculatedHeight = (int) ( width * ( latSpan / lonSpan ) );
-        int calculatedWidth = (int) ( height * ( lonSpan / latSpan ) );
-        
-        if ( calculatedHeight < maxHeight )
+        if ( updateSize )
         {
-            if ( previousWidth != width || previousHeight != calculatedHeight )
+            updateSize = false;
+            
+            double latSpan = bounds.maxLat - bounds.minLat;
+            double lonSpan = bounds.maxLon - bounds.minLon;
+            
+            double ratio = ( latSpan / lonSpan );
+            
+            double fcalculatedHeight = Math.sqrt( preferredPixelCount * ratio );
+            double fcalculatedWidth = preferredPixelCount / fcalculatedHeight;
+            
+            int calculatedHeight = (int) fcalculatedHeight;
+            int calculatedWidth = (int) fcalculatedWidth;
+            
+            if ( calculatedHeight > maxHeight )
             {
-                previousWidth = width;
-                previousHeight = calculatedHeight;
-                offscreenCanvas.resize( width, calculatedHeight );
+                calculatedHeight = maxHeight;
+                calculatedWidth = (int) Math.min( maxWidth, calculatedHeight * ratio );
             }
-        }
-        else if ( calculatedWidth < maxWidth )
-        {
-            if ( previousWidth != calculatedWidth || previousHeight != height )
+            else if ( calculatedWidth > maxWidth )
+            {
+                calculatedWidth = maxWidth;
+                calculatedHeight = (int) Math.min( maxHeight, calculatedWidth * ( 1 / ratio ) );
+            }
+            
+            if ( previousWidth != calculatedWidth || previousHeight != calculatedHeight )
             {
                 previousWidth = calculatedWidth;
-                previousHeight = height;
-                offscreenCanvas.resize( calculatedWidth, height );
+                previousHeight = calculatedHeight;
+                offscreenCanvas.resize( calculatedWidth, calculatedHeight );
             }
-        }
-        else if ( previousWidth != width || previousHeight != height )
-        {
-            previousWidth = width;
-            previousHeight = height;
-            offscreenCanvas.resize( width, height );
         }
     }
 }
