@@ -27,8 +27,9 @@ import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
 
 /**
- * GlimpseSurfaceTile uses TextureSurfaceTile to display the output of Glimpse
- * offscreen rendering onto the surface of the Worldwind globe.
+ * Displays the content of a GlimpseLayout onto the surface of the Worldwind globe
+ * and dynamically adjusts the surface area of the tile to just fill the screen (and no more)
+ * to ensure that the visible areas receive maximum texture resolution.
  * 
  * @author ulman
  */

@@ -34,6 +34,7 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.worldwind.event.MouseWrapperWorldwind;
 import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
 import com.metsci.glimpse.worldwind.tile.GlimpseDynamicSurfaceTile;
+import com.metsci.glimpse.worldwind.tile.GlimpseResizingSurfaceTile;
 
 public class BaythmetryTileExample
 {
@@ -91,7 +92,7 @@ public class BaythmetryTileExample
         corners.add( LatLon.fromDegrees( corner3.getLatDeg( ), corner3.getLonDeg( ) ) );
         corners.add( LatLon.fromDegrees( corner4.getLatDeg( ), corner4.getLonDeg( ) ) );
 
-        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseDynamicSurfaceTile( baseLayout, wwaxis, projection, 3000, 3000, corners );
+        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseResizingSurfaceTile( baseLayout, wwaxis, projection, 3000, 3000, corners );
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
         // Create and install the view controls layer and register a controller for it with the World Window.
