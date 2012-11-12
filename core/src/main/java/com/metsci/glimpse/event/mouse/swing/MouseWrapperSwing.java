@@ -32,17 +32,14 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.util.List;
-import java.util.Set;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.MouseWrapper;
-import com.metsci.glimpse.event.mouse.Mouseable;
+import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
-public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
+public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
 {
     public static final int ANY_BUTTON_DOWN_MASK = MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
 
@@ -103,6 +100,19 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
         return GlimpseMouseWrapper.fromMouseEvent( e );
     }
 
+    @Override
+    protected GlimpseMouseEvent toLocalGlimpseEvent( MouseEvent e, GlimpseTargetStack stack )
+    {
+        if ( e instanceof MouseWheelEvent )
+        {
+            return GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( ( MouseWheelEvent ) e, stack ) );
+        }
+        else
+        {
+            return super.toLocalGlimpseEvent( e, stack );
+        }
+    }
+
     protected MouseWheelEvent toLocalCoords( MouseWheelEvent e, GlimpseTargetStack stack )
     {
         if ( stack == null ) return null;
@@ -132,180 +142,9 @@ public class MouseWrapperSwing extends MouseWrapper<MouseEvent> implements Mouse
         return localEvent;
     }
 
-    protected GlimpseMouseEvent toLocalGlimpseEvent( MouseWheelEvent e, GlimpseTargetStack stack )
-    {
-        return GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
-    }
-    
-    protected GlimpseMouseEvent toLocalGlimpseEvent( MouseWheelEvent e, GlimpseTargetStack stack, boolean handled )
-    {
-        GlimpseMouseEvent event = GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
-        event.setHandled( handled );
-        return event;
-    }
-
     @Override
-    public void mouseClicked( MouseEvent event )
+    public void mouseWheelMoved( MouseWheelEvent e )
     {
-        // not handled by GlimpseMouseListener, use mousePressed/mouseReleased
-    }
-
-    @Override
-    public void mouseEntered( MouseEvent event )
-    {
-        // save the old hovered stacks
-        Set<GlimpseTargetStack> oldHovered = clearHovered( );
-        
-        // update hovered stacks
-        getContainingTargets( event );
-        
-        // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
-        // send mouseExited and mouseEntered events based on the old/new hovered stacks
-        notifyMouseEnteredExited( event, oldHovered, newHovered );
-    }
-
-    @Override
-    public void mouseExited( MouseEvent event )
-    {
-        // save the old hovered stacks
-        Set<GlimpseTargetStack> oldHovered = clearHovered( );
-        
-        // update hovered stacks
-        getContainingTargets( event );
-        
-        // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
-        // send mouseExited and mouseEntered events based on the old/new hovered stacks
-        notifyMouseEnteredExited( event, oldHovered, newHovered );
-    }
-
-    @Override
-    public void mousePressed( MouseEvent event )
-    {
-        List<GlimpseTargetStack> list = getContainingTargets( event );
-
-        setAllHovered( list );
-
-        // stacks with low indices are on top in the layout, and
-        // have their mouse events generated first
-        for ( GlimpseTargetStack stack : list )
-        {
-            Mouseable mouseTarget = getMouseTarget( stack );
-            if ( mouseTarget == null ) return;
-
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
-
-            mouseTarget.mousePressed( glimpseEvent );
-        
-            if ( glimpseEvent.isHandled( ) ) break;
-        }
-    }
-
-    @Override
-    public void mouseReleased( MouseEvent event )
-    {
-        // always always deliver the mouseUp event regardless of which
-        // component the mouse event occurred inside
-        if ( isDragHovered( ) )
-        {
-            Set<GlimpseTargetStack> hoveredList = getDragHovered( );
-            for ( GlimpseTargetStack hoveredStack : hoveredList )
-            {
-                Mouseable mouseTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack );
-
-                if ( mouseTarget != null ) mouseTarget.mouseReleased( glimpseEvent );
-                
-                if ( glimpseEvent.isHandled( ) ) break;
-            }
-        }
-
-        // call getContainingTarget to setHovered correctly
-        // call after event is sent because we want to send the mouseReleased event
-        // to the previously hovered component then setHovered to the GlimpseTarget
-        // currently under the mouse
-        getContainingTargets( event );
-    }
-
-    @Override
-    public void mouseDragged( MouseEvent event )
-    {
-        // save the old hovered stacks
-        Set<GlimpseTargetStack> oldHovered = clearHovered( );
-        
-        // call getContainingTarget to setHovered correctly
-        getContainingTargets( event );
-
-        // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
-        // send mouseExited and mouseEntered events based on the old/new hovered stacks
-        notifyMouseEnteredExited( event, oldHovered, newHovered );
-        
-        if ( isDragHovered( ) )
-        {
-            Set<GlimpseTargetStack> hoveredList = getDragHovered( );
-            for ( GlimpseTargetStack hoveredStack : hoveredList )
-            {
-                Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
-
-                if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
-                
-                if ( glimpseHoveredEvent.isHandled( ) ) break;
-            }
-        }
-    }
-
-    @Override
-    public void mouseMoved( MouseEvent event )
-    {
-        // if the mouse is hovering, recalculate hovered components every event
-        // isButtonDown check isn't necessary like it is for MouseWrapperSWT.mouseMove(),
-        // since this event would be a mouseDragged if it was
-        Set<GlimpseTargetStack> oldHovered = clearAllHovered( );
-
-        // call getContainingTarget to setHovered correctly
-        getContainingTargets( event );
-
-        // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
-        // send mouseExited and mouseEntered events based on the old/new hovered stacks
-        notifyMouseEnteredExited( event, oldHovered, newHovered );
-        
-        // if we have something hovered, send mouseMoved events
-        if ( isDragHovered( ) )
-        {
-            for ( GlimpseTargetStack hoveredStack : newHovered )
-            {
-                Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
-
-                if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
-                
-                if ( glimpseHoveredEvent.isHandled( ) ) break;
-            }
-        }
-    }
-    
-    @Override
-    public void mouseWheelMoved( MouseWheelEvent event )
-    {
-        // stacks with low indices are on top in the layout, and
-        // have their mouse events generated first
-        for ( GlimpseTargetStack stack : getContainingTargets( event ) )
-        {
-            Mouseable mouseTarget = getMouseTarget( stack );
-            if ( mouseTarget == null ) return;
-
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
-            mouseTarget.mouseWheelMoved( glimpseEvent );
-            
-            if ( glimpseEvent.isHandled( ) ) break;
-        }
+        mouseWheelMoved( ( MouseEvent ) e );
     }
 }

@@ -20,7 +20,7 @@ import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
-import com.metsci.glimpse.worldwind.tile.GlimpseSurfaceTile;
+import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
 
 /**
  * Demonstrates rendering the contents of a Glimpse plot onto
@@ -57,7 +57,7 @@ public class SurfaceTileExample
         // put any GlimpseLayout here!
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
 
-        GlimpseSurfaceTile glimpseLayer = new GlimpseSurfaceTile( layout, 1000, 1000, CORNERS );
+        GlimpseStaticSurfaceTile glimpseLayer = new GlimpseStaticSurfaceTile( layout, 1000, 1000, CORNERS );
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
         // create and install the view controls layer and register a controller for it with the World Window.

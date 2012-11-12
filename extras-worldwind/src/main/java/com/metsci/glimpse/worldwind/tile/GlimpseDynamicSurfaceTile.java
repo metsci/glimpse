@@ -19,6 +19,8 @@ import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -33,7 +35,7 @@ import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
  * 
  * @author ulman
  */
-public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderable, PreRenderable
+public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  GlimpseSurfaceTile, Renderable, PreRenderable
 {
     private static final Logger logger = Logger.getLogger( GlimpseDynamicSurfaceTile.class.getSimpleName( ) );
 
@@ -54,15 +56,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
 
     public GlimpseDynamicSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int width, int height, double minLat, double maxLat, double minLon, double maxLon )
     {
-        this.axes = axes;
-        this.projection = projection;
-        this.layout = layout;
-
-        this.width = width;
-        this.height = height;
-
-        this.maxBounds = new LatLonBounds( minLat, maxLat, minLon, maxLon );
-        this.maxCorners = getCorners( this.maxBounds );
+        this( layout, axes, projection, width, height, getCorners( new LatLonBounds( minLat, maxLat, minLon, maxLon ) ) );
     }
 
     public GlimpseDynamicSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int width, int height, List<LatLon> corners )
@@ -78,13 +72,27 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         this.maxCorners = getCorners( this.maxBounds );
 
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
+        this.offscreenCanvas.addLayout( layout );
     }
 
+    @Override
+    public GlimpseLayout getGlimpseLayout( )
+    {
+        return this.layout;
+    }
+    
+    @Override
     public GlimpseCanvas getGlimpseCanvas( )
     {
         return this.offscreenCanvas;
     }
-
+    
+    @Override
+    public GlimpseTargetStack getTargetStack( )
+    {
+        return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );
+    }
+    
     @Override
     public void preRender( DrawContext dc )
     {
@@ -156,7 +164,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         axes.getAxisY( ).validate( );
     }
 
-    protected double minX( Vector2d... corners )
+    public static double minX( Vector2d... corners )
     {
         double min = Double.POSITIVE_INFINITY;
         for ( Vector2d corner : corners )
@@ -166,7 +174,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return min;
     }
 
-    protected double minY( Vector2d... corners )
+    public static double minY( Vector2d... corners )
     {
         double min = Double.POSITIVE_INFINITY;
         for ( Vector2d corner : corners )
@@ -176,7 +184,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return min;
     }
 
-    protected double maxX( Vector2d... corners )
+    public static double maxX( Vector2d... corners )
     {
         double max = Double.NEGATIVE_INFINITY;
         for ( Vector2d corner : corners )
@@ -186,7 +194,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return max;
     }
 
-    protected double maxY( Vector2d... corners )
+    public static double maxY( Vector2d... corners )
     {
         double max = Double.NEGATIVE_INFINITY;
         for ( Vector2d corner : corners )
@@ -196,7 +204,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return max;
     }
 
-    protected boolean isValid( List<LatLon> screenCorners )
+    public static boolean isValid( List<LatLon> screenCorners )
     {
         if ( screenCorners == null ) return false;
 
@@ -208,7 +216,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return true;
     }
 
-    protected LatLonBounds bufferCorners( LatLonBounds corners, double bufferFraction )
+    public static LatLonBounds bufferCorners( LatLonBounds corners, double bufferFraction )
     {
         double diffLat = corners.maxLat - corners.minLat;
         double diffLon = corners.maxLon - corners.minLon;
@@ -221,7 +229,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return new LatLonBounds( buffMinLat, buffMaxLat, buffMinLon, buffMaxLon );
     }
 
-    protected LatLonBounds getCorners( List<LatLon> screenCorners )
+    public static LatLonBounds getCorners( List<LatLon> screenCorners )
     {
         double minLat = Double.POSITIVE_INFINITY;
         double minLon = Double.POSITIVE_INFINITY;
@@ -241,7 +249,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return new LatLonBounds( minLat, maxLat, minLon, maxLon );
     }
 
-    protected LatLonBounds getIntersectedCorners( LatLonBounds corners1, LatLonBounds corners2 )
+    public static LatLonBounds getIntersectedCorners( LatLonBounds corners1, LatLonBounds corners2 )
     {
         double minLat = Math.max( corners1.minLat, corners2.minLat );
         double minLon = Math.max( corners1.minLon, corners2.minLon );
@@ -251,7 +259,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return new LatLonBounds( minLat, maxLat, minLon, maxLon );
     }
 
-    protected List<LatLon> getCorners( LatLonBounds bounds )
+    public static List<LatLon> getCorners( LatLonBounds bounds )
     {
         List<LatLon> corners = new ArrayList<LatLon>( );
 
@@ -263,7 +271,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements Renderab
         return corners;
     }
 
-    protected List<LatLon> getCorners( DrawContext dc )
+    public static List<LatLon> getCorners( DrawContext dc )
     {
         View view = dc.getView( );
         Rectangle viewport = view.getViewport( );

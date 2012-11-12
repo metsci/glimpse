@@ -12,19 +12,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.media.opengl.GL;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
-import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.context.TargetStackUtil;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.examples.charts.bathy.BathymetryExample;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
+import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.support.repaint.RepaintManager;
@@ -55,7 +55,8 @@ public class BaythmetryTileExample
         panel.add( wwc, BorderLayout.CENTER );
 
         // put any GlimpseLayout here!
-        GlimpseLayout baseLayout = new GlimpseLayout( );
+        Axis2D wwaxis = new Axis2D( );
+        GlimpseAxisLayout2D baseLayout = new GlimpseAxisLayout2D( wwaxis );
         GlimpseLayoutManagerMig manager = new GlimpseLayoutManagerMig( );
         manager.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets 0 0 0 0" ) );
         baseLayout.setLayoutManager( manager );
@@ -68,7 +69,6 @@ public class BaythmetryTileExample
         MapPlot2D plot = example.getLayout( projection );
         Axis2D axis = plot.getAxis( );
 
-        Axis2D wwaxis = new Axis2D( );
         GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( wwaxis );
 
         // add a listener to the layout (which will receive mouse events translated from worldwind)
@@ -77,6 +77,44 @@ public class BaythmetryTileExample
         layout.addPainter( example.getBathymetryPainter( ) );
         layout.addPainter( example.getContourPainter( ) );
         layout.addPainter( plot.getCrosshairPainter( ) );
+
+        layout.addPainter( new GlimpseDataPainter2D( )
+        {
+
+            @Override
+            public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+            {
+                //gl.glDisable( GL.GL_LINE_SMOOTH );
+
+                gl.glLineWidth( 3.0f );
+                gl.glColor3f( 1.0f, 0.0f, 0.0f );
+
+                gl.glBegin( GL.GL_LINES );
+                try
+                {
+                    gl.glVertex2d( -81.129573, 19.450632 );
+                    gl.glVertex2d( -79.911464, 19.598186 );
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
+
+                gl.glPointSize( 30.0f );
+
+                gl.glBegin( GL.GL_POINTS );
+                try
+                {
+                    gl.glVertex2d( -81.129573, 19.450632 );
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
+
+            }
+
+        } );
 
         baseLayout.addPainter( new BackgroundPainter( ).setColor( 0, 0, 0, 0 ) );
         baseLayout.addLayout( layout );
@@ -121,8 +159,7 @@ public class BaythmetryTileExample
         glimpseFrame.setVisible( true );
 
         // pass mouse events from Worldwind back to Glimpse
-        GlimpseTargetStack stack = TargetStackUtil.newTargetStack( glimpseLayer.getGlimpseCanvas( ), baseLayout, layout );
-        MouseWrapperWorldwind mouseWrapper = new MouseWrapperWorldwind( wwc, projection, stack );
+        MouseWrapperWorldwind mouseWrapper = new MouseWrapperWorldwind( wwc, projection, glimpseLayer );
         wwc.addMouseListener( mouseWrapper );
         wwc.addMouseMotionListener( mouseWrapper );
         wwc.addMouseWheelListener( mouseWrapper );
