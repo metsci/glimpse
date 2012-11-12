@@ -286,12 +286,12 @@ public class MinimapLayout extends GlimpseAxisLayout2D
     // in the main map axes as an argument).
     protected Axis2D getMainMapAxis0( GlimpseContext context )
     {
-        return getAxis0( newTargetStack( context.getTargetStack( ) ).pop( ).pop( ) );
+        return getAxis0( context.getTargetStack( ) );
     }
 
     protected Axis2D getMainMapAxis0( GlimpseTargetStack stack )
     {
-        return getAxis0( newTargetStack( stack ).pop( ) );
+        return getAxis0( newTargetStack( stack ).pop( ).pop( ) );
     }
 
     protected Axis2D getAxis0( GlimpseTargetStack stack )
