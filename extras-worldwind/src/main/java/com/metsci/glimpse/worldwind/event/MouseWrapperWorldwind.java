@@ -76,8 +76,6 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
     @Override
     protected boolean isButtonDown( GlimpseMouseEvent e )
     {
-        System.out.println( e );
-        
         return e.isAnyButtonDown( );
     }
 
@@ -164,44 +162,59 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
     }
 
     @Override
-    public void mousePressed( MouseEvent e )
-    {
-        mousePressed( fromWorldwindMouseEvent( e ) );
-    }
-
-    @Override
-    public void mouseReleased( MouseEvent e )
-    {
-        mouseReleased( fromWorldwindMouseEvent( e ) );
-    }
-
-    @Override
     public void mouseEntered( MouseEvent e )
     {
-        mouseEntered( fromWorldwindMouseEvent( e ) );
+        mouseEntered0( fromWorldwindMouseEvent( e ) );
     }
 
     @Override
     public void mouseExited( MouseEvent e )
     {
-        mouseExited( fromWorldwindMouseEvent( e ) );
+        mouseExited0( fromWorldwindMouseEvent( e ) );
+    }
+    
+    @Override
+    public void mousePressed( MouseEvent e )
+    {
+        boolean handled = mousePressed0( fromWorldwindMouseEvent( e ) );
+        
+        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+        if ( handled ) e.consume( );
+    }
+
+    @Override
+    public void mouseReleased( MouseEvent e )
+    {
+        boolean handled = mouseReleased0( fromWorldwindMouseEvent( e ) );
+        
+        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+        if ( handled ) e.consume( );
     }
 
     @Override
     public void mouseDragged( MouseEvent e )
     {
-        mouseDragged( fromWorldwindMouseEvent( e ) );
+        boolean handled = mouseDragged0( fromWorldwindMouseEvent( e ) );
+        
+        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+        if ( handled ) e.consume( );
     }
 
     @Override
     public void mouseMoved( MouseEvent e )
     {
-        mouseMoved( fromWorldwindMouseEvent( e ) );
+        boolean handled = mouseMoved0( fromWorldwindMouseEvent( e ) );
+        
+        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+        if ( handled ) e.consume( );
     }
 
     @Override
     public void mouseWheelMoved( MouseWheelEvent e )
     {
-        mouseWheelMoved( fromWorldwindMouseWheelEvent( e ) );
+        boolean handled = mouseWheelMoved0( fromWorldwindMouseWheelEvent( e ) );
+        
+        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+        if ( handled ) e.consume( );
     }
 }

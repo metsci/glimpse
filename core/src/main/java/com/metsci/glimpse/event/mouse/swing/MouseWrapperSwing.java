@@ -145,6 +145,48 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
     @Override
     public void mouseWheelMoved( MouseWheelEvent e )
     {
-        mouseWheelMoved( ( MouseEvent ) e );
+        mouseWheelMoved0( ( MouseEvent ) e );
+    }
+
+    @Override
+    public void mouseClicked( MouseEvent e )
+    {
+        mouseClicked0( e );
+    }
+
+    @Override
+    public void mousePressed( MouseEvent e )
+    {
+        mousePressed0( e );
+    }
+
+    @Override
+    public void mouseReleased( MouseEvent e )
+    {
+        mouseReleased0( e );
+    }
+
+    @Override
+    public void mouseEntered( MouseEvent e )
+    {
+        mouseEntered0( e );
+    }
+
+    @Override
+    public void mouseExited( MouseEvent e )
+    {
+        mouseExited0( e );
+    }
+
+    @Override
+    public void mouseDragged( MouseEvent e )
+    {
+        mouseDragged0( e );
+    }
+
+    @Override
+    public void mouseMoved( MouseEvent e )
+    {
+        mouseMoved0( e );
     }
 }
