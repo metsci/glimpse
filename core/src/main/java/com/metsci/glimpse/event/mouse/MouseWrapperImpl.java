@@ -21,6 +21,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public void mouseEntered0( E event )
     {
+        if ( event == null ) return;
+        
         // save the old hovered stacks
         Set<GlimpseTargetStack> oldHovered = clearHovered( );
 
@@ -36,6 +38,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public void mouseExited0( E event )
     {
+        if ( event == null ) return;
+        
         // save the old hovered stacks
         Set<GlimpseTargetStack> oldHovered = clearHovered( );
 
@@ -51,6 +55,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public boolean mousePressed0( E event )
     {
+        if ( event == null ) return false;
+        
         List<GlimpseTargetStack> list = getContainingTargets( event );
 
         setAllHovered( list );
@@ -74,6 +80,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public boolean mouseReleased0( E event )
     {
+        if ( event == null ) return false;
+        
         boolean handled = false;
 
         // always always deliver the mouseUp event regardless of which
@@ -108,6 +116,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public boolean mouseDragged0( E event )
     {
+        if ( event == null ) return false;
+        
         // save the old hovered stacks
         Set<GlimpseTargetStack> oldHovered = clearHovered( );
 
@@ -139,6 +149,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public boolean mouseMoved0( E event )
     {
+        if ( event == null ) return false;
+        
         // if the mouse is hovering, recalculate hovered components every event
         // isButtonDown check isn't necessary like it is for MouseWrapperSWT.mouseMove(),
         // since this event would be a mouseDragged if it was
@@ -172,6 +184,8 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
 
     public boolean mouseWheelMoved0( E event )
     {
+        if ( event == null ) return false;
+        
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first
         for ( GlimpseTargetStack stack : getContainingTargets( event ) )
