@@ -68,13 +68,18 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
         this.width = width;
         this.height = height;
 
-        this.maxBounds = getCorners( corners );
-        this.maxCorners = getCorners( this.maxBounds );
-
+        updateMaxCorners(corners);
+        
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
         this.offscreenCanvas.addLayout( layout );
     }
 
+    public void updateMaxCorners(List<LatLon> corners)
+    {
+        this.maxBounds = getCorners( corners );
+        this.maxCorners = getCorners( this.maxBounds );    	
+    }
+    
     @Override
     public GlimpseLayout getGlimpseLayout( )
     {
