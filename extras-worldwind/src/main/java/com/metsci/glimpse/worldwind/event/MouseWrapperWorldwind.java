@@ -147,6 +147,8 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
 
     protected GlimpseMouseEvent fromWorldwindMouseWheelEvent( MouseWheelEvent mouseEvent, GlimpsePosition position )
     {
+        if ( position == null ) return null;
+        
         EnumSet<MouseButton> buttons = GlimpseMouseWrapper.getMouseButtons( mouseEvent );
         EnumSet<ModifierKey> modifiers = GlimpseMouseWrapper.getModifierKeys( mouseEvent );
         int wheelRotation = mouseEvent.getWheelRotation( );
