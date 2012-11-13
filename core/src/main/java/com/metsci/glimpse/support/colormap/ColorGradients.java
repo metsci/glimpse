@@ -120,12 +120,20 @@ public class ColorGradients
         @Override
         public void toColor( float fraction, float[] rgba )
         {
-            float[] rgb = GlimpseColor.fromColorHsb( 0.333f, .77647f, fraction );
-
-            rgba[0] = rgb[0];
-            rgba[1] = rgb[1];
-            rgba[2] = rgb[2];
-            rgba[3] = 1.0f;
+            if ( fraction < 0.5 )
+            {
+                rgba[0] = 0.0f;
+                rgba[1] = 2 * fraction;
+                rgba[2] = 0.0f;
+                rgba[3] = 1.0f;
+            }
+            else
+            {
+                rgba[0] = ( fraction - 0.5f ) * 2;
+                rgba[1] = 1.0f;
+                rgba[2] = ( fraction - 0.5f ) * 2;
+                rgba[3] = 1.0f;
+            }
         }
 
     };
@@ -136,8 +144,17 @@ public class ColorGradients
         @Override
         public void toColor( float fraction, float[] rgba )
         {
-            float[] rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f, fraction );
-
+            float[] rgb;
+            
+            if ( fraction < 0.5 )
+            {
+                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f, 2 * fraction );       
+            }
+            else
+            {
+                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f-((fraction-0.5f)*2), 1.0f );
+            }
+            
             rgba[0] = rgb[0];
             rgba[1] = rgb[1];
             rgba[2] = rgb[2];
