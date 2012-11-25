@@ -78,6 +78,40 @@ public class QuickAtan
             return eval0( x );
         }
     }
+    
+    public static double eval2( double y, double x )
+    {
+    	if ( x > 0 )
+    	{
+    		return eval( y / x);
+    	}
+    	else if ( x < 0 )
+    	{
+    		if ( y >= 0 )
+    		{
+    			return Math.PI + eval( y / x );
+    		}
+    		else
+    		{
+    			return -Math.PI + eval( y / x );
+    		}
+    	}
+    	else
+    	{
+    		if ( y > 0 )
+    		{
+    			return Math.PI / 2;
+    		}
+    		else if ( y < 0 )
+    		{
+    			return -Math.PI / 2;
+    		}
+    		else
+    		{
+    			return 0;  // undefined
+    		}
+    	}
+    }
 
     /**
      * Compute atan(x) for x in range [0,2-sqrt(3)].
