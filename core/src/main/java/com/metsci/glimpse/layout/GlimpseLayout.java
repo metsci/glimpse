@@ -805,6 +805,9 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         }
     }
 
+    /**
+     * Event consumers do not pass on mouse events to their parents.
+     */
     @Override
     public boolean isEventConsumer( )
     {
@@ -817,6 +820,10 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         this.isEventConsumer = consume;
     }
 
+    /**
+     * Event generators do not generate mouse events if they are the top layout
+     * when a mouse event occurs.
+     */
     @Override
     public boolean isEventGenerator( )
     {

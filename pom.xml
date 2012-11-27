@@ -55,6 +55,7 @@
         <module>extras-spacenav</module>
         <module>extras-swt</module>
         <module>extras-examples</module>
+        <module>extras-worldwind</module>
 
     </modules>
 

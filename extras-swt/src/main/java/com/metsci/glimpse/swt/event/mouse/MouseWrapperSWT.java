@@ -27,7 +27,6 @@
 package com.metsci.glimpse.swt.event.mouse;
 
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -75,22 +74,19 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
     @Override
     protected MouseEvent toLocalCoords( MouseEvent e, GlimpseTargetStack stack )
     {
-        if ( stack == null )
-            return null;
+        if ( stack == null ) return null;
 
         GlimpseBounds bounds = stack.getBounds( );
 
-        if ( bounds == null )
-            return null;
+        if ( bounds == null ) return null;
 
-        if ( !(e.getSource( ) instanceof Control) )
-            return null;
+        if ( ! ( e.getSource( ) instanceof Control ) ) return null;
 
-        Rectangle parentBounds = ( (Control) e.getSource( ) ).getBounds( );
+        Rectangle parentBounds = ( ( Control ) e.getSource( ) ).getBounds( );
 
         int parentHeight = parentBounds.height;
 
-        Event localEvent = new Event();
+        Event localEvent = new Event( );
 
         localEvent.x = e.x - bounds.getX( );
         localEvent.y = e.y - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) );
@@ -118,7 +114,7 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
     {
         return toLocalGlimpseWheelEvent( e, stack, false );
     }
-    
+
     protected GlimpseMouseEvent toLocalGlimpseWheelEvent( MouseEvent e, GlimpseTargetStack stack, boolean handled )
     {
         GlimpseMouseEvent event = GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( e, stack ) );
@@ -130,14 +126,14 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
     public void mouseEnter( MouseEvent event )
     {
         // save the old hovered stacks
-        Set<GlimpseTargetStack> oldHovered = clearHovered( );
-        
+        List<GlimpseTargetStack> oldHovered = clearHovered( );
+
         // update hovered stacks
         getContainingTargets( event );
-        
+
         // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
+        List<GlimpseTargetStack> newHovered = getHovered( );
+
         // send mouseExited and mouseEntered events based on the old/new hovered stacks
         notifyMouseEnteredExited( event, oldHovered, newHovered );
     }
@@ -146,14 +142,14 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
     public void mouseExit( MouseEvent event )
     {
         // save the old hovered stacks
-        Set<GlimpseTargetStack> oldHovered = clearHovered( );
-        
+        List<GlimpseTargetStack> oldHovered = clearHovered( );
+
         // update hovered stacks
         getContainingTargets( event );
-        
+
         // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
+        List<GlimpseTargetStack> newHovered = getHovered( );
+
         // send mouseExited and mouseEntered events based on the old/new hovered stacks
         notifyMouseEnteredExited( event, oldHovered, newHovered );
     }
@@ -168,27 +164,27 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
     public void mouseMove( MouseEvent event )
     {
         // if the mouse is hovering, recalculate hovered components every event
-        Set<GlimpseTargetStack> oldHovered = isButtonDown( event ) ? clearHovered( ) : clearAllHovered( );
+        List<GlimpseTargetStack> oldHovered = isButtonDown( event ) ? clearHovered( ) : clearAllHovered( );
 
         // call getContainingTarget to setHovered correctly
         getContainingTargets( event );
 
         // get the new hovered stacks
-        Set<GlimpseTargetStack> newHovered = getHovered( );
-        
+        List<GlimpseTargetStack> newHovered = getHovered( );
+
         // send mouseExited and mouseEntered events based on the old/new hovered stacks
         notifyMouseEnteredExited( event, oldHovered, newHovered );
 
         if ( isDragHovered( ) )
         {
-            Set<GlimpseTargetStack> hoveredList = getDragHovered( );
+            List<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
                 GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
 
                 if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
-                
+
                 if ( glimpseHoveredEvent.isHandled( ) ) break;
             }
         }
@@ -209,7 +205,7 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
 
             GlimpseMouseEvent glimpseEvent = toLocalGlimpseWheelEvent( event, stack );
             mouseTarget.mouseWheelMoved( glimpseEvent );
-            
+
             if ( glimpseEvent.isHandled( ) ) break;
         }
     }
@@ -237,7 +233,7 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
             GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
 
             mouseTarget.mousePressed( glimpseEvent );
-            
+
             if ( glimpseEvent.isHandled( ) ) break;
         }
     }
@@ -249,14 +245,14 @@ public class MouseWrapperSWT extends MouseWrapper<MouseEvent> implements MouseLi
         // component the mouse event occurred inside
         if ( isDragHovered( ) )
         {
-            Set<GlimpseTargetStack> hoveredList = getDragHovered( );
+            List<GlimpseTargetStack> hoveredList = getDragHovered( );
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseTarget = getMouseTarget( hoveredStack );
                 GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack );
 
                 if ( mouseTarget != null ) mouseTarget.mouseReleased( glimpseEvent );
-                
+
                 if ( glimpseEvent.isHandled( ) ) break;
             }
         }

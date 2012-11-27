@@ -135,7 +135,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
         // setup the color map for the painter
         ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
+        colors.setColorGradient( ColorGradients.purpleBone );
 
         // create a painter to display the heatmap data
         // this heatmap painter knows about axis tags

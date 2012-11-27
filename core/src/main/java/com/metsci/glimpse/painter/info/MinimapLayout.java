@@ -31,6 +31,7 @@ import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.factory.DefaultAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -44,7 +45,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.group.DelegatePainter;
+import com.metsci.glimpse.plot.Plot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -58,18 +59,21 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  */
 public class MinimapLayout extends GlimpseAxisLayout2D
 {
-    protected DelegatePainter delegatePainter;
-
+    protected GlimpseAxisLayout2D delegateLayer;
+    
     public MinimapLayout( )
     {
         Axis2D minimapAxis = new Axis2D( );
-        setAxis( minimapAxis );
+        this.setAxis( minimapAxis );
 
-        delegatePainter = new DelegatePainter( );
-
-        super.addPainter( delegatePainter );
-        super.addPainter( new MiniMapBoundsPainter( ) );
-        super.addPainter( new BorderPainter( ) );
+        this.delegateLayer = new GlimpseAxisLayout2D( );
+        this.delegateLayer.setAxisFactory( new DefaultAxisFactory2D( ) );
+        this.delegateLayer.setEventConsumer( false );
+        this.delegateLayer.setEventGenerator( true );
+        
+        this.addLayout( this.delegateLayer );
+        this.delegateLayer.addPainter( new MiniMapBoundsPainter( ), Plot2D.FOREGROUND_LAYER );
+        this.delegateLayer.addPainter( new BorderPainter( ), Plot2D.FOREGROUND_LAYER );
 
         addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
         {
@@ -113,12 +117,12 @@ public class MinimapLayout extends GlimpseAxisLayout2D
 
     public void addPainter( GlimpsePainter painter )
     {
-        delegatePainter.addPainter( painter );
+        this.delegateLayer.addPainter( painter );
     }
 
     public void removePainter( GlimpsePainter painter )
     {
-        delegatePainter.removePainter( painter );
+        this.delegateLayer.removePainter( painter );
     }
 
     /**
@@ -271,7 +275,8 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         return getAxis0( stack );
     }
 
-    // assume that the main map is always one GlimpseTarget up from the mini-map
+    // assume that the main map is always two GlimpseTargets up from the mini-map
+    // (this is how things are currently set up)
     // subclasses may override for use in situations where this is not the case
     //
     // because this minimap layout could be painted to multiple contexts with different
@@ -281,12 +286,17 @@ public class MinimapLayout extends GlimpseAxisLayout2D
     // in the main map axes as an argument).
     protected Axis2D getMainMapAxis0( GlimpseContext context )
     {
-        return getAxis0( newTargetStack( context.getTargetStack( ) ).pop( ) );
+        return getAxis0( getMainMapTargetStack( context.getTargetStack( ) ) );
     }
 
     protected Axis2D getMainMapAxis0( GlimpseTargetStack stack )
     {
-        return getAxis0( newTargetStack( stack ).pop( ) );
+        return getAxis0( getMainMapTargetStack( stack ) );
+    }
+    
+    protected GlimpseTargetStack getMainMapTargetStack( GlimpseTargetStack stack )
+    {
+        return newTargetStack( stack ).pop( ).pop( );
     }
 
     protected Axis2D getAxis0( GlimpseTargetStack stack )

@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metsci.glimpse</groupId>
+        <artifactId>glimpse-parent</artifactId>
+        <version>CURRENT-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>glimpse-extras-worldwind</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-core</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+
+        <dependency>
+        	<groupId>gov.nasa</groupId>
+        	<artifactId>worldwindx</artifactId>
+        	<version>4.1.0</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
+        <dependency>
+        	<groupId>gov.nasa</groupId>
+        	<artifactId>worldwind</artifactId>
+        	<version>4.1.0</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+</project>

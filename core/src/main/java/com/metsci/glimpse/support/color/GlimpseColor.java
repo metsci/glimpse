@@ -84,9 +84,9 @@ public class GlimpseColor
     public static float[] fromColorHsb( float hue, float saturation, float brightness )
     {
         int rgb = Color.HSBtoRGB( hue, saturation, brightness );
-        int r = rgb >> 16 | 0xff;
-        int g = rgb >> 8 | 0xff;
-        int b = rgb | 0xff;
+        int r = rgb >> 16 & 0xff;
+        int g = rgb >> 8 & 0xff;
+        int b = rgb & 0xff;
 
         return fromColorRgb( r, g, b );
     }
