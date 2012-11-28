@@ -36,10 +36,18 @@ public class SwingLookAndFeel extends AbstractLookAndFeel
     public SwingLookAndFeel( )
     {
         map.put( CROSSHAIR_COLOR, getBlack( ) );
+        map.put( BORDER_COLOR, getBlack( ) );
+        
         map.put( PLOT_BACKGROUND_COLOR, addRgb( fromColorAwt( SystemColor.window ), -0.1f ) );
         map.put( FRAME_BACKGROUND_COLOR, fromColorAwt( SystemColor.window ) );
-
+        
+        map.put( AXIS_TEXT_COLOR, getBlack( ) );
+        map.put( AXIS_TICK_COLOR, getBlack( ) );
+        map.put( AXIS_TAG_COLOR, getBlack( 0.2f ) );
+        
         map.put( AXIS_FONT, getDefaultPlain( 11 ) );
         map.put( TITLE_FONT, getDefaultPlain( 14 ) );
+        
+        map.put( TEXT_BACKGROUND_COLOR, getBlack( ) );
     }
 }

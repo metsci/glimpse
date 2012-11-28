@@ -61,26 +61,28 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     }
 
     private float[] textColor = GlimpseColor.getBlack( );
-
+    private boolean textColorSet = false;
+    
     private boolean paintBackground = false;
     private float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
+    private boolean backgroundColorSet = false;
 
     private boolean paintBorder = false;
     private float[] borderColor = GlimpseColor.getWhite( 1f );
-
+    private boolean borderColorSet = false;
+    
     private int padding = 5;
 
     private HorizontalPosition hPos;
     private VerticalPosition vPos;
 
     private TextRenderer textRenderer;
-
+    private boolean fontSet = false;
+    
     private String sizeText;
     private String text;
 
     private boolean horizontal = true;
-    
-    private boolean fontSet = false;
     
     private volatile Font newFont = null;
     private volatile boolean antialias = false;
@@ -108,6 +110,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     public SimpleTextPainter setBackgroundColor( float[] backgroundColor )
     {
         this.backgroundColor = backgroundColor;
+        this.backgroundColorSet = true;
         return this;
     }
     
@@ -120,6 +123,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     public SimpleTextPainter setBorderColor( float[] borderColor )
     {
         this.borderColor = borderColor;
+        this.borderColorSet = true;
         return this;
     }
 
@@ -190,6 +194,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     public SimpleTextPainter setColor( float[] rgba )
     {
         textColor = rgba;
+        textColorSet = true;
         return this;
     }
 
@@ -215,6 +220,24 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         {
             setFont( laf.getFont( AbstractLookAndFeel.TITLE_FONT ), false );
             fontSet = false;
+        }
+        
+        if ( !textColorSet )
+        {
+            setColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            textColorSet = false;
+        }
+        
+        if ( !backgroundColorSet )
+        {
+            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TEXT_BACKGROUND_COLOR ) );
+            backgroundColorSet = false;
+        }
+        
+        if ( !borderColorSet )
+        {
+            setBorderColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
+            borderColorSet = false;
         }
     }
 

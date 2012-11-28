@@ -31,6 +31,8 @@ import javax.media.opengl.GL;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * Paints a simple solid color line border around the outside
@@ -41,7 +43,8 @@ import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 public class BorderPainter extends GlimpsePainterImpl
 {
     protected float[] borderColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
-
+    protected boolean colorSet = false;
+    
     protected float lineWidth = 1.0f;
 
     protected int stippleFactor = 1;
@@ -75,8 +78,21 @@ public class BorderPainter extends GlimpsePainterImpl
         borderColor[1] = g;
         borderColor[2] = b;
         borderColor[3] = a;
+        
+        colorSet = true;
 
         return this;
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        // ignore the look and feel if a color has been manually set
+        if ( !colorSet )
+        {
+            setColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
+            colorSet = false;
+        }
     }
 
     @Override

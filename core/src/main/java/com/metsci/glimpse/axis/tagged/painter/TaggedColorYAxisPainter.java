@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
-
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -38,6 +36,8 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * A vertical (y) axis painter which displays positions of tags on
@@ -55,6 +55,8 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
     protected static final int DEFAULT_TAG_HALFBASE = 5;
 
     protected float[] tagColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f );
+    protected boolean tagColorSet = false;
+    
     protected int tagHalfWidth = DEFAULT_TAG_HALFBASE;
     protected int tagHeight = DEFAULT_TAG_HEIGHT;
     protected int tagPointerHeight = DEFAULT_TAG_POINTER_HEIGHT;
@@ -80,6 +82,18 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
     public void setTagHeight( int height )
     {
         this.tagHeight = height;
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        super.setLookAndFeel( laf );
+        
+        if ( !tagColorSet )
+        {
+            setTagColor( laf.getColor( AbstractLookAndFeel.AXIS_TAG_COLOR ) );
+            tagColorSet = false;
+        }
     }
 
     @Override
@@ -152,7 +166,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
             gl.glEnd( );
         }
 
-        GlimpseColor.glColor( gl, getBlack( ), 1f );
+        GlimpseColor.glColor( gl, tagColor, 1f );
         gl.glLineWidth( tagPointerOutlineWidth );
         gl.glEnable( GL.GL_LINE_SMOOTH );
         gl.glBegin( GL.GL_LINE_LOOP );

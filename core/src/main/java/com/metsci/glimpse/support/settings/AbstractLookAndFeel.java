@@ -32,9 +32,18 @@ import java.util.Map;
 
 public abstract class AbstractLookAndFeel implements LookAndFeel
 {
+    public static String TEXT_BACKGROUND_COLOR = "background.text.color";
+    
+    public static String AXIS_TEXT_COLOR = "axis.text.color";
+    public static String AXIS_TICK_COLOR = "axis.tick.color";
+    public static String AXIS_TAG_COLOR = "axis.tag.color";
+    
     public static String AXIS_FONT = "axis.font";
     public static String TITLE_FONT = "title.font";
+    
     public static String CROSSHAIR_COLOR = "crosshair.color";
+    public static String BORDER_COLOR = "border.color";
+    
     public static String FRAME_BACKGROUND_COLOR = "frame.background.color";
     public static String PLOT_BACKGROUND_COLOR = "plot.background.color";
 
