@@ -89,10 +89,9 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     
     public SimpleTextPainter( )
     {
-        setFont( 12, true, false );
-        
-        hPos = HorizontalPosition.Left;
-        vPos = VerticalPosition.Bottom;
+        this.newFont = getDefaultBold( 12 );
+        this.hPos = HorizontalPosition.Left;
+        this.vPos = VerticalPosition.Bottom;
     }
 
     public SimpleTextPainter setHorizontalLabels( boolean horizontal )

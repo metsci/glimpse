@@ -37,6 +37,7 @@ import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -50,7 +51,10 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new VerticalTimelinePlotExample( ) );
+        Example example = Example.showWithSwing( new VerticalTimelinePlotExample( ) );
+        
+        // set a blue color scheme look and feel for the plot
+        example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
     }
 
     @Override

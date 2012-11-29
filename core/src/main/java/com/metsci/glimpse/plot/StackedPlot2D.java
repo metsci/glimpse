@@ -52,6 +52,7 @@ import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 public class StackedPlot2D extends GlimpseLayout
 {
     protected int outerBorder = 10;
+    protected int plotSpacing = 0;
 
     protected Axis1D commonAxis;
 
@@ -113,7 +114,7 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected void initializePainters( )
     {
-        this.backgroundPainter = new BackgroundPainter( false );
+        this.backgroundPainter = new BackgroundPainter( true );
         this.addPainter( this.backgroundPainter, Integer.MIN_VALUE );
     }
 
@@ -144,14 +145,14 @@ public class StackedPlot2D extends GlimpseLayout
                 {
                     if ( orientation == Orientation.HORIZONTAL )
                     {
-                        String format = "cell %d %d 1 1, pushy, growy, width %d!";
-                        String layout = String.format( format, i, 0, info.getSize( ) );
+                        String format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %d %d";
+                        String layout = String.format( format, i, 0, info.getSize( ), i == 0 ? 0 :plotSpacing, i == axisList.size( )-1 ? 0 : plotSpacing );
                         info.getLayout( ).setLayoutData( layout );
                     }
                     else if ( orientation == Orientation.VERTICAL )
                     {
-                        String format = "cell %d %d 1 1, pushx, growx, height %d!";
-                        String layout = String.format( format, 0, i, info.getSize( ) );
+                        String format = "cell %d %d 1 1, pushx, growx, height %d!, gap %d %d 0 0";
+                        String layout = String.format( format, 0, i, info.getSize( ), i == 0 ? 0 :plotSpacing, i == axisList.size( )-1 ? 0 : plotSpacing );
                         info.getLayout( ).setLayoutData( layout );
                     }
                 }
@@ -204,6 +205,12 @@ public class StackedPlot2D extends GlimpseLayout
     //      Customization Methods       //
     //////////////////////////////////////
 
+    
+    public void setPlotSpacing( int size )
+    {
+        this.plotSpacing = size;
+        this.validate( );
+    }
     
     public void setBackgroundColor( float[] color )
     {
@@ -386,7 +393,7 @@ public class StackedPlot2D extends GlimpseLayout
          * @return the parent StackedPlot2D
          */
         public StackedPlot2D getStackedPlot( );
-
+        
         /**
          * Gets the unique identifier assigned to this plot. This identifier can
          * be used to retrieve this plot handle from the StackedPlot2D.

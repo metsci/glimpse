@@ -35,10 +35,14 @@ import java.util.TimeZone;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
@@ -77,7 +81,8 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
     protected float[] textColor;
 
     protected TextRenderer textRenderer;
-    protected Font font;
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
 
     protected Epoch epoch;
     protected final TimeZone timeZone;
@@ -100,6 +105,10 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
 
     protected int pixelsBetweenTicks = 60;
     protected double yearOrderFactor = 6.0;
+    
+    protected boolean fontSet = false;
+    protected boolean tickColorSet = false;
+    protected boolean labelColorSet = false;
 
     //@formatter:off
     public TimeAxisPainter( TimeStampFormat minuteSecondFormat,
@@ -112,8 +121,7 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
                             TimeStampFormat yearFormat,
                             TimeZone timeZone, Epoch epoch )
     {
-        this.font = FontUtils.getBitstreamVeraSansPlain( 12.0f );
-        this.textRenderer = new TextRenderer( font );
+        this.newFont = FontUtils.getBitstreamVeraSansPlain( 12.0f );
 
         this.timeZone = timeZone;
 
@@ -131,8 +139,8 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
 
         this.epoch = epoch;
 
-        this.setTextColor( GlimpseColor.getBlack( ) );
-        this.setTickColor( GlimpseColor.getBlack( ) );
+        this.tickColor = GlimpseColor.getBlack( );
+        this.textColor = GlimpseColor.getBlack( );
 
         this.setCurrentTimeTextColor( GlimpseColor.getGreen( 0.5f ) );
         this.setCurrentTimeTickColor( GlimpseColor.getGreen( 1.0f ) );
@@ -170,16 +178,6 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
         return epoch.fromTimeStamp( time );
     }
 
-    public void setTickColor( float[] color )
-    {
-        this.tickColor = color;
-    }
-
-    public void setTextColor( float[] color )
-    {
-        this.textColor = color;
-    }
-
     public void setCurrentTimeTickColor( float[] color )
     {
         this.currentTimeTickColor = color;
@@ -199,14 +197,24 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
     {
         setFont( font, true );
     }
+    
+    public void setTickColor( float[] color )
+    {
+        this.tickColor = color;
+        this.tickColorSet = true;
+    }
+
+    public void setTextColor( float[] color )
+    {
+        this.textColor = color;
+        this.labelColorSet = true;
+    }
 
     public void setFont( Font font, boolean antialias )
     {
-        this.font = font;
-
-        if ( this.textRenderer != null ) this.textRenderer.dispose( );
-
-        this.textRenderer = new TextRenderer( font, antialias, false );
+        this.newFont = font;
+        this.antialias = antialias;
+        this.fontSet = true;
     }
 
     protected double tickInterval( List<TimeStamp> list )
@@ -594,11 +602,47 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
 
         return days;
     }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        if ( laf == null ) return;
+        
+        // ignore the look and feel if a font has been manually set
+        if ( !fontSet )
+        {
+            setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
+            fontSet = false;
+        }
+        
+        if ( !labelColorSet )
+        {
+            setTextColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            labelColorSet = false;
+        }
+        
+        if ( !tickColorSet )
+        {
+            setTickColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );
+            tickColorSet = false;
+        }
+    }
 
     @Override
     public void dispose( GLContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
+    }
+    
+    @Override
+    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    {
+        if ( newFont != null )
+        {
+            if ( textRenderer != null ) textRenderer.dispose( );
+            textRenderer = new TextRenderer( newFont, antialias, false );
+            newFont = null;
+        }
     }
 }
