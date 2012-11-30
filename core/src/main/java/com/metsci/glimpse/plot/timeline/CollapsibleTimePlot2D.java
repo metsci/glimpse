@@ -4,9 +4,15 @@ import static javax.media.opengl.GL.GL_MODELVIEW;
 import static javax.media.opengl.GL.GL_PROJECTION;
 
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.media.opengl.GL;
 
@@ -28,14 +34,20 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
+    protected Map<PlotInfo, GroupInfo> childParentMap;
+
     public CollapsibleTimePlot2D( )
     {
         super( Orientation.VERTICAL );
+
+        this.childParentMap = new HashMap<PlotInfo, GroupInfo>( );
     }
 
     public CollapsibleTimePlot2D( Epoch epoch )
     {
         super( Orientation.VERTICAL, epoch );
+
+        this.childParentMap = new HashMap<PlotInfo, GroupInfo>( );
     }
 
     /**
@@ -58,6 +70,10 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
             GroupInfo group = new GroupInfoImpl( plotInfo, subplots );
             stackedPlots.put( id, group );
+            for ( PlotInfo sub : subplots )
+            {
+                childParentMap.put( sub, group );
+            }
             validate( );
             return group;
         }
@@ -65,6 +81,64 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             this.lock.unlock( );
         }
+    }
+
+    public Collection<GroupInfo> getAllGroups( )
+    {
+        this.lock.lock( );
+        try
+        {
+            List<GroupInfo> list = new LinkedList<GroupInfo>( );
+
+            for ( PlotInfo plot : getAllPlots( ) )
+            {
+                if ( plot instanceof GroupInfo ) list.add( ( GroupInfo ) plot );
+            }
+
+            return list;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    @Override
+    protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
+    {
+        // remove children of groups from list of all plots
+        Set<PlotInfo> ungroupedPlots = new HashSet<PlotInfo>( );
+        ungroupedPlots.addAll( unsorted );
+
+        for ( GroupInfo group : getAllGroups( ) )
+        {
+            ungroupedPlots.removeAll( group.getChildPlots( ) );
+        }
+
+        List<PlotInfo> sortedPlots = new ArrayList<PlotInfo>( );
+        sortedPlots.addAll( ungroupedPlots );
+        Collections.sort( sortedPlots, PlotInfoImpl.getComparator( ) );
+
+        List<PlotInfo> sortedPlotsCopy = new ArrayList<PlotInfo>( );
+        sortedPlotsCopy.addAll( sortedPlots );
+
+        int totalChildren = 0;
+        for ( int i = 0; i < sortedPlotsCopy.size( ); i++ )
+        {
+            PlotInfo plot = sortedPlotsCopy.get( i );
+
+            if ( plot instanceof GroupInfo )
+            {
+                GroupInfo group = ( GroupInfo ) plot;
+                List<PlotInfo> childPlots = new ArrayList<PlotInfo>( );
+                childPlots.addAll( group.getChildPlots( ) );
+                Collections.sort( childPlots, PlotInfoImpl.getComparator( ) );
+                sortedPlots.addAll( i + totalChildren + 1, childPlots );
+                totalChildren += childPlots.size( );
+            }
+        }
+
+        return sortedPlots;
     }
 
     @Override
@@ -170,11 +244,17 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     public static interface GroupInfo extends PlotInfo
     {
         public void setLabelText( String text );
+
+        public void addChildPlot( PlotInfo plot );
+
+        public void removeChildPlot( PlotInfo plot );
+
+        public Collection<PlotInfo> getChildPlots( );
     }
 
-    public static class GroupInfoImpl implements GroupInfo
+    public class GroupInfoImpl implements GroupInfo
     {
-        protected List<PlotInfo> subplots;
+        protected Set<PlotInfo> subplots;
         protected PlotInfo group;
 
         protected GroupLabelPainter label;
@@ -182,13 +262,35 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         public GroupInfoImpl( PlotInfo group, Collection<PlotInfo> subplots )
         {
             this.group = group;
-            this.subplots = new LinkedList<PlotInfo>( );
+            this.subplots = new HashSet<PlotInfo>( );
             this.subplots.addAll( subplots );
 
             this.label = new GroupLabelPainter( group.getId( ) );
             this.group.getLayout( ).addPainter( this.label );
 
             this.group.setSize( 22 );
+        }
+
+        @Override
+        public void addChildPlot( PlotInfo plot )
+        {
+            subplots.add( plot );
+            childParentMap.put( plot, this );
+            getStackedPlot( ).invalidateLayout( );
+        }
+
+        @Override
+        public void removeChildPlot( PlotInfo plot )
+        {
+            subplots.remove( plot );
+            childParentMap.remove( plot );
+            getStackedPlot( ).invalidateLayout( );
+        }
+
+        @Override
+        public Collection<PlotInfo> getChildPlots( )
+        {
+            return Collections.unmodifiableCollection( this.subplots );
         }
 
         @Override

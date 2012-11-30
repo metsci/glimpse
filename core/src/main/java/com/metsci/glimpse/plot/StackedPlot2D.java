@@ -316,25 +316,7 @@ public class StackedPlot2D extends GlimpseLayout
         // be in the order that plots were added
         // this means that plots with the same order constant
         // will be displayed in the order they were added
-        Collections.sort( sortedList, new Comparator<PlotInfo>( )
-        {
-            @Override
-            public int compare( PlotInfo axis0, PlotInfo axis1 )
-            {
-                if ( axis0.getOrder( ) < axis1.getOrder( ) )
-                {
-                    return -1;
-                }
-                else if ( axis0.getOrder( ) > axis1.getOrder( ) )
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        } );
+        Collections.sort( sortedList, PlotInfoImpl.getComparator( ) );
 
         return sortedList;
     }
@@ -579,6 +561,53 @@ public class StackedPlot2D extends GlimpseLayout
             }
 
             this.layout.addLayout( childLayout );
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            PlotInfoImpl other = ( PlotInfoImpl ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
+        }
+        
+        public static Comparator<PlotInfo> getComparator( )
+        {
+            return new Comparator<PlotInfo>( )
+            {
+                @Override
+                public int compare( PlotInfo axis0, PlotInfo axis1 )
+                {
+                    if ( axis0.getOrder( ) < axis1.getOrder( ) )
+                    {
+                        return -1;
+                    }
+                    else if ( axis0.getOrder( ) > axis1.getOrder( ) )
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            };
         }
     }
 }
