@@ -41,6 +41,7 @@ import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeXAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
+import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.Tag;
@@ -170,7 +171,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return this.overlayLayout;
     }
-    
+
     public GlimpseAxisLayout1D getUnderlayLayout( )
     {
         return this.underlayLayout;
@@ -522,8 +523,8 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return this.timeAxisBorderPainter;
     }
-    
-    public SelectedTimeRegionPainter getSelectedTimePainter( ) 
+
+    public SelectedTimeRegionPainter getSelectedTimePainter( )
     {
         return this.selectedTimePainter;
     }
@@ -612,11 +613,11 @@ public class StackedTimePlot2D extends StackedPlot2D
         {
             PlotInfo info = this.stackedPlots.get( name );
             if ( info == null ) return;
-            
+
             if ( info instanceof TimePlotInfo )
             {
-                TimePlotInfo timeInfo = (TimePlotInfo) info;
-                
+                TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+
                 this.removeLayout( info.getLayout( ) );
                 this.removeLayout( timeInfo.getLabelLayout( ) );
                 this.stackedPlots.remove( name );
@@ -812,7 +813,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         TaggedAxis1D timeAxis = getTimeAxis( );
 
         this.timelineMouseListener = new TimelineMouseListener1D( this );
-        
+
         this.addTimeTags( getTimeAxis( ) );
 
         this.minTag = timeAxis.getTag( MIN_TIME );
@@ -881,7 +882,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
 
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
-        
+
         this.overlayLayout.setEventGenerator( true );
         this.overlayLayout.setEventConsumer( false );
         this.overlayLayout.addPainter( this.selectedTimePainter );
@@ -992,19 +993,30 @@ public class StackedTimePlot2D extends StackedPlot2D
         };
 
         layoutInfo.getLayout( ).addPainter( new BackgroundPainter( false ), Integer.MIN_VALUE );
-        
+
         // add a painter for user data
         DelegatePainter dataPainter = new DelegatePainter( );
         layoutInfo.getLayout( ).addPainter( dataPainter );
 
+        AxisLabelHandler xHandler, yHandler;
+        if ( orientation == Orientation.HORIZONTAL )
+        {
+            xHandler = labelHandler;
+            yHandler = timeAxisPainter.getLabelHandler( );
+        }
+        else
+        {
+            yHandler = labelHandler;
+            xHandler = timeAxisPainter.getLabelHandler( );
+        }
+
         // create a painter to display Y axis grid lines
-        GridPainter gridPainter = new GridPainter( labelHandler, labelHandler );
+        GridPainter gridPainter = new GridPainter( xHandler, yHandler );
         gridPainter.setShowMinorGrid( false );
         layoutInfo.getLayout( ).addPainter( gridPainter );
 
-        // create a painter to display Y axis tick marks along the left edge of
-        // the graph
-        NumericXYAxisPainter axisPainter = new NumericXYAxisPainter( labelHandler, labelHandler );
+        // create a painter to display Y axis tick marks along the left edge of the graph
+        NumericXYAxisPainter axisPainter = new NumericXYAxisPainter( xHandler, yHandler );
         axisPainter.setFont( getDefaultPlain( 9 ), false );
         axisPainter.setShowLabelsNearOrigin( true );
         axisPainter.setShowOriginLabel( true );
@@ -1032,12 +1044,12 @@ public class StackedTimePlot2D extends StackedPlot2D
         labelPainter.setText( "" );
         labelPainter.setHorizontalLabels( false );
         labelLayout.addPainter( labelPainter );
-        
+
         // add a border
         BorderPainter labelBorderPainter = new BorderPainter( );
         labelBorderPainter.setVisible( false );
         labelLayout.addPainter( labelBorderPainter );
-        
+
         //@formatter:off
         TimePlotInfo timePlotInfo = new TimePlotInfo( StackedTimePlot2D.this,
                                                       layoutInfo,
@@ -1050,7 +1062,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                                                       labelBorderPainter,
                                                       dataPainter );
         //@formatter:on
-        
+
         if ( isTimeAxisHorizontal( ) )
         {
             gridPainter.setShowVerticalLines( false );
@@ -1071,6 +1083,86 @@ public class StackedTimePlot2D extends StackedPlot2D
         return timePlotInfo;
     }
 
+    protected void setPlotInfoLayout( int i, int size, PlotInfo info )
+    {
+        if ( isTimeAxisHorizontal( ) )
+        {
+            int topSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
+            int bottomSpace = i >= size - 2 ? 0 : plotSpacing;
+
+            if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+            {
+                String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
+                String layout = String.format( format, 1, i, topSpace, bottomSpace );
+                info.getLayout( ).setLayoutData( layout );
+
+                if ( info instanceof TimePlotInfo )
+                {
+                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+
+                    format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
+                    layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
+                    timeInfo.getLabelLayout( ).setLayoutData( layout );
+                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
+                }
+            }
+            else
+            {
+                String format = "cell %d %d 1 1, pushx, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
+                String layout = String.format( format, 1, i, info.getSize( ), topSpace, bottomSpace );
+                info.getLayout( ).setLayoutData( layout );
+
+                if ( info instanceof TimePlotInfo )
+                {
+                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+
+                    format = "cell %d %d 1 1, width %d!, height %d!, gap 0 0 %5$d %6$d";
+                    layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
+                    timeInfo.getLabelLayout( ).setLayoutData( layout );
+                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
+                }
+            }
+        }
+        else
+        {
+            int topSpace = i <= 1 ? 0 : plotSpacing;
+            int bottomSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
+
+            if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+            {
+                String format = "cell %d %d 1 1, push, grow, id i%1$d, gap %3$d %4$d 0 0";
+                String layout = String.format( format, i, 1, topSpace, bottomSpace );
+                info.getLayout( ).setLayoutData( layout );
+
+                if ( info instanceof TimePlotInfo )
+                {
+                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+
+                    format = "cell %d %d 1 1, pushx, growx, height %d!, gap %4$d %5$d 0 0";
+                    layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
+                    timeInfo.getLabelLayout( ).setLayoutData( layout );
+                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
+                }
+            }
+            else
+            {
+                String format = "cell %d %d 1 1, pushy, growy, width %d!, id i%1$d, gap %4$d %5$d 0 0";
+                String layout = String.format( format, i, 1, info.getSize( ), topSpace, bottomSpace );
+                info.getLayout( ).setLayoutData( layout );
+
+                if ( info instanceof TimePlotInfo )
+                {
+                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+
+                    format = "cell %d %d 1 1, height %d!, width %d!, gap %5$d %6$d 0 0";
+                    layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
+                    timeInfo.getLabelLayout( ).setLayoutData( layout );
+                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
+                }
+            }
+        }
+    }
+    
     @Override
     protected void updatePainterLayout( )
     {
@@ -1084,83 +1176,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             for ( int i = 0; i < axisList.size( ); i++ )
             {
                 PlotInfo info = axisList.get( i );
-                
-                if ( isTimeAxisHorizontal( ) )
-                {
-                    int topSpace = i == 0 || i >= axisList.size( )-1 ? 0 :plotSpacing;
-                    int bottomSpace = i >= axisList.size( )-2 ? 0 : plotSpacing;
-
-                    if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
-                    {
-                        String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
-                        String layout = String.format( format, 1, i, topSpace, bottomSpace );
-                        info.getLayout( ).setLayoutData( layout );
-
-                        if ( info instanceof TimePlotInfo )
-                        {
-                            TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                            format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
-                            layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
-                            timeInfo.getLabelLayout( ).setLayoutData( layout );
-                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                        }
-                    }
-                    else
-                    {
-                        String format = "cell %d %d 1 1, pushx, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
-                        String layout = String.format( format, 1, i, info.getSize( ), topSpace, bottomSpace );
-                        info.getLayout( ).setLayoutData( layout );
-
-                        if ( info instanceof TimePlotInfo )
-                        {
-                            TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                            format = "cell %d %d 1 1, width %d!, height %d!, gap 0 0 %5$d %6$d";
-                            layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
-                            timeInfo.getLabelLayout( ).setLayoutData( layout );
-                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                        }
-                    }
-                }
-                else
-                {
-                    int topSpace = i <= 1 ? 0 :plotSpacing;
-                    int bottomSpace = i == 0 || i >= axisList.size( )-1 ? 0 : plotSpacing;
-                    
-                    if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
-                    {
-                        String format = "cell %d %d 1 1, push, grow, id i%1$d, gap %3$d %4$d 0 0";
-                        String layout = String.format( format, i, 1, topSpace, bottomSpace );
-                        info.getLayout( ).setLayoutData( layout );
-
-                        if ( info instanceof TimePlotInfo )
-                        {
-                            TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                            format = "cell %d %d 1 1, pushx, growx, height %d!, gap %4$d %5$d 0 0";
-                            layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
-                            timeInfo.getLabelLayout( ).setLayoutData( layout );
-                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                        }
-                    }
-                    else
-                    {
-                        String format = "cell %d %d 1 1, pushy, growy, width %d!, id i%1$d, gap %4$d %5$d 0 0";
-                        String layout = String.format( format, i, 1, info.getSize( ), topSpace, bottomSpace );
-                        info.getLayout( ).setLayoutData( layout );
-
-                        if ( info instanceof TimePlotInfo )
-                        {
-                            TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                            format = "cell %d %d 1 1, height %d!, width %d!, gap %5$d %6$d 0 0";
-                            layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
-                            timeInfo.getLabelLayout( ).setLayoutData( layout );
-                            timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                        }
-                    }
-                }
+                setPlotInfoLayout( i, axisList.size( ), info );
             }
 
             // position the overlay in absolute coordinates based on the position of the plots

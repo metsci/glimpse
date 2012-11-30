@@ -50,25 +50,51 @@ public class BorderPainter extends GlimpsePainterImpl
     protected int stippleFactor = 1;
     protected short stipplePattern = ( short ) 0x00FF;
     protected boolean stippleOn = false;
+    
+    protected boolean drawTop = true;
+    protected boolean drawBottom = true;
+    protected boolean drawRight = true;
+    protected boolean drawLeft = true;
+    
+    public BorderPainter setDrawTop( boolean draw )
+    {
+        this.drawTop = draw;
+        return this;
+    }
+    
+    public BorderPainter setDrawBottom( boolean draw )
+    {
+        this.drawBottom = draw;
+        return this;
+    }
+    
+    public BorderPainter setDrawLeft( boolean draw )
+    {
+        this.drawLeft = draw;
+        return this;
+    }
+    
+    public BorderPainter setDrawRight( boolean draw )
+    {
+        this.drawRight = draw;
+        return this;
+    }
 
     public BorderPainter setDotted( boolean dotted )
     {
         this.stippleOn = dotted;
-
         return this;
     }
 
     public BorderPainter setLineWidth( float lineWidth )
     {
         this.lineWidth = lineWidth;
-
         return this;
     }
 
     public BorderPainter setColor( float[] rgba )
     {
         borderColor = rgba;
-
         return this;
     }
 
@@ -78,9 +104,7 @@ public class BorderPainter extends GlimpsePainterImpl
         borderColor[1] = g;
         borderColor[2] = b;
         borderColor[3] = a;
-        
         colorSet = true;
-
         return this;
     }
     
@@ -121,13 +145,32 @@ public class BorderPainter extends GlimpsePainterImpl
             gl.glLineStipple( stippleFactor, stipplePattern );
         }
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL.GL_LINES );
         try
         {
-            gl.glVertex2f( x, y );
-            gl.glVertex2f( x + width, y );
-            gl.glVertex2f( x + width, y + height );
-            gl.glVertex2f( x, y + height );
+            if ( drawBottom )
+            {
+                gl.glVertex2f( x, y );
+                gl.glVertex2f( x + width, y );
+            }
+            
+            if ( drawRight )
+            {
+                gl.glVertex2f( x + width, y );
+                gl.glVertex2f( x + width, y + height );
+            }
+
+            if ( drawTop )
+            {
+                gl.glVertex2f( x + width, y + height );
+                gl.glVertex2f( x, y + height );
+            }
+            
+            if ( drawLeft )
+            {
+                gl.glVertex2f( x, y + height );
+                gl.glVertex2f( x, y );
+            }
 
         }
         finally

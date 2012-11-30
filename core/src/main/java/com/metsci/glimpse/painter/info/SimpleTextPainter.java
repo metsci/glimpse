@@ -71,7 +71,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     private float[] borderColor = GlimpseColor.getWhite( 1f );
     private boolean borderColorSet = false;
     
-    private int padding = 5;
+    private int horizontalPadding = 5;
+    private int verticalPadding = 5;
 
     private HorizontalPosition hPos;
     private VerticalPosition vPos;
@@ -186,10 +187,23 @@ public class SimpleTextPainter extends GlimpsePainterImpl
 
     public SimpleTextPainter setPadding( int padding )
     {
-        this.padding = padding;
+        this.verticalPadding = padding;
+        this.horizontalPadding = padding;
+        return this;
+    }
+    
+    public SimpleTextPainter setVerticalPadding( int padding )
+    {
+        this.verticalPadding = padding;
         return this;
     }
 
+    public SimpleTextPainter setHorizontalPadding( int padding )
+    {
+        this.horizontalPadding = padding;
+        return this;
+    }
+    
     public SimpleTextPainter setColor( float[] rgba )
     {
         textColor = rgba;
@@ -206,9 +220,14 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         return this;
     }
 
-    public int getPadding( )
+    public int getVerticalPadding( )
     {
-        return padding;
+        return verticalPadding;
+    }
+    
+    public int getHorizontalPadding( )
+    {
+        return horizontalPadding;
     }
 
     @Override
@@ -247,34 +266,39 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         textRenderer = null;
     }
     
+    public Rectangle2D getTextBounds( )
+    {
+        return sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
+    }
+    
     protected void paintToHorizontal( GL gl, int width, int height, Rectangle2D textBounds )
     {
-        int xText = padding;
-        int yText = padding;
+        int xText = horizontalPadding;
+        int yText = verticalPadding;
 
         switch ( hPos )
         {
         case Left:
-            xText = ( int ) padding;
+            xText = ( int ) horizontalPadding;
             break;
         case Center:
             xText = ( int ) ( width / 2d - textBounds.getWidth( ) / 2d );
             break;
         case Right:
-            xText = ( int ) ( width - textBounds.getWidth( ) - padding );
+            xText = ( int ) ( width - textBounds.getWidth( ) - horizontalPadding );
             break;
         }
 
         switch ( vPos )
         {
         case Bottom:
-            yText = ( int ) padding;
+            yText = ( int ) verticalPadding;
             break;
         case Center:
             yText = ( int ) ( height / 2d - textBounds.getHeight( ) / 2d );
             break;
         case Top:
-            yText = ( int ) ( height - textBounds.getHeight( ) - padding );
+            yText = ( int ) ( height - textBounds.getHeight( ) - verticalPadding );
             break;
         }
 
@@ -351,8 +375,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     
     protected void paintToVertical( GL gl, int width, int height, Rectangle2D textBounds )
     {
-        int xText = padding;
-        int yText = padding;
+        int xText = horizontalPadding;
+        int yText = verticalPadding;
         
         double textWidth = textBounds.getWidth( );
         double textHeight = textBounds.getHeight( );
@@ -363,26 +387,26 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         switch ( hPos )
         {
         case Left:
-            xText = ( int ) ( padding - halfTextWidth + halfTextHeight );
+            xText = ( int ) ( horizontalPadding - halfTextWidth + halfTextHeight );
             break;
         case Center:
             xText = ( int ) ( width / 2d - halfTextWidth );
             break;
         case Right:
-            xText = ( int ) ( width - halfTextWidth - halfTextHeight - padding );
+            xText = ( int ) ( width - halfTextWidth - halfTextHeight - horizontalPadding );
             break;
         }
 
         switch ( vPos )
         {
         case Bottom:
-            yText = ( int ) ( padding - halfTextHeight + halfTextWidth );
+            yText = ( int ) ( verticalPadding - halfTextHeight + halfTextWidth );
             break;
         case Center:
             yText = ( int ) ( height / 2d - halfTextHeight );
             break;
         case Top:
-            yText = ( int ) ( height - halfTextHeight - halfTextWidth - padding );
+            yText = ( int ) ( height - halfTextHeight - halfTextWidth - verticalPadding );
             break;
         }
         

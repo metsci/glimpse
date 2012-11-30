@@ -352,7 +352,11 @@ public class StackedPlot2D extends GlimpseLayout
     // must be called while holding lock
     protected PlotInfo createPlot0( String name, Axis1D axis )
     {
-        if ( stackedPlots.containsKey( name ) )
+        if ( name == null )
+        {
+            throw new IllegalArgumentException( "Plot ID cannot be null." );
+        }
+        else if ( stackedPlots.containsKey( name ) )
         {
             throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
         }
