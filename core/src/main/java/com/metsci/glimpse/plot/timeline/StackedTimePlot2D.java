@@ -1163,6 +1163,11 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
     }
     
+    protected String getLayoutConstraints( )
+    {
+        return String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder );
+    }
+    
     @Override
     protected void updatePainterLayout( )
     {
@@ -1171,7 +1176,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         {
             List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
 
-            this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
+            this.layout.setLayoutConstraints( getLayoutConstraints( ) );
 
             for ( int i = 0; i < axisList.size( ); i++ )
             {

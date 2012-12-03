@@ -1,5 +1,7 @@
 package com.metsci.glimpse.plot.timeline;
 
+import static com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupLabelPainter.buttonSize;
+import static com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupLabelPainter.padding;
 import static javax.media.opengl.GL.GL_MODELVIEW;
 import static javax.media.opengl.GL.GL_PROJECTION;
 
@@ -20,6 +22,8 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -27,6 +31,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
@@ -140,40 +145,119 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
         return sortedPlots;
     }
-
+    
+    @Override
+    protected String getLayoutConstraints( )
+    {
+        return super.getLayoutConstraints( ) + ",nocache";
+    }
+    
     @Override
     protected void setPlotInfoLayout( int i, int size, PlotInfo info )
     {
-        super.setPlotInfoLayout( i, size, info );
-
-        if ( info instanceof GroupInfo )
+        if ( isTimeAxisHorizontal( ) )
         {
+            boolean show = true;
+
+            // hide the children of non-expanded groups
+            if ( childParentMap != null )
+            {
+                GroupInfo group = childParentMap.get( info );
+                if ( group != null && !group.isExpanded( ) )
+                {
+                    show = false;
+                }
+            }
+
             int topSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
             int bottomSpace = i >= size - 2 ? 0 : plotSpacing;
 
-            if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+            if ( !show )
             {
-                String format = "cell %d %d 2 1, grow, id i%2$d, gap 0 0 %3$d %4$d";
-                String layout = String.format( format, 0, i, topSpace, bottomSpace );
+                String format = "cell %d %d 1 1, id i%2$d, height 0!";
+                String layout = String.format( format, 1, i );
                 info.getLayout( ).setLayoutData( layout );
+                info.getLayout( ).setVisible( false );
+                
+                if ( info instanceof TimePlotInfo )
+                {
+                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+
+                    format = "cell %d %d 1 1, height 0!";
+                    layout = String.format( format, 0, i );
+                    timeInfo.getLabelLayout( ).setLayoutData( layout );
+                    timeInfo.getLabelLayout( ).setVisible( false );
+                }
             }
             else
             {
-                String format = "cell %d %d 2 1, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
-                String layout = String.format( format, 0, i, info.getSize( ), topSpace, bottomSpace );
-                info.getLayout( ).setLayoutData( layout );
+                if ( info instanceof GroupInfo )
+                {
+                    if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                    {
+                        String format = "cell %d %d 2 1, grow, id i%2$d, gap 0 0 %3$d %4$d";
+                        String layout = String.format( format, 0, i, topSpace, bottomSpace );
+                        info.getLayout( ).setLayoutData( layout );
+                    }
+                    else
+                    {
+                        String format = "cell %d %d 2 1, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
+                        String layout = String.format( format, 0, i, info.getSize( ), topSpace, bottomSpace );
+                        info.getLayout( ).setLayoutData( layout );
+                    }
+                }
+                else if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                {
+                    String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
+                    String layout = String.format( format, 1, i, topSpace, bottomSpace );
+                    info.getLayout( ).setLayoutData( layout );
+                    info.getLayout( ).setVisible( true );
+                    
+                    if ( info instanceof TimePlotInfo )
+                    {
+                        TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+    
+                        format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
+                        layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
+                        timeInfo.getLabelLayout( ).setLayoutData( layout );
+                        timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
+                    }
+                }
+                else
+                {
+                    String format = "cell %d %d 1 1, pushx, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
+                    String layout = String.format( format, 1, i, info.getSize( ), topSpace, bottomSpace );
+                    info.getLayout( ).setLayoutData( layout );
+                    info.getLayout( ).setVisible( true );
+    
+                    if ( info instanceof TimePlotInfo )
+                    {
+                        TimePlotInfo timeInfo = ( TimePlotInfo ) info;
+    
+                        format = "cell %d %d 1 1, width %d!, height %d!, gap 0 0 %5$d %6$d";
+                        layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
+                        timeInfo.getLabelLayout( ).setLayoutData( layout );
+                        timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
+                    }
+                }
             }
+        }
+        else
+        {
+            throw new UnsupportedOperationException( "CollapsibleTimePlot2D must have Vertical Layout" );
         }
     }
 
     public static class GroupLabelPainter extends GlimpsePainterImpl
     {
-        protected final int buttonSize = 20;
-        protected final int padding = 5;
+        public static final int buttonSize = 8;
+        public static final int padding = 5;
 
         protected float[] lineColor = GlimpseColor.getBlack( );
 
         protected SimpleTextPainter textDelegate;
+
+        protected boolean isExpanded = true;
 
         public GroupLabelPainter( String name )
         {
@@ -185,6 +269,11 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.textDelegate.setVerticalPadding( 0 );
             this.textDelegate.setText( name );
             this.textDelegate.setFont( FontUtils.getDefaultPlain( 14 ), true );
+        }
+
+        public void setExpanded( boolean isExpanded )
+        {
+            this.isExpanded = isExpanded;
         }
 
         public void setText( String text )
@@ -209,6 +298,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             gl.glMatrixMode( GL_MODELVIEW );
             gl.glLoadIdentity( );
 
+            // Paint Line
             Rectangle2D textBounds = this.textDelegate.getTextBounds( );
             float startY = ( float ) height / 2.0f;
             float startX = ( float ) ( padding + this.textDelegate.getHorizontalPadding( ) + textBounds.getWidth( ) + ( textBounds.getMinX( ) ) - 1 );
@@ -221,6 +311,32 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             {
                 gl.glVertex2f( startX, startY );
                 gl.glVertex2f( width, startY );
+            }
+            finally
+            {
+                gl.glEnd( );
+            }
+
+            float halfSize = buttonSize / 2.0f;
+            float centerX = halfSize + padding;
+            float centerY = height / 2.0f;
+
+            // Paint Expand/Collapse Button
+            gl.glBegin( GL.GL_POLYGON );
+            try
+            {
+                if ( isExpanded )
+                {
+                    gl.glVertex2f( centerX - halfSize, centerY + halfSize );
+                    gl.glVertex2f( centerX + halfSize, centerY + halfSize );
+                    gl.glVertex2f( centerX, centerY - halfSize );
+                }
+                else
+                {
+                    gl.glVertex2f( centerX - halfSize, centerY - halfSize );
+                    gl.glVertex2f( centerX - halfSize, centerY + halfSize );
+                    gl.glVertex2f( centerX + halfSize, centerY );
+                }
             }
             finally
             {
@@ -250,6 +366,10 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         public void removeChildPlot( PlotInfo plot );
 
         public Collection<PlotInfo> getChildPlots( );
+
+        public void setExpanded( boolean expanded );
+
+        public boolean isExpanded( );
     }
 
     public class GroupInfoImpl implements GroupInfo
@@ -259,16 +379,52 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
         protected GroupLabelPainter label;
 
+        protected boolean expanded;
+
         public GroupInfoImpl( PlotInfo group, Collection<PlotInfo> subplots )
         {
             this.group = group;
             this.subplots = new HashSet<PlotInfo>( );
             this.subplots.addAll( subplots );
+            for ( PlotInfo plot : subplots )
+            {
+                childParentMap.put( plot, this );
+            }
 
             this.label = new GroupLabelPainter( group.getId( ) );
             this.group.getLayout( ).addPainter( this.label );
 
             this.group.setSize( 22 );
+
+            this.expanded = true;
+
+            this.group.getLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
+            {
+                @Override
+                public void mousePressed( GlimpseMouseEvent event )
+                {
+                    int x = event.getScreenPixelsX( );
+
+                    if ( x > padding && x < padding + buttonSize )
+                    {
+                        setExpanded( !expanded );
+                    }
+                }
+            } );
+        }
+
+        @Override
+        public boolean isExpanded( )
+        {
+            return this.expanded;
+        }
+
+        @Override
+        public void setExpanded( boolean expanded )
+        {
+            this.expanded = expanded;
+            this.label.setExpanded( expanded );
+            validateLayout( );
         }
 
         @Override
@@ -276,7 +432,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             subplots.add( plot );
             childParentMap.put( plot, this );
-            getStackedPlot( ).invalidateLayout( );
+            validateLayout( );
         }
 
         @Override
@@ -284,7 +440,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             subplots.remove( plot );
             childParentMap.remove( plot );
-            getStackedPlot( ).invalidateLayout( );
+            validateLayout( );
         }
 
         @Override
