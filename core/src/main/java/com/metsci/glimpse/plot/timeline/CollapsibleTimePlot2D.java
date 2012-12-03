@@ -67,7 +67,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         return createGroup( id, list );
     }
 
-    public GroupInfo createGroup( String id, Collection<PlotInfo> subplots )
+    public GroupInfo createGroup( String id, Collection<? extends PlotInfo> subplots )
     {
         this.lock.lock( );
         try
@@ -216,7 +216,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                     if ( info instanceof TimePlotInfo )
                     {
                         TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-    
+                        
                         format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
                         layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
                         timeInfo.getLabelLayout( ).setLayoutData( layout );
@@ -381,7 +381,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
         protected boolean expanded;
 
-        public GroupInfoImpl( PlotInfo group, Collection<PlotInfo> subplots )
+        public GroupInfoImpl( PlotInfo group, Collection<? extends PlotInfo> subplots )
         {
             this.group = group;
             this.subplots = new HashSet<PlotInfo>( );
@@ -403,12 +403,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                 @Override
                 public void mousePressed( GlimpseMouseEvent event )
                 {
-                    int x = event.getScreenPixelsX( );
-
-                    if ( x > padding && x < padding + buttonSize )
-                    {
-                        setExpanded( !expanded );
-                    }
+                    setExpanded( !expanded );
                 }
             } );
         }

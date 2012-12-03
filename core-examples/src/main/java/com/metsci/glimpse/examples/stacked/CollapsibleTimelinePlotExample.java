@@ -17,6 +17,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     public static void main( String[] args ) throws Exception
     {
         Example example = Example.showWithSwing( new CollapsibleTimelinePlotExample( ) );
+
+        // set a black and white look and feel
         example.getCanvas( ).setLookAndFeel( new BlackAndWhiteLookAndFeel( ) );
     }
 
@@ -29,15 +31,15 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         plot.setLabelSize( 120 );
 
         Collection<TimePlotInfo> rows = plot.getAllTimePlots( );
-        
+
         for ( TimePlotInfo row : rows )
         {
             // create a collapsible/expandable group for each row
             GroupInfo group = plot.createGroup( String.format( "%s-group", row.getId( ) ), row );
-            
+
             // add a label to the group
             group.setLabelText( "Group Name" );
-            
+
             // draw horizontal labels in the upper left corner of the label area
             row.getLabelPainter( ).setHorizontalPosition( HorizontalPosition.Left );
             row.getLabelPainter( ).setVerticalPosition( VerticalPosition.Top );
@@ -53,7 +55,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
             // make grid lines solid instead of dotted
             row.getGridPainter( ).setDotted( false );
-            
+
             // don't draw top or bottom border lines
             row.getBorderPainter( ).setDrawBottom( false );
             row.getBorderPainter( ).setDrawTop( false );
