@@ -1,7 +1,5 @@
 package com.metsci.glimpse.plot.timeline;
 
-import static com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupLabelPainter.buttonSize;
-import static com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupLabelPainter.padding;
 import static javax.media.opengl.GL.GL_MODELVIEW;
 import static javax.media.opengl.GL.GL_PROJECTION;
 
@@ -145,13 +143,13 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
         return sortedPlots;
     }
-    
+
     @Override
     protected String getLayoutConstraints( )
     {
         return super.getLayoutConstraints( ) + ",nocache";
     }
-    
+
     @Override
     protected void setPlotInfoLayout( int i, int size, PlotInfo info )
     {
@@ -178,7 +176,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                 String layout = String.format( format, 1, i );
                 info.getLayout( ).setLayoutData( layout );
                 info.getLayout( ).setVisible( false );
-                
+
                 if ( info instanceof TimePlotInfo )
                 {
                     TimePlotInfo timeInfo = ( TimePlotInfo ) info;
@@ -212,11 +210,11 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                     String layout = String.format( format, 1, i, topSpace, bottomSpace );
                     info.getLayout( ).setLayoutData( layout );
                     info.getLayout( ).setVisible( true );
-                    
+
                     if ( info instanceof TimePlotInfo )
                     {
                         TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-                        
+
                         format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
                         layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
                         timeInfo.getLabelLayout( ).setLayoutData( layout );
@@ -229,11 +227,11 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                     String layout = String.format( format, 1, i, info.getSize( ), topSpace, bottomSpace );
                     info.getLayout( ).setLayoutData( layout );
                     info.getLayout( ).setVisible( true );
-    
+
                     if ( info instanceof TimePlotInfo )
                     {
                         TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-    
+
                         format = "cell %d %d 1 1, width %d!, height %d!, gap 0 0 %5$d %6$d";
                         layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
                         timeInfo.getLabelLayout( ).setLayoutData( layout );
