@@ -48,9 +48,48 @@ public class Event
         this.endTime = endTime;
     }
     
-    public void paint( GL gl, Axis1D axis, EventPainter painter )
+    public void paint( GL gl, Axis1D axis, EventPainter painter, int sizeMin, int sizeMax )
     {
+        Epoch epoch = painter.getEpoch( );
+        double timeMin = epoch.fromTimeStamp( startTime );
+        double timeMax = epoch.fromTimeStamp( endTime );
+    
+        if ( painter.isHorizontal( ) )
+        {
         
+            GlimpseColor.glColor( gl, backgroundColor );
+            gl.glBegin( GL.GL_QUADS );
+            try
+            {
+                gl.glVertex2d( timeMin, sizeMin );
+                gl.glVertex2d( timeMin, sizeMax );
+                gl.glVertex2d( timeMax, sizeMax );
+                gl.glVertex2d( timeMax, sizeMin );
+            }
+            finally
+            {
+                gl.glEnd( );
+            }
+        
+        }
+        else
+        {
+            
+            GlimpseColor.glColor( gl, backgroundColor );
+            gl.glBegin( GL.GL_QUADS );
+            try
+            {
+                gl.glVertex2d( sizeMin, timeMin );
+                gl.glVertex2d( sizeMax, timeMin );
+                gl.glVertex2d( sizeMax, timeMax );
+                gl.glVertex2d( sizeMin, timeMax );
+            }
+            finally
+            {
+                gl.glEnd( );
+            }
+            
+        }
     }
 
     public String getName( )
