@@ -87,7 +87,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     public static final String BACKGROUND = "Timeline Background";
     public static final String TIMELINE = "Timeline";
 
-    public static final int TIME_PLOT_1D_SIZE = 20;
+    public static final int TIME_PLOT_1D_SIZE = 35;
     
     // tags representing the minimum and maximum bounds of the selected time window
     protected Tag minTag;
@@ -1003,6 +1003,9 @@ public class StackedTimePlot2D extends StackedPlot2D
         
         // don't show grid lines
         timePlot.getGridPainter( ).setVisible( false );
+        
+        // center the labels because the plots are so small anyway
+        timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         
         EventPlotInfo timePlot1D = new EventPlotInfo( timePlot );
         

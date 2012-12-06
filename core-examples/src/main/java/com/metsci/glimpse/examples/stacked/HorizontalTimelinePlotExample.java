@@ -113,7 +113,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // add mouse listeners to the GlimpseLayouts of the plots
         addMouseListener( epoch, plot1 );
         addMouseListener( epoch, plot2 );
-
+        
         return plot;
     }
 
