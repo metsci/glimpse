@@ -8,6 +8,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.painter.EventPainter;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
+import com.sun.opengl.util.j2d.TextRenderer;
 
 public class Event
 {
@@ -16,10 +17,12 @@ public class Event
     protected Object id;
     protected String name;
     protected Object iconId; // references id in associated TextureAtlas
+    
     protected float[] backgroundColor;
     protected float[] borderColor;
     protected float[] textColor;
-
+    protected float borderThickness = 1.8f;
+    
     protected TimeStamp startTime;
     protected TimeStamp endTime;
 
@@ -56,9 +59,26 @@ public class Event
     
         if ( painter.isHorizontal( ) )
         {
-        
-            GlimpseColor.glColor( gl, backgroundColor );
+            TextRenderer textRenderer = painter.getTextRenderer( );
+            GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
+            
+            GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
+            try
+            {
+                gl.glVertex2d( timeMin, sizeMin );
+                gl.glVertex2d( timeMin, sizeMax );
+                gl.glVertex2d( timeMax, sizeMax );
+                gl.glVertex2d( timeMax, sizeMin );
+            }
+            finally
+            {
+                gl.glEnd( );
+            }
+            
+            GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+            gl.glLineWidth( borderThickness );
+            gl.glBegin( GL.GL_LINE_LOOP );
             try
             {
                 gl.glVertex2d( timeMin, sizeMin );
@@ -74,9 +94,23 @@ public class Event
         }
         else
         {
-            
-            GlimpseColor.glColor( gl, backgroundColor );
+            GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
+            try
+            {
+                gl.glVertex2d( sizeMin, timeMin );
+                gl.glVertex2d( sizeMax, timeMin );
+                gl.glVertex2d( sizeMax, timeMax );
+                gl.glVertex2d( sizeMin, timeMax );
+            }
+            finally
+            {
+                gl.glEnd( );
+            }
+            
+            GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+            gl.glLineWidth( borderThickness );
+            gl.glBegin( GL.GL_LINE_LOOP );
             try
             {
                 gl.glVertex2d( sizeMin, timeMin );
@@ -112,6 +146,11 @@ public class Event
         this.iconId = iconId;
     }
 
+    public void setBorderThickness( float thickness )
+    {
+        this.borderThickness = thickness;
+    }
+    
     public float[] getBackgroundColor( )
     {
         return backgroundColor;

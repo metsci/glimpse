@@ -16,6 +16,8 @@ import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.sun.opengl.util.j2d.TextRenderer;
@@ -39,7 +41,6 @@ public class EventPainter extends GlimpseDataPainter1D
     protected Set<Event> visibleEvents;
     protected double prevMin;
     protected double prevMax;
-
     
     protected TextRenderer textRenderer;
     protected boolean fontSet = false;
@@ -48,6 +49,14 @@ public class EventPainter extends GlimpseDataPainter1D
     protected volatile boolean antialias = false;
     
     protected int bufferPixels = 2;
+    
+    protected float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
+    protected float[] borderColor = GlimpseColor.getWhite( 1f );
+    protected float[] textColor = GlimpseColor.getBlack( );
+    
+    protected boolean textColorSet = false;
+    protected boolean backgroundColorSet = false;
+    protected boolean borderColorSet = false;
     
     public EventPainter( Epoch epoch, TextureAtlas atlas, boolean isHorizontal )
     {
@@ -59,6 +68,41 @@ public class EventPainter extends GlimpseDataPainter1D
         this.eventMap = new HashMap<Object, Event>( );
 
         this.isHorizontal = isHorizontal;
+        
+        this.newFont = FontUtils.getDefaultPlain( 12 );
+    }
+    
+    public float[] getBackgroundColor( )
+    {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor( float[] backgroundColor )
+    {
+        this.backgroundColor = backgroundColor;
+        this.backgroundColorSet = true;
+    }
+
+    public float[] getBorderColor( )
+    {
+        return borderColor;
+    }
+
+    public void setBorderColor( float[] borderColor )
+    {
+        this.borderColor = borderColor;
+        this.borderColorSet = true;
+    }
+
+    public float[] getTextColor( )
+    {
+        return textColor;
+    }
+
+    public void setTextColor( float[] textColor )
+    {
+        this.textColor = textColor;
+        this.textColorSet = true;
     }
 
     public void addEvent( Event event )
@@ -93,6 +137,11 @@ public class EventPainter extends GlimpseDataPainter1D
     {
         this.bufferPixels = bufferPixels;
     }
+    
+    public TextRenderer getTextRenderer( )
+    {
+        return this.textRenderer;
+    }
 
     public EventPainter setFont( Font font, boolean antialias )
     {
@@ -110,17 +159,6 @@ public class EventPainter extends GlimpseDataPainter1D
     public Epoch getEpoch( )
     {
         return this.epoch;
-    }
-
-    @Override
-    public void setLookAndFeel( LookAndFeel laf )
-    {
-        // ignore the look and feel if a font has been manually set
-        if ( !fontSet )
-        {
-            setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
-            fontSet = false;
-        }
     }
 
     protected void calculateVisibleEvents( double min, double max )
@@ -160,9 +198,36 @@ public class EventPainter extends GlimpseDataPainter1D
 
         for ( Event event : visibleEvents )
         {
-            System.out.println( "painting " + event.getId( ) );
-            
             event.paint( gl, axis, this, bufferPixels, (isHorizontal ? height : width)-bufferPixels );
+        }
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        // ignore the look and feel if a font has been manually set
+        if ( !fontSet )
+        {
+            setFont( laf.getFont( AbstractLookAndFeel.TITLE_FONT ), false );
+            fontSet = false;
+        }
+        
+        if ( !textColorSet )
+        {
+            setTextColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            textColorSet = false;
+        }
+        
+        if ( !backgroundColorSet )
+        {
+            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TEXT_BACKGROUND_COLOR ) );
+            backgroundColorSet = false;
+        }
+        
+        if ( !borderColorSet )
+        {
+            setBorderColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
+            borderColorSet = false;
         }
     }
 }
