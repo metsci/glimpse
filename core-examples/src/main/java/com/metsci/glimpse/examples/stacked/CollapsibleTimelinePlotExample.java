@@ -8,10 +8,15 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.util.units.time.Time;
+import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExample
 {
@@ -59,12 +64,27 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         setPlotLookAndFeel( events3 );
         
         events1.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
-        events1.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
+        events2.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
+        events3.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
 
         // create a collapsible/expandable group for all the event plots
         GroupInfo group = plot.createGroup( "events-group", events1, events2, events3 );
         group.setLabelText( "Event Group" );
+        
+        // put the event group directly below the timeline
+        group.setOrder( 100 );
+        events1.setOrder( 2 );
+        events2.setOrder( 3 );
+        events3.setOrder( 1 );
+        
+        // add some events
+        Epoch e = plot.getEpoch( );
+        TimeStamp t0 = e.toTimeStamp( 0 );
+        Event e1 = new Event( "e1", "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
+        e1.setBackgroundColor( GlimpseColor.getGreen( ) );
 
+        events1.addEvent( e1 );
+        
         return plot;
     }
 
@@ -81,6 +101,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // show vertical lines instead of horizontal lines on all plots
         row.getGridPainter( ).setShowHorizontalLines( false );
         row.getGridPainter( ).setShowVerticalLines( true );
+        row.getGridPainter( ).setVisible( true );
 
         // make grid lines solid instead of dotted
         row.getGridPainter( ).setDotted( false );

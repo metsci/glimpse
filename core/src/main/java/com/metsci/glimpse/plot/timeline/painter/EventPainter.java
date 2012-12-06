@@ -12,8 +12,7 @@ import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter1D;
+import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -26,17 +25,11 @@ import com.sun.opengl.util.j2d.TextRenderer;
  * 
  * @author ulman
  */
-public class EventPainter extends GlimpsePainter1D
+public class EventPainter extends GlimpseDataPainter1D
 {
-    protected Map<Object,Event> eventMap;
+    protected Map<Object, Event> eventMap;
     protected NavigableSet<Event> startTimes;
     protected NavigableSet<Event> endTimes;
-
-    private TextRenderer textRenderer;
-    private boolean fontSet = false;
-
-    private volatile Font newFont = null;
-    private volatile boolean antialias = false;
 
     protected Epoch epoch;
     protected TextureAtlas atlas;
@@ -47,6 +40,15 @@ public class EventPainter extends GlimpsePainter1D
     protected double prevMin;
     protected double prevMax;
 
+    
+    protected TextRenderer textRenderer;
+    protected boolean fontSet = false;
+
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
+    
+    protected int bufferPixels = 2;
+    
     public EventPainter( Epoch epoch, TextureAtlas atlas, boolean isHorizontal )
     {
         this.epoch = epoch;
@@ -54,11 +56,11 @@ public class EventPainter extends GlimpsePainter1D
 
         this.startTimes = new TreeSet<Event>( Event.getStartTimeComparator( ) );
         this.endTimes = new TreeSet<Event>( Event.getEndTimeComparator( ) );
-        this.eventMap = new HashMap<Object,Event>( );
-        
+        this.eventMap = new HashMap<Object, Event>( );
+
         this.isHorizontal = isHorizontal;
     }
-    
+
     public void addEvent( Event event )
     {
         if ( event != null )
@@ -69,11 +71,11 @@ public class EventPainter extends GlimpsePainter1D
             this.visibleEvents = null;
         }
     }
-    
+
     public void removeEvent( Object id )
     {
         Event event = this.eventMap.remove( id );
-        
+
         if ( event != null )
         {
             this.startTimes.remove( event );
@@ -87,6 +89,11 @@ public class EventPainter extends GlimpsePainter1D
         return this.eventMap.get( id );
     }
     
+    public void setBuffer( int bufferPixels )
+    {
+        this.bufferPixels = bufferPixels;
+    }
+
     public EventPainter setFont( Font font, boolean antialias )
     {
         this.newFont = font;
@@ -134,12 +141,10 @@ public class EventPainter extends GlimpsePainter1D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void paintTo( GL gl, GlimpseBounds bounds, Axis1D axis )
     {
         int height = bounds.getHeight( );
         int width = bounds.getWidth( );
-
-        GL gl = context.getGL( );
 
         if ( newFont != null )
         {
@@ -155,7 +160,9 @@ public class EventPainter extends GlimpsePainter1D
 
         for ( Event event : visibleEvents )
         {
-            event.paint( gl, axis, this, 0, isHorizontal ? height : width );
+            System.out.println( "painting " + event.getId( ) );
+            
+            event.paint( gl, axis, this, bufferPixels, (isHorizontal ? height : width)-bufferPixels );
         }
     }
 }
