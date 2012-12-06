@@ -196,9 +196,12 @@ public class EventPainter extends GlimpseDataPainter1D
             calculateVisibleEvents( axis.getMin( ), axis.getMax( ) );
         }
 
+        int x = bufferPixels;
+        int y = (isHorizontal ? height : width)-bufferPixels;
+        
         for ( Event event : visibleEvents )
         {
-            event.paint( gl, axis, this, bufferPixels, (isHorizontal ? height : width)-bufferPixels );
+            event.paint( gl, axis, this, width, height, x, y );
         }
     }
     

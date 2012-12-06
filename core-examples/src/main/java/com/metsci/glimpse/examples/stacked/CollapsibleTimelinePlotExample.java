@@ -83,7 +83,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Event e1 = new Event( "e1", "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
         e1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
         e1.setBorderColor( GlimpseColor.getGreen( ) );
-
+        
         events1.addEvent( e1 );
         
         return plot;

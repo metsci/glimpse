@@ -1,5 +1,6 @@
 package com.metsci.glimpse.plot.timeline.data;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 
 import javax.media.opengl.GL;
@@ -13,7 +14,8 @@ import com.sun.opengl.util.j2d.TextRenderer;
 public class Event
 {
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
-
+    public static final int BUFFER = 2;
+    
     protected Object id;
     protected String name;
     protected Object iconId; // references id in associated TextureAtlas
@@ -51,16 +53,39 @@ public class Event
         this.endTime = endTime;
     }
     
-    public void paint( GL gl, Axis1D axis, EventPainter painter, int sizeMin, int sizeMax )
+    public void paint( GL gl, Axis1D axis, EventPainter painter, int width, int height, int sizeMin, int sizeMax )
     {
         Epoch epoch = painter.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
         double timeMax = epoch.fromTimeStamp( endTime );
-    
+        double timeSpan = timeMax - timeMin;
+        double pixelSpan = axis.getPixelsPerValue( ) * timeSpan;
+        
+        
         if ( painter.isHorizontal( ) )
         {
+            // draw text
             TextRenderer textRenderer = painter.getTextRenderer( );
-            GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
+            Rectangle2D bounds = textRenderer.getBounds( name );
+            
+            
+            
+            // only draw the text if it will fit in the event box
+            if ( bounds.getWidth( ) < pixelSpan )
+            {
+                GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
+                textRenderer.beginRendering( width, height );
+                try
+                {
+                    int x = BUFFER + axis.valueToScreenPixel( timeMin );
+                    int y = (int) ( height / 2.0 - bounds.getHeight( ) * 0.38 );
+                    textRenderer.draw( name, x, y );
+                }
+                finally
+                {
+                    textRenderer.endRendering( );
+                }
+            }
             
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
@@ -94,6 +119,8 @@ public class Event
         }
         else
         {
+            //TODO handle drawing text in VERTICAL orientation
+            
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
             try

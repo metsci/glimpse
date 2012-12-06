@@ -87,7 +87,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     public static final String BACKGROUND = "Timeline Background";
     public static final String TIMELINE = "Timeline";
 
-    public static final int TIME_PLOT_1D_SIZE = 35;
+    public static final int TIME_PLOT_1D_SIZE = 26;
     
     // tags representing the minimum and maximum bounds of the selected time window
     protected Tag minTag;
