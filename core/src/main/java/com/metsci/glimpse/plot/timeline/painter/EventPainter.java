@@ -1,7 +1,9 @@
 package com.metsci.glimpse.plot.timeline.painter;
 
 import java.awt.Font;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,6 +28,7 @@ import com.sun.opengl.util.j2d.TextRenderer;
  */
 public class EventPainter extends GlimpsePainter1D
 {
+    protected Map<Object,Event> eventMap;
     protected NavigableSet<Event> startTimes;
     protected NavigableSet<Event> endTimes;
 
@@ -51,10 +54,39 @@ public class EventPainter extends GlimpsePainter1D
 
         this.startTimes = new TreeSet<Event>( Event.getStartTimeComparator( ) );
         this.endTimes = new TreeSet<Event>( Event.getEndTimeComparator( ) );
-
+        this.eventMap = new HashMap<Object,Event>( );
+        
         this.isHorizontal = isHorizontal;
     }
+    
+    public void addEvent( Event event )
+    {
+        if ( event != null )
+        {
+            this.eventMap.put( event.getId( ), event );
+            this.startTimes.add( event );
+            this.endTimes.add( event );
+            this.visibleEvents = null;
+        }
+    }
+    
+    public void removeEvent( Object id )
+    {
+        Event event = this.eventMap.remove( id );
+        
+        if ( event != null )
+        {
+            this.startTimes.remove( event );
+            this.endTimes.remove( event );
+            this.visibleEvents = null;
+        }
+    }
 
+    public Event getEvent( Object id )
+    {
+        return this.eventMap.get( id );
+    }
+    
     public EventPainter setFont( Font font, boolean antialias )
     {
         this.newFont = font;

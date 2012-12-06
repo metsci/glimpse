@@ -61,7 +61,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo1D;
+import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener1D;
 import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
 import com.metsci.glimpse.plot.timeline.painter.SelectedTimeRegionPainter;
@@ -699,13 +699,13 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
     }
     
-    public TimePlotInfo1D createTimePlot1D( String name )
+    public EventPlotInfo createEventPlot( String name )
     {
         this.lock.lock( );
         try
         {
             PlotInfo plotInfo = createPlot0( name, new Axis1D( ) );
-            TimePlotInfo1D timePlotInfo = createTimePlot1D0( plotInfo );
+            EventPlotInfo timePlotInfo = createEventPlot0( plotInfo );
             stackedPlots.put( name, timePlotInfo );
             validate( );
             return timePlotInfo;
@@ -994,7 +994,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         return new TaggedAxis1D( );
     }
     
-    protected TimePlotInfo1D createTimePlot1D0( PlotInfo plotInfo )
+    protected EventPlotInfo createEventPlot0( PlotInfo plotInfo )
     {
         TimePlotInfo timePlot = createTimePlot0( plotInfo );
         
@@ -1004,7 +1004,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         // don't show grid lines
         timePlot.getGridPainter( ).setVisible( false );
         
-        TimePlotInfo1D timePlot1D = new TimePlotInfo1D( timePlot );
+        EventPlotInfo timePlot1D = new EventPlotInfo( timePlot );
         
         timePlot1D.setSize( TIME_PLOT_1D_SIZE );
         
