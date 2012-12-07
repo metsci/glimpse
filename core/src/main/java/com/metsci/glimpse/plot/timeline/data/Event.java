@@ -124,7 +124,7 @@ public class Event
                         ImageData iconData = atlas.getImageData( iconId );
                         double iconScale = size / ( double ) iconData.getHeight( );
 
-                        atlas.drawImageAxisX( gl, iconId, axis, valueX, buffer, iconScale, iconScale, 0, iconData.getHeight( ) );
+                        atlas.drawImageAxisX( gl, iconId, axis, valueX, sizeMin, iconScale, iconScale, 0, iconData.getHeight( ) );
                     }
                     finally
                     {
@@ -149,7 +149,7 @@ public class Event
                     textRenderer.beginRendering( width, height );
                     try
                     {
-                        int pixelY = ( int ) ( height / 2.0 - bounds.getHeight( ) * 0.3 );
+                        int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
                         textRenderer.draw( name, pixelX, pixelY );
 
                         remainingSpaceX -= bounds.getWidth( ) + buffer;

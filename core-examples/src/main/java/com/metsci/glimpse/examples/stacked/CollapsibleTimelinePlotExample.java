@@ -104,8 +104,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         e1.setBackgroundColor( GlimpseColor.getRed( 0.6f ) );
         e1.setBorderColor( GlimpseColor.getRed( ) );
         
-        Event e2 = events3.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
-        Event e3 = events3.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
+        Event e2 = events1.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
+        Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
         
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
         

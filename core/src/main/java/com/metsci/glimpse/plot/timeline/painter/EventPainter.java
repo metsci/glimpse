@@ -131,7 +131,7 @@ public class EventPainter extends GlimpseDataPainter1D
     
     public int getRowCount( )
     {
-        return Math.min( 1, this.rows.size( ) );
+        return Math.max( 1, this.rows.size( ) );
     }
 
     public float[] getBackgroundColor( )
