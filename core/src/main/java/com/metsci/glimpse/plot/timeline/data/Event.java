@@ -34,7 +34,8 @@ public class Event
     protected boolean showIcon = true;
     protected boolean showBorder = true;
 
-    protected boolean hideOverfullLabels = true;
+    protected boolean hideOverfullLabels;
+    protected boolean hideIntersectingLabels;
 
     private Event( TimeStamp time )
     {
@@ -47,6 +48,9 @@ public class Event
         this.name = name;
         this.startTime = time;
         this.endTime = time;
+        
+        this.hideIntersectingLabels = true;
+        this.hideOverfullLabels = false;
     }
 
     public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
@@ -55,6 +59,9 @@ public class Event
         this.name = name;
         this.startTime = startTime;
         this.endTime = endTime;
+        
+        this.hideIntersectingLabels = true;
+        this.hideOverfullLabels = true;
     }
 
     public void paint( GL gl, Axis1D axis, EventPainter painter, int width, int height, int sizeMin, int sizeMax )
@@ -106,7 +113,7 @@ public class Event
             {
                 int iconSizePixels = height - BUFFER * 2;
 
-                if ( iconSizePixels < remainingSpaceX )
+                if ( iconSizePixels < remainingSpaceX || !hideOverfullLabels )
                 {
                     double valueX = axis.screenPixelToValue( pixelX );
 
@@ -276,6 +283,17 @@ public class Event
         this.showName = showName;
     }
 
+    /**
+     * If true, hides labels and/or icons if they would intersect with other events.
+     */
+    public void setHideIntersectingName( boolean hide )
+    {
+        this.hideIntersectingLabels = hide;
+    }
+    
+    /**
+     * If true, hides labels and/or icons if they would fall outside this event's time window.
+     */
     public void setHideOverfullName( boolean hide )
     {
         this.hideOverfullLabels = hide;

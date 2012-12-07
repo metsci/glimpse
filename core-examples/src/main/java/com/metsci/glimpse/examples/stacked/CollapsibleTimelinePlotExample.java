@@ -107,6 +107,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Event e2 = events3.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
         Event e3 = events3.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
         
+        Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
+        
         // add icons to the events
         TextureAtlas atlas = plot.getTextureAtlas( );
         try
@@ -121,9 +123,12 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             logWarning( logger, "Trouble loading icon.", ex );
         }
         
-        e0.setIconId( "alarm-clock" );
+        e4.setIconId( "alarm-clock" );
+        e0.setIconId( "glass" );
         e2.setIconId( "cloud" );
         e3.setIconId( "sun" );
+        
+        e0.setHideOverfullName( false );
         
         return plot;
     }
