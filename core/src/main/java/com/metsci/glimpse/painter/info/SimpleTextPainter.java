@@ -282,8 +282,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             xText = ( int ) horizontalPadding;
             break;
         case Center:
-            // 0.38 looks more "centered" for most fonts than 0.5
-            xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.38 );
+            // 0.3 looks more "centered" for most fonts than 0.5
+            xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.3 );
             break;
         case Right:
             xText = ( int ) ( width - textBounds.getWidth( ) - horizontalPadding );
@@ -296,8 +296,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             yText = ( int ) verticalPadding;
             break;
         case Center:
-         // 0.38 looks more "centered" for most fonts than 0.5
-            yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.38 );
+         // 0.3 looks more "centered" for most fonts than 0.5
+            yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.3 );
             break;
         case Top:
             yText = ( int ) ( height - textBounds.getHeight( ) - verticalPadding );

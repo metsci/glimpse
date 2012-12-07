@@ -1,6 +1,12 @@
 package com.metsci.glimpse.examples.stacked;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+
+import java.io.IOException;
 import java.util.Collection;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
@@ -12,14 +18,18 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExample
 {
+    private static final Logger logger = Logger.getLogger( CollapsibleTimelinePlotExample.class.getName( ) );
+    
     public static void main( String[] args ) throws Exception
     {
         Example example = Example.showWithSwing( new CollapsibleTimelinePlotExample( ) );
@@ -56,8 +66,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         EventPlotInfo events3 = plot.createEventPlot( "event-3" );
 
         events1.setLabelText( "Snail Schedule" );
-        events2.setLabelText( "Weather" );
-        events3.setLabelText( "Nap Time" );
+        events2.setLabelText( "Holidays" );
+        events3.setLabelText( "Weather" );
 
         setPlotLookAndFeel( events1 );
         setPlotLookAndFeel( events2 );
@@ -76,15 +86,44 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.setOrder( 2 );
         events2.setOrder( 3 );
         events3.setOrder( 1 );
+       
+        // set default colors for the event plots
+        events1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
+        events1.setBorderColor( GlimpseColor.getGreen( ) );
+        events3.setBackgroundColor( GlimpseColor.getCyan( 0.6f ) );
+        events3.setBorderColor( GlimpseColor.getCyan( ) );
         
-        // add some events
         Epoch e = plot.getEpoch( );
         TimeStamp t0 = e.toTimeStamp( 0 );
-        Event e1 = new Event( "e1", "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
-        e1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
-        e1.setBorderColor( GlimpseColor.getGreen( ) );
         
-        events1.addEvent( e1 );
+        // add some events
+        Event e0 = events1.addEvent( "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
+        events1.addEvent( "Spread Slime On Stuff", t0.add( Time.fromMinutes( 30 ) ), t0.add( Time.fromMinutes( 200 ) ) );
+        
+        Event e1 = events1.addEvent( "Chill", t0.add( Time.fromMinutes( 290 ) ), t0.add( Time.fromMinutes( 320 ) ) );
+        e1.setBackgroundColor( GlimpseColor.getRed( 0.6f ) );
+        e1.setBorderColor( GlimpseColor.getRed( ) );
+        
+        Event e2 = events3.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
+        Event e3 = events3.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
+        
+        // add icons to the events
+        TextureAtlas atlas = plot.getTextureAtlas( );
+        try
+        {
+            atlas.loadImage( "cloud", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/weather-clouds.png" ) ) );
+            atlas.loadImage( "sun", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/weather.png" ) ) );
+            atlas.loadImage( "glass", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/glass.png" ) ) );
+            atlas.loadImage( "alarm-clock", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/alarm-clock-blue.png" ) ) );
+        }
+        catch ( IOException ex )
+        {
+            logWarning( logger, "Trouble loading icon.", ex );
+        }
+        
+        e0.setIconId( "alarm-clock" );
+        e2.setIconId( "cloud" );
+        e3.setIconId( "sun" );
         
         return plot;
     }

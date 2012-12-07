@@ -143,6 +143,11 @@ public class EventPainter extends GlimpseDataPainter1D
         return this.textRenderer;
     }
 
+    public TextureAtlas getTextureAtlas( )
+    {
+        return this.atlas;
+    }
+    
     public EventPainter setFont( Font font, boolean antialias )
     {
         this.newFont = font;

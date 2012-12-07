@@ -1,6 +1,7 @@
 package com.metsci.glimpse.plot.timeline.layout;
 
 import java.awt.Font;
+import java.util.UUID;
 
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
@@ -9,6 +10,7 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.plot.timeline.painter.EventPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class EventPlotInfo extends TimePlotInfo
 {
@@ -17,6 +19,11 @@ public class EventPlotInfo extends TimePlotInfo
 
     //@formatter:off
     public EventPlotInfo( TimePlotInfo delegate )
+    {
+        this( delegate, new TextureAtlas( ) );
+    }
+    
+    public EventPlotInfo( TimePlotInfo delegate, TextureAtlas atlas )
     {
         super( delegate.parent,
                 delegate.child,
@@ -30,7 +37,6 @@ public class EventPlotInfo extends TimePlotInfo
                 delegate.dataPainter );
     
         Epoch epoch = delegate.parent.getEpoch( );
-        TextureAtlas atlas = new TextureAtlas( );
         boolean isHorizontal = delegate.parent.isTimeAxisHorizontal( );
         
         if ( isHorizontal )
@@ -44,10 +50,15 @@ public class EventPlotInfo extends TimePlotInfo
         
         this.layout1D.setEventConsumer( false );
         this.eventPainter = new EventPainter( epoch, atlas, isHorizontal );
-        this.layout1D.addPainter( this.eventPainter );
+        this.layout1D.addPainter( this.eventPainter );        
     }
     //@formatter:on
 
+    public TextureAtlas getTextureAtlas( )
+    {
+        return this.eventPainter.getTextureAtlas( );
+    }
+    
     public void setBackgroundColor( float[] backgroundColor )
     {
         this.eventPainter.setBackgroundColor( backgroundColor );
@@ -71,6 +82,30 @@ public class EventPlotInfo extends TimePlotInfo
     public void setFont( Font font, boolean antialias )
     {
         this.eventPainter.setFont( font, antialias );
+    }
+    
+    public Event addEvent( String name, TimeStamp time )
+    {
+        return addEvent( UUID.randomUUID( ), name, time );
+    }
+    
+    public Event addEvent( String name, TimeStamp startTime, TimeStamp endTime )
+    {
+        return addEvent( UUID.randomUUID( ), name, startTime, endTime );
+    }
+    
+    public Event addEvent( Object id, String name, TimeStamp time )
+    {
+        Event event = new Event( id, name, time );
+        addEvent( event );
+        return event;
+    }
+    
+    public Event addEvent( Object id, String name, TimeStamp startTime, TimeStamp endTime )
+    {
+        Event event = new Event( id, name, startTime, endTime );
+        addEvent( event );
+        return event;
     }
 
     public void addEvent( Event event )

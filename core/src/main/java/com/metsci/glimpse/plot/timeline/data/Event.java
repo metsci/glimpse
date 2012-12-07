@@ -7,6 +7,8 @@ import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.painter.EventPainter;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
@@ -15,28 +17,30 @@ public class Event
 {
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
     public static final int BUFFER = 2;
-    
+
     protected Object id;
     protected String name;
     protected Object iconId; // references id in associated TextureAtlas
-    
+
     protected float[] backgroundColor;
     protected float[] borderColor;
     protected float[] textColor;
     protected float borderThickness = 1.8f;
-    
+
     protected TimeStamp startTime;
     protected TimeStamp endTime;
 
-    protected boolean showName;
-    protected boolean showIcon;
-    protected boolean showBorder;
-    
+    protected boolean showName = true;
+    protected boolean showIcon = true;
+    protected boolean showBorder = true;
+
+    protected boolean hideOverfullLabels = true;
+
     private Event( TimeStamp time )
     {
         this( null, null, time );
     }
-    
+
     public Event( Object id, String name, TimeStamp time )
     {
         this.id = id;
@@ -52,41 +56,20 @@ public class Event
         this.startTime = startTime;
         this.endTime = endTime;
     }
-    
+
     public void paint( GL gl, Axis1D axis, EventPainter painter, int width, int height, int sizeMin, int sizeMax )
     {
         Epoch epoch = painter.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
         double timeMax = epoch.fromTimeStamp( endTime );
-        double timeSpan = timeMax - timeMin;
-        double pixelSpan = axis.getPixelsPerValue( ) * timeSpan;
-        
-        
+
+        double timeSpan = Math.min( axis.getMax( ), timeMax ) - Math.max( axis.getMin( ), timeMin );
+        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - BUFFER * 2;
+
+        int pixelX = BUFFER + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
+
         if ( painter.isHorizontal( ) )
         {
-            // draw text
-            TextRenderer textRenderer = painter.getTextRenderer( );
-            Rectangle2D bounds = textRenderer.getBounds( name );
-            
-            
-            
-            // only draw the text if it will fit in the event box
-            if ( bounds.getWidth( ) < pixelSpan )
-            {
-                GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
-                textRenderer.beginRendering( width, height );
-                try
-                {
-                    int x = BUFFER + axis.valueToScreenPixel( timeMin );
-                    int y = (int) ( height / 2.0 - bounds.getHeight( ) * 0.38 );
-                    textRenderer.draw( name, x, y );
-                }
-                finally
-                {
-                    textRenderer.endRendering( );
-                }
-            }
-            
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
             try
@@ -100,27 +83,82 @@ public class Event
             {
                 gl.glEnd( );
             }
-            
-            GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
-            gl.glLineWidth( borderThickness );
-            gl.glBegin( GL.GL_LINE_LOOP );
-            try
+
+            if ( showBorder )
             {
-                gl.glVertex2d( timeMin, sizeMin );
-                gl.glVertex2d( timeMin, sizeMax );
-                gl.glVertex2d( timeMax, sizeMax );
-                gl.glVertex2d( timeMax, sizeMin );
+                GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+                gl.glLineWidth( borderThickness );
+                gl.glBegin( GL.GL_LINE_LOOP );
+                try
+                {
+                    gl.glVertex2d( timeMin, sizeMin );
+                    gl.glVertex2d( timeMin, sizeMax );
+                    gl.glVertex2d( timeMax, sizeMax );
+                    gl.glVertex2d( timeMax, sizeMin );
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
             }
-            finally
+
+            if ( showIcon && iconId != null )
             {
-                gl.glEnd( );
+                int iconSizePixels = height - BUFFER * 2;
+
+                if ( iconSizePixels < remainingSpaceX )
+                {
+                    double valueX = axis.screenPixelToValue( pixelX );
+
+                    TextureAtlas atlas = painter.getTextureAtlas( );
+                    atlas.beginRendering( );
+                    try
+                    {
+                        ImageData iconData = atlas.getImageData( iconId );
+                        double iconScale = iconSizePixels / ( double ) iconData.getHeight( );
+
+                        atlas.drawImageAxisX( gl, iconId, axis, valueX, BUFFER, iconScale, iconScale, 0, iconData.getHeight( ) );
+                    }
+                    finally
+                    {
+                        atlas.endRendering( );
+                    }
+
+                    remainingSpaceX -= iconSizePixels + BUFFER;
+                    pixelX += iconSizePixels + BUFFER;
+                }
             }
-        
+
+            if ( showName )
+            {
+                // draw text
+                TextRenderer textRenderer = painter.getTextRenderer( );
+                Rectangle2D bounds = textRenderer.getBounds( name );
+
+                // only draw the text if it will fit in the event box
+                if ( bounds.getWidth( ) < remainingSpaceX || !hideOverfullLabels )
+                {
+                    GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
+                    textRenderer.beginRendering( width, height );
+                    try
+                    {
+                        int pixelY = ( int ) ( height / 2.0 - bounds.getHeight( ) * 0.3 );
+                        textRenderer.draw( name, pixelX, pixelY );
+
+                        remainingSpaceX -= bounds.getWidth( ) + BUFFER;
+                        pixelX += bounds.getWidth( ) + BUFFER;
+                    }
+                    finally
+                    {
+                        textRenderer.endRendering( );
+                    }
+                }
+            }
         }
         else
         {
             //TODO handle drawing text in VERTICAL orientation
-            
+
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
             try
@@ -134,7 +172,7 @@ public class Event
             {
                 gl.glEnd( );
             }
-            
+
             GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
             gl.glLineWidth( borderThickness );
             gl.glBegin( GL.GL_LINE_LOOP );
@@ -149,7 +187,7 @@ public class Event
             {
                 gl.glEnd( );
             }
-            
+
         }
     }
 
@@ -177,7 +215,7 @@ public class Event
     {
         this.borderThickness = thickness;
     }
-    
+
     public float[] getBackgroundColor( )
     {
         return backgroundColor;
@@ -236,6 +274,11 @@ public class Event
     public void setShowName( boolean showName )
     {
         this.showName = showName;
+    }
+
+    public void setHideOverfullName( boolean hide )
+    {
+        this.hideOverfullLabels = hide;
     }
 
     public boolean isShowIcon( )
@@ -298,12 +341,12 @@ public class Event
             }
         };
     }
-    
+
     public static Event createDummyEvent( TimeStamp time )
     {
         return new Event( time );
     }
-    
+
     public static Comparator<Event> getEndTimeComparator( )
     {
         return new Comparator<Event>( )

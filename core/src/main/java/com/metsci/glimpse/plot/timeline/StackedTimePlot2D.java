@@ -65,6 +65,7 @@ import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener1D;
 import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
 import com.metsci.glimpse.plot.timeline.painter.SelectedTimeRegionPainter;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.units.time.Time;
@@ -127,6 +128,8 @@ public class StackedTimePlot2D extends StackedPlot2D
     // the size of the label layout area in pixels
     protected int labelLayoutSize;
     protected boolean showLabelLayout = false;
+    
+    protected TextureAtlas defaultTextureAtlas;
 
     public StackedTimePlot2D( )
     {
@@ -157,6 +160,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         super( orientation );
 
         this.epoch = epoch;
+        this.defaultTextureAtlas = new TextureAtlas( );
 
         this.initializeTimePlot( );
     }
@@ -699,13 +703,23 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
     }
     
+    public TextureAtlas getTextureAtlas( )
+    {
+        return this.defaultTextureAtlas;
+    }
+    
     public EventPlotInfo createEventPlot( String name )
+    {
+        return createEventPlot( name, defaultTextureAtlas );
+    }
+    
+    public EventPlotInfo createEventPlot( String name, TextureAtlas atlas )
     {
         this.lock.lock( );
         try
         {
             PlotInfo plotInfo = createPlot0( name, new Axis1D( ) );
-            EventPlotInfo timePlotInfo = createEventPlot0( plotInfo );
+            EventPlotInfo timePlotInfo = createEventPlot0( plotInfo, atlas );
             stackedPlots.put( name, timePlotInfo );
             validate( );
             return timePlotInfo;
@@ -994,7 +1008,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         return new TaggedAxis1D( );
     }
     
-    protected EventPlotInfo createEventPlot0( PlotInfo plotInfo )
+    protected EventPlotInfo createEventPlot0( PlotInfo plotInfo, TextureAtlas atlas )
     {
         TimePlotInfo timePlot = createTimePlot0( plotInfo );
         
@@ -1007,11 +1021,16 @@ public class StackedTimePlot2D extends StackedPlot2D
         // center the labels because the plots are so small anyway
         timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         
-        EventPlotInfo timePlot1D = new EventPlotInfo( timePlot );
+        EventPlotInfo timePlot1D = new EventPlotInfo( timePlot, atlas );
         
         timePlot1D.setSize( TIME_PLOT_1D_SIZE );
         
         return timePlot1D;
+    }
+    
+    protected EventPlotInfo createEventPlot0( PlotInfo plotInfo )
+    {
+        return createEventPlot0( plotInfo, defaultTextureAtlas );
     }
 
     protected TimePlotInfo createTimePlot0( PlotInfo plotInfo )
