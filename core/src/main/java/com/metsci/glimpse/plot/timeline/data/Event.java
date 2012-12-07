@@ -16,7 +16,6 @@ import com.sun.opengl.util.j2d.TextRenderer;
 public class Event
 {
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
-    public static final int BUFFER = 2;
 
     protected Object id;
     protected String name;
@@ -66,14 +65,17 @@ public class Event
 
     public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
     {
+        int size = sizeMax - sizeMin;
+        int buffer = painter.getBufferSize( );
+        
         Epoch epoch = painter.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
         double timeMax = epoch.fromTimeStamp( endTime );
 
         double timeSpan = Math.min( axis.getMax( ), timeMax ) - Math.max( axis.getMin( ), timeMin );
-        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - BUFFER * 2;
+        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
-        int pixelX = BUFFER + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
+        int pixelX = buffer + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
 
         if ( painter.isHorizontal( ) )
         {
@@ -111,9 +113,7 @@ public class Event
 
             if ( showIcon && iconId != null )
             {
-                int iconSizePixels = height - BUFFER * 2;
-
-                if ( iconSizePixels < remainingSpaceX || !hideOverfullLabels )
+                if ( size < remainingSpaceX || !hideOverfullLabels )
                 {
                     double valueX = axis.screenPixelToValue( pixelX );
 
@@ -122,17 +122,17 @@ public class Event
                     try
                     {
                         ImageData iconData = atlas.getImageData( iconId );
-                        double iconScale = iconSizePixels / ( double ) iconData.getHeight( );
+                        double iconScale = size / ( double ) iconData.getHeight( );
 
-                        atlas.drawImageAxisX( gl, iconId, axis, valueX, BUFFER, iconScale, iconScale, 0, iconData.getHeight( ) );
+                        atlas.drawImageAxisX( gl, iconId, axis, valueX, buffer, iconScale, iconScale, 0, iconData.getHeight( ) );
                     }
                     finally
                     {
                         atlas.endRendering( );
                     }
 
-                    remainingSpaceX -= iconSizePixels + BUFFER;
-                    pixelX += iconSizePixels + BUFFER;
+                    remainingSpaceX -= size + buffer;
+                    pixelX += size + buffer;
                 }
             }
 
@@ -152,8 +152,8 @@ public class Event
                         int pixelY = ( int ) ( height / 2.0 - bounds.getHeight( ) * 0.3 );
                         textRenderer.draw( name, pixelX, pixelY );
 
-                        remainingSpaceX -= bounds.getWidth( ) + BUFFER;
-                        pixelX += bounds.getWidth( ) + BUFFER;
+                        remainingSpaceX -= bounds.getWidth( ) + buffer;
+                        pixelX += bounds.getWidth( ) + buffer;
                     }
                     finally
                     {

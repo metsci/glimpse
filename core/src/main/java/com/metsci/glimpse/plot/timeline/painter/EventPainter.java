@@ -16,6 +16,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
+import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -35,6 +36,7 @@ public class EventPainter extends GlimpseDataPainter1D
     // map from row id to navigable sets of events within that row
     protected List<Row> rows;
 
+    protected EventPlotInfo plot;
     protected Epoch epoch;
     protected TextureAtlas atlas;
 
@@ -49,8 +51,6 @@ public class EventPainter extends GlimpseDataPainter1D
 
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
-
-    protected int bufferPixels = 2;
 
     protected float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
@@ -104,8 +104,9 @@ public class EventPainter extends GlimpseDataPainter1D
         }
     }
 
-    public EventPainter( Epoch epoch, TextureAtlas atlas, boolean isHorizontal )
+    public EventPainter( EventPlotInfo plot, Epoch epoch, TextureAtlas atlas, boolean isHorizontal )
     {
+        this.plot = plot;
         this.epoch = epoch;
         this.atlas = atlas;
 
@@ -116,6 +117,21 @@ public class EventPainter extends GlimpseDataPainter1D
         this.isHorizontal = isHorizontal;
 
         this.newFont = FontUtils.getDefaultPlain( 12 );
+    }
+    
+    public int getRowSize( )
+    {
+        return this.plot.getRowSize( );
+    }
+    
+    public int getBufferSize( )
+    {
+        return this.plot.getBufferSize( );
+    }
+    
+    public int getRowCount( )
+    {
+        return Math.min( 1, this.rows.size( ) );
     }
 
     public float[] getBackgroundColor( )
@@ -158,6 +174,7 @@ public class EventPainter extends GlimpseDataPainter1D
             this.eventMap.put( event.getId( ), event );
             this.addEvent0( event );
             this.visibleEventsDirty = true;
+            this.plot.updateSize( );
         }
     }
 
@@ -169,17 +186,13 @@ public class EventPainter extends GlimpseDataPainter1D
         {
             this.removeEvent0( event );
             this.visibleEventsDirty = true;
+            this.plot.updateSize( );
         }
     }
 
     public Event getEvent( Object id )
     {
         return this.eventMap.get( id );
-    }
-
-    public void setBuffer( int bufferPixels )
-    {
-        this.bufferPixels = bufferPixels;
     }
 
     public TextRenderer getTextRenderer( )
@@ -340,8 +353,11 @@ public class EventPainter extends GlimpseDataPainter1D
             calculateVisibleEvents( axis.getMin( ), axis.getMax( ) );
         }
 
-        int x = bufferPixels;
-        int y = ( isHorizontal ? height : width ) - bufferPixels;
+        int buffer = plot.getBufferSize( );
+        int rowSize = plot.getRowSize( );
+        
+        int sizeMin = buffer;
+        int sizeMax = buffer + rowSize;
 
         int size = rows.size( );
         for ( int i = 0; i < size; i++ )
@@ -354,7 +370,7 @@ public class EventPainter extends GlimpseDataPainter1D
             {
                 if ( prev != null )
                 {
-                    prev.paint( gl, axis, this, event, width, height, x, y );
+                    prev.paint( gl, axis, this, event, width, height, sizeMin, sizeMax );
                 }
 
                 prev = event;
@@ -363,8 +379,11 @@ public class EventPainter extends GlimpseDataPainter1D
             // paint last event
             if ( prev != null )
             {
-                prev.paint( gl, axis, this, null, width, height, x, y );
+                prev.paint( gl, axis, this, null, width, height, sizeMin, sizeMax );
             }
+            
+            sizeMin = sizeMax + buffer;
+            sizeMax = sizeMax + buffer + rowSize;
         }
     }
 

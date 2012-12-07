@@ -14,9 +14,15 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class EventPlotInfo extends TimePlotInfo
 {
+    public static final int DEFAULT_ROW_SIZE = 26;
+    public static final int DEFAULT_BUFFER_SIZE = 2;
+    
     protected EventPainter eventPainter;
     protected GlimpseAxisLayout1D layout1D;
 
+    protected int rowSize;
+    protected int bufferSize;
+    
     //@formatter:off
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -49,11 +55,48 @@ public class EventPlotInfo extends TimePlotInfo
         }
         
         this.layout1D.setEventConsumer( false );
-        this.eventPainter = new EventPainter( epoch, atlas, isHorizontal );
-        this.layout1D.addPainter( this.eventPainter );        
+        this.eventPainter = new EventPainter( this, epoch, atlas, isHorizontal );
+        this.layout1D.addPainter( this.eventPainter );
+        
+        this.rowSize = DEFAULT_ROW_SIZE;
+        this.bufferSize = DEFAULT_BUFFER_SIZE;
+        this.updateSize( );
     }
     //@formatter:on
 
+    /**
+     * Sets the size of a single row of events. An EventPlotInfo may contain
+     * multiple rows of events if some of those events overlap in time.
+     */
+    public void setRowSize( int size )
+    {
+        this.rowSize = size;
+        this.updateSize( );
+    }
+    
+    public void setBufferSize( int size )
+    {
+        this.bufferSize = size;
+        this.updateSize( );
+    }
+    
+    public int getBufferSize( )
+    {
+        return this.bufferSize;
+    }
+    
+    public int getRowSize( )
+    {
+        return this.rowSize;
+    }
+    
+    public void updateSize( )
+    {
+        int rowCount = this.eventPainter.getRowCount( );
+        
+        this.setSize( rowCount * this.rowSize + (rowCount+1) * this.bufferSize );
+    }
+    
     public TextureAtlas getTextureAtlas( )
     {
         return this.eventPainter.getTextureAtlas( );
@@ -72,11 +115,6 @@ public class EventPlotInfo extends TimePlotInfo
     public void setTextColor( float[] textColor )
     {
         this.eventPainter.setTextColor( textColor );
-    }
-
-    public void setBuffer( int bufferPixels )
-    {
-        this.eventPainter.setBuffer( bufferPixels );
     }
 
     public void setFont( Font font, boolean antialias )

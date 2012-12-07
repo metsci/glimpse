@@ -87,8 +87,6 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     public static final String BACKGROUND = "Timeline Background";
     public static final String TIMELINE = "Timeline";
-
-    public static final int TIME_PLOT_1D_SIZE = 26;
     
     // tags representing the minimum and maximum bounds of the selected time window
     protected Tag minTag;
@@ -1022,8 +1020,6 @@ public class StackedTimePlot2D extends StackedPlot2D
         timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         
         EventPlotInfo timePlot1D = new EventPlotInfo( timePlot, atlas );
-        
-        timePlot1D.setSize( TIME_PLOT_1D_SIZE );
         
         return timePlot1D;
     }
