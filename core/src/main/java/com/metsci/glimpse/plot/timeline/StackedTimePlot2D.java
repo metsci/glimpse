@@ -713,6 +713,11 @@ public class StackedTimePlot2D extends StackedPlot2D
     
     public EventPlotInfo createEventPlot( String name, TextureAtlas atlas )
     {
+        if ( !isTimeAxisHorizontal( ) )
+        {
+            throw new UnsupportedOperationException( "Event Plots are currently not supported by HORIZTONAL StackedTimePlot2D" );
+        }
+        
         this.lock.lock( );
         try
         {

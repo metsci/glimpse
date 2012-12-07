@@ -1,9 +1,10 @@
 package com.metsci.glimpse.examples.stacked;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -17,6 +18,7 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo.EventPlotListener;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -29,7 +31,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     private static final Logger logger = Logger.getLogger( CollapsibleTimelinePlotExample.class.getName( ) );
-    
+
     public static void main( String[] args ) throws Exception
     {
         Example example = Example.showWithSwing( new CollapsibleTimelinePlotExample( ) );
@@ -72,7 +74,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         setPlotLookAndFeel( events1 );
         setPlotLookAndFeel( events2 );
         setPlotLookAndFeel( events3 );
-        
+
         events1.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events2.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events3.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
@@ -80,35 +82,35 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // create a collapsible/expandable group for all the event plots
         GroupInfo group = plot.createGroup( "events-group", events1, events2, events3 );
         group.setLabelText( "Event Group" );
-        
+
         // put the event group directly below the timeline
         group.setOrder( 100 );
         events1.setOrder( 2 );
         events2.setOrder( 3 );
         events3.setOrder( 1 );
-       
+
         // set default colors for the event plots
         events1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
         events1.setBorderColor( GlimpseColor.getGreen( ) );
         events3.setBackgroundColor( GlimpseColor.getCyan( 0.6f ) );
         events3.setBorderColor( GlimpseColor.getCyan( ) );
-        
+
         Epoch e = plot.getEpoch( );
         TimeStamp t0 = e.toTimeStamp( 0 );
-        
+
         // add some events
         Event e0 = events1.addEvent( "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
         events1.addEvent( "Spread Slime On Stuff", t0.add( Time.fromMinutes( 30 ) ), t0.add( Time.fromMinutes( 200 ) ) );
-        
+
         Event e1 = events1.addEvent( "Chill", t0.add( Time.fromMinutes( 290 ) ), t0.add( Time.fromMinutes( 320 ) ) );
         e1.setBackgroundColor( GlimpseColor.getRed( 0.6f ) );
         e1.setBorderColor( GlimpseColor.getRed( ) );
-        
+
         Event e2 = events1.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
         Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
-        
+
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
-        
+
         // add icons to the events
         TextureAtlas atlas = plot.getTextureAtlas( );
         try
@@ -122,14 +124,34 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         {
             logWarning( logger, "Trouble loading icon.", ex );
         }
-        
+
         e4.setIconId( "alarm-clock" );
         e0.setIconId( "glass" );
         e2.setIconId( "cloud" );
         e3.setIconId( "sun" );
-        
-        e0.setHideOverfullName( false );
-        
+
+        // add listeners to EventPlots
+        events1.addEventPlotListener( new EventPlotListener( )
+        {
+            @Override
+            public void eventsHovered( Set<Event> events )
+            {
+                System.out.println( "eventsHovered: " + events );
+            }
+
+            @Override
+            public void eventClicked( Event event )
+            {
+                System.out.println( "eventClicked: " + event );
+            }
+
+            @Override
+            public void eventUpdated( Event event )
+            {
+                System.out.println( "eventUpdated: " + event );
+            }
+        } );
+
         return plot;
     }
 

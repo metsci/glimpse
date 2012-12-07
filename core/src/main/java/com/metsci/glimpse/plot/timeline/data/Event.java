@@ -168,7 +168,7 @@ public class Event
         }
         else
         {
-            //TODO handle drawing text in VERTICAL orientation
+            //TODO handle drawing text and icons in HORIZONTAL orientation
 
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
             gl.glBegin( GL.GL_QUADS );
@@ -350,6 +350,12 @@ public class Event
         }
         else if ( !id.equals( other.id ) ) return false;
         return true;
+    }
+    
+    @Override
+    public String toString( )
+    {
+        return String.format( "%s (%s)", name, id );
     }
 
     public static Comparator<Event> getStartTimeComparator( )

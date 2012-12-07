@@ -2,17 +2,21 @@ package com.metsci.glimpse.plot.timeline.painter;
 
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.media.opengl.GL;
 
+import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
@@ -22,6 +26,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
@@ -221,6 +226,32 @@ public class EventPainter extends GlimpseDataPainter1D
     public Epoch getEpoch( )
     {
         return this.epoch;
+    }
+    
+    public Set<Event> getNearestEvents( GlimpseMouseEvent e )
+    {
+        if ( isHorizontal )
+        {
+            Axis1D axis = e.getAxis1D( );
+            int valueY = e.getY( );
+            double valueX = axis.screenPixelToValue( e.getX( ) );
+            TimeStamp time = epoch.toTimeStamp( valueX );
+            Event eventTime = Event.createDummyEvent( time );
+        
+            int rowIndex = (int) Math.floor( valueY / (double) ( getRowSize( ) + getBufferSize( ) ) );
+            rowIndex = rows.size( ) - 1 - rowIndex;
+            
+            if ( rowIndex >= 0 && rowIndex < rows.size( ) )
+            {
+                Row row = rows.get( rowIndex );
+                SortedSet<Event> s1 = row.startTimes.headSet( eventTime );
+                SortedSet<Event> s2 = row.endTimes.tailSet( eventTime );
+                
+                return Sets.intersection( s1, s2 );
+            }
+        }
+        
+        return Collections.emptySet( );
     }
 
     protected void removeEvent0( Event event )
