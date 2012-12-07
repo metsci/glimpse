@@ -64,7 +64,7 @@ public class Event
         this.hideOverfullLabels = true;
     }
 
-    public void paint( GL gl, Axis1D axis, EventPainter painter, int width, int height, int sizeMin, int sizeMax )
+    public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
     {
         Epoch epoch = painter.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
