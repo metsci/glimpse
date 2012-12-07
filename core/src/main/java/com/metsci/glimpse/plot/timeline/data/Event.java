@@ -76,7 +76,11 @@ public class Event
         double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
         int pixelX = buffer + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
-
+        
+        // start positions of the next event in this row
+        double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : Double.MAX_VALUE;
+        int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : Integer.MAX_VALUE;
+        
         if ( painter.isHorizontal( ) )
         {
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
@@ -113,7 +117,7 @@ public class Event
 
             if ( showIcon && iconId != null )
             {
-                if ( size < remainingSpaceX || !hideOverfullLabels )
+                if ( ( size + buffer < remainingSpaceX || !hideOverfullLabels ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersectingLabels ) )
                 {
                     double valueX = axis.screenPixelToValue( pixelX );
 
@@ -143,7 +147,7 @@ public class Event
                 Rectangle2D bounds = textRenderer.getBounds( name );
 
                 // only draw the text if it will fit in the event box
-                if ( bounds.getWidth( ) < remainingSpaceX || !hideOverfullLabels )
+                if ( ( bounds.getWidth( ) + buffer < remainingSpaceX || !hideOverfullLabels ) && ( pixelX + bounds.getWidth( ) + buffer < nextStartPixel || !hideIntersectingLabels ) )
                 {
                     GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
                     textRenderer.beginRendering( width, height );
