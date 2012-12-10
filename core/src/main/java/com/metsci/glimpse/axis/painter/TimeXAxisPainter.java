@@ -156,6 +156,11 @@ public class TimeXAxisPainter extends TimeAxisPainter
             textRenderer.endRendering( );
         }
     }
+    
+    protected TimeStamp getCurrentTime( )
+    {
+        return currentTime( );
+    }
 
     private void printHoverLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, TimeStructFactory factory, double jTimeText, int width, int height )
     {
@@ -213,7 +218,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
     private void drawCurrentTimeTick( GL gl, Axis1D axis, int width, int height )
     {
-        int iTick = axis.valueToScreenPixel( fromTimeStamp( currentTime( ) ) );
+        int iTick = axis.valueToScreenPixel( fromTimeStamp( getCurrentTime( ) ) );
 
         gl.glColor4fv( currentTimeTickColor, 0 );
         gl.glLineWidth( currentTimeLineThickness );
