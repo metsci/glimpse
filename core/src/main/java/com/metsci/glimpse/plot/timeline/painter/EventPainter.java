@@ -36,6 +36,8 @@ import com.sun.opengl.util.j2d.TextRenderer;
  */
 public class EventPainter extends GlimpseDataPainter1D
 {
+    protected static final int PICK_BUFFER_PIXELS = 10;
+    
     protected Map<Object, Event> eventMap;
     protected Map<Object, Row> rowMap;
     // map from row id to navigable sets of events within that row
@@ -235,8 +237,12 @@ public class EventPainter extends GlimpseDataPainter1D
             Axis1D axis = e.getAxis1D( );
             int valueY = e.getY( );
             double valueX = axis.screenPixelToValue( e.getX( ) );
-            TimeStamp time = epoch.toTimeStamp( valueX );
-            Event eventTime = Event.createDummyEvent( time );
+            double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
+            
+            TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
+            TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
+            Event eventStart = Event.createDummyEvent( timeStart );
+            Event eventEnd = Event.createDummyEvent( timeEnd );
         
             int rowIndex = (int) Math.floor( valueY / (double) ( getRowSize( ) + getBufferSize( ) ) );
             rowIndex = rows.size( ) - 1 - rowIndex;
@@ -244,8 +250,8 @@ public class EventPainter extends GlimpseDataPainter1D
             if ( rowIndex >= 0 && rowIndex < rows.size( ) )
             {
                 Row row = rows.get( rowIndex );
-                SortedSet<Event> s1 = row.startTimes.headSet( eventTime );
-                SortedSet<Event> s2 = row.endTimes.tailSet( eventTime );
+                SortedSet<Event> s1 = row.startTimes.headSet( eventEnd );
+                SortedSet<Event> s2 = row.endTimes.tailSet( eventStart );
                 
                 return Sets.intersection( s1, s2 );
             }
