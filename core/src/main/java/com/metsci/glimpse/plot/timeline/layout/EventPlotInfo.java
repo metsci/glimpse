@@ -147,6 +147,16 @@ public class EventPlotInfo extends TimePlotInfo
         this.eventListeners.remove( listener );
     }
 
+    public boolean isStackOverlappingEvents( )
+    {
+        return eventPainter.isStackOverlappingEvents( );
+    }
+    
+    public void setStackOverlappingEvents( boolean stack )
+    {
+        eventPainter.setStackOverlappingEvents( stack );
+    }
+    
     /**
      * Sets the size of a single row of events. An EventPlotInfo may contain
      * multiple rows of events if some of those events overlap in time.

@@ -53,7 +53,8 @@ public class EventPainter extends GlimpseDataPainter1D
     protected Epoch epoch;
     protected TextureAtlas atlas;
 
-    protected boolean isHorizontal;
+    protected boolean shouldStack = true;
+    protected boolean isHorizontal = true;
 
     protected boolean visibleEventsDirty = true;
     protected double prevMin;
@@ -72,7 +73,7 @@ public class EventPainter extends GlimpseDataPainter1D
     protected boolean textColorSet = false;
     protected boolean backgroundColorSet = false;
     protected boolean borderColorSet = false;
-
+    
     protected class Row
     {
         int index;
@@ -130,6 +131,28 @@ public class EventPainter extends GlimpseDataPainter1D
         this.isHorizontal = isHorizontal;
 
         this.newFont = FontUtils.getDefaultPlain( 12 );
+    }
+    
+    public boolean isStackOverlappingEvents( )
+    {
+        return this.shouldStack;
+    }
+    
+    public void setStackOverlappingEvents( boolean stack )
+    {
+        this.shouldStack = stack;
+        
+        if ( !stack )
+        {
+            unstackRows0( );
+        }
+        else
+        {
+            stackRows0( );
+        }
+        
+        this.visibleEventsDirty = true;
+        this.plot.updateSize( );
     }
     
     public int getRowSize( )
@@ -312,12 +335,38 @@ public class EventPainter extends GlimpseDataPainter1D
         
         return new EventSelection( event, locations );
     }
+    
+    protected void stackRows0( )
+    {        
+        Map<Object, Row> newMap = new HashMap<Object, Row>( );
+        newMap.putAll( rowMap );
+     
+        rows.clear( );
+        rowMap.clear( );
+        
+        for ( Event event : eventMap.values( ) )
+        {
+            addEvent0( event );
+        }
+    }
+    
+    protected void unstackRows0( )
+    {
+        Row newRow = new Row( 0 );
+        
+        for ( Event event : eventMap.values( ) )
+        {
+            newRow.addEvent( event );
+        }
+        
+        rows.clear( );
+        rows.add( newRow );
+    }
 
     protected void removeEvent0( Event event )
     {
         // remove the event then determine if other events should be
         // shifted down to fill its place
-
         eventMap.remove( event.getId( ) );
 
         Row row = rowMap.remove( event.getId( ) );
@@ -390,25 +439,37 @@ public class EventPainter extends GlimpseDataPainter1D
     {
         Event startTime = Event.createDummyEvent( event.getStartTime( ) );
         Event endTime = Event.createDummyEvent( event.getEndTime( ) );
-
         int size = rows.size( );
-        for ( int i = 0; i < size; i++ )
+        
+        Row row = null;
+        if ( shouldStack )
         {
-            Row row = rows.get( i );
-
-            SortedSet<Event> subEnd = getOverlappingStartTimes0( event, startTime, endTime, row );
-            SortedSet<Event> subStart = getOverlappingEndTimes0( event, startTime, endTime, row );
-
-            if ( subEnd.isEmpty( ) && subStart.isEmpty( ) )
+            for ( int i = 0; i < size; i++ )
             {
-                row.addEvent( event );
-                return;
+                Row candidate = rows.get( i );
+    
+                SortedSet<Event> subEnd = getOverlappingStartTimes0( event, startTime, endTime, candidate );
+                SortedSet<Event> subStart = getOverlappingEndTimes0( event, startTime, endTime, candidate );
+    
+                if ( subEnd.isEmpty( ) && subStart.isEmpty( ) )
+                {
+                    row = candidate;
+                    break;
+                }
             }
         }
-
+        else if ( size != 0 )
+        {
+            row = rows.get( 0 );
+        }
+        
         // we haven't found a suitable row, so create one
-        Row row = new Row( size );
-        rows.add( row );
+        if ( row == null )
+        {
+            row = new Row( size );
+            rows.add( row );
+        }
+        
         row.addEvent( event );
     }
 

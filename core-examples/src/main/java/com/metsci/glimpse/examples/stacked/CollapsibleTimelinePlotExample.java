@@ -9,7 +9,9 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
@@ -65,7 +67,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         }
 
         // create a 1D timeline to display event durations
-        EventPlotInfo events1 = plot.createEventPlot( "event-1" );
+        final EventPlotInfo events1 = plot.createEventPlot( "event-1" );
         EventPlotInfo events2 = plot.createEventPlot( "event-2" );
         EventPlotInfo events3 = plot.createEventPlot( "event-3" );
 
@@ -151,6 +153,19 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
                 System.out.println( "eventUpdated: " + events );
+            }
+        } );
+
+        // use middle click to switch between stacking and not stacking events (just for demonstration purposes)
+        plot.getOverlayLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
+        {
+            @Override
+            public void mousePressed( GlimpseMouseEvent event )
+            {
+                if ( event.isButtonDown( MouseButton.Button2 ) )
+                {
+                    events1.setStackOverlappingEvents( !events1.isStackOverlappingEvents( ) );
+                }
             }
         } );
 
