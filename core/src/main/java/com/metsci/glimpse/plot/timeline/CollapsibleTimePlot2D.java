@@ -519,5 +519,15 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             group.addLayout( childLayout );
         }
+
+        @Override
+        public void setLookAndFeel( LookAndFeel laf )
+        {
+            group.setLookAndFeel( laf );
+            for ( PlotInfo plot : subplots )
+            {
+                plot.setLookAndFeel( laf );
+            }
+        }
     }
 }

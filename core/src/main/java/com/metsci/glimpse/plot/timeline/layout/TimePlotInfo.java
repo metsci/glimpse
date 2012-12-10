@@ -35,6 +35,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
@@ -43,6 +44,7 @@ import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * @author ulman
@@ -54,6 +56,7 @@ public class TimePlotInfo implements PlotInfo
     protected SimpleTextPainter labelPainter;
     protected BorderPainter borderPainter;
     protected BorderPainter labelBorderPainter;
+    protected BackgroundPainter backgroundPainter;
     protected DelegatePainter dataPainter;
 
     protected StackedTimePlot2D parent;
@@ -73,6 +76,7 @@ public class TimePlotInfo implements PlotInfo
                          SimpleTextPainter labelPainter,
                          BorderPainter borderPainter,
                          BorderPainter labelBorderPainter,
+                         BackgroundPainter backgroundPainter,
                          DelegatePainter dataPainter )
     {
         this.parent = parent;
@@ -84,6 +88,7 @@ public class TimePlotInfo implements PlotInfo
         this.labelPainter = labelPainter;
         this.borderPainter = borderPainter;
         this.labelBorderPainter = labelBorderPainter;
+        this.backgroundPainter = backgroundPainter;
         this.dataPainter = dataPainter;
     }
     //@formatter:on
@@ -134,9 +139,19 @@ public class TimePlotInfo implements PlotInfo
         this.axisPainter.setFont( font );
     }
     
+    public void setBackgroundColor( float[] rgba )
+    {
+        this.backgroundPainter.setColor( rgba );
+    }
+    
     public GlimpseLayout getLabelLayout( )
     {
         return labelLayout;
+    }
+    
+    public BackgroundPainter getBackgroundPainter( )
+    {
+        return this.backgroundPainter;
     }
 
     public GridPainter getGridPainter( )
@@ -254,5 +269,12 @@ public class TimePlotInfo implements PlotInfo
     public TaggedAxis1D getCommonAxis( )
     {
         return ( TaggedAxis1D ) child.getCommonAxis( );
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        child.setLookAndFeel( laf );
+        labelLayout.setLookAndFeel( laf );
     }
 }

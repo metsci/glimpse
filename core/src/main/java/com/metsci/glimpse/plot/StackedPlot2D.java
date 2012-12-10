@@ -42,6 +42,7 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * A plot which allows multiple plots or GlimpseLayout areas to be easily arranged in a vertical
@@ -63,6 +64,8 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected Orientation orientation = Orientation.VERTICAL;
 
+    protected LookAndFeel laf;
+    
     public StackedPlot2D( Orientation orientation )
     {
         this.orientation = orientation;
@@ -347,16 +350,22 @@ public class StackedPlot2D extends GlimpseLayout
         int size = -1;
 
         Axis1D commonChildAxis = commonAxis.clone( );
-
         Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
 
         GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
-
-        this.addLayout( layout );
-
-        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
+        layout.setLookAndFeel( laf );
         
+        addLayout( layout );
+        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
         return info;
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        super.setLookAndFeel( laf );
+        
+        this.laf = laf;
     }
     
     
@@ -463,6 +472,8 @@ public class StackedPlot2D extends GlimpseLayout
          * @param childLayout
          */
         public void addLayout( GlimpseAxisLayout2D childLayout );
+        
+        public void setLookAndFeel( LookAndFeel laf );
     }
 
     public static class PlotInfoImpl implements PlotInfo
@@ -561,6 +572,12 @@ public class StackedPlot2D extends GlimpseLayout
             }
 
             this.layout.addLayout( childLayout );
+        }
+        
+        @Override
+        public void setLookAndFeel( LookAndFeel laf )
+        {
+            this.layout.setLookAndFeel( laf );
         }
 
         @Override

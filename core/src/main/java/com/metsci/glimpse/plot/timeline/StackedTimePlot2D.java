@@ -1017,16 +1017,15 @@ public class StackedTimePlot2D extends StackedPlot2D
         
         // don't show axes
         timePlot.getAxisPainter( ).setVisible( false );
-        
         // don't show grid lines
         timePlot.getGridPainter( ).setVisible( false );
-        
         // center the labels because the plots are so small anyway
         timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         
-        EventPlotInfo timePlot1D = new EventPlotInfo( timePlot, atlas );
+        EventPlotInfo eventPlotInfo = new EventPlotInfo( timePlot, atlas );
+        eventPlotInfo.setLookAndFeel( laf );
         
-        return timePlot1D;
+        return eventPlotInfo;
     }
     
     protected EventPlotInfo createEventPlot0( PlotInfo plotInfo )
@@ -1052,7 +1051,8 @@ public class StackedTimePlot2D extends StackedPlot2D
             }
         };
 
-        plotInfo.getLayout( ).addPainter( new BackgroundPainter( false ), Integer.MIN_VALUE );
+        BackgroundPainter backgroundPainter = new BackgroundPainter( false );
+        plotInfo.getLayout( ).addPainter( backgroundPainter, Integer.MIN_VALUE );
 
         // add a painter for user data
         DelegatePainter dataPainter = new DelegatePainter( );
@@ -1120,6 +1120,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                                                       labelPainter,
                                                       borderPainter,
                                                       labelBorderPainter,
+                                                      backgroundPainter,
                                                       dataPainter );
         //@formatter:on
 
@@ -1139,6 +1140,8 @@ public class StackedTimePlot2D extends StackedPlot2D
             axisPainter.setShowHorizontalTicks( true );
             axisPainter.setLockTop( true );
         }
+        
+        timePlotInfo.setLookAndFeel( laf );
 
         return timePlotInfo;
     }

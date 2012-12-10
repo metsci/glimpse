@@ -47,6 +47,7 @@ public class EventPlotInfo extends TimePlotInfo
                 delegate.labelPainter,
                 delegate.borderPainter,
                 delegate.labelBorderPainter,
+                delegate.backgroundPainter,
                 delegate.dataPainter );
     
         final Epoch epoch = delegate.parent.getEpoch( );
