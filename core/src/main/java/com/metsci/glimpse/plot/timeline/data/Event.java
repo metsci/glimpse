@@ -419,6 +419,11 @@ public class Event
         };
     }
 
+    public static Event createDummyEvent( Event event )
+    {
+        return new Event( event.getId( ), null, event.getStartTime( ), event.getEndTime( ) );
+    }
+    
     public static Event createDummyEvent( TimeStamp time )
     {
         return new Event( time );

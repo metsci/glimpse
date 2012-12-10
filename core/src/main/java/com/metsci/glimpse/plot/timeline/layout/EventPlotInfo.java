@@ -9,6 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
@@ -113,13 +115,6 @@ public class EventPlotInfo extends TimePlotInfo
                     }
                 }
             }
-            
-            protected TimeStamp getTime( GlimpseMouseEvent e )
-            {
-                Axis1D axis = e.getAxis1D( );
-                double valueX = axis.screenPixelToValue( e.getX( ) );
-                return epoch.toTimeStamp( valueX );
-            }
         });
         
         this.rowSize = DEFAULT_ROW_SIZE;
@@ -128,12 +123,85 @@ public class EventPlotInfo extends TimePlotInfo
     }
     //@formatter:on
 
+    protected class DragListener implements EventPlotListener, GlimpseMouseMotionListener, GlimpseMouseListener
+    {
+        TimeStamp anchorTime = null;
+        TimeStamp eventStart = null;
+        TimeStamp eventEnd = null;
+        Event dragEvent = null;
+        
+        @Override
+        public void mouseMoved( GlimpseMouseEvent e )
+        {
+            if ( dragEvent != null && anchorTime != null )
+            {
+                TimeStamp time = getTime( e );
+                double diff = time.durationAfter( anchorTime );
+            
+                //TODO finish this
+            }
+        }
+
+        @Override
+        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+        }
+
+        @Override
+        public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+            for ( EventSelection selection : events )
+            {
+                if ( selection.isStartTimeSelection( ) && !selection.isCenterSelection( ) )
+                {
+                    dragEvent = selection.getEvent( );
+                    eventStart = dragEvent.getStartTime( );
+                    eventEnd = dragEvent.getEndTime( );
+                    anchorTime = time;
+                }
+            }
+        }
+
+        @Override
+        public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+        }
+
+        @Override
+        public void mouseEntered( GlimpseMouseEvent event )
+        {
+        }
+
+        @Override
+        public void mouseExited( GlimpseMouseEvent event )
+        {
+        }
+
+        @Override
+        public void mousePressed( GlimpseMouseEvent event )
+        {
+        }
+
+        @Override
+        public void mouseReleased( GlimpseMouseEvent event )
+        {
+            dragEvent = null;
+            anchorTime = null;
+        }
+
+    }
+    
+    public TimeStamp getTime( GlimpseMouseEvent e )
+    {
+        Axis1D axis = e.getAxis1D( );
+        double valueX = axis.screenPixelToValue( e.getX( ) );
+        return parent.getEpoch( ).toTimeStamp( valueX );
+    }
+
     public interface EventPlotListener
     {
         public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
-
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
-
         public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
     }
 
@@ -151,7 +219,7 @@ public class EventPlotInfo extends TimePlotInfo
     {
         return eventPainter.isStackOverlappingEvents( );
     }
-    
+
     public void setStackOverlappingEvents( boolean stack )
     {
         eventPainter.setStackOverlappingEvents( stack );

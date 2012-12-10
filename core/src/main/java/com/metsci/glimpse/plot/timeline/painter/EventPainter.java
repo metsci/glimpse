@@ -202,6 +202,11 @@ public class EventPainter extends GlimpseDataPainter1D
         this.textColor = textColor;
         this.textColorSet = true;
     }
+    
+    public void adjustEvent( Event event, TimeStamp newStart, TimeStamp newEnd )
+    {
+        Event oldEvent = event.createDummyEvent( event );
+    }
 
     public void addEvent( Event event )
     {
@@ -362,6 +367,24 @@ public class EventPainter extends GlimpseDataPainter1D
         rows.clear( );
         rows.add( newRow );
     }
+    
+    protected void moveEvent0( Event eventOld, Event eventNew )
+    {
+        // remove the event from its current row
+        // *but don't shift events yet*
+        Row oldRow = rowMap.remove( eventOld.getId( ) );
+        if ( oldRow == null ) return;
+        oldRow.removeEvent( eventOld );
+        
+        // add the moved version of the event back in
+        // (which might land it on a different row if it
+        //  has been moved over top of another event)
+        Row newRow = addEvent0( eventNew );
+        
+        // now shift events to fill the space left
+        // by moving the event
+        shiftEvents0( eventOld, newRow );
+    }
 
     protected void removeEvent0( Event event )
     {
@@ -435,7 +458,7 @@ public class EventPainter extends GlimpseDataPainter1D
         return row.startTimes.subSet( startTime, false, endTime, false );
     }
 
-    protected void addEvent0( Event event )
+    protected Row addEvent0( Event event )
     {
         Event startTime = Event.createDummyEvent( event.getStartTime( ) );
         Event endTime = Event.createDummyEvent( event.getEndTime( ) );
@@ -471,6 +494,8 @@ public class EventPainter extends GlimpseDataPainter1D
         }
         
         row.addEvent( event );
+        
+        return row;
     }
 
     protected void calculateVisibleEvents( double min, double max )
