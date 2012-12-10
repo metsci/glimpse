@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
@@ -13,6 +14,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
+import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.painter.EventPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -70,7 +72,6 @@ public class EventPlotInfo extends TimePlotInfo
         
         this.layout1D.addGlimpseMouseAllListener( new GlimpseMouseAllListener( )
         {
-
             @Override
             public void mouseEntered( GlimpseMouseEvent e ) { }
 
@@ -82,14 +83,12 @@ public class EventPlotInfo extends TimePlotInfo
             {
                 if ( isHorizontal )
                 {
-                    Set<Event> events = eventPainter.getNearestEvents( e );
+                    TimeStamp time = getTime( e );
+                    Set<EventSelection> events = eventPainter.getNearestEvents( e );
                     
-                    for ( Event event : events )
+                    for ( EventPlotListener listener : eventListeners )
                     {
-                        for ( EventPlotListener listener : eventListeners )
-                        {
-                            listener.eventClicked( event );
-                        }
+                        listener.eventsClicked( e, events, time );
                     }
                 }
             }
@@ -105,13 +104,21 @@ public class EventPlotInfo extends TimePlotInfo
             {
                 if ( isHorizontal )
                 {
-                    Set<Event> events = eventPainter.getNearestEvents( e );
+                    TimeStamp time = getTime( e );
+                    Set<EventSelection> events = eventPainter.getNearestEvents( e );
                     
                     for ( EventPlotListener listener : eventListeners )
                     {
-                        listener.eventsHovered( events );
+                        listener.eventsHovered( e, events, time );
                     }
                 }
+            }
+            
+            protected TimeStamp getTime( GlimpseMouseEvent e )
+            {
+                Axis1D axis = e.getAxis1D( );
+                double valueX = axis.screenPixelToValue( e.getX( ) );
+                return epoch.toTimeStamp( valueX );
             }
         });
         
@@ -123,11 +130,11 @@ public class EventPlotInfo extends TimePlotInfo
 
     public interface EventPlotListener
     {
-        public void eventsHovered( Set<Event> events );
+        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
-        public void eventClicked( Event event );
+        public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
-        public void eventUpdated( Event event );
+        public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
     }
 
     public void addEventPlotListener( EventPlotListener listener )

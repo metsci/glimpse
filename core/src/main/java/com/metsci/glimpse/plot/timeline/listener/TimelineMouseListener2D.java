@@ -38,7 +38,7 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 
 public class TimelineMouseListener2D extends AxisMouseListener2D
 {
-    public static final int TIMELINE_WIDTH = 28;
+    protected static final int ORTHOGONAL_AXIS_SIZE = 28;
 
     protected StackedTimePlot2D plot;
     protected AxisMouseListener1D delegateListener;
@@ -46,6 +46,8 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
 
     protected boolean axisSelected;
     protected boolean timeIsX;
+    
+    protected int orthogonalAxisSize = ORTHOGONAL_AXIS_SIZE;
 
     public TimelineMouseListener2D( StackedTimePlot2D plot, PlotInfo info, AxisMouseListener1D timeMouseListener )
     {
@@ -72,6 +74,11 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
         this( plot, info, new TimelineMouseListener1D( plot ) );
     }
 
+    public void setOrthogonalAxisSize( int size )
+    {
+        this.orthogonalAxisSize = size;
+    }
+    
     @Override
     public void mouseMoved( GlimpseMouseEvent e )
     {
@@ -138,12 +145,12 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
 
-        if ( timeIsX && ( e.getX( ) < TIMELINE_WIDTH || e.isKeyDown( ModifierKey.Shift ) ) )
+        if ( timeIsX && ( e.getX( ) < orthogonalAxisSize || e.isKeyDown( ModifierKey.Shift ) ) )
         {
             this.axisSelected = true;
             this.mousePressed( e, axisY, false );
         }
-        else if ( !timeIsX && ( e.getY( ) < TIMELINE_WIDTH || e.isKeyDown( ModifierKey.Shift ) ) )
+        else if ( !timeIsX && ( e.getY( ) < orthogonalAxisSize || e.isKeyDown( ModifierKey.Shift ) ) )
         {
             this.axisSelected = true;
             this.mousePressed( e, axisX, true );
@@ -201,11 +208,11 @@ public class TimelineMouseListener2D extends AxisMouseListener2D
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
 
-        if ( timeIsX && ( e.getX( ) < TIMELINE_WIDTH || e.isKeyDown( ModifierKey.Shift ) ) )
+        if ( timeIsX && ( e.getX( ) < orthogonalAxisSize || e.isKeyDown( ModifierKey.Shift ) ) )
         {
             this.mouseWheelMoved( e, axisY, false );
         }
-        else if ( !timeIsX && ( e.getY( ) < TIMELINE_WIDTH || e.isKeyDown( ModifierKey.Shift ) ) )
+        else if ( !timeIsX && ( e.getY( ) < orthogonalAxisSize || e.isKeyDown( ModifierKey.Shift ) ) )
         {
             this.mouseWheelMoved( e, axisX, true );
         }

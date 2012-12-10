@@ -33,8 +33,15 @@ public class Event
     protected boolean showIcon = true;
     protected boolean showBorder = true;
 
-    protected boolean hideOverfullLabels;
-    protected boolean hideIntersectingLabels;
+    protected boolean hideOverfull;
+    protected boolean hideIntersecting;
+    
+    protected boolean isIconVisible;
+    protected boolean isTextVisible;
+    protected TimeStamp iconStartTime;
+    protected TimeStamp iconEndTime;
+    protected TimeStamp textStartTime;
+    protected TimeStamp textEndTime;
 
     private Event( TimeStamp time )
     {
@@ -48,8 +55,8 @@ public class Event
         this.startTime = time;
         this.endTime = time;
         
-        this.hideIntersectingLabels = true;
-        this.hideOverfullLabels = false;
+        this.hideIntersecting = true;
+        this.hideOverfull = false;
     }
 
     public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
@@ -59,8 +66,8 @@ public class Event
         this.startTime = startTime;
         this.endTime = endTime;
         
-        this.hideIntersectingLabels = true;
-        this.hideOverfullLabels = true;
+        this.hideIntersecting = true;
+        this.hideOverfull = true;
     }
 
     public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
@@ -115,54 +122,56 @@ public class Event
                 }
             }
 
-            if ( showIcon && iconId != null )
+            isIconVisible = isIconVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+            
+            if ( isIconVisible )
             {
-                if ( ( size + buffer < remainingSpaceX || !hideOverfullLabels ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersectingLabels ) )
+                double valueX = axis.screenPixelToValue( pixelX );
+                iconStartTime = epoch.toTimeStamp( valueX );
+                iconEndTime = iconStartTime.add( size / axis.getPixelsPerValue( ) );
+
+                TextureAtlas atlas = painter.getTextureAtlas( );
+                atlas.beginRendering( );
+                try
                 {
-                    double valueX = axis.screenPixelToValue( pixelX );
+                    ImageData iconData = atlas.getImageData( iconId );
+                    double iconScale = size / ( double ) iconData.getHeight( );
 
-                    TextureAtlas atlas = painter.getTextureAtlas( );
-                    atlas.beginRendering( );
-                    try
-                    {
-                        ImageData iconData = atlas.getImageData( iconId );
-                        double iconScale = size / ( double ) iconData.getHeight( );
-
-                        atlas.drawImageAxisX( gl, iconId, axis, valueX, sizeMin, iconScale, iconScale, 0, iconData.getHeight( ) );
-                    }
-                    finally
-                    {
-                        atlas.endRendering( );
-                    }
-
-                    remainingSpaceX -= size + buffer;
-                    pixelX += size + buffer;
+                    atlas.drawImageAxisX( gl, iconId, axis, valueX, sizeMin, iconScale, iconScale, 0, iconData.getHeight( ) );
                 }
+                finally
+                {
+                    atlas.endRendering( );
+                }
+
+                remainingSpaceX -= size + buffer;
+                pixelX += size + buffer;
             }
 
-            if ( showName )
+            TextRenderer textRenderer = painter.getTextRenderer( );
+            Rectangle2D bounds = showName ? textRenderer.getBounds( name ) : null;
+
+            isTextVisible = isTextVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
+            
+            if ( isTextVisible )
             {
-                // draw text
-                TextRenderer textRenderer = painter.getTextRenderer( );
-                Rectangle2D bounds = textRenderer.getBounds( name );
-
-                // only draw the text if it will fit in the event box
-                if ( ( bounds.getWidth( ) + buffer < remainingSpaceX || !hideOverfullLabels ) && ( pixelX + bounds.getWidth( ) + buffer < nextStartPixel || !hideIntersectingLabels ) )
+                double valueX = axis.screenPixelToValue( pixelX );
+                textStartTime = epoch.toTimeStamp( valueX );
+                textEndTime = textStartTime.add( bounds.getWidth( ) / axis.getPixelsPerValue( ) );
+                
+                GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
+                textRenderer.beginRendering( width, height );
+                try
                 {
-                    GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
-                    textRenderer.beginRendering( width, height );
-                    try
-                    {
-                        int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
-                        textRenderer.draw( name, pixelX, pixelY );
+                    int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
+                    textRenderer.draw( name, pixelX, pixelY );
 
-                        remainingSpaceX -= bounds.getWidth( ) + buffer;
-                        pixelX += bounds.getWidth( ) + buffer;
-                    }
-                    finally
-                    {
-                        textRenderer.endRendering( );
-                    }
+                    remainingSpaceX -= bounds.getWidth( ) + buffer;
+                    pixelX += bounds.getWidth( ) + buffer;
+                }
+                finally
+                {
+                    textRenderer.endRendering( );
                 }
             }
         }
@@ -198,11 +207,20 @@ public class Event
             {
                 gl.glEnd( );
             }
-
         }
     }
+    
+    protected boolean isTextVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    {
+        return showName && ( bounds.getWidth( ) + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + bounds.getWidth( ) + buffer < nextStartPixel || !hideIntersecting );
+    }
+    
+    protected boolean isIconVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    {
+        return showIcon && iconId != null && ( size + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersecting );
+    }
 
-    public String getName( )
+    public String getLabel( )
     {
         return name;
     }
@@ -247,12 +265,12 @@ public class Event
         this.borderColor = borderColor;
     }
 
-    public float[] getTextColor( )
+    public float[] getLabelColor( )
     {
         return textColor;
     }
 
-    public void setTextColor( float[] textColor )
+    public void setLabelColor( float[] textColor )
     {
         this.textColor = textColor;
     }
@@ -277,12 +295,12 @@ public class Event
         this.endTime = endTime;
     }
 
-    public boolean isShowName( )
+    public boolean isShowLabel( )
     {
         return showName;
     }
 
-    public void setShowName( boolean showName )
+    public void setShowLabel( boolean showName )
     {
         this.showName = showName;
     }
@@ -290,17 +308,17 @@ public class Event
     /**
      * If true, hides labels and/or icons if they would intersect with other events.
      */
-    public void setHideIntersectingName( boolean hide )
+    public void setHideIntersecting( boolean hide )
     {
-        this.hideIntersectingLabels = hide;
+        this.hideIntersecting = hide;
     }
     
     /**
      * If true, hides labels and/or icons if they would fall outside this event's time window.
      */
-    public void setHideOverfullName( boolean hide )
+    public void setHideOverfull( boolean hide )
     {
-        this.hideOverfullLabels = hide;
+        this.hideOverfull = hide;
     }
 
     public boolean isShowIcon( )
@@ -327,6 +345,37 @@ public class Event
     {
         return id;
     }
+    
+    public boolean isIconVisible( )
+    {
+        return isIconVisible;
+    }
+
+    public boolean isLabelVisible( )
+    {
+        return isTextVisible;
+    }
+
+    public TimeStamp getIconStartTime( )
+    {
+        return iconStartTime;
+    }
+
+    public TimeStamp getIconEndTime( )
+    {
+        return iconEndTime;
+    }
+
+    public TimeStamp getLabelStartTime( )
+    {
+        return textStartTime;
+    }
+
+    public TimeStamp getLabelEndTime( )
+    {
+        return textEndTime;
+    }
+
 
     @Override
     public int hashCode( )

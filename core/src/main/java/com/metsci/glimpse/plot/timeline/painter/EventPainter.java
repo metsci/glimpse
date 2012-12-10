@@ -1,9 +1,13 @@
 package com.metsci.glimpse.plot.timeline.painter;
 
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
+
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -20,6 +24,8 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
+import com.metsci.glimpse.plot.timeline.data.EventSelection;
+import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
 import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -230,7 +236,7 @@ public class EventPainter extends GlimpseDataPainter1D
         return this.epoch;
     }
     
-    public Set<Event> getNearestEvents( GlimpseMouseEvent e )
+    public Set<EventSelection> getNearestEvents( GlimpseMouseEvent e )
     {
         if ( isHorizontal )
         {
@@ -239,6 +245,7 @@ public class EventPainter extends GlimpseDataPainter1D
             double valueX = axis.screenPixelToValue( e.getX( ) );
             double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
             
+            TimeStamp time = epoch.toTimeStamp( valueX );
             TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
             TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
             Event eventStart = Event.createDummyEvent( timeStart );
@@ -253,11 +260,57 @@ public class EventPainter extends GlimpseDataPainter1D
                 SortedSet<Event> s1 = row.startTimes.headSet( eventEnd );
                 SortedSet<Event> s2 = row.endTimes.tailSet( eventStart );
                 
-                return Sets.intersection( s1, s2 );
+                Set<Event> events = Sets.intersection( s1, s2 );
+                Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
+                return eventSelections;
             }
         }
         
         return Collections.emptySet( );
+    }
+    
+    protected Set<EventSelection> createEventSelection( Axis1D axis, Set<Event> events, TimeStamp clickTime )
+    {
+        Set<EventSelection> set = new HashSet<EventSelection>( );
+        
+        for ( Event event : events )
+        {
+            set.add( createEventSelection( axis, event, clickTime ) );
+        }
+        
+        return set;
+    }
+    
+    protected EventSelection createEventSelection( Axis1D axis, Event event, TimeStamp t )
+    {
+        double buffer = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
+     
+        TimeStamp t1 = t.subtract( buffer );
+        TimeStamp t2 = t.add( buffer );
+        
+        TimeStamp e1 = event.getStartTime( );
+        TimeStamp e2 = event.getEndTime( );
+        
+        EnumSet<Location> locations = EnumSet.noneOf( Location.class );
+        
+        boolean start = t2.isAfterOrEquals( e1 ) &&  t1.isBeforeOrEquals( e1 );
+        boolean end = t2.isAfterOrEquals( e2 ) &&  t1.isBeforeOrEquals( e2 );
+        
+        TimeStamp i1 = event.getIconStartTime( );
+        TimeStamp i2 = event.getIconEndTime( );
+        boolean icon = event.isIconVisible( ) && i1 != null && i2 != null && t.isAfterOrEquals( i1 ) && t.isBeforeOrEquals( i2 );
+        
+        TimeStamp l1 = event.getLabelStartTime( );
+        TimeStamp l2 = event.getLabelEndTime( );
+        boolean text = event.isLabelVisible( ) && l1 != null && l2 != null && t.isAfterOrEquals( l1 ) && t.isBeforeOrEquals( l2 );
+        
+        if ( text ) locations.add( Label );
+        if ( icon ) locations.add( Icon );
+        if ( start ) locations.add( Start );
+        if ( end ) locations.add( End );
+        if ( (!start && !end) || (start && end) ) locations.add( Center );
+        
+        return new EventSelection( event, locations );
     }
 
     protected void removeEvent0( Event event )

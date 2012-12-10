@@ -1021,6 +1021,8 @@ public class StackedTimePlot2D extends StackedPlot2D
         timePlot.getGridPainter( ).setVisible( false );
         // center the labels because the plots are so small anyway
         timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
+        // there is no orthogonal axis, so don't ever send mouse events to it
+        timePlot.getTimelineMouseListener( ).setOrthogonalAxisSize( 0 );
         
         EventPlotInfo eventPlotInfo = new EventPlotInfo( timePlot, atlas );
         eventPlotInfo.setLookAndFeel( laf );

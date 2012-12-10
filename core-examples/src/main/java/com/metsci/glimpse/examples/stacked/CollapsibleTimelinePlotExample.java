@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
@@ -17,6 +18,7 @@ import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.Event;
+import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo.EventPlotListener;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
@@ -134,21 +136,21 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.addEventPlotListener( new EventPlotListener( )
         {
             @Override
-            public void eventsHovered( Set<Event> events )
+            public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
                 System.out.println( "eventsHovered: " + events );
             }
 
             @Override
-            public void eventClicked( Event event )
+            public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventClicked: " + event );
+                System.out.println( "eventClicked: " + events );
             }
 
             @Override
-            public void eventUpdated( Event event )
+            public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventUpdated: " + event );
+                System.out.println( "eventUpdated: " + events );
             }
         } );
 
