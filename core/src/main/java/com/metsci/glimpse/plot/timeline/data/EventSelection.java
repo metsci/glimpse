@@ -1,10 +1,12 @@
 package com.metsci.glimpse.plot.timeline.data;
 
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Icon;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
 
 import java.util.EnumSet;
 
-import com.google.common.collect.Sets;
 import com.metsci.glimpse.plot.timeline.event.Event;
 
 public class EventSelection

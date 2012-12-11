@@ -89,6 +89,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         // put the event group directly below the timeline
         group.setOrder( 100 );
+
+        // order the event plots within the group
         events1.setOrder( 2 );
         events2.setOrder( 3 );
         events3.setOrder( 1 );
@@ -105,17 +107,20 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // add some events
         Event e0 = events1.addEvent( "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
         events1.addEvent( "Spread Slime On Stuff", t0.add( Time.fromMinutes( 30 ) ), t0.add( Time.fromMinutes( 200 ) ) );
-
         Event e1 = events1.addEvent( "Chill", t0.add( Time.fromMinutes( 290 ) ), t0.add( Time.fromMinutes( 320 ) ) );
         e1.setBackgroundColor( GlimpseColor.getRed( 0.6f ) );
         e1.setBorderColor( GlimpseColor.getRed( ) );
-
         Event e2 = events1.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
         Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
-
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
 
-        // add icons to the events
+        // add constraints on how the user can adjust the various events
+        e0.setEndTimeMoveable( false );
+        e1.setResizeable( false );
+        e2.setMinTimeSpan( Time.fromMinutes( 100 ) );
+        e3.setMaxTimeSpan( Time.fromMinutes( 500 ) );
+
+        // load icons into the texture atlas for the plot
         TextureAtlas atlas = plot.getTextureAtlas( );
         try
         {
@@ -129,6 +134,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             logWarning( logger, "Trouble loading icon.", ex );
         }
 
+        // add icons to the events
         e4.setIconId( "alarm-clock" );
         e0.setIconId( "glass" );
         e2.setIconId( "cloud" );
@@ -141,22 +147,19 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             @Override
             public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                // TODO Auto-generated method stub
-                
+                System.out.println( "eventsHovered: " + events );
             }
 
             @Override
             public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                // TODO Auto-generated method stub
-                
+                System.out.println( "eventsClicked: " + events );
             }
 
             @Override
             public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                // TODO Auto-generated method stub
-                
+                System.out.println( "eventsUpdated: " + events );
             }
 
         } );

@@ -2,11 +2,15 @@ package com.metsci.glimpse.plot.timeline.event;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.data.EventConstraint;
+import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -18,7 +22,7 @@ public class Event
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
 
     protected EventPlotInfo info;
-    
+
     protected Object id;
     protected String name;
     protected Object iconId; // references id in associated TextureAtlas
@@ -37,13 +41,72 @@ public class Event
 
     protected boolean hideOverfull;
     protected boolean hideIntersecting;
-    
+
     protected boolean isIconVisible;
     protected boolean isTextVisible;
     protected TimeStamp iconStartTime;
     protected TimeStamp iconEndTime;
     protected TimeStamp textStartTime;
     protected TimeStamp textEndTime;
+
+    protected boolean isEndTimeMoveable = true;
+    protected boolean isStartTimeMoveable = true;
+    protected boolean isResizeable = true;
+    protected double maxTimeSpan = Double.MAX_VALUE;
+    protected double minTimeSpan = 0;
+
+    protected List<EventConstraint> constraints;
+
+    protected EventConstraint builtInConstraints = new EventConstraint( )
+    {
+        @Override
+        public TimeSpan applyConstraint( Event event, TimeSpan proposedTimeSpan )
+        {
+            TimeStamp oldStart = event.getStartTime( );
+            TimeStamp oldEnd = event.getEndTime( );
+
+            TimeStamp newStart = proposedTimeSpan.getStartTime( );
+            TimeStamp newEnd = proposedTimeSpan.getEndTime( );
+
+            if ( !isEndTimeMoveable ) newEnd = oldEnd;
+            if ( !isStartTimeMoveable ) newStart = oldStart;
+
+            double newDiff = newEnd.durationAfter( newStart );
+            double oldDiff = oldEnd.durationAfter( oldStart );
+
+            if ( !isResizeable && newDiff != oldDiff )
+            {
+                newEnd = oldEnd;
+                newStart = oldStart;
+            }
+
+            if ( newDiff < minTimeSpan )
+            {
+                if ( oldEnd.equals( newEnd ) )
+                {
+                    newStart = newEnd.subtract( minTimeSpan );
+                }
+                else
+                {
+                    newEnd = newStart.add( minTimeSpan );
+                }
+            }
+
+            if ( newDiff > maxTimeSpan )
+            {
+                if ( oldEnd.equals( newEnd ) )
+                {
+                    newStart = newEnd.subtract( maxTimeSpan );
+                }
+                else
+                {
+                    newEnd = newStart.add( maxTimeSpan );
+                }
+            }
+
+            return new TimeSpan( newStart, newEnd );
+        }
+    };
 
     private Event( TimeStamp time )
     {
@@ -56,9 +119,12 @@ public class Event
         this.name = name;
         this.startTime = time;
         this.endTime = time;
-        
+
         this.hideIntersecting = true;
         this.hideOverfull = false;
+
+        this.constraints = new LinkedList<EventConstraint>( );
+        this.constraints.add( builtInConstraints );
     }
 
     public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
@@ -67,16 +133,29 @@ public class Event
         this.name = name;
         this.startTime = startTime;
         this.endTime = endTime;
-        
+
         this.hideIntersecting = true;
         this.hideOverfull = true;
+
+        this.constraints = new LinkedList<EventConstraint>( );
+        this.constraints.add( builtInConstraints );
+    }
+
+    public void addConstraint( EventConstraint constraint )
+    {
+        this.constraints.add( constraint );
+    }
+
+    public void removeConstrain( EventConstraint constraint )
+    {
+        this.constraints.remove( constraint );
     }
 
     public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
     {
         int size = sizeMax - sizeMin;
         int buffer = painter.getBufferSize( );
-        
+
         Epoch epoch = painter.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
         double timeMax = epoch.fromTimeStamp( endTime );
@@ -85,11 +164,11 @@ public class Event
         double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
         int pixelX = buffer + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
-        
+
         // start positions of the next event in this row
         double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : Double.MAX_VALUE;
         int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : Integer.MAX_VALUE;
-        
+
         if ( painter.isHorizontal( ) )
         {
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
@@ -125,7 +204,7 @@ public class Event
             }
 
             isIconVisible = isIconVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-            
+
             if ( isIconVisible )
             {
                 double valueX = axis.screenPixelToValue( pixelX );
@@ -154,13 +233,13 @@ public class Event
             Rectangle2D bounds = showName ? textRenderer.getBounds( name ) : null;
 
             isTextVisible = isTextVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
-            
+
             if ( isTextVisible )
             {
                 double valueX = axis.screenPixelToValue( pixelX );
                 textStartTime = epoch.toTimeStamp( valueX );
                 textEndTime = textStartTime.add( bounds.getWidth( ) / axis.getPixelsPerValue( ) );
-                
+
                 GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
                 textRenderer.beginRendering( width, height );
                 try
@@ -211,22 +290,72 @@ public class Event
             }
         }
     }
-    
+
     protected boolean isTextVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
         return showName && ( bounds.getWidth( ) + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + bounds.getWidth( ) + buffer < nextStartPixel || !hideIntersecting );
     }
-    
+
     protected boolean isIconVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
         return showIcon && iconId != null && ( size + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersecting );
     }
-    
+
+    public boolean isEndTimeMoveable( )
+    {
+        return isEndTimeMoveable;
+    }
+
+    public void setEndTimeMoveable( boolean isEndTimeMoveable )
+    {
+        this.isEndTimeMoveable = isEndTimeMoveable;
+    }
+
+    public boolean isStartTimeMoveable( )
+    {
+        return isStartTimeMoveable;
+    }
+
+    public void setStartTimeMoveable( boolean isStartTimeMoveable )
+    {
+        this.isStartTimeMoveable = isStartTimeMoveable;
+    }
+
+    public boolean isResizeable( )
+    {
+        return isResizeable;
+    }
+
+    public void setResizeable( boolean isResizeable )
+    {
+        this.isResizeable = isResizeable;
+    }
+
+    public double getMaxTimeSpan( )
+    {
+        return maxTimeSpan;
+    }
+
+    public void setMaxTimeSpan( double maxTimeSpan )
+    {
+        this.maxTimeSpan = maxTimeSpan;
+    }
+
+    public double getMinTimeSpan( )
+    {
+        return minTimeSpan;
+    }
+
+    public void setMinTimeSpan( double minTimeSpan )
+    {
+        this.minTimeSpan = minTimeSpan;
+    }
+
     public EventPlotInfo getEventPlotInfo( )
     {
         return info;
     }
-    
+
     public void setEventPlotInfo( EventPlotInfo info )
     {
         this.info = info;
@@ -291,13 +420,20 @@ public class Event
     {
         return startTime;
     }
-    
-    public void setTimes( TimeStamp startTime, TimeStamp endTime )
+
+    public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
+        if ( !force )
+        {
+            TimeSpan newTimes = applyConstraints( new TimeSpan( startTime, endTime ) );
+            startTime = newTimes.getStartTime( );
+            endTime = newTimes.getEndTime( );
+        }
+
         if ( this.info == null )
         {
             this.startTime = startTime;
-            this.endTime = endTime;   
+            this.endTime = endTime;
         }
         else
         {
@@ -306,27 +442,33 @@ public class Event
             this.info.updateEvent( this, startTime, endTime );
         }
     }
-    
+
+    protected TimeSpan applyConstraints( TimeSpan span )
+    {
+        for ( EventConstraint constraint : constraints )
+        {
+            span = constraint.applyConstraint( this, span );
+        }
+
+        return span;
+    }
+
+    public void setTimes( TimeStamp startTime, TimeStamp endTime )
+    {
+        setTimes( startTime, endTime, false );
+    }
+
     void setTimes0( TimeStamp startTime, TimeStamp endTime )
     {
         this.startTime = startTime;
-        this.endTime = endTime;  
+        this.endTime = endTime;
     }
 
     public void setStartTime( TimeStamp startTime )
     {
-        if ( this.info == null )
-        {
-            this.startTime = startTime;
-        }
-        else
-        {
-            // if we're attached to a plot, delegate the update of our
-            // start/end time to it, so that it can update its data structures
-            this.info.updateEvent( this, startTime, endTime );
-        }
+        setTimes( startTime, this.endTime );
     }
-    
+
     void setStartTime0( TimeStamp startTime )
     {
         this.startTime = startTime;
@@ -339,18 +481,9 @@ public class Event
 
     public void setEndTime( TimeStamp endTime )
     {
-        if ( this.info == null )
-        {
-            this.endTime = endTime;
-        }
-        else
-        {
-            // if we're attached to a plot, delegate the update of our
-            // start/end time to it, so that it can update its data structures
-            this.info.updateEvent( this, startTime, endTime );
-        }
+        setTimes( this.startTime, endTime );
     }
-    
+
     void setEndTime0( TimeStamp endTime )
     {
         this.endTime = endTime;
@@ -373,7 +506,7 @@ public class Event
     {
         this.hideIntersecting = hide;
     }
-    
+
     /**
      * If true, hides labels and/or icons if they would fall outside this event's time window.
      */
@@ -406,7 +539,7 @@ public class Event
     {
         return id;
     }
-    
+
     public boolean isIconVisible( )
     {
         return isIconVisible;
@@ -437,7 +570,6 @@ public class Event
         return textEndTime;
     }
 
-
     @Override
     public int hashCode( )
     {
@@ -461,7 +593,7 @@ public class Event
         else if ( !id.equals( other.id ) ) return false;
         return true;
     }
-    
+
     @Override
     public String toString( )
     {
@@ -474,12 +606,12 @@ public class Event
         TimeStamp endTime = TimeStamp.fromTimeStamp( event.getEndTime( ) );
         return new Event( event.getId( ), null, startTime, endTime );
     }
-    
+
     public static Event createDummyEvent( TimeStamp time )
     {
         return new Event( time );
     }
-    
+
     public static Comparator<Event> getStartTimeComparator( )
     {
         return new Comparator<Event>( )

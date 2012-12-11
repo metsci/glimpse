@@ -133,8 +133,6 @@ public class EventPlotInfo extends TimePlotInfo
         {
             if ( e.isButtonDown( MouseButton.Button1 ) && dragEvent != null )
             {
-                System.out.println( "******************** " + dragEvent );
-
                 TimeStamp time = getTime( e );
 
                 if ( dragType == Location.Center )
@@ -187,8 +185,6 @@ public class EventPlotInfo extends TimePlotInfo
                         {
                             dragType = End;
                         }
-
-                        System.out.println( "Selection " + dragType + " " + dragEvent );
 
                         return;
                     }
