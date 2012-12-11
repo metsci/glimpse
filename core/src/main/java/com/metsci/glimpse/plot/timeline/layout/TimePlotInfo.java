@@ -67,6 +67,22 @@ public class TimePlotInfo implements PlotInfo
     protected GlimpseLayout labelLayout;
 
     //@formatter:off
+    public TimePlotInfo( TimePlotInfo delegate )
+    {
+        this( delegate.parent,
+                delegate.child,
+                delegate.labelLayout,
+                delegate.listener,
+                delegate.gridPainter,
+                delegate.axisPainter,
+                delegate.labelPainter,
+                delegate.borderPainter,
+                delegate.labelBorderPainter,
+                delegate.backgroundPainter,
+                delegate.dataPainter );
+    }
+            
+    
     public TimePlotInfo( StackedTimePlot2D parent,
                          PlotInfo child,
                          GlimpseLayout labelLayout,

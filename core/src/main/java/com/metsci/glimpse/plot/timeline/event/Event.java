@@ -1,4 +1,4 @@
-package com.metsci.glimpse.plot.timeline.data;
+package com.metsci.glimpse.plot.timeline.event;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -6,7 +6,7 @@ import java.util.Comparator;
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.plot.timeline.painter.EventPainter;
+import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -17,6 +17,8 @@ public class Event
 {
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
 
+    protected EventPlotInfo info;
+    
     protected Object id;
     protected String name;
     protected Object iconId; // references id in associated TextureAtlas
@@ -219,6 +221,16 @@ public class Event
     {
         return showIcon && iconId != null && ( size + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersecting );
     }
+    
+    public EventPlotInfo getEventPlotInfo( )
+    {
+        return info;
+    }
+    
+    public void setEventPlotInfo( EventPlotInfo info )
+    {
+        this.info = info;
+    }
 
     public String getLabel( )
     {
@@ -279,8 +291,43 @@ public class Event
     {
         return startTime;
     }
+    
+    public void setTimes( TimeStamp startTime, TimeStamp endTime )
+    {
+        if ( this.info == null )
+        {
+            this.startTime = startTime;
+            this.endTime = endTime;   
+        }
+        else
+        {
+            // if we're attached to a plot, delegate the update of our
+            // start/end time to it, so that it can update its data structures
+            this.info.updateEvent( this, startTime, endTime );
+        }
+    }
+    
+    void setTimes0( TimeStamp startTime, TimeStamp endTime )
+    {
+        this.startTime = startTime;
+        this.endTime = endTime;  
+    }
 
     public void setStartTime( TimeStamp startTime )
+    {
+        if ( this.info == null )
+        {
+            this.startTime = startTime;
+        }
+        else
+        {
+            // if we're attached to a plot, delegate the update of our
+            // start/end time to it, so that it can update its data structures
+            this.info.updateEvent( this, startTime, endTime );
+        }
+    }
+    
+    void setStartTime0( TimeStamp startTime )
     {
         this.startTime = startTime;
     }
@@ -291,6 +338,20 @@ public class Event
     }
 
     public void setEndTime( TimeStamp endTime )
+    {
+        if ( this.info == null )
+        {
+            this.endTime = endTime;
+        }
+        else
+        {
+            // if we're attached to a plot, delegate the update of our
+            // start/end time to it, so that it can update its data structures
+            this.info.updateEvent( this, startTime, endTime );
+        }
+    }
+    
+    void setEndTime0( TimeStamp endTime )
     {
         this.endTime = endTime;
     }

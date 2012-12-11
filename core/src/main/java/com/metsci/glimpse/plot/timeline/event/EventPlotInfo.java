@@ -1,4 +1,4 @@
-package com.metsci.glimpse.plot.timeline.layout;
+package com.metsci.glimpse.plot.timeline.event;
 
 import java.awt.Font;
 import java.util.List;
@@ -15,9 +15,8 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
-import com.metsci.glimpse.plot.timeline.painter.EventPainter;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -42,20 +41,10 @@ public class EventPlotInfo extends TimePlotInfo
     
     public EventPlotInfo( TimePlotInfo delegate, TextureAtlas atlas )
     {
-        super( delegate.parent,
-                delegate.child,
-                delegate.labelLayout,
-                delegate.listener,
-                delegate.gridPainter,
-                delegate.axisPainter,
-                delegate.labelPainter,
-                delegate.borderPainter,
-                delegate.labelBorderPainter,
-                delegate.backgroundPainter,
-                delegate.dataPainter );
+        super( delegate );
     
-        final Epoch epoch = delegate.parent.getEpoch( );
-        final boolean isHorizontal = delegate.parent.isTimeAxisHorizontal( );
+        final Epoch epoch = parent.getEpoch( );
+        final boolean isHorizontal = parent.isTimeAxisHorizontal( );
         
         if ( isHorizontal )
         {
@@ -309,16 +298,27 @@ public class EventPlotInfo extends TimePlotInfo
 
     public void addEvent( Event event )
     {
+        event.setEventPlotInfo( this );
         this.eventPainter.addEvent( event );
     }
 
     public void removeEvent( Event event )
     {
+        event.setEventPlotInfo( null );
         this.eventPainter.removeEvent( event.getId( ) );
     }
 
     public void removeEvent( Object id )
     {
-        this.eventPainter.removeEvent( id );
+        Event event = this.eventPainter.removeEvent( id );
+        if ( event != null )
+        {
+            event.setEventPlotInfo( null );
+        }
+    }
+    
+    void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
+    {
+        this.eventPainter.updateEvent( oldEvent, newStartTime, newEndTime );
     }
 }

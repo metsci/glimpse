@@ -1,4 +1,4 @@
-package com.metsci.glimpse.plot.timeline.painter;
+package com.metsci.glimpse.plot.timeline.event;
 
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
 
@@ -23,10 +23,8 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.data.Event;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
-import com.metsci.glimpse.plot.timeline.layout.EventPlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -203,11 +201,6 @@ public class EventPainter extends GlimpseDataPainter1D
         this.textColorSet = true;
     }
     
-    public void adjustEvent( Event event, TimeStamp newStart, TimeStamp newEnd )
-    {
-        Event oldEvent = event.createDummyEvent( event );
-    }
-
     public void addEvent( Event event )
     {
         if ( event != null )
@@ -219,7 +212,7 @@ public class EventPainter extends GlimpseDataPainter1D
         }
     }
 
-    public void removeEvent( Object id )
+    public Event removeEvent( Object id )
     {
         Event event = this.eventMap.remove( id );
 
@@ -229,6 +222,8 @@ public class EventPainter extends GlimpseDataPainter1D
             this.visibleEventsDirty = true;
             this.plot.updateSize( );
         }
+        
+        return event;
     }
 
     public Event getEvent( Object id )
@@ -509,6 +504,13 @@ public class EventPainter extends GlimpseDataPainter1D
         }
 
         this.visibleEventsDirty = false;
+    }
+    
+    void updateEvent( Event event, TimeStamp newStartTime, TimeStamp newEndTime )
+    {
+        Event eventOld = Event.createDummyEvent( event );
+        event.setTimes0( newStartTime, newEndTime );
+        moveEvent0( eventOld, event );
     }
 
     @Override

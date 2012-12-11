@@ -4,6 +4,8 @@ import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
 
 import java.util.EnumSet;
 
+import com.metsci.glimpse.plot.timeline.event.Event;
+
 public class EventSelection
 {
     /**
