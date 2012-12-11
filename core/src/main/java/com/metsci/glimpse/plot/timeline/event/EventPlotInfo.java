@@ -1,5 +1,9 @@
 package com.metsci.glimpse.plot.timeline.event;
 
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
+
 import java.awt.Font;
 import java.util.List;
 import java.util.Set;
@@ -9,13 +13,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
+import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
+import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -71,7 +75,7 @@ public class EventPlotInfo extends TimePlotInfo
 
             @Override
             public void mousePressed( GlimpseMouseEvent e )
-            {
+            {                
                 if ( isHorizontal )
                 {
                     TimeStamp time = getTime( e );
@@ -106,28 +110,48 @@ public class EventPlotInfo extends TimePlotInfo
             }
         });
         
+        DragListener dragListener = new DragListener( );
+        this.addEventPlotListener( dragListener );
+        this.layout1D.addGlimpseMouseAllListener( dragListener );
+        
         this.rowSize = DEFAULT_ROW_SIZE;
         this.bufferSize = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
     }
     //@formatter:on
 
-    protected class DragListener implements EventPlotListener, GlimpseMouseMotionListener, GlimpseMouseListener
+    protected class DragListener implements EventPlotListener, GlimpseMouseAllListener
     {
+        Location dragType = null;
         TimeStamp anchorTime = null;
         TimeStamp eventStart = null;
         TimeStamp eventEnd = null;
         Event dragEvent = null;
-        
+
         @Override
         public void mouseMoved( GlimpseMouseEvent e )
         {
-            if ( dragEvent != null && anchorTime != null )
+            if ( e.isButtonDown( MouseButton.Button1 ) && dragEvent != null )
             {
+                System.out.println( "******************** " + dragEvent );
+
                 TimeStamp time = getTime( e );
-                double diff = time.durationAfter( anchorTime );
-            
-                //TODO finish this
+
+                if ( dragType == Location.Center )
+                {
+                    double diff = time.durationAfter( anchorTime );
+                    dragEvent.setTimes( eventStart.add( diff ), eventEnd.add( diff ) );
+                }
+                else if ( dragType == Location.End && eventStart.isBefore( time ) )
+                {
+                    dragEvent.setTimes( eventStart, time );
+                }
+                else if ( dragType == Location.Start && eventEnd.isAfter( time ) )
+                {
+                    dragEvent.setTimes( time, eventEnd );
+                }
+
+                e.setHandled( true );
             }
         }
 
@@ -139,14 +163,35 @@ public class EventPlotInfo extends TimePlotInfo
         @Override
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
-            for ( EventSelection selection : events )
+            if ( e.isButtonDown( MouseButton.Button1 ) )
             {
-                if ( selection.isStartTimeSelection( ) && !selection.isCenterSelection( ) )
+                for ( EventSelection selection : events )
                 {
-                    dragEvent = selection.getEvent( );
-                    eventStart = dragEvent.getStartTime( );
-                    eventEnd = dragEvent.getEndTime( );
-                    anchorTime = time;
+                    if ( selection.isLocation( Center, Start, End ) )
+                    {
+                        dragEvent = selection.getEvent( );
+                        eventStart = dragEvent.getStartTime( );
+                        eventEnd = dragEvent.getEndTime( );
+                        anchorTime = time;
+                        e.setHandled( true );
+
+                        if ( selection.isCenterSelection( ) )
+                        {
+                            dragType = Center;
+                        }
+                        else if ( selection.isStartTimeSelection( ) )
+                        {
+                            dragType = Start;
+                        }
+                        else if ( selection.isEndTimeSelection( ) )
+                        {
+                            dragType = End;
+                        }
+
+                        System.out.println( "Selection " + dragType + " " + dragEvent );
+
+                        return;
+                    }
                 }
             }
         }
@@ -174,12 +219,20 @@ public class EventPlotInfo extends TimePlotInfo
         @Override
         public void mouseReleased( GlimpseMouseEvent event )
         {
-            dragEvent = null;
+            dragType = null;
             anchorTime = null;
+            eventStart = null;
+            eventEnd = null;
+            dragEvent = null;
+        }
+
+        @Override
+        public void mouseWheelMoved( GlimpseMouseEvent e )
+        {
         }
 
     }
-    
+
     public TimeStamp getTime( GlimpseMouseEvent e )
     {
         Axis1D axis = e.getAxis1D( );
@@ -190,7 +243,9 @@ public class EventPlotInfo extends TimePlotInfo
     public interface EventPlotListener
     {
         public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
+
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
+
         public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
     }
 
@@ -213,7 +268,7 @@ public class EventPlotInfo extends TimePlotInfo
     {
         eventPainter.setStackOverlappingEvents( stack );
     }
-    
+
     /**
      * Sets the size of a single row of events. An EventPlotInfo may contain
      * multiple rows of events if some of those events overlap in time.
@@ -316,9 +371,9 @@ public class EventPlotInfo extends TimePlotInfo
             event.setEventPlotInfo( null );
         }
     }
-    
+
     void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
-        this.eventPainter.updateEvent( oldEvent, newStartTime, newEndTime );
+        this.eventPainter.moveEvent0( oldEvent, newStartTime, newEndTime );
     }
 }

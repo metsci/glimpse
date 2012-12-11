@@ -4,6 +4,7 @@ import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
 
 import java.util.EnumSet;
 
+import com.google.common.collect.Sets;
 import com.metsci.glimpse.plot.timeline.event.Event;
 
 public class EventSelection
@@ -80,6 +81,16 @@ public class EventSelection
     public boolean isCenterSelection( )
     {
         return locations.contains( Center );
+    }
+    
+    public boolean isLocation( Location... locationList )
+    {
+        for ( Location location : locationList )
+        {
+            if ( locations.contains( location ) ) return true;
+        }
+        
+        return false;
     }
     
     @Override

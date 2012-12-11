@@ -137,23 +137,28 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // add listeners to EventPlots
         events1.addEventPlotListener( new EventPlotListener( )
         {
+
             @Override
             public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventsHovered: " + events );
+                // TODO Auto-generated method stub
+                
             }
 
             @Override
             public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventClicked: " + events );
+                // TODO Auto-generated method stub
+                
             }
 
             @Override
             public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventUpdated: " + events );
+                // TODO Auto-generated method stub
+                
             }
+
         } );
 
         // use middle click to switch between stacking and not stacking events (just for demonstration purposes)

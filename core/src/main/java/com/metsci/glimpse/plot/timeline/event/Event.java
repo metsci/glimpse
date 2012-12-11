@@ -468,6 +468,18 @@ public class Event
         return String.format( "%s (%s)", name, id );
     }
 
+    public static Event createDummyEvent( Event event )
+    {
+        TimeStamp startTime = TimeStamp.fromTimeStamp( event.getStartTime( ) );
+        TimeStamp endTime = TimeStamp.fromTimeStamp( event.getEndTime( ) );
+        return new Event( event.getId( ), null, startTime, endTime );
+    }
+    
+    public static Event createDummyEvent( TimeStamp time )
+    {
+        return new Event( time );
+    }
+    
     public static Comparator<Event> getStartTimeComparator( )
     {
         return new Comparator<Event>( )
@@ -478,16 +490,6 @@ public class Event
                 return o1.getStartTime( ).compareTo( o2.getStartTime( ) );
             }
         };
-    }
-
-    public static Event createDummyEvent( Event event )
-    {
-        return new Event( event.getId( ), null, event.getStartTime( ), event.getEndTime( ) );
-    }
-    
-    public static Event createDummyEvent( TimeStamp time )
-    {
-        return new Event( time );
     }
 
     public static Comparator<Event> getEndTimeComparator( )
