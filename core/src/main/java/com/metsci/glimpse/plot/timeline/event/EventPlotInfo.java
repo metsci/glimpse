@@ -152,12 +152,7 @@ public class EventPlotInfo extends TimePlotInfo
                 e.setHandled( true );
             }
         }
-
-        @Override
-        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-        {
-        }
-
+        
         @Override
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
@@ -191,6 +186,21 @@ public class EventPlotInfo extends TimePlotInfo
                 }
             }
         }
+        
+        @Override
+        public void mouseReleased( GlimpseMouseEvent event )
+        {
+            dragType = null;
+            anchorTime = null;
+            eventStart = null;
+            eventEnd = null;
+            dragEvent = null;
+        }
+        
+        @Override
+        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+        }
 
         @Override
         public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
@@ -210,16 +220,6 @@ public class EventPlotInfo extends TimePlotInfo
         @Override
         public void mousePressed( GlimpseMouseEvent event )
         {
-        }
-
-        @Override
-        public void mouseReleased( GlimpseMouseEvent event )
-        {
-            dragType = null;
-            anchorTime = null;
-            eventStart = null;
-            eventEnd = null;
-            dragEvent = null;
         }
 
         @Override
