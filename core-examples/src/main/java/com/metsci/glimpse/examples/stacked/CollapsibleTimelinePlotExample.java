@@ -9,10 +9,10 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
@@ -198,11 +198,13 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             }
         } );
 
-        // lock the axis selection and don't allow the user to unlock it with the mouse
-        // the selection bounds can still be adjusted by ctrl clicking and dragging
-        AxisMouseListener1D listener = plot.getTimeAxisMouseListener( );
-        listener.setAllowSelectionLock( false );
-        plot.getTimeAxis( ).setSelectionLock( true );
+        // replace the default StackedTimePlot2D mouse listener behavior with
+        // the default tagged axis behavior (the selected area will not follow
+        // the mouse, but the user can move it by clicking and dragging inside
+        // the selected area)
+        plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
+        // don't draw text indicating whether the selection is locked
+        plot.getSelectedTimePainter( ).setShowLockedStatus( false );
 
         // add an axis listener which keeps the current time selection
         // equal to the max time selection

@@ -40,7 +40,6 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 
 public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
 {
-    protected boolean dragTogether = false;
     protected boolean onlyMoveCurrent = false;
     protected StackedTimePlot2D plot;
 
@@ -62,7 +61,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         updateTagSelection( e, axis, horizontal );
 
         // right clicks toggle selection locking
-        if ( this.allowSelectionLock && e.isButtonDown( MouseButton.Button3 ) )
+        if ( allowSelectionLock && e.isButtonDown( MouseButton.Button3 ) )
         {
             if ( plot.isCurrentTimeLocked( ) || plot.isSelectionLocked( ) )
             {
@@ -82,8 +81,6 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
         Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
-
-        dragTogether = false;
 
         double maxDistance = maxPixelDist / taggedAxis.getPixelsPerValue( );
         double mouseValue = taggedAxis.screenPixelToValue( mousePos );
