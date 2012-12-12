@@ -366,7 +366,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         textRenderer.beginRendering( width, height );
         try
         {
-            textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
+            GlimpseColor.setColor( textRenderer, textColor );
             textRenderer.draw( text, xText, yText );
         }
         finally
@@ -485,7 +485,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             gl.glRotated( 90, 0, 0, 1.0f );
             gl.glTranslated( -xShift, -yShift, 0 );
             
-            textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
+            GlimpseColor.setColor( textRenderer, textColor );
             textRenderer.draw( text, xText, yText );
         }
         finally
