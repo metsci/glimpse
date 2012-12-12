@@ -5,11 +5,14 @@ import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
 
 import java.awt.Font;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -36,24 +39,23 @@ public class EventPlotInfo extends TimePlotInfo
     protected int bufferSize;
 
     protected List<EventPlotListener> eventListeners;
-    
+
     protected boolean isHorizontal;
-    
+
     protected DragListener dragListener;
 
-    //@formatter:off
     public EventPlotInfo( TimePlotInfo delegate )
     {
         this( delegate, new TextureAtlas( ) );
     }
-    
+
     public EventPlotInfo( TimePlotInfo delegate, TextureAtlas atlas )
     {
         super( delegate );
-    
+
         final Epoch epoch = parent.getEpoch( );
         this.isHorizontal = parent.isTimeAxisHorizontal( );
-        
+
         if ( isHorizontal )
         {
             this.layout1D = new GlimpseAxisLayoutX( getLayout( ), "EventLayout1D" );
@@ -62,47 +64,54 @@ public class EventPlotInfo extends TimePlotInfo
         {
             this.layout1D = new GlimpseAxisLayoutY( getLayout( ), "EventLayout1D" );
         }
-        
+
         this.layout1D.setEventConsumer( false );
         this.eventPainter = new EventPainter( this, epoch, atlas, isHorizontal );
         this.layout1D.addPainter( this.eventPainter );
-        
+
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
-        
+
         this.layout1D.addGlimpseMouseAllListener( new EventListener( ) );
-        
+
         this.dragListener = new DragListener( );
         this.addEventPlotListener( dragListener );
         this.layout1D.addGlimpseMouseAllListener( dragListener );
-        
+
         this.rowSize = DEFAULT_ROW_SIZE;
         this.bufferSize = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
     }
-    //@formatter:on
-    
+
     protected class EventListener implements GlimpseMouseAllListener
     {
+        Set<EventSelection> hoveredEvents = Collections.emptySet( );
+
         @Override
         public void mouseEntered( GlimpseMouseEvent e )
         {
-            
         }
 
         @Override
         public void mouseExited( GlimpseMouseEvent e )
         {
+            // exit all currently hovered events
+            TimeStamp time = getTime( e );
+            for ( EventPlotListener listener : eventListeners )
+            {
+                listener.eventsExited( e, hoveredEvents, time );
+            }
             
+            hoveredEvents = Collections.emptySet( );
         }
 
         @Override
         public void mousePressed( GlimpseMouseEvent e )
-        {                
+        {
             if ( isHorizontal )
             {
                 TimeStamp time = getTime( e );
-                Set<EventSelection> events = eventPainter.getNearestEvents( e );
-                
+                Set<EventSelection> events = Collections.unmodifiableSet( eventPainter.getNearestEvents( e ) );
+
                 for ( EventPlotListener listener : eventListeners )
                 {
                     listener.eventsClicked( e, events, time );
@@ -111,23 +120,41 @@ public class EventPlotInfo extends TimePlotInfo
         }
 
         @Override
-        public void mouseReleased( GlimpseMouseEvent e ) { }
+        public void mouseReleased( GlimpseMouseEvent e )
+        {
+        }
 
         @Override
-        public void mouseWheelMoved( GlimpseMouseEvent e ) { }
-        
+        public void mouseWheelMoved( GlimpseMouseEvent e )
+        {
+        }
+
         @Override
         public void mouseMoved( GlimpseMouseEvent e )
         {
             if ( isHorizontal )
             {
                 TimeStamp time = getTime( e );
-                Set<EventSelection> events = eventPainter.getNearestEvents( e );
-                
+                Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( eventPainter.getNearestEvents( e ) );
+
                 for ( EventPlotListener listener : eventListeners )
                 {
-                    listener.eventsHovered( e, events, time );
+                    listener.eventsHovered( e, newHoveredEvents, time );
                 }
+
+                SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsEntered( e, eventsEntered, time );
+                }
+
+                SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsExited( e, eventsExited, time );
+                }
+
+                hoveredEvents = Sets.newHashSet( newHoveredEvents );
             }
         }
     }
@@ -139,21 +166,21 @@ public class EventPlotInfo extends TimePlotInfo
         TimeStamp eventStart = null;
         TimeStamp eventEnd = null;
         Event dragEvent = null;
-        
+
         boolean enabled = true;
-        
+
         public boolean isEnabled( )
         {
             return this.enabled;
         }
-        
+
         public void setEnabled( boolean enabled )
         {
             this.enabled = enabled;
-            
+
             reset( );
         }
-        
+
         public void reset( )
         {
             dragType = null;
@@ -167,7 +194,7 @@ public class EventPlotInfo extends TimePlotInfo
         public void mouseMoved( GlimpseMouseEvent e )
         {
             if ( !enabled ) return;
-            
+
             if ( e.isButtonDown( MouseButton.Button1 ) && dragEvent != null )
             {
                 TimeStamp time = getTime( e );
@@ -189,12 +216,12 @@ public class EventPlotInfo extends TimePlotInfo
                 e.setHandled( true );
             }
         }
-        
+
         @Override
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
             if ( !enabled ) return;
-            
+
             if ( e.isButtonDown( MouseButton.Button1 ) )
             {
                 for ( EventSelection selection : events )
@@ -225,54 +252,38 @@ public class EventPlotInfo extends TimePlotInfo
                 }
             }
         }
-        
+
         @Override
         public void mouseReleased( GlimpseMouseEvent event )
         {
             if ( !enabled ) return;
-            
+
             reset( );
         }
-        
-        @Override
-        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-        {
-        }
 
-        @Override
-        public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-        {
-        }
-
-        @Override
-        public void mouseEntered( GlimpseMouseEvent event )
-        {
-        }
-
-        @Override
-        public void mouseExited( GlimpseMouseEvent event )
-        {
-        }
-
-        @Override
-        public void mousePressed( GlimpseMouseEvent event )
-        {
-        }
-
-        @Override
-        public void mouseWheelMoved( GlimpseMouseEvent e )
-        {
-        }
-
+        //@formatter:off
+        @Override public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
+        @Override public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
+        @Override public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
+        @Override public void eventUpdated( Event event ) { }
+        @Override public void mouseEntered( GlimpseMouseEvent event ) { }
+        @Override public void mouseExited( GlimpseMouseEvent event ) { }
+        @Override public void mousePressed( GlimpseMouseEvent event ) { }
+        @Override public void mouseWheelMoved( GlimpseMouseEvent e ) { }
+        //@formatter:on
     }
-    
+
     public interface EventPlotListener
     {
+        public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
+
+        public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
+
         public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
-        public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
+        public void eventUpdated( Event event );
     }
 
     public TimeStamp getTime( GlimpseMouseEvent e )
@@ -281,12 +292,12 @@ public class EventPlotInfo extends TimePlotInfo
         double valueX = axis.screenPixelToValue( e.getX( ) );
         return parent.getEpoch( ).toTimeStamp( valueX );
     }
-    
+
     public boolean isMouseDragEnabled( )
     {
         return this.dragListener.isEnabled( );
     }
-    
+
     public void setMouseDragEnabled( boolean enabled )
     {
         this.dragListener.setEnabled( enabled );
@@ -418,5 +429,10 @@ public class EventPlotInfo extends TimePlotInfo
     void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
         this.eventPainter.moveEvent0( oldEvent, newStartTime, newEndTime );
+
+        for ( EventPlotListener listener : eventListeners )
+        {
+            listener.eventUpdated( oldEvent );
+        }
     }
 }

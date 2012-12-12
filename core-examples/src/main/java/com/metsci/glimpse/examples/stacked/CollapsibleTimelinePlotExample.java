@@ -1,6 +1,6 @@
 package com.metsci.glimpse.examples.stacked;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -143,25 +143,35 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // add listeners to EventPlots
         events1.addEventPlotListener( new EventPlotListener( )
         {
-
             @Override
             public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventsHovered: " + events );
+                logInfo( logger, "Events Hovered: %s Time: %s", events, time );
             }
 
             @Override
             public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventsClicked: " + events );
+                logInfo( logger, "Events Clicked: %s Time: %s", events, time );
+            }
+            
+            @Override
+            public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+            {
+                if ( !events.isEmpty( ) ) logInfo( logger, "Events Exited: %s Time: %s", events, time );
             }
 
             @Override
-            public void eventsUpdated( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+            public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                System.out.println( "eventsUpdated: " + events );
+                if ( !events.isEmpty( ) ) logInfo( logger, "Events Entered: %s Time: %s", events, time );
             }
 
+            @Override
+            public void eventUpdated( Event event )
+            {
+                logInfo( logger, "Event Updated: %s", event );
+            }
         } );
 
         // use middle click to switch between stacking and not stacking events (just for demonstration purposes)
