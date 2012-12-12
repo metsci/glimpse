@@ -19,6 +19,8 @@ import com.sun.opengl.util.j2d.TextRenderer;
 
 public class Event
 {
+    public static final int ARROW_TIP_BUFFER = 2;
+    public static final int ARROW_SIZE = 10;
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
 
     protected EventPlotInfo info;
@@ -154,16 +156,39 @@ public class Event
     public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
     {
         int size = sizeMax - sizeMin;
+        double sizeCenter = sizeMin + size / 2.0;
         int buffer = painter.getBufferSize( );
-
+        int arrowSize = Math.min( size, ARROW_SIZE );
+        
         Epoch epoch = painter.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
         double timeMax = epoch.fromTimeStamp( endTime );
 
-        double timeSpan = Math.min( axis.getMax( ), timeMax ) - Math.max( axis.getMin( ), timeMin );
+        double arrowBaseMin = timeMin;
+        boolean offEdgeMin = false;
+        if ( axis.getMin( ) > timeMin )
+        {
+            offEdgeMin = true;
+            timeMin = axis.getMin( ) + ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
+            arrowBaseMin = timeMin + arrowSize / axis.getPixelsPerValue( );
+        }
+        
+        double arrowBaseMax = timeMax;
+        boolean offEdgeMax = false;
+        if ( axis.getMax( ) < timeMax )
+        {
+            offEdgeMax = true;
+            timeMax = axis.getMax( ) - ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
+            arrowBaseMax = timeMax - arrowSize / axis.getPixelsPerValue( );
+        }
+        
+        arrowBaseMax = Math.max( timeMin, arrowBaseMax );
+        arrowBaseMin = Math.min( timeMax, arrowBaseMin );
+        
+        double timeSpan = timeMax - timeMin;
         double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
-        int pixelX = buffer + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
+        int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
 
         // start positions of the next event in this row
         double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : Double.MAX_VALUE;
@@ -172,24 +197,10 @@ public class Event
         if ( painter.isHorizontal( ) )
         {
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-            gl.glBegin( GL.GL_QUADS );
-            try
+            
+            if ( !offEdgeMin && !offEdgeMax )
             {
-                gl.glVertex2d( timeMin, sizeMin );
-                gl.glVertex2d( timeMin, sizeMax );
-                gl.glVertex2d( timeMax, sizeMax );
-                gl.glVertex2d( timeMax, sizeMin );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-
-            if ( showBorder )
-            {
-                GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
-                gl.glLineWidth( borderThickness );
-                gl.glBegin( GL.GL_LINE_LOOP );
+                gl.glBegin( GL.GL_QUADS );
                 try
                 {
                     gl.glVertex2d( timeMin, sizeMin );
@@ -200,6 +211,61 @@ public class Event
                 finally
                 {
                     gl.glEnd( );
+                }
+    
+                if ( showBorder )
+                {
+                    GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+                    gl.glLineWidth( borderThickness );
+                    gl.glBegin( GL.GL_LINE_LOOP );
+                    try
+                    {
+                        gl.glVertex2d( timeMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMin );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+            }
+            else
+            {
+                gl.glBegin( GL.GL_POLYGON );
+                try
+                {
+                    gl.glVertex2d( arrowBaseMin, sizeMax );
+                    gl.glVertex2d( arrowBaseMax, sizeMax );
+                    gl.glVertex2d( timeMax, sizeCenter );
+                    gl.glVertex2d( arrowBaseMax, sizeMin );
+                    gl.glVertex2d( arrowBaseMin, sizeMin );
+                    gl.glVertex2d( timeMin, sizeCenter );
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
+                
+                if ( showBorder )
+                {
+                    GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+                    gl.glLineWidth( borderThickness );
+                    gl.glBegin( GL.GL_LINE_LOOP );
+                    try
+                    {
+                        gl.glVertex2d( arrowBaseMin, sizeMax );
+                        gl.glVertex2d( arrowBaseMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeCenter );
+                        gl.glVertex2d( arrowBaseMax, sizeMin );
+                        gl.glVertex2d( arrowBaseMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeCenter );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
                 }
             }
 
