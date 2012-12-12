@@ -191,8 +191,8 @@ public class Event
         int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
 
         // start positions of the next event in this row
-        double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : Double.MAX_VALUE;
-        int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : Integer.MAX_VALUE;
+        double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : axis.getMax( );
+        int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : width;
 
         if ( painter.isHorizontal( ) )
         {
