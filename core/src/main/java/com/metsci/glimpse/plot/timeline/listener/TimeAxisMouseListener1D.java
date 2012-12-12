@@ -59,7 +59,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
     @Override
     public void mousePressed( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
     {
-        super.mousePressed( e, axis, horizontal );
+        updateTagSelection( e, axis, horizontal );
 
         // right clicks toggle selection locking
         if ( this.allowSelectionLock && e.isButtonDown( MouseButton.Button3 ) )
@@ -128,11 +128,6 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         }
 
         mouseMoved0( e, taggedAxis, horizontal );
-
-        taggedAxis.validateTags( );
-        taggedAxis.validate( );
-
-        notifyTagsUpdated( taggedAxis );
     }
 
     protected void mouseMoved0( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
@@ -178,7 +173,6 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
     public void mouseWheelMoved( GlimpseMouseEvent e )
     {
         TaggedAxis1D taggedAxis = getAxis( e );
-
         if ( taggedAxis == null ) return;
 
         if ( e.isKeyDown( ModifierKey.Ctrl ) || e.isKeyDown( ModifierKey.Meta ) )
@@ -189,11 +183,36 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         {
             super.mouseWheelMoved( e );
         }
-
+    }
+    
+    @Override
+    public void mousePressed( GlimpseMouseEvent event )
+    {
+        super.mousePressed( event );
+        
+        TaggedAxis1D taggedAxis = getAxis( event );
+        if ( taggedAxis == null ) return;
         taggedAxis.validateTags( );
-        taggedAxis.validate( );
+    }
 
-        notifyTagsUpdated( taggedAxis );
+    @Override
+    public void mouseMoved( GlimpseMouseEvent event )
+    {
+        super.mouseMoved( event );
+        
+        TaggedAxis1D taggedAxis = getAxis( event );
+        if ( taggedAxis == null ) return;
+        taggedAxis.validateTags( );
+    }
+
+    @Override
+    public void mouseReleased( GlimpseMouseEvent event )
+    {
+        super.mouseReleased( event );
+        
+        TaggedAxis1D taggedAxis = getAxis( event );
+        if ( taggedAxis == null ) return;
+        taggedAxis.validateTags( );
     }
 
     public void handleCtrlMouseWheel( GlimpseMouseEvent e )
@@ -218,8 +237,6 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
 
         taggedAxis.validateTags( );
         taggedAxis.validate( );
-
-        notifyTagsUpdated( minTag.getValue( ), maxTag.getValue( ), currentTag.getValue( ) );
     }
 
     protected TaggedAxis1D getAxis( GlimpseMouseEvent e )
@@ -262,15 +279,5 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         {
             tag.setValue( tag.getValue( ) + deltaTagValue );
         }
-    }
-
-    protected void notifyTagsUpdated( TaggedAxis1D timeAxis )
-    {
-        List<Tag> tags = timeAxis.getSortedTags( );
-        notifyTagsUpdated( tags.get( 0 ).getValue( ), tags.get( 2 ).getValue( ), tags.get( 1 ).getValue( ) );
-    }
-
-    protected void notifyTagsUpdated( double startValue, double endValue, double selectedValue )
-    {
     }
 }

@@ -262,19 +262,19 @@ public class StackedTimePlot2D extends StackedPlot2D
         return this.selectedLayout;
     }
 
-    public void setTimelineMouseListener1D( AxisMouseListener1D listener )
+    public void setTimeAxisMouseListener( AxisMouseListener1D listener )
     {
         this.lock.lock( );
         try
         {
             if ( this.timelineMouseListener != null )
             {
-                this.timeLayout.removeGlimpseMouseAllListener( this.timelineMouseListener );
+                this.underlayLayout.removeGlimpseMouseAllListener( this.timelineMouseListener );
             }
 
             if ( listener != null )
             {
-                this.timeLayout.addGlimpseMouseAllListener( listener );
+                this.underlayLayout.addGlimpseMouseAllListener( listener );
             }
 
             this.timelineMouseListener = listener;
@@ -285,7 +285,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
     }
 
-    public AxisMouseListener1D getTimelineMouseListener1D( )
+    public AxisMouseListener1D getTimeAxisMouseListener( )
     {
         return this.timelineMouseListener;
     }

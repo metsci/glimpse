@@ -1,14 +1,18 @@
 package com.metsci.glimpse.examples.stacked;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
+import com.metsci.glimpse.axis.tagged.Tag;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
@@ -45,18 +49,20 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     }
 
     @Override
+    protected StackedTimePlot2D createPlot( )
+    {
+        return new CollapsibleTimePlot2D( );
+    }
+
+    @Override
     public StackedTimePlot2D getLayout( )
     {
-        CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
+        final CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
 
-        plot.setTimelineMouseListener1D( null );
-        
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
-        Collection<TimePlotInfo> rows = plot.getAllTimePlots( );
-
-        for ( TimePlotInfo row : rows )
+        for ( TimePlotInfo row : plot.getAllTimePlots( ) )
         {
             // create a collapsible/expandable group for each row
             GroupInfo group = plot.createGroup( String.format( "%s-group", row.getId( ) ), row );
@@ -159,7 +165,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             {
                 logInfo( logger, "Events Clicked: %s Time: %s", events, time );
             }
-            
+
             @Override
             public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
@@ -192,6 +198,30 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             }
         } );
 
+        // lock the axis selection and don't allow the user to unlock it with the mouse
+        // the selection bounds can still be adjusted by ctrl clicking and dragging
+        AxisMouseListener1D listener = plot.getTimeAxisMouseListener( );
+        listener.setAllowSelectionLock( false );
+        plot.getTimeAxis( ).setSelectionLock( true );
+
+        // add an axis listener which keeps the current time selection
+        // equal to the max time selection
+        plot.getTimeAxis( ).addAxisListener( new TaggedAxisListener1D( )
+        {
+            @Override
+            public void tagsUpdated( TaggedAxis1D axis )
+            {
+                Tag s = plot.getTimeSelection( );
+                Tag m = plot.getTimeSelectionMax( );
+
+                if ( s != null && m != null && s.getValue( ) != m.getValue( ) )
+                {
+                    s.setValue( m.getValue( ) );
+                    axis.validateTags( );
+                }
+            }
+        } );
+
         return plot;
     }
 
@@ -216,10 +246,5 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // don't draw top or bottom border lines
         row.getBorderPainter( ).setDrawBottom( false );
         row.getBorderPainter( ).setDrawTop( false );
-    }
-
-    protected StackedTimePlot2D createPlot( )
-    {
-        return new CollapsibleTimePlot2D( );
     }
 }
