@@ -60,33 +60,33 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         Bottom, Center, Top;
     }
 
-    private float[] textColor = GlimpseColor.getBlack( );
-    private boolean textColorSet = false;
+    protected float[] textColor = GlimpseColor.getBlack( );
+    protected boolean textColorSet = false;
     
-    private boolean paintBackground = false;
-    private float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
-    private boolean backgroundColorSet = false;
+    protected boolean paintBackground = false;
+    protected float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
+    protected boolean backgroundColorSet = false;
 
-    private boolean paintBorder = false;
-    private float[] borderColor = GlimpseColor.getWhite( 1f );
-    private boolean borderColorSet = false;
+    protected boolean paintBorder = false;
+    protected float[] borderColor = GlimpseColor.getWhite( 1f );
+    protected boolean borderColorSet = false;
     
-    private int horizontalPadding = 5;
-    private int verticalPadding = 5;
+    protected int horizontalPadding = 5;
+    protected int verticalPadding = 5;
 
-    private HorizontalPosition hPos;
-    private VerticalPosition vPos;
+    protected HorizontalPosition hPos;
+    protected VerticalPosition vPos;
 
-    private TextRenderer textRenderer;
-    private boolean fontSet = false;
+    protected TextRenderer textRenderer;
+    protected boolean fontSet = false;
     
-    private String sizeText;
-    private String text;
+    protected String sizeText;
+    protected String text;
 
-    private boolean horizontal = true;
+    protected boolean horizontal = true;
     
-    private volatile Font newFont = null;
-    private volatile boolean antialias = false;
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
     
     public SimpleTextPainter( )
     {
@@ -499,9 +499,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     {
         if ( newFont != null )
         {
-            if ( textRenderer != null ) textRenderer.dispose( );
-            textRenderer = new TextRenderer( newFont, antialias, false );
-            newFont = null;
+            updateTextRenderer( );
         }
         
         if ( text == null ) return;
@@ -520,5 +518,12 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         {
             paintToVertical( gl, width, height, textBounds );
         }
+    }
+    
+    protected void updateTextRenderer( )
+    {
+        if ( textRenderer != null ) textRenderer.dispose( );
+        textRenderer = new TextRenderer( newFont, antialias, false );
+        newFont = null;
     }
 }
