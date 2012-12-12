@@ -71,14 +71,17 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         EventPlotInfo events2 = plot.createEventPlot( "event-2" );
         EventPlotInfo events3 = plot.createEventPlot( "event-3" );
 
+        // set the text label displayed to the left of each plot
         events1.setLabelText( "Snail Schedule" );
         events2.setLabelText( "Holidays" );
         events3.setLabelText( "Weather" );
 
+        // set additional display options on each plot
         setPlotLookAndFeel( events1 );
         setPlotLookAndFeel( events2 );
         setPlotLookAndFeel( events3 );
 
+        // center the label for the event plots
         events1.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events2.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events3.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );

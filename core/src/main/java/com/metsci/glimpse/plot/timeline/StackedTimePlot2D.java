@@ -271,12 +271,12 @@ public class StackedTimePlot2D extends StackedPlot2D
                 this.timeLayout.removeGlimpseMouseAllListener( this.timelineMouseListener );
             }
 
-            this.timelineMouseListener = listener;
-
-            if ( this.timelineMouseListener != null )
+            if ( listener != null )
             {
-                this.timeLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
+                this.timeLayout.addGlimpseMouseAllListener( listener );
             }
+
+            this.timelineMouseListener = listener;
         }
         finally
         {
