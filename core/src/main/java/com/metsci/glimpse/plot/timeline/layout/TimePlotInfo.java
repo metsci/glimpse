@@ -43,7 +43,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
+import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -62,8 +62,8 @@ public class TimePlotInfo implements PlotInfo
     protected StackedTimePlot2D parent;
     protected PlotInfo child;
 
-    protected TimelineMouseListener2D listener;
-    
+    protected DataAxisMouseListener1D listener;
+
     protected GlimpseLayout labelLayout;
 
     //@formatter:off
@@ -86,7 +86,7 @@ public class TimePlotInfo implements PlotInfo
     public TimePlotInfo( StackedTimePlot2D parent,
                          PlotInfo child,
                          GlimpseLayout labelLayout,
-                         TimelineMouseListener2D listener,
+                         DataAxisMouseListener1D listener,
                          GridPainter gridPainter,
                          NumericXYAxisPainter axisPainter,
                          SimpleTextPainter labelPainter,
@@ -109,7 +109,7 @@ public class TimePlotInfo implements PlotInfo
     }
     //@formatter:on
 
-    public TimelineMouseListener2D getTimelineMouseListener( )
+    public DataAxisMouseListener1D getDataAxisMouseListener( )
     {
         return listener;
     }
@@ -123,7 +123,7 @@ public class TimePlotInfo implements PlotInfo
     {
         this.borderPainter.setLineWidth( width );
     }
-    
+
     public void setLabelBorderColor( float[] rgba )
     {
         this.labelBorderPainter.setColor( rgba );
@@ -154,17 +154,17 @@ public class TimePlotInfo implements PlotInfo
     {
         this.axisPainter.setFont( font );
     }
-    
+
     public void setBackgroundColor( float[] rgba )
     {
         this.backgroundPainter.setColor( rgba );
     }
-    
+
     public GlimpseLayout getLabelLayout( )
     {
         return labelLayout;
     }
-    
+
     public BackgroundPainter getBackgroundPainter( )
     {
         return this.backgroundPainter;
@@ -189,7 +189,7 @@ public class TimePlotInfo implements PlotInfo
     {
         return borderPainter;
     }
-    
+
     public BorderPainter getLabelBorderPainter( )
     {
         return labelBorderPainter;
@@ -286,7 +286,7 @@ public class TimePlotInfo implements PlotInfo
     {
         return ( TaggedAxis1D ) child.getCommonAxis( );
     }
-    
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {

@@ -65,6 +65,9 @@ public class EventPlotInfo extends TimePlotInfo
             this.layout1D = new GlimpseAxisLayoutY( getLayout( ), "EventLayout1D" );
         }
 
+        // layout1D should completely cover its parent layout
+        this.layout1D.setLayoutData( "pos container.x container.y container.x2 container.y2" );
+        // un-handled events should be passed on to the parent layout
         this.layout1D.setEventConsumer( false );
         this.eventPainter = new EventPainter( this, epoch, atlas, isHorizontal );
         this.layout1D.addPainter( this.eventPainter );

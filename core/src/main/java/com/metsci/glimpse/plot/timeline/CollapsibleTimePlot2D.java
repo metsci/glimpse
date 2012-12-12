@@ -145,12 +145,6 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     }
 
     @Override
-    protected String getLayoutConstraints( )
-    {
-        return super.getLayoutConstraints( ) + ",nocache";
-    }
-
-    @Override
     protected void setPlotInfoLayout( int i, int size, PlotInfo info )
     {
         if ( isTimeAxisHorizontal( ) )

@@ -49,6 +49,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     {
         CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
 
+        plot.setTimelineMouseListener1D( null );
+        
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
