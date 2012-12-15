@@ -3,6 +3,7 @@ package com.metsci.glimpse.worldwind.tile;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.PreRenderable;
@@ -25,6 +26,8 @@ import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.units.Azimuth;
+import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
 
@@ -39,6 +42,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
 {
     private static final Logger logger = Logger.getLogger( GlimpseDynamicSurfaceTile.class.getSimpleName( ) );
 
+    protected static final int HEURISTIC_ALTITUDE_CUTOFF = 800;
+    
     protected GlimpseLayout layout;
     protected Axis2D axes;
     protected GeoProjection projection;
@@ -53,7 +58,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
     protected SimpleOffscreenCanvas offscreenCanvas;
     protected TextureSurfaceTile tile;
     protected GLContext context;
-
+    
     public GlimpseDynamicSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int width, int height, double minLat, double maxLat, double minLon, double maxLon )
     {
         this( layout, axes, projection, width, height, getCorners( new LatLonBounds( minLat, maxLat, minLon, maxLon ) ) );
@@ -140,7 +145,19 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
         }
         else
         {
-            LatLonBounds screenBounds = bufferCorners( getCorners( screenCorners ), 0.5 );
+            // two heuristic methods of calculating the screen corners
+            LatLonBounds screenBounds = null;
+            if ( dc.getView( ).getEyePosition( ).getAltitude( ) < HEURISTIC_ALTITUDE_CUTOFF )
+            {
+                screenBounds = bufferCorners( getCorners( getCorners0( dc ) ), 0.5 );
+            }
+            else
+            {
+                LatLonBounds screenBounds1 = bufferCorners( getCorners( screenCorners ), 0.5 );
+                LatLonBounds screenBounds2 = bufferCorners( getCorners( getCorners0( dc ) ), 0.5 );
+                screenBounds = getUnionedCorners( screenBounds1, screenBounds2 );
+            }
+            
             bounds = getIntersectedCorners( maxBounds, screenBounds );
             corners = getCorners( bounds );
         }
@@ -254,6 +271,17 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
         return new LatLonBounds( minLat, maxLat, minLon, maxLon );
     }
 
+    public static LatLonBounds getUnionedCorners( LatLonBounds corners1, LatLonBounds corners2 )
+    {
+        double minLat = Math.min( corners1.minLat, corners2.minLat );
+        double minLon = Math.min( corners1.minLon, corners2.minLon );
+        double maxLat = Math.max( corners1.maxLat, corners2.maxLat );
+        double maxLon = Math.max( corners1.maxLon, corners2.maxLon );
+
+        return new LatLonBounds( minLat, maxLat, minLon, maxLon );
+    }
+
+    
     public static LatLonBounds getIntersectedCorners( LatLonBounds corners1, LatLonBounds corners2 )
     {
         double minLat = Math.max( corners1.minLat, corners2.minLat );
@@ -280,12 +308,56 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
     {
         View view = dc.getView( );
         Rectangle viewport = view.getViewport( );
-
+        
         List<LatLon> corners = new ArrayList<LatLon>( 4 );
         corners.add( view.computePositionFromScreenPoint( viewport.getMinX( ), viewport.getMinY( ) ) );
         corners.add( view.computePositionFromScreenPoint( viewport.getMinX( ), viewport.getMaxY( ) ) );
         corners.add( view.computePositionFromScreenPoint( viewport.getMaxX( ), viewport.getMaxY( ) ) );
         corners.add( view.computePositionFromScreenPoint( viewport.getMaxX( ), viewport.getMinY( ) ) );
+
+        return corners;
+    }
+    
+    // another possible heuristic for calculating the corners of the visible region
+    // the computePositionFromScreenPoint sometimes seems to return too small a region
+    public static List<LatLon> getCorners0( DrawContext dc )
+    {
+        View view = dc.getView( );
+        Rectangle viewport = view.getViewport( );
+
+        Position pos = view.getEyePosition( );
+        // heuristic: below 1000 the meters per pixel gets small very quickly
+        double elevation = Math.max( HEURISTIC_ALTITUDE_CUTOFF, pos.getAltitude( ) );
+        
+        // the distance in meters on the surface of the earth
+        // of one screen pixel directly under the eye position
+        double metersPerPixel = view.computePixelSizeAtDistance( elevation );
+        
+        // now assume this size roughly holds across the whole screen
+        // (which is an ok assumption when we're zoomed in)
+        double viewportHeightMeters = viewport.getHeight( ) * metersPerPixel;
+        double viewportWidthMeters =  viewport.getWidth( ) * metersPerPixel;
+        
+        // in order to not worry about how the viewport is rotated
+        // (which direction is north) just take the largest dimension
+        double viewportSizeMeters = 2.0 * Math.max( viewportHeightMeters, viewportWidthMeters );
+        
+        LatLonGeo centerLatLon = LatLonGeo.fromDeg( pos.latitude.getDegrees( ), pos.longitude.getDegrees( ) );
+        LatLonGeo swLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southwest );
+        LatLonGeo seLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southeast );
+        LatLonGeo nwLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.northwest );
+        LatLonGeo neLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.northeast );
+        
+        Position swPos = Position.fromDegrees( swLatLon.getLatDeg( ), swLatLon.getLonDeg( ) );
+        Position sePos = Position.fromDegrees( seLatLon.getLatDeg( ), seLatLon.getLonDeg( ) );
+        Position nwPos = Position.fromDegrees( nwLatLon.getLatDeg( ), nwLatLon.getLonDeg( ) );
+        Position nePos = Position.fromDegrees( neLatLon.getLatDeg( ), neLatLon.getLonDeg( ) );
+        
+        List<LatLon> corners = new ArrayList<LatLon>( 4 );
+        corners.add( swPos );
+        corners.add( sePos );
+        corners.add( nwPos );
+        corners.add( nePos );
 
         return corners;
     }
@@ -348,6 +420,12 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements  Glimpse
             this.maxLat = maxLat;
             this.minLon = minLon;
             this.maxLon = maxLon;
+        }
+        
+        @Override
+        public String toString( )
+        {
+            return String.format( "%f %f %f %f", minLat, maxLat, minLon, maxLon );
         }
     }
 }
