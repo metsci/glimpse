@@ -274,7 +274,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 {
                     public void run( )
                     {
-                        if ( !display.isDisposed( ) )
+                        if ( !display.isDisposed( ) && !isDisposed( ) && !parent.isDisposed( ) )
                         {
                             forceFocus( );
                         }
