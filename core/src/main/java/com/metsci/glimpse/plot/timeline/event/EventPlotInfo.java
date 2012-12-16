@@ -20,6 +20,8 @@ import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
+import com.metsci.glimpse.painter.info.TooltipPainter;
+import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
@@ -43,6 +45,7 @@ public class EventPlotInfo extends TimePlotInfo
     protected boolean isHorizontal;
 
     protected DragListener dragListener;
+    protected TooltipListener tooltipListener;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -80,6 +83,9 @@ public class EventPlotInfo extends TimePlotInfo
         this.addEventPlotListener( dragListener );
         this.layout1D.addGlimpseMouseAllListener( dragListener );
 
+        this.tooltipListener = new TooltipListener( );
+        this.addEventPlotListener( tooltipListener );
+        
         this.rowSize = DEFAULT_ROW_SIZE;
         this.bufferSize = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
@@ -140,26 +146,75 @@ public class EventPlotInfo extends TimePlotInfo
                 TimeStamp time = getTime( e );
                 Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( eventPainter.getNearestEvents( e ) );
 
-                for ( EventPlotListener listener : eventListeners )
-                {
-                    listener.eventsHovered( e, newHoveredEvents, time );
-                }
-
-                SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
-                for ( EventPlotListener listener : eventListeners )
-                {
-                    listener.eventsEntered( e, eventsEntered, time );
-                }
-
                 SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
                 for ( EventPlotListener listener : eventListeners )
                 {
                     listener.eventsExited( e, eventsExited, time );
                 }
+                
+                SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsEntered( e, eventsEntered, time );
+                }
+                
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsHovered( e, newHoveredEvents, time );
+                }
 
                 hoveredEvents = Sets.newHashSet( newHoveredEvents );
             }
         }
+    }
+    
+    protected class TooltipListener implements EventPlotListener
+    {
+        EventSelection event = null;
+        
+        @Override
+        public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+            if ( events.contains( event ) )
+            {
+                StackedTimePlot2D plot = getStackedTimePlot( );
+                TooltipPainter tooltipPainter = plot.getTooltipPainter( );
+                tooltipPainter.setText( null );
+                
+                event = null;
+            }
+        }
+
+        @Override
+        public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+            if ( events.isEmpty( ) || event != null ) return;
+            
+            event = events.iterator( ).next( );
+            
+            StackedTimePlot2D plot = getStackedTimePlot( );
+            TooltipPainter tooltipPainter = plot.getTooltipPainter( );
+            
+            String text = event.getEvent( ).getLabel( );
+            
+            tooltipPainter.setText( text );
+        }
+
+        @Override
+        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+        }
+
+        @Override
+        public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+        }
+
+        @Override
+        public void eventUpdated( Event event )
+        {
+        }
+        
     }
 
     protected class DragListener implements EventPlotListener, GlimpseMouseAllListener

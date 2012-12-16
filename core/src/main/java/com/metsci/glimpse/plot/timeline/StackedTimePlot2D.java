@@ -939,14 +939,6 @@ public class StackedTimePlot2D extends StackedPlot2D
             @Override
             public void mouseMoved( GlimpseMouseEvent e )
             {
-                double x = e.getAxisCoordinatesX( );
-                double y = e.getAxisCoordinatesY( );
-                double data = isTimeAxisHorizontal( ) ? y : x;
-                TimeStamp time = isTimeAxisHorizontal( ) ? epoch.toTimeStamp( x ) : epoch.toTimeStamp( y );
-                
-                String text = String.format( "%s\n%.3f\n", time, data );
-                
-                tooltipPainter.setText( text );
                 tooltipPainter.setLocation( e );
             }   
         });

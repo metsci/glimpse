@@ -13,6 +13,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.SimpleTextLayout;
 import com.metsci.glimpse.support.font.SimpleTextLayout.TextBoundingBox;
+import com.metsci.glimpse.support.font.SimpleTextLayoutCenter;
 
 /**
  * Displays tool tip text at a specified position.
@@ -24,10 +25,10 @@ public class TooltipPainter extends SimpleTextPainter
     // if true, tooltip text will be wrapped if it extends past the edge of the box
     protected boolean isFixedWidth = false;
     protected int fixedWidth = 50;
-    protected int borderSize = 6;
+    protected int borderSize = 4;
     protected float lineSpacing = 2;
     protected boolean breakOnEol = true;
-    protected int offsetX = -20;
+    protected int offsetX = 14;
     protected int offsetY = -10;
     protected boolean clampToScreenEdges = true;
 
@@ -57,7 +58,7 @@ public class TooltipPainter extends SimpleTextPainter
 
         return this;
     }
-    
+
     public TooltipPainter setOffset( int x, int y )
     {
         this.offsetX = x;
@@ -97,7 +98,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
-    
+
     public void setClampToScreenEdges( boolean clamp )
     {
         this.clampToScreenEdges = clamp;
@@ -163,7 +164,7 @@ public class TooltipPainter extends SimpleTextPainter
     {
         Font font = textRenderer.getFont( );
         FontRenderContext frc = textRenderer.getFontRenderContext( );
-        textLayout = new SimpleTextLayout( font, frc, breakIterator );
+        textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
     }
@@ -189,7 +190,9 @@ public class TooltipPainter extends SimpleTextPainter
             }
         }
 
-        linesBounds = new Bounds( minX - borderSize, maxX + borderSize, minY, maxY );
+        // subtracting .75 of the descent is just a heuristic to make the spacing
+        // at the top and bottom of the bounding box look more uniform
+        linesBounds = new Bounds( minX - borderSize, maxX + borderSize, minY - textLayout.getDescent( ) * .75 - borderSize, maxY + borderSize );
     }
 
     @Override
@@ -215,7 +218,7 @@ public class TooltipPainter extends SimpleTextPainter
         GL gl = context.getGL( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-        
+
         double clampX = 0;
         double clampY = 0;
         if ( clampToScreenEdges )
@@ -224,7 +227,7 @@ public class TooltipPainter extends SimpleTextPainter
             if ( maxX > width ) clampX = width - maxX;
             double minX = x + linesBounds.minX + offsetX;
             if ( minX < 0 ) clampX = -minX;
-            
+
             double maxY = height - y + linesBounds.maxY + offsetY;
             if ( maxY > height ) clampY = height - maxY;
             double minY = height - y + linesBounds.minY + offsetY;
@@ -250,7 +253,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL.GL_QUADS );
                 try
                 {
-                    borderVertices( gl, height, clampX+offsetX, clampY+offsetY );
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
                 }
                 finally
                 {
@@ -267,7 +270,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL.GL_LINE_LOOP );
                 try
                 {
-                    borderVertices( gl, height, clampX+offsetX, clampY+offsetY );
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
                 }
                 finally
                 {
@@ -285,7 +288,7 @@ public class TooltipPainter extends SimpleTextPainter
             for ( TextBoundingBox line : lines )
             {
                 int posX = ( int ) ( x + line.leftX + clampX + offsetX );
-                int posY = ( int ) ( height - y + line.baselineY + clampY + offsetY );
+                int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY );
                 textRenderer.draw( line.text, posX, posY );
             }
         }
