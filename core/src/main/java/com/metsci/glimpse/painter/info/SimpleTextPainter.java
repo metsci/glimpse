@@ -184,6 +184,11 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         this.text = text;
         return this;
     }
+    
+    public String getText( )
+    {
+        return this.text;
+    }
 
     public SimpleTextPainter setPadding( int padding )
     {

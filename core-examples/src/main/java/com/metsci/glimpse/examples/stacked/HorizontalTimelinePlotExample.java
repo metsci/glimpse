@@ -61,7 +61,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
     public static void main( String[] args ) throws Exception
     {
         Example example = Example.showWithSwing( new HorizontalTimelinePlotExample( ) );
-        
+
         // set a blue color scheme look and feel for the plot
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
     }
@@ -84,7 +84,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
         // set the overall bounds of the timeline
         plot.setTimeAxisBounds( axisMinTime, axisMaxTime );
-        
+
         // add spacing between stacked plots
         plot.setPlotSpacing( 2 );
         plot.setBorderSize( 4 );
@@ -113,7 +113,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // add mouse listeners to the GlimpseLayouts of the plots
         addMouseListener( epoch, plot1 );
         addMouseListener( epoch, plot2 );
-        
+
         return plot;
     }
 

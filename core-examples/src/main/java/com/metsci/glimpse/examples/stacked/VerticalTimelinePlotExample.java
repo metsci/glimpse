@@ -52,7 +52,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     public static void main( String[] args ) throws Exception
     {
         Example example = Example.showWithSwing( new VerticalTimelinePlotExample( ) );
-        
+
         // set a blue color scheme look and feel for the plot
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
     }
@@ -61,16 +61,16 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     public StackedTimePlot2D getLayout( )
     {
         StackedTimePlot2D plot = super.getLayout( );
-        
+
         // display horizontal labels
         for ( TimePlotInfo info : plot.getAllTimePlots( ) )
         {
             info.getLabelPainter( ).setHorizontalLabels( true );
         }
-        
+
         return plot;
     }
-    
+
     @Override
     protected StackedTimePlot2D createPlot( )
     {
@@ -90,7 +90,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
     }
-    
+
     @Override
     protected void addMouseListener( final Epoch epoch, final TimePlotInfo plot1 )
     {

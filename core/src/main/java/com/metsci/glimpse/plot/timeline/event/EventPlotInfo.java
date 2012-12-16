@@ -14,22 +14,37 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
+import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
+import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.painter.decoration.BorderPainter;
+import com.metsci.glimpse.painter.decoration.GridPainter;
+import com.metsci.glimpse.painter.group.DelegatePainter;
+import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.TooltipPainter;
+import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl.TimeToolTipHandler;
+import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
-public class EventPlotInfo extends TimePlotInfo
+public class EventPlotInfo implements TimePlotInfo
 {
     public static final int DEFAULT_ROW_SIZE = 26;
     public static final int DEFAULT_BUFFER_SIZE = 2;
@@ -44,9 +59,11 @@ public class EventPlotInfo extends TimePlotInfo
 
     protected boolean isHorizontal;
 
-    protected EventToolTipHandler toolTipHandler;
+    protected EventToolTipHandler eventToolTipHandler;
     protected DragListener dragListener;
     protected TooltipListener tooltipListener;
+
+    protected TimePlotInfo delegate;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -55,10 +72,10 @@ public class EventPlotInfo extends TimePlotInfo
 
     public EventPlotInfo( TimePlotInfo delegate, TextureAtlas atlas )
     {
-        super( delegate );
+        this.delegate = delegate;
 
-        final Epoch epoch = parent.getEpoch( );
-        this.isHorizontal = parent.isTimeAxisHorizontal( );
+        final Epoch epoch = getStackedTimePlot( ).getEpoch( );
+        this.isHorizontal = getStackedTimePlot( ).isTimeAxisHorizontal( );
 
         if ( isHorizontal )
         {
@@ -87,12 +104,16 @@ public class EventPlotInfo extends TimePlotInfo
         this.tooltipListener = new TooltipListener( );
         this.addEventPlotListener( tooltipListener );
 
-        this.toolTipHandler = new EventToolTipHandler( )
+        this.delegate.setTimeToolTipHandler( null );
+        this.eventToolTipHandler = new EventToolTipHandler( )
         {
             @Override
             public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter )
             {
+
                 Event event = selection.getEvent( );
+
+                System.out.println( "setting " + event.getLabel( ) );
                 String label = event.getLabel( ) == null ? "" : event.getLabel( );
                 String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
                 String text = String.format( "%s\n%s", label, tip );
@@ -194,14 +215,14 @@ public class EventPlotInfo extends TimePlotInfo
             for ( EventSelection eventSelection : events )
             {
                 Event event = eventSelection.getEvent( );
-                
+
                 double diff = Math.abs( event.getEndTime( ).durationAfter( time ) );
                 if ( diff < bestDiff )
                 {
                     bestSelection = eventSelection;
                     bestDiff = diff;
                 }
-                
+
                 diff = Math.abs( event.getStartTime( ).durationAfter( time ) );
                 if ( diff < bestDiff )
                 {
@@ -209,7 +230,7 @@ public class EventPlotInfo extends TimePlotInfo
                     bestDiff = diff;
                 }
             }
-            
+
             if ( bestSelection == null || bestSelection.equals( selection ) ) return;
 
             selection = bestSelection;
@@ -217,13 +238,13 @@ public class EventPlotInfo extends TimePlotInfo
             StackedTimePlot2D plot = getStackedTimePlot( );
             TooltipPainter tooltipPainter = plot.getTooltipPainter( );
 
-            if ( toolTipHandler != null ) toolTipHandler.setToolTip( selection, tooltipPainter );
+            if ( eventToolTipHandler != null ) eventToolTipHandler.setToolTip( selection, tooltipPainter );
         }
 
         @Override
         public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
-            if ( events.contains( selection ) )
+            if ( eventToolTipHandler != null && events.contains( selection ) )
             {
                 StackedTimePlot2D plot = getStackedTimePlot( );
                 TooltipPainter tooltipPainter = plot.getTooltipPainter( );
@@ -391,14 +412,14 @@ public class EventPlotInfo extends TimePlotInfo
 
     public void setEventToolTipHandler( EventToolTipHandler toolTipHandler )
     {
-        this.toolTipHandler = toolTipHandler;
+        this.eventToolTipHandler = toolTipHandler;
     }
 
     public TimeStamp getTime( GlimpseMouseEvent e )
     {
         Axis1D axis = e.getAxis1D( );
         double valueX = axis.screenPixelToValue( e.getX( ) );
-        return parent.getEpoch( ).toTimeStamp( valueX );
+        return getStackedTimePlot( ).getEpoch( ).toTimeStamp( valueX );
     }
 
     public boolean isMouseDragEnabled( )
@@ -542,5 +563,203 @@ public class EventPlotInfo extends TimePlotInfo
         {
             listener.eventUpdated( oldEvent );
         }
+    }
+
+    @Override
+    public StackedPlot2D getStackedPlot( )
+    {
+        return delegate.getStackedPlot( );
+    }
+
+    @Override
+    public String getId( )
+    {
+        return delegate.getId( );
+    }
+
+    @Override
+    public int getOrder( )
+    {
+        return delegate.getOrder( );
+    }
+
+    @Override
+    public int getSize( )
+    {
+        return delegate.getSize( );
+    }
+
+    @Override
+    public void setOrder( int order )
+    {
+        delegate.setOrder( order );
+    }
+
+    @Override
+    public void setSize( int size )
+    {
+        delegate.setSize( size );
+    }
+
+    @Override
+    public GlimpseAxisLayout2D getLayout( )
+    {
+        return delegate.getLayout( );
+    }
+
+    @Override
+    public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack )
+    {
+        return delegate.getCommonAxis( );
+    }
+
+    @Override
+    public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
+    {
+        return delegate.getOrthogonalAxis( );
+    }
+
+    @Override
+    public TaggedAxis1D getCommonAxis( )
+    {
+        return delegate.getCommonAxis( );
+    }
+
+    @Override
+    public Axis1D getOrthogonalAxis( )
+    {
+        return delegate.getOrthogonalAxis( );
+    }
+
+    @Override
+    public void addLayout( GlimpseAxisLayout2D childLayout )
+    {
+        delegate.addLayout( childLayout );
+    }
+
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        delegate.setLookAndFeel( laf );
+    }
+
+    @Override
+    public void setTimeToolTipHandler( TimeToolTipHandler toolTipHandler )
+    {
+        delegate.setTimeToolTipHandler( toolTipHandler );
+    }
+
+    @Override
+    public DataAxisMouseListener1D getDataAxisMouseListener( )
+    {
+        return delegate.getDataAxisMouseListener( );
+    }
+
+    @Override
+    public void setBorderWidth( float width )
+    {
+        delegate.setBorderWidth( width );
+    }
+
+    @Override
+    public void setLabelBorderColor( float[] rgba )
+    {
+        delegate.setLabelBorderColor( rgba );
+    }
+
+    @Override
+    public void setLabelBorderWidth( float width )
+    {
+        delegate.setLabelBorderWidth( width );
+    }
+
+    @Override
+    public void setLabelText( String text )
+    {
+        delegate.setLabelText( text );
+    }
+
+    @Override
+    public void setLabelColor( float[] rgba )
+    {
+        delegate.setLabelColor( rgba );
+    }
+
+    @Override
+    public void setAxisColor( float[] rgba )
+    {
+        delegate.setAxisColor( rgba );
+    }
+
+    @Override
+    public void setAxisFont( Font font )
+    {
+        delegate.setAxisFont( font );
+    }
+
+    @Override
+    public GlimpseLayout getLabelLayout( )
+    {
+        return delegate.getLabelLayout( );
+    }
+
+    @Override
+    public BackgroundPainter getBackgroundPainter( )
+    {
+        return delegate.getBackgroundPainter( );
+    }
+
+    @Override
+    public GridPainter getGridPainter( )
+    {
+        return delegate.getGridPainter( );
+    }
+
+    @Override
+    public NumericXYAxisPainter getAxisPainter( )
+    {
+        return delegate.getAxisPainter( );
+    }
+
+    @Override
+    public SimpleTextPainter getLabelPainter( )
+    {
+        return delegate.getLabelPainter( );
+    }
+
+    @Override
+    public BorderPainter getBorderPainter( )
+    {
+        return delegate.getBorderPainter( );
+    }
+
+    @Override
+    public BorderPainter getLabelBorderPainter( )
+    {
+        return delegate.getLabelBorderPainter( );
+    }
+
+    @Override
+    public StackedTimePlot2D getStackedTimePlot( )
+    {
+        return delegate.getStackedTimePlot( );
+    }
+
+    @Override
+    public DelegatePainter getDataPainter( )
+    {
+        return delegate.getDataPainter( );
+    }
+
+    @Override
+    public void addPainter( GlimpsePainter painter )
+    {
+        delegate.addPainter( painter );
+    }
+
+    @Override
+    public void removePainter( GlimpsePainter painter )
+    {
+        delegate.removePainter( painter );
     }
 }
