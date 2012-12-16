@@ -10,7 +10,10 @@ import javax.media.opengl.GL;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.font.SimpleTextLayout;
 import com.metsci.glimpse.support.font.SimpleTextLayout.TextBoundingBox;
 import com.metsci.glimpse.support.font.SimpleTextLayoutCenter;
@@ -37,16 +40,46 @@ public class TooltipPainter extends SimpleTextPainter
     protected List<TextBoundingBox> lines;
     protected Bounds linesBounds;
 
+    protected TextureAtlas atlas;
+    protected Object iconId;
+    protected ImageData icon;
+    protected boolean wrapTextAroundIcon = false;
+
     protected int x;
     protected int y;
 
-    public TooltipPainter( )
+    public TooltipPainter( TextureAtlas atlas )
     {
         this.breakIterator = BreakIterator.getWordInstance( );
         this.paintBackground = true;
         this.paintBorder = true;
+        this.atlas = atlas;
+    }
+    
+    public TooltipPainter( )
+    {
+        this( null );
     }
 
+    /**
+     * Sets the icon to be displayed on the first line of the tool tip.
+     * @param id the id of the icon in TooltipPainter's TextureAtlas
+     */
+    public TooltipPainter setIcon( Object iconId )
+    {
+        this.iconId = iconId;
+        this.icon = iconId != null ? atlas.getImageData( iconId ) : null;
+        this.lines = null; // signal that layout should be recalculated
+        return this;
+    }
+    
+    public TooltipPainter setWrapTextAroundIcon( boolean wrap )
+    {
+        this.wrapTextAroundIcon = wrap;
+        this.lines = null; // signal that layout should be recalculated
+        return this;
+    }
+    
     /**
      * Sets the location of the upper left corner of the tooltip box
      * in screen/pixel coordinates.
@@ -168,6 +201,18 @@ public class TooltipPainter extends SimpleTextPainter
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
     }
+    
+    protected float getIconSize( )
+    {
+        //XXX another spacing heuristic which it would be nice to eliminate
+        return (float) textLayout.getAscent( );
+    }
+    
+    protected float getIconSpacing( int i )
+    {
+        //XXX another spacing heuristic which it would be nice to eliminate
+        return (float) (iconId != null && ( !wrapTextAroundIcon || i == 0 ) ? textLayout.getAscent( ) + borderSize : 0);
+    }
 
     protected void updateLayout( )
     {
@@ -181,18 +226,26 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( !lines.isEmpty( ) )
         {
-            for ( TextBoundingBox line : lines )
+            for ( int i = 0 ; i < lines.size( ) ; i++ )
             {
+                TextBoundingBox line = lines.get( i );
+                
+                float iconSize = getIconSpacing( i );
+                
                 minX = Math.min( minX, line.getMinX( ) );
                 minY = Math.min( minY, line.getMinY( ) );
-                maxX = Math.max( maxX, line.getMaxX( ) );
+                maxX = Math.max( maxX, line.getMaxX( ) + iconSize );
                 maxY = Math.max( maxY, line.getMaxY( ) );
             }
         }
 
-        // subtracting .75 of the descent is just a heuristic to make the spacing
-        // at the top and bottom of the bounding box look more uniform
-        linesBounds = new Bounds( minX - borderSize, maxX + borderSize, minY - textLayout.getDescent( ) * .75 - borderSize, maxY + borderSize );
+        double overallMinX = minX - borderSize;
+        double overallMaxX = maxX + borderSize;
+        //XXX subtracting .5 of the descent is just a heuristic to make the spacing
+        //XXX at the top and bottom of the bounding box look more uniform
+        double overallMinY = minY - textLayout.getDescent( ) * 0.5 - borderSize;
+        double overallMaxY = maxY + borderSize;
+        linesBounds = new Bounds( overallMinX, overallMaxX, overallMinY, overallMaxY );
     }
 
     @Override
@@ -281,13 +334,18 @@ public class TooltipPainter extends SimpleTextPainter
 
         gl.glDisable( GL.GL_BLEND );
 
+        // draw text
         GlimpseColor.setColor( textRenderer, textColor );
         textRenderer.beginRendering( width, height );
         try
         {
-            for ( TextBoundingBox line : lines )
+            for ( int i = 0 ; i < lines.size( ) ; i++ )
             {
-                int posX = ( int ) ( x + line.leftX + clampX + offsetX );
+                TextBoundingBox line = lines.get( i );
+                
+                float iconSize = getIconSpacing( i );
+                
+                int posX = ( int ) ( x + line.leftX + iconSize + clampX + offsetX );
                 int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY );
                 textRenderer.draw( line.text, posX, posY );
             }
@@ -295,6 +353,30 @@ public class TooltipPainter extends SimpleTextPainter
         finally
         {
             textRenderer.endRendering( );
+        }
+        
+        // draw icon
+        if ( !lines.isEmpty( ) && iconId != null )
+        {
+            TextBoundingBox line = lines.get( 0 );
+            float iconSize = getIconSize( );
+            
+            atlas.beginRendering( );
+            try
+            {
+                ImageData iconData = atlas.getImageData( iconId );
+                double iconScale = iconSize / ( double ) iconData.getWidth( );
+                
+                int posX = ( int ) ( x + line.leftX + clampX + offsetX );
+                //XXX another spacing heuristic which it would be nice to eliminate
+                int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY - textLayout.getDescent( ) * 0.25 );
+                
+                atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
+            }
+            finally
+            {
+                atlas.endRendering( );
+            }
         }
     }
 

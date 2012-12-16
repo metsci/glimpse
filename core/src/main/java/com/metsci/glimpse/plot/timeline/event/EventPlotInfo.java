@@ -170,39 +170,46 @@ public class EventPlotInfo extends TimePlotInfo
     
     protected class TooltipListener implements EventPlotListener
     {
-        EventSelection event = null;
+        EventSelection selection = null;
+        
+        protected void selectEvent( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+        {
+            if ( events.isEmpty( ) || selection != null ) return;
+            
+            selection = events.iterator( ).next( );
+            
+            StackedTimePlot2D plot = getStackedTimePlot( );
+            TooltipPainter tooltipPainter = plot.getTooltipPainter( );
+            
+            Event event = selection.getEvent( );
+            
+            tooltipPainter.setText( event.getLabel( ) );
+            tooltipPainter.setIcon( event.getIconId( ) );
+        }
         
         @Override
         public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
-            if ( events.contains( event ) )
+            if ( events.contains( selection ) )
             {
                 StackedTimePlot2D plot = getStackedTimePlot( );
                 TooltipPainter tooltipPainter = plot.getTooltipPainter( );
                 tooltipPainter.setText( null );
                 
-                event = null;
+                selection = null;
             }
         }
 
         @Override
         public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
-            if ( events.isEmpty( ) || event != null ) return;
-            
-            event = events.iterator( ).next( );
-            
-            StackedTimePlot2D plot = getStackedTimePlot( );
-            TooltipPainter tooltipPainter = plot.getTooltipPainter( );
-            
-            String text = event.getEvent( ).getLabel( );
-            
-            tooltipPainter.setText( text );
+            selectEvent( e, events, time );
         }
 
         @Override
         public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
+            selectEvent( e, events, time );
         }
 
         @Override

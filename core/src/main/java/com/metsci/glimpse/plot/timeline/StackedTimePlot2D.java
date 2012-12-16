@@ -154,17 +154,22 @@ public class StackedTimePlot2D extends StackedPlot2D
         this( orientation, Epoch.posixEpoch( ) );
     }
 
+    public StackedTimePlot2D( Orientation orientation, Epoch epoch )
+    {
+        this( orientation, epoch, new TextureAtlas( ) );
+    }
+    
     /**
      * Creates a StackedTimePlot2D with specified orientation. The provided
      * epoch determines what absolute timestamp corresponds to value 0.0 on the
      * time Axis1D.
      */
-    public StackedTimePlot2D( Orientation orientation, Epoch epoch )
+    public StackedTimePlot2D( Orientation orientation, Epoch epoch, TextureAtlas atlas )
     {
         super( orientation );
 
         this.epoch = epoch;
-        this.defaultTextureAtlas = new TextureAtlas( );
+        this.defaultTextureAtlas = atlas;
 
         this.initializeTimePlot( );
     }
@@ -728,7 +733,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         return createEventPlot( name, defaultTextureAtlas );
     }
 
-    public EventPlotInfo createEventPlot( String name, TextureAtlas atlas )
+    protected EventPlotInfo createEventPlot( String name, TextureAtlas atlas )
     {
         if ( !isTimeAxisHorizontal( ) )
         {
@@ -933,7 +938,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
 
-        this.tooltipPainter = new TooltipPainter( );
+        this.tooltipPainter = new TooltipPainter( this.defaultTextureAtlas );
         this.overlayLayout.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
         {
             @Override

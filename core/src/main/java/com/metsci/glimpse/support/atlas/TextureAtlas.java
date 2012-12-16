@@ -379,7 +379,7 @@ public class TextureAtlas
     //////////////////////////////////////////////////////////////
     ///                Image Rendering Methods                 ///
     //////////////////////////////////////////////////////////////
-
+    
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
@@ -493,6 +493,24 @@ public class TextureAtlas
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
         drawImage( gl, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+    }
+    
+    public void drawImage( GL gl, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+    }
+    
+    public void drawImage( GL gl, Object id, int positionX, int positionY, double scaleX, double scaleY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
+    }
+    
+    public void drawImage( GL gl, Object id, int positionX, int positionY )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        drawImage( gl, 1.0, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
 
     protected void drawImage( GL gl, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
