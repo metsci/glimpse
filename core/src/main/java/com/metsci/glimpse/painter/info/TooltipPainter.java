@@ -2,7 +2,6 @@ package com.metsci.glimpse.painter.info;
 
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.text.BreakIterator;
 import java.util.List;
 
@@ -10,6 +9,7 @@ import javax.media.opengl.GL;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.SimpleTextLayout;
 import com.metsci.glimpse.support.font.SimpleTextLayout.TextBoundingBox;
@@ -24,23 +24,28 @@ public class TooltipPainter extends SimpleTextPainter
     // if true, tooltip text will be wrapped if it extends past the edge of the box
     protected boolean isFixedWidth = false;
     protected int fixedWidth = 50;
-    protected int borderSize = 4;
+    protected int borderSize = 6;
     protected float lineSpacing = 2;
     protected boolean breakOnEol = true;
-    
+    protected int offsetX = -20;
+    protected int offsetY = -10;
+    protected boolean clampToScreenEdges = true;
+
     protected SimpleTextLayout textLayout;
     protected BreakIterator breakIterator;
     protected List<TextBoundingBox> lines;
-    protected Rectangle2D bounds;
-    
+    protected Bounds linesBounds;
+
     protected int x;
     protected int y;
-    
+
     public TooltipPainter( )
     {
         this.breakIterator = BreakIterator.getWordInstance( );
+        this.paintBackground = true;
+        this.paintBorder = true;
     }
-    
+
     /**
      * Sets the location of the upper left corner of the tooltip box
      * in screen/pixel coordinates.
@@ -49,22 +54,35 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
-        
+
         return this;
     }
     
+    public TooltipPainter setOffset( int x, int y )
+    {
+        this.offsetX = x;
+        this.offsetY = y;
+
+        return this;
+    }
+
+    public TooltipPainter setLocation( GlimpseMouseEvent e )
+    {
+        return setLocation( e.getScreenPixelsX( ), e.getScreenPixelsY( ) );
+    }
+
     public TooltipPainter setBorderSize( int size )
     {
         this.borderSize = size;
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
-    
+
     public int getBorderSize( )
     {
         return this.borderSize;
     }
-    
+
     public TooltipPainter setFixedWidth( int fixedWidth )
     {
         this.fixedWidth = fixedWidth;
@@ -72,7 +90,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
-    
+
     public TooltipPainter setUnlimitedWidth( )
     {
         this.isFixedWidth = false;
@@ -80,11 +98,16 @@ public class TooltipPainter extends SimpleTextPainter
         return this;
     }
     
+    public void setClampToScreenEdges( boolean clamp )
+    {
+        this.clampToScreenEdges = clamp;
+    }
+
     public int getFixedWidth( )
     {
         return this.fixedWidth;
     }
-    
+
     public boolean isFixedWidth( )
     {
         return this.isFixedWidth;
@@ -120,14 +143,14 @@ public class TooltipPainter extends SimpleTextPainter
     {
         return lineSpacing;
     }
-    
+
     public TooltipPainter setBreakIterator( BreakIterator breakIterator )
     {
         this.breakIterator = breakIterator;
         this.textLayout = null; // signal that textLayout should be recreated
         return this;
     }
-    
+
     @Override
     public TooltipPainter setText( String text )
     {
@@ -144,17 +167,17 @@ public class TooltipPainter extends SimpleTextPainter
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
     }
-    
+
     protected void updateLayout( )
     {
         textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
         lines = textLayout.getLines( );
-        
+
         float minX = Float.POSITIVE_INFINITY;
         float minY = Float.POSITIVE_INFINITY;
         float maxX = Float.NEGATIVE_INFINITY;
         float maxY = Float.NEGATIVE_INFINITY;
-        
+
         if ( !lines.isEmpty( ) )
         {
             for ( TextBoundingBox line : lines )
@@ -165,14 +188,10 @@ public class TooltipPainter extends SimpleTextPainter
                 maxY = Math.max( maxY, line.getMaxY( ) );
             }
         }
-        
-        float x = minX - borderSize;
-        float y = minY - borderSize;
-        float width  = maxX - minX + 2*borderSize;
-        float height = maxY - minY + 2*borderSize;
-        bounds = new Rectangle2D.Float( x, y, width, height );
+
+        linesBounds = new Bounds( minX - borderSize, maxX + borderSize, minY, maxY );
     }
-    
+
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
@@ -180,23 +199,38 @@ public class TooltipPainter extends SimpleTextPainter
         {
             updateTextRenderer( );
         }
-        
+
         if ( textLayout == null && textRenderer != null )
         {
             updateTextLayout( );
         }
-        
-        if ( lines == null && textLayout != null )
+
+        if ( lines == null && textLayout != null && text != null )
         {
             updateLayout( );
         }
-        
+
         if ( textRenderer == null || lines == null ) return;
-        
+
         GL gl = context.getGL( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
         
+        double clampX = 0;
+        double clampY = 0;
+        if ( clampToScreenEdges )
+        {
+            double maxX = x + linesBounds.maxX + offsetX;
+            if ( maxX > width ) clampX = width - maxX;
+            double minX = x + linesBounds.minX + offsetX;
+            if ( minX < 0 ) clampX = -minX;
+            
+            double maxY = height - y + linesBounds.maxY + offsetY;
+            if ( maxY > height ) clampY = height - maxY;
+            double minY = height - y + linesBounds.minY + offsetY;
+            if ( minY < 0 ) clampY = -minY;
+        }
+
         gl.glMatrixMode( GL.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5, -0.5, height - 1 + 0.5, -1, 1 );
@@ -205,41 +239,35 @@ public class TooltipPainter extends SimpleTextPainter
 
         gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_BLEND );
-        
+
         if ( this.paintBackground || this.paintBorder )
         {
-            if(this.paintBackground)
+            if ( this.paintBackground )
             {
                 // Draw Text Background
                 gl.glColor4fv( backgroundColor, 0 );
-    
+
                 gl.glBegin( GL.GL_QUADS );
                 try
                 {
-                    gl.glVertex2f( x + bounds.getX( ), y + bounds.getY( ) );
-                    gl.glVertex2f( x + bounds.getX( ) + bounds.getWidth( ), y + bounds.getY( ) );
-                    gl.glVertex2f( x + bounds.getX( ) + bounds.getWidth( ), y + bounds.getY( ) + bounds.getHeight( ) );
-                    gl.glVertex2f( x + bounds.getX( ), y + bounds.getY( ) + bounds.getHeight( ) );
+                    borderVertices( gl, height, clampX+offsetX, clampY+offsetY );
                 }
                 finally
                 {
                     gl.glEnd( );
                 }
             }
-            
-            if(this.paintBorder)
+
+            if ( this.paintBorder )
             {
                 // Draw Text Background
                 gl.glColor4fv( borderColor, 0 );
-                gl.glEnable(GL.GL_LINE_SMOOTH);
-                
+                gl.glEnable( GL.GL_LINE_SMOOTH );
+
                 gl.glBegin( GL.GL_LINE_LOOP );
                 try
                 {
-                    gl.glVertex2f( x + bounds.getX( ), y + bounds.getY( ) );
-                    gl.glVertex2f( x + bounds.getX( ) + bounds.getWidth( ), y + bounds.getY( ) );
-                    gl.glVertex2f( x + bounds.getX( ) + bounds.getWidth( ), y + bounds.getY( ) + bounds.getHeight( ) );
-                    gl.glVertex2f( x + bounds.getX( ), y + bounds.getY( ) + bounds.getHeight( ) );
+                    borderVertices( gl, height, clampX+offsetX, clampY+offsetY );
                 }
                 finally
                 {
@@ -247,7 +275,7 @@ public class TooltipPainter extends SimpleTextPainter
                 }
             }
         }
-        
+
         gl.glDisable( GL.GL_BLEND );
 
         GlimpseColor.setColor( textRenderer, textColor );
@@ -256,12 +284,52 @@ public class TooltipPainter extends SimpleTextPainter
         {
             for ( TextBoundingBox line : lines )
             {
-                textRenderer.draw( line.text, (int) line.leftX, (int) line.baselineY );   
+                int posX = ( int ) ( x + line.leftX + clampX + offsetX );
+                int posY = ( int ) ( height - y + line.baselineY + clampY + offsetY );
+                textRenderer.draw( line.text, posX, posY );
             }
         }
         finally
         {
             textRenderer.endRendering( );
+        }
+    }
+
+    protected void borderVertices( GL gl, int height, double offsetX, double offsetY )
+    {
+        double posX = x + linesBounds.minX + offsetX;
+        double posY = height - y + linesBounds.minY + offsetY;
+        gl.glVertex2d( posX, posY );
+
+        posX = x + linesBounds.maxX + offsetX;
+        posY = height - y + linesBounds.minY + offsetY;
+        gl.glVertex2d( posX, posY );
+
+        posX = x + linesBounds.maxX + offsetX;
+        posY = height - y + linesBounds.maxY + offsetY;
+        gl.glVertex2d( posX, posY );
+
+        posX = x + linesBounds.minX + offsetX;
+        posY = height - y + linesBounds.maxY + offsetY;
+        gl.glVertex2d( posX, posY );
+    }
+
+    protected static class Bounds
+    {
+        public double minX, maxX, minY, maxY;
+
+        public Bounds( double minX, double maxX, double minY, double maxY )
+        {
+            this.minX = minX;
+            this.maxX = maxX;
+            this.minY = minY;
+            this.maxY = maxY;
+        }
+
+        @Override
+        public String toString( )
+        {
+            return String.format( "%f %f %f %f", minX, maxX, minY, maxY );
         }
     }
 }

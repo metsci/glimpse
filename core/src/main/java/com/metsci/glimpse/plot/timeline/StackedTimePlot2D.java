@@ -47,6 +47,8 @@ import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
@@ -59,6 +61,7 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
+import com.metsci.glimpse.painter.info.TooltipPainter;
 import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
@@ -116,6 +119,8 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected BorderPainter timeAxisBorderPainter;
     protected SelectedTimeRegionPainter selectedTimePainter;
 
+    protected TooltipPainter tooltipPainter;
+    
     // default settings for TimelineMouseListeners of new plots
     protected boolean allowPanX = true;
     protected boolean allowPanY = true;
@@ -190,6 +195,11 @@ public class StackedTimePlot2D extends StackedPlot2D
     public GlimpseAxisLayout1D getTimelineLayout( )
     {
         return this.timeLayout;
+    }
+    
+    public TooltipPainter getTooltipPainter( )
+    {
+        return this.tooltipPainter;
     }
 
     /**
@@ -923,9 +933,28 @@ public class StackedTimePlot2D extends StackedPlot2D
         
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
 
+        this.tooltipPainter = new TooltipPainter( );
+        this.overlayLayout.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
+        {
+            @Override
+            public void mouseMoved( GlimpseMouseEvent e )
+            {
+                double x = e.getAxisCoordinatesX( );
+                double y = e.getAxisCoordinatesY( );
+                double data = isTimeAxisHorizontal( ) ? y : x;
+                TimeStamp time = isTimeAxisHorizontal( ) ? epoch.toTimeStamp( x ) : epoch.toTimeStamp( y );
+                
+                String text = String.format( "%s\n%.3f\n", time, data );
+                
+                tooltipPainter.setText( text );
+                tooltipPainter.setLocation( e );
+            }   
+        });
+        
         this.overlayLayout.setEventGenerator( true );
         this.overlayLayout.setEventConsumer( false );
         this.overlayLayout.addPainter( this.selectedTimePainter );
+        this.overlayLayout.addPainter( this.tooltipPainter );
         
         this.timelineMouseListener = createTimeAxisListener( );
         this.underlayLayout.setEventGenerator( true );
