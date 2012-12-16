@@ -13,7 +13,6 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.font.SimpleTextLayout;
 import com.metsci.glimpse.support.font.SimpleTextLayout.TextBoundingBox;
 import com.metsci.glimpse.support.font.SimpleTextLayoutCenter;
@@ -55,7 +54,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.paintBorder = true;
         this.atlas = atlas;
     }
-    
+
     public TooltipPainter( )
     {
         this( null );
@@ -72,14 +71,14 @@ public class TooltipPainter extends SimpleTextPainter
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
-    
+
     public TooltipPainter setWrapTextAroundIcon( boolean wrap )
     {
         this.wrapTextAroundIcon = wrap;
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
-    
+
     /**
      * Sets the location of the upper left corner of the tooltip box
      * in screen/pixel coordinates.
@@ -201,17 +200,17 @@ public class TooltipPainter extends SimpleTextPainter
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
     }
-    
+
     protected float getIconSize( )
     {
         //XXX another spacing heuristic which it would be nice to eliminate
-        return (float) textLayout.getAscent( );
+        return ( float ) textLayout.getAscent( );
     }
-    
+
     protected float getIconSpacing( int i )
     {
         //XXX another spacing heuristic which it would be nice to eliminate
-        return (float) (iconId != null && ( !wrapTextAroundIcon || i == 0 ) ? textLayout.getAscent( ) + borderSize : 0);
+        return ( float ) ( iconId != null && ( !wrapTextAroundIcon || i == 0 ) ? textLayout.getAscent( ) + borderSize : 0 );
     }
 
     protected void updateLayout( )
@@ -226,12 +225,12 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( !lines.isEmpty( ) )
         {
-            for ( int i = 0 ; i < lines.size( ) ; i++ )
+            for ( int i = 0; i < lines.size( ); i++ )
             {
                 TextBoundingBox line = lines.get( i );
-                
+
                 float iconSize = getIconSpacing( i );
-                
+
                 minX = Math.min( minX, line.getMinX( ) );
                 minY = Math.min( minY, line.getMinY( ) );
                 maxX = Math.max( maxX, line.getMaxX( ) + iconSize );
@@ -339,12 +338,12 @@ public class TooltipPainter extends SimpleTextPainter
         textRenderer.beginRendering( width, height );
         try
         {
-            for ( int i = 0 ; i < lines.size( ) ; i++ )
+            for ( int i = 0; i < lines.size( ); i++ )
             {
                 TextBoundingBox line = lines.get( i );
-                
+
                 float iconSize = getIconSpacing( i );
-                
+
                 int posX = ( int ) ( x + line.leftX + iconSize + clampX + offsetX );
                 int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY );
                 textRenderer.draw( line.text, posX, posY );
@@ -354,23 +353,23 @@ public class TooltipPainter extends SimpleTextPainter
         {
             textRenderer.endRendering( );
         }
-        
+
         // draw icon
         if ( !lines.isEmpty( ) && iconId != null )
         {
             TextBoundingBox line = lines.get( 0 );
             float iconSize = getIconSize( );
-            
+
             atlas.beginRendering( );
             try
             {
                 ImageData iconData = atlas.getImageData( iconId );
                 double iconScale = iconSize / ( double ) iconData.getWidth( );
-                
+
                 int posX = ( int ) ( x + line.leftX + clampX + offsetX );
                 //XXX another spacing heuristic which it would be nice to eliminate
                 int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY - textLayout.getDescent( ) * 0.25 );
-                
+
                 atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
             }
             finally

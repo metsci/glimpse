@@ -44,6 +44,7 @@ public class EventPlotInfo extends TimePlotInfo
 
     protected boolean isHorizontal;
 
+    protected EventToolTipHandler toolTipHandler;
     protected DragListener dragListener;
     protected TooltipListener tooltipListener;
 
@@ -85,7 +86,21 @@ public class EventPlotInfo extends TimePlotInfo
 
         this.tooltipListener = new TooltipListener( );
         this.addEventPlotListener( tooltipListener );
-        
+
+        this.toolTipHandler = new EventToolTipHandler( )
+        {
+            @Override
+            public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter )
+            {
+                Event event = selection.getEvent( );
+                String label = event.getLabel( ) == null ? "" : event.getLabel( );
+                String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
+                String text = String.format( "%s\n%s", label, tip );
+                tooltipPainter.setText( text );
+                tooltipPainter.setIcon( event.getIconId( ) );
+            }
+        };
+
         this.rowSize = DEFAULT_ROW_SIZE;
         this.bufferSize = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
@@ -109,7 +124,7 @@ public class EventPlotInfo extends TimePlotInfo
             {
                 listener.eventsExited( e, hoveredEvents, time );
             }
-            
+
             hoveredEvents = Collections.emptySet( );
         }
 
@@ -151,13 +166,13 @@ public class EventPlotInfo extends TimePlotInfo
                 {
                     listener.eventsExited( e, eventsExited, time );
                 }
-                
+
                 SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
                 for ( EventPlotListener listener : eventListeners )
                 {
                     listener.eventsEntered( e, eventsEntered, time );
                 }
-                
+
                 for ( EventPlotListener listener : eventListeners )
                 {
                     listener.eventsHovered( e, newHoveredEvents, time );
@@ -167,26 +182,44 @@ public class EventPlotInfo extends TimePlotInfo
             }
         }
     }
-    
+
     protected class TooltipListener implements EventPlotListener
     {
         EventSelection selection = null;
-        
+
         protected void selectEvent( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
-            if ( events.isEmpty( ) || selection != null ) return;
+            EventSelection bestSelection = null;
+            double bestDiff = Double.POSITIVE_INFINITY;
+            for ( EventSelection eventSelection : events )
+            {
+                Event event = eventSelection.getEvent( );
+                
+                double diff = Math.abs( event.getEndTime( ).durationAfter( time ) );
+                if ( diff < bestDiff )
+                {
+                    bestSelection = eventSelection;
+                    bestDiff = diff;
+                }
+                
+                diff = Math.abs( event.getStartTime( ).durationAfter( time ) );
+                if ( diff < bestDiff )
+                {
+                    bestSelection = eventSelection;
+                    bestDiff = diff;
+                }
+            }
             
-            selection = events.iterator( ).next( );
-            
+            if ( bestSelection == null || bestSelection.equals( selection ) ) return;
+
+            selection = bestSelection;
+
             StackedTimePlot2D plot = getStackedTimePlot( );
             TooltipPainter tooltipPainter = plot.getTooltipPainter( );
-            
-            Event event = selection.getEvent( );
-            
-            tooltipPainter.setText( event.getLabel( ) );
-            tooltipPainter.setIcon( event.getIconId( ) );
+
+            if ( toolTipHandler != null ) toolTipHandler.setToolTip( selection, tooltipPainter );
         }
-        
+
         @Override
         public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
         {
@@ -195,7 +228,7 @@ public class EventPlotInfo extends TimePlotInfo
                 StackedTimePlot2D plot = getStackedTimePlot( );
                 TooltipPainter tooltipPainter = plot.getTooltipPainter( );
                 tooltipPainter.setText( null );
-                
+
                 selection = null;
             }
         }
@@ -221,7 +254,7 @@ public class EventPlotInfo extends TimePlotInfo
         public void eventUpdated( Event event )
         {
         }
-        
+
     }
 
     protected class DragListener implements EventPlotListener, GlimpseMouseAllListener
@@ -349,6 +382,16 @@ public class EventPlotInfo extends TimePlotInfo
         public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
         public void eventUpdated( Event event );
+    }
+
+    public interface EventToolTipHandler
+    {
+        public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter );
+    }
+
+    public void setEventToolTipHandler( EventToolTipHandler toolTipHandler )
+    {
+        this.toolTipHandler = toolTipHandler;
     }
 
     public TimeStamp getTime( GlimpseMouseEvent e )

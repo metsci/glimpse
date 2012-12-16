@@ -28,7 +28,8 @@ public class Event
     protected Object id;
     protected String name;
     protected Object iconId; // references id in associated TextureAtlas
-
+    protected String toolTipText;
+    
     protected float[] backgroundColor;
     protected float[] borderColor;
     protected float[] textColor;
@@ -365,6 +366,16 @@ public class Event
     protected boolean isIconVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
         return showIcon && iconId != null && ( size + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersecting );
+    }
+    
+    public void setToolTipText( String text )
+    {
+        this.toolTipText = text;
+    }
+    
+    public String getToolTipText( )
+    {
+        return this.toolTipText;
     }
 
     public boolean isEndTimeMoveable( )

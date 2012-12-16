@@ -146,11 +146,21 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         }
 
         // add icons to the events
-        e4.setIconId( "alarm-clock" );
-        e0.setIconId( "glass" );
+        e1.setIconId( "glass" );
         e2.setIconId( "cloud" );
         e3.setIconId( "sun" );
-
+        e4.setIconId( "alarm-clock" );
+        
+        // wrap the tool tips after 150 pixels
+        plot.getTooltipPainter( ).setFixedWidth( 300 );
+        
+        // set tool tips on the events
+        e0.setToolTipText( "Wax on. Wax off. Wax on. Wax off. Wax on. Wax off. Wax on. Wax off. Wax on. Wax off.");
+        e1.setToolTipText( "The Riesling had an elegant, almost austere grip, redolent of creosote and with a corpulent, full-bodied bouquet.");
+        e2.setToolTipText( "I wandered lonely as a cloud\nThat floats on high o'er vales and hills,\nWhen all at once I saw a crowd,\nA host, of golden daffodils;\nBeside the lake, beneath the trees,\nFluttering and dancing in the breeze.\n-William Wordsworth" );
+        e3.setToolTipText( "NML Cygni = 1,650 Solar Radii" );
+        e4.setToolTipText( "Suns up! Morning's Here! Up And At 'Em Engineer!\nHurry! Hurry! Load The Freight!\nTo The City! Can't Be Late!" );
+        
         // add listeners to EventPlots
         events1.addEventPlotListener( new EventPlotListener( )
         {
