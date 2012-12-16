@@ -53,8 +53,16 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
             this.y = y;
         }
     }
+    
+    public static void addListeners( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
+    {
+        MouseWrapperWorldwind wrapper = new MouseWrapperWorldwind( wwd, projection, tile );
+        wwd.getInputHandler( ).addMouseListener( wrapper );
+        wwd.getInputHandler( ).addMouseMotionListener( wrapper );
+        wwd.getInputHandler( ).addMouseWheelListener( wrapper );
+    }
 
-    public MouseWrapperWorldwind( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
+    private MouseWrapperWorldwind( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
     {
         super( tile.getGlimpseCanvas( ) );
 

@@ -118,10 +118,7 @@ public class BaythmetryTileExample
         glimpseFrame.setVisible( true );
 
         // pass mouse events from Worldwind back to Glimpse
-        MouseWrapperWorldwind mouseWrapper = new MouseWrapperWorldwind( wwc, projection, glimpseLayer );
-        wwc.addMouseListener( mouseWrapper );
-        wwc.addMouseMotionListener( mouseWrapper );
-        wwc.addMouseWheelListener( mouseWrapper );
+        MouseWrapperWorldwind.addListeners( wwc, projection, glimpseLayer );
 
         // add a thread to constantly repaint the WorldWind window
         // this isn't an ideal solution, but because Glimpse currently
