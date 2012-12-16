@@ -119,6 +119,16 @@ public class SimpleTextLayout
         setBreakOnEol( true );
     }
 
+    public double getDescent( )
+    {
+        return descent;
+    }
+    
+    public double getAscent( )
+    {
+        return ascent;
+    }
+    
     public void setBreakOnEol( boolean breakOnEol )
     {
         this.breakOnEol = breakOnEol;
@@ -405,7 +415,7 @@ public class SimpleTextLayout
          */
         public float getMaxY( )
         {
-            return baselineY + maxHeight;
+            return baselineY + maxHeight - maxDescent;
         }
 
         /**
@@ -413,7 +423,7 @@ public class SimpleTextLayout
          */
         public float getMinY( )
         {
-            return baselineY + maxDescent;
+            return baselineY - maxDescent;
         }
 
         /**
