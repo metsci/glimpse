@@ -255,6 +255,7 @@ public class SimpleTextLayout
     {
         lines = new ArrayList<TextBoundingBox>( breaks.size( ) - 1 );
 
+        double prevMinX = 0;
         for ( int i = 1; i < breaks.size( ); i++ )
         {
             int firstIdx = breaks.getInt( i - 1 );
@@ -281,13 +282,14 @@ public class SimpleTextLayout
                 maxY = max( maxY, b.getMaxY( ) );
             }
 
+            prevMinX = minX;
             double height = maxY - minY;
             double width = maxX - minX;
 
             float baseline = topY - ascent;
 
             String line = text.substring( firstIdx, lastIdx + 1 );
-            TextBoundingBox box = new TextBoundingBox( line, baseline, ( float ) minX, ( float ) minY, ( float ) width, ( float ) height );
+            TextBoundingBox box = new TextBoundingBox( line, baseline, ( float ) ( minX - prevMinX ), ( float ) minY, ( float ) width, ( float ) height );
             lines.add( box );
 
             topY = baseline - getLineSpacing( );
@@ -403,7 +405,7 @@ public class SimpleTextLayout
          */
         public float getMaxY( )
         {
-            return baselineY + maxHeight - maxDescent;
+            return baselineY + maxHeight;
         }
 
         /**
@@ -411,7 +413,7 @@ public class SimpleTextLayout
          */
         public float getMinY( )
         {
-            return baselineY - maxDescent;
+            return baselineY + maxDescent;
         }
 
         /**
