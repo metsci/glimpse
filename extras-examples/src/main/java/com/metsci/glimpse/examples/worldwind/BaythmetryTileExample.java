@@ -1,5 +1,8 @@
 package com.metsci.glimpse.examples.worldwind;
 
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkAxisToWorldWind;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkWorldWindToAxis;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.LatLon;
@@ -28,7 +31,6 @@ import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.worldwind.event.MouseWrapperWorldwind;
 import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
 import com.metsci.glimpse.worldwind.tile.GlimpseDynamicSurfaceTile;
 import com.metsci.glimpse.worldwind.tile.GlimpseResizingSurfaceTile;
@@ -117,8 +119,12 @@ public class BaythmetryTileExample
         glimpseFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         glimpseFrame.setVisible( true );
 
-        // pass mouse events from Worldwind back to Glimpse
-        MouseWrapperWorldwind.addListeners( wwc, projection, glimpseLayer );
+        // pass mouse events from WorldWind back to Glimpse
+        linkMouseEvents( wwc, projection, glimpseLayer );
+
+        // force the WorldWind and Glimpse windows to pan together
+        linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
+        linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
 
         // add a thread to constantly repaint the WorldWind window
         // this isn't an ideal solution, but because Glimpse currently

@@ -99,10 +99,15 @@ public class Axis2D
         x.lockAspectRatio( y, x_to_y_ratio );
         y.lockAspectRatio( x, 1.0 / x_to_y_ratio );
 
+        validate( );
+    }
+
+    public void validate( )
+    {
         applyConstraints( );
         updateLinkedAxes( );
     }
-
+    
     public void applyConstraints( )
     {
         x.applyConstraints( );

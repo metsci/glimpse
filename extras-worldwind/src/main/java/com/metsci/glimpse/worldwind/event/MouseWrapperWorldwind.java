@@ -54,7 +54,7 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
         }
     }
     
-    public static void addListeners( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
+    public static void linkMouseEvents( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
     {
         MouseWrapperWorldwind wrapper = new MouseWrapperWorldwind( wwd, projection, tile );
         wwd.getInputHandler( ).addMouseListener( wrapper );
