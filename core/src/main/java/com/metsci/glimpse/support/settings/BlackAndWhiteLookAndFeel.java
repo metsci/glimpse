@@ -46,6 +46,7 @@ public class BlackAndWhiteLookAndFeel extends AbstractLookAndFeel
         map.put( AXIS_FONT, getDefaultPlain( 11 ) );
         map.put( TITLE_FONT, getDefaultBold( 14 ) );
         
-        map.put( TEXT_BACKGROUND_COLOR, getBlack( 0.7f ) );
+        map.put( TOOLTIP_BACKGROUND_COLOR, getBlack( 0.7f ) );
+        map.put( TOOLTIP_TEXT_COLOR, getWhite( ) );
     }
 }
