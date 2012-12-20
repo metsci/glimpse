@@ -619,7 +619,7 @@ public class EventPainter extends GlimpseDataPainter1D
 
         if ( !backgroundColorSet )
         {
-            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TEXT_BACKGROUND_COLOR ) );
+            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TOOLTIP_BACKGROUND_COLOR ) );
             backgroundColorSet = false;
         }
 

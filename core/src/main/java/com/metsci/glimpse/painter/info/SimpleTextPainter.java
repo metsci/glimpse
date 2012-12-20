@@ -253,7 +253,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         
         if ( !backgroundColorSet )
         {
-            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TEXT_BACKGROUND_COLOR ) );
+            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TOOLTIP_BACKGROUND_COLOR ) );
             backgroundColorSet = false;
         }
         
