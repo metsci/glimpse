@@ -151,6 +151,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
 
+        e0.setShowBackground( false );
+
         // add constraints on how the user can adjust the various events
         e0.setEndTimeMoveable( false );
         e1.setResizeable( false );

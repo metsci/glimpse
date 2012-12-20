@@ -95,9 +95,10 @@ public class EventPainter extends GlimpseDataPainter1D
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
-    protected float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
+    protected float[] backgroundColor = GlimpseColor.getGray( 0.2f );
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
     protected float[] textColor = GlimpseColor.getBlack( );
+    protected float[] textColorNoBackground = GlimpseColor.getBlack( );
 
     protected boolean textColorSet = false;
     protected boolean backgroundColorSet = false;
@@ -613,14 +614,9 @@ public class EventPainter extends GlimpseDataPainter1D
 
         if ( !textColorSet )
         {
-            setTextColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            textColor = laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR );
+            textColorNoBackground = laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR );
             textColorSet = false;
-        }
-
-        if ( !backgroundColorSet )
-        {
-            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TOOLTIP_BACKGROUND_COLOR ) );
-            backgroundColorSet = false;
         }
 
         if ( !borderColorSet )

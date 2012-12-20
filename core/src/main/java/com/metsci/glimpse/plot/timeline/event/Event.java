@@ -67,6 +67,7 @@ public class Event
     protected boolean showName = true;
     protected boolean showIcon = true;
     protected boolean showBorder = true;
+    protected boolean showBackground = true;
 
     protected boolean hideOverfull;
     protected boolean hideIntersecting;
@@ -222,22 +223,24 @@ public class Event
         int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : width;
 
         if ( painter.isHorizontal( ) )
-        {
-            GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-            
+        {   
             if ( !offEdgeMin && !offEdgeMax )
             {
-                gl.glBegin( GL.GL_QUADS );
-                try
+                if ( showBackground )
                 {
-                    gl.glVertex2d( timeMin, sizeMin );
-                    gl.glVertex2d( timeMin, sizeMax );
-                    gl.glVertex2d( timeMax, sizeMax );
-                    gl.glVertex2d( timeMax, sizeMin );
-                }
-                finally
-                {
-                    gl.glEnd( );
+                    GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
+                    gl.glBegin( GL.GL_QUADS );
+                    try
+                    {
+                        gl.glVertex2d( timeMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMin );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
                 }
     
                 if ( showBorder )
@@ -260,19 +263,23 @@ public class Event
             }
             else
             {
-                gl.glBegin( GL.GL_POLYGON );
-                try
+                if ( showBackground )
                 {
-                    gl.glVertex2d( arrowBaseMin, sizeMax );
-                    gl.glVertex2d( arrowBaseMax, sizeMax );
-                    gl.glVertex2d( timeMax, sizeCenter );
-                    gl.glVertex2d( arrowBaseMax, sizeMin );
-                    gl.glVertex2d( arrowBaseMin, sizeMin );
-                    gl.glVertex2d( timeMin, sizeCenter );
-                }
-                finally
-                {
-                    gl.glEnd( );
+                    GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
+                    gl.glBegin( GL.GL_POLYGON );
+                    try
+                    {
+                        gl.glVertex2d( arrowBaseMin, sizeMax );
+                        gl.glVertex2d( arrowBaseMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeCenter );
+                        gl.glVertex2d( arrowBaseMax, sizeMin );
+                        gl.glVertex2d( arrowBaseMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeCenter );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
                 }
                 
                 if ( showBorder )
@@ -333,7 +340,23 @@ public class Event
                 textStartTime = epoch.toTimeStamp( valueX );
                 textEndTime = textStartTime.add( bounds.getWidth( ) / axis.getPixelsPerValue( ) );
 
-                GlimpseColor.setColor( textRenderer, textColor != null ? textColor : painter.getTextColor( ) );
+                // use this event's text color if it has been set
+                if ( textColor != null )
+                {
+                    GlimpseColor.setColor( textRenderer, textColor );
+                }
+                // otherwise, use the default no background color if the background is not showing
+                // and if a color has not been explicitly set for the EventPainter
+                else if ( !painter.textColorSet && !showBackground )
+                {
+                    GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
+                }
+                // otherwise use the EventPainter's default text color
+                else
+                {
+                    GlimpseColor.setColor( textRenderer, painter.textColor );
+                }
+                
                 textRenderer.beginRendering( width, height );
                 try
                 {
@@ -628,6 +651,16 @@ public class Event
         this.showIcon = showIcon;
     }
 
+    public boolean isShowBackground( )
+    {
+        return showBackground;
+    }
+
+    public void setShowBackground( boolean showBorder )
+    {
+        this.showBackground = showBorder;
+    }
+    
     public boolean isShowBorder( )
     {
         return showBorder;
