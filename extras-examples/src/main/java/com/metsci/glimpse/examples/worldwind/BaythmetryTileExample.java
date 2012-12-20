@@ -101,7 +101,7 @@ public class BaythmetryTileExample
 
         layout.addPainter( example.getBathymetryPainter( ) );
         layout.addPainter( example.getContourPainter( ) );
-        layout.addPainter( plot.getCrosshairPainter( ) );
+        //layout.addPainter( plot.getCrosshairPainter( ) );
 
         baseLayout.addPainter( new BackgroundPainter( ).setColor( 0, 0, 0, 0 ) );
         baseLayout.addLayout( layout );
@@ -149,8 +149,8 @@ public class BaythmetryTileExample
         linkMouseEvents( wwc, projection, glimpseLayer );
 
         // force the WorldWind and Glimpse windows to pan together
-        linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
-        linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
+        //linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
+        //linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
 
         // add a thread to constantly repaint the WorldWind window
         // this isn't an ideal solution, but because Glimpse currently
