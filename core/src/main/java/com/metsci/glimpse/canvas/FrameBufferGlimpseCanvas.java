@@ -47,6 +47,7 @@ import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.sun.opengl.util.texture.Texture;
 
@@ -295,30 +296,6 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        GLContext context = getGLContext( );
-
-        context.makeCurrent( );
-        try
-        {
-            fbo.dispose( context );
-        }
-        finally
-        {
-            context.release( );
-        }
-
-        this.isDisposed = true;
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
-    }
-
-    @Override
     public String toString( )
     {
         return FrameBufferGlimpseCanvas.class.getSimpleName( );
@@ -346,5 +323,50 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         // do nothing
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return this.isDisposed;
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                    
+                    fbo.dispose( glContext );
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.syncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
+        
+        isDisposed = true;
     }
 }

@@ -54,6 +54,7 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWTBridge;
 
@@ -71,7 +72,8 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     protected MouseWrapperSWTBridge mouseHelper;
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
-
+    protected boolean isDisposed = false;
+    
     public SwtBridgeGlimpseCanvas( Composite parent )
     {
         this( parent, null );
@@ -370,5 +372,50 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 // do nothing
             }
         } );
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return isDisposed;
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.syncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
+        
+        dispose( );
+    
+        isDisposed = true;
     }
 }

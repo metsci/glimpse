@@ -58,7 +58,7 @@ public class SimpleLayoutExampleWithPopup
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = RepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example (Swing)" );
         frame.add( canvas );
@@ -73,7 +73,7 @@ public class SimpleLayoutExampleWithPopup
             @Override
             public void run( )
             {
-                canvas.dispose( );
+                canvas.dispose( manager );
             }
         } );
 

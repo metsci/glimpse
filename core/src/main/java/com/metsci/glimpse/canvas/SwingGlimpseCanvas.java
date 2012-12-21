@@ -52,6 +52,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -71,12 +72,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 
     protected LayoutManager layoutManager;
 
-    protected boolean isDisposed;
-
     protected MouseWrapperSwing mouseHelper;
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
-
+    protected boolean isDisposed = false;
+    
     public SwingGlimpseCanvas( )
     {
         this( true );
@@ -267,21 +267,6 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        //TODO how should dispose( ) react? should GlimpseCanvas have a dispose( ) method?
-        //     should this be the responsibility of the GlimpseLayout containing the painters?
-        //     or of the painter itself since it might be used elsewhere?
-        this.isDisposed = true;
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
-    }
-
-    @Override
     public String toString( )
     {
         return SwingGlimpseCanvas.class.getSimpleName( );
@@ -409,5 +394,48 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 // do nothing
             }
         } );
+    }
+
+    @Override
+    public boolean isDisposed( )
+    {
+        return this.isDisposed;
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.syncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
+        
+        isDisposed = true;
     }
 }

@@ -53,6 +53,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.gl.GLListenerInfo;
 import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWT;
 import com.metsci.glimpse.swt.misc.CursorUtil;
@@ -70,6 +71,7 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     protected MouseWrapperSWT mouseHelper;
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
+    protected boolean isDisposed = false;
 
     public SwtGlimpseCanvas( Composite _parent )
     {
@@ -254,13 +256,6 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        super.dispose( );
-        canvasCursor.dispose( );
-    }
-
-    @Override
     public void paint( )
     {
         if ( !parent.isDisposed( ) )
@@ -342,5 +337,57 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         this.isEventGenerator = generate;
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return isDisposed;
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        super.dispose( );
+        canvasCursor.dispose( );
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.syncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
+        
+        dispose( );
+    
+        isDisposed = true;
     }
 }

@@ -40,6 +40,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -196,30 +197,6 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        GLContext context = getGLContext( );
-
-        context.makeCurrent( );
-        try
-        {
-            fbo.dispose( context );
-        }
-        finally
-        {
-            context.release( );
-        }
-
-        this.isDisposed = true;
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
-    }
-
-    @Override
     public String toString( )
     {
         return SimpleOffscreenCanvas.class.getSimpleName( );
@@ -247,5 +224,50 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         // do nothing
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return this.isDisposed;
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                    
+                    fbo.dispose( glContext );
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.syncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
+        
+        isDisposed = true;
     }
 }

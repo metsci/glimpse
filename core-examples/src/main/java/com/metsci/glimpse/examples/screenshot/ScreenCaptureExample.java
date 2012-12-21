@@ -68,7 +68,7 @@ public class ScreenCaptureExample
         canvas.addLayout( new ScreenCaptureExample( ).getLayout( context ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = RepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example" );
         frame.add( canvas );
@@ -83,7 +83,7 @@ public class ScreenCaptureExample
             @Override
             public void run( )
             {
-                canvas.dispose( );
+                canvas.dispose( manager );
             }
         } );
     }

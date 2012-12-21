@@ -32,6 +32,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTarget;
 
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 
 /**
  * A heavy weight target for Glimpse rendering. Represents
@@ -65,7 +66,7 @@ public interface GlimpseCanvas extends GlimpseTarget
     /**
      * Disposes of any native resources associated with the GlimpseCanvas.
      */
-    public void dispose( );
+    public void dispose( RepaintManager manager );
 
     /**
      *

@@ -46,6 +46,7 @@ import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.gl.GLSimplePixelBuffer;
 import com.metsci.glimpse.gl.GLSimplePixelBuffer.GLRunnable;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -248,19 +249,6 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        pixelBuffer.dispose( );
-        isDisposed = true;
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return isDisposed;
-    }
-
-    @Override
     public String toString( )
     {
         return OffscreenGlimpseCanvas.class.getSimpleName( );
@@ -288,5 +276,50 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         // do nothing
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return this.isDisposed;
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                    
+                    pixelBuffer.dispose( );
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.syncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
+        
+        isDisposed = true;
     }
 }

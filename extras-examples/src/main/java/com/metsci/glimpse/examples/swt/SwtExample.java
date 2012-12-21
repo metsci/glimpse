@@ -33,6 +33,8 @@ import java.util.logging.Logger;
 import javax.media.opengl.GLContext;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -61,20 +63,29 @@ public abstract class SwtExample
         shell.setText( "Glimpse Example (SWT)" );
         shell.setLayout( new FillLayout( ) );
 
-        SwtGlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
+        final SwtGlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = RepaintManager.newRepaintManager( canvas );
 
         shell.setSize( 800, 800 );
         shell.setLocation( 0, 0 );
         shell.open( );
         shell.moveAbove( null );
+        
+        shell.addDisposeListener( new DisposeListener( )
+        {
+            @Override
+            public void widgetDisposed( DisposeEvent event )
+            {
+                canvas.dispose( manager );
+            }
+        });
 
         while ( !shell.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
-
+        
         return;
     }
 

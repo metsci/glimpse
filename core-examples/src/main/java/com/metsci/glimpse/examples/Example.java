@@ -82,7 +82,7 @@ public class Example
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        RepaintManager manager = RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = RepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example" );
         frame.add( canvas );
@@ -97,7 +97,7 @@ public class Example
             @Override
             public void run( )
             {
-                canvas.dispose( );
+                canvas.dispose( manager );
             }
         } );
 
