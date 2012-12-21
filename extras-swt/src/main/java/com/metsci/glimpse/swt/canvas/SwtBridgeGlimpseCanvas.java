@@ -272,7 +272,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 final Display display = Display.getDefault( );
                 
                 // we want the glCanvas to have AWT focus and this Composite to have SWT focus
-                display.syncExec( new Runnable( )
+                display.asyncExec( new Runnable( )
                 {
                     public void run( )
                     {
