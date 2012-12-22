@@ -402,20 +402,20 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 {
                     glContext.release( );
                 }
+                
+                dispose( );
+                
+                isDisposed = true;
             }
         };
         
         if ( manager != null )
         {
-            manager.syncExec( dispose );   
+            manager.asyncExec( dispose );   
         }
         else
         {
             dispose.run( );
         }
-        
-        dispose( );
-    
-        isDisposed = true;
     }
 }

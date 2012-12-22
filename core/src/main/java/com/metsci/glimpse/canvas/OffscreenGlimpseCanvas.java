@@ -303,6 +303,8 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
                     }
                     
                     pixelBuffer.dispose( );
+                    
+                    isDisposed = true;
                 }
                 finally
                 {
@@ -313,13 +315,11 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
         
         if ( manager != null )
         {
-            manager.syncExec( dispose );   
+            manager.asyncExec( dispose );   
         }
         else
         {
             dispose.run( );
         }
-        
-        isDisposed = true;
     }
 }

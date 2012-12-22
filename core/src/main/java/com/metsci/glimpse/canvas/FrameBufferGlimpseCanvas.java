@@ -355,18 +355,18 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
                 {
                     glContext.release( );
                 }
+                
+                isDisposed = true;
             }
         };
         
         if ( manager != null )
         {
-            manager.syncExec( dispose );   
+            manager.asyncExec( dispose );   
         }
         else
         {
             dispose.run( );
         }
-        
-        isDisposed = true;
     }
 }

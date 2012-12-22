@@ -374,20 +374,20 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
                 {
                     glContext.release( );
                 }
+                
+                dispose( );
+                
+                isDisposed = true;
             }
         };
         
         if ( manager != null )
         {
-            manager.syncExec( dispose );   
+            manager.asyncExec( dispose );   
         }
         else
         {
             dispose.run( );
         }
-        
-        dispose( );
-    
-        isDisposed = true;
     }
 }
