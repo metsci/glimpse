@@ -107,6 +107,9 @@ public class AnimatedPolygonExample implements GlimpseLayoutProvider
 
         polygonPainter.setLineColor( 6, 1.0f, 0.0f, 0.0f, 1.0f );
         polygonPainter.setFill( 6, false );
+        
+        polygonPainter.setPolyDotted( 4, true );
+        polygonPainter.setPolyDotted( 3, true );
 
         ( new Thread( )
         {

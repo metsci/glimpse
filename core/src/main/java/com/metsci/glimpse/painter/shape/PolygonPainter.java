@@ -73,7 +73,7 @@ public class PolygonPainter extends GlimpsePainter2D
 {
     // expand
     protected static final double DELETE_EXPAND_FACTOR = 1.2;
-    
+
     protected static final Comparator<IdPolygon> startTimeComparator = new Comparator<IdPolygon>( )
     {
         @Override
@@ -158,7 +158,35 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     };
 
-    protected byte halftone[] = { ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55 };
+    //@formatter:off
+    protected byte halftone[] = {
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55 };
+    //@formatter:on
 
     protected PolygonTessellator tessellator;
 
@@ -725,13 +753,13 @@ public class PolygonPainter extends GlimpsePainter2D
 
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
-                    
+
                     if ( group.polygonsInserted )
                     {
                         updateVertices( gl, loaded, group, true );
                         updateVertices( gl, loaded, group, false );
                     }
-                    
+
                     if ( group.polygonsSelected )
                     {
                         loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
@@ -784,12 +812,12 @@ public class PolygonPainter extends GlimpsePainter2D
         int insertSize = fill ? group.fillInsertVertexCount : group.lineInsertVertexCount;
         int totalSize = fill ? group.totalFillVertexCount : group.totalLineVertexCount;
         int handle = fill ? loaded.glFillBufferHandle : loaded.glLineBufferHandle;
-        
+
         // the size needed is the current buffer location plus new inserts (we cannot use
         // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
         // polygons have been deleted
         int sizeNeeded = currentSize + insertSize;
-        
+
         if ( !initialized || maxSize < sizeNeeded )
         {
             // if we've deleted vertices, but are still close to the max buffer size, then
@@ -819,10 +847,10 @@ public class PolygonPainter extends GlimpsePainter2D
                 gl.glGenBuffers( 1, bufferHandle, 0 );
                 handle = bufferHandle[0];
             }
-            
+
             // copy all the track data into a host buffer
             ensureDataBufferSize( maxSize );
-            
+
             if ( fill )
             {
                 loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
@@ -861,7 +889,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             // copy all the new track data into a host buffer
             ensureDataBufferSize( insertSize );
-            
+
             if ( fill )
             {
                 loaded.loadFillVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
@@ -878,7 +906,7 @@ public class PolygonPainter extends GlimpsePainter2D
             glHandleError( gl, "glBindBuffer Error  (Case 2)" );
             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
             glHandleError( gl, "glBufferSubData Error" );
-            
+
             if ( fill )
             {
                 loaded.glFillBufferCurrentSize = sizeNeeded;
@@ -889,7 +917,7 @@ public class PolygonPainter extends GlimpsePainter2D
             }
         }
     }
-    
+
     protected void drawGroup( GL gl, LoadedGroup loaded )
     {
         if ( !isGroupReady( loaded ) ) return;
@@ -981,14 +1009,12 @@ public class PolygonPainter extends GlimpsePainter2D
             }
         }
     }
-    
+
     protected boolean isGroupReady( LoadedGroup loaded )
     {
-        return  loaded.glFillBufferInitialized    && loaded.glLineBufferInitialized   &&
-                loaded.glLineOffsetBuffer != null && loaded.glLineCountBuffer != null &&
-                loaded.glFillOffsetBuffer != null && loaded.glFillCountBuffer != null;
+        return loaded.glFillBufferInitialized && loaded.glLineBufferInitialized && loaded.glLineOffsetBuffer != null && loaded.glLineCountBuffer != null && loaded.glFillOffsetBuffer != null && loaded.glFillCountBuffer != null;
     }
-    
+
     protected static Polygon buildPolygon( float[] geometryX, float[] geometryY )
     {
         Polygon p = new Polygon( );
@@ -1295,7 +1321,7 @@ public class PolygonPainter extends GlimpsePainter2D
         short lineStipplePattern;
         boolean lineStippleOn;
 
-        byte[] polyStipplePattern = new byte[32];
+        byte[] polyStipplePattern = new byte[128];
         boolean polyStippleOn;
 
         float[] fillColor = new float[4];
@@ -1450,7 +1476,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             ensureLineOffsetBufferSize( size );
             ensureLineCountBufferSize( size );
-            
+
             glLineOffsetBuffer.position( offset );
             glLineCountBuffer.position( offset );
 
@@ -1563,7 +1589,7 @@ public class PolygonPainter extends GlimpsePainter2D
         int selectedLinePrimitiveCount;
 
         // vertices in the above counts refer to tesselated triangle vertices
-        
+
         // current total vertex count
         int totalFillVertexCount;
         int totalLineVertexCount;
@@ -1610,7 +1636,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             this.startTimes.clear( );
             this.endTimes.clear( );
-            
+
             this.totalLineVertexCount = 0;
             this.lineInsertVertexCount = 0;
 
@@ -1625,21 +1651,21 @@ public class PolygonPainter extends GlimpsePainter2D
 
             this.groupCleared = true;
         }
-        
+
         public void deletePolygon( int polygonId )
         {
             IdPolygon polygon = this.polygonMap.remove( polygonId );
-            
+
             if ( polygon != null )
             {
                 this.newPolygons.remove( polygon );
                 this.startTimes.remove( polygon );
                 this.endTimes.remove( polygon );
-                
+
                 // if the polygon was selected when it is deleted, mark the selection changed
                 this.polygonsSelected = this.selectedPolygons.remove( polygon );
                 boolean newDeleted = this.newSelectedPolygons.remove( polygon );
-                
+
                 int lineVertexCount = polygon.lineVertexCount;
                 this.totalLineVertexCount -= lineVertexCount;
                 if ( newDeleted ) this.lineInsertVertexCount -= lineVertexCount;
@@ -1647,7 +1673,7 @@ public class PolygonPainter extends GlimpsePainter2D
                 int fillVertexCount = polygon.fillVertexCount;
                 this.totalFillVertexCount -= fillVertexCount;
                 if ( newDeleted ) this.fillInsertVertexCount -= fillVertexCount;
-                
+
                 this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
                 this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
             }
@@ -1677,7 +1703,7 @@ public class PolygonPainter extends GlimpsePainter2D
                 this.selectedPolygons.add( polygon );
                 this.newSelectedPolygons.add( polygon );
             }
-            
+
             this.polygonsInserted = true;
         }
 
@@ -1773,12 +1799,12 @@ public class PolygonPainter extends GlimpsePainter2D
             this.lineStippleFactor = stippleFactor;
             this.lineStipplePattern = stipplePattern;
         }
-        
+
         public void reset( )
         {
             this.newSelectedPolygons.clear( );
             this.newPolygons.clear( );
-            
+
             this.lineInsertVertexCount = 0;
             this.fillInsertVertexCount = 0;
             this.polygonsInserted = false;
