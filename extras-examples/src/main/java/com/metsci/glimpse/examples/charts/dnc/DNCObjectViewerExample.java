@@ -71,7 +71,7 @@ import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
 import com.metsci.glimpse.gl.Jogular;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -491,31 +491,32 @@ public class DNCObjectViewerExample extends JPanel
         {
             Jogular.initJogl( );
 
-            List<String> roots = new ArrayList<String>();
+            List<String> roots = new ArrayList<String>( );
             String dirPath = "/path/to/dnc_dir/";
 
             if ( args.length > 0 )
             {
-                roots.addAll(Arrays.asList(args));
+                roots.addAll( Arrays.asList( args ) );
             }
             else
             {
-                roots.add("dnc15-harbor");
+                roots.add( "dnc15-harbor" );
                 //roots.add("dnc15-coastal");
             }
 
             SwingGlimpseCanvas panel = new SwingGlimpseCanvas( true );
-            RepaintManager.newRepaintManager( panel );
+            SwingRepaintManager.newRepaintManager( panel );
 
-            Iterator<String> rootIt = roots.iterator();
-            String dncResource =  dirPath + rootIt.next() + ".dnc";
+            Iterator<String> rootIt = roots.iterator( );
+            String dncResource = dirPath + rootIt.next( ) + ".dnc";
             GeoRecordListForStream<DNCObject> dncSource = new GeoRecordListForStream<DNCObject>( new DNCObjectLoader( ), dncResource );
-            while ( rootIt.hasNext() ) {
-                dncResource =  dirPath + rootIt.next() + ".dnc";
-                dncSource.add( new DNCObjectLoader(), dncResource );
+            while ( rootIt.hasNext( ) )
+            {
+                dncResource = dirPath + rootIt.next( ) + ".dnc";
+                dncSource.add( new DNCObjectLoader( ), dncResource );
             }
 
-            DNCObjectViewerExample driver = new DNCObjectViewerExample( panel, new MercatorProjection( ), dncSource);
+            DNCObjectViewerExample driver = new DNCObjectViewerExample( panel, new MercatorProjection( ), dncSource );
 
             JFrame frame = containInJFrame( driver, "Shape viewer", new Dimension( 800, 1100 ), null );
             frame.setVisible( true );

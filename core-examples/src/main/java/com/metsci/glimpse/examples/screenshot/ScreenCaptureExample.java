@@ -47,6 +47,7 @@ import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.screenshot.ScreenshotUtil;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
@@ -68,7 +69,7 @@ public class ScreenCaptureExample
         canvas.addLayout( new ScreenCaptureExample( ).getLayout( context ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final RepaintManager manager = RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example" );
         frame.add( canvas );

@@ -73,7 +73,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
-    
+
     public SwtBridgeGlimpseCanvas( Composite parent )
     {
         this( parent, null );
@@ -269,21 +269,16 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
         {
             public void requestFocus( )
             {
-                final Display display = Display.getDefault( );
-                
-                // we want the glCanvas to have AWT focus and this Composite to have SWT focus
-                display.asyncExec( new Runnable( )
+                Display.getDefault( ).asyncExec( new Runnable( )
                 {
                     public void run( )
                     {
-                        if ( !display.isDisposed( ) && !isDisposed( ) && !parent.isDisposed( ) )
+                        if ( !Display.getDefault( ).isDisposed( ) && !isDisposed( ) && !parent.isDisposed( ) )
                         {
-                            forceFocus( );
+                            setFocus( );
                         }
                     }
                 } );
-
-                glCanvas.requestFocus( );
             }
 
             public void mouseClicked( MouseEvent e )
@@ -373,13 +368,13 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
             }
         } );
     }
-    
+
     @Override
     public boolean isDisposed( )
     {
         return isDisposed;
     }
-    
+
     @Override
     public void dispose( RepaintManager manager )
     {
@@ -402,16 +397,25 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 {
                     glContext.release( );
                 }
-                
-                dispose( );
-                
+
                 isDisposed = true;
             }
         };
-        
+
+        // don't dispose this component inside the Runnable
+        // (because dispose() should always be called from the SWT thread)
+        Display.getDefault( ).asyncExec( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                dispose( );
+            }
+        } );
+
         if ( manager != null )
         {
-            manager.asyncExec( dispose );   
+            manager.asyncExec( dispose );
         }
         else
         {

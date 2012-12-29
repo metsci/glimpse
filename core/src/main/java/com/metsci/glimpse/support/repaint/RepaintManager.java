@@ -139,7 +139,7 @@ public class RepaintManager
         {
             if ( !started )
             {
-                executor.scheduleWithFixedDelay( new RepaintRunnable( ), 0, DELAY, TimeUnit.MILLISECONDS );
+                executor.scheduleWithFixedDelay( newRepaintRunnable( ), 0, DELAY, TimeUnit.MILLISECONDS );
                 started = true;
             }
         }
@@ -200,6 +200,11 @@ public class RepaintManager
     public boolean checkThread( )
     {
         return Thread.currentThread( ).equals( thread );
+    }
+    
+    public Runnable newRepaintRunnable( )
+    {
+        return new RepaintRunnable( );
     }
 
     public class RepaintRunnable implements Runnable

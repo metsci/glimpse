@@ -27,8 +27,6 @@
 package com.metsci.glimpse.examples.worldwind;
 
 import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkAxisToWorldWind;
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkWorldWindToAxis;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.LatLon;
@@ -53,7 +51,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -137,7 +135,7 @@ public class BaythmetryTileExample
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        RepaintManager.newRepaintManager( glimpseCanvas );
+        SwingRepaintManager.newRepaintManager( glimpseCanvas );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );

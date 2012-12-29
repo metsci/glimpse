@@ -44,6 +44,7 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.swt.canvas.SwtGlimpseCanvas;
 import com.metsci.glimpse.swt.misc.SwtLookAndFeel;
+import com.metsci.glimpse.swt.repaint.SwtRepaintManager;
 
 /**
  * @author ulman
@@ -67,13 +68,13 @@ public abstract class SwtExample
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        final RepaintManager manager = RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = SwtRepaintManager.newRepaintManager( canvas );
 
         shell.setSize( 800, 800 );
         shell.setLocation( 0, 0 );
         shell.open( );
         shell.moveAbove( null );
-        
+
         shell.addDisposeListener( new DisposeListener( )
         {
             @Override
@@ -81,11 +82,11 @@ public abstract class SwtExample
             {
                 canvas.dispose( manager );
             }
-        });
+        } );
 
         while ( !shell.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
-        
+
         return;
     }
 
@@ -104,7 +105,7 @@ public abstract class SwtExample
         canvasA.addLayout( layoutProviderA.getLayout( ) );
         canvasA.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvasA );
+        SwtRepaintManager.newRepaintManager( canvasA );
 
         shellA.setSize( 800, 800 );
         shellA.setLocation( 0, 0 );
@@ -119,7 +120,7 @@ public abstract class SwtExample
         canvasB.addLayout( layoutProviderB.getLayout( ) );
         canvasB.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvasB );
+        SwtRepaintManager.newRepaintManager( canvasB );
 
         shellB.setSize( 800, 800 );
         shellB.setLocation( 0, 0 );

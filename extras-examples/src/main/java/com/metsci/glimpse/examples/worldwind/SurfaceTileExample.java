@@ -44,7 +44,7 @@ import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
 
@@ -56,13 +56,8 @@ import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
  */
 public class SurfaceTileExample
 {
-    public static final java.util.List<LatLon> CORNERS = Arrays.asList(
-            LatLon.fromDegrees(34, -112),
-            LatLon.fromDegrees(34, -104),
-            LatLon.fromDegrees(44, -104),
-            LatLon.fromDegrees(44, -112)
-        );
-    
+    public static final java.util.List<LatLon> CORNERS = Arrays.asList( LatLon.fromDegrees( 34, -112 ), LatLon.fromDegrees( 34, -104 ), LatLon.fromDegrees( 44, -104 ), LatLon.fromDegrees( 44, -112 ) );
+
     public static void main( String[] args ) throws IOException
     {
         Jogular.initJogl( );
@@ -103,7 +98,7 @@ public class SurfaceTileExample
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        RepaintManager.newRepaintManager( glimpseCanvas );
+        SwingRepaintManager.newRepaintManager( glimpseCanvas );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );
