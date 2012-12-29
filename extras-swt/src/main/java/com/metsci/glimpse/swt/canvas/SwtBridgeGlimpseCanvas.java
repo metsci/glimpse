@@ -409,7 +409,10 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
             @Override
             public void run( )
             {
-                dispose( );
+                if ( !Display.getDefault( ).isDisposed( ) && !isDisposed( ) && !parent.isDisposed( ) )
+                {
+                    dispose( );
+                }
             }
         } );
 
