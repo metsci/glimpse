@@ -21,6 +21,10 @@ target
 /extras-examples/.classpath
 /extras-examples/.project
 /extras-examples/.settings
+/extras-worldwind/target
+/extras-worldwind/.classpath
+/extras-worldwind/.project
+/extras-worldwind/.settings
 /extras-spacenav/.project
 /extras-spacenav/.settings
 /extras-spacenav/target
