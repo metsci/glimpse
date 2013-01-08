@@ -33,10 +33,8 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.media.opengl.GL;
 
@@ -77,7 +75,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
     //To keep consistent ordering, also keep a list
     private final List<String> list;
-    private final Map<String, float[]> map;
+    private final Map<String, float[]> colors;
 
     //Relative placement in the window
     private LegendPlacement placement;
@@ -90,9 +88,9 @@ public abstract class LegendPainter extends GlimpsePainter2D
      */
     private int offsetX = 10;
     private int offsetY = 10;
-    
+
     private boolean fontSet = false;
-    
+
     private volatile Font newFont = null;
     private volatile boolean antialias = false;
 
@@ -100,7 +98,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
     {
         this.placement = placement;
         this.list = new ArrayList<String>( );
-        this.map = new HashMap<String, float[]>( );
+        this.colors = new HashMap<String, float[]>( );
         setFont( 15, false );
     }
 
@@ -137,7 +135,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
         return this;
     }
-    
+
     public LegendPainter setTextColor( float[] rgba )
     {
         textColor = rgba;
@@ -159,28 +157,28 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
     public void addItem( String label, float[] rgba )
     {
-        if ( !map.containsKey( label ) )
+        if ( !colors.containsKey( label ) )
         {
             list.add( label );
         }
-        map.put( label, rgba );
+        colors.put( label, rgba );
     }
 
     public void removeItem( String label )
     {
         list.remove( label );
-        map.remove( label );
+        colors.remove( label );
     }
 
     public void clear( )
     {
         list.clear( );
-        map.clear( );
+        colors.clear( );
     }
 
     public void setColor( String label, float r, float g, float b, float a )
     {
-        float[] rgba = map.get( label );
+        float[] rgba = colors.get( label );
         rgba[0] = r;
         rgba[1] = g;
         rgba[2] = b;
@@ -283,7 +281,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         {
             Rectangle2D bounds = textRenderer.getBounds( label );
             int labelHeight = ( int ) bounds.getHeight( );
-            float[] rgba = map.get( label );
+            float[] rgba = colors.get( label );
             drawLegendItem( gl, label, xpos, ypos, rgba, labelHeight );
             ypos -= ( labelHeight + spacer );
         }
@@ -381,33 +379,30 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
     public static class LineLegendPainter extends LegendPainter
     {
-
-        //TODO line widths/stipples per label?
-        private Set<String> stippleLabels;
-
-        private int stippleFactor = 1;
-        private short stipplePattern = ( short ) 0x00FF;
+        private Map<String, LineLegendPainterItem> items;
 
         public LineLegendPainter( LegendPlacement placement )
         {
             super( placement );
-            this.stippleLabels = new HashSet<String>( );
+            items = new HashMap<String, LineLegendPainterItem>( );
         }
 
         @Override
         protected void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height )
         {
             gl.glColor4fv( rgba, 0 );
-            if ( stippleLabels.contains( label ) )
+
+            LineLegendPainterItem item = items.get( label );
+            if ( item.doStipple )
             {
                 gl.glEnable( GL.GL_LINE_STIPPLE );
-                gl.glLineStipple( stippleFactor, stipplePattern );
+                gl.glLineStipple( item.stippleFactor, item.stipplePattern );
             }
             else
             {
                 gl.glDisable( GL.GL_LINE_STIPPLE );
             }
-            gl.glLineWidth( 1f );
+            gl.glLineWidth( item.lineWidth );
             gl.glBegin( GL.GL_LINE_STRIP );
             double ymid = ypos - ( height / 2. );
             try
@@ -421,50 +416,58 @@ public abstract class LegendPainter extends GlimpsePainter2D
             }
         }
 
-        public void setLineStipplePattern( int stippleFactor, short stipplePattern )
+        /**
+         * Enables stipple and sets the pattern on the legend item.
+         */
+        public void setLineStipple( String label, int stippleFactor, short stipplePattern )
         {
-            this.stippleFactor = stippleFactor;
-            this.stipplePattern = stipplePattern;
+            LineLegendPainterItem item = items.get( label );
+            item.stippleFactor = stippleFactor;
+            item.stipplePattern = stipplePattern;
+            item.doStipple = true;
         }
 
+        /**
+         * Toggles stipple on the legend item.
+         */
         public void setLineStipple( String label, boolean stipple )
         {
-            if ( stipple )
-            {
-                stippleLabels.add( label );
-            }
-            else
-            {
-                stippleLabels.remove( label );
-            }
+            items.get( label ).doStipple = stipple;
         }
 
-        public void addItem( String label, float r, float g, float b, float a, boolean stipple )
+        public void setLineWidth( String label, float width )
         {
-            addItem( label, r, g, b, a );
-            setLineStipple( label, stipple );
+            items.get( label ).lineWidth = width;
         }
 
-        public void addItem( String label, float[] rgba, boolean stipple )
+        @Override
+        public void addItem( String label, float[] rgba )
         {
-            addItem( label, rgba );
-            setLineStipple( label, stipple );
+            super.addItem( label, rgba );
+            items.put( label, new LineLegendPainterItem( ) );
         }
 
         @Override
         public void removeItem( String label )
         {
             super.removeItem( label );
-            stippleLabels.remove( label );
+            items.remove( label );
         }
 
         @Override
         public void clear( )
         {
             super.clear( );
-            stippleLabels.clear( );
+            items.clear( );
         }
 
+        public static class LineLegendPainterItem
+        {
+            public short stipplePattern = 0x00FF;
+            public int stippleFactor = 1;
+            public float lineWidth = 1;
+            public boolean doStipple = false;
+        }
     }
 
     @Override
@@ -472,11 +475,14 @@ public abstract class LegendPainter extends GlimpsePainter2D
     {
         if ( newFont != null )
         {
-            if ( textRenderer != null ) textRenderer.dispose( );
+            if ( textRenderer != null )
+            {
+                textRenderer.dispose( );
+            }
             textRenderer = new TextRenderer( newFont, antialias, false );
             newFont = null;
         }
-    	
+
         GL gl = context.getGL( );
 
         int width = bounds.getWidth( );
@@ -498,7 +504,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
             displayLegend( gl, width, height );
         }
     }
-    
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
@@ -509,11 +515,14 @@ public abstract class LegendPainter extends GlimpsePainter2D
             fontSet = false;
         }
     }
-    
+
     @Override
     public void dispose( GlimpseContext context )
     {
-        if ( textRenderer != null ) textRenderer.dispose( );
+        if ( textRenderer != null )
+        {
+            textRenderer.dispose( );
+        }
         textRenderer = null;
     }
 
