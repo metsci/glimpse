@@ -1152,7 +1152,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
 
         // don't bother iterating through all the tracks again if none have labels turned on
-        if ( labelOn )
+        if ( labelOn && fontRenderer != null )
         {
             fontRenderer.beginRendering( width, height );
             try

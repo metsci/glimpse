@@ -482,6 +482,8 @@ public abstract class LegendPainter extends GlimpsePainter2D
             textRenderer = new TextRenderer( newFont, antialias, false );
             newFont = null;
         }
+        
+        if ( textRenderer == null ) return;
 
         GL gl = context.getGL( );
 

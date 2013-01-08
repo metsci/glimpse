@@ -273,9 +273,10 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 {
                     public void run( )
                     {
-                        if ( !Display.getDefault( ).isDisposed( ) && !isDisposed( ) && !parent.isDisposed( ) )
+                        if ( !SwtBridgeGlimpseCanvas.super.isDisposed( ) )
                         {
                             setFocus( );
+                            glCanvas.requestFocus( );
                         }
                     }
                 } );
@@ -409,7 +410,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
             @Override
             public void run( )
             {
-                if ( !Display.getDefault( ).isDisposed( ) && !isDisposed( ) && !parent.isDisposed( ) )
+                if ( !SwtBridgeGlimpseCanvas.super.isDisposed( ) )
                 {
                     dispose( );
                 }

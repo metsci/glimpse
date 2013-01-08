@@ -203,12 +203,14 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        if ( newFont != null )
+        if ( this.newFont != null )
         {
             if ( this.textRenderer != null ) this.textRenderer.dispose( );
-            this.textRenderer = new TextRenderer( newFont, antialias, false );
-            newFont = null;
+            this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
+            this.newFont = null;
         }
+        
+        if ( this.textRenderer == null ) return;
         
         GL gl = context.getGL( );
 

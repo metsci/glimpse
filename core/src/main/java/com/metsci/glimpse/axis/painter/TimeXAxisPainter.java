@@ -79,6 +79,8 @@ public class TimeXAxisPainter extends TimeAxisPainter
     {
         super.paintTo( context, bounds, axis );
         
+        if ( textRenderer == null ) return;
+        
         GL gl = context.getGL( );
 
         int width = bounds.getWidth( );

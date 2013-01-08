@@ -61,8 +61,9 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected boolean showLabel = true;
     protected boolean showMinorTicks = false;
 
-    protected Font font;
     protected TextRenderer textRenderer;
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
 
     protected float[] tickColor = GlimpseColor.getBlack( );
     protected float[] tickLabelColor = GlimpseColor.getBlack( );
@@ -107,13 +108,8 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
 
     public void setFont( Font font, boolean antialias )
     {
-        this.font = font;
-
-        if ( this.textRenderer != null ) this.textRenderer.dispose( );
-
-        this.textRenderer = new TextRenderer( font, antialias, false );
-        this.textRenderer.setSmoothing( true );
-
+        this.newFont = font;
+        this.antialias = antialias;
         this.fontSet = true;
     }
 
@@ -206,5 +202,15 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
+    }
+
+    public void updateTextRenderer( )
+    {
+        if ( newFont != null )
+        {
+            if ( textRenderer != null ) textRenderer.dispose( );
+            textRenderer = new TextRenderer( newFont, antialias, false );
+            newFont = null;
+        }
     }
 }

@@ -140,6 +140,8 @@ public class MeasurementPainter extends GlimpseDataPainter2D
     @Override
     public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
     {
+        if ( textRenderer == null ) return;
+        
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 

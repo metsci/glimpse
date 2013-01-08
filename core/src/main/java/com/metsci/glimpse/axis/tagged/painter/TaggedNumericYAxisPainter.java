@@ -97,6 +97,9 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
+        updateTextRenderer( );
+        if ( textRenderer == null ) return;
+        
         if ( axis instanceof TaggedAxis1D )
         {
             TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;

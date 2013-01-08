@@ -242,6 +242,9 @@ public class ScalePainter extends GlimpsePainterImpl
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
+        if ( tickTextRenderer == null ) return;
+        if ( overallTextRenderer == null ) return;
+        
         Axis1D axis = null;
         
         GlimpseTarget target = context.getTargetStack( ).getTarget( );

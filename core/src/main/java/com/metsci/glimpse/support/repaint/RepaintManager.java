@@ -131,6 +131,19 @@ public class RepaintManager
             lock.unlock( );
         }
     }
+    
+    public void shutdown( )
+    {
+        lock.lock( );
+        try
+        {
+            this.executor.shutdown( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
 
     public void start( )
     {

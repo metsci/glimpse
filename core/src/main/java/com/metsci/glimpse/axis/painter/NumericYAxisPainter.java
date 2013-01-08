@@ -54,6 +54,9 @@ public class NumericYAxisPainter extends NumericAxisPainter
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
+        updateTextRenderer( );
+        if ( textRenderer == null ) return;
+        
         GL gl = context.getGL( );
 
         int width = bounds.getWidth( );

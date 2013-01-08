@@ -517,7 +517,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             updateTextRenderer( );
         }
 
-        if ( text == null ) return;
+        if ( text == null || textRenderer == null ) return;
 
         GL gl = context.getGL( );
         int width = bounds.getWidth( );

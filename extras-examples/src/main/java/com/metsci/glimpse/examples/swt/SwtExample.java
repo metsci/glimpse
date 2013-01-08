@@ -39,6 +39,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
@@ -64,7 +65,7 @@ public abstract class SwtExample
         shell.setText( "Glimpse Example (SWT)" );
         shell.setLayout( new FillLayout( ) );
 
-        final SwtGlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
+        final GlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
@@ -87,6 +88,9 @@ public abstract class SwtExample
         while ( !shell.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
 
+        // shutdown the Glimpse repaint manager
+        manager.shutdown( );
+
         return;
     }
 
@@ -105,7 +109,7 @@ public abstract class SwtExample
         canvasA.addLayout( layoutProviderA.getLayout( ) );
         canvasA.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        SwtRepaintManager.newRepaintManager( canvasA );
+        SwtRepaintManager manager = SwtRepaintManager.newRepaintManager( canvasA );
 
         shellA.setSize( 800, 800 );
         shellA.setLocation( 0, 0 );
@@ -120,7 +124,7 @@ public abstract class SwtExample
         canvasB.addLayout( layoutProviderB.getLayout( ) );
         canvasB.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        SwtRepaintManager.newRepaintManager( canvasB );
+        manager.addGlimpseCanvas( canvasB );
 
         shellB.setSize( 800, 800 );
         shellB.setLocation( 0, 0 );
@@ -129,6 +133,9 @@ public abstract class SwtExample
 
         while ( !shellA.isDisposed( ) && !shellB.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
+
+        // shutdown the Glimpse repaint manager
+        manager.shutdown( );
 
         return;
     }

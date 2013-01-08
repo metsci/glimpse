@@ -563,6 +563,8 @@ public class EventPainter extends GlimpseDataPainter1D
             newFont = null;
         }
 
+        if ( textRenderer == null ) return;
+        
         if ( visibleEventsDirty || axis.getMin( ) != prevMin || axis.getMax( ) != prevMax )
         {
             calculateVisibleEvents( axis.getMin( ), axis.getMax( ) );
