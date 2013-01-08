@@ -280,11 +280,9 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
         setCursor( canvasCursor );
     }
 
-    // In linux, the component the mouse pointer is over receives mouse wheel
-    // events
-    // In windows, the component with focus receives mouse wheel events
-    // These listeners emulate linux-like mouse wheel event dispatch for
-    // important components
+    // In Linux, the component the mouse pointer is over receives mouse wheel events.
+    // In Windows, the component with focus receives mouse wheel events.
+    // These listeners emulate linux-like mouse wheel event dispatch for important components.
     // This causes the application to work in slightly un-windows-like ways
     // some of the time, but the effect is minor.
     protected void addFocusListener( final Control control )
