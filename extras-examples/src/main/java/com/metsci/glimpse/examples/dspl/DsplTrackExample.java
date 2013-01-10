@@ -275,8 +275,8 @@ public class DsplTrackExample implements GlimpseLayoutProvider
             @Override
             public void mouseMoved( GlimpseMouseEvent e )
             {
-                Tag minTag = timePlot.getTimeSelectionMin( );
-                Tag maxTag = timePlot.getTimeSelectionMax( );
+                Tag minTag = timePlot.getTimeSelectionMinTag( );
+                Tag maxTag = timePlot.getTimeSelectionMaxTag( );
 
                 TimeStamp selectionMin = epoch.toTimeStamp( minTag.getValue( ) );
                 TimeStamp selectionMax = epoch.toTimeStamp( maxTag.getValue( ) );

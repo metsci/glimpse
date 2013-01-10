@@ -251,8 +251,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             @Override
             public void tagsUpdated( TaggedAxis1D axis )
             {
-                Tag s = plot.getTimeSelection( );
-                Tag m = plot.getTimeSelectionMax( );
+                Tag s = plot.getTimeSelectionTag( );
+                Tag m = plot.getTimeSelectionMaxTag( );
 
                 if ( s != null && m != null && s.getValue( ) != m.getValue( ) )
                 {

@@ -486,7 +486,7 @@ public class StackedTimePlot2D extends StackedPlot2D
      *
      * @return the current time selection Tag
      */
-    public Tag getTimeSelection( )
+    public Tag getTimeSelectionTag( )
     {
         return this.currentTag;
     }
@@ -497,7 +497,7 @@ public class StackedTimePlot2D extends StackedPlot2D
      *
      * @return the earliest time selection Tag
      */
-    public Tag getTimeSelectionMin( )
+    public Tag getTimeSelectionMinTag( )
     {
         return this.minTag;
     }
@@ -508,9 +508,33 @@ public class StackedTimePlot2D extends StackedPlot2D
      *
      * @return the latest time selection Tag
      */
-    public Tag getTimeSelectionMax( )
+    public Tag getTimeSelectionMaxTag( )
     {
         return this.maxTag;
+    }
+    
+    /**
+     * Get the currently selected time (usually equal to getTimeSelectionMax()).
+     */
+    public TimeStamp getTimeSelection( )
+    {
+        return epoch.toTimeStamp( currentTag.getValue( ) );
+    }
+
+    /**
+     * Get the TimeStamp of earliest endpoint of the selected time region.
+     */
+    public TimeStamp getTimeSelectionMin( )
+    {
+        return epoch.toTimeStamp( minTag.getValue( ) );
+    }
+
+    /**
+     * Get the TimeStamp of latest endpoint of the selected time region.
+     */
+    public TimeStamp getTimeSelectionMax( )
+    {
+        return epoch.toTimeStamp( maxTag.getValue( ) );
     }
 
     public Epoch getEpoch( )
