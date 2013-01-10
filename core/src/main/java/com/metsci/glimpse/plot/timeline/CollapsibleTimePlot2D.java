@@ -49,6 +49,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
@@ -136,7 +137,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
     {
         // remove children of groups from list of all plots
-        Set<PlotInfo> ungroupedPlots = new HashSet<PlotInfo>( );
+        List<PlotInfo> ungroupedPlots = new ArrayList<PlotInfo>( );
         ungroupedPlots.addAll( unsorted );
 
         for ( GroupInfo group : getAllGroups( ) )
@@ -416,12 +417,21 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
             this.expanded = true;
 
-            this.group.getLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
+            GlimpseLayout layout = this.group.getLayout( );
+            layout.setEventConsumer( false );
+            layout.setEventGenerator( true );
+            layout.addGlimpseMouseListener( new GlimpseMouseAdapter( )
             {
                 @Override
                 public void mousePressed( GlimpseMouseEvent event )
                 {
-                    setExpanded( !expanded );
+                    int x = event.getScreenPixelsX( );
+                    
+                    if ( x < labelLayoutSize )
+                    {
+                        setExpanded( !expanded );
+                        event.setHandled( true );
+                    }
                 }
             } );
         }
