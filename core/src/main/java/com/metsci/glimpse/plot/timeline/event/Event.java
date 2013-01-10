@@ -79,6 +79,7 @@ public class Event
     protected TimeStamp textStartTime;
     protected TimeStamp textEndTime;
 
+    protected boolean isEditable = true;
     protected boolean isEndTimeMoveable = true;
     protected boolean isStartTimeMoveable = true;
     protected boolean isResizeable = true;
@@ -92,6 +93,8 @@ public class Event
         @Override
         public TimeSpan applyConstraint( Event event, TimeSpan proposedTimeSpan )
         {
+            if ( !isEditable ) return event.getTimeSpan( );
+            
             TimeStamp oldStart = event.getStartTime( );
             TimeStamp oldEnd = event.getEndTime( );
 
@@ -171,6 +174,16 @@ public class Event
         this.constraints.add( builtInConstraints );
     }
 
+    /**
+     * <p>Adds an EventConstraint which determines whether proposed changes to the min
+     * and max time bounds of an Event are allowed.</p>
+     * 
+     * <p>This method should be used for specialized constraints. Events support basic
+     * constraints by default via setEditable, setResizeable, setEndTimeMoveable,
+     * setStartTimeMoveable, setMinTimeSpan, and setMaxTimeSpan.</p>
+     * 
+     * @param constraint
+     */
     public void addConstraint( EventConstraint constraint )
     {
         this.constraints.add( constraint );
@@ -426,12 +439,25 @@ public class Event
     {
         return this.toolTipText;
     }
+    
+    public void setEditable( boolean isEditable )
+    {
+        this.isEditable = isEditable;
+    }
+    
+    public boolean isEditable( )
+    {
+        return isEditable;
+    }
 
     public boolean isEndTimeMoveable( )
     {
         return isEndTimeMoveable;
     }
 
+    /**
+     * If true, the endTime of the Event cannot be adjusted by user mouse gestures.
+     */
     public void setEndTimeMoveable( boolean isEndTimeMoveable )
     {
         this.isEndTimeMoveable = isEndTimeMoveable;
@@ -442,6 +468,9 @@ public class Event
         return isStartTimeMoveable;
     }
 
+    /**
+     * If true, the startTime of the Event cannot be adjusted by user mouse gestures. 
+     */
     public void setStartTimeMoveable( boolean isStartTimeMoveable )
     {
         this.isStartTimeMoveable = isStartTimeMoveable;
@@ -452,6 +481,11 @@ public class Event
         return isResizeable;
     }
 
+    /**
+     * If true, the time span of the Event (the amount of time between the start and
+     * end times) cannot be adjusted by user mouse gestures. However, the Event may
+     * still be dragged. 
+     */
     public void setResizeable( boolean isResizeable )
     {
         this.isResizeable = isResizeable;
@@ -462,6 +496,10 @@ public class Event
         return maxTimeSpan;
     }
 
+    /**
+     * Sets the maximum time span between the start and end times. By default the
+     * maximum is Double.MAX_VALUE.
+     */
     public void setMaxTimeSpan( double maxTimeSpan )
     {
         this.maxTimeSpan = maxTimeSpan;
@@ -472,6 +510,10 @@ public class Event
         return minTimeSpan;
     }
 
+    /**
+     * Sets the minimum (inclusive) span between the start and end times. By default the
+     * minimum is 0.
+     */
     public void setMinTimeSpan( double minTimeSpan )
     {
         this.minTimeSpan = minTimeSpan;
@@ -613,6 +655,11 @@ public class Event
     void setEndTime0( TimeStamp endTime )
     {
         this.endTime = endTime;
+    }
+    
+    public TimeSpan getTimeSpan( )
+    {
+        return new TimeSpan( startTime, endTime );
     }
 
     public boolean isShowLabel( )
