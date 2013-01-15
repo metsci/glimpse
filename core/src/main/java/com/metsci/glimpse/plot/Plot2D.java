@@ -60,7 +60,6 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.repaint.RepaintManager;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 
 /**
