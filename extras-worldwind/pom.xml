@@ -18,14 +18,14 @@
         </dependency>
 
         <dependency>
-        	<groupId>com.metsci.ext.gov.nasa</groupId>
+        	<groupId>com.metsci.ext.gov.nasa.worldwind</groupId>
         	<artifactId>worldwindx</artifactId>
         	<version>1.4.0</version>
         	<type>jar</type>
         	<scope>compile</scope>
         </dependency>
         <dependency>
-        	<groupId>com.metsci.ext.gov.nasa</groupId>
+        	<groupId>com.metsci.ext.gov.nasa.worldwind</groupId>
         	<artifactId>worldwind</artifactId>
         	<version>1.4.0</version>
         	<type>jar</type>
