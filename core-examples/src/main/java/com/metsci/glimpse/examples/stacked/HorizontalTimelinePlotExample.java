@@ -153,8 +153,8 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
                 // the StackedTimePlot2D allows access to the time selection region
                 StackedTimePlot2D parent = plot1.getStackedTimePlot( );
-                Tag timeSelectionMin = parent.getTimeSelectionMin( );
-                Tag timeSelectionMax = parent.getTimeSelectionMax( );
+                Tag timeSelectionMin = parent.getTimeSelectionMinTag( );
+                Tag timeSelectionMax = parent.getTimeSelectionMaxTag( );
 
                 // alternatively, we can get the tags directly from the TaggedAxis1D if we know
                 // their String identifiers, which StackedTimePlot2D provides as public fields
