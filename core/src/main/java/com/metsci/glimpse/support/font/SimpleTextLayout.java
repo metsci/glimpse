@@ -43,10 +43,10 @@ import java.util.List;
 
 /**
  * Performs simple text layout so text can be wrapped in small areas or broken
- * on words or newlines. This implementation currently assumes that the mapping
+ * on words or newlines. This implementation currently makes the following
+ * assumptions which are valid for latin text:
  *
  * <p>
- * Assumptions:
  * <ul>
  * <li>mapping chars to glyphs is 1:1 in order, (no Unicode surrogate pairs or
  * multi-glyph characters)</li>
@@ -57,6 +57,7 @@ import java.util.List;
  * <p>
  * All coordinates are in the same space as the text is being drawn (typically
  * pixels).
+ * </p>
  *
  * @author borkholder
  */
@@ -123,12 +124,12 @@ public class SimpleTextLayout
     {
         return descent;
     }
-    
+
     public double getAscent( )
     {
         return ascent;
     }
-    
+
     public void setBreakOnEol( boolean breakOnEol )
     {
         this.breakOnEol = breakOnEol;
