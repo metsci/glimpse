@@ -6,6 +6,12 @@
       color: #000000; /* black text */
     }
 
+    div.centred
+    {
+        margin: auto;
+        text-align: center;
+    }
+
     .list ul li
     {
       border-left:10px;
