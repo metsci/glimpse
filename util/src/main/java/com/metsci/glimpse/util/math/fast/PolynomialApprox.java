@@ -111,4 +111,45 @@ public class PolynomialApprox
 
         return theta;
     }
+    
+    public static double atan( double x )
+    {
+    	double h = Math.sqrt( x * x + 1 );
+    	
+    	return asin( x / h );
+    }
+    
+    public static double atan2( double y, double x )
+    {
+    	if ( x > 0 )
+    	{
+    		return atan( y / x);
+    	}
+    	else if ( x < 0 )
+    	{
+    		if ( y >= 0 )
+    		{
+    			return Math.PI + atan( y / x );
+    		}
+    		else
+    		{
+    			return -Math.PI + atan( y / x );
+    		}
+    	}
+    	else
+    	{
+    		if ( y > 0 )
+    		{
+    			return Math.PI / 2;
+    		}
+    		else if ( y < 0 )
+    		{
+    			return -Math.PI / 2;
+    		}
+    		else
+    		{
+    			return 0;  // undefined
+    		}
+    	}
+    }
 }

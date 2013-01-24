@@ -42,6 +42,7 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * A plot which allows multiple plots or GlimpseLayout areas to be easily arranged in a vertical
@@ -52,6 +53,7 @@ import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 public class StackedPlot2D extends GlimpseLayout
 {
     protected int outerBorder = 10;
+    protected int plotSpacing = 0;
 
     protected Axis1D commonAxis;
 
@@ -62,6 +64,8 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected Orientation orientation = Orientation.VERTICAL;
 
+    protected LookAndFeel laf;
+    
     public StackedPlot2D( Orientation orientation )
     {
         this.orientation = orientation;
@@ -113,7 +117,7 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected void initializePainters( )
     {
-        this.backgroundPainter = new BackgroundPainter( false );
+        this.backgroundPainter = new BackgroundPainter( true );
         this.addPainter( this.backgroundPainter, Integer.MIN_VALUE );
     }
 
@@ -144,14 +148,14 @@ public class StackedPlot2D extends GlimpseLayout
                 {
                     if ( orientation == Orientation.HORIZONTAL )
                     {
-                        String format = "cell %d %d 1 1, pushy, growy, width %d!";
-                        String layout = String.format( format, i, 0, info.getSize( ) );
+                        String format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %d %d";
+                        String layout = String.format( format, i, 0, info.getSize( ), i == 0 ? 0 :plotSpacing, i == axisList.size( )-1 ? 0 : plotSpacing );
                         info.getLayout( ).setLayoutData( layout );
                     }
                     else if ( orientation == Orientation.VERTICAL )
                     {
-                        String format = "cell %d %d 1 1, pushx, growx, height %d!";
-                        String layout = String.format( format, 0, i, info.getSize( ) );
+                        String format = "cell %d %d 1 1, pushx, growx, height %d!, gap %d %d 0 0";
+                        String layout = String.format( format, 0, i, info.getSize( ), i == 0 ? 0 :plotSpacing, i == axisList.size( )-1 ? 0 : plotSpacing );
                         info.getLayout( ).setLayoutData( layout );
                     }
                 }
@@ -204,6 +208,12 @@ public class StackedPlot2D extends GlimpseLayout
     //      Customization Methods       //
     //////////////////////////////////////
 
+    
+    public void setPlotSpacing( int size )
+    {
+        this.plotSpacing = size;
+        this.validate( );
+    }
     
     public void setBackgroundColor( float[] color )
     {
@@ -309,25 +319,7 @@ public class StackedPlot2D extends GlimpseLayout
         // be in the order that plots were added
         // this means that plots with the same order constant
         // will be displayed in the order they were added
-        Collections.sort( sortedList, new Comparator<PlotInfo>( )
-        {
-            @Override
-            public int compare( PlotInfo axis0, PlotInfo axis1 )
-            {
-                if ( axis0.getOrder( ) < axis1.getOrder( ) )
-                {
-                    return -1;
-                }
-                else if ( axis0.getOrder( ) > axis1.getOrder( ) )
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        } );
+        Collections.sort( sortedList, PlotInfoImpl.getComparator( ) );
 
         return sortedList;
     }
@@ -345,7 +337,11 @@ public class StackedPlot2D extends GlimpseLayout
     // must be called while holding lock
     protected PlotInfo createPlot0( String name, Axis1D axis )
     {
-        if ( stackedPlots.containsKey( name ) )
+        if ( name == null )
+        {
+            throw new IllegalArgumentException( "Plot ID cannot be null." );
+        }
+        else if ( stackedPlots.containsKey( name ) )
         {
             throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
         }
@@ -354,16 +350,22 @@ public class StackedPlot2D extends GlimpseLayout
         int size = -1;
 
         Axis1D commonChildAxis = commonAxis.clone( );
-
         Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
 
         GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
-
-        this.addLayout( layout );
-
-        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
+        layout.setLookAndFeel( laf );
         
+        addLayout( layout );
+        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
         return info;
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        super.setLookAndFeel( laf );
+        
+        this.laf = laf;
     }
     
     
@@ -386,7 +388,7 @@ public class StackedPlot2D extends GlimpseLayout
          * @return the parent StackedPlot2D
          */
         public StackedPlot2D getStackedPlot( );
-
+        
         /**
          * Gets the unique identifier assigned to this plot. This identifier can
          * be used to retrieve this plot handle from the StackedPlot2D.
@@ -470,6 +472,8 @@ public class StackedPlot2D extends GlimpseLayout
          * @param childLayout
          */
         public void addLayout( GlimpseAxisLayout2D childLayout );
+        
+        public void setLookAndFeel( LookAndFeel laf );
     }
 
     public static class PlotInfoImpl implements PlotInfo
@@ -568,6 +572,59 @@ public class StackedPlot2D extends GlimpseLayout
             }
 
             this.layout.addLayout( childLayout );
+        }
+        
+        @Override
+        public void setLookAndFeel( LookAndFeel laf )
+        {
+            this.layout.setLookAndFeel( laf );
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            PlotInfoImpl other = ( PlotInfoImpl ) obj;
+            if ( id == null )
+            {
+                if ( other.id != null ) return false;
+            }
+            else if ( !id.equals( other.id ) ) return false;
+            return true;
+        }
+        
+        public static Comparator<PlotInfo> getComparator( )
+        {
+            return new Comparator<PlotInfo>( )
+            {
+                @Override
+                public int compare( PlotInfo axis0, PlotInfo axis1 )
+                {
+                    if ( axis0.getOrder( ) < axis1.getOrder( ) )
+                    {
+                        return -1;
+                    }
+                    else if ( axis0.getOrder( ) > axis1.getOrder( ) )
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            };
         }
     }
 }

@@ -30,6 +30,7 @@ import java.util.EnumSet;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
@@ -52,6 +53,7 @@ public class GlimpseMouseEvent
     protected int clickCount;
     protected int x;
     protected int y;
+    protected boolean handled;
 
     public GlimpseMouseEvent( GlimpseTargetStack stack, int x, int y )
     {
@@ -78,6 +80,17 @@ public class GlimpseMouseEvent
         this.y = y;
         this.wheelIncrement = wheelIncrement;
         this.clickCount = clickCount;
+        this.handled = false;
+    }
+    
+    public boolean isHandled( )
+    {
+        return this.handled;
+    }
+    
+    public void setHandled( boolean handled )
+    {
+        this.handled = handled;
     }
 
     public EnumSet<ModifierKey> getModifiers( )
@@ -109,10 +122,69 @@ public class GlimpseMouseEvent
     {
         return x;
     }
+    
+    public int getScreenPixelsX( )
+    {
+        return getX( );
+    }
+    
+    public double getAxisCoordinatesX( )
+    {
+        Axis1D axis = null;
+        
+        Axis2D axis2D = getAxis2D( );
+        if ( axis2D != null )
+        {
+            axis = axis2D.getAxisX( );
+        }
+        else
+        {
+            axis = getAxis1D( );
+        }
+
+        if ( axis != null )
+        {
+            return axis.screenPixelToValue( x ); 
+        }
+        else
+        {
+            throw new AxisNotSetException( stack );
+        }
+    }
 
     public int getY( )
     {
         return y;
+    }
+    
+    public double getAxisCoordinatesY( )
+    {
+        Axis1D axis = null;
+        
+        Axis2D axis2D = getAxis2D( );
+        if ( axis2D != null )
+        {
+            axis = axis2D.getAxisY( );
+        }
+        else
+        {
+            axis = getAxis1D( );
+        }
+
+        if ( axis != null )
+        {
+            int height = axis.getSizePixels( );
+            return axis.screenPixelToValue( height - y ); 
+        }
+        else
+        {
+            throw new AxisNotSetException( stack );
+        }
+    }
+    
+    public int getScreenPixelsY( )
+    {
+        return getY( );
     }
 
     public int getWheelIncrement( )

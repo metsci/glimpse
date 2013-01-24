@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.support.colormap;
 
+import com.metsci.glimpse.support.color.GlimpseColor;
+
 /**
  * A collection of common color gradients.
  *
@@ -34,9 +36,9 @@ package com.metsci.glimpse.support.colormap;
 public class ColorGradients
 {
 
-    public static final ColorGradient clearToBlack = new ColorGradient()
+    public static final ColorGradient clearToBlack = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+        public void toColor( float fraction, float[] rgba )
         {
             rgba[0] = 0;
             rgba[1] = 0;
@@ -45,9 +47,9 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient blackToClear = new ColorGradient()
+    public static final ColorGradient blackToClear = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+        public void toColor( float fraction, float[] rgba )
         {
             rgba[0] = 0;
             rgba[1] = 0;
@@ -56,9 +58,9 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient gray = new ColorGradient()
+    public static final ColorGradient gray = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+        public void toColor( float fraction, float[] rgba )
         {
             rgba[0] = fraction;
             rgba[1] = fraction;
@@ -67,13 +69,13 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient jet = new ColorGradient()
+    public static final ColorGradient jet = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+        public void toColor( float fraction, float[] rgba )
         {
             float x = 4 * fraction;
-            int segment = (int) (8 * fraction);
-            switch (segment)
+            int segment = ( int ) ( 8 * fraction );
+            switch ( segment )
             {
                 case 0:
                     rgba[0] = 0;
@@ -112,21 +114,70 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient reverseBone = new ColorGradient()
+    public static final ColorGradient greenBone = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+
+        @Override
+        public void toColor( float fraction, float[] rgba )
         {
-            float x = 1f - (float) 0.875 * fraction;
-            if (fraction < 0.375)
+            if ( fraction < 0.5 )
+            {
+                rgba[0] = 0.0f;
+                rgba[1] = 2 * fraction;
+                rgba[2] = 0.0f;
+                rgba[3] = 1.0f;
+            }
+            else
+            {
+                rgba[0] = ( fraction - 0.5f ) * 2;
+                rgba[1] = 1.0f;
+                rgba[2] = ( fraction - 0.5f ) * 2;
+                rgba[3] = 1.0f;
+            }
+        }
+
+    };
+
+    public static final ColorGradient purpleBone = new ColorGradient( )
+    {
+
+        @Override
+        public void toColor( float fraction, float[] rgba )
+        {
+            float[] rgb;
+            
+            if ( fraction < 0.5 )
+            {
+                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f, 2 * fraction );       
+            }
+            else
+            {
+                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f-((fraction-0.5f)*2), 1.0f );
+            }
+            
+            rgba[0] = rgb[0];
+            rgba[1] = rgb[1];
+            rgba[2] = rgb[2];
+            rgba[3] = 1.0f;
+        }
+
+    };
+
+    public static final ColorGradient reverseBone = new ColorGradient( )
+    {
+        public void toColor( float fraction, float[] rgba )
+        {
+            float x = 1f - ( float ) 0.875 * fraction;
+            if ( fraction < 0.375 )
             {
                 rgba[0] = x;
                 rgba[1] = x;
-                rgba[2] = x - fraction/3f;
+                rgba[2] = x - fraction / 3f;
             }
-            else if (fraction < 0.75)
+            else if ( fraction < 0.75 )
             {
                 rgba[0] = x;
-                rgba[1] = x + 0.125f - fraction/3f;
+                rgba[1] = x + 0.125f - fraction / 3f;
                 rgba[2] = x - 0.125f;
             }
             else
@@ -139,12 +190,12 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient bathymetry = new ColorGradient()
+    public static final ColorGradient bathymetry = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+        public void toColor( float fraction, float[] rgba )
         {
             float bathyMin = -10000f;
-            float dataVal = (1.0f - fraction) * -8000.0f;
+            float dataVal = ( 1.0f - fraction ) * -8000.0f;
 
             if ( dataVal < -5000.0 )
             {
@@ -175,9 +226,9 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient topography = new ColorGradient()
+    public static final ColorGradient topography = new ColorGradient( )
     {
-        public void toColor(float fraction, float[] rgba)
+        public void toColor( float fraction, float[] rgba )
         {
             float bathyMax = 8000f;
             float dataVal = fraction * 8000.0f;
@@ -211,18 +262,19 @@ public class ColorGradients
         }
     };
 
-    public static ColorGradient reverse(final ColorGradient gradient)
+    public static ColorGradient reverse( final ColorGradient gradient )
     {
-        return new ColorGradient()
+        return new ColorGradient( )
         {
-            public void toColor(float fraction, float[] rgba)
+            public void toColor( float fraction, float[] rgba )
             {
-                gradient.toColor(1 - fraction, rgba);
+                gradient.toColor( 1 - fraction, rgba );
             }
         };
     }
 
-    private ColorGradients()
-    { }
+    private ColorGradients( )
+    {
+    }
 
 }

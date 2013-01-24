@@ -39,6 +39,7 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -59,7 +60,10 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new HorizontalTimelinePlotExample( ) );
+        Example example = Example.showWithSwing( new HorizontalTimelinePlotExample( ) );
+
+        // set a blue color scheme look and feel for the plot
+        example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
     }
 
     @Override
@@ -81,6 +85,10 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // set the overall bounds of the timeline
         plot.setTimeAxisBounds( axisMinTime, axisMaxTime );
 
+        // add spacing between stacked plots
+        plot.setPlotSpacing( 2 );
+        plot.setBorderSize( 4 );
+
         // create two plots (which by default will appear to the right of the timeline)
         // the returned ChartLayoutInfo reference can be used to add GlimpsePainters to
         // the plot area or customize its coloring and appearance
@@ -99,16 +107,8 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         plot1.getLabelPainter( ).setHorizontalLabels( false );
         plot2.getLabelPainter( ).setHorizontalLabels( false );
 
-        // set custom coloring for the plots
-        setChartLookAndFeel( plot1 );
         setChartData( plot1, epoch, axisMinTime, axisMaxTime );
-
-        setChartLookAndFeel( plot2 );
         setChartData( plot2, epoch, axisMinTime, axisMaxTime );
-
-        // customize colors for the timeline
-        plot.setAxisColor( GlimpseColor.getWhite( ) );
-        plot.setBackgroundColor( GlimpseColor.fromColorRgb( 25, 42, 62 ) );
 
         // add mouse listeners to the GlimpseLayouts of the plots
         addMouseListener( epoch, plot1 );
@@ -153,8 +153,8 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
                 // the StackedTimePlot2D allows access to the time selection region
                 StackedTimePlot2D parent = plot1.getStackedTimePlot( );
-                Tag timeSelectionMin = parent.getTimeSelectionMin( );
-                Tag timeSelectionMax = parent.getTimeSelectionMax( );
+                Tag timeSelectionMin = parent.getTimeSelectionMinTag( );
+                Tag timeSelectionMax = parent.getTimeSelectionMaxTag( );
 
                 // alternatively, we can get the tags directly from the TaggedAxis1D if we know
                 // their String identifiers, which StackedTimePlot2D provides as public fields
@@ -237,13 +237,5 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         Axis1D axis = chart.getLayout( ).getAxis( ).getAxisY( );
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
-    }
-
-    protected void setChartLookAndFeel( TimePlotInfo chart )
-    {
-        chart.setAxisColor( GlimpseColor.getWhite( ) );
-        chart.setLabelColor( GlimpseColor.getWhite( ) );
-        chart.setLabelBorderColor( GlimpseColor.fromColorRgba( 0.8f, 0.8f, 0.8f, 1.0f ) );
-        chart.setBorderColor( GlimpseColor.fromColorRgba( 0.8f, 0.8f, 0.8f, 1.0f ) );
     }
 }

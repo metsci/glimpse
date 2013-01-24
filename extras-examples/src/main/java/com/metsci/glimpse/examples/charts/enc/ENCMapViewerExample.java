@@ -59,7 +59,7 @@ import com.metsci.glimpse.painter.info.MeasurementPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.shader.SampledColorScaleShaderInteger;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -82,7 +82,7 @@ public class ENCMapViewerExample
     private ShadedTexturePainter bsbPainter;
 
     private LandShapePainter ndgcPainter;
-    
+
     private MercatorProjection projection;
 
     private ENCMapViewerExample( GlimpseCanvas panel, MercatorProjection projection, MapInfo<ENCObject> mapInfo ) throws Exception
@@ -171,7 +171,7 @@ public class ENCMapViewerExample
     private void buildPlot( MercatorProjection projection ) throws Exception
     {
         geoplot = new SimplePlot2D( );
-        
+
         geoplot.setAxisSizeX( 0 );
         geoplot.setAxisSizeY( 0 );
         geoplot.setTitleHeight( 0 );
@@ -250,14 +250,14 @@ public class ENCMapViewerExample
                 root = "US3NY01M";
                 //root = "US1BS04M0";
             }
-            
+
             GlimpseCanvas panel = new SwingGlimpseCanvas( true );
             MercatorProjection projection = new MercatorProjection( );
 
             MapInfo<ENCObject> mapInfo = ResourceBasedMapInfo.createENCMapInfo( root, dir );
             new ENCMapViewerExample( panel, projection, mapInfo );
 
-            RepaintManager.newRepaintManager( panel );
+            SwingRepaintManager.newRepaintManager( panel );
             containInFrame( panel );
         }
         catch ( Throwable t )

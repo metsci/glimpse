@@ -33,15 +33,19 @@ import java.util.logging.Logger;
 import javax.media.opengl.GLContext;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.swt.canvas.SwtGlimpseCanvas;
 import com.metsci.glimpse.swt.misc.SwtLookAndFeel;
+import com.metsci.glimpse.swt.repaint.SwtRepaintManager;
 
 /**
  * @author ulman
@@ -61,19 +65,31 @@ public abstract class SwtExample
         shell.setText( "Glimpse Example (SWT)" );
         shell.setLayout( new FillLayout( ) );
 
-        SwtGlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
+        final GlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = SwtRepaintManager.newRepaintManager( canvas );
 
         shell.setSize( 800, 800 );
         shell.setLocation( 0, 0 );
         shell.open( );
         shell.moveAbove( null );
 
+        shell.addDisposeListener( new DisposeListener( )
+        {
+            @Override
+            public void widgetDisposed( DisposeEvent event )
+            {
+                canvas.dispose( manager );
+            }
+        } );
+
         while ( !shell.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
+
+        // shutdown the Glimpse repaint manager
+        manager.shutdown( );
 
         return;
     }
@@ -93,7 +109,7 @@ public abstract class SwtExample
         canvasA.addLayout( layoutProviderA.getLayout( ) );
         canvasA.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvasA );
+        SwtRepaintManager manager = SwtRepaintManager.newRepaintManager( canvasA );
 
         shellA.setSize( 800, 800 );
         shellA.setLocation( 0, 0 );
@@ -108,7 +124,7 @@ public abstract class SwtExample
         canvasB.addLayout( layoutProviderB.getLayout( ) );
         canvasB.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvasB );
+        manager.addGlimpseCanvas( canvasB );
 
         shellB.setSize( 800, 800 );
         shellB.setLocation( 0, 0 );
@@ -117,6 +133,9 @@ public abstract class SwtExample
 
         while ( !shellA.isDisposed( ) && !shellB.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
+
+        // shutdown the Glimpse repaint manager
+        manager.shutdown( );
 
         return;
     }

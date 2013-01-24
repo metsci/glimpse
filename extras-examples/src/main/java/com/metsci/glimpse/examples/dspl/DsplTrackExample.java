@@ -274,9 +274,9 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         {
             @Override
             public void mouseMoved( GlimpseMouseEvent e )
-            {                
-                Tag minTag = timePlot.getTimeSelectionMin( );
-                Tag maxTag = timePlot.getTimeSelectionMax( );
+            {
+                Tag minTag = timePlot.getTimeSelectionMinTag( );
+                Tag maxTag = timePlot.getTimeSelectionMaxTag( );
 
                 TimeStamp selectionMin = epoch.toTimeStamp( minTag.getValue( ) );
                 TimeStamp selectionMax = epoch.toTimeStamp( maxTag.getValue( ) );
@@ -309,10 +309,10 @@ public class DsplTrackExample implements GlimpseLayoutProvider
             // we still need the track identifier and time columns
             Concept identifierConcept = identifierPattern.findDimension( slice );
             Concept timeConcept = timePattern.findDimension( slice );
-            
+
             TableColumn identifierColumn = data.getDimensionColumn( identifierConcept );
             TableColumn timeColumn = data.getDimensionColumn( timeConcept );
-            
+
             // iterate through all the other metric columns in the data set
             for ( String id : data.getMetricColumnIds( ) )
             {
@@ -334,35 +334,35 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                 {
                     TimePlotInfo plotInfo = timePlot.createTimePlot( id );
                     TrackPainter plotPainter = new TrackPainter( );
-                    
+
                     for ( Integer trackId : trackIdMap.values( ) )
                     {
                         initializeTimelinePlot( plotPainter, trackId );
                     }
-                    
+
                     plotInfo.addPainter( plotPainter );
 
                     initializePlot( concept.getNameEnglish( ), plotInfo );
 
                     pair = new Pair<TrackPainter, TimePlotInfo>( plotPainter, plotInfo );
-                    
+
                     plotMap.put( id, pair );
                 }
 
                 TrackPainter plotPainter = pair.first( );
                 TimePlotInfo plotInfo = pair.second( );
-                
+
                 minY = Double.POSITIVE_INFINITY;
                 maxY = Double.NEGATIVE_INFINITY;
-                
+
                 // iterate through the data set rows
                 for ( int i = 0; i < data.getNumRows( ); i++ )
                 {
                     String identifier = identifierColumn.getStringData( i );
                     Integer trackId = trackIdMap.get( identifier );
-                    
+
                     double dataY = 0.0;
-                    
+
                     if ( type == DataType.INTEGER )
                     {
                         dataY = column.getIntegerData( i );
@@ -371,23 +371,23 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                     {
                         dataY = column.getFloatData( i );
                     }
-                    
+
                     if ( minY > dataY ) minY = dataY;
                     if ( maxY < dataY ) maxY = dataY;
-                    
+
                     long time = timeColumn.getDateData( i );
                     TimeStamp timestamp = TimeStamp.fromPosixMillis( time );
                     double timeX = epoch.fromTimeStamp( timestamp );
-                    
+
                     plotPainter.addPoint( trackId, 0, timeX, dataY, time );
                 }
-                
+
                 Axis1D axisY = plotInfo.getOrthogonalAxis( );
                 axisY.setMin( minY );
                 axisY.setMax( maxY );
             }
         }
-        
+
         // if there were no additional data columns, create an empty timeline plot anyway
         if ( plotMap.isEmpty( ) )
         {
@@ -397,7 +397,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
 
         return parentLayout;
     }
-    
+
     protected void initializePlot( String name, TimePlotInfo plot )
     {
         plot.setLabelText( name );
@@ -414,7 +414,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         trackPainter.setShowPoints( trackId, false );
         trackPainter.setShowHeadPoint( trackId, false );
     }
-    
+
     protected void initializeTimelinePlot( TrackPainter trackPainter, int trackId )
     {
         trackPainter.setLineColor( trackId, GlimpseColor.getRed( ) );

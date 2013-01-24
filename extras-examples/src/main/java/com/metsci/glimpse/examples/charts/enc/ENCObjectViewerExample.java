@@ -70,7 +70,7 @@ import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
 import com.metsci.glimpse.charts.vector.parser.autogen.ENCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.gl.Jogular;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -507,7 +507,7 @@ public class ENCObjectViewerExample extends JPanel
             }
 
             SwingGlimpseCanvas panel = new SwingGlimpseCanvas( true );
-            RepaintManager.newRepaintManager( panel );
+            SwingRepaintManager.newRepaintManager( panel );
 
             GeoProjection projection = new MercatorProjection( );
 

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -36,11 +36,10 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -72,6 +71,9 @@ import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
  */
 public class PolygonPainter extends GlimpsePainter2D
 {
+    // expand
+    protected static final double DELETE_EXPAND_FACTOR = 1.2;
+
     protected static final Comparator<IdPolygon> startTimeComparator = new Comparator<IdPolygon>( )
     {
         @Override
@@ -156,7 +158,35 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     };
 
-    protected byte halftone[] = { ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0xAA, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55, ( byte ) 0x55 };
+    //@formatter:off
+    protected byte halftone[] = {
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA,
+            (byte) 0xAA, (byte) 0x55, (byte) 0x55, (byte) 0x55, (byte) 0x55,
+            (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
+            (byte) 0x55, (byte) 0x55, (byte) 0x55 };
+    //@formatter:on
 
     protected PolygonTessellator tessellator;
 
@@ -543,7 +573,7 @@ public class PolygonPainter extends GlimpsePainter2D
         {
             for ( Group group : groups.values( ) )
             {
-                group.delete( );
+                group.deleteGroup( );
             }
 
             this.updatedGroups.addAll( groups.values( ) );
@@ -568,7 +598,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             Group group = groups.get( groupId );
 
-            group.delete( );
+            group.deleteGroup( );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -593,7 +623,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             Group group = groups.get( groupId );
 
-            group.clear( );
+            group.clearGroup( );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -606,7 +636,20 @@ public class PolygonPainter extends GlimpsePainter2D
 
     public void deletePolygon( int groupId, int polygonId )
     {
-        throw new UnsupportedOperationException( "Deletion of single polygons is not currently supported. Use deleteGroup() to remove an entire group." );
+        this.updateLock.lock( );
+        try
+        {
+            Group group = getOrCreateGroup( groupId );
+
+            group.deletePolygon( polygonId );
+
+            this.updatedGroups.add( group );
+            this.newData = true;
+        }
+        finally
+        {
+            this.updateLock.unlock( );
+        }
     }
 
     protected void addPolygon( int groupId, IdPolygon polygon )
@@ -616,7 +659,7 @@ public class PolygonPainter extends GlimpsePainter2D
         {
             Group group = getOrCreateGroup( groupId );
 
-            group.add( polygon );
+            group.addPolygon( polygon );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -689,7 +732,7 @@ public class PolygonPainter extends GlimpsePainter2D
                 {
                     int id = group.groupId;
 
-                    if ( group.isDeletePending( ) || group.isClearPending( ) )
+                    if ( group.groupDeleted || group.groupCleared )
                     {
                         // if the corresponding LoadedGroup does not exist, create it
                         LoadedGroup loaded = getOrCreateLoadedGroup( id, group );
@@ -698,7 +741,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
                         // If the group was deleted then recreated in between calls to display0(),
                         // (both isDataInserted() and isDeletePending() are true) then don't remove the group
-                        if ( group.isDeletePending( ) && !group.isDataInserted( ) )
+                        if ( group.groupDeleted && !group.polygonsInserted )
                         {
                             groups.remove( id );
                             continue;
@@ -711,142 +754,13 @@ public class PolygonPainter extends GlimpsePainter2D
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
 
-                    if ( group.isDataInserted( ) )
+                    if ( group.polygonsInserted )
                     {
-                        ///////////////////////////////////////
-                        //// load polygon outline geometry ////
-                        ///////////////////////////////////////
-
-                        if ( !loaded.glLineBufferInitialized || loaded.glLineBufferMaxSize < group.getTotalLineVertices( ) )
-                        {
-                            // if the track doesn't have a gl buffer or it is too small we must
-                            // copy all the track's data into a new, larger buffer
-
-                            // if this is the first time we have allocated memory for this track
-                            // don't allocate any extra, it may never get added to
-                            // however, once a track has been updated once, we assume it is likely
-                            // to be updated again and give it extra memory
-                            if ( loaded.glLineBufferInitialized )
-                            {
-                                gl.glDeleteBuffers( 1, new int[] { loaded.glLineBufferHandle }, 0 );
-                                loaded.glLineBufferMaxSize = Math.max( ( int ) ( loaded.glLineBufferMaxSize * 1.5 ), group.getTotalLineVertices( ) );
-                            }
-                            else
-                            {
-                                loaded.glLineBufferMaxSize = group.getTotalLineVertices( );
-                            }
-
-                            // copy all the track data into a host buffer
-                            ensureDataBufferSize( loaded.glLineBufferMaxSize );
-                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, 0, group.getPolygonCount( ) );
-
-                            // create a new device buffer handle
-                            int[] bufferHandle = new int[1];
-                            gl.glGenBuffers( 1, bufferHandle, 0 );
-                            loaded.glLineBufferHandle = bufferHandle[0];
-
-                            // load the offset and count values for all selected polygons
-                            loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
-
-                            // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-                            glHandleError( gl, "glBindBuffer Line Error (Case 1)" );
-                            gl.glBufferData( GL.GL_ARRAY_BUFFER, loaded.glLineBufferMaxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-                            glHandleError( gl, "glBufferData Line Error" );
-
-                            loaded.glLineBufferInitialized = true;
-                        }
-                        else
-                        {
-                            // there is enough empty space in the device buffer to accommodate all the new data
-                            int insertOffset = group.getOffsetInsertPolygons( );
-                            int insertCount = group.getCountInsertPolygons( );
-                            int insertVertices = group.getLineInsertCountVertices( );
-
-                            // copy all the new track data into a host buffer
-                            ensureDataBufferSize( insertVertices );
-                            loaded.loadLineVerticesIntoBuffer( group, dataBuffer, loaded.glLineBufferCurrentSize, insertOffset, insertCount );
-
-                            // load the offset and count values for the newly selected polygons
-                            loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
-
-                            // update the device buffer with the new data
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-                            glHandleError( gl, "glBindBuffer Line Error  (Case 2)" );
-                            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, loaded.glLineBufferCurrentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-                            glHandleError( gl, "glBufferSubData Line Error" );
-                        }
-
-                        loaded.glLineBufferCurrentSize = group.getTotalLineVertices( );
-
-                        ////////////////////////////////////
-                        //// load polygon fill geometry ////
-                        ////////////////////////////////////
-
-                        if ( !loaded.glFillBufferInitialized || loaded.glFillBufferMaxSize < group.getTotalFillVertices( ) )
-                        {
-                            // if the track doesn't have a gl buffer or it is too small we must
-                            // copy all the track's data into a new, larger buffer
-
-                            // if this is the first time we have allocated memory for this track
-                            // don't allocate any extra, it may never get added to
-                            // however, once a track has been updated once, we assume it is likely
-                            // to be updated again and give it extra memory
-                            if ( loaded.glFillBufferInitialized )
-                            {
-                                gl.glDeleteBuffers( 1, new int[] { loaded.glFillBufferHandle }, 0 );
-                                loaded.glFillBufferMaxSize = Math.max( ( int ) ( loaded.glFillBufferMaxSize * 1.5 ), group.getTotalFillVertices( ) );
-                            }
-                            else
-                            {
-                                loaded.glFillBufferMaxSize = group.getTotalFillVertices( );
-                            }
-
-                            // copy all the track data into a host buffer
-                            ensureDataBufferSize( loaded.glFillBufferMaxSize );
-                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, 0, group.getPolygonCount( ) );
-
-                            // create a new device buffer handle
-                            int[] bufferHandle = new int[1];
-                            gl.glGenBuffers( 1, bufferHandle, 0 );
-                            loaded.glFillBufferHandle = bufferHandle[0];
-
-                            // load the offset and count values for all selected polygons
-                            loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
-
-                            // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-                            glHandleError( gl, "glBindBuffer Fill Error  (Case 1)" );
-                            gl.glBufferData( GL.GL_ARRAY_BUFFER, loaded.glFillBufferMaxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-                            glHandleError( gl, "glBufferData Fill Error" );
-
-                            loaded.glFillBufferInitialized = true;
-                        }
-                        else
-                        {
-                            // there is enough empty space in the device buffer to accommodate all the new data
-                            int insertOffset = group.getOffsetInsertPolygons( );
-                            int insertCount = group.getCountInsertPolygons( );
-                            int insertVertices = group.getFillInsertCountVertices( );
-
-                            // copy all the new track data into a host buffer
-                            ensureDataBufferSize( insertVertices );
-                            loaded.loadFillVerticesIntoBuffer( group, dataBuffer, loaded.glFillBufferCurrentSize, insertOffset, insertCount );
-
-                            // load the offset and count values for the newly selected polygons
-                            loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
-
-                            // update the device buffer with the new data
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-                            glHandleError( gl, "glBindBuffer Fill Error  (Case 2)" );
-                            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, loaded.glFillBufferCurrentSize * 3 * BYTES_PER_FLOAT, insertVertices * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-                            glHandleError( gl, "glBufferSubData Fill Error" );
-                        }
-
-                        loaded.glFillBufferCurrentSize = group.getTotalFillVertices( );
+                        updateVertices( gl, loaded, group, true );
+                        updateVertices( gl, loaded, group, false );
                     }
 
-                    if ( group.selectionChanged && loaded.glLineBufferInitialized && loaded.glFillBufferInitialized )
+                    if ( group.polygonsSelected )
                     {
                         loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
                         loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
@@ -880,94 +794,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
         for ( LoadedGroup loaded : loadedGroups.values( ) )
         {
-            if ( !loaded.glFillBufferInitialized || !loaded.glLineBufferInitialized ) continue;
-
-            if ( loaded.fillOn )
-            {
-                gl.glColor4fv( loaded.fillColor, 0 );
-
-                if ( loaded.polyStippleOn )
-                {
-                    gl.glEnable( GL.GL_POLYGON_STIPPLE );
-                    gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
-                }
-
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-                gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
-
-                loaded.glFillOffsetBuffer.rewind( );
-                loaded.glFillCountBuffer.rewind( );
-
-                // A count > 65535 causes problems on some ATI cards, so we must loop through the
-                // groups of primitives and split them up where necessary.  An alternate way would be
-                // to construct the count and offset arrays so that groups are less then 65535 in size.
-                // There is some evidence on web forums that this may provide performance benefits as well
-                // when dynamic data is being used.
-                for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
-                {
-                    int fillCountTotal = loaded.glFillCountBuffer.get( i );
-                    int fillCountRemaining = fillCountTotal;
-                    while ( fillCountRemaining > 0 )
-                    {
-                        int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
-                        int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                        gl.glDrawArrays( GL.GL_TRIANGLES, offset, fillCount );
-                        fillCountRemaining -= fillCount;
-                    }
-                }
-
-                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-                // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
-
-                if ( loaded.polyStippleOn )
-                {
-                    gl.glDisable( GL.GL_POLYGON_STIPPLE );
-                }
-            }
-
-            if ( loaded.linesOn )
-            {
-                gl.glColor4fv( loaded.lineColor, 0 );
-                gl.glLineWidth( loaded.lineWidth );
-
-                if ( loaded.lineStippleOn )
-                {
-                    gl.glEnable( GL.GL_LINE_STIPPLE );
-                    gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
-                }
-
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-                gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
-
-                loaded.glLineOffsetBuffer.rewind( );
-                loaded.glLineCountBuffer.rewind( );
-
-                // A count > 65535 causes problems on some ATI cards, so we must loop through the
-                // groups of primitives and split them up where necessary.  An alternate way would be
-                // to construct the count and offset arrays so that groups are less then 65535 in size.
-                // There is some evidence on web forums that this may provide performance benefits as well
-                // when dynamic data is being used.
-                for ( int i = 0; i < loaded.glTotalLinePrimitives; i++ )
-                {
-                    int fillCountTotal = loaded.glLineCountBuffer.get( i );
-                    int fillCountRemaining = fillCountTotal;
-                    while ( fillCountRemaining > 0 )
-                    {
-                        int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 2
-                        int offset = loaded.glLineOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                        gl.glDrawArrays( GL.GL_LINE_LOOP, offset, fillCount );
-                        fillCountRemaining -= fillCount;
-                    }
-                }
-
-                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-                // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
-
-                if ( loaded.lineStippleOn )
-                {
-                    gl.glDisable( GL.GL_LINE_STIPPLE );
-                }
-            }
+            drawGroup( gl, loaded );
         }
 
         glHandleError( gl, "Draw Error" );
@@ -975,6 +802,217 @@ public class PolygonPainter extends GlimpsePainter2D
         gl.glDisable( GL.GL_DEPTH_TEST );
         gl.glDisable( GL.GL_BLEND );
         gl.glDisable( GL.GL_LINE_SMOOTH );
+    }
+
+    protected void updateVertices( GL gl, LoadedGroup loaded, Group group, boolean fill )
+    {
+        boolean initialized = fill ? loaded.glFillBufferInitialized : loaded.glLineBufferInitialized;
+        int maxSize = fill ? loaded.glFillBufferMaxSize : loaded.glLineBufferMaxSize;
+        int currentSize = fill ? loaded.glFillBufferCurrentSize : loaded.glLineBufferCurrentSize;
+        int insertSize = fill ? group.fillInsertVertexCount : group.lineInsertVertexCount;
+        int totalSize = fill ? group.totalFillVertexCount : group.totalLineVertexCount;
+        int handle = fill ? loaded.glFillBufferHandle : loaded.glLineBufferHandle;
+
+        // the size needed is the current buffer location plus new inserts (we cannot use
+        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
+        // polygons have been deleted
+        int sizeNeeded = currentSize + insertSize;
+
+        if ( !initialized || maxSize < sizeNeeded )
+        {
+            // if we've deleted vertices, but are still close to the max buffer size, then
+            // go ahead and expand the max buffer size anyway
+            // if we're far below the max because of deletions, don't expand the array
+            if ( !initialized || maxSize < DELETE_EXPAND_FACTOR * totalSize )
+            {
+                // if the track doesn't have a gl buffer or it is too small we must
+                // copy all the track's data into a new, larger buffer
+
+                // if this is the first time we have allocated memory for this track
+                // don't allocate any extra, it may never get added to
+                // however, once a track has been updated once, we assume it is likely
+                // to be updated again and give it extra memory
+                if ( initialized )
+                {
+                    gl.glDeleteBuffers( 1, new int[] { handle }, 0 );
+                    maxSize = Math.max( ( int ) ( maxSize * 1.5 ), totalSize );
+                }
+                else
+                {
+                    maxSize = totalSize;
+                }
+
+                // create a new device buffer handle
+                int[] bufferHandle = new int[1];
+                gl.glGenBuffers( 1, bufferHandle, 0 );
+                handle = bufferHandle[0];
+            }
+
+            // copy all the track data into a host buffer
+            ensureDataBufferSize( maxSize );
+
+            if ( fill )
+            {
+                loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
+                loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
+            }
+            else
+            {
+                loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
+                loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
+            }
+
+            // copy data from the host buffer into the device buffer
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            glHandleError( gl, "glBindBuffer Error  (Case 1)" );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+            glHandleError( gl, "glBufferData Error" );
+
+            if ( fill )
+            {
+                loaded.glFillBufferInitialized = true;
+                loaded.glFillBufferCurrentSize = totalSize;
+                loaded.glFillBufferHandle = handle;
+                loaded.glFillBufferMaxSize = maxSize;
+            }
+            else
+            {
+                loaded.glLineBufferInitialized = true;
+                loaded.glLineBufferCurrentSize = totalSize;
+                loaded.glLineBufferHandle = handle;
+                loaded.glLineBufferMaxSize = maxSize;
+            }
+        }
+        else
+        {
+            // there is enough empty space in the device buffer to accommodate all the new data
+
+            // copy all the new track data into a host buffer
+            ensureDataBufferSize( insertSize );
+
+            if ( fill )
+            {
+                loaded.loadFillVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
+                loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
+            }
+            else
+            {
+                loaded.loadLineVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
+                loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
+            }
+
+            // update the device buffer with the new data
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            glHandleError( gl, "glBindBuffer Error  (Case 2)" );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+            glHandleError( gl, "glBufferSubData Error" );
+
+            if ( fill )
+            {
+                loaded.glFillBufferCurrentSize = sizeNeeded;
+            }
+            else
+            {
+                loaded.glLineBufferCurrentSize = sizeNeeded;
+            }
+        }
+    }
+
+    protected void drawGroup( GL gl, LoadedGroup loaded )
+    {
+        if ( !isGroupReady( loaded ) ) return;
+
+        if ( loaded.fillOn )
+        {
+            gl.glColor4fv( loaded.fillColor, 0 );
+
+            if ( loaded.polyStippleOn )
+            {
+                gl.glEnable( GL.GL_POLYGON_STIPPLE );
+                gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
+            }
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
+            gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+
+            loaded.glFillOffsetBuffer.rewind( );
+            loaded.glFillCountBuffer.rewind( );
+
+            // A count > 65535 causes problems on some ATI cards, so we must loop through the
+            // groups of primitives and split them up where necessary.  An alternate way would be
+            // to construct the count and offset arrays so that groups are less then 65535 in size.
+            // There is some evidence on web forums that this may provide performance benefits as well
+            // when dynamic data is being used.
+            for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
+            {
+                int fillCountTotal = loaded.glFillCountBuffer.get( i );
+                int fillCountRemaining = fillCountTotal;
+                while ( fillCountRemaining > 0 )
+                {
+                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
+                    int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
+                    gl.glDrawArrays( GL.GL_TRIANGLES, offset, fillCount );
+                    fillCountRemaining -= fillCount;
+                }
+            }
+
+            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+            // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
+
+            if ( loaded.polyStippleOn )
+            {
+                gl.glDisable( GL.GL_POLYGON_STIPPLE );
+            }
+        }
+
+        if ( loaded.linesOn )
+        {
+            gl.glColor4fv( loaded.lineColor, 0 );
+            gl.glLineWidth( loaded.lineWidth );
+
+            if ( loaded.lineStippleOn )
+            {
+                gl.glEnable( GL.GL_LINE_STIPPLE );
+                gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
+            }
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
+            gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+
+            loaded.glLineOffsetBuffer.rewind( );
+            loaded.glLineCountBuffer.rewind( );
+
+            // A count > 65535 causes problems on some ATI cards, so we must loop through the
+            // groups of primitives and split them up where necessary.  An alternate way would be
+            // to construct the count and offset arrays so that groups are less then 65535 in size.
+            // There is some evidence on web forums that this may provide performance benefits as well
+            // when dynamic data is being used.
+            for ( int i = 0; i < loaded.glTotalLinePrimitives; i++ )
+            {
+                int fillCountTotal = loaded.glLineCountBuffer.get( i );
+                int fillCountRemaining = fillCountTotal;
+                while ( fillCountRemaining > 0 )
+                {
+                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 2
+                    int offset = loaded.glLineOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
+                    gl.glDrawArrays( GL.GL_LINE_LOOP, offset, fillCount );
+                    fillCountRemaining -= fillCount;
+                }
+            }
+
+            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+            // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
+
+            if ( loaded.lineStippleOn )
+            {
+                gl.glDisable( GL.GL_LINE_STIPPLE );
+            }
+        }
+    }
+
+    protected boolean isGroupReady( LoadedGroup loaded )
+    {
+        return loaded.glFillBufferInitialized && loaded.glLineBufferInitialized && loaded.glLineOffsetBuffer != null && loaded.glLineCountBuffer != null && loaded.glFillOffsetBuffer != null && loaded.glFillCountBuffer != null;
     }
 
     protected static Polygon buildPolygon( float[] geometryX, float[] geometryY )
@@ -1283,7 +1321,7 @@ public class PolygonPainter extends GlimpsePainter2D
         short lineStipplePattern;
         boolean lineStippleOn;
 
-        byte[] polyStipplePattern = new byte[32];
+        byte[] polyStipplePattern = new byte[128];
         boolean polyStippleOn;
 
         float[] fillColor = new float[4];
@@ -1411,15 +1449,12 @@ public class PolygonPainter extends GlimpsePainter2D
          *
          * @param vertexBuffer the buffer to place polygon vertices into
          * @param offsetVertex the offset of the vertices from the start of the vertexBuffer
-         * @param offset the offset from the start of the buffer array of the first polygon to add
-         * @param size the number of polygons from the polygon array to add
          */
-        public void loadLineVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, int offset, int size )
+        public void loadLineVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
         {
             int vertexCount = 0;
-            for ( int i = 0; i < size; i++ )
+            for ( IdPolygon polygon : polygons )
             {
-                IdPolygon polygon = group.polygonIndices.get( offset + i );
                 vertexCount += polygon.loadLineVerticesIntoBuffer( polygon.depth, vertexBuffer, offsetVertex + vertexCount );
             }
         }
@@ -1437,10 +1472,10 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void loadLineSelectionIntoBuffer( Collection<IdPolygon> polygons, int size, int offset )
         {
+            if ( size <= 0 || offset < 0 ) return;
+
             ensureLineOffsetBufferSize( size );
             ensureLineCountBufferSize( size );
-
-            if ( size <= 0 || offset < 0 ) return;
 
             glLineOffsetBuffer.position( offset );
             glLineCountBuffer.position( offset );
@@ -1451,14 +1486,11 @@ public class PolygonPainter extends GlimpsePainter2D
             }
         }
 
-        public void loadFillVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, int offset, int size )
+        public void loadFillVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
         {
-            if ( size <= 0 ) return;
-
             int vertexCount = 0;
-            for ( int i = 0; i < size; i++ )
+            for ( IdPolygon polygon : polygons )
             {
-                IdPolygon polygon = group.polygonIndices.get( offset + i );
                 vertexCount += polygon.loadFillVerticesIntoBuffer( polygon.depth + 0.5f, vertexBuffer, offsetVertex + vertexCount );
             }
         }
@@ -1520,13 +1552,12 @@ public class PolygonPainter extends GlimpsePainter2D
      */
     private class Group
     {
-        //// group display attributes ////
         float[] lineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
         float lineWidth = 1;
         boolean linesOn = true;
 
         int lineStippleFactor = 1;
-        short lineStipplePattern = ( short ) 0x00FF;;
+        short lineStipplePattern = ( short ) 0x00FF;
         boolean lineStippleOn = false;
 
         byte[] polyStipplePattern = halftone;
@@ -1534,22 +1565,22 @@ public class PolygonPainter extends GlimpsePainter2D
 
         float[] fillColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         boolean fillOn = false;
-        //// group display attributes ////
 
         int groupId;
 
-        //TODO: allow deletions, there is no need to compact the buffer after
-        // each deletion, perhaps wait a configurable number of deletions
-        // before doing it automatically
-        List<IdPolygon> polygonIndices;
+        // mapping from polygonId to IdPolygon object
+        Map<Integer, IdPolygon> polygonMap;
+        // polygons added since last display( ) call 
+        Set<IdPolygon> newPolygons;
+        // polygons selected since the last display( ) call
+        // (always a subset of newPolygons)
+        Set<IdPolygon> newSelectedPolygons;
+        // all selected polygons (based on selectionStart and selectionEnd)
+        Set<IdPolygon> selectedPolygons;
         // view of the IdPolygons in the polygons list sorted by startTime
         NavigableSet<IdPolygon> startTimes;
         // view of the IdPolygons in the polygons list sorted by endTime
         NavigableSet<IdPolygon> endTimes;
-        // the polygons selected based on selectionStart and selectionEnd
-        Set<IdPolygon> selectedPolygons;
-        // polygons selected since the last display( ) call
-        Set<IdPolygon> newSelectedPolygons;
 
         IdPolygon selectionStart;
         IdPolygon selectionEnd;
@@ -1557,177 +1588,195 @@ public class PolygonPainter extends GlimpsePainter2D
         int selectedFillPrimitiveCount;
         int selectedLinePrimitiveCount;
 
+        // vertices in the above counts refer to tesselated triangle vertices
+
+        // current total vertex count
         int totalFillVertexCount;
         int totalLineVertexCount;
 
-        //        int totalFillPrimitiveCount;
-        //        int totalLinePrimitiveCount;
-
+        // vertex count of inserts since last display() call
         int fillInsertVertexCount;
         int lineInsertVertexCount;
 
-        int offsetInsertPolygons;
-
         // if true, the contents of the selectedPolygons set has changed
-        boolean selectionChanged = false;
+        boolean polygonsSelected = false;
         // if true, new polygons have been added to the group
-        boolean dataInserted = false;
+        boolean polygonsInserted = false;
         // if true, this group is waiting to be deleted
-        boolean deletePending = false;
+        boolean groupDeleted = false;
         // if true, this group is waiting to be cleared
-        boolean clearPending = false;
+        boolean groupCleared = false;
 
         public Group( int groupId )
         {
             this.groupId = groupId;
             this.selectedPolygons = new LinkedHashSet<IdPolygon>( );
             this.newSelectedPolygons = new LinkedHashSet<IdPolygon>( );
-            this.polygonIndices = new LinkedList<IdPolygon>( );
+            this.newPolygons = new LinkedHashSet<IdPolygon>( );
+            this.polygonMap = new HashMap<Integer, IdPolygon>( );
             this.startTimes = new TreeSet<IdPolygon>( startTimeComparator );
             this.endTimes = new TreeSet<IdPolygon>( endTimeComparator );
             this.selectionStart = createSearchBoundStart( -Long.MAX_VALUE );
             this.selectionEnd = createSearchBoundEnd( Long.MAX_VALUE );
         }
 
-        public void delete( )
+        public void deleteGroup( )
         {
-            this.deletePending = true;
-            this.clear( );
+            this.groupDeleted = true;
+            this.clearGroup( );
         }
 
-        public void clear( )
+        public void clearGroup( )
         {
-            this.polygonIndices.clear( );
+            this.polygonMap.clear( );
+
+            this.newPolygons.clear( );
+            this.selectedPolygons.clear( );
+            this.newSelectedPolygons.clear( );
+
             this.startTimes.clear( );
             this.endTimes.clear( );
 
             this.totalLineVertexCount = 0;
             this.lineInsertVertexCount = 0;
-            //            this.totalLinePrimitiveCount = 0;
 
             this.totalFillVertexCount = 0;
             this.fillInsertVertexCount = 0;
-            //            this.totalFillPrimitiveCount = 0;
-
-            this.selectedPolygons.clear( );
-            this.newSelectedPolygons.clear( );
 
             this.selectedFillPrimitiveCount = 0;
             this.selectedLinePrimitiveCount = 0;
 
-            this.offsetInsertPolygons = 0;
-            this.dataInserted = false;
-            this.selectionChanged = false;
+            this.polygonsInserted = false;
+            this.polygonsSelected = false;
 
-            this.clearPending = true;
+            this.groupCleared = true;
         }
 
-        public void add( IdPolygon polygon )
+        public void deletePolygon( int polygonId )
         {
-            int polygonInsertIndex = this.polygonIndices.size( );
+            IdPolygon polygon = this.polygonMap.remove( polygonId );
 
-            this.polygonIndices.add( polygon );
+            if ( polygon != null )
+            {
+                this.newPolygons.remove( polygon );
+                this.startTimes.remove( polygon );
+                this.endTimes.remove( polygon );
+
+                // if the polygon was selected when it is deleted, mark the selection changed
+                this.polygonsSelected = this.selectedPolygons.remove( polygon );
+                boolean newDeleted = this.newSelectedPolygons.remove( polygon );
+
+                int lineVertexCount = polygon.lineVertexCount;
+                this.totalLineVertexCount -= lineVertexCount;
+                if ( newDeleted ) this.lineInsertVertexCount -= lineVertexCount;
+
+                int fillVertexCount = polygon.fillVertexCount;
+                this.totalFillVertexCount -= fillVertexCount;
+                if ( newDeleted ) this.fillInsertVertexCount -= fillVertexCount;
+
+                this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
+                this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
+            }
+        }
+
+        public void addPolygon( IdPolygon polygon )
+        {
+            this.polygonMap.put( polygon.polygonId, polygon );
+
+            this.newPolygons.add( polygon );
+
             this.startTimes.add( polygon );
             this.endTimes.add( polygon );
 
             int lineVertexCount = polygon.lineVertexCount;
-            //            int linePrimitiveCount = polygon.linePrimitiveCount;
             this.totalLineVertexCount += lineVertexCount;
             this.lineInsertVertexCount += lineVertexCount;
-            //            this.totalLinePrimitiveCount += linePrimitiveCount;
 
             int fillVertexCount = polygon.fillVertexCount;
-            //            int fillPrimitiveCount = polygon.fillPrimitiveCount;
             this.totalFillVertexCount += fillVertexCount;
             this.fillInsertVertexCount += fillVertexCount;
-            //            this.totalFillPrimitiveCount += fillPrimitiveCount;
 
-            //TODO using IdPolygons to hold start/end times of window is awkward
             if ( polygon.getStartTime( ) <= selectionEnd.endTime && polygon.getEndTime( ) >= selectionStart.startTime )
             {
-                selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
-                selectedLinePrimitiveCount += polygon.linePrimitiveCount;
-                selectedPolygons.add( polygon );
-                newSelectedPolygons.add( polygon );
+                this.selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
+                this.selectedLinePrimitiveCount += polygon.linePrimitiveCount;
+                this.selectedPolygons.add( polygon );
+                this.newSelectedPolygons.add( polygon );
             }
 
-            if ( !dataInserted || polygonInsertIndex < offsetInsertPolygons )
-            {
-                offsetInsertPolygons = polygonInsertIndex;
-                dataInserted = true;
-            }
+            this.polygonsInserted = true;
         }
 
         public void setTimeRange( IdPolygon startPoint, IdPolygon endPoint )
         {
-            selectionStart = startPoint;
-            selectionEnd = endPoint;
+            this.selectionStart = startPoint;
+            this.selectionEnd = endPoint;
 
             checkTimeRange( );
         }
 
         public void checkTimeRange( )
         {
-            if ( selectionStart == null || selectionEnd == null ) return;
+            if ( this.selectionStart == null || this.selectionEnd == null ) return;
 
-            SortedSet<IdPolygon> startSet = startTimes.headSet( selectionEnd, true );
-            SortedSet<IdPolygon> endSet = endTimes.tailSet( selectionStart, true );
+            SortedSet<IdPolygon> startSet = this.startTimes.headSet( this.selectionEnd, true );
+            SortedSet<IdPolygon> endSet = this.endTimes.tailSet( this.selectionStart, true );
 
             // selectedPolys contains the set intersection of startSet and endSet
-            selectedPolygons.clear( );
-            selectedPolygons.addAll( startSet );
-            selectedPolygons.retainAll( endSet );
+            this.selectedPolygons.clear( );
+            this.selectedPolygons.addAll( startSet );
+            this.selectedPolygons.retainAll( endSet );
 
-            selectedFillPrimitiveCount = 0;
-            selectedLinePrimitiveCount = 0;
-            for ( IdPolygon polygon : selectedPolygons )
+            this.selectedFillPrimitiveCount = 0;
+            this.selectedLinePrimitiveCount = 0;
+            for ( IdPolygon polygon : this.selectedPolygons )
             {
-                selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
-                selectedLinePrimitiveCount += polygon.linePrimitiveCount;
+                this.selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
+                this.selectedLinePrimitiveCount += polygon.linePrimitiveCount;
             }
 
-            selectionChanged = true;
+            this.polygonsSelected = true;
         }
 
         public void setLineColor( float[] rgba )
         {
-            lineColor = rgba;
+            this.lineColor = rgba;
         }
 
         public void setLineColor( float r, float g, float b, float a )
         {
-            lineColor[0] = r;
-            lineColor[1] = g;
-            lineColor[2] = b;
-            lineColor[3] = a;
+            this.lineColor[0] = r;
+            this.lineColor[1] = g;
+            this.lineColor[2] = b;
+            this.lineColor[3] = a;
         }
 
         public void setFillColor( float[] rgba )
         {
-            fillColor = rgba;
+            this.fillColor = rgba;
         }
 
         public void setFillColor( float r, float g, float b, float a )
         {
-            fillColor[0] = r;
-            fillColor[1] = g;
-            fillColor[2] = b;
-            fillColor[3] = a;
+            this.fillColor[0] = r;
+            this.fillColor[1] = g;
+            this.fillColor[2] = b;
+            this.fillColor[3] = a;
         }
 
         public void setLineWidth( float width )
         {
-            lineWidth = width;
+            this.lineWidth = width;
         }
 
         public void setShowLines( boolean show )
         {
-            linesOn = show;
+            this.linesOn = show;
         }
 
         public void setShowPoly( boolean show )
         {
-            fillOn = show;
+            this.fillOn = show;
         }
 
         public void setPolyStipple( boolean activate )
@@ -1751,86 +1800,17 @@ public class PolygonPainter extends GlimpsePainter2D
             this.lineStipplePattern = stipplePattern;
         }
 
-        public boolean isDataInserted( )
-        {
-            return dataInserted;
-        }
-
-        public boolean isDeletePending( )
-        {
-            return deletePending;
-        }
-
-        public boolean isClearPending( )
-        {
-            return clearPending;
-        }
-
         public void reset( )
         {
-            newSelectedPolygons.clear( );
-            lineInsertVertexCount = 0;
-            fillInsertVertexCount = 0;
-            dataInserted = false;
-            selectionChanged = false;
-            clearPending = false;
-            deletePending = false;
-        }
+            this.newSelectedPolygons.clear( );
+            this.newPolygons.clear( );
 
-        /**
-         * @return the number of vertices making up the polygon outline to insert
-         */
-        public int getLineInsertCountVertices( )
-        {
-            return lineInsertVertexCount;
-        }
-
-        /**
-         * @return the number of vertices making up the polygon fill to insert
-         */
-        public int getFillInsertCountVertices( )
-        {
-            return fillInsertVertexCount;
-        }
-
-        /**
-         * @return the index of the first polygon in the group to insert
-         */
-        public int getOffsetInsertPolygons( )
-        {
-            return offsetInsertPolygons;
-        }
-
-        /**
-         * @return the number of polygons in the group to insert
-         */
-        public int getCountInsertPolygons( )
-        {
-            return getPolygonCount( ) - getOffsetInsertPolygons( );
-        }
-
-        /**
-         * @return the total number of edge vertices for all polygons in the group.
-         */
-        public int getTotalLineVertices( )
-        {
-            return totalLineVertexCount;
-        }
-
-        /**
-         * @return the total number of tesselated triangle vertices for all polygons in the group.
-         */
-        public int getTotalFillVertices( )
-        {
-            return totalFillVertexCount;
-        }
-
-        /**
-         * @return the total number of polygons in the group.
-         */
-        public int getPolygonCount( )
-        {
-            return polygonIndices.size( );
+            this.lineInsertVertexCount = 0;
+            this.fillInsertVertexCount = 0;
+            this.polygonsInserted = false;
+            this.polygonsSelected = false;
+            this.groupCleared = false;
+            this.groupDeleted = false;
         }
     }
 }

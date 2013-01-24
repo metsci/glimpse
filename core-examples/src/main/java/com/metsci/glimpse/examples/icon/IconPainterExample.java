@@ -126,9 +126,8 @@ public class IconPainterExample implements GlimpseLayoutProvider
             @Override
             public void mousePressed( GlimpseMouseEvent event )
             {
-                Axis2D axis = event.getAxis2D( );
-                float x = ( float ) axis.getAxisX( ).screenPixelToValue( event.getX( ) );
-                float y = ( float ) axis.getAxisY( ).screenPixelToValue( axis.getAxisY( ).getSizePixels( ) - event.getY( ) );
+                float x = ( float ) event.getAxisCoordinatesX( );
+                float y = ( float ) event.getAxisCoordinatesY( );
 
                 if ( event.isButtonDown( MouseButton.Button1 ) )
                 {

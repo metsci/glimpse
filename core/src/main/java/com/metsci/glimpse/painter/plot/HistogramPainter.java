@@ -41,8 +41,11 @@ import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.sun.opengl.util.BufferUtil;
 
 /**
- * Plots a simple frequency histogram histogram. Binning of
+ * Plots a simple frequency histogram. Binning of
  * data is handled automatically.
+ * 
+ * Construct with asDensity = true to scale as a density 
+ * estimate instead of as a frequency histogram.
  *
  * @author ulman
  */
@@ -66,10 +69,18 @@ public class HistogramPainter extends GlimpseDataPainter2D
     protected float maxY;
     protected float minX;
     protected float maxX;
+    
+    protected final boolean asDensity;
 
-    public HistogramPainter( )
+    public HistogramPainter( boolean asDensity )
     {
         dataBufferLock = new ReentrantLock( );
+        this.asDensity = asDensity;
+    }
+    
+    public HistogramPainter( )
+    {
+    	this( false );
     }
 
     public void setColor( float[] rgba )
@@ -196,12 +207,14 @@ public class HistogramPainter extends GlimpseDataPainter2D
                 dataBuffer = BufferUtil.newFloatBuffer( dataSize * FLOATS_PER_BAR );
             }
 
+            final float denom = (asDensity) ? (binSize * totalSize) : totalSize;
+            
             for ( Float2IntMap.Entry entry : counts.float2IntEntrySet() )
             {
                 float bin = entry.getFloatKey( );
                 int count = entry.getIntValue( );
 
-                float freq = ( float ) count / ( float ) totalSize;
+                float freq = ( float ) count / denom;
 
                 if ( freq > maxY ) maxY = freq;
 

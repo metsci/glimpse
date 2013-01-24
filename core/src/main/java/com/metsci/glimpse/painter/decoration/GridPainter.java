@@ -63,9 +63,11 @@ public class GridPainter extends GlimpseDataPainter2D
 
     protected boolean showMinorTicks = true;
 
+    protected boolean stipple = true;
+    
     protected AxisLabelHandler ticksX;
     protected AxisLabelHandler ticksY;
-
+    
     public GridPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
@@ -75,6 +77,11 @@ public class GridPainter extends GlimpseDataPainter2D
     public GridPainter( )
     {
         this( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) );
+    }
+    
+    public void setDotted( boolean dotted )
+    {
+        this.stipple = dotted;
     }
 
     public GridPainter setLineColor( float r, float g, float b, float a )
@@ -171,7 +178,7 @@ public class GridPainter extends GlimpseDataPainter2D
         // we want crisp lines
         gl.glDisable( GL.GL_LINE_SMOOTH );
         gl.glDisable( GL.GL_POINT_SMOOTH );
-        gl.glEnable( GL.GL_LINE_STIPPLE );
+        if ( this.stipple ) gl.glEnable( GL.GL_LINE_STIPPLE );
 
         if ( ticksX == null || ticksY == null ) return;
 
@@ -194,7 +201,7 @@ public class GridPainter extends GlimpseDataPainter2D
         {
             gl.glLineWidth( majorLineThickness );
             gl.glColor4fv( majorLineColor, 0 );
-            glLineStipple( gl, axisY, converterY );
+            if ( this.stipple ) glLineStipple( gl, axisY, converterY );
 
             gl.glBegin( GL.GL_LINES );
             try
@@ -243,7 +250,7 @@ public class GridPainter extends GlimpseDataPainter2D
         {
             gl.glLineWidth( majorLineThickness );
             gl.glColor4fv( majorLineColor, 0 );
-            glLineStipple( gl, axisX, converterX );
+            if ( this.stipple ) glLineStipple( gl, axisX, converterX );
 
             gl.glBegin( GL.GL_LINES );
             try

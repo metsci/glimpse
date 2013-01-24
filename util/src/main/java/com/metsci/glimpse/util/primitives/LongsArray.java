@@ -55,7 +55,7 @@ public class LongsArray implements LongsModifiable
 
     public LongsArray(int n)
     {
-        this(new long[n], n);
+        this(new long[n], 0);
     }
 
     public LongsArray()

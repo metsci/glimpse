@@ -44,6 +44,8 @@ public class BackgroundPainter implements GlimpsePainter
     protected float[] backgroundColor = new float[4];
     protected boolean colorSet = false;
     protected String lafColorKey;
+    
+    protected boolean displayOn = true;
 
     public BackgroundPainter( )
     {
@@ -55,6 +57,18 @@ public class BackgroundPainter implements GlimpsePainter
         setLookAndFeelKey( isFrameBackground ? FRAME_BACKGROUND_COLOR : PLOT_BACKGROUND_COLOR );
     }
 
+    @Override
+    public void setVisible( boolean show )
+    {
+        this.displayOn = show;
+    }
+
+    @Override
+    public boolean isVisible( )
+    {
+        return displayOn;
+    }
+    
     public BackgroundPainter setColor( float[] rgba )
     {
         backgroundColor = rgba;
@@ -83,6 +97,8 @@ public class BackgroundPainter implements GlimpsePainter
     @Override
     public void paintTo( GlimpseContext context )
     {
+        if ( !displayOn ) return;
+        
         GL gl = context.getGL( );
         gl.glClearColor( backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] );
         gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );

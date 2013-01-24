@@ -55,7 +55,7 @@ public class IntsArray implements IntsModifiable
 
     public IntsArray(int n)
     {
-        this(new int[n], n);
+        this(new int[n], 0);
     }
 
     public IntsArray()

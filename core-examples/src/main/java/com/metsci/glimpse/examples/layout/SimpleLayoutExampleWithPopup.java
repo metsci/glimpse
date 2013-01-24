@@ -40,6 +40,7 @@ import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -58,7 +59,7 @@ public class SimpleLayoutExampleWithPopup
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example (Swing)" );
         frame.add( canvas );
@@ -73,7 +74,7 @@ public class SimpleLayoutExampleWithPopup
             @Override
             public void run( )
             {
-                canvas.dispose( );
+                canvas.dispose( manager );
             }
         } );
 

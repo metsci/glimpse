@@ -50,6 +50,14 @@ public interface GlimpsePainter
     public void setLookAndFeel( LookAndFeel laf );
     
     /**
+     * A painter which is set to non-visible should make no OpenGL calls when its
+     * paintTo method is called.
+     */
+    public void setVisible( boolean visible );
+    
+    public boolean isVisible( );
+    
+    /**
      * Free GPU and CPU memory associated with this this GlimpsePainter.
      * After this call returns, the results of calling other GlimpsePainter
      * methods besides isDisposed( ) are undefined.

@@ -30,8 +30,6 @@ import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Bottom;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Left;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Right;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Top;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.util.ArrayList;
@@ -67,8 +65,6 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -370,8 +366,6 @@ public class MultiAxisPlot2D extends GlimpseLayout
 
         if ( titlePainter != null ) titleLayout.addPainter( titlePainter );
 
-        this.setTitleFont( getDefaultTitleFont( ), false );
-
         this.plotBackgroundPainter = new BackgroundPainter( false );
         this.axisLayoutXY.addPainter( this.plotBackgroundPainter );
 
@@ -412,9 +406,6 @@ public class MultiAxisPlot2D extends GlimpseLayout
         super.setLookAndFeel( laf );
 
         this.laf = laf;
-        this.setPlotBackgroundColor( laf.getColor( AbstractLookAndFeel.PLOT_BACKGROUND_COLOR ) );
-        this.setBackgroundColor( laf.getColor( AbstractLookAndFeel.FRAME_BACKGROUND_COLOR ) );
-        this.setTitleFont( laf.getFont( AbstractLookAndFeel.TITLE_FONT ), false );
     }
 
     public void setPlotBackgroundColor( float[] color )
@@ -628,11 +619,9 @@ public class MultiAxisPlot2D extends GlimpseLayout
 
         GridAxisLabelHandler tickHandler = createTickHandlerRight( );
         NumericAxisPainter painter = createAxisPainterRight( tickHandler );
-        painter.setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
+        painter.setLookAndFeel( laf );
 
         GlimpseLayout layout = new GlimpseAxisLayoutY( this, name, axis );
-
-        painter.setFont( getDefaultAxisFont( ) );
 
         attachAxisMouseListener( layout, mouseListener );
 
@@ -661,11 +650,9 @@ public class MultiAxisPlot2D extends GlimpseLayout
         int size = defaultAxisSizeLeft( );
         GridAxisLabelHandler tickHandler = createTickHandlerLeft( );
         NumericAxisPainter painter = createAxisPainterLeft( tickHandler );
-        painter.setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
+        painter.setLookAndFeel( laf );
 
         GlimpseLayout layout = new GlimpseAxisLayoutY( this, name, axis );
-
-        painter.setFont( getDefaultAxisFont( ) );
 
         attachAxisMouseListener( layout, mouseListener );
 
@@ -694,11 +681,9 @@ public class MultiAxisPlot2D extends GlimpseLayout
         int size = defaultAxisSizeTop( );
         GridAxisLabelHandler tickHandler = createTickHandlerTop( );
         NumericAxisPainter painter = createAxisPainterTop( tickHandler );
-        painter.setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
+        painter.setLookAndFeel( laf );
 
         GlimpseLayout layout = new GlimpseAxisLayoutX( this, name, axis );
-
-        painter.setFont( getDefaultAxisFont( ) );
 
         attachAxisMouseListener( layout, mouseListener );
 
@@ -727,11 +712,9 @@ public class MultiAxisPlot2D extends GlimpseLayout
         int size = defaultAxisSizeBottom( );
         GridAxisLabelHandler tickHandler = createTickHandlerBottom( );
         NumericAxisPainter painter = createAxisPainterBottom( tickHandler );
-        painter.setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
+        painter.setLookAndFeel( laf );
 
         GlimpseLayout layout = new GlimpseAxisLayoutX( this, name, axis );
-
-        painter.setFont( getDefaultAxisFont( ) );
 
         attachAxisMouseListener( layout, mouseListener );
 
@@ -871,18 +854,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
         SimpleTextPainter painter = new SimpleTextPainter( );
         painter.setHorizontalPosition( HorizontalPosition.Center );
         painter.setVerticalPosition( VerticalPosition.Center );
-        painter.setColor( GlimpseColor.getBlack( ) );
         return painter;
-    }
-
-    public Font getDefaultAxisFont( )
-    {
-        return getDefaultPlain( 11 );
-    }
-
-    public Font getDefaultTitleFont( )
-    {
-        return getDefaultBold( 14 );
     }
 
     protected boolean isTitleVisible( )

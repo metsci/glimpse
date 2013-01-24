@@ -107,10 +107,14 @@ public class TaggedAxisMouseListener1D extends AxisMouseListener1D
     @Override
     public void mousePressed( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
     {
+        super.mousePressed( e, axis, horizontal );
+        this.updateTagSelection( e, axis, horizontal );
+    }
+    
+    protected void updateTagSelection( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
+    {
         TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
-
-        super.mousePressed( e, taggedAxis, horizontal );
-
+        
         List<Tag> tags = taggedAxis.getSortedTags( );
         int pos = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
         this.selectedTag = getSelectedTag( taggedAxis, tags, pos, maxDistance );

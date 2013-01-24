@@ -28,231 +28,70 @@ package com.metsci.glimpse.plot.timeline.layout;
 
 import java.awt.Font;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.listener.TimelineMouseListener2D;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl.TimeToolTipHandler;
+import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 
-/**
- * @author ulman
- */
-public class TimePlotInfo implements PlotInfo
+public interface TimePlotInfo extends PlotInfo
 {
-    protected GridPainter gridPainter;
-    protected NumericXYAxisPainter axisPainter;
-    protected SimpleTextPainter labelPainter;
-    protected BorderPainter borderPainter;
-    protected BorderPainter labelBorderPainter;
-    protected DelegatePainter dataPainter;
+    public void setTimeToolTipHandler( TimeToolTipHandler toolTipHandler );
 
-    protected StackedTimePlot2D parent;
-    protected PlotInfo child;
+    public DataAxisMouseListener1D getDataAxisMouseListener( );
 
-    protected TimelineMouseListener2D listener;
-    
-    protected GlimpseLayout labelLayout;
+    public void setBorderColor( float[] rgba );
 
-    //@formatter:off
-    public TimePlotInfo( StackedTimePlot2D parent,
-                         PlotInfo child,
-                         GlimpseLayout labelLayout,
-                         TimelineMouseListener2D listener,
-                         GridPainter gridPainter,
-                         NumericXYAxisPainter axisPainter,
-                         SimpleTextPainter labelPainter,
-                         BorderPainter borderPainter,
-                         BorderPainter labelBorderPainter,
-                         DelegatePainter dataPainter )
-    {
-        this.parent = parent;
-        this.child = child;
-        this.labelLayout = labelLayout;
-        this.listener = listener;
-        this.gridPainter = gridPainter;
-        this.axisPainter = axisPainter;
-        this.labelPainter = labelPainter;
-        this.borderPainter = borderPainter;
-        this.labelBorderPainter = labelBorderPainter;
-        this.dataPainter = dataPainter;
-    }
-    //@formatter:on
+    public void setBorderWidth( float width );
 
-    public TimelineMouseListener2D getTimelineMouseListener( )
-    {
-        return listener;
-    }
+    public void setLabelBorderColor( float[] rgba );
 
-    public void setBorderColor( float[] rgba )
-    {
-        this.borderPainter.setColor( rgba );
-    }
+    public void setLabelBorderWidth( float width );
 
-    public void setBorderWidth( float width )
-    {
-        this.borderPainter.setLineWidth( width );
-    }
-    
-    public void setLabelBorderColor( float[] rgba )
-    {
-        this.labelBorderPainter.setColor( rgba );
-    }
+    public void setLabelText( String text );
 
-    public void setLabelBorderWidth( float width )
-    {
-        this.labelBorderPainter.setLineWidth( width );
-    }
+    public void setLabelColor( float[] rgba );
 
-    public void setLabelText( String text )
-    {
-        this.labelPainter.setText( text );
-    }
+    public void setAxisColor( float[] rgba );
 
-    public void setLabelColor( float[] rgba )
-    {
-        this.labelPainter.setColor( rgba );
-    }
+    public void setAxisFont( Font font );
 
-    public void setAxisColor( float[] rgba )
-    {
-        this.axisPainter.setLineColor( rgba );
-        this.axisPainter.setTextColor( rgba );
-    }
+    public void setBackgroundColor( float[] rgba );
 
-    public void setAxisFont( Font font )
-    {
-        this.axisPainter.setFont( font );
-    }
-    
-    public GlimpseLayout getLabelLayout( )
-    {
-        return labelLayout;
-    }
+    public GlimpseLayout getLabelLayout( );
 
-    public GridPainter getGridPainter( )
-    {
-        return gridPainter;
-    }
+    public BackgroundPainter getBackgroundPainter( );
 
-    public NumericXYAxisPainter getAxisPainter( )
-    {
-        return axisPainter;
-    }
+    public GridPainter getGridPainter( );
 
-    public SimpleTextPainter getLabelPainter( )
-    {
-        return labelPainter;
-    }
+    public NumericXYAxisPainter getAxisPainter( );
 
-    public BorderPainter getBorderPainter( )
-    {
-        return borderPainter;
-    }
-    
-    public BorderPainter getLabelBorderPainter( )
-    {
-        return labelBorderPainter;
-    }
+    public SimpleTextPainter getLabelPainter( );
 
-    public StackedTimePlot2D getStackedTimePlot( )
-    {
-        return parent;
-    }
+    public BorderPainter getBorderPainter( );
 
-    public DelegatePainter getDataPainter( )
-    {
-        return dataPainter;
-    }
+    public BorderPainter getLabelBorderPainter( );
 
-    public void addPainter( GlimpsePainter painter )
-    {
-        this.dataPainter.addPainter( painter );
-    }
+    public StackedTimePlot2D getStackedTimePlot( );
 
-    public void removePainter( GlimpsePainter painter )
-    {
-        this.dataPainter.removePainter( painter );
-    }
+    public DelegatePainter getDataPainter( );
+
+    public void addPainter( GlimpsePainter painter );
+
+    public void removePainter( GlimpsePainter painter );
 
     @Override
-    public StackedPlot2D getStackedPlot( )
-    {
-        return child.getStackedPlot( );
-    }
+    public TaggedAxis1D getCommonAxis( );
 
     @Override
-    public String getId( )
-    {
-        return child.getId( );
-    }
-
-    @Override
-    public int getOrder( )
-    {
-        return child.getOrder( );
-    }
-
-    @Override
-    public int getSize( )
-    {
-        return child.getSize( );
-    }
-
-    @Override
-    public void setOrder( int order )
-    {
-        child.setOrder( order );
-    }
-
-    @Override
-    public void setSize( int size )
-    {
-        child.setSize( size );
-    }
-
-    @Override
-    public GlimpseAxisLayout2D getLayout( )
-    {
-        return child.getLayout( );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
-    {
-        return child.getOrthogonalAxis( stack );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( )
-    {
-        return child.getOrthogonalAxis( );
-    }
-
-    @Override
-    public void addLayout( GlimpseAxisLayout2D childLayout )
-    {
-        child.addLayout( childLayout );
-    }
-
-    @Override
-    public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack )
-    {
-        return ( TaggedAxis1D ) child.getCommonAxis( stack );
-    }
-
-    @Override
-    public TaggedAxis1D getCommonAxis( )
-    {
-        return ( TaggedAxis1D ) child.getCommonAxis( );
-    }
+    public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack );
 }

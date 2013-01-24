@@ -36,7 +36,7 @@ import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -57,7 +57,7 @@ public class SwingMoveCanvasTest
         GlimpseLayout plot = new HeatMapExample( ).getLayout( );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
-        RepaintManager.newRepaintManager( canvas );
+        SwingRepaintManager.newRepaintManager( canvas );
 
         // create two frames
         final JFrame frame = makeFrame( 0, 0, 800, 800 );
@@ -78,12 +78,12 @@ public class SwingMoveCanvasTest
                 if ( toc )
                 {
                     frame.remove( canvas );
-                    frame2.add(canvas);
+                    frame2.add( canvas );
                 }
                 else
                 {
                     frame2.remove( canvas );
-                    frame.add(canvas);
+                    frame.add( canvas );
                 }
 
                 frame2.validate( );
@@ -91,7 +91,7 @@ public class SwingMoveCanvasTest
 
                 toc = !toc;
             }
-        }).start( );
+        } ).start( );
     }
 
     public static JFrame makeFrame( int x, int y, int width, int height )

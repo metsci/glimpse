@@ -36,6 +36,8 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * A horizontal (x) axis painter which displays positions of tags in addition
@@ -50,7 +52,9 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
     protected static final int DEFAULT_TAG_HEIGHT = 8;
     protected static final int DEFAULT_TAG_BASE = 8;
 
-    protected float[] tagColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.9f );
+    protected float[] tagColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f );
+    protected boolean tagColorSet = false;
+    
     protected int tagWidth = DEFAULT_TAG_BASE;
     protected int tagHeight = DEFAULT_TAG_HEIGHT;
 
@@ -73,10 +77,25 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
     {
         this.tagHeight = height;
     }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        super.setLookAndFeel( laf );
+        
+        if ( !tagColorSet )
+        {
+            setTagColor( laf.getColor( AbstractLookAndFeel.AXIS_TAG_COLOR ) );
+            tagColorSet = false;
+        }
+    }
 
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
+        updateTextRenderer( );
+        if ( textRenderer == null ) return;
+        
         if ( axis instanceof TaggedAxis1D )
         {
             TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;

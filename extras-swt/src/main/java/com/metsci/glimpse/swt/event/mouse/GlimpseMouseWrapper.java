@@ -68,7 +68,9 @@ public class GlimpseMouseWrapper
         // for some reason SWT appears to count one "click" of the mouse wheel as
         // three clicks on most platforms, this brings it in line with Swing
         // mouse wheel reporting. It also flips the sign
-        int clickCount = - event.count / 3;
+        // (extra logic avoids rounding signed 1 or 2 to 0)
+        double c = - event.count / 3.0;
+        int clickCount = ( int ) ( c < 0 ? Math.floor( c ) : Math.ceil( c ) );
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
 

@@ -37,6 +37,7 @@ import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -50,23 +51,26 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new VerticalTimelinePlotExample( ) );
+        Example example = Example.showWithSwing( new VerticalTimelinePlotExample( ) );
+
+        // set a blue color scheme look and feel for the plot
+        example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
     }
 
     @Override
     public StackedTimePlot2D getLayout( )
     {
         StackedTimePlot2D plot = super.getLayout( );
-        
+
         // display horizontal labels
         for ( TimePlotInfo info : plot.getAllTimePlots( ) )
         {
             info.getLabelPainter( ).setHorizontalLabels( true );
         }
-        
+
         return plot;
     }
-    
+
     @Override
     protected StackedTimePlot2D createPlot( )
     {
@@ -86,7 +90,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
     }
-    
+
     @Override
     protected void addMouseListener( final Epoch epoch, final TimePlotInfo plot1 )
     {
@@ -124,8 +128,8 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 
                 // the StackedTimePlot2D allows access to the time selection region
                 StackedTimePlot2D parent = plot1.getStackedTimePlot( );
-                Tag timeSelectionMin = parent.getTimeSelectionMin( );
-                Tag timeSelectionMax = parent.getTimeSelectionMax( );
+                Tag timeSelectionMin = parent.getTimeSelectionMinTag( );
+                Tag timeSelectionMax = parent.getTimeSelectionMaxTag( );
 
                 // alternatively, we can get the tags directly from the TaggedAxis1D if we know
                 // their String identifiers, which StackedTimePlot2D provides as public fields

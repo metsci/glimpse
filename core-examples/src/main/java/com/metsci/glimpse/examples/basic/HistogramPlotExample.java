@@ -26,9 +26,17 @@
  */
 package com.metsci.glimpse.examples.basic;
 
+import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
+
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.plot.HistogramPainter;
+import com.metsci.glimpse.painter.plot.StackedHistogramPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
@@ -47,28 +55,57 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
     public static int NUM_POINTS = 100000;
 
     @Override
-    public SimplePlot2D getLayout( )
+    public GlimpseLayout getLayout( )
+    {
+        float[] data1 = generateData1( new float[NUM_POINTS], NUM_POINTS );
+        float[] data2 = generateData2( new float[NUM_POINTS], NUM_POINTS );
+        float[] data3 = generateData3( new float[NUM_POINTS], NUM_POINTS );
+
+        Axis1D xAxis = new Axis1D( );
+        xAxis.setMin( -10 );
+        xAxis.setMax( 15 );
+        xAxis.setAbsoluteMin( -10 );
+        xAxis.setAbsoluteMax( 15 );
+
+        GlimpseLayout histogramPlot1 = createDualHistograms( xAxis, data1, data2, data3 );
+        GlimpseLayout histogramPlot2 = createStackedHistograms( xAxis, data1, data2, data3 );
+        GlimpseLayout histogramPlot3 = createStackedScaledHistograms( xAxis, data1, data2, data3 );
+
+        GlimpseLayout layout = new GlimpseLayout( );
+        layout.addPainter( new BackgroundPainter( true ) );
+        ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setLayoutConstraints( "bottomtotop, gapx 0, gapy 0, insets 5 5 5 5" );
+        ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setRowConstraints( "[grow|grow|grow]" );
+        ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setColumnConstraints( "[grow]" );
+
+        layout.addLayout( histogramPlot1 );
+        histogramPlot1.setLayoutData( "grow, wrap" );
+        layout.addLayout( histogramPlot2 );
+        histogramPlot2.setLayoutData( "grow, wrap" );
+        layout.addLayout( histogramPlot3 );
+        histogramPlot3.setLayoutData( "grow" );
+        layout.invalidateLayout( );
+
+        return layout;
+    }
+
+    GlimpseLayout createDualHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
     {
         // create a premade histogram plot
         SimplePlot2D histogramplot = new SimplePlot2D( );
-        
+
         // set axis labels and chart title
-        histogramplot.setTitle( "Histogram Plot Example" );
+        histogramplot.setTitle( "Histogram Plot" );
         histogramplot.setAxisLabelX( "x axis" );
         histogramplot.setAxisLabelY( "frequency" );
 
-        // set the x, y initial axis bounds
-        histogramplot.setMinX( -10.0 );
-        histogramplot.setMaxX( 15.0 );
+        // link the parent x axis
+        histogramplot.getAxis( ).getAxisX( ).setParent( xAxis );
 
         histogramplot.setMinY( 0.0 );
         histogramplot.setMaxY( 0.02 );
 
-        // set the x, y absolute axis bounds
+        // set the y absolute axis bounds
         // the axis will never be allowed to exceed these values
-        histogramplot.setAbsoluteMinX( -10.0 );
-        histogramplot.setAbsoluteMaxX( 15.0 );
-
         histogramplot.setAbsoluteMinY( 0.0 );
         histogramplot.setAbsoluteMaxY( 1.0 );
 
@@ -84,24 +121,116 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
         histogramplot.setShowMinorTicksX( true );
         histogramplot.setShowMinorTicksY( true );
 
-        // add two data series to the plot
-        final float[] data = new float[NUM_POINTS];
-
         // create a painter/layer to display the histogram data
         HistogramPainter series1 = new HistogramPainter( );
         HistogramPainter series2 = new HistogramPainter( );
+        HistogramPainter series3 = new HistogramPainter( );
 
         // add data and color information to the first data series painter/layer
-        series1.setData( generateData1( data, NUM_POINTS ) );
-        series1.setColor( GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 0.6f ) );
+        series1.setData( data1 );
+        series1.setColor( GlimpseColor.fromColorRgba( 1, 0, 0, 0.6f ) );
 
         // add data and color information to the second data series painter/layer
-        series2.setData( generateData2( data, NUM_POINTS ) );
-        series2.setColor( GlimpseColor.fromColorRgba( 0.0f, 1.0f, 0.0f, 0.6f ) );
+        series2.setData( data2 );
+        series2.setColor( GlimpseColor.fromColorRgba( 0, 1, 0, 0.6f ) );
 
-        // add the two painters to the plot
+        series3.setData( data3 );
+        series3.setColor( GlimpseColor.fromColorRgba( 0, 0, 1, 0.6f ) );
+
         histogramplot.addPainter( series1 );
         histogramplot.addPainter( series2 );
+        histogramplot.addPainter( series3 );
+
+        return histogramplot;
+    }
+
+    GlimpseLayout createStackedHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
+    {
+        SimplePlot2D histogramplot = new SimplePlot2D( );
+
+        histogramplot.setTitle( "Stacked Histograms" );
+        histogramplot.setAxisLabelX( "x axis" );
+        histogramplot.setAxisLabelY( "frequency" );
+
+        histogramplot.getAxis( ).getAxisX( ).setParent( xAxis );
+
+        histogramplot.lockMinY( 0 );
+
+        histogramplot.setShowMinorTicksX( true );
+        histogramplot.setShowMinorTicksY( true );
+
+        histogramplot.getCrosshairPainter( ).showSelectionBox( false );
+
+        StackedHistogramPainter stacked = new StackedHistogramPainter( );
+
+        stacked.setData( data1, data2, data3 );
+        stacked.setSeriesColor( 0, GlimpseColor.fromColorRgba( 1, 0, 0, 0.6f ) );
+        stacked.setSeriesColor( 1, GlimpseColor.fromColorRgba( 0, 1, 0, 0.6f ) );
+        stacked.setSeriesColor( 2, GlimpseColor.fromColorRgba( 0, 0, 1, 0.6f ) );
+
+        // add the two painters to the plot
+        histogramplot.addPainter( stacked );
+
+        stacked.autoAdjustAxisBounds( histogramplot.getAxis( ) );
+
+        return histogramplot;
+    }
+
+    GlimpseLayout createStackedScaledHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
+    {
+        SimplePlot2D histogramplot = new SimplePlot2D( );
+
+        histogramplot.setTitle( "Stacked/Scaled Histograms" );
+        histogramplot.setAxisLabelX( "x axis" );
+        histogramplot.setAxisLabelY( "frequency" );
+
+        histogramplot.getAxis( ).getAxisX( ).setParent( xAxis );
+
+        histogramplot.lockMinY( 0 );
+
+        histogramplot.setShowMinorTicksX( true );
+        histogramplot.setShowMinorTicksY( true );
+
+        histogramplot.getCrosshairPainter( ).showSelectionBox( false );
+
+        StackedHistogramPainter stacked = new StackedHistogramPainter( )
+        {
+            Float2IntMap totalHeights;
+
+            @Override
+            public void setData( int totalNumValues, float binSize, Float2IntMap... counts )
+            {
+                totalHeights = new Float2IntOpenHashMap( );
+                totalHeights.defaultReturnValue( 0 );
+                for ( Float2IntMap countMap : counts )
+                {
+                    for ( Float2IntMap.Entry entry : countMap.float2IntEntrySet( ) )
+                    {
+                        int sum = totalHeights.get( entry.getFloatKey( ) );
+                        sum += entry.getIntValue( );
+                        totalHeights.put( entry.getFloatKey( ), sum );
+                    }
+                }
+
+                super.setData( totalNumValues, binSize, counts );
+            }
+
+            @Override
+            protected float getBarHeight( float bin, int count, int totalValues )
+            {
+                return count / ( float ) totalHeights.get( bin );
+            }
+        };
+
+        stacked.setData( data1, data2, data3 );
+        stacked.setSeriesColor( 0, GlimpseColor.fromColorRgba( 1, 0, 0, 0.6f ) );
+        stacked.setSeriesColor( 1, GlimpseColor.fromColorRgba( 0, 1, 0, 0.6f ) );
+        stacked.setSeriesColor( 2, GlimpseColor.fromColorRgba( 0, 0, 1, 0.6f ) );
+
+        // add the two painters to the plot
+        histogramplot.addPainter( stacked );
+
+        stacked.autoAdjustAxisBounds( histogramplot.getAxis( ) );
 
         return histogramplot;
     }
@@ -109,7 +238,9 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
     public static float[] generateData1( float[] data, int size )
     {
         for ( int i = 0; i < size; i++ )
+        {
             data[i] = ( float ) ( 5 * Math.random( ) + 10.0f * Math.sin( i * ( 20.0f / Math.PI ) ) );
+        }
 
         return data;
     }
@@ -117,7 +248,19 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
     public static float[] generateData2( float[] data, int size )
     {
         for ( int i = 0; i < size; i++ )
+        {
             data[i] = ( float ) ( Math.pow( Math.random( ), 3.0 ) * -20.0 + 10.0 );
+        }
+
+        return data;
+    }
+
+    public static float[] generateData3( float[] data, int size )
+    {
+        for ( int i = 0; i < size; i++ )
+        {
+            data[i] = ( float ) ( Math.pow( 35, Math.random( ) ) - 10 );
+        }
 
         return data;
     }

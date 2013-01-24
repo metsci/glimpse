@@ -29,27 +29,24 @@ package com.metsci.glimpse.plot.timeline.listener;
 import java.util.List;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.event.mouse.MouseButton;
+import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 
-public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
+public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
 {
-    protected boolean dragTogether = false;
     protected boolean onlyMoveCurrent = false;
     protected StackedTimePlot2D plot;
-    protected boolean timeIsX;
 
-    public TimelineMouseListener1D( StackedTimePlot2D plot )
+    public TimeAxisMouseListener1D( StackedTimePlot2D plot )
     {
         super( 25 );
 
-        this.timeIsX = plot.isTimeAxisHorizontal( );
         this.plot = plot;
     }
 
@@ -61,10 +58,10 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
     @Override
     public void mousePressed( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
     {
-        super.mousePressed( e, axis, horizontal );
+        updateTagSelection( e, axis, horizontal );
 
         // right clicks toggle selection locking
-        if ( this.allowSelectionLock && e.isButtonDown( MouseButton.Button3 ) )
+        if ( allowSelectionLock && e.isButtonDown( MouseButton.Button3 ) )
         {
             if ( plot.isCurrentTimeLocked( ) || plot.isSelectionLocked( ) )
             {
@@ -84,8 +81,6 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
         Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
-
-        dragTogether = false;
 
         double maxDistance = maxPixelDist / taggedAxis.getPixelsPerValue( );
         double mouseValue = taggedAxis.screenPixelToValue( mousePos );
@@ -130,18 +125,13 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         }
 
         mouseMoved0( e, taggedAxis, horizontal );
-
-        taggedAxis.validateTags( );
-        taggedAxis.validate( );
-
-        notifyTagsUpdated( taggedAxis );
     }
-    
+
     protected void mouseMoved0( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
     {
         // subclasses can add additional mouseMoved behaviors here, do nothing by default
     }
-    
+
     protected void tagDragged( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
     {
         anchor( taggedAxis, horizontal, e.getX( ), e.getY( ) );
@@ -153,18 +143,18 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
 
         this.selectedTag.setValue( newTagValue );
     }
-    
+
     protected void mouseDragged( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
     {
         pan( taggedAxis, horizontal, e.getX( ), e.getY( ) );
     }
-    
+
     protected void mouseHovered( GlimpseMouseEvent e, TaggedAxis1D taggedAxis, boolean horizontal )
     {
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
         Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
-        
+
         int mousePosPixels = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
         double mousePosValue = taggedAxis.screenPixelToValue( mousePosPixels );
 
@@ -175,12 +165,11 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         maxTag.setValue( mousePosValue + maxDiff );
         currentTag.setValue( mousePosValue );
     }
-    
+
     @Override
     public void mouseWheelMoved( GlimpseMouseEvent e )
     {
-        TaggedAxis1D taggedAxis = getTaggedAxis1D( e );
-
+        TaggedAxis1D taggedAxis = getAxis( e );
         if ( taggedAxis == null ) return;
 
         if ( e.isKeyDown( ModifierKey.Ctrl ) || e.isKeyDown( ModifierKey.Meta ) )
@@ -189,48 +178,78 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         }
         else
         {
-            if ( timeIsX )
-            {
-                this.mouseWheelMoved( e, taggedAxis, true );
-            }
-            else
-            {
-                this.mouseWheelMoved( e, taggedAxis, false );
-            }
+            super.mouseWheelMoved( e );
         }
-
+    }
+    
+    @Override
+    public void mousePressed( GlimpseMouseEvent event )
+    {
+        super.mousePressed( event );
+        
+        TaggedAxis1D taggedAxis = getAxis( event );
+        if ( taggedAxis == null ) return;
         taggedAxis.validateTags( );
-        taggedAxis.validate( );
+    }
 
-        notifyTagsUpdated( taggedAxis );
+    @Override
+    public void mouseMoved( GlimpseMouseEvent event )
+    {
+        super.mouseMoved( event );
+        
+        TaggedAxis1D taggedAxis = getAxis( event );
+        if ( taggedAxis == null ) return;
+        taggedAxis.validateTags( );
+    }
+
+    @Override
+    public void mouseReleased( GlimpseMouseEvent event )
+    {
+        super.mouseReleased( event );
+        
+        TaggedAxis1D taggedAxis = getAxis( event );
+        if ( taggedAxis == null ) return;
+        taggedAxis.validateTags( );
     }
 
     public void handleCtrlMouseWheel( GlimpseMouseEvent e )
     {
-        TaggedAxis1D taggedAxis = getTaggedAxis1D( e );
+        TaggedAxis1D taggedAxis = getAxis( e );
 
         if ( taggedAxis == null ) return;
-        
+
         int zoomIncrements = e.getWheelIncrement( );
 
         double newSelectionSize = calculateNewSelectionSize( taggedAxis, zoomIncrements );
-        
+
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
         Tag currentTag = taggedAxis.getTag( StackedTimePlot2D.CURRENT_TIME );
-        
+
         double maxValue = maxTag.getValue( );
-        
+
         minTag.setValue( maxValue - newSelectionSize );
         maxTag.setValue( maxValue );
         currentTag.setValue( maxValue );
 
         taggedAxis.validateTags( );
         taggedAxis.validate( );
-
-        notifyTagsUpdated( minTag.getValue( ), maxTag.getValue( ), currentTag.getValue( ) );
     }
-    
+
+    protected TaggedAxis1D getAxis( GlimpseMouseEvent e )
+    {
+        GlimpseAxisLayout1D layout = getAxisLayout( e );
+        Axis1D axis = layout.getAxis( );
+        if ( axis instanceof TaggedAxis1D )
+        {
+            return ( TaggedAxis1D ) axis;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     protected double calculateNewSelectionSize( TaggedAxis1D taggedAxis, int zoomIncrements )
     {
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
@@ -247,35 +266,8 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         }
         zoomPercentDbl = zoomIncrements > 0 ? 1.0 / zoomPercentDbl : zoomPercentDbl;
         double newSelectionSize = selectionSize * zoomPercentDbl;
-        
+
         return newSelectionSize;
-    }
-
-    // TimelineMouseListener1D is used as a delegate for TimelineMouseListener2D, which
-    // means it is sometimes passed GlimpseMouseEvents from GlimpseAxisLayout2D. This
-    // method gets the correct Axis1D based on whether the time axis is X or Y for this timeline plot
-    protected TaggedAxis1D getTaggedAxis1D( GlimpseMouseEvent e )
-    {
-        Axis1D axis = e.getAxis1D( );
-
-        if ( axis != null )
-        {
-            return ( TaggedAxis1D ) e.getAxis1D( );
-        }
-        else
-        {
-            Axis2D axis2D = e.getAxis2D( );
-            if ( axis2D == null ) return null;
-
-            if ( timeIsX )
-            {
-                return ( TaggedAxis1D ) axis2D.getAxisX( );
-            }
-            else
-            {
-                return ( TaggedAxis1D ) axis2D.getAxisY( );
-            }   
-        }
     }
 
     protected void moveAllTags( TaggedAxis1D taggedAxis, double deltaTagValue )
@@ -284,15 +276,5 @@ public class TimelineMouseListener1D extends TaggedAxisMouseListener1D
         {
             tag.setValue( tag.getValue( ) + deltaTagValue );
         }
-    }
-
-    protected void notifyTagsUpdated( TaggedAxis1D timeAxis )
-    {
-        List<Tag> tags = timeAxis.getSortedTags( );
-        notifyTagsUpdated( tags.get( 0 ).getValue( ), tags.get( 2 ).getValue( ), tags.get( 1 ).getValue( ) );
-    }
-
-    protected void notifyTagsUpdated( double startValue, double endValue, double selectedValue )
-    {
     }
 }

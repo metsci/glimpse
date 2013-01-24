@@ -28,11 +28,8 @@ package com.metsci.glimpse.event.mouse;
 
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -46,17 +43,17 @@ public abstract class MouseWrapper<E>
 {
     protected GlimpseCanvas canvas;
     // set of hovered stacks which does not change during drags
-    protected Set<GlimpseTargetStack> dragHoveredSet;
+    protected LinkedList<GlimpseTargetStack> dragHoveredSet;
     // set of hovered stacks which changes even during drags
     // this is necessary because mouseExited and mouseEntered events
     // are fired even while the mouse is dragging
-    protected Set<GlimpseTargetStack> hoveredSet;
+    protected LinkedList<GlimpseTargetStack> hoveredSet;
 
     public MouseWrapper( GlimpseCanvas canvas )
     {
         this.canvas = canvas;
-        this.dragHoveredSet = new HashSet<GlimpseTargetStack>( );
-        this.hoveredSet = new HashSet<GlimpseTargetStack>( );
+        this.dragHoveredSet = new LinkedList<GlimpseTargetStack>( );
+        this.hoveredSet = new LinkedList<GlimpseTargetStack>( );
     }
 
     public List<GlimpseTargetStack> getContainingTargets( E e )
@@ -67,7 +64,7 @@ public abstract class MouseWrapper<E>
         // GlimpseMouseEvents to
         GlimpseContext context = new GlimpseContextImpl( canvas );
 
-        List<GlimpseTargetStack> result = new ArrayList<GlimpseTargetStack>( );
+        List<GlimpseTargetStack> result = new LinkedList<GlimpseTargetStack>( );
 
         getContainingTargets( e, context, result );
 
@@ -155,23 +152,23 @@ public abstract class MouseWrapper<E>
         return mouseTarget;
     }
 
-    protected Set<GlimpseTargetStack> clearAllHovered( )
+    protected List<GlimpseTargetStack> clearAllHovered( )
     {
-        Set<GlimpseTargetStack> oldHovered = copyHovered( );
+        List<GlimpseTargetStack> oldHovered = copyHovered( );
         dragHoveredSet.clear( );
         hoveredSet.clear( );
         return oldHovered;
     }
 
-    protected void setAllHovered( Collection<GlimpseTargetStack> list )
+    protected void setAllHovered( List<GlimpseTargetStack> list )
     {
         setDragHovered( list );
         setHovered( list );
     }
 
-    protected Set<GlimpseTargetStack> clearDragHovered( )
+    protected List<GlimpseTargetStack> clearDragHovered( )
     {
-        Set<GlimpseTargetStack> oldHovered = copyDragHovered( );
+        List<GlimpseTargetStack> oldHovered = copyDragHovered( );
         dragHoveredSet.clear( );
         return oldHovered;
     }
@@ -181,7 +178,7 @@ public abstract class MouseWrapper<E>
         dragHoveredSet.add( TargetStackUtil.newTargetStack( stack ) );
     }
 
-    protected void setDragHovered( Collection<GlimpseTargetStack> list )
+    protected void setDragHovered( List<GlimpseTargetStack> list )
     {
         clearDragHovered( );
         for ( GlimpseTargetStack stack : list )
@@ -193,19 +190,19 @@ public abstract class MouseWrapper<E>
         return dragHoveredSet != null && !dragHoveredSet.isEmpty( );
     }
 
-    protected Set<GlimpseTargetStack> copyDragHovered( )
+    protected List<GlimpseTargetStack> copyDragHovered( )
     {
-        return new HashSet<GlimpseTargetStack>( dragHoveredSet );
+        return new LinkedList<GlimpseTargetStack>( dragHoveredSet );
     }
 
-    protected Set<GlimpseTargetStack> getDragHovered( )
+    protected List<GlimpseTargetStack> getDragHovered( )
     {
         return dragHoveredSet;
     }
 
-    protected Set<GlimpseTargetStack> clearHovered( )
+    protected List<GlimpseTargetStack> clearHovered( )
     {
-        Set<GlimpseTargetStack> oldHovered = copyHovered( );
+        List<GlimpseTargetStack> oldHovered = copyHovered( );
         hoveredSet.clear( );
         return oldHovered;
     }
@@ -215,7 +212,7 @@ public abstract class MouseWrapper<E>
         hoveredSet.add( TargetStackUtil.newTargetStack( stack ) );
     }
 
-    protected void setHovered( Collection<GlimpseTargetStack> list )
+    protected void setHovered( List<GlimpseTargetStack> list )
     {
         clearHovered( );
         for ( GlimpseTargetStack stack : list )
@@ -227,12 +224,12 @@ public abstract class MouseWrapper<E>
         return hoveredSet != null && !hoveredSet.isEmpty( );
     }
 
-    protected Set<GlimpseTargetStack> copyHovered( )
+    protected List<GlimpseTargetStack> copyHovered( )
     {
-        return new HashSet<GlimpseTargetStack>( hoveredSet );
+        return new LinkedList<GlimpseTargetStack>( hoveredSet );
     }
 
-    protected Set<GlimpseTargetStack> getHovered( )
+    protected List<GlimpseTargetStack> getHovered( )
     {
         return hoveredSet;
     }
@@ -240,6 +237,13 @@ public abstract class MouseWrapper<E>
     protected GlimpseMouseEvent toLocalGlimpseEvent( E e, GlimpseTargetStack stack )
     {
         return toGlimpseEvent( toLocalCoords( e, stack ) );
+    }
+    
+    protected GlimpseMouseEvent toLocalGlimpseEvent( E e, GlimpseTargetStack stack, boolean handled )
+    {
+        GlimpseMouseEvent event = toLocalGlimpseEvent( e, stack );
+        event.setHandled( handled );
+        return event;
     }
 
     protected abstract boolean isButtonDown( E e );
@@ -252,7 +256,7 @@ public abstract class MouseWrapper<E>
 
     protected abstract GlimpseMouseEvent toGlimpseEvent( E e );
 
-    public void notifyMouseEnteredExited( E event, Set<GlimpseTargetStack> oldStacks, Set<GlimpseTargetStack> newStacks )
+    public void notifyMouseEnteredExited( E event, List<GlimpseTargetStack> oldStacks, List<GlimpseTargetStack> newStacks )
     {
         for ( GlimpseTargetStack oldStack : oldStacks )
         {
@@ -278,7 +282,7 @@ public abstract class MouseWrapper<E>
         if ( mouseTarget != null ) mouseTarget.mouseEntered( glimpseEvent );
     }
 
-    public void notifyMouseEntered( E event, Set<GlimpseTargetStack> stacks )
+    public void notifyMouseEntered( E event, List<GlimpseTargetStack> stacks )
     {
         for ( GlimpseTargetStack stack : stacks )
         {
@@ -293,7 +297,7 @@ public abstract class MouseWrapper<E>
         if ( mouseTarget != null ) mouseTarget.mouseExited( glimpseEvent );
     }
 
-    public void notifyMouseExited( E event, Set<GlimpseTargetStack> stacks )
+    public void notifyMouseExited( E event, List<GlimpseTargetStack> stacks )
     {
         for ( GlimpseTargetStack stack : stacks )
         {

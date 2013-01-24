@@ -96,7 +96,17 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
 
         if ( blend )
         {
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+            // When blending, we want the resulting RGB to be the obvious weighted average
+            // of RGB_s and RGB_d (weighted by A_s and 1-A_s, respectively).
+            //
+            // However, the resulting A should be (1 - (1-A_d)*(1-A_s)). With a little bit
+            // of algebra, you'll find that:
+            //
+            //     A_s*(1) + A_d*(1-A_s)  =  (1 - (1-A_d)*(1-A_s))
+            //
+            // So that's why the third and fourth args here are (1) and (1-A_s).
+            //
+            gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
             gl.glEnable( GL.GL_BLEND );
         }
         

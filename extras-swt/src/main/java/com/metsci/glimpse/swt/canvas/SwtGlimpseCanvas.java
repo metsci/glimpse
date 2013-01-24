@@ -53,6 +53,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.gl.GLListenerInfo;
 import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWT;
 import com.metsci.glimpse.swt.misc.CursorUtil;
@@ -70,6 +71,7 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     protected MouseWrapperSWT mouseHelper;
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
+    protected boolean isDisposed = false;
 
     public SwtGlimpseCanvas( Composite _parent )
     {
@@ -254,13 +256,6 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        super.dispose( );
-        canvasCursor.dispose( );
-    }
-
-    @Override
     public void paint( )
     {
         if ( !parent.isDisposed( ) )
@@ -285,11 +280,9 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
         setCursor( canvasCursor );
     }
 
-    // In linux, the component the mouse pointer is over receives mouse wheel
-    // events
-    // In windows, the component with focus receives mouse wheel events
-    // These listeners emulate linux-like mouse wheel event dispatch for
-    // important components
+    // In Linux, the component the mouse pointer is over receives mouse wheel events.
+    // In Windows, the component with focus receives mouse wheel events.
+    // These listeners emulate linux-like mouse wheel event dispatch for important components.
     // This causes the application to work in slightly un-windows-like ways
     // some of the time, but the effect is minor.
     protected void addFocusListener( final Control control )
@@ -342,5 +335,57 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         this.isEventGenerator = generate;
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return isDisposed;
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        super.dispose( );
+        canvasCursor.dispose( );
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+                
+                dispose( );
+                
+                isDisposed = true;
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.asyncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
     }
 }

@@ -172,6 +172,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
+        if ( textRenderer == null ) return;
+        
         GL gl = context.getGL( );
 
         TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;

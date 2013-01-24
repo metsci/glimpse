@@ -31,7 +31,6 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -54,6 +53,7 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWTBridge;
 
@@ -71,6 +71,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     protected MouseWrapperSWTBridge mouseHelper;
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
+    protected boolean isDisposed = false;
 
     public SwtBridgeGlimpseCanvas( Composite parent )
     {
@@ -254,67 +255,31 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
         glCanvas.display( );
     }
 
-    // In linux, the component the mouse pointer is over receives mouse wheel
-    // events
-    // In windows, the component with focus receives mouse wheel events
-    // These listeners emulate linux-like mouse wheel event dispatch for
-    // important components
+    // In Linux, the component the mouse pointer is over receives mouse wheel events.
+    // In Windows, the component with focus receives mouse wheel events.
+    // These listeners emulate linux-like mouse wheel event dispatch for important components.
     // This causes the application to work in slightly un-windows-like ways
     // some of the time, but the effect is minor.
     protected void addFocusListener( )
     {
+        // This code is rather fragile. It looks odd that the Swing requestFocus()
+        // call is placed inside a SWT asyncExec() block. However, if we make the
+        // requestFocus() call from the Swing thread, the call sometimes never returns,
+        // freezing the application.
         glCanvas.addMouseListener( new MouseAdapter( )
         {
             public void requestFocus( )
             {
-                // we want the glCanvas to have AWT focus and this Composite to have SWT focus
-                Display.getDefault( ).syncExec( new Runnable( )
+                Display.getDefault( ).asyncExec( new Runnable( )
                 {
                     public void run( )
                     {
-                        forceFocus( );
-
+                        glCanvas.requestFocus( );
                     }
                 } );
-
-                glCanvas.requestFocus( );
-            }
-
-            public void mouseClicked( MouseEvent e )
-            {
-                requestFocus( );
-            }
-
-            public void mousePressed( MouseEvent e )
-            {
-                requestFocus( );
-            }
-
-            public void mouseReleased( MouseEvent e )
-            {
-                requestFocus( );
             }
 
             public void mouseEntered( MouseEvent e )
-            {
-                requestFocus( );
-            }
-
-            public void mouseExited( MouseEvent e )
-            {
-            }
-
-            public void mouseWheelMoved( MouseWheelEvent e )
-            {
-                requestFocus( );
-            }
-
-            public void mouseDragged( MouseEvent e )
-            {
-                requestFocus( );
-            }
-
-            public void mouseMoved( MouseEvent e )
             {
                 requestFocus( );
             }
@@ -366,5 +331,62 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 // do nothing
             }
         } );
+    }
+
+    @Override
+    public boolean isDisposed( )
+    {
+        return isDisposed;
+    }
+
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+
+                isDisposed = true;
+            }
+        };
+
+        // don't dispose this component inside the Runnable
+        // (because dispose() should always be called from the SWT thread)
+        Display.getDefault( ).asyncExec( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                if ( !SwtBridgeGlimpseCanvas.super.isDisposed( ) )
+                {
+                    dispose( );
+                }
+            }
+        } );
+
+        if ( manager != null )
+        {
+            manager.asyncExec( dispose );
+        }
+        else
+        {
+            dispose.run( );
+        }
     }
 }

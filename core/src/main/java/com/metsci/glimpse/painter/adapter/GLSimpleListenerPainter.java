@@ -42,21 +42,37 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class GLSimpleListenerPainter implements GlimpsePainter
 {
-    private GLSimpleListenerAbstract listener;
+    protected GLSimpleListenerAbstract listener;
 
-    private boolean init = false;
-    private boolean dispose = false;
+    protected boolean init = false;
+    protected boolean dispose = false;
     
-    private GlimpseBounds lastBounds;
+    protected GlimpseBounds lastBounds;
 
+    protected boolean displayOn = true;
+    
     public GLSimpleListenerPainter( GLSimpleListenerAbstract listener )
     {
         this.listener = listener;
+    }
+    
+    @Override
+    public void setVisible( boolean show )
+    {
+        this.displayOn = show;
+    }
+
+    @Override
+    public boolean isVisible( )
+    {
+        return displayOn;
     }
 
     @Override
     public void paintTo( GlimpseContext context )
     {
+        if ( !displayOn ) return;
+        
         GLContext glContext = context.getGLContext( );
 
         if ( !init )

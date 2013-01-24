@@ -42,17 +42,24 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
 {
     protected StackedTimePlot2D plot;
 
+    protected boolean showLockedStatus = true;
+    
     public SelectedTimeRegionPainter( StackedTimePlot2D plot )
     {
         super( plot.getOrientation( ) );
         this.plot = plot;
+    }
+    
+    public void setShowLockedStatus( boolean show )
+    {
+        this.showLockedStatus = show;
     }
 
     protected void paint( GL gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
     {
         super.paint( gl, taggedAxis, tags, min, max, current, width, height );
 
-        if ( plot.isLocked( ) )
+        if ( plot.isLocked( ) && showLockedStatus )
         {
             String text = "LOCKED";
 

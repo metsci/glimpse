@@ -60,34 +60,40 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         Bottom, Center, Top;
     }
 
-    private float[] textColor = GlimpseColor.getBlack( );
+    protected float[] textColor = GlimpseColor.getWhite( );
+    protected float[] textColorNoBackground = GlimpseColor.getBlack( );
+    protected boolean textColorSet = false;
 
-    private boolean paintBackground = false;
-    private float[] backgroundColor = GlimpseColor.getBlack( 0.3f );
+    protected boolean paintBackground = false;
+    protected float[] backgroundColor = GlimpseColor.getBlack( 0.7f );
+    protected boolean backgroundColorSet = false;
 
-    private int padding = 5;
+    protected boolean paintBorder = false;
+    protected float[] borderColor = GlimpseColor.getWhite( 1f );
+    protected boolean borderColorSet = false;
 
-    private HorizontalPosition hPos;
-    private VerticalPosition vPos;
+    protected int horizontalPadding = 5;
+    protected int verticalPadding = 5;
 
-    private TextRenderer textRenderer;
+    protected HorizontalPosition hPos;
+    protected VerticalPosition vPos;
 
-    private String sizeText;
-    private String text;
+    protected TextRenderer textRenderer;
+    protected boolean fontSet = false;
 
-    private boolean horizontal = true;
-    
-    private boolean fontSet = false;
-    
-    private volatile Font newFont = null;
-    private volatile boolean antialias = false;
-    
+    protected String sizeText;
+    protected String text;
+
+    protected boolean horizontal = true;
+
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
+
     public SimpleTextPainter( )
     {
-        setFont( 12, true, false );
-        
-        hPos = HorizontalPosition.Left;
-        vPos = VerticalPosition.Bottom;
+        this.newFont = getDefaultBold( 12 );
+        this.hPos = HorizontalPosition.Left;
+        this.vPos = VerticalPosition.Bottom;
     }
 
     public SimpleTextPainter setHorizontalLabels( boolean horizontal )
@@ -95,7 +101,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         this.horizontal = horizontal;
         return this;
     }
-    
+
     public SimpleTextPainter setPaintBackground( boolean paintBackground )
     {
         this.paintBackground = paintBackground;
@@ -105,6 +111,20 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     public SimpleTextPainter setBackgroundColor( float[] backgroundColor )
     {
         this.backgroundColor = backgroundColor;
+        this.backgroundColorSet = true;
+        return this;
+    }
+
+    public SimpleTextPainter setPaintBorder( boolean paintBorder )
+    {
+        this.paintBorder = paintBorder;
+        return this;
+    }
+
+    public SimpleTextPainter setBorderColor( float[] borderColor )
+    {
+        this.borderColor = borderColor;
+        this.borderColorSet = true;
         return this;
     }
 
@@ -166,15 +186,34 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         return this;
     }
 
+    public String getText( )
+    {
+        return this.text;
+    }
+
     public SimpleTextPainter setPadding( int padding )
     {
-        this.padding = padding;
+        this.verticalPadding = padding;
+        this.horizontalPadding = padding;
+        return this;
+    }
+
+    public SimpleTextPainter setVerticalPadding( int padding )
+    {
+        this.verticalPadding = padding;
+        return this;
+    }
+
+    public SimpleTextPainter setHorizontalPadding( int padding )
+    {
+        this.horizontalPadding = padding;
         return this;
     }
 
     public SimpleTextPainter setColor( float[] rgba )
     {
         textColor = rgba;
+        textColorSet = true;
         return this;
     }
 
@@ -187,9 +226,14 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         return this;
     }
 
-    public int getPadding( )
+    public int getVerticalPadding( )
     {
-        return padding;
+        return verticalPadding;
+    }
+
+    public int getHorizontalPadding( )
+    {
+        return horizontalPadding;
     }
 
     @Override
@@ -201,6 +245,25 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             setFont( laf.getFont( AbstractLookAndFeel.TITLE_FONT ), false );
             fontSet = false;
         }
+
+        if ( !textColorSet )
+        {
+            textColor = laf.getColor( AbstractLookAndFeel.TOOLTIP_TEXT_COLOR );
+            textColorNoBackground = laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR );
+            textColorSet = false;
+        }
+
+        if ( !backgroundColorSet )
+        {
+            setBackgroundColor( laf.getColor( AbstractLookAndFeel.TOOLTIP_BACKGROUND_COLOR ) );
+            backgroundColorSet = false;
+        }
+
+        if ( !borderColorSet )
+        {
+            setBorderColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
+            borderColorSet = false;
+        }
     }
 
     @Override
@@ -209,39 +272,46 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
     }
-    
+
+    public Rectangle2D getTextBounds( )
+    {
+        return sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
+    }
+
     protected void paintToHorizontal( GL gl, int width, int height, Rectangle2D textBounds )
     {
-        int xText = padding;
-        int yText = padding;
+        int xText = horizontalPadding;
+        int yText = verticalPadding;
 
         switch ( hPos )
         {
         case Left:
-            xText = ( int ) padding;
+            xText = ( int ) horizontalPadding;
             break;
         case Center:
-            xText = ( int ) ( width / 2d - textBounds.getWidth( ) / 2d );
+            // 0.3 looks more "centered" for most fonts than 0.5
+            xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.3 );
             break;
         case Right:
-            xText = ( int ) ( width - textBounds.getWidth( ) - padding );
+            xText = ( int ) ( width - textBounds.getWidth( ) - horizontalPadding );
             break;
         }
 
         switch ( vPos )
         {
         case Bottom:
-            yText = ( int ) padding;
+            yText = ( int ) verticalPadding;
             break;
         case Center:
-            yText = ( int ) ( height / 2d - textBounds.getHeight( ) / 2d );
+         // 0.3 looks more "centered" for most fonts than 0.5
+            yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.3 );
             break;
         case Top:
-            yText = ( int ) ( height - textBounds.getHeight( ) - padding );
+            yText = ( int ) ( height - textBounds.getHeight( ) - verticalPadding );
             break;
         }
 
-        if ( this.paintBackground )
+        if (  paintBackground ||  paintBorder )
         {
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glLoadIdentity( );
@@ -257,20 +327,44 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             int xTextMax = ( int ) ( xText + bound.getWidth( ) + ( bound.getMinX( ) ) - 1 );
             int yTextMax = ( int ) ( yText + bound.getHeight( ) - 3 );
 
-            // Draw Text Background
-            gl.glColor4fv( backgroundColor, 0 );
-
-            gl.glBegin( GL.GL_QUADS );
-            try
+            if( paintBackground)
             {
-                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
-                gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
-                gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
-                gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+	            // Draw Text Background
+	            gl.glColor4fv( backgroundColor, 0 );
+	
+	            gl.glBegin( GL.GL_QUADS );
+	            try
+	            {
+	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
+	                gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+	            }
+	            finally
+	            {
+	                gl.glEnd( );
+	            }
             }
-            finally
+            
+            if( paintBorder )
             {
-                gl.glEnd( );
+	            // Draw Text Border
+	            gl.glColor4fv( borderColor, 0 );
+            	gl.glEnable(GL.GL_LINE_SMOOTH);
+	
+	            gl.glBegin( GL.GL_LINE_STRIP );
+	            try
+	            {
+	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
+	                gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
+	                gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+	            }
+	            finally
+	            {
+	                gl.glEnd( );
+	            }
             }
         }
         
@@ -279,7 +373,15 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         textRenderer.beginRendering( width, height );
         try
         {
-            textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
+            if ( !textColorSet && !paintBackground )
+            {
+                GlimpseColor.setColor( textRenderer, textColorNoBackground );
+            }
+            else
+            {
+                GlimpseColor.setColor( textRenderer, textColor );
+            }
+                
             textRenderer.draw( text, xText, yText );
         }
         finally
@@ -287,45 +389,45 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             textRenderer.endRendering( );
         }
     }
-    
+
     protected void paintToVertical( GL gl, int width, int height, Rectangle2D textBounds )
     {
-        int xText = padding;
-        int yText = padding;
-        
+        int xText = horizontalPadding;
+        int yText = verticalPadding;
+
         double textWidth = textBounds.getWidth( );
         double textHeight = textBounds.getHeight( );
-        
-        int halfTextWidth = (int) ( textWidth / 2d );
-        int halfTextHeight = (int) ( textHeight / 2d );
+
+        int halfTextWidth = ( int ) ( textWidth / 2d );
+        int halfTextHeight = ( int ) ( textHeight / 2d );
 
         switch ( hPos )
         {
-        case Left:
-            xText = ( int ) ( padding - halfTextWidth + halfTextHeight );
-            break;
-        case Center:
-            xText = ( int ) ( width / 2d - halfTextWidth );
-            break;
-        case Right:
-            xText = ( int ) ( width - halfTextWidth - halfTextHeight - padding );
-            break;
+            case Left:
+                xText = ( int ) ( horizontalPadding - halfTextWidth + halfTextHeight );
+                break;
+            case Center:
+                xText = ( int ) ( width / 2d - halfTextWidth );
+                break;
+            case Right:
+                xText = ( int ) ( width - halfTextWidth - halfTextHeight - horizontalPadding );
+                break;
         }
 
         switch ( vPos )
         {
-        case Bottom:
-            yText = ( int ) ( padding - halfTextHeight + halfTextWidth );
-            break;
-        case Center:
-            yText = ( int ) ( height / 2d - halfTextHeight );
-            break;
-        case Top:
-            yText = ( int ) ( height - halfTextHeight - halfTextWidth - padding );
-            break;
+            case Bottom:
+                yText = ( int ) ( verticalPadding - halfTextHeight + halfTextWidth );
+                break;
+            case Center:
+                yText = ( int ) ( height / 2d - halfTextHeight );
+                break;
+            case Top:
+                yText = ( int ) ( height - halfTextHeight - halfTextWidth - verticalPadding );
+                break;
         }
-        
-        if ( this.paintBackground )
+
+        if ( this.paintBackground || this.paintBorder )
         {
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glLoadIdentity( );
@@ -337,44 +439,68 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             gl.glEnable( GL.GL_BLEND );
 
             int buffer = 2;
-            
+
             int xTextMin = ( int ) ( xText + halfTextWidth - halfTextHeight - buffer );
             int yTextMin = ( int ) ( yText + halfTextWidth + halfTextHeight + buffer );
-            
+
             int xTextMax = ( int ) ( xText + halfTextWidth + halfTextHeight + buffer + 3 );
             int yTextMax = ( int ) ( yText - halfTextWidth + halfTextHeight - buffer );
 
-            // Draw Text Background
-            gl.glColor4fv( backgroundColor, 0 );
+            if ( this.paintBackground )
+            {
+                // Draw Text Background
+                gl.glColor4fv( backgroundColor, 0 );
 
-            gl.glBegin( GL.GL_QUADS );
-            try
-            {
-                gl.glVertex2f( xTextMin, yTextMin );
-                gl.glVertex2f( xTextMax, yTextMin );
-                gl.glVertex2f( xTextMax, yTextMax );
-                gl.glVertex2f( xTextMin, yTextMax );
+                gl.glBegin( GL.GL_QUADS );
+                try
+                {
+                    gl.glVertex2f( xTextMin, yTextMin );
+                    gl.glVertex2f( xTextMax, yTextMin );
+                    gl.glVertex2f( xTextMax, yTextMax );
+                    gl.glVertex2f( xTextMin, yTextMax );
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
             }
-            finally
+
+            if ( this.paintBorder )
             {
-                gl.glEnd( );
+                // Draw Text Background
+                gl.glColor4fv( borderColor, 0 );
+                gl.glEnable( GL.GL_LINE_SMOOTH );
+
+                gl.glBegin( GL.GL_LINE_STRIP );
+                try
+                {
+                    gl.glVertex2f( xTextMin, yTextMin );
+                    gl.glVertex2f( xTextMax, yTextMin );
+                    gl.glVertex2f( xTextMax, yTextMax );
+                    gl.glVertex2f( xTextMin, yTextMax );
+                    gl.glVertex2f( xTextMin, yTextMin );
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
             }
         }
-        
+
         gl.glDisable( GL.GL_BLEND );
-        
+
         textRenderer.beginRendering( width, height );
         try
         {
             double xShift = xText + halfTextWidth;
             double yShift = yText + halfTextHeight;
-            
+
             gl.glMatrixMode( GL.GL_PROJECTION );
             gl.glTranslated( xShift, yShift, 0 );
             gl.glRotated( 90, 0, 0, 1.0f );
             gl.glTranslated( -xShift, -yShift, 0 );
-            
-            textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
+
+            GlimpseColor.setColor( textRenderer, textColor );
             textRenderer.draw( text, xText, yText );
         }
         finally
@@ -388,12 +514,10 @@ public class SimpleTextPainter extends GlimpsePainterImpl
     {
         if ( newFont != null )
         {
-            if ( textRenderer != null ) textRenderer.dispose( );
-            textRenderer = new TextRenderer( newFont, antialias, false );
-            newFont = null;
+            updateTextRenderer( );
         }
-        
-        if ( text == null ) return;
+
+        if ( text == null || textRenderer == null ) return;
 
         GL gl = context.getGL( );
         int width = bounds.getWidth( );
@@ -409,5 +533,12 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         {
             paintToVertical( gl, width, height, textBounds );
         }
+    }
+
+    protected void updateTextRenderer( )
+    {
+        if ( textRenderer != null ) textRenderer.dispose( );
+        textRenderer = new TextRenderer( newFont, antialias, false );
+        newFont = null;
     }
 }

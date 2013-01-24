@@ -48,7 +48,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseClicked( event );
+                mouseClicked0( event );
             }
         } );
     }
@@ -60,7 +60,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseEntered( event );
+                mouseEntered0( event );
             }
         } );
     }
@@ -72,7 +72,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseExited( event );
+                mouseExited0( event );
             }
         } );
     }
@@ -84,7 +84,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mousePressed( event );
+                mousePressed0( event );
             }
         } );
     }
@@ -96,7 +96,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseReleased( event );
+                mouseReleased0( event );
             }
         } );
     }
@@ -108,7 +108,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseDragged( event );
+                mouseDragged0( event );
             }
         } );
     }
@@ -120,7 +120,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseMoved( event );
+                mouseMoved0( event );
             }
         } );
     }
@@ -132,7 +132,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperSwing
         {
             public void run( )
             {
-                MouseWrapperSWTBridge.super.mouseWheelMoved( event );
+                mouseWheelMoved0( event );
             }
         } );
     }

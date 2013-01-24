@@ -88,19 +88,19 @@ public class Plot2D extends GlimpseAxisLayout2D
      * GlimpsePainters which should appear behind the plot data should be given this z order value.
      */
     public static int BACKGROUND_LAYER = -100;
-    
+
     /**
      * A constant for use with {@link com.metsci.glimpse.layout.GlimpseLayout#setZOrder(com.metsci.glimpse.painter.base.GlimpsePainter, int)}.
      * GlimpsePainters which contain plot data should generally be given this z order value. Note, this is the default z order.
      */
     public static int DATA_LAYER = 0;
-    
+
     /**
      * A constant for use with {@link com.metsci.glimpse.layout.GlimpseLayout#setZOrder(com.metsci.glimpse.painter.base.GlimpsePainter, int)}.
      * GlimpsePainters which contain overlays that should appear in front of plot data should be given this z order value.
      */
-    public static int FOREGROUND_LAYER = 100;   
-    
+    public static int FOREGROUND_LAYER = 100;
+
     protected int outerBorder = 10;
     protected int axisThicknessX = 40;
     protected int axisThicknessY = 60;

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.swt.misc;
 
+import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.support.color.GlimpseColor.getWhite;
 import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import org.eclipse.swt.SWT;
@@ -38,10 +40,19 @@ public class SwtLookAndFeel extends AbstractLookAndFeel
     public SwtLookAndFeel( )
     {
         map.put( CROSSHAIR_COLOR, GlimpseColor.getBlack( ) );
+        map.put( BORDER_COLOR, getBlack( ) );
+        
         map.put( PLOT_BACKGROUND_COLOR, GlimpseColorSwt.fromColorSwtSystemColor( SWT.COLOR_WIDGET_NORMAL_SHADOW ) );
         map.put( FRAME_BACKGROUND_COLOR, GlimpseColorSwt.fromColorSwtSystemColor( SWT.COLOR_WIDGET_BACKGROUND ) );
 
+        map.put( AXIS_TEXT_COLOR, getBlack( ) );
+        map.put( AXIS_TICK_COLOR, getBlack( ) );
+        map.put( AXIS_TAG_COLOR, getBlack( 0.2f ) );
+        
         map.put( AXIS_FONT, getDefaultPlain( 11 ) );
         map.put( TITLE_FONT, getDefaultPlain( 14 ) );
+        
+        map.put( TOOLTIP_BACKGROUND_COLOR, getBlack( 0.7f ) );
+        map.put( TOOLTIP_TEXT_COLOR, getWhite( ) );
     }
 }

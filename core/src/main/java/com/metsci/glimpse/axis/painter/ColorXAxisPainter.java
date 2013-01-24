@@ -72,6 +72,9 @@ public class ColorXAxisPainter extends NumericXAxisPainter
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
+        updateTextRenderer( );
+        if ( textRenderer == null ) return;
+        
         GL gl = context.getGL( );
 
         int width = bounds.getWidth( );
@@ -134,7 +137,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         float y1 = getColorBarMinY( height );
         float y2 = getColorBarMaxY( height );
 
-        gl.glColor4f( 0f, 0f, 0f, 1f );
+        gl.glColor4fv( tickColor, 0 );
 
         gl.glBegin( GL.GL_LINES );
         try

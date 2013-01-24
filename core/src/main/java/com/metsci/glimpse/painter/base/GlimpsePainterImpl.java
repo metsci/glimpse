@@ -58,11 +58,13 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         this.doErrorHandling = doErrorHandling;
     }
 
+    @Override
     public void setVisible( boolean show )
     {
         this.displayOn = show;
     }
 
+    @Override
     public boolean isVisible( )
     {
         return displayOn;

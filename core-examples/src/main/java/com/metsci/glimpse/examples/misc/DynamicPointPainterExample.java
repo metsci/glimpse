@@ -41,6 +41,17 @@ import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkPointAccumula
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
+/**
+ * <p>Demonstrates use of DynamicPointSetPainter. This painter is useful when painting
+ * large sets of points which can change dynamically and must be individually colored.</p>
+ * 
+ * <p>TrackPainter is another option for painting large numbers of points, but it can only
+ * efficiently draw large groups of points with a single color. ShadedPointPainter allows
+ * even more control over the coloring of points (via a shader)  but does not allow easy
+ * dynamic addition and removal of points.</p>
+ * 
+ * @author ulman
+ */
 public class DynamicPointPainterExample implements GlimpseLayoutProvider
 {
     private static final Logger logger = Logger.getLogger( DynamicPointPainterExample.class.getName( ) );

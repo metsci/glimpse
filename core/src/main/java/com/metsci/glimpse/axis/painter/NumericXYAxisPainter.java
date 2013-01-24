@@ -44,6 +44,8 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
@@ -59,6 +61,9 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 {
     protected TextRenderer textRenderer;
     protected Font font;
+    
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
 
     protected float[] lineColor;
     protected float[] textColor;
@@ -75,17 +80,18 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
     protected boolean showHorizontal = true;
     protected boolean showVertical = true;
-
     protected boolean showLabelsNearOrigin = false;
-
     protected boolean showOrigin = true;
-
     protected boolean showZero = false;
 
     protected boolean lockLeft = false;
     protected boolean lockRight = false;
     protected boolean lockTop = false;
     protected boolean lockBottom = false;
+    
+    protected boolean fontSet = false;
+    protected boolean tickColorSet = false;
+    protected boolean labelColorSet = false;
     
     public NumericXYAxisPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
@@ -97,7 +103,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         this.textColor = GlimpseColor.getBlack( );
         this.lineColor = GlimpseColor.getBlack( );
     }
-
+    
     public NumericXYAxisPainter( )
     {
         this( new GridAxisExponentLabelHandler( ), new GridAxisExponentLabelHandler( ) );
@@ -108,19 +114,18 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         setFont( font, true );
     }
 
-    public void setFont( Font font, boolean antialias )
+    public NumericXYAxisPainter setFont( Font font, boolean antialias )
     {
-        this.font = font;
-
-        if ( this.textRenderer != null ) this.textRenderer.dispose( );
-
-        this.textRenderer = new TextRenderer( font, antialias, false );
+        this.newFont = font;
+        this.antialias = antialias;
+        this.fontSet = true;
+        return this;
     }
 
     public NumericXYAxisPainter setTextColor( float[] rgba )
     {
         this.textColor = rgba;
-
+        this.labelColorSet = true;
         return this;
     }
 
@@ -167,6 +172,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     public NumericXYAxisPainter setLineColor( float[] rgba )
     {
         this.lineColor = rgba;
+        this.tickColorSet = true;
         return this;
     }
 
@@ -197,6 +203,15 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
+        if ( this.newFont != null )
+        {
+            if ( this.textRenderer != null ) this.textRenderer.dispose( );
+            this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
+            this.newFont = null;
+        }
+        
+        if ( this.textRenderer == null ) return;
+        
         GL gl = context.getGL( );
 
         int width = bounds.getWidth( );
@@ -422,6 +437,29 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     protected boolean shouldPaintLabel( boolean atMinCorner, boolean atMaxCorner, int labelPos, int axisSize, int buffer )
     {
         return ( showLabelsNearOrigin || ( ( !atMaxCorner || labelPos > buffer ) && ( !atMinCorner || labelPos < axisSize - buffer ) ) );
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        // ignore the look and feel if a font has been manually set
+        if ( !fontSet )
+        {
+            setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
+            fontSet = false;
+        }
+        
+        if ( !tickColorSet )
+        {
+            setLineColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );
+            tickColorSet = false;
+        }
+        
+        if ( !labelColorSet )
+        {
+            setTextColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            labelColorSet = false;
+        }
     }
 
     @Override

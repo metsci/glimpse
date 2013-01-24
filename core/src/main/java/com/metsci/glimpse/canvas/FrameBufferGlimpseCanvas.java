@@ -47,6 +47,7 @@ import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.sun.opengl.util.texture.Texture;
 
@@ -77,12 +78,17 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 
     public FrameBufferGlimpseCanvas( int width, int height, GLContext context )
     {
+        this( width, height, true, false, context );
+    }
+    
+    public FrameBufferGlimpseCanvas( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
+    {
         GLContext newContext = createPixelBuffer( 1, 1, context ).getContext( );
 
         this.width = width;
         this.height = height;
 
-        this.fbo = new GLSimpleFrameBufferObject( width, height, newContext );
+        this.fbo = new GLSimpleFrameBufferObject( width, height, useDepth, useStencil, newContext );
 
         this.layoutManager = new LayoutManager( );
 
@@ -108,9 +114,17 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
             @Override
             public void display( GLContext context )
             {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                fbo.bind( context );
+                try
                 {
-                    layout.paintTo( getGlimpseContext( ) );
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.paintTo( getGlimpseContext( ) );
+                    }
+                }
+                finally
+                {
+                    fbo.unbind( context );
                 }
             }
 
@@ -282,30 +296,6 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( )
-    {
-        GLContext context = getGLContext( );
-
-        context.makeCurrent( );
-        try
-        {
-            fbo.dispose( context );
-        }
-        finally
-        {
-            context.release( );
-        }
-
-        this.isDisposed = true;
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
-    }
-
-    @Override
     public String toString( )
     {
         return FrameBufferGlimpseCanvas.class.getSimpleName( );
@@ -333,5 +323,50 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         // do nothing
+    }
+    
+    @Override
+    public boolean isDisposed( )
+    {
+        return this.isDisposed;
+    }
+    
+    @Override
+    public void dispose( RepaintManager manager )
+    {
+        Runnable dispose = new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                GLContext glContext = getGLContext( );
+                GlimpseContext context = new GlimpseContextImpl( glContext );
+                glContext.makeCurrent( );
+                try
+                {
+                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                    {
+                        layout.dispose( context );
+                    }
+                    
+                    fbo.dispose( glContext );
+                }
+                finally
+                {
+                    glContext.release( );
+                }
+                
+                isDisposed = true;
+            }
+        };
+        
+        if ( manager != null )
+        {
+            manager.asyncExec( dispose );   
+        }
+        else
+        {
+            dispose.run( );
+        }
     }
 }

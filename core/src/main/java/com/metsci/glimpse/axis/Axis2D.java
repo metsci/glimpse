@@ -99,10 +99,15 @@ public class Axis2D
         x.lockAspectRatio( y, x_to_y_ratio );
         y.lockAspectRatio( x, 1.0 / x_to_y_ratio );
 
+        validate( );
+    }
+
+    public void validate( )
+    {
         applyConstraints( );
         updateLinkedAxes( );
     }
-
+    
     public void applyConstraints( )
     {
         x.applyConstraints( );
@@ -151,7 +156,19 @@ public class Axis2D
         y.setMin( minY );
         y.setMax( maxY );
     }
-
+    
+    public void lock( )
+    {
+        x.lock( );
+        y.lock( );
+    }
+    
+    public void unlock( )
+    {
+        x.unlock( );
+        y.unlock( );
+    }
+    
     public double getMinX( )
     {
         return x.getMin( );

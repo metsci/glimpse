@@ -61,8 +61,9 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected boolean showLabel = true;
     protected boolean showMinorTicks = false;
 
-    protected Font font;
     protected TextRenderer textRenderer;
+    protected volatile Font newFont = null;
+    protected volatile boolean antialias = false;
 
     protected float[] tickColor = GlimpseColor.getBlack( );
     protected float[] tickLabelColor = GlimpseColor.getBlack( );
@@ -71,6 +72,8 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected AxisLabelHandler ticks;
 
     protected boolean fontSet = false;
+    protected boolean tickColorSet = false;
+    protected boolean labelColorSet = false;
 
     public NumericAxisPainter( AxisLabelHandler ticks )
     {
@@ -105,13 +108,8 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
 
     public void setFont( Font font, boolean antialias )
     {
-        this.font = font;
-
-        if ( this.textRenderer != null ) this.textRenderer.dispose( );
-
-        this.textRenderer = new TextRenderer( font, antialias, false );
-        this.textRenderer.setSmoothing( true );
-
+        this.newFont = font;
+        this.antialias = antialias;
         this.fontSet = true;
     }
 
@@ -148,16 +146,19 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     public void setTickColor( float[] color )
     {
         this.tickColor = color;
+        this.tickColorSet = true;
     }
 
     public void setTickLabelColor( float[] color )
     {
         this.tickLabelColor = color;
+        this.labelColorSet = true;
     }
 
     public void setAxisLabelColor( float[] color )
     {
         this.axisLabelColor = color;
+        this.labelColorSet = true;
     }
 
     public void setShowMinorTicks( boolean show )
@@ -173,11 +174,26 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
+        if ( laf == null ) return;
+        
         // ignore the look and feel if a font has been manually set
         if ( !fontSet )
         {
             setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
             fontSet = false;
+        }
+        
+        if ( !labelColorSet )
+        {
+            setAxisLabelColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            setTickLabelColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
+            labelColorSet = false;
+        }
+        
+        if ( !tickColorSet )
+        {
+            setTickColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );
+            tickColorSet = false;
         }
     }
 
@@ -186,5 +202,15 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
+    }
+
+    public void updateTextRenderer( )
+    {
+        if ( newFont != null )
+        {
+            if ( textRenderer != null ) textRenderer.dispose( );
+            textRenderer = new TextRenderer( newFont, antialias, false );
+            newFont = null;
+        }
     }
 }

@@ -28,23 +28,25 @@ package com.metsci.glimpse.painter.treemap;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.ints.IntArrays;
+import it.unimi.dsi.fastutil.ints.IntComparator;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
  * A TreeMap layout which better preserves aspect ratio and provides easier
  * understanding of spatial relationships between nodes.
- * 
+ *
  * This layout is detailed in Squarified Treemaps, by Bruls, Huizing and van
  * Wijk. Additional information was found on <a
  * href="http://jectbd.com/?p=271">http://jectbd.com/?p=271</a>. The following
- * sources provide pseudo-code only. This custom Java implementation carries
- * the same Metron copyright and license as the rest of the Glimpse source code. 
- * 
+ * sources provide pseudo-code only. This custom Java implementation carries the
+ * same Metron copyright and license as the rest of the Glimpse source code.
+ *
  * @author borkholder
  */
 public class SquarifiedLayout implements TreeMapLayout
@@ -53,27 +55,28 @@ public class SquarifiedLayout implements TreeMapLayout
     public Rectangle2D[] layout( Rectangle2D boundary, double[] areas, int level )
     {
         // sort by descending size
-        int[] order = sort( areas );
+        int[] order = sortDescending( areas );
 
         double sumOfAreas = 0;
-        for ( double a : areas )
+        for ( int i = 0; i < areas.length; i++ )
         {
-            sumOfAreas += a;
+            sumOfAreas += areas[i];
         }
 
         // order and normalize areas
         double[] sorted = new double[areas.length];
+        double normalizer = boundary.getWidth( ) * boundary.getHeight( ) / sumOfAreas;
         for ( int i = 0; i < order.length; i++ )
         {
-            sorted[i] = areas[order[i]] / sumOfAreas * boundary.getWidth( ) * boundary.getHeight( );
+            sorted[i] = areas[order[i]] * normalizer;
         }
 
         // squarify, or use entire area if just one area
         List<Rectangle2D> rectList = new ArrayList<Rectangle2D>( );
         if ( sorted.length > 1 )
         {
-            double shortestSide = Math.min( boundary.getWidth( ), boundary.getHeight( ) );
-            squarify( 0, sorted, boundary, new ArrayList<Double>( ), shortestSide, rectList );
+            double shortestSide = min( boundary.getWidth( ), boundary.getHeight( ) );
+            squarify( sorted, boundary, shortestSide, rectList );
         }
         else
         {
@@ -90,53 +93,73 @@ public class SquarifiedLayout implements TreeMapLayout
         return rects;
     }
 
-    protected void squarify( int head, double[] sortedSizes, Rectangle2D boundary, List<Double> row, double shortestSide, List<Rectangle2D> rects )
+    protected void squarify( double[] sortedSizes, Rectangle2D initialBoundary, double shortestSide, List<Rectangle2D> rects )
     {
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
+        double totalArea = 0;
+        DoubleList row = new DoubleArrayList( );
+        Rectangle2D boundary = initialBoundary;
 
-        /*
-         * If the worst aspect ratio with the new area is better than without, add
-         * it to the row and continue. If not, lay out the current row and start a
-         * new row.
-         */
-        if ( row.isEmpty( ) || worst( row, null, shortestSide ) >= worst( row, sortedSizes[head], shortestSide ) )
+        int head = 0;
+        while ( head < sortedSizes.length )
         {
-            if ( head == sortedSizes.length - 1 )
+            double newArea = sortedSizes[head];
+
+            /*
+             * If the worst aspect ratio with the new area is better than without, add
+             * it to the row and continue. If not, lay out the current row and start a
+             * new row.
+             */
+            boolean isBetter = maxAspectRatio( min, max, totalArea, shortestSide ) >= maxAspectRatio( min, max, totalArea + newArea, shortestSide );
+            if ( head == sortedSizes.length - 1 || row.isEmpty( ) || isBetter )
             {
-                row.add( sortedSizes[head] );
-                layoutRow( boundary, rects, row );
+                row.add( newArea );
+                min = min( min, newArea );
+                max = max( max, newArea );
+                totalArea += newArea;
+
+                head++;
+
+                if ( head == sortedSizes.length )
+                {
+                    layoutRow( boundary, rects, row );
+                    // end loop
+                }
             }
             else
             {
-                row.add( sortedSizes[head] );
-                squarify( head + 1, sortedSizes, boundary, row, shortestSide, rects );
+                boundary = layoutRow( boundary, rects, row );
+                shortestSide = min( boundary.getWidth( ), boundary.getHeight( ) );
+
+                row = new DoubleArrayList( );
+                min = Double.POSITIVE_INFINITY;
+                max = Double.NEGATIVE_INFINITY;
+                totalArea = 0;
             }
-        }
-        else
-        {
-            Rectangle2D newBoundary = layoutRow( boundary, rects, row );
-            shortestSide = Math.min( newBoundary.getWidth( ), newBoundary.getHeight( ) );
-            squarify( head, sortedSizes, newBoundary, new ArrayList<Double>( ), shortestSide, rects );
         }
     }
 
-    protected Rectangle2D layoutRow( Rectangle2D boundary, List<Rectangle2D> rects, List<Double> row )
+    protected Rectangle2D layoutRow( Rectangle2D boundary, List<Rectangle2D> rects, DoubleList row )
     {
         double sumOfAreas = 0;
-        for ( double a : row )
+        for ( int i = 0; i < row.size( ); i++ )
         {
-            sumOfAreas += a;
+            sumOfAreas += row.getDouble( i );
         }
 
-        // do layout vertically
         boolean vertical = boundary.getWidth( ) >= boundary.getHeight( );
 
+        // largest areas are to the top and left
         double x = boundary.getMinX( );
         double y = boundary.getMaxY( );
+
         double width = sumOfAreas / boundary.getHeight( );
         double height = sumOfAreas / boundary.getWidth( );
 
-        for ( double area : row )
+        for ( int i = 0; i < row.size( ); i++ )
         {
+            double area = row.getDouble( i );
             if ( vertical )
             {
                 height = area / width;
@@ -159,6 +182,7 @@ public class SquarifiedLayout implements TreeMapLayout
             }
         }
 
+        // return remaining unused area
         if ( vertical )
         {
             return new Rectangle2D.Double( boundary.getMinX( ) + width, boundary.getMinY( ), boundary.getWidth( ) - width, boundary.getHeight( ) );
@@ -169,28 +193,11 @@ public class SquarifiedLayout implements TreeMapLayout
         }
     }
 
-    protected double worst( List<Double> areas, Double newArea, double shortestSide )
+    protected double maxAspectRatio( double minArea, double maxArea, double totalArea, double fixedSide )
     {
-        double minArea = Double.POSITIVE_INFINITY;
-        double maxArea = Double.NEGATIVE_INFINITY;
-        double totalArea = 0;
+        double ratio = ( totalArea * totalArea ) / ( fixedSide * fixedSide );
 
-        for ( double a : areas )
-        {
-            minArea = min( a, minArea );
-            maxArea = max( a, maxArea );
-            totalArea += a;
-        }
-
-        if ( newArea != null )
-        {
-            minArea = min( newArea, minArea );
-            maxArea = max( newArea, maxArea );
-            totalArea += newArea;
-        }
-
-        double worst = max( ( maxArea * shortestSide * shortestSide ) / ( totalArea * totalArea ), ( totalArea * totalArea ) / ( minArea * shortestSide * shortestSide ) );
-
+        double worst = max( maxArea / ratio, ratio / minArea );
         return worst;
     }
 
@@ -199,28 +206,28 @@ public class SquarifiedLayout implements TreeMapLayout
      * returned array contains the old indexes, in the new order. The order is
      * descending by size of the area.
      */
-    protected int[] sort( final double[] areas )
+    protected int[] sortDescending( final double[] areas )
     {
-        List<Integer> list = new ArrayList<Integer>( areas.length );
+        int[] indexes = new int[areas.length];
         for ( int i = 0; i < areas.length; i++ )
         {
-            list.add( i );
+            indexes[i] = i;
         }
 
-        Collections.sort( list, new Comparator<Integer>( )
+        IntArrays.quickSort( indexes, new IntComparator( )
         {
             @Override
             public int compare( Integer o1, Integer o2 )
             {
-                return Double.compare( areas[o2], areas[o1] );
+                return compare( o1.intValue( ), o2.intValue( ) );
+            }
+
+            @Override
+            public int compare( int k1, int k2 )
+            {
+                return Double.compare( areas[k2], areas[k1] );
             }
         } );
-
-        int[] indexes = new int[list.size( )];
-        for ( int i = 0; i < list.size( ); i++ )
-        {
-            indexes[i] = list.get( i );
-        }
 
         return indexes;
     }

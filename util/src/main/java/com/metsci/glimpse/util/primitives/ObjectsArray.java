@@ -54,7 +54,7 @@ public class ObjectsArray implements ObjectsModifiable
 
     public ObjectsArray(int n)
     {
-        this(new Object[n], n);
+        this(new Object[n], 0);
     }
 
     public ObjectsArray()

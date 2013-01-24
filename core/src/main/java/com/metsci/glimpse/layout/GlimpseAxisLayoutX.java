@@ -67,6 +67,11 @@ public class GlimpseAxisLayoutX extends GlimpseAxisLayout1D
     {
         super( parent );
     }
+    
+    public GlimpseAxisLayoutX( )
+    {
+        super( null, null, null );
+    }
 
     @Override
     protected Axis1D getAxis( Axis2D axis )

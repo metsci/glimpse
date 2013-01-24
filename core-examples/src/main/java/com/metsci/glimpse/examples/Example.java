@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples;
 
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+
 import javax.media.opengl.GLContext;
 import javax.swing.JFrame;
 
@@ -33,9 +35,8 @@ import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
-
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
 /**
  * Provides static utility methods for initializing a Swing JFrame, adding a GlimpseCanvas,
@@ -48,7 +49,7 @@ public class Example
     private SwingGlimpseCanvas canvas;
     private RepaintManager manager;
     private JFrame frame;
-    
+
     public Example( SwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame )
     {
         super( );
@@ -56,7 +57,7 @@ public class Example
         this.manager = manager;
         this.frame = frame;
     }
-    
+
     public SwingGlimpseCanvas getCanvas( )
     {
         return canvas;
@@ -66,7 +67,7 @@ public class Example
     {
         return manager;
     }
-    
+
     public JFrame getFrame( )
     {
         return frame;
@@ -82,7 +83,7 @@ public class Example
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        RepaintManager manager = RepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example" );
         frame.add( canvas );
@@ -97,7 +98,7 @@ public class Example
             @Override
             public void run( )
             {
-                canvas.dispose( );
+                canvas.dispose( manager );
             }
         } );
 
@@ -114,7 +115,7 @@ public class Example
         SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( true, leftPanel.getGLContext( ) );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
-        RepaintManager repaintManager = new RepaintManager( );
+        RepaintManager repaintManager = new SwingRepaintManager( );
         repaintManager.addGlimpseCanvas( leftPanel );
         repaintManager.addGlimpseCanvas( rightPanel );
         repaintManager.start( );

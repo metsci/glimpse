@@ -55,7 +55,7 @@ import com.metsci.glimpse.painter.info.MeasurementPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.shader.SampledColorScaleShaderInteger;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -230,7 +230,7 @@ public class DNCMapViewerExample
         {
             String root = null;
             String dir = "/path/to/dnc_dir/";
-            
+
             if ( args.length > 0 )
             {
                 root = args[0];
@@ -240,7 +240,6 @@ public class DNCMapViewerExample
             {
                 root = "dnc15-general";
             }
-            
 
             GlimpseCanvas panel = new SwingGlimpseCanvas( true );
             MercatorProjection projection = new MercatorProjection( );
@@ -248,7 +247,7 @@ public class DNCMapViewerExample
             MapInfo<DNCObject> mapInfo = ResourceBasedMapInfo.createDNCMapInfo( root, dir );
             new DNCMapViewerExample( panel, projection, mapInfo );
 
-            RepaintManager.newRepaintManager( panel );
+            SwingRepaintManager.newRepaintManager( panel );
             containInFrame( panel );
         }
         catch ( Throwable t )

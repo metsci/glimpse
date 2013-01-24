@@ -41,6 +41,7 @@ public class Length
     public static final double feetToMeters             = 0.3048;
     public static final double kiloyardsToYards         = 1.0e3;
     public static final double feetToInches             = 12.0;
+    public static final double metersToKilometers       = 1.0e-3;
     public static final double metersToMillimeters      = 1.0e3;
     public static final double yardsToMeters            = yardsToFeet * feetToMeters;
     public static final double kiloyardsToMeters        = kiloyardsToYards * yardsToMeters;
@@ -60,6 +61,7 @@ public class Length
     public static final double metersToFeet             = 1.0 / feetToMeters;
     public static final double yardsToKiloyards         = 1.0 / kiloyardsToYards;
     public static final double inchesToFeet             = 1.0 / feetToInches;
+    public static final double kilometersToMeters       = 1.0 / metersToKilometers;
     public static final double millimetersToMeters      = 1.0 / metersToMillimeters;
     public static final double metersToYards            = 1.0 / yardsToMeters;
     public static final double metersToKiloyards        = 1.0 / kiloyardsToMeters;
@@ -417,6 +419,7 @@ public class Length
     public static final double kiloyardsToSu     = kiloyardsToMeters;
     public static final double inchesToSu        = inchesToMeters;
     public static final double millimetersToSu   = millimetersToMeters;
+    public static final double kilometersToSu    = kilometersToMeters;
 
     public static final double suToMeters        = 1.0 / metersToSu;
     public static final double suToNauticalMiles = 1.0 / nauticalMilesToSu;
@@ -425,6 +428,7 @@ public class Length
     public static final double suToKiloyards     = 1.0 / kiloyardsToSu;
     public static final double suToInches        = 1.0 / inchesToSu;
     public static final double suToMillimeters   = 1.0 / millimetersToSu;
+    public static final double suToKilometers    = 1.0 / kilometersToSu;
 
 
     /**
@@ -567,6 +571,27 @@ public class Length
      */
     public static double[] toMillimeters(double... lengths_SU) { return multiply(lengths_SU, suToMillimeters); }
 
+    /**
+     * Converts length from kilometers to system-units.
+     */
+    public static double fromKilometers(double length_KILOMETERS) { return length_KILOMETERS * kilometersToSu; }
+
+    /**
+     * Converts length from kilometers to system-units.
+     */
+    public static double[] fromKilometers(double... length_KILOMETERS) { return multiply(length_KILOMETERS, kilometersToSu); }
+
+    /**
+     * Converts length from system-units to kilometers.
+     */
+    public static double toKilometers(double length_SU) { return length_SU * suToKilometers; }
+
+    /**
+     * Converts length from system-units to kilometers.
+     */
+    public static double[] toKiloeters(double... lengths_SU) { return multiply(lengths_SU, suToKilometers); }
+    
+    
 
     private static double[] multiply(double[] array, double factor)
     {

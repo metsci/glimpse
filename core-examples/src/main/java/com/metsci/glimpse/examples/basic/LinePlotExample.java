@@ -120,7 +120,8 @@ public class LinePlotExample implements GlimpseLayoutProvider
         legend.setOffsetY( 10 );
         legend.setOffsetX( 100 );
         legend.addItem( "Series 1", GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 0.8f ) );
-        legend.addItem( "Series 2", GlimpseColor.fromColorRgba( 0.0f, 0.0f, 1.0f, 0.8f ), true );
+        legend.addItem( "Series 2", GlimpseColor.fromColorRgba( 0.0f, 0.0f, 1.0f, 0.8f ) );
+        legend.setLineStipple( "Series 2", 1, (short) 0x00FF );
 
         //make the lines in the legend slightly longer
         legend.setLegendItemWidth( 60 );
