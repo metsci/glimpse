@@ -59,7 +59,7 @@ import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
 import com.metsci.glimpse.worldwind.tile.GlimpseDynamicSurfaceTile;
 import com.metsci.glimpse.worldwind.tile.GlimpseResizingSurfaceTile;
 
-public class BaythmetryTileExample
+public class BathymetryTileExample
 {
     public static void main( String[] args ) throws IOException
     {
