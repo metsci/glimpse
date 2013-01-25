@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -403,7 +403,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         public GroupInfoImpl( PlotInfo group, Collection<? extends PlotInfo> subplots )
         {
             this.group = group;
-            this.subplots = new HashSet<PlotInfo>( );
+            this.subplots = new LinkedHashSet<PlotInfo>( );
             this.subplots.addAll( subplots );
             for ( PlotInfo plot : subplots )
             {
