@@ -1226,15 +1226,18 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         return timePlotInfo;
     }
-
-    protected void setPlotInfoLayout( int i, int size, PlotInfo info )
+    
+    protected void setPlotInfoLayout( PlotInfo info, int i, int size, int growingPlotCount )
     {
+        //XXX hack, overload negative size to mean "grow to fill available space"
+        boolean grow = info.getSize( ) < 0 || ( growingPlotCount == 0 && info.getId( ).equals( TIMELINE ) );
+        
         if ( isTimeAxisHorizontal( ) )
         {
             int topSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
             int bottomSpace = i >= size - 2 ? 0 : plotSpacing;
 
-            if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+            if ( grow )
             {
                 String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
                 String layout = String.format( format, 1, i, topSpace, bottomSpace );
@@ -1272,7 +1275,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             int topSpace = i <= 1 ? 0 : plotSpacing;
             int bottomSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
 
-            if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+            if ( grow )
             {
                 String format = "cell %d %d 1 1, push, grow, id i%1$d, gap %3$d %4$d 0 0";
                 String layout = String.format( format, i, 1, topSpace, bottomSpace );
@@ -1312,20 +1315,35 @@ public class StackedTimePlot2D extends StackedPlot2D
         return String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder );
     }
 
+    
+    //XXX hack, overload negative size to mean "grow to fill available space"
+    // count the number of plots who are configured to grow in this way
+    protected int growingPlotCount( List<PlotInfo> list )
+    {
+        int count = 0;
+        for ( PlotInfo info : list )
+        {
+            if ( info.getSize( ) < 0 ) count++;
+        }
+        
+        return count;
+    }
+    
     @Override
     protected void updatePainterLayout( )
     {
         this.lock.lock( );
         try
         {
-            List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
+            List<PlotInfo> plots = getSortedAxes( stackedPlots.values( ) );
 
             this.layout.setLayoutConstraints( getLayoutConstraints( ) );
 
-            for ( int i = 0; i < axisList.size( ); i++ )
+            int growingPlotCount = growingPlotCount( plots );
+            for ( int i = 0; i < plots.size( ); i++ )
             {
-                PlotInfo info = axisList.get( i );
-                setPlotInfoLayout( i, axisList.size( ), info );
+                PlotInfo info = plots.get( i );
+                setPlotInfoLayout( info, i, plots.size( ), growingPlotCount );
             }
 
             // position the overlay in absolute coordinates based on the position of the plots
@@ -1334,13 +1352,13 @@ public class StackedTimePlot2D extends StackedPlot2D
             {
                 if ( this.isTimeAxisHorizontal( ) )
                 {
-                    String layout = String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( axisList.size( ) - 1 ) );
+                    String layout = String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( plots.size( ) - 1 ) );
                     this.overlayLayout.setLayoutData( layout );
                     this.underlayLayout.setLayoutData( layout );
                 }
                 else
                 {
-                    String layout = String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( axisList.size( ) - 1 ) );
+                    String layout = String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( plots.size( ) - 1 ) );
                     this.overlayLayout.setLayoutData( layout );
                     this.underlayLayout.setLayoutData( layout );
                 }

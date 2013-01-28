@@ -171,9 +171,39 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         return sortedPlots;
     }
 
+    //XXX hack, overload negative size to mean "grow to fill available space"
+    // count the number of plots who are configured to grow in this way
     @Override
-    protected void setPlotInfoLayout( int i, int size, PlotInfo info )
+    protected int growingPlotCount( List<PlotInfo> list )
     {
+        int count = 0;
+        for ( PlotInfo info : list )
+        {
+            // the children of non-expanded groups don't count
+            if ( childParentMap != null )
+            {
+                GroupInfo group = childParentMap.get( info );
+                if ( group != null && !group.isExpanded( ) )
+                {
+                    continue;
+                }
+            }
+
+            if ( info.getSize( ) < 0 )
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    @Override
+    protected void setPlotInfoLayout( PlotInfo info, int i, int size, int growingPlotCount )
+    {
+        //XXX hack, overload negative size to mean "grow to fill available space"
+        boolean grow = info.getSize( ) < 0 || ( growingPlotCount == 0 && info.getId( ).equals( TIMELINE ) );
+
         if ( isTimeAxisHorizontal( ) )
         {
             boolean show = true;
@@ -212,7 +242,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             {
                 if ( info instanceof GroupInfo )
                 {
-                    if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                    if ( grow )
                     {
                         String format = "cell %d %d 2 1, grow, id i%2$d, gap 0 0 %3$d %4$d";
                         String layout = String.format( format, 0, i, topSpace, bottomSpace );
@@ -225,7 +255,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                         info.getLayout( ).setLayoutData( layout );
                     }
                 }
-                else if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                else if ( grow )
                 {
                     String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
                     String layout = String.format( format, 1, i, topSpace, bottomSpace );
@@ -426,7 +456,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                 public void mousePressed( GlimpseMouseEvent event )
                 {
                     int x = event.getScreenPixelsX( );
-                    
+
                     if ( x < labelLayoutSize )
                     {
                         setExpanded( !expanded );
