@@ -402,63 +402,70 @@ public class Event
                 pixelX += size + buffer;
             }
 
-            TextRenderer textRenderer = painter.getTextRenderer( );
-            Rectangle2D labelBounds = showLabel ? textRenderer.getBounds( label ) : null;
-
-            boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-            boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-            boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && textRenderingMode == HideAll );
-            double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-            
-            isTextVisible = showLabel && !isTextOverlappingAndHidden;
-
-            if ( isTextVisible )
+            if ( showLabel )
             {
-                Rectangle2D displayBounds = labelBounds;
-                String displayText = label;
+                TextRenderer textRenderer = painter.getTextRenderer( );
+                Rectangle2D labelBounds = textRenderer.getBounds( label );
+    
+                boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+                boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+                boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && textRenderingMode == HideAll );
+                double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
                 
-                if ( labelBounds.getWidth( ) > availableSpace && textRenderingMode != ShowAll )
+                isTextVisible = !isTextOverlappingAndHidden;
+    
+                if ( isTextVisible )
                 {
-                    displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
-                    displayBounds = textRenderer.getBounds( displayText );
+                    Rectangle2D displayBounds = labelBounds;
+                    String displayText = label;
+                    
+                    if ( labelBounds.getWidth( ) > availableSpace && textRenderingMode != ShowAll )
+                    {
+                        displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
+                        displayBounds = textRenderer.getBounds( displayText );
+                    }
+                    
+                    double valueX = axis.screenPixelToValue( pixelX );
+                    textStartTime = epoch.toTimeStamp( valueX );
+                    textEndTime = textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
+    
+                    // use this event's text color if it has been set
+                    if ( textColor != null )
+                    {
+                        GlimpseColor.setColor( textRenderer, textColor );
+                    }
+                    // otherwise, use the default no background color if the background is not showing
+                    // and if a color has not been explicitly set for the EventPainter
+                    else if ( !painter.textColorSet && !showBackground )
+                    {
+                        GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
+                    }
+                    // otherwise use the EventPainter's default text color
+                    else
+                    {
+                        GlimpseColor.setColor( textRenderer, painter.textColor );
+                    }
+                    
+                    textRenderer.beginRendering( width, height );
+                    try
+                    {
+                        // use the labelBounds for the height (if the text shortening removed a character which
+                        // hangs below the line, we don't want the text position to move)
+                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + sizeMin );
+                        textRenderer.draw( displayText, pixelX, pixelY );
+    
+                        remainingSpaceX -= displayBounds.getWidth( ) + buffer;
+                        pixelX += displayBounds.getWidth( ) + buffer;
+                    }
+                    finally
+                    {
+                        textRenderer.endRendering( );
+                    }
                 }
-                
-                double valueX = axis.screenPixelToValue( pixelX );
-                textStartTime = epoch.toTimeStamp( valueX );
-                textEndTime = textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
-
-                // use this event's text color if it has been set
-                if ( textColor != null )
-                {
-                    GlimpseColor.setColor( textRenderer, textColor );
-                }
-                // otherwise, use the default no background color if the background is not showing
-                // and if a color has not been explicitly set for the EventPainter
-                else if ( !painter.textColorSet && !showBackground )
-                {
-                    GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
-                }
-                // otherwise use the EventPainter's default text color
-                else
-                {
-                    GlimpseColor.setColor( textRenderer, painter.textColor );
-                }
-                
-                textRenderer.beginRendering( width, height );
-                try
-                {
-                    // use the labelBounds for the height (if the text shortening removed a character which
-                    // hangs below the line, we don't want the text position to move)
-                    int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + sizeMin );
-                    textRenderer.draw( displayText, pixelX, pixelY );
-
-                    remainingSpaceX -= displayBounds.getWidth( ) + buffer;
-                    pixelX += displayBounds.getWidth( ) + buffer;
-                }
-                finally
-                {
-                    textRenderer.endRendering( );
-                }
+            }
+            else
+            {
+                isTextVisible = false;
             }
         }
         else
