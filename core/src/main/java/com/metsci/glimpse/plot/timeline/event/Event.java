@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
+import static com.metsci.glimpse.plot.timeline.event.Event.ShortenMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapMode.*;
+
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -82,9 +85,9 @@ public class Event
     protected boolean showBorder = true;
     protected boolean showBackground = true;
 
-    protected boolean hideOverfull;
-    protected boolean hideIntersecting;
-
+    protected ShortenMode shortenMode = HideAll;
+    protected OverlapMode overlapMode = Overfull;
+    
     protected boolean isIconVisible;
     protected boolean isTextVisible;
     protected TimeStamp iconStartTime;
@@ -100,6 +103,48 @@ public class Event
     protected double minTimeSpan = 0;
 
     protected List<EventConstraint> constraints;
+    
+    /**
+     * Indicates how text which is too large to fit in the Event box should be shortened.
+     * 
+     * @author ulman
+     */
+    public enum ShortenMode
+    {
+        /**
+         * Don't shorten the text at all. It will simply spill over the event box into adjacent event boxes.
+         */
+        ShowAll,
+        /**
+         * If any of the text does not fit, hide all the text.
+         */
+        HideAll,
+        /**
+         * Shorten the text to fit in the box and display ellipsis to indicate that the text has been shortened.
+         */
+        Ellipsis;
+    }
+    
+    /**
+     * Indicates what types of overlaps should be considered when determining whether to shorten Event box text.
+     * 
+     * @author ulman
+     */
+    public enum OverlapMode
+    {
+        /**
+         * Don't try to detect overlaps. When this mode is set, text will never be shortened regardless of the {@link ShortenMode}.
+         */
+        None,
+        /**
+         * Only shorten text when it overflows the box for this Event. Don't try to detect overlaps with other Events.
+         */
+        Overfull,
+        /**
+         * Shorten the text when it overflows the box for this Event or overlaps with another Event.
+         */
+        Intersecting;
+    }
 
     protected EventConstraint builtInConstraints = new EventConstraint( )
     {
@@ -166,9 +211,6 @@ public class Event
         this.startTime = time;
         this.endTime = time;
 
-        this.hideIntersecting = true;
-        this.hideOverfull = false;
-
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
     }
@@ -179,9 +221,6 @@ public class Event
         this.label = name;
         this.startTime = startTime;
         this.endTime = endTime;
-
-        this.hideIntersecting = true;
-        this.hideOverfull = true;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -333,7 +372,7 @@ public class Event
                 }
             }
 
-            isIconVisible = isIconVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+            isIconVisible = showIcon && iconId != null && !isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
 
             if ( isIconVisible )
             {
@@ -362,7 +401,7 @@ public class Event
             TextRenderer textRenderer = painter.getTextRenderer( );
             Rectangle2D bounds = showName ? textRenderer.getBounds( label ) : null;
 
-            isTextVisible = isTextVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
+            isTextVisible = showName && !isTextOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
 
             if ( isTextVisible )
             {
@@ -436,15 +475,22 @@ public class Event
             }
         }
     }
-
-    protected boolean isTextVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    
+    protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
-        return showName && ( bounds.getWidth( ) + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + bounds.getWidth( ) + buffer < nextStartPixel || !hideIntersecting );
+        double insideBoxSpace = remainingSpaceX - buffer;
+        double outsideBoxSpace = nextStartPixel - pixelX - buffer;
+        return Math.min( insideBoxSpace, outsideBoxSpace );
     }
 
-    protected boolean isIconVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    protected boolean isTextOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return showIcon && iconId != null && ( size + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersecting );
+        return ( bounds.getWidth( ) + buffer > remainingSpaceX && overlapMode == Overfull ) || ( pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapMode == Intersecting );
+    }
+    
+    protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    {
+        return ( size + buffer > remainingSpaceX && overlapMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapMode == Intersecting );
     }
     
     public void setToolTipText( String text )
@@ -828,21 +874,43 @@ public class Event
     }
 
     /**
-     * If true, hides labels and/or icons if they would intersect with other events.
+     * Set what types of overlaps should be considered when determining whether to shorten Event box text
+     * and whether to display the Event's icon.
+     * 
+     * @param mode
      */
-    public void setHideIntersecting( boolean hide )
+    public void setOverlapMode( OverlapMode mode )
     {
-        this.hideIntersecting = hide;
+        this.overlapMode = mode;
+    }
+    
+    /**
+     * @see #setOverlapMode(OverlapMode)
+     */
+    public OverlapMode getOverlapMode( )
+    {
+        return this.overlapMode;
+    }
+    
+    /**
+     * Sets how text and icons should be handled when this Event's box is too small or when it overlaps
+     * with another Event's box.
+     * 
+     * @param mode
+     */
+    public void setShortenMode( ShortenMode mode )
+    {
+        this.shortenMode = mode;
     }
 
     /**
-     * If true, hides labels and/or icons if they would fall outside this event's time window.
+     * @see #setShortenMode(ShortenMode)
      */
-    public void setHideOverfull( boolean hide )
+    public ShortenMode getShortenMode( )
     {
-        this.hideOverfull = hide;
+        return this.shortenMode;
     }
-
+    
     /**
      * return whether the icon associated with this event should be shown when room permits.
      */
@@ -850,7 +918,6 @@ public class Event
     {
         return showIcon;
     }
-
 
     /**
      * @return if false, the icon is not visible, either because there is no room to show it,
