@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.ShortenMode.*;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -80,13 +80,13 @@ public class Event
     protected TimeStamp startTime;
     protected TimeStamp endTime;
 
-    protected boolean showName = true;
+    protected boolean showLabel = true;
     protected boolean showIcon = true;
     protected boolean showBorder = true;
     protected boolean showBackground = true;
 
-    protected ShortenMode shortenMode = HideAll;
-    protected OverlapMode overlapMode = Overfull;
+    protected TextRenderingMode textRenderingMode = Ellipsis;
+    protected OverlapRenderingMode overlapRenderingMode = Overfull;
     
     protected boolean isIconVisible;
     protected boolean isTextVisible;
@@ -109,7 +109,7 @@ public class Event
      * 
      * @author ulman
      */
-    public enum ShortenMode
+    public enum TextRenderingMode
     {
         /**
          * Don't shorten the text at all. It will simply spill over the event box into adjacent event boxes.
@@ -130,7 +130,7 @@ public class Event
      * 
      * @author ulman
      */
-    public enum OverlapMode
+    public enum OverlapRenderingMode
     {
         /**
          * Don't try to detect overlaps. When this mode is set, text will never be shortened regardless of the {@link ShortenMode}.
@@ -208,8 +208,10 @@ public class Event
     {
         this.id = id;
         this.label = name;
+        
         this.startTime = time;
         this.endTime = time;
+        this.overlapRenderingMode = Intersecting;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -219,8 +221,10 @@ public class Event
     {
         this.id = id;
         this.label = name;
+        
         this.startTime = startTime;
         this.endTime = endTime;
+        this.overlapRenderingMode = startTime.equals( endTime ) ? Intersecting : Overfull;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -399,31 +403,29 @@ public class Event
             }
 
             TextRenderer textRenderer = painter.getTextRenderer( );
-            Rectangle2D bounds = showName ? textRenderer.getBounds( label ) : null;
+            Rectangle2D labelBounds = showLabel ? textRenderer.getBounds( label ) : null;
 
-            boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
-            boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
-            boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && shortenMode == HideAll );
+            boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+            boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+            boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && textRenderingMode == HideAll );
             double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
             
-            isTextVisible = showName && !isTextOverlappingAndHidden;
+            isTextVisible = showLabel && !isTextOverlappingAndHidden;
 
             if ( isTextVisible )
             {
+                Rectangle2D displayBounds = labelBounds;
                 String displayText = label;
                 
-                if ( bounds.getWidth( ) > availableSpace )
+                if ( labelBounds.getWidth( ) > availableSpace && textRenderingMode != ShowAll )
                 {
                     displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
-                    bounds = textRenderer.getBounds( displayText );
-
-                    
-                    System.out.println( displayText );
+                    displayBounds = textRenderer.getBounds( displayText );
                 }
                 
                 double valueX = axis.screenPixelToValue( pixelX );
                 textStartTime = epoch.toTimeStamp( valueX );
-                textEndTime = textStartTime.add( bounds.getWidth( ) / axis.getPixelsPerValue( ) );
+                textEndTime = textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
 
                 // use this event's text color if it has been set
                 if ( textColor != null )
@@ -445,11 +447,13 @@ public class Event
                 textRenderer.beginRendering( width, height );
                 try
                 {
-                    int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
+                    // use the labelBounds for the height (if the text shortening removed a character which
+                    // hangs below the line, we don't want the text position to move)
+                    int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + sizeMin );
                     textRenderer.draw( displayText, pixelX, pixelY );
 
-                    remainingSpaceX -= bounds.getWidth( ) + buffer;
-                    pixelX += bounds.getWidth( ) + buffer;
+                    remainingSpaceX -= displayBounds.getWidth( ) + buffer;
+                    pixelX += displayBounds.getWidth( ) + buffer;
                 }
                 finally
                 {
@@ -509,12 +513,12 @@ public class Event
         double insideBoxSpace = remainingSpaceX - buffer;
         double outsideBoxSpace = nextStartPixel - pixelX - buffer;
         
-        switch ( overlapMode )
+        switch ( overlapRenderingMode )
         {
             case Overfull:
                 return insideBoxSpace;
             case Intersecting:
-                return Math.min( insideBoxSpace, outsideBoxSpace );
+                return outsideBoxSpace;
             case None:
             default:
                 return Double.MAX_VALUE; 
@@ -523,17 +527,17 @@ public class Event
 
     protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapMode == Overfull;
+        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapRenderingMode == Overfull;
     }
     
     protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapMode == Intersecting;
+        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapRenderingMode == Intersecting;
     }
     
     protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
-        return ( size + buffer > remainingSpaceX && overlapMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapMode == Intersecting );
+        return ( size + buffer > remainingSpaceX && overlapRenderingMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapRenderingMode == Intersecting );
     }
     
     public void setToolTipText( String text )
@@ -896,7 +900,7 @@ public class Event
      */
     public boolean isShowLabel( )
     {
-        return showName;
+        return showLabel;
     }
 
     /**
@@ -913,7 +917,7 @@ public class Event
      */
     public void setShowLabel( boolean showName )
     {
-        this.showName = showName;
+        this.showLabel = showName;
     }
 
     /**
@@ -922,17 +926,17 @@ public class Event
      * 
      * @param mode
      */
-    public void setOverlapMode( OverlapMode mode )
+    public void setOverlapMode( OverlapRenderingMode mode )
     {
-        this.overlapMode = mode;
+        this.overlapRenderingMode = mode;
     }
     
     /**
-     * @see #setOverlapMode(OverlapMode)
+     * @see #setOverlapMode(OverlapRenderingMode)
      */
-    public OverlapMode getOverlapMode( )
+    public OverlapRenderingMode getOverlapRenderingMode( )
     {
-        return this.overlapMode;
+        return this.overlapRenderingMode;
     }
     
     /**
@@ -941,17 +945,17 @@ public class Event
      * 
      * @param mode
      */
-    public void setShortenMode( ShortenMode mode )
+    public void setTextRenderingMode( TextRenderingMode mode )
     {
-        this.shortenMode = mode;
+        this.textRenderingMode = mode;
     }
 
     /**
-     * @see #setShortenMode(ShortenMode)
+     * @see #setTextRenderingMode(TextRenderingMode)
      */
-    public ShortenMode getShortenMode( )
+    public TextRenderingMode getTextRenderingMode( )
     {
-        return this.shortenMode;
+        return this.textRenderingMode;
     }
     
     /**

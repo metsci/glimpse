@@ -29,6 +29,7 @@ package com.metsci.glimpse.plot.timeline.event;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 import java.awt.Font;
 import java.util.Collections;
@@ -63,6 +64,8 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
+import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
+import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl.TimeToolTipHandler;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
@@ -90,6 +93,8 @@ public class EventPlotInfo implements TimePlotInfo
     protected TooltipListener tooltipListener;
 
     protected TimePlotInfo delegate;
+
+    protected TextRenderingMode textRenderingMode = Ellipsis;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -549,20 +554,30 @@ public class EventPlotInfo implements TimePlotInfo
     public Event addEvent( Object id, String name, TimeStamp time )
     {
         Event event = new Event( id, name, time );
+
+        event.setTextRenderingMode( textRenderingMode );
+
         addEvent( event );
+
         return event;
     }
 
     public Event addEvent( Object id, String name, TimeStamp startTime, TimeStamp endTime )
     {
         Event event = new Event( id, name, startTime, endTime );
+
+        event.setTextRenderingMode( textRenderingMode );
+
         addEvent( event );
+
         return event;
     }
 
     public void addEvent( Event event )
     {
         event.setEventPlotInfo( this );
+        event.setTextRenderingMode( textRenderingMode );
+
         this.eventPainter.addEvent( event );
     }
 
@@ -579,6 +594,28 @@ public class EventPlotInfo implements TimePlotInfo
         {
             event.setEventPlotInfo( null );
         }
+    }
+
+    /**
+     * Sets the TextRenderingMode for all {@link Event} children of this EventPlotInfo.
+     * This value will also be the default of any newly created Events. The value can be
+     * overridden on a per-Event basis using {@link Event#setTextRenderingMode(OverlapRenderingMode)}.
+     * However, the next call to {@link EventPlotInfo#setTextRenderingMode(OverlapRenderingMode)} will
+     * reset all Events to the same value.
+     * 
+     * @see Event#setOverlapMode(OverlapRenderingMode)
+     */
+    public void setTextRenderingMode( TextRenderingMode mode )
+    {
+        this.textRenderingMode = mode;
+    }
+
+    /**
+     * @see #setTextRenderingMode(TextRenderingMode)
+     */
+    public TextRenderingMode getTextRenderingMode( )
+    {
+        return this.textRenderingMode;
     }
 
     void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
