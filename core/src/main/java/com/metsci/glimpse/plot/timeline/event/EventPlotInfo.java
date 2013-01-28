@@ -141,10 +141,7 @@ public class EventPlotInfo implements TimePlotInfo
             @Override
             public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter )
             {
-
                 Event event = selection.getEvent( );
-
-                System.out.println( "setting " + event.getLabel( ) );
                 String label = event.getLabel( ) == null ? "" : event.getLabel( );
                 String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
                 String text = String.format( "%s\n%s", label, tip );
