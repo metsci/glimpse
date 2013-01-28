@@ -37,12 +37,25 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo.EventPlotListener;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
 
+/**
+ * Event represents an occurrence with a start and end time and is usually created
+ * by an {@link com.metsci.glimpse.plot.timeline.event.EventPlotInfo} (which represents
+ * a row or column of a {@link com.metsci.glimpse.plot.timeline.StackedTimePlot2D}.
+ * 
+ * In addition to time bounds, Events can have text labels, icons, and tool tips associated
+ * with them. EventPlotInfo allows registering of listeners which report when the mouse
+ * interacts with an Event. Events can also be adjusted by the user by click and
+ * dragging on their bounds.
+ * 
+ * @author ulman
+ */
 public class Event
 {
     public static final int ARROW_TIP_BUFFER = 2;
@@ -52,7 +65,7 @@ public class Event
     protected EventPlotInfo info;
 
     protected Object id;
-    protected String name;
+    protected String label;
     protected Object iconId; // references id in associated TextureAtlas
     protected String toolTipText;
     
@@ -149,7 +162,7 @@ public class Event
     public Event( Object id, String name, TimeStamp time )
     {
         this.id = id;
-        this.name = name;
+        this.label = name;
         this.startTime = time;
         this.endTime = time;
 
@@ -163,7 +176,7 @@ public class Event
     public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
     {
         this.id = id;
-        this.name = name;
+        this.label = name;
         this.startTime = startTime;
         this.endTime = endTime;
 
@@ -182,13 +195,17 @@ public class Event
      * constraints by default via setEditable, setResizeable, setEndTimeMoveable,
      * setStartTimeMoveable, setMinTimeSpan, and setMaxTimeSpan.</p>
      * 
-     * @param constraint
+     * @param constraint the EventConstraint to add
      */
     public void addConstraint( EventConstraint constraint )
     {
         this.constraints.add( constraint );
     }
 
+    /**
+     * @see #addConstraint(EventConstraint)
+     * @param constraint the EventConstraint to remove
+     */
     public void removeConstrain( EventConstraint constraint )
     {
         this.constraints.remove( constraint );
@@ -343,7 +360,7 @@ public class Event
             }
 
             TextRenderer textRenderer = painter.getTextRenderer( );
-            Rectangle2D bounds = showName ? textRenderer.getBounds( name ) : null;
+            Rectangle2D bounds = showName ? textRenderer.getBounds( label ) : null;
 
             isTextVisible = isTextVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
 
@@ -374,7 +391,7 @@ public class Event
                 try
                 {
                     int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
-                    textRenderer.draw( name, pixelX, pixelY );
+                    textRenderer.draw( label, pixelX, pixelY );
 
                     remainingSpaceX -= bounds.getWidth( ) + buffer;
                     pixelX += bounds.getWidth( ) + buffer;
@@ -440,16 +457,34 @@ public class Event
         return this.toolTipText;
     }
     
+    /**
+     * Sets whether or not the Event start and end times are modifiable by the user
+     * via mouse interaction. This does not prevent programmatically changing the
+     * mouse bounds.
+     * 
+     * For finer control over what the user is allowed to do when modifying the
+     * start and end time of an Event (without disallowing it completely) see
+     * {@link #setStartTimeMoveable(boolean)}, {@link #setResizeable(boolean)},
+     * and {@link #setMinTimeSpan(double)}.
+     */
     public void setEditable( boolean isEditable )
     {
         this.isEditable = isEditable;
     }
     
+    /**
+     * @see #setEditable(boolean)
+     * @return
+     */
     public boolean isEditable( )
     {
         return isEditable;
     }
 
+    /**
+     * @see #setEndTimeMoveable(boolean)
+     * @return
+     */
     public boolean isEndTimeMoveable( )
     {
         return isEndTimeMoveable;
@@ -463,6 +498,10 @@ public class Event
         this.isEndTimeMoveable = isEndTimeMoveable;
     }
 
+    /**
+     * @see #setStartTimeMoveable(boolean)
+     * @return
+     */
     public boolean isStartTimeMoveable( )
     {
         return isStartTimeMoveable;
@@ -476,6 +515,10 @@ public class Event
         this.isStartTimeMoveable = isStartTimeMoveable;
     }
 
+    /**
+     * {@link #setStartTimeMoveable(boolean)}
+     * @return
+     */
     public boolean isResizeable( )
     {
         return isResizeable;
@@ -491,6 +534,10 @@ public class Event
         this.isResizeable = isResizeable;
     }
 
+    /**
+     * {@link #setMaxTimeSpan(double)}
+     * @return
+     */
     public double getMaxTimeSpan( )
     {
         return maxTimeSpan;
@@ -505,6 +552,10 @@ public class Event
         this.maxTimeSpan = maxTimeSpan;
     }
 
+    /**
+     * {@link #setMinTimeSpan(double)}
+     * @return
+     */
     public double getMinTimeSpan( )
     {
         return minTimeSpan;
@@ -519,76 +570,141 @@ public class Event
         this.minTimeSpan = minTimeSpan;
     }
 
-    public EventPlotInfo getEventPlotInfo( )
-    {
-        return info;
-    }
-
-    public void setEventPlotInfo( EventPlotInfo info )
-    {
-        this.info = info;
-    }
-
+    /**
+     * @return the text displayed inside the Event box on the timeline.
+     */
     public String getLabel( )
     {
-        return name;
+        return label;
     }
 
+    /**
+     * Sets the text displayed inside the Event box on the timeline.
+     * @param name
+     */
+    public void setLabel( String name )
+    {
+        this.label = name;
+    }
+    
+    /**
+     * @deprecated use {@link #getLabel()}
+     * @return
+     */
+    public String getName( )
+    {
+        return label;
+    }
+    
+    /**
+     * @deprecated use {@link #setLabel(String)}
+     * @return
+     */
     public void setName( String name )
     {
-        this.name = name;
+        this.label = name;
     }
 
+    /**
+     * @see #setIconId(Object)
+     * @return the identifier for the icon displayed inside the Event box on the timeline.
+     */
     public Object getIconId( )
     {
         return iconId;
     }
 
+    /**
+     * Sets the icon displayed inside the Event box on the timeline. The iconId corresponds
+     * to an icon loaded into the {@link TextureAtlas} associated with the {@link EventPlotInfo}
+     * parent of this Event.
+     * 
+     * @param iconId  the identifier for the icon displayed inside the Event box on the timeline.
+     */
     public void setIconId( Object iconId )
     {
         this.iconId = iconId;
     }
 
+    /**
+     * @param thickness the thickness (in pixels) of the border around the box for this Event on the timeline.
+     */
     public void setBorderThickness( float thickness )
     {
         this.borderThickness = thickness;
     }
+    
+    /**
+     * @see #setBorderThickness(float)
+     * @return
+     */
+    public float getBorderThickness( )
+    {
+        return this.borderThickness;
+    }
 
+    /**
+     * {@link #setBackgroundColor(float[])}
+     * @return
+     */
     public float[] getBackgroundColor( )
     {
         return backgroundColor;
     }
 
+    /**
+     * @param backgroundColor the fill color of the box for this Event on the timeline.
+     */
     public void setBackgroundColor( float[] backgroundColor )
     {
         this.backgroundColor = backgroundColor;
     }
 
+    /**
+     * {@link #setBorderColor(float[])}
+     * @return
+     */
     public float[] getBorderColor( )
     {
         return borderColor;
     }
 
+    /**
+     * @param borderColor the border color of the box for this Event on the timeline.
+     */
     public void setBorderColor( float[] borderColor )
     {
         this.borderColor = borderColor;
     }
 
+    /**
+     * @see #setLabelColor(float[])
+     * @return
+     */
     public float[] getLabelColor( )
     {
         return textColor;
     }
 
+    /**
+     * @param textColor the color for the label text display for this Event on the timeline.
+     */
     public void setLabelColor( float[] textColor )
     {
         this.textColor = textColor;
     }
 
-    public TimeStamp getStartTime( )
-    {
-        return startTime;
-    }
-
+    /**
+     * <p>Sets the start and end time for this Event.</p>
+     * 
+     * <p>If force is false, then the constraints (see {@link #addConstraint(EventConstraint)})
+     * are taken into account and the final Event bounds might not be equal to
+     * the input arguments.</p>
+     * 
+     * @param startTime
+     * @param endTime
+     * @param force
+     */
     public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
         if ( !force )
@@ -621,38 +737,62 @@ public class Event
         return span;
     }
 
+    /**
+     * {@link #setTimes(TimeStamp, TimeStamp, boolean)}
+     * @param startTime
+     * @param endTime
+     */
     public void setTimes( TimeStamp startTime, TimeStamp endTime )
     {
         setTimes( startTime, endTime, false );
     }
 
-    void setTimes0( TimeStamp startTime, TimeStamp endTime )
+    protected void setTimes0( TimeStamp startTime, TimeStamp endTime )
     {
         this.startTime = startTime;
         this.endTime = endTime;
     }
+    
+    /**
+     * @return the start / earliest / left-edge TimeStamp for this Event.
+     */
+    public TimeStamp getStartTime( )
+    {
+        return startTime;
+    }
 
+    /**
+     * @see #setTimes(TimeStamp, TimeStamp, boolean)
+     * @param startTime
+     */
     public void setStartTime( TimeStamp startTime )
     {
         setTimes( startTime, this.endTime );
     }
 
-    void setStartTime0( TimeStamp startTime )
+    protected void setStartTime0( TimeStamp startTime )
     {
         this.startTime = startTime;
     }
 
+    /**
+     * @return the end / latest / right-edge TimeStamp for this Event.
+     */
     public TimeStamp getEndTime( )
     {
         return endTime;
     }
 
+    /**
+     * @see #setTimes(TimeStamp, TimeStamp, boolean)
+     * @param startTime
+     */
     public void setEndTime( TimeStamp endTime )
     {
         setTimes( this.startTime, endTime );
     }
 
-    void setEndTime0( TimeStamp endTime )
+    protected void setEndTime0( TimeStamp endTime )
     {
         this.endTime = endTime;
     }
@@ -662,11 +802,26 @@ public class Event
         return new TimeSpan( startTime, endTime );
     }
 
+    /**
+     * return whether the label associated with this event should be shown when room permits.
+     */
     public boolean isShowLabel( )
     {
         return showName;
     }
 
+    /**
+     * @return if false, the label is not visible, either because there is no room to show it,
+     *         or {@link #isShowLabel()} is set to false.
+     */
+    public boolean isLabelVisible( )
+    {
+        return isTextVisible;
+    }
+    
+    /**
+     * @param showName whether to show the label text in this Event's box on the timeline.
+     */
     public void setShowLabel( boolean showName )
     {
         this.showName = showName;
@@ -688,69 +843,136 @@ public class Event
         this.hideOverfull = hide;
     }
 
+    /**
+     * return whether the icon associated with this event should be shown when room permits.
+     */
     public boolean isShowIcon( )
     {
         return showIcon;
     }
 
+
+    /**
+     * @return if false, the icon is not visible, either because there is no room to show it,
+     *         or {@link #isShowIcon()} is set to false.
+     */
+    public boolean isIconVisible( )
+    {
+        return isIconVisible;
+    }
+    
+    /**
+     * @param showIcon whether to show the icon associated with this event.
+     */
     public void setShowIcon( boolean showIcon )
     {
         this.showIcon = showIcon;
     }
 
+    /**
+     * return if true, the event box is filled with the background color. If false, the box is transparent.
+     */
     public boolean isShowBackground( )
     {
         return showBackground;
     }
 
+    /**
+     * @param showBorder whether to fill the event box with the background color.
+     */
     public void setShowBackground( boolean showBorder )
     {
         this.showBackground = showBorder;
     }
     
+    /**
+     * @return if true, a line border is drawn around the event box.
+     */
     public boolean isShowBorder( )
     {
         return showBorder;
     }
 
+    /**
+     * @param showBorder whether to draw a line border around the event box.
+     */
     public void setShowBorder( boolean showBorder )
     {
         this.showBorder = showBorder;
     }
 
+    /**
+     * <p>An Event's id may be any Object, but its {@link #equals(Object)} and {@link #hashCode()}
+     * methods should be properly implemented and it should be unique among the Events of an
+     * {@link EventPlotInfo} timeline.</p>
+     * 
+     * <p>{@link EventPlotListener} will use this id when reporting events occurring on this Event.</p>
+     * 
+     * @return the unique id for this Event.
+     */
     public Object getId( )
     {
         return id;
     }
 
-    public boolean isIconVisible( )
-    {
-        return isIconVisible;
-    }
-
-    public boolean isLabelVisible( )
-    {
-        return isTextVisible;
-    }
-
+    /**
+     * Returns the timestamp associated with the left hand side of the icon. Because the icon
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getIconStartTime( )
     {
         return iconStartTime;
     }
 
+    /**
+     * Returns the timestamp associated with the right hand side of the icon. Because the icon
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getIconEndTime( )
     {
         return iconEndTime;
     }
 
+    /**
+     * Returns the timestamp associated with the left hand side of the label. Because the label
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getLabelStartTime( )
     {
         return textStartTime;
     }
 
+    /**
+     * Returns the timestamp associated with the right hand side of the label. Because the label
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getLabelEndTime( )
     {
         return textEndTime;
+    }
+    
+    /**
+     * @return the timeline which this Event is attached to.
+     */
+    public EventPlotInfo getEventPlotInfo( )
+    {
+        return info;
+    }
+
+    /**
+     * The parent EventPlotInfo of an Event should be modified by
+     * calling {@link EventPlotInfo#addEvent(Event)} and
+     * {@link EventPlotInfo#removeEvent(Event)}.
+     * 
+     * @param info
+     */
+    protected void setEventPlotInfo( EventPlotInfo info )
+    {
+        this.info = info;
     }
 
     @Override
@@ -780,7 +1002,7 @@ public class Event
     @Override
     public String toString( )
     {
-        return String.format( "%s (%s)", name, id );
+        return String.format( "%s (%s)", label, id );
     }
 
     public static Event createDummyEvent( Event event )
