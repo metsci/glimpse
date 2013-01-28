@@ -282,7 +282,7 @@ public class Event
         arrowBaseMax = Math.max( timeMin, arrowBaseMax );
         arrowBaseMin = Math.min( timeMax, arrowBaseMin );
         
-        double timeSpan = timeMax - timeMin;
+        double timeSpan = arrowBaseMax - arrowBaseMin;
         double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
         int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
@@ -401,10 +401,26 @@ public class Event
             TextRenderer textRenderer = painter.getTextRenderer( );
             Rectangle2D bounds = showName ? textRenderer.getBounds( label ) : null;
 
-            isTextVisible = showName && !isTextOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
+            boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
+            boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
+            boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && shortenMode == HideAll );
+            double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+            
+            isTextVisible = showName && !isTextOverlappingAndHidden;
 
             if ( isTextVisible )
             {
+                String displayText = label;
+                
+                if ( bounds.getWidth( ) > availableSpace )
+                {
+                    displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
+                    bounds = textRenderer.getBounds( displayText );
+
+                    
+                    System.out.println( displayText );
+                }
+                
                 double valueX = axis.screenPixelToValue( pixelX );
                 textStartTime = epoch.toTimeStamp( valueX );
                 textEndTime = textStartTime.add( bounds.getWidth( ) / axis.getPixelsPerValue( ) );
@@ -430,7 +446,7 @@ public class Event
                 try
                 {
                     int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
-                    textRenderer.draw( label, pixelX, pixelY );
+                    textRenderer.draw( displayText, pixelX, pixelY );
 
                     remainingSpaceX -= bounds.getWidth( ) + buffer;
                     pixelX += bounds.getWidth( ) + buffer;
@@ -476,16 +492,43 @@ public class Event
         }
     }
     
+    protected String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
+    {
+        for ( int endIndex = fullText.length( ) ; endIndex >= 0 ; endIndex-- )
+        {
+            String subText = fullText.substring( 0, endIndex ) + "...";
+            Rectangle2D bounds = textRenderer.getBounds( subText );
+            if ( bounds.getWidth( ) < availableSpace ) return subText;
+        }
+        
+        return "";
+    }
+    
     protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
         double insideBoxSpace = remainingSpaceX - buffer;
         double outsideBoxSpace = nextStartPixel - pixelX - buffer;
-        return Math.min( insideBoxSpace, outsideBoxSpace );
+        
+        switch ( overlapMode )
+        {
+            case Overfull:
+                return insideBoxSpace;
+            case Intersecting:
+                return Math.min( insideBoxSpace, outsideBoxSpace );
+            case None:
+            default:
+                return Double.MAX_VALUE; 
+        }
     }
 
-    protected boolean isTextOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return ( bounds.getWidth( ) + buffer > remainingSpaceX && overlapMode == Overfull ) || ( pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapMode == Intersecting );
+        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapMode == Overfull;
+    }
+    
+    protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    {
+        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapMode == Intersecting;
     }
     
     protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
