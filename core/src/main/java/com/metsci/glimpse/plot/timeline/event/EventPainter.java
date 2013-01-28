@@ -79,7 +79,6 @@ public class EventPainter extends GlimpseDataPainter1D
     protected List<Row> rows;
 
     protected EventPlotInfo plot;
-    protected Epoch epoch;
     protected TextureAtlas atlas;
 
     protected boolean shouldStack = true;
@@ -178,7 +177,6 @@ public class EventPainter extends GlimpseDataPainter1D
     public EventPainter( EventPlotInfo plot, Epoch epoch, TextureAtlas atlas, boolean isHorizontal )
     {
         this.plot = plot;
-        this.epoch = epoch;
         this.atlas = atlas;
 
         this.rows = new ArrayList<Row>( );
@@ -315,7 +313,7 @@ public class EventPainter extends GlimpseDataPainter1D
 
     public Epoch getEpoch( )
     {
-        return this.epoch;
+        return this.plot.getStackedTimePlot( ).getEpoch( );
     }
 
     public Set<EventSelection> getNearestEvents( GlimpseMouseEvent e )
@@ -327,6 +325,8 @@ public class EventPainter extends GlimpseDataPainter1D
             double valueX = axis.screenPixelToValue( e.getX( ) );
             double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
 
+            Epoch epoch = getEpoch( );
+            
             TimeStamp time = epoch.toTimeStamp( valueX );
             TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
             TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
@@ -539,6 +539,8 @@ public class EventPainter extends GlimpseDataPainter1D
 
     protected void calculateVisibleEvents( double min, double max )
     {
+        Epoch epoch = getEpoch( );
+        
         Event minTimestamp = Event.createDummyEvent( epoch.toTimeStamp( min ) );
         Event maxTimestamp = Event.createDummyEvent( epoch.toTimeStamp( max ) );
 
