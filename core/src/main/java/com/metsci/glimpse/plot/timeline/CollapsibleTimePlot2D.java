@@ -329,6 +329,11 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.textDelegate.setFont( FontUtils.getDefaultPlain( 14 ), true );
         }
 
+        public SimpleTextPainter getTextPainter( )
+        {
+            return this.textDelegate;
+        }
+        
         public void setExpanded( boolean isExpanded )
         {
             this.isExpanded = isExpanded;
@@ -478,6 +483,8 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         public void setDividerColor( float[] color );
 
         public float[] getDividerColor( );
+        
+        public SimpleTextPainter getTextPainter( );
     }
 
     public class GroupInfoImpl implements GroupInfo
@@ -524,6 +531,11 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                     }
                 }
             } );
+        }
+        
+        public SimpleTextPainter getTextPainter( )
+        {
+            return this.labelPainter.getTextPainter( );
         }
 
         public void setShowArrow( boolean show )
