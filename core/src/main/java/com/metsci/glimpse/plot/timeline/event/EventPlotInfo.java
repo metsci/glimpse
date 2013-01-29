@@ -538,6 +538,11 @@ public class EventPlotInfo implements TimePlotInfo
         this.eventPainter.setFont( font, antialias );
     }
     
+    public Set<Event> getEvents( )
+    {
+        return this.eventPainter.getEvents( );
+    }
+    
     public Event getEvent( Object id )
     {
         return this.eventPainter.getEvent( id );

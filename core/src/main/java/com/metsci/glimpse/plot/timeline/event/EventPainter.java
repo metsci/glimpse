@@ -283,6 +283,11 @@ public class EventPainter extends GlimpseDataPainter1D
         return event;
     }
 
+    public Set<Event> getEvents( )
+    {
+        return Collections.unmodifiableSet( new HashSet<Event>( this.eventMap.values( ) ) );
+    }
+    
     public Event getEvent( Object id )
     {
         return this.eventMap.get( id );
