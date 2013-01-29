@@ -373,7 +373,7 @@ public class EventPlotInfo implements TimePlotInfo
             {
                 for ( EventSelection selection : events )
                 {
-                    if ( selection.isLocation( Center, Start, End ) )
+                    if ( selection.isLocation( Center, Start, End ) && selection.getEvent( ).isEditable( ) )
                     {
                         dragEvent = selection.getEvent( );
                         eventStart = dragEvent.getStartTime( );
