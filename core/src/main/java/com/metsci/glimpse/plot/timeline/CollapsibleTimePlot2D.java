@@ -88,7 +88,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     {
         return createGroup( UUID.randomUUID( ), subplots );
     }
-    
+
     public GroupInfo createGroup( Object id, PlotInfo... subplots )
     {
         LinkedList<PlotInfo> list = new LinkedList<PlotInfo>( );
@@ -314,6 +314,9 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
         protected boolean isExpanded = true;
 
+        protected boolean showDivider = true;
+        protected boolean showArrow = true;
+
         public GroupLabelPainter( String name )
         {
             this.textDelegate = new SimpleTextPainter( );
@@ -336,6 +339,36 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.textDelegate.setText( text );
         }
 
+        public void setShowArrow( boolean show )
+        {
+            this.showArrow = show;
+        }
+
+        public boolean isShowArrow( )
+        {
+            return this.showArrow;
+        }
+
+        public void setShowDivider( boolean show )
+        {
+            this.showDivider = show;
+        }
+
+        public boolean isShowDivider( )
+        {
+            return this.showDivider;
+        }
+
+        public void setDividerColor( float[] color )
+        {
+            this.lineColor = color;
+        }
+
+        public float[] getDividerColor( )
+        {
+            return lineColor;
+        }
+
         @Override
         protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
         {
@@ -354,48 +387,54 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             gl.glLoadIdentity( );
 
             // Paint Line
-            Rectangle2D textBounds = this.textDelegate.getTextBounds( );
-            float startY = ( float ) height / 2.0f;
-            float startX = ( float ) ( padding + this.textDelegate.getHorizontalPadding( ) + textBounds.getWidth( ) + ( textBounds.getMinX( ) ) - 1 );
-
-            gl.glLineWidth( 1.0f );
-            GlimpseColor.glColor( gl, lineColor );
-
-            gl.glBegin( GL.GL_LINES );
-            try
+            if ( showDivider )
             {
-                gl.glVertex2f( startX, startY );
-                gl.glVertex2f( width, startY );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
+                Rectangle2D textBounds = this.textDelegate.getTextBounds( );
+                float startY = ( float ) height / 2.0f;
+                float startX = ( float ) ( padding + this.textDelegate.getHorizontalPadding( ) + textBounds.getWidth( ) + ( textBounds.getMinX( ) ) - 1 );
 
-            float halfSize = buttonSize / 2.0f;
-            float centerX = halfSize + padding;
-            float centerY = height / 2.0f;
+                gl.glLineWidth( 1.0f );
+                GlimpseColor.glColor( gl, lineColor );
 
-            // Paint Expand/Collapse Button
-            gl.glBegin( GL.GL_POLYGON );
-            try
-            {
-                if ( isExpanded )
+                gl.glBegin( GL.GL_LINES );
+                try
                 {
-                    gl.glVertex2f( centerX - halfSize, centerY + halfSize );
-                    gl.glVertex2f( centerX + halfSize, centerY + halfSize );
-                    gl.glVertex2f( centerX, centerY - halfSize );
+                    gl.glVertex2f( startX, startY );
+                    gl.glVertex2f( width, startY );
                 }
-                else
+                finally
                 {
-                    gl.glVertex2f( centerX - halfSize, centerY - halfSize );
-                    gl.glVertex2f( centerX - halfSize, centerY + halfSize );
-                    gl.glVertex2f( centerX + halfSize, centerY );
+                    gl.glEnd( );
                 }
             }
-            finally
+
+            if ( showArrow )
             {
-                gl.glEnd( );
+                float halfSize = buttonSize / 2.0f;
+                float centerX = halfSize + padding;
+                float centerY = height / 2.0f;
+
+                // Paint Expand/Collapse Button
+                gl.glBegin( GL.GL_POLYGON );
+                try
+                {
+                    if ( isExpanded )
+                    {
+                        gl.glVertex2f( centerX - halfSize, centerY + halfSize );
+                        gl.glVertex2f( centerX + halfSize, centerY + halfSize );
+                        gl.glVertex2f( centerX, centerY - halfSize );
+                    }
+                    else
+                    {
+                        gl.glVertex2f( centerX - halfSize, centerY - halfSize );
+                        gl.glVertex2f( centerX - halfSize, centerY + halfSize );
+                        gl.glVertex2f( centerX + halfSize, centerY );
+                    }
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
             }
         }
 
@@ -415,14 +454,30 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     public static interface GroupInfo extends PlotInfo
     {
         public void setLabelText( String text );
+
         public String getLabelText( );
 
         public void addChildPlot( PlotInfo plot );
+
         public void removeChildPlot( PlotInfo plot );
+
         public Collection<PlotInfo> getChildPlots( );
 
         public void setExpanded( boolean expanded );
+
         public boolean isExpanded( );
+        
+        public void setShowArrow( boolean show );
+        
+        public boolean isShowArrow( );
+
+        public void setShowDivider( boolean show );
+
+        public boolean isShowDivider( );
+        
+        public void setDividerColor( float[] color );
+
+        public float[] getDividerColor( );
     }
 
     public class GroupInfoImpl implements GroupInfo
@@ -471,6 +526,36 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             } );
         }
 
+        public void setShowArrow( boolean show )
+        {
+            this.labelPainter.setShowArrow( show );
+        }
+
+        public boolean isShowArrow( )
+        {
+            return this.labelPainter.isShowArrow( );
+        }
+
+        public void setShowDivider( boolean show )
+        {
+            this.labelPainter.setShowDivider( show );
+        }
+
+        public boolean isShowDivider( )
+        {
+            return this.labelPainter.isShowDivider( );
+        }
+        
+        public void setDividerColor( float[] color )
+        {
+            this.labelPainter.setDividerColor( color );
+        }
+
+        public float[] getDividerColor( )
+        {
+            return this.labelPainter.getDividerColor( );
+        }
+        
         @Override
         public boolean isExpanded( )
         {
@@ -513,7 +598,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.label = label;
             this.labelPainter.setText( label );
         }
-        
+
         @Override
         public String getLabelText( )
         {
