@@ -538,19 +538,19 @@ public class EventPlotInfo implements TimePlotInfo
         this.eventPainter.setFont( font, antialias );
     }
 
-    public Event addEvent( String name, TimeStamp time )
+    public Event addEvent( String label, TimeStamp time )
     {
-        return addEvent( UUID.randomUUID( ), name, time );
+        return addEvent( UUID.randomUUID( ), label, time );
     }
 
-    public Event addEvent( String name, TimeStamp startTime, TimeStamp endTime )
+    public Event addEvent( String label, TimeStamp startTime, TimeStamp endTime )
     {
-        return addEvent( UUID.randomUUID( ), name, startTime, endTime );
+        return addEvent( UUID.randomUUID( ), label, startTime, endTime );
     }
 
-    public Event addEvent( Object id, String name, TimeStamp time )
+    public Event addEvent( Object id, String label, TimeStamp time )
     {
-        Event event = new Event( id, name, time );
+        Event event = new Event( id, label, time );
 
         event.setTextRenderingMode( textRenderingMode );
 
@@ -559,9 +559,9 @@ public class EventPlotInfo implements TimePlotInfo
         return event;
     }
 
-    public Event addEvent( Object id, String name, TimeStamp startTime, TimeStamp endTime )
+    public Event addEvent( Object id, String label, TimeStamp startTime, TimeStamp endTime )
     {
-        Event event = new Event( id, name, startTime, endTime );
+        Event event = new Event( id, label, startTime, endTime );
 
         event.setTextRenderingMode( textRenderingMode );
 
@@ -632,7 +632,7 @@ public class EventPlotInfo implements TimePlotInfo
     }
 
     @Override
-    public String getId( )
+    public Object getId( )
     {
         return delegate.getId( );
     }

@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.media.opengl.GL;
 
@@ -83,7 +84,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     /**
      * Create a collapsible/expandable group of plots.
      */
-    public GroupInfo createGroup( String id, PlotInfo... subplots )
+    public GroupInfo createGroup( PlotInfo... subplots )
+    {
+        return createGroup( UUID.randomUUID( ), subplots );
+    }
+    
+    public GroupInfo createGroup( Object id, PlotInfo... subplots )
     {
         LinkedList<PlotInfo> list = new LinkedList<PlotInfo>( );
         for ( int i = 0; i < subplots.length; i++ )
@@ -92,7 +98,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         return createGroup( id, list );
     }
 
-    public GroupInfo createGroup( String id, Collection<? extends PlotInfo> subplots )
+    public GroupInfo createGroup( Object id, Collection<? extends PlotInfo> subplots )
     {
         this.lock.lock( );
         try
@@ -409,15 +415,13 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     public static interface GroupInfo extends PlotInfo
     {
         public void setLabelText( String text );
+        public String getLabelText( );
 
         public void addChildPlot( PlotInfo plot );
-
         public void removeChildPlot( PlotInfo plot );
-
         public Collection<PlotInfo> getChildPlots( );
 
         public void setExpanded( boolean expanded );
-
         public boolean isExpanded( );
     }
 
@@ -426,7 +430,8 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         protected Set<PlotInfo> subplots;
         protected PlotInfo group;
 
-        protected GroupLabelPainter label;
+        protected GroupLabelPainter labelPainter;
+        protected String label;
 
         protected boolean expanded;
 
@@ -440,8 +445,8 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                 childParentMap.put( plot, this );
             }
 
-            this.label = new GroupLabelPainter( group.getId( ) );
-            this.group.getLayout( ).addPainter( this.label );
+            this.labelPainter = new GroupLabelPainter( "" );
+            this.group.getLayout( ).addPainter( this.labelPainter );
 
             this.group.setSize( 22 );
 
@@ -476,7 +481,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         public void setExpanded( boolean expanded )
         {
             this.expanded = expanded;
-            this.label.setExpanded( expanded );
+            this.labelPainter.setExpanded( expanded );
             validateLayout( );
         }
 
@@ -503,9 +508,16 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         }
 
         @Override
-        public void setLabelText( String text )
+        public void setLabelText( String label )
         {
-            this.label.setText( text );
+            this.label = label;
+            this.labelPainter.setText( label );
+        }
+        
+        @Override
+        public String getLabelText( )
+        {
+            return this.label;
         }
 
         @Override
@@ -515,7 +527,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         }
 
         @Override
-        public String getId( )
+        public Object getId( )
         {
             return group.getId( );
         }

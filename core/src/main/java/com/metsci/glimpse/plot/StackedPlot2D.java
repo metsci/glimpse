@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -58,7 +59,7 @@ public class StackedPlot2D extends GlimpseLayout
     protected Axis1D commonAxis;
 
     protected GlimpseLayoutManagerMig layout;
-    protected Map<String, PlotInfo> stackedPlots;
+    protected Map<Object, PlotInfo> stackedPlots;
 
     protected BackgroundPainter backgroundPainter;
 
@@ -106,7 +107,7 @@ public class StackedPlot2D extends GlimpseLayout
 
     protected void initializeArrays( )
     {
-        this.stackedPlots = new LinkedHashMap<String, PlotInfo>( );
+        this.stackedPlots = new LinkedHashMap<Object, PlotInfo>( );
     }
 
     protected void initializeLayout( )
@@ -185,9 +186,9 @@ public class StackedPlot2D extends GlimpseLayout
         return commonAxis;
     }
 
-    public PlotInfo getPlot( String name )
+    public PlotInfo getPlot( Object id )
     {
-        return this.stackedPlots.get( name );
+        return this.stackedPlots.get( id );
     }
 
     public Collection<PlotInfo> getAllPlots( )
@@ -255,17 +256,17 @@ public class StackedPlot2D extends GlimpseLayout
         updatePainterLayout( );
     }
 
-    public void deletePlot( String name )
+    public void deletePlot( Object id )
     {
         this.lock.lock( );
         try
         {
-            PlotInfo info = stackedPlots.get( name );
+            PlotInfo info = stackedPlots.get( id );
 
             if ( info == null ) return;
 
             this.removeLayout( info.getLayout( ) );
-            stackedPlots.remove( name );
+            stackedPlots.remove( id );
 
             validate( );
         }
@@ -275,18 +276,23 @@ public class StackedPlot2D extends GlimpseLayout
         }
     }
 
-    public PlotInfo createPlot( String name )
+    public PlotInfo createPlot( )
     {
-        return createPlot( name, new Axis1D( ) );
+        return createPlot( UUID.randomUUID( ) );
+    }
+        
+    public PlotInfo createPlot( Object id )
+    {
+        return createPlot( id, new Axis1D( ) );
     }
 
-    public PlotInfo createPlot( String name, Axis1D axis )
+    public PlotInfo createPlot( Object id, Axis1D axis )
     {
         this.lock.lock( );
         try
         {
-            PlotInfo info = createPlot0( name, axis );
-            stackedPlots.put( name, info );
+            PlotInfo info = createPlot0( id, axis );
+            stackedPlots.put( id, info );
             validate( );
             return info;
         }
@@ -335,15 +341,15 @@ public class StackedPlot2D extends GlimpseLayout
     }
     
     // must be called while holding lock
-    protected PlotInfo createPlot0( String name, Axis1D axis )
+    protected PlotInfo createPlot0( Object id, Axis1D axis )
     {
-        if ( name == null )
+        if ( id == null )
         {
             throw new IllegalArgumentException( "Plot ID cannot be null." );
         }
-        else if ( stackedPlots.containsKey( name ) )
+        else if ( stackedPlots.containsKey( id ) )
         {
-            throw new IllegalArgumentException( "Plot ID: " + name + " already exists." );
+            throw new IllegalArgumentException( "Plot ID: " + id + " already exists." );
         }
 
         int order = 0;
@@ -352,11 +358,11 @@ public class StackedPlot2D extends GlimpseLayout
         Axis1D commonChildAxis = commonAxis.clone( );
         Axis2D axis2D = orientation == Orientation.HORIZONTAL ? new Axis2D( axis, commonChildAxis ) : new Axis2D( commonChildAxis, axis );
 
-        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, name, axis2D );
+        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, id.toString( ), axis2D );
         layout.setLookAndFeel( laf );
         
         addLayout( layout );
-        PlotInfo info = new PlotInfoImpl( this, name, order, size, layout );
+        PlotInfo info = new PlotInfoImpl( this, id, order, size, layout );
         return info;
     }
     
@@ -395,7 +401,7 @@ public class StackedPlot2D extends GlimpseLayout
          *
          * @return the plot unique identifier
          */
-        public String getId( );
+        public Object getId( );
 
         /**
          * @return the ordering value for this plot
@@ -478,13 +484,13 @@ public class StackedPlot2D extends GlimpseLayout
 
     public static class PlotInfoImpl implements PlotInfo
     {
-        protected String id;
+        protected Object id;
         protected int order;
         protected int size;
         protected GlimpseAxisLayout2D layout;
         protected StackedPlot2D parent;
 
-        public PlotInfoImpl( StackedPlot2D parent, String id, int order, int size, GlimpseAxisLayout2D layout )
+        public PlotInfoImpl( StackedPlot2D parent, Object id, int order, int size, GlimpseAxisLayout2D layout )
         {
             this.parent = parent;
             this.id = id;
@@ -500,7 +506,7 @@ public class StackedPlot2D extends GlimpseLayout
         }
 
         @Override
-        public String getId( )
+        public Object getId( )
         {
             return id;
         }

@@ -33,6 +33,7 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -238,15 +239,15 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Returns the time plot handle for the plot identified via its unique string identifier.
      * 
-     * @param name a plot unique identifier
-     * @return the PlotInfo handle
+     * @param id a plot unique identifier
+     * @return the TimePlotInfo handle
      */
-    public TimePlotInfo getTimePlot( String name )
+    public TimePlotInfo getTimePlot( Object id )
     {
         this.lock.lock( );
         try
         {
-            PlotInfo plot = getPlot( name );
+            PlotInfo plot = getPlot( id );
 
             if ( plot instanceof TimePlotInfo )
             {
@@ -262,10 +263,38 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.lock.unlock( );
         }
     }
-
-    public void setSelectedPlot( String name )
+    
+    /**
+     * Returns the event plot handle for the plot identified via its unique string identifier.
+     * 
+     * @param id a plot unique identifier
+     * @return the EventPlotInfo handle
+     */
+    public EventPlotInfo getEventPlot( Object id )
     {
-        this.setSelectedPlot( getPlot( name ) );
+        this.lock.lock( );
+        try
+        {
+            PlotInfo plot = getPlot( id );
+
+            if ( plot instanceof EventPlotInfo )
+            {
+                return ( EventPlotInfo ) plot;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    public void setSelectedPlot( Object id )
+    {
+        this.setSelectedPlot( getPlot( id ) );
     }
 
     public void setSelectedPlot( PlotInfo layout )
@@ -631,14 +660,13 @@ public class StackedTimePlot2D extends StackedPlot2D
      * Pushes the layout stack for the named plot onto the provided
      * GlimpseTargetStack.
      *
-     * @param name
-     *            the name of the plot
+     * @param id unique identifier for the plot
      * @return a relative GlimpseTargetStack for the named plot
      */
-    public GlimpseTargetStack pushLayoutTargetStack( GlimpseTargetStack stack, String name )
+    public GlimpseTargetStack pushLayoutTargetStack( GlimpseTargetStack stack, Object id )
     {
         stack = pushPlotTargetStack( stack );
-        PlotInfo plot = getPlot( name );
+        PlotInfo plot = getPlot( id );
         stack.push( plot.getLayout( ) );
         return stack;
     }
@@ -660,12 +688,12 @@ public class StackedTimePlot2D extends StackedPlot2D
      * @see com.metsci.glimpse.plot.StackedPlot2D#deletePlot(String)
      */
     @Override
-    public void deletePlot( String name )
+    public void deletePlot( Object id )
     {
         this.lock.lock( );
         try
         {
-            PlotInfo info = this.stackedPlots.get( name );
+            PlotInfo info = this.stackedPlots.get( id );
             if ( info == null ) return;
 
             if ( info instanceof TimePlotInfo )
@@ -674,13 +702,13 @@ public class StackedTimePlot2D extends StackedPlot2D
 
                 this.removeLayout( info.getLayout( ) );
                 this.removeLayout( timeInfo.getLabelLayout( ) );
-                this.stackedPlots.remove( name );
+                this.stackedPlots.remove( id );
                 this.validate( );
             }
             else
             {
                 this.removeLayout( info.getLayout( ) );
-                this.stackedPlots.remove( name );
+                this.stackedPlots.remove( id );
                 this.validate( );
             }
         }
@@ -691,11 +719,19 @@ public class StackedTimePlot2D extends StackedPlot2D
     }
 
     /**
-     * @see #createPlot( String, Axis1D )
+     * @see #createPlot( Object )
      */
-    public PlotInfo createPlot( String name )
+    public PlotInfo createPlot( )
     {
-        return this.createPlot( name, new Axis1D( ) );
+        return createPlot( UUID.randomUUID( ) );
+    }
+    
+    /**
+     * @see #createPlot( Object, Axis1D )
+     */
+    public PlotInfo createPlot( Object id )
+    {
+        return createPlot( id, new Axis1D( ) );
     }
 
     /**
@@ -704,24 +740,32 @@ public class StackedTimePlot2D extends StackedPlot2D
      * axis. Returns a handle which may be used for adding GlimpsePainter to the
      * plot or adjusting its size, order, and other display characteristics.
      *
-     * @param name the unique identifier of the plot to create
+     * @param id the unique identifier of the plot to create
      * @param axis the non-shared / non-time data axis for the plot
      * @return a handle to the newly created plot
      */
     @Override
-    public PlotInfo createPlot( String name, Axis1D axis )
+    public PlotInfo createPlot( Object id, Axis1D axis )
     {
-        PlotInfo layoutInfo = super.createPlot( name, axis );
+        PlotInfo layoutInfo = super.createPlot( id, axis );
 
         return layoutInfo;
     }
 
     /**
-     * @see #createPlot(String, Axis1D )
+     * @see #createPlot(Object )
      */
-    public TimePlotInfo createTimePlot( String name )
+    public TimePlotInfo createTimePlot( )
     {
-        return createTimePlot( name, new Axis1D( ) );
+        return createTimePlot( UUID.randomUUID( ) );
+    }
+    
+    /**
+     * @see #createPlot(Object, Axis1D )
+     */
+    public TimePlotInfo createTimePlot( Object id )
+    {
+        return createTimePlot( id, new Axis1D( ) );
     }
 
     /**
@@ -729,16 +773,16 @@ public class StackedTimePlot2D extends StackedPlot2D
      * additional plot decorations, including: grid lines, axes labels for the
      * data axis, and a text label describing the plot.
      *
-     * @see #createPlot(String, Axis1D )
+     * @see #createPlot(Object, Axis1D )
      */
-    public TimePlotInfo createTimePlot( String name, Axis1D axis )
+    public TimePlotInfo createTimePlot( Object id, Axis1D axis )
     {
         this.lock.lock( );
         try
         {
-            PlotInfo plotInfo = createPlot0( name, axis );
+            PlotInfo plotInfo = createPlot0( id, axis );
             TimePlotInfo timePlotInfo = createTimePlot0( plotInfo );
-            stackedPlots.put( name, timePlotInfo );
+            stackedPlots.put( id, timePlotInfo );
             validate( );
             return timePlotInfo;
         }
@@ -753,12 +797,17 @@ public class StackedTimePlot2D extends StackedPlot2D
         return this.defaultTextureAtlas;
     }
 
-    public EventPlotInfo createEventPlot( String name )
+    public EventPlotInfo createEventPlot( )
     {
-        return createEventPlot( name, defaultTextureAtlas );
+        return createEventPlot( UUID.randomUUID( ) );
+    }
+    
+    public EventPlotInfo createEventPlot( Object id )
+    {
+        return createEventPlot( id, defaultTextureAtlas );
     }
 
-    protected EventPlotInfo createEventPlot( String name, TextureAtlas atlas )
+    protected EventPlotInfo createEventPlot( Object id, TextureAtlas atlas )
     {
         if ( !isTimeAxisHorizontal( ) )
         {
@@ -768,9 +817,9 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.lock.lock( );
         try
         {
-            PlotInfo plotInfo = createPlot0( name, new Axis1D( ) );
+            PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
             EventPlotInfo timePlotInfo = createEventPlot0( plotInfo, atlas );
-            stackedPlots.put( name, timePlotInfo );
+            stackedPlots.put( id, timePlotInfo );
             validate( );
             return timePlotInfo;
         }
@@ -794,8 +843,7 @@ public class StackedTimePlot2D extends StackedPlot2D
      * Fixes the selected time region so that it will no longer follow the mouse
      * cursor.
      *
-     * @param lock
-     *            whether to lock or unlock the selected time region
+     * @param lock whether to lock or unlock the selected time region
      */
     public void setSelectionLocked( boolean lock )
     {

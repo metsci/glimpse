@@ -302,7 +302,7 @@ public class TimePlotInfoImpl implements TimePlotInfo
     }
 
     @Override
-    public String getId( )
+    public Object getId( )
     {
         return child.getId( );
     }
