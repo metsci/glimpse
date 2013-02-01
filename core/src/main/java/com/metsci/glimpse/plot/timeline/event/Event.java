@@ -261,7 +261,7 @@ public class Event
     {
         int size = sizeMax - sizeMin;
         double sizeCenter = sizeMin + size / 2.0;
-        int buffer = painter.getBufferSize( );
+        int buffer = painter.getRowBufferSize( );
         int arrowSize = Math.min( size, ARROW_SIZE );
         
         Epoch epoch = painter.getEpoch( );

@@ -502,24 +502,24 @@ public class EventPlotInfo implements TimePlotInfo
         return this.rowSize;
     }
     
-    public void setBufferSize( int size )
+    public void setRowBufferSize( int size )
     {
         this.bufferSize = size;
         this.updateSize( );
     }
 
-    public int getBufferSize( )
+    public int getRowBufferSize( )
     {
         return this.bufferSize;
     }
     
-    public void setMinRowCount( int count )
+    public void setRowMinCount( int count )
     {
         this.minRowCount = count;
         this.updateSize( );
     }
     
-    public int getMinRowCount( )
+    public int getRowMinCount( )
     {
         return this.minRowCount;
     }

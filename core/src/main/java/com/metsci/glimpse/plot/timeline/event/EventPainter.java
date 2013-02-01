@@ -211,9 +211,9 @@ public class EventPainter extends GlimpseDataPainter1D
         return this.plot.getRowSize( );
     }
 
-    public int getBufferSize( )
+    public int getRowBufferSize( )
     {
-        return this.plot.getBufferSize( );
+        return this.plot.getRowBufferSize( );
     }
 
     public int getRowCount( )
@@ -334,7 +334,7 @@ public class EventPainter extends GlimpseDataPainter1D
             Event eventStart = Event.createDummyEvent( timeStart );
             Event eventEnd = Event.createDummyEvent( timeEnd );
 
-            int rowIndex = ( int ) Math.floor( valueY / ( double ) ( getRowSize( ) + getBufferSize( ) ) );
+            int rowIndex = ( int ) Math.floor( valueY / ( double ) ( getRowSize( ) + getRowBufferSize( ) ) );
             rowIndex = plot.getRowCount( ) - 1 - rowIndex;
 
             if ( rowIndex >= 0 && rowIndex < rows.size( ) )
@@ -651,7 +651,7 @@ public class EventPainter extends GlimpseDataPainter1D
             calculateVisibleEvents( axis.getMin( ), axis.getMax( ) );
         }
 
-        int buffer = plot.getBufferSize( );
+        int buffer = plot.getRowBufferSize( );
         int rowSize = plot.getRowSize( );
 
         int sizeMin = buffer;
