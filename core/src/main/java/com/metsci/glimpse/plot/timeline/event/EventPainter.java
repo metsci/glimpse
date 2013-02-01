@@ -256,13 +256,15 @@ public class EventPainter extends GlimpseDataPainter1D
 
     public void addEvent( Event event )
     {
-        if ( event != null )
-        {
-            this.eventMap.put( event.getId( ), event );
-            this.addEvent0( event );
-            this.visibleEventsDirty = true;
-            this.plot.updateSize( );
-        }
+        if ( event == null ) return;
+        
+        // remove the event if it already exists
+        this.removeEvent( event.getId( ) );
+        
+        this.eventMap.put( event.getId( ), event );
+        this.addEvent0( event );
+        this.visibleEventsDirty = true;
+        this.plot.updateSize( );
     }
 
     public Event removeEvent( Object id )

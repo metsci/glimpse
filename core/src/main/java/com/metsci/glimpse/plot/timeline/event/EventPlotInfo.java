@@ -584,22 +584,14 @@ public class EventPlotInfo implements TimePlotInfo
     public Event addEvent( Object id, String label, TimeStamp time )
     {
         Event event = new Event( id, label, time );
-
-        event.setTextRenderingMode( textRenderingMode );
-
         addEvent( event );
-
         return event;
     }
 
     public Event addEvent( Object id, String label, TimeStamp startTime, TimeStamp endTime )
     {
         Event event = new Event( id, label, startTime, endTime );
-
-        event.setTextRenderingMode( textRenderingMode );
-
         addEvent( event );
-
         return event;
     }
 
