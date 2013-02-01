@@ -81,6 +81,7 @@ public class EventPlotInfo implements TimePlotInfo
     protected EventPainter eventPainter;
     protected GlimpseAxisLayout1D layout1D;
 
+    protected int minRowCount = 0;
     protected int rowSize;
     protected int bufferSize;
 
@@ -480,6 +481,12 @@ public class EventPlotInfo implements TimePlotInfo
         eventPainter.setStackOverlappingEvents( stack );
     }
 
+    
+    public int getRow( Object eventId )
+    {
+        return this.eventPainter.getRow( eventId );
+    }
+    
     /**
      * Sets the size of a single row of events. An EventPlotInfo may contain
      * multiple rows of events if some of those events overlap in time.
@@ -490,6 +497,11 @@ public class EventPlotInfo implements TimePlotInfo
         this.updateSize( );
     }
 
+    public int getRowSize( )
+    {
+        return this.rowSize;
+    }
+    
     public void setBufferSize( int size )
     {
         this.bufferSize = size;
@@ -500,15 +512,26 @@ public class EventPlotInfo implements TimePlotInfo
     {
         return this.bufferSize;
     }
-
-    public int getRowSize( )
+    
+    public void setMinRowCount( int count )
     {
-        return this.rowSize;
+        this.minRowCount = count;
+        this.updateSize( );
+    }
+    
+    public int getMinRowCount( )
+    {
+        return this.minRowCount;
     }
 
+    public int getRowCount( )
+    {
+        return Math.max( minRowCount, this.eventPainter.getRowCount( ) );
+    }
+    
     public void updateSize( )
     {
-        int rowCount = this.eventPainter.getRowCount( );
+        int rowCount = getRowCount( );
 
         this.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.bufferSize );
     }
@@ -625,13 +648,25 @@ public class EventPlotInfo implements TimePlotInfo
         return this.textRenderingMode;
     }
 
-    void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
+    public void updateEventRow( Event event, int rowIndex )
+    {
+        this.eventPainter.setRow( event.getId( ), rowIndex );
+        
+        this.notifyEventUpdated( event );
+    }
+    
+    public void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
         this.eventPainter.moveEvent0( oldEvent, newStartTime, newEndTime );
 
+        this.notifyEventUpdated( oldEvent );
+    }
+    
+    protected void notifyEventUpdated( Event event )
+    {
         for ( EventPlotListener listener : eventListeners )
         {
-            listener.eventUpdated( oldEvent );
+            listener.eventUpdated( event );
         }
     }
 

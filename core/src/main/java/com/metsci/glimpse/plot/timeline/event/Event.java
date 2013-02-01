@@ -79,6 +79,9 @@ public class Event
 
     protected TimeStamp startTime;
     protected TimeStamp endTime;
+    
+    protected boolean fixedRow = false;
+    protected int fixedRowIndex = 0;
 
     protected boolean showLabel = true;
     protected boolean showIcon = true;
@@ -824,6 +827,54 @@ public class Event
             // if we're attached to a plot, delegate the update of our
             // start/end time to it, so that it can update its data structures
             this.info.updateEvent( this, startTime, endTime );
+        }
+    }
+    
+    public int getRow( )
+    {
+        if ( this.info != null )
+        {
+            return this.info.getRow( id );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    
+    public boolean isFixedRow( )
+    {
+        return this.fixedRow;
+    }
+    
+    protected int getFixedRow( )
+    {
+        return this.fixedRowIndex;
+    }
+    
+    /**
+     * The row this Event appears on will be managed by its {@link EventPlotInfo}
+     * parent. If {@link EventPlotInfo#setStackOverlappingEvents(boolean)} is set
+     * to true, then the row will be set to avoid overlaps with other events, otherwise
+     * the Event will be placed in the first row.
+     */
+    public void setFloatingRow( )
+    {
+        this.fixedRow = false;
+    }
+    
+    /**
+     * This event will appear on the requested row index in the timeline
+     * regardless of whether that causes it to overlap with other Events.
+     */
+    public void setFixedRow( int rowIndex )
+    {
+        this.fixedRow = true;
+        this.fixedRowIndex = rowIndex;
+        
+        if ( this.info != null )
+        {
+            this.info.updateEventRow( this, rowIndex );
         }
     }
 
