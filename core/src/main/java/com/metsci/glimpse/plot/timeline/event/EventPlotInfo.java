@@ -60,6 +60,7 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.TooltipPainter;
 import com.metsci.glimpse.plot.StackedPlot2D;
+import com.metsci.glimpse.plot.StackedPlot2D.LayoutDataUpdater;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
@@ -858,5 +859,17 @@ public class EventPlotInfo implements TimePlotInfo
     public void removePainter( GlimpsePainter painter )
     {
         delegate.removePainter( painter );
+    }
+
+    @Override
+    public void setLayoutDataUpdater( LayoutDataUpdater updater )
+    {
+        delegate.setLayoutDataUpdater( updater );
+    }
+
+    @Override
+    public LayoutDataUpdater getLayoutDataUpdater( )
+    {
+        return delegate.getLayoutDataUpdater( );
     }
 }

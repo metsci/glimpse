@@ -103,11 +103,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     // epoch encapsulating the absolute time which maps to value 0 on the timeline
     protected Epoch epoch;
 
-    // layout covering all plots and timeline (for drawing
-    // which must span multiple plots)
-    protected GlimpseAxisLayout1D overlayLayout;
-    protected GlimpseAxisLayout1D underlayLayout;
-
     // time layout painters and listeners
     protected PlotInfo timelineInfo;
     protected GlimpseAxisLayout1D timeLayout;
@@ -174,6 +169,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.defaultTextureAtlas = atlas;
 
         this.initializeTimePlot( );
+        this.initializeOverlayPainters( );
     }
 
     /**
@@ -263,7 +259,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.lock.unlock( );
         }
     }
-    
+
     /**
      * Returns the event plot handle for the plot identified via its unique string identifier.
      * 
@@ -541,7 +537,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return this.maxTag;
     }
-    
+
     /**
      * Get the currently selected time (usually equal to getTimeSelectionMax()).
      */
@@ -651,6 +647,16 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.validateLayout( );
     }
 
+    public int getLabelSize( )
+    {
+        return this.labelLayoutSize;
+    }
+
+    public boolean isShowLabels( )
+    {
+        return this.showLabelLayout;
+    }
+
     public boolean isTimeAxisHorizontal( )
     {
         return getOrientation( ) == Orientation.VERTICAL;
@@ -719,47 +725,13 @@ public class StackedTimePlot2D extends StackedPlot2D
     }
 
     /**
-     * @see #createPlot( Object )
-     */
-    public PlotInfo createPlot( )
-    {
-        return createPlot( UUID.randomUUID( ) );
-    }
-    
-    /**
-     * @see #createPlot( Object, Axis1D )
-     */
-    public PlotInfo createPlot( Object id )
-    {
-        return createPlot( id, new Axis1D( ) );
-    }
-
-    /**
-     * Creates a plotting area with one common time axis and attaches a mouse
-     * listener which handles properly adjusting the time selection on the time
-     * axis. Returns a handle which may be used for adding GlimpsePainter to the
-     * plot or adjusting its size, order, and other display characteristics.
-     *
-     * @param id the unique identifier of the plot to create
-     * @param axis the non-shared / non-time data axis for the plot
-     * @return a handle to the newly created plot
-     */
-    @Override
-    public PlotInfo createPlot( Object id, Axis1D axis )
-    {
-        PlotInfo layoutInfo = super.createPlot( id, axis );
-
-        return layoutInfo;
-    }
-
-    /**
      * @see #createPlot(Object )
      */
     public TimePlotInfo createTimePlot( )
     {
         return createTimePlot( UUID.randomUUID( ) );
     }
-    
+
     /**
      * @see #createPlot(Object, Axis1D )
      */
@@ -801,7 +773,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return createEventPlot( UUID.randomUUID( ) );
     }
-    
+
     public EventPlotInfo createEventPlot( Object id )
     {
         return createEventPlot( id, defaultTextureAtlas );
@@ -940,6 +912,50 @@ public class StackedTimePlot2D extends StackedPlot2D
         setTimeSelection( minTime, maxTime, maxTime );
     }
 
+    protected void initializeOverlayPainters( )
+    {
+        this.selectedTimePainter = new SelectedTimeRegionPainter( this );
+
+        this.tooltipPainter = new TooltipPainter( this.defaultTextureAtlas );
+        this.overlayLayout.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
+        {
+            @Override
+            public void mouseMoved( GlimpseMouseEvent e )
+            {
+                tooltipPainter.setLocation( e );
+            }
+        } );
+
+        this.overlayLayout.addPainter( this.selectedTimePainter );
+        this.overlayLayout.addPainter( this.tooltipPainter );
+
+        this.timelineMouseListener = createTimeAxisListener( );
+        this.underlayLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
+    }
+
+    protected LayoutDataUpdater createTimelineLayoutDataUpdater( PlotInfo info )
+    {
+        return new LayoutDataUpdaterImpl( info, 1 )
+        {
+            protected int growingPlotCount( List<PlotInfo> list )
+            {
+                int count = 0;
+                for ( PlotInfo info : list )
+                {
+                    if ( info.getSize( ) < 0 ) count++;
+                }
+
+                return count;
+            }
+
+            @Override
+            public int getSizePixels( List<PlotInfo> list, int index )
+            {
+                return growingPlotCount( list ) == 0 ? -1 : this.info.getSize( );
+            }
+        };
+    }
+
     protected void initializeTimePlot( )
     {
         TaggedAxis1D timeAxis = getTimeAxis( );
@@ -952,6 +968,10 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         this.timelineInfo = createPlot( TIMELINE );
 
+        // modify the layout data of the timeline to set its size to -1 (causing it to expand)
+        // if nothing else in the timeline is expanded
+        this.timelineInfo.setLayoutDataUpdater( createTimelineLayoutDataUpdater( this.timelineInfo ) );
+
         if ( isTimeAxisHorizontal( ) )
         {
             this.timelineInfo.setSize( 45 );
@@ -959,7 +979,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
             this.timeLayout = new GlimpseAxisLayoutX( this.timelineInfo.getLayout( ) );
             this.timeLayout.setEventConsumer( false );
-            
+
             this.labelLayoutSize = 30;
         }
         else
@@ -972,7 +992,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
             this.labelLayoutSize = 30;
         }
-        
+
         this.timelineInfo.getLayout( ).setEventConsumer( false );
 
         this.timeAxisPainter = createTimeAxisPainter( );
@@ -1001,43 +1021,6 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         this.timeLayout.addPainter( this.timeUnitsPainter );
         this.timeLayout.addPainter( this.timeAxisBorderPainter );
-
-        if ( isTimeAxisHorizontal( ) )
-        {
-            this.overlayLayout = new GlimpseAxisLayoutX( this, "Overlay", timeAxis );
-            this.underlayLayout = new GlimpseAxisLayoutX( this, "Underlay", timeAxis );
-        }
-        else
-        {
-            this.overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", timeAxis );
-            this.underlayLayout = new GlimpseAxisLayoutY( this, "Underlay", timeAxis );
-        }
-
-        this.selectedTimePainter = new SelectedTimeRegionPainter( this );
-
-        this.tooltipPainter = new TooltipPainter( this.defaultTextureAtlas );
-        this.overlayLayout.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
-        {
-            @Override
-            public void mouseMoved( GlimpseMouseEvent e )
-            {
-                tooltipPainter.setLocation( e );
-            }
-        } );
-
-        this.overlayLayout.setEventGenerator( true );
-        this.overlayLayout.setEventConsumer( false );
-        this.overlayLayout.addPainter( this.selectedTimePainter );
-        this.overlayLayout.addPainter( this.tooltipPainter );
-
-        this.timelineMouseListener = createTimeAxisListener( );
-        this.underlayLayout.setEventGenerator( true );
-        this.underlayLayout.setEventConsumer( false );
-        this.underlayLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
-
-        // nothing should be placed in front of the overlayLayout
-        this.setZOrder( this.overlayLayout, Integer.MAX_VALUE );
-        this.setZOrder( this.underlayLayout, Integer.MIN_VALUE );
 
         this.validate( );
     }
@@ -1273,150 +1256,5 @@ public class StackedTimePlot2D extends StackedPlot2D
         timePlotInfo.setLookAndFeel( laf );
 
         return timePlotInfo;
-    }
-    
-    protected void setPlotInfoLayout( PlotInfo info, int i, int size, int growingPlotCount )
-    {
-        //XXX hack, overload negative size to mean "grow to fill available space"
-        boolean grow = info.getSize( ) < 0 || ( growingPlotCount == 0 && info.getId( ).equals( TIMELINE ) );
-        
-        if ( isTimeAxisHorizontal( ) )
-        {
-            int topSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
-            int bottomSpace = i >= size - 2 ? 0 : plotSpacing;
-
-            if ( grow )
-            {
-                String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
-                String layout = String.format( format, 1, i, topSpace, bottomSpace );
-                info.getLayout( ).setLayoutData( layout );
-
-                if ( info instanceof TimePlotInfo )
-                {
-                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                    format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
-                    layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
-                    timeInfo.getLabelLayout( ).setLayoutData( layout );
-                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                }
-            }
-            else
-            {
-                String format = "cell %d %d 1 1, pushx, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
-                String layout = String.format( format, 1, i, info.getSize( ), topSpace, bottomSpace );
-                info.getLayout( ).setLayoutData( layout );
-
-                if ( info instanceof TimePlotInfo )
-                {
-                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                    format = "cell %d %d 1 1, width %d!, height %d!, gap 0 0 %5$d %6$d";
-                    layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
-                    timeInfo.getLabelLayout( ).setLayoutData( layout );
-                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                }
-            }
-        }
-        else
-        {
-            int topSpace = i <= 1 ? 0 : plotSpacing;
-            int bottomSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
-
-            if ( grow )
-            {
-                String format = "cell %d %d 1 1, push, grow, id i%1$d, gap %3$d %4$d 0 0";
-                String layout = String.format( format, i, 1, topSpace, bottomSpace );
-                info.getLayout( ).setLayoutData( layout );
-
-                if ( info instanceof TimePlotInfo )
-                {
-                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                    format = "cell %d %d 1 1, pushx, growx, height %d!, gap %4$d %5$d 0 0";
-                    layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
-                    timeInfo.getLabelLayout( ).setLayoutData( layout );
-                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                }
-            }
-            else
-            {
-                String format = "cell %d %d 1 1, pushy, growy, width %d!, id i%1$d, gap %4$d %5$d 0 0";
-                String layout = String.format( format, i, 1, info.getSize( ), topSpace, bottomSpace );
-                info.getLayout( ).setLayoutData( layout );
-
-                if ( info instanceof TimePlotInfo )
-                {
-                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                    format = "cell %d %d 1 1, height %d!, width %d!, gap %5$d %6$d 0 0";
-                    layout = String.format( format, i, 0, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
-                    timeInfo.getLabelLayout( ).setLayoutData( layout );
-                    timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                }
-            }
-        }
-    }
-
-    protected String getLayoutConstraints( )
-    {
-        return String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder );
-    }
-
-    
-    //XXX hack, overload negative size to mean "grow to fill available space"
-    // count the number of plots who are configured to grow in this way
-    protected int growingPlotCount( List<PlotInfo> list )
-    {
-        int count = 0;
-        for ( PlotInfo info : list )
-        {
-            if ( info.getSize( ) < 0 ) count++;
-        }
-        
-        return count;
-    }
-    
-    @Override
-    protected void updatePainterLayout( )
-    {
-        this.lock.lock( );
-        try
-        {
-            List<PlotInfo> plots = getSortedAxes( stackedPlots.values( ) );
-
-            this.layout.setLayoutConstraints( getLayoutConstraints( ) );
-
-            int growingPlotCount = growingPlotCount( plots );
-            for ( int i = 0; i < plots.size( ); i++ )
-            {
-                PlotInfo info = plots.get( i );
-                setPlotInfoLayout( info, i, plots.size( ), growingPlotCount );
-            }
-
-            // position the overlay in absolute coordinates based on the position of the plots
-            // which are given miglayout ids: i0, i1, etc...
-            if ( this.overlayLayout != null )
-            {
-                if ( this.isTimeAxisHorizontal( ) )
-                {
-                    String layout = String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( plots.size( ) - 1 ) );
-                    this.overlayLayout.setLayoutData( layout );
-                    this.underlayLayout.setLayoutData( layout );
-                }
-                else
-                {
-                    String layout = String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( plots.size( ) - 1 ) );
-                    this.overlayLayout.setLayoutData( layout );
-                    this.underlayLayout.setLayoutData( layout );
-                }
-            }
-
-            this.invalidateLayout( );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
     }
 }

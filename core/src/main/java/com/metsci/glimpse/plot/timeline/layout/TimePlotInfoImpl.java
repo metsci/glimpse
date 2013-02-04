@@ -44,6 +44,7 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.TooltipPainter;
 import com.metsci.glimpse.plot.StackedPlot2D;
+import com.metsci.glimpse.plot.StackedPlot2D.LayoutDataUpdater;
 import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
@@ -53,6 +54,7 @@ import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
 import com.metsci.glimpse.util.units.time.format.TimeStampFormatStandard;
 
 /**
+ * @see TimePlotInfo
  * @author ulman
  */
 public class TimePlotInfoImpl implements TimePlotInfo
@@ -73,6 +75,8 @@ public class TimePlotInfoImpl implements TimePlotInfo
     protected GlimpseLayout labelLayout;
 
     protected TimeToolTipHandler timeToolTipHandler;
+
+    protected LayoutDataUpdater updater;
 
     public interface TimeToolTipHandler
     {
@@ -104,6 +108,8 @@ public class TimePlotInfoImpl implements TimePlotInfo
         this.labelBorderPainter = labelBorderPainter;
         this.backgroundPainter = backgroundPainter;
         this.dataPainter = dataPainter;
+        
+        this.updater = new TimeLayoutDataUpdater( this );
         
         this.timeToolTipHandler = new TimeToolTipHandler( )
         {
@@ -372,5 +378,17 @@ public class TimePlotInfoImpl implements TimePlotInfo
     {
         child.setLookAndFeel( laf );
         labelLayout.setLookAndFeel( laf );
+    }
+
+    @Override
+    public void setLayoutDataUpdater( LayoutDataUpdater updater )
+    {
+        this.updater = updater;
+    }
+
+    @Override
+    public LayoutDataUpdater getLayoutDataUpdater( )
+    {
+        return this.updater;
     }
 }

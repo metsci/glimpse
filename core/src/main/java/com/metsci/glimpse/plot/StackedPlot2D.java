@@ -38,7 +38,10 @@ import java.util.UUID;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -66,7 +69,12 @@ public class StackedPlot2D extends GlimpseLayout
     protected Orientation orientation = Orientation.VERTICAL;
 
     protected LookAndFeel laf;
-    
+
+    // layout covering all plots and timeline (for drawing
+    // which must span multiple plots)
+    protected GlimpseAxisLayout1D overlayLayout;
+    protected GlimpseAxisLayout1D underlayLayout;
+
     public StackedPlot2D( Orientation orientation )
     {
         this.orientation = orientation;
@@ -79,17 +87,16 @@ public class StackedPlot2D extends GlimpseLayout
         this( Orientation.VERTICAL );
     }
 
-    
     //////////////////////////////////////
     //     Initialization Methods       //
     //////////////////////////////////////
 
-    
     protected void initializePlot( )
     {
         initializeAxes( );
         initializeArrays( );
         initializeLayout( );
+        initializeOverlayLayout( );
         initializePainters( );
         initializeLookAndFeel( );
         updatePainterLayout( );
@@ -127,40 +134,45 @@ public class StackedPlot2D extends GlimpseLayout
         setLookAndFeel( new DefaultLookAndFeel( ) );
     }
 
+    protected void initializeOverlayLayout( )
+    {
+        if ( getOrientation( ) == Orientation.VERTICAL )
+        {
+            this.overlayLayout = new GlimpseAxisLayoutX( this, "Overlay", commonAxis );
+            this.underlayLayout = new GlimpseAxisLayoutX( this, "Underlay", commonAxis );
+        }
+        else
+        {
+            this.overlayLayout = new GlimpseAxisLayoutY( this, "Overlay", commonAxis );
+            this.underlayLayout = new GlimpseAxisLayoutY( this, "Underlay", commonAxis );
+        }
+
+        this.overlayLayout.setEventGenerator( true );
+        this.overlayLayout.setEventConsumer( false );
+        this.underlayLayout.setEventGenerator( true );
+        this.underlayLayout.setEventConsumer( false );
+
+        // nothing should be placed in front of the overlayLayout
+        this.setZOrder( this.overlayLayout, Integer.MAX_VALUE );
+        this.setZOrder( this.underlayLayout, Integer.MIN_VALUE );
+    }
+
     protected void updatePainterLayout( )
     {
         this.lock.lock( );
         try
         {
-            this.layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
+            setLayoutConstraints( );
 
-            List<PlotInfo> axisList = getSortedAxes( stackedPlots.values( ) );
-            for ( int i = 0; i < axisList.size( ); i++ )
+            List<PlotInfo> list = getSortedPlots( stackedPlots.values( ) );
+            for ( int index = 0; index < list.size( ); index++ )
             {
-                PlotInfo info = axisList.get( i );
-
-                if ( info.getSize( ) < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
-                {
-                    String format = "cell %d %d 1 1, push, grow";
-                    String layout = orientation == Orientation.HORIZONTAL ? String.format( format, i, 0 ) : String.format( format, 0, i );
-                    info.getLayout( ).setLayoutData( layout );
-                }
-                else
-                {
-                    if ( orientation == Orientation.HORIZONTAL )
-                    {
-                        String format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %d %d";
-                        String layout = String.format( format, i, 0, info.getSize( ), i == 0 ? 0 :plotSpacing, i == axisList.size( )-1 ? 0 : plotSpacing );
-                        info.getLayout( ).setLayoutData( layout );
-                    }
-                    else if ( orientation == Orientation.VERTICAL )
-                    {
-                        String format = "cell %d %d 1 1, pushx, growx, height %d!, gap %d %d 0 0";
-                        String layout = String.format( format, 0, i, info.getSize( ), i == 0 ? 0 :plotSpacing, i == axisList.size( )-1 ? 0 : plotSpacing );
-                        info.getLayout( ).setLayoutData( layout );
-                    }
-                }
+                LayoutDataUpdater updater = list.get( index ).getLayoutDataUpdater( );
+                int size = updater.getSizePixels( list, index );
+                updater.updateLayoutData( list, index, size );
             }
+
+            this.updateOverlayLayout( list );
 
             this.invalidateLayout( );
         }
@@ -170,12 +182,41 @@ public class StackedPlot2D extends GlimpseLayout
         }
     }
 
+    protected void updateOverlayLayout( List<PlotInfo> list )
+    {
+        // position the overlay in absolute coordinates based on the position of the plots
+        // which are given miglayout ids: i0, i1, etc...
+        if ( this.overlayLayout != null )
+        {
+            if ( getOrientation( ) == Orientation.VERTICAL )
+            {
+                String layout = String.format( "pos i%1$d.x i%1$d.y i0.x2 i0.y2", ( list.size( ) - 1 ) );
+                this.overlayLayout.setLayoutData( layout );
+                this.underlayLayout.setLayoutData( layout );
+            }
+            else
+            {
+                String layout = String.format( "pos i0.x i0.y i%1$d.x2 i%1$d.y2", ( list.size( ) - 1 ) );
+                this.overlayLayout.setLayoutData( layout );
+                this.underlayLayout.setLayoutData( layout );
+            }
+        }
+    }
     
+    protected void setLayoutConstraints( )
+    {
+        layout.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets %d %d %d %d", outerBorder, outerBorder, outerBorder, outerBorder ) );
+    }
+
     //////////////////////////////////////
-    //          Getter Methods          //
+    //   Getter / Setter Methods        //
     //////////////////////////////////////
 
-    
+    public int getPlotSpacing( )
+    {
+        return this.plotSpacing;
+    }
+
     public Orientation getOrientation( )
     {
         return orientation;
@@ -203,19 +244,17 @@ public class StackedPlot2D extends GlimpseLayout
             this.lock.unlock( );
         }
     }
-    
 
     //////////////////////////////////////
     //      Customization Methods       //
     //////////////////////////////////////
 
-    
     public void setPlotSpacing( int size )
     {
         this.plotSpacing = size;
         this.validate( );
     }
-    
+
     public void setBackgroundColor( float[] color )
     {
         this.backgroundPainter.setColor( color );
@@ -280,7 +319,7 @@ public class StackedPlot2D extends GlimpseLayout
     {
         return createPlot( UUID.randomUUID( ) );
     }
-        
+
     public PlotInfo createPlot( Object id )
     {
         return createPlot( id, new Axis1D( ) );
@@ -301,20 +340,18 @@ public class StackedPlot2D extends GlimpseLayout
             this.lock.unlock( );
         }
     }
-    
+
     @Override
     public String toString( )
     {
         return StackedPlot2D.class.getSimpleName( );
     }
-    
-    
+
     //////////////////////////////////////
     //              Internals           //
     //////////////////////////////////////
-    
 
-    protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
+    protected List<PlotInfo> getSortedPlots( Collection<PlotInfo> unsorted )
     {
         List<PlotInfo> sortedList = new ArrayList<PlotInfo>( );
 
@@ -339,7 +376,7 @@ public class StackedPlot2D extends GlimpseLayout
     {
         return orientation == Orientation.HORIZONTAL ? axis.getAxisX( ) : axis.getAxisY( );
     }
-    
+
     // must be called while holding lock
     protected PlotInfo createPlot0( Object id, Axis1D axis )
     {
@@ -360,26 +397,24 @@ public class StackedPlot2D extends GlimpseLayout
 
         GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( null, id.toString( ), axis2D );
         layout.setLookAndFeel( laf );
-        
+
         addLayout( layout );
         PlotInfo info = new PlotInfoImpl( this, id, order, size, layout );
         return info;
     }
-    
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
         super.setLookAndFeel( laf );
-        
+
         this.laf = laf;
     }
-    
-    
+
     //////////////////////////////////////
     //           Inner Classes          //
     //////////////////////////////////////
-    
-    
+
     public enum Orientation
     {
         HORIZONTAL, VERTICAL;
@@ -394,7 +429,7 @@ public class StackedPlot2D extends GlimpseLayout
          * @return the parent StackedPlot2D
          */
         public StackedPlot2D getStackedPlot( );
-        
+
         /**
          * Gets the unique identifier assigned to this plot. This identifier can
          * be used to retrieve this plot handle from the StackedPlot2D.
@@ -478,8 +513,108 @@ public class StackedPlot2D extends GlimpseLayout
          * @param childLayout
          */
         public void addLayout( GlimpseAxisLayout2D childLayout );
-        
+
         public void setLookAndFeel( LookAndFeel laf );
+
+        public void setLayoutDataUpdater( LayoutDataUpdater updater );
+
+        public LayoutDataUpdater getLayoutDataUpdater( );
+    }
+
+    public static interface LayoutDataUpdater
+    {
+        /**
+         * Updates the MigLayout LayoutData string which positions this PlotInfo within
+         * the StackedPlot2D. This method is called automatically by the plot when
+         * necessary and generally should not be called by client code.
+         * 
+         * @param list a list of all the plots in this StackedPlot2D
+         * @param index the index of this PlotInfo within the list
+         * @param size the pixel size of the plot, as returned by {@link #getSizePixels(List, int)}
+         */
+        public void updateLayoutData( List<PlotInfo> list, int index, int size );
+
+        /**
+         * <p>Returns the correct pixel size (height or width depending on whether the
+         * stacked plot is oriented horizontally or vertically) for the plot. Usually
+         * this height is simply {@link PlotInfo#getSize()}, however if the plot allows
+         * collapsing of plots under certain circumstances, or the height of the plot
+         * changes in response to user actions, this method may return a value different
+         * than the requested size of the plot.</p>
+         * 
+         * @param list a list of all the plots in this StackedPlot2D
+         * @param index the index of this PlotInfo within the list
+         */
+        public int getSizePixels( List<PlotInfo> list, int index );
+    }
+
+    public static class LayoutDataUpdaterImpl implements LayoutDataUpdater
+    {
+        protected PlotInfo info;
+        protected int startIndex;
+        protected boolean push;
+
+        public LayoutDataUpdaterImpl( PlotInfo info, int startIndex, boolean push )
+        {
+            this.info = info;
+            this.startIndex = startIndex;
+            this.push = push;
+        }
+        
+        public LayoutDataUpdaterImpl( PlotInfo info, int startIndex )
+        {
+            this( info, startIndex, true );
+        }
+
+        @Override
+        public int getSizePixels( List<PlotInfo> list, int index )
+        {
+            return this.info.getSize( );
+        }
+
+        @Override
+        public void updateLayoutData( List<PlotInfo> list, int index, int size )
+        {
+            Orientation orientation = info.getStackedPlot( ).getOrientation( );
+            int plotSpacing = info.getStackedPlot( ).getPlotSpacing( );
+
+            String layoutData = null;
+
+            if ( orientation == Orientation.HORIZONTAL )
+            {
+                int gapTop = index == 0 ? 0 : plotSpacing;
+                int gapBottom = index == list.size( ) - 1 ? 0 : plotSpacing;
+
+                if ( size < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                {
+                    String format = "cell %d %d, spany, push, grow, gap 0 0 %d %d, id i%1$d";
+                    layoutData = String.format( format, index, startIndex, gapTop, gapBottom );
+                }
+                else
+                {
+                    String format = "cell %d %d, spany, growy, width %d!, gap 0 0 %d %d, id i%1$d";
+                    layoutData = String.format( format, index, startIndex, size, gapTop, gapBottom );
+                }
+            }
+            else if ( orientation == Orientation.VERTICAL )
+            {
+                int gapLeft = index == 0 ? 0 : plotSpacing;
+                int gapRight = index == list.size( ) - 1 ? 0 : plotSpacing;
+
+                if ( size < 0 ) // slight hack, overload negative size to mean "grow to fill available space"
+                {
+                    String format = "cell %d %d, spanx, push, grow, gap 0 0 %d %d, id i%2$d";
+                    layoutData = String.format( format, startIndex, index, gapLeft, gapRight );
+                }
+                else
+                {
+                    String format = "cell %d %d, spanx, pushx, growx, height %d!, gap %d %d 0 0, id i%2$d";
+                    layoutData = String.format( format, startIndex, index, size, gapLeft, gapRight );
+                }
+            }
+
+            info.getLayout( ).setLayoutData( layoutData );
+        }
     }
 
     public static class PlotInfoImpl implements PlotInfo
@@ -489,6 +624,7 @@ public class StackedPlot2D extends GlimpseLayout
         protected int size;
         protected GlimpseAxisLayout2D layout;
         protected StackedPlot2D parent;
+        protected LayoutDataUpdater updater;
 
         public PlotInfoImpl( StackedPlot2D parent, Object id, int order, int size, GlimpseAxisLayout2D layout )
         {
@@ -497,6 +633,19 @@ public class StackedPlot2D extends GlimpseLayout
             this.order = order;
             this.size = size;
             this.layout = layout;
+            this.updater = new LayoutDataUpdaterImpl( this, 1 );
+        }
+
+        @Override
+        public LayoutDataUpdater getLayoutDataUpdater( )
+        {
+            return this.updater;
+        }
+
+        @Override
+        public void setLayoutDataUpdater( LayoutDataUpdater updater )
+        {
+            this.updater = updater;
         }
 
         @Override
@@ -579,7 +728,7 @@ public class StackedPlot2D extends GlimpseLayout
 
             this.layout.addLayout( childLayout );
         }
-        
+
         @Override
         public void setLookAndFeel( LookAndFeel laf )
         {
@@ -609,7 +758,7 @@ public class StackedPlot2D extends GlimpseLayout
             else if ( !id.equals( other.id ) ) return false;
             return true;
         }
-        
+
         public static Comparator<PlotInfo> getComparator( )
         {
             return new Comparator<PlotInfo>( )

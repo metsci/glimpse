@@ -26,42 +26,23 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
-import static javax.media.opengl.GL.GL_MODELVIEW;
-import static javax.media.opengl.GL.GL_PROJECTION;
-
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import javax.media.opengl.GL;
-
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
-import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
-import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.group.GroupInfo;
+import com.metsci.glimpse.plot.timeline.group.GroupInfoImpl;
+import com.metsci.glimpse.plot.timeline.group.GroupLayoutDataUpdater;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
-import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
 
 public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
@@ -81,6 +62,40 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         this.childParentMap = new HashMap<PlotInfo, GroupInfo>( );
     }
 
+    @Override
+    public PlotInfo createPlot( Object id, Axis1D axis )
+    {
+        PlotInfo info = super.createPlot( id, axis );
+        wrapLayoutDataUpdater( info );
+        return info;
+    }
+
+    @Override
+    protected TimePlotInfo createTimePlot0( PlotInfo plotInfo )
+    {
+        TimePlotInfo info = super.createTimePlot0( plotInfo );
+        wrapLayoutDataUpdater( info );
+        return info;
+    }
+
+    @Override
+    protected EventPlotInfo createEventPlot0( PlotInfo plotInfo, TextureAtlas atlas )
+    {
+        EventPlotInfo info = super.createEventPlot0( plotInfo, atlas );
+        wrapLayoutDataUpdater( info );
+        return info;
+    }
+
+    // wrap the layout updater with a group-aware updater which will
+    // set the size of the plot to 0 if its parent plot is collapsed
+    protected void wrapLayoutDataUpdater( PlotInfo info )
+    {
+        // wrap the layout updater with a group-aware updater which will
+        // set the size of the plot to 0 if its parent plot is collapsed
+        LayoutDataUpdater delegate = info.getLayoutDataUpdater( );
+        info.setLayoutDataUpdater( new GroupLayoutDataUpdater( this, info, delegate ) );
+    }
+
     /**
      * Create a collapsible/expandable group of plots.
      */
@@ -98,13 +113,39 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         return createGroup( id, list );
     }
 
+    public GroupInfo getGroupById( Object id )
+    {
+        this.lock.lock( );
+        try
+        {
+            return getGroup( getPlot( id ) );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    public GroupInfo getGroup( PlotInfo info )
+    {
+        this.lock.lock( );
+        try
+        {
+            return childParentMap.get( info );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
     public GroupInfo createGroup( Object id, Collection<? extends PlotInfo> subplots )
     {
         this.lock.lock( );
         try
         {
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
-            GroupInfo group = new GroupInfoImpl( plotInfo, subplots );
+            GroupInfo group = new GroupInfoInner( this, plotInfo, subplots );
             stackedPlots.put( id, group );
             for ( PlotInfo sub : subplots )
             {
@@ -112,6 +153,32 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             }
             validate( );
             return group;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    protected void addChildPlot0( GroupInfo group, PlotInfo child )
+    {
+        this.lock.lock( );
+        try
+        {
+            childParentMap.put( child, group );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+
+    protected void removeChildPlot0( GroupInfo group, PlotInfo child )
+    {
+        this.lock.lock( );
+        try
+        {
+            childParentMap.remove( child );
         }
         finally
         {
@@ -140,7 +207,52 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     }
 
     @Override
-    protected List<PlotInfo> getSortedAxes( Collection<PlotInfo> unsorted )
+    protected LayoutDataUpdater createTimelineLayoutDataUpdater( PlotInfo info )
+    {
+        return new LayoutDataUpdaterImpl( info, 1 )
+        {
+            protected int growingPlotCount( List<PlotInfo> list )
+            {
+                int count = 0;
+                for ( PlotInfo info : list )
+                {
+                    if ( info.getSize( ) < 0 )
+                    {
+                        count++;
+                    }
+
+                    // the children of non-expanded groups don't count
+                    // they will be counted above, so remove them from the count here
+                    if ( info instanceof GroupInfo )
+                    {
+                        GroupInfo groupInfo = ( GroupInfo ) info;
+
+                        if ( !groupInfo.isExpanded( ) )
+                        {
+                            for ( PlotInfo childInfo : groupInfo.getChildPlots( ) )
+                            {
+                                if ( childInfo.getSize( ) < 0 )
+                                {
+                                    count--;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return count;
+            }
+
+            @Override
+            public int getSizePixels( List<PlotInfo> list, int index )
+            {
+                return growingPlotCount( list ) == 0 ? -1 : this.info.getSize( );
+            }
+        };
+    }
+
+    @Override
+    protected List<PlotInfo> getSortedPlots( Collection<PlotInfo> unsorted )
     {
         // remove children of groups from list of all plots
         List<PlotInfo> ungroupedPlots = new ArrayList<PlotInfo>( );
@@ -177,526 +289,26 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         return sortedPlots;
     }
 
-    //XXX hack, overload negative size to mean "grow to fill available space"
-    // count the number of plots who are configured to grow in this way
-    @Override
-    protected int growingPlotCount( List<PlotInfo> list )
+    public class GroupInfoInner extends GroupInfoImpl
     {
-        int count = 0;
-        for ( PlotInfo info : list )
+        public GroupInfoInner( CollapsibleTimePlot2D plot, final PlotInfo group, Collection<? extends PlotInfo> subplots )
         {
-            // the children of non-expanded groups don't count
-            if ( childParentMap != null )
-            {
-                GroupInfo group = childParentMap.get( info );
-                if ( group != null && !group.isExpanded( ) )
-                {
-                    continue;
-                }
-            }
-
-            if ( info.getSize( ) < 0 )
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    @Override
-    protected void setPlotInfoLayout( PlotInfo info, int i, int size, int growingPlotCount )
-    {
-        //XXX hack, overload negative size to mean "grow to fill available space"
-        boolean grow = info.getSize( ) < 0 || ( growingPlotCount == 0 && info.getId( ).equals( TIMELINE ) );
-
-        if ( isTimeAxisHorizontal( ) )
-        {
-            boolean show = true;
-
-            // hide the children of non-expanded groups
-            if ( childParentMap != null )
-            {
-                GroupInfo group = childParentMap.get( info );
-                if ( group != null && !group.isExpanded( ) )
-                {
-                    show = false;
-                }
-            }
-
-            int topSpace = i == 0 || i >= size - 1 ? 0 : plotSpacing;
-            int bottomSpace = i >= size - 2 ? 0 : plotSpacing;
-
-            if ( !show )
-            {
-                String format = "cell %d %d 1 1, id i%2$d, height 0!";
-                String layout = String.format( format, 1, i );
-                info.getLayout( ).setLayoutData( layout );
-                info.getLayout( ).setVisible( false );
-
-                if ( info instanceof TimePlotInfo )
-                {
-                    TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                    format = "cell %d %d 1 1, height 0!";
-                    layout = String.format( format, 0, i );
-                    timeInfo.getLabelLayout( ).setLayoutData( layout );
-                    timeInfo.getLabelLayout( ).setVisible( false );
-                }
-            }
-            else
-            {
-                if ( info instanceof GroupInfo )
-                {
-                    if ( grow )
-                    {
-                        String format = "cell %d %d 2 1, grow, id i%2$d, gap 0 0 %3$d %4$d";
-                        String layout = String.format( format, 0, i, topSpace, bottomSpace );
-                        info.getLayout( ).setLayoutData( layout );
-                    }
-                    else
-                    {
-                        String format = "cell %d %d 2 1, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
-                        String layout = String.format( format, 0, i, info.getSize( ), topSpace, bottomSpace );
-                        info.getLayout( ).setLayoutData( layout );
-                    }
-                }
-                else if ( grow )
-                {
-                    String format = "cell %d %d 1 1, push, grow, id i%2$d, gap 0 0 %3$d %4$d";
-                    String layout = String.format( format, 1, i, topSpace, bottomSpace );
-                    info.getLayout( ).setLayoutData( layout );
-                    info.getLayout( ).setVisible( true );
-
-                    if ( info instanceof TimePlotInfo )
-                    {
-                        TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                        format = "cell %d %d 1 1, pushy, growy, width %d!, gap 0 0 %4$d %5$d";
-                        layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, topSpace, bottomSpace );
-                        timeInfo.getLabelLayout( ).setLayoutData( layout );
-                        timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                    }
-                }
-                else
-                {
-                    String format = "cell %d %d 1 1, pushx, growx, height %d!, id i%2$d, gap 0 0 %4$d %5$d";
-                    String layout = String.format( format, 1, i, info.getSize( ), topSpace, bottomSpace );
-                    info.getLayout( ).setLayoutData( layout );
-                    info.getLayout( ).setVisible( true );
-
-                    if ( info instanceof TimePlotInfo )
-                    {
-                        TimePlotInfo timeInfo = ( TimePlotInfo ) info;
-
-                        format = "cell %d %d 1 1, width %d!, height %d!, gap 0 0 %5$d %6$d";
-                        layout = String.format( format, 0, i, showLabelLayout ? labelLayoutSize : 0, info.getSize( ), topSpace, bottomSpace );
-                        timeInfo.getLabelLayout( ).setLayoutData( layout );
-                        timeInfo.getLabelLayout( ).setVisible( showLabelLayout );
-                    }
-                }
-            }
-        }
-        else
-        {
-            throw new UnsupportedOperationException( "CollapsibleTimePlot2D must have Vertical Layout" );
-        }
-    }
-
-    public static class GroupLabelPainter extends GlimpsePainterImpl
-    {
-        public static final int buttonSize = 8;
-        public static final int padding = 5;
-
-        protected float[] lineColor = GlimpseColor.getBlack( );
-
-        protected SimpleTextPainter textDelegate;
-
-        protected boolean isExpanded = true;
-
-        protected boolean showDivider = true;
-        protected boolean showArrow = true;
-
-        public GroupLabelPainter( String name )
-        {
-            this.textDelegate = new SimpleTextPainter( );
-            this.textDelegate.setHorizontalPosition( HorizontalPosition.Left );
-            this.textDelegate.setVerticalPosition( VerticalPosition.Top );
-            this.textDelegate.setHorizontalLabels( true );
-            this.textDelegate.setHorizontalPadding( buttonSize + padding * 2 );
-            this.textDelegate.setVerticalPadding( 0 );
-            this.textDelegate.setText( name );
-            this.textDelegate.setFont( FontUtils.getDefaultPlain( 14 ), true );
-        }
-
-        public SimpleTextPainter getTextPainter( )
-        {
-            return this.textDelegate;
-        }
-        
-        public void setExpanded( boolean isExpanded )
-        {
-            this.isExpanded = isExpanded;
-        }
-
-        public void setText( String text )
-        {
-            this.textDelegate.setText( text );
-        }
-
-        public void setShowArrow( boolean show )
-        {
-            this.showArrow = show;
-        }
-
-        public boolean isShowArrow( )
-        {
-            return this.showArrow;
-        }
-
-        public void setShowDivider( boolean show )
-        {
-            this.showDivider = show;
-        }
-
-        public boolean isShowDivider( )
-        {
-            return this.showDivider;
-        }
-
-        public void setDividerColor( float[] color )
-        {
-            this.lineColor = color;
-        }
-
-        public float[] getDividerColor( )
-        {
-            return lineColor;
+            super( plot, group, subplots );
         }
 
         @Override
-        protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+        public void addChildPlot( PlotInfo childPlot )
         {
-            this.textDelegate.paintTo( context );
-
-            int width = bounds.getWidth( );
-            int height = bounds.getHeight( );
-
-            GL gl = context.getGL( );
-
-            gl.glMatrixMode( GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
-
-            gl.glMatrixMode( GL_MODELVIEW );
-            gl.glLoadIdentity( );
-
-            // Paint Line
-            if ( showDivider )
-            {
-                Rectangle2D textBounds = this.textDelegate.getTextBounds( );
-                float startY = ( float ) height / 2.0f;
-                float startX = ( float ) ( padding + this.textDelegate.getHorizontalPadding( ) + textBounds.getWidth( ) + ( textBounds.getMinX( ) ) - 1 );
-
-                gl.glLineWidth( 1.0f );
-                GlimpseColor.glColor( gl, lineColor );
-
-                gl.glBegin( GL.GL_LINES );
-                try
-                {
-                    gl.glVertex2f( startX, startY );
-                    gl.glVertex2f( width, startY );
-                }
-                finally
-                {
-                    gl.glEnd( );
-                }
-            }
-
-            if ( showArrow )
-            {
-                float halfSize = buttonSize / 2.0f;
-                float centerX = halfSize + padding;
-                float centerY = height / 2.0f;
-
-                // Paint Expand/Collapse Button
-                gl.glBegin( GL.GL_POLYGON );
-                try
-                {
-                    if ( isExpanded )
-                    {
-                        gl.glVertex2f( centerX - halfSize, centerY + halfSize );
-                        gl.glVertex2f( centerX + halfSize, centerY + halfSize );
-                        gl.glVertex2f( centerX, centerY - halfSize );
-                    }
-                    else
-                    {
-                        gl.glVertex2f( centerX - halfSize, centerY - halfSize );
-                        gl.glVertex2f( centerX - halfSize, centerY + halfSize );
-                        gl.glVertex2f( centerX + halfSize, centerY );
-                    }
-                }
-                finally
-                {
-                    gl.glEnd( );
-                }
-            }
+            addChildPlot0( this, childPlot );
+            super.addChildPlot( childPlot );
         }
 
         @Override
-        public void setLookAndFeel( LookAndFeel laf )
+        public void removeChildPlot( PlotInfo childPlot )
         {
-            super.setLookAndFeel( laf );
-
-            if ( laf != null )
-            {
-                this.textDelegate.setLookAndFeel( laf );
-                this.lineColor = laf.getColor( AbstractLookAndFeel.BORDER_COLOR );
-            }
-        }
-    }
-
-    public static interface GroupInfo extends PlotInfo
-    {
-        public void setLabelText( String text );
-
-        public String getLabelText( );
-
-        public void addChildPlot( PlotInfo plot );
-
-        public void removeChildPlot( PlotInfo plot );
-
-        public Collection<PlotInfo> getChildPlots( );
-
-        public void setExpanded( boolean expanded );
-
-        public boolean isExpanded( );
-        
-        public void setShowArrow( boolean show );
-        
-        public boolean isShowArrow( );
-
-        public void setShowDivider( boolean show );
-
-        public boolean isShowDivider( );
-        
-        public void setDividerColor( float[] color );
-
-        public float[] getDividerColor( );
-        
-        public SimpleTextPainter getTextPainter( );
-    }
-
-    public class GroupInfoImpl implements GroupInfo
-    {
-        protected Set<PlotInfo> subplots;
-        protected PlotInfo group;
-
-        protected GroupLabelPainter labelPainter;
-        protected String label;
-
-        protected boolean expanded;
-
-        public GroupInfoImpl( PlotInfo group, Collection<? extends PlotInfo> subplots )
-        {
-            this.group = group;
-            this.subplots = new LinkedHashSet<PlotInfo>( );
-            this.subplots.addAll( subplots );
-            for ( PlotInfo plot : subplots )
-            {
-                childParentMap.put( plot, this );
-            }
-
-            this.labelPainter = new GroupLabelPainter( "" );
-            this.group.getLayout( ).addPainter( this.labelPainter );
-
-            this.group.setSize( 22 );
-
-            this.expanded = true;
-
-            GlimpseLayout layout = this.group.getLayout( );
-            layout.setEventConsumer( false );
-            layout.setEventGenerator( true );
-            layout.addGlimpseMouseListener( new GlimpseMouseAdapter( )
-            {
-                @Override
-                public void mousePressed( GlimpseMouseEvent event )
-                {
-                    int x = event.getScreenPixelsX( );
-
-                    if ( x < labelLayoutSize )
-                    {
-                        setExpanded( !expanded );
-                        event.setHandled( true );
-                    }
-                }
-            } );
-        }
-        
-        public SimpleTextPainter getTextPainter( )
-        {
-            return this.labelPainter.getTextPainter( );
+            removeChildPlot0( this, childPlot );
+            super.removeChildPlot( childPlot );
         }
 
-        public void setShowArrow( boolean show )
-        {
-            this.labelPainter.setShowArrow( show );
-        }
-
-        public boolean isShowArrow( )
-        {
-            return this.labelPainter.isShowArrow( );
-        }
-
-        public void setShowDivider( boolean show )
-        {
-            this.labelPainter.setShowDivider( show );
-        }
-
-        public boolean isShowDivider( )
-        {
-            return this.labelPainter.isShowDivider( );
-        }
-        
-        public void setDividerColor( float[] color )
-        {
-            this.labelPainter.setDividerColor( color );
-        }
-
-        public float[] getDividerColor( )
-        {
-            return this.labelPainter.getDividerColor( );
-        }
-        
-        @Override
-        public boolean isExpanded( )
-        {
-            return this.expanded;
-        }
-
-        @Override
-        public void setExpanded( boolean expanded )
-        {
-            this.expanded = expanded;
-            this.labelPainter.setExpanded( expanded );
-            validateLayout( );
-        }
-
-        @Override
-        public void addChildPlot( PlotInfo plot )
-        {
-            subplots.add( plot );
-            childParentMap.put( plot, this );
-            validateLayout( );
-        }
-
-        @Override
-        public void removeChildPlot( PlotInfo plot )
-        {
-            subplots.remove( plot );
-            childParentMap.remove( plot );
-            validateLayout( );
-        }
-
-        @Override
-        public Collection<PlotInfo> getChildPlots( )
-        {
-            return Collections.unmodifiableCollection( this.subplots );
-        }
-
-        @Override
-        public void setLabelText( String label )
-        {
-            this.label = label;
-            this.labelPainter.setText( label );
-        }
-
-        @Override
-        public String getLabelText( )
-        {
-            return this.label;
-        }
-
-        @Override
-        public StackedPlot2D getStackedPlot( )
-        {
-            return group.getStackedPlot( );
-        }
-
-        @Override
-        public Object getId( )
-        {
-            return group.getId( );
-        }
-
-        @Override
-        public int getOrder( )
-        {
-            return group.getOrder( );
-        }
-
-        @Override
-        public int getSize( )
-        {
-            return group.getSize( );
-        }
-
-        @Override
-        public void setOrder( int order )
-        {
-            group.setOrder( order );
-        }
-
-        @Override
-        public void setSize( int size )
-        {
-            group.setSize( size );
-        }
-
-        @Override
-        public GlimpseAxisLayout2D getLayout( )
-        {
-            return group.getLayout( );
-        }
-
-        @Override
-        public Axis1D getCommonAxis( GlimpseTargetStack stack )
-        {
-            return group.getCommonAxis( stack );
-        }
-
-        @Override
-        public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
-        {
-            return group.getOrthogonalAxis( stack );
-        }
-
-        @Override
-        public Axis1D getCommonAxis( )
-        {
-            return group.getCommonAxis( );
-        }
-
-        @Override
-        public Axis1D getOrthogonalAxis( )
-        {
-            return group.getOrthogonalAxis( );
-        }
-
-        @Override
-        public void addLayout( GlimpseAxisLayout2D childLayout )
-        {
-            group.addLayout( childLayout );
-        }
-
-        @Override
-        public void setLookAndFeel( LookAndFeel laf )
-        {
-            group.setLookAndFeel( laf );
-            for ( PlotInfo plot : subplots )
-            {
-                plot.setLookAndFeel( laf );
-            }
-        }
     }
 }

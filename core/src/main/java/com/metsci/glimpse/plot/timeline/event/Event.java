@@ -1196,7 +1196,34 @@ public class Event
             @Override
             public int compare( Event o1, Event o2 )
             {
-                return o1.getStartTime( ).compareTo( o2.getStartTime( ) );
+                int c_time = o1.getStartTime( ).compareTo( o2.getStartTime( ) );
+                
+                if ( c_time == 0 )
+                {
+                    // if the times are equal but object ids are not, the comparator
+                    // should not return 0 to remain consistent with equals
+                    // otherwise we make a rather arbitrary decision about ordering
+                    if ( o1.getId( ) == null && o2.getId( ) == null )
+                    {
+                        return 0;
+                    }
+                    else if ( o1.getId( ) == null )
+                    {
+                        return -1;
+                    }
+                    else if ( o2.getId( ) == null )
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    return c_time;
+                }
             }
         };
     }
