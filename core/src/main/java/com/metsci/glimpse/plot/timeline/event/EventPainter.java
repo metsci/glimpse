@@ -34,20 +34,19 @@ import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Star
 
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.SortedMap;
 
 import javax.media.opengl.GL;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.SetMultimap;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -104,66 +103,57 @@ public class EventPainter extends GlimpseDataPainter1D
     protected class Row
     {
         int index;
-        NavigableSet<Event> startTimes;
-        NavigableSet<Event> endTimes;
-        NavigableSet<Event> visibleEvents;
+        IntervalSortedMultimap events;
+        // sorted by event start time
+        SortedMap<TimeStamp, Collection<Event>> visibleEvents;
 
         public Row( int index )
         {
             this.index = index;
-            this.visibleEvents = new TreeSet<Event>( Event.getStartTimeComparator( ) );
-            this.startTimes = new TreeSet<Event>( Event.getStartTimeComparator( ) );
-            this.endTimes = new TreeSet<Event>( Event.getEndTimeComparator( ) );
+            this.events = new IntervalSortedMultimap( );
         }
 
         public void addEvent( Event event )
         {
-            this.startTimes.add( event );
-            this.endTimes.add( event );
+            this.events.addEvent( event );
             rowMap.put( event.getId( ), this );
         }
 
         public void removeEvent( Event event )
         {
-            this.startTimes.remove( event );
-            this.endTimes.remove( event );
+            this.events.removeEvent( event );
             rowMap.remove( event.getId( ) );
         }
 
-        public void calculateVisibleEvents( Event minTimestamp, Event maxTimestamp )
+        public void calculateVisibleEvents( TimeStamp min, TimeStamp max )
         {
-            // all Events whose end time is greater than the axis min
-            NavigableSet<Event> endAfterMinSet = endTimes.tailSet( minTimestamp, true );
-
-            // all Events whose start time is less than the axis max
-            NavigableSet<Event> startBeforeMaxSet = startTimes.headSet( maxTimestamp, true );
-
-            // the visible events are the intersection of the above two sets
-            visibleEvents.clear( );
-            visibleEvents.addAll( endAfterMinSet );
-            visibleEvents.retainAll( startBeforeMaxSet );
+            SetMultimap<TimeStamp, Event> visibleMap = this.events.getMap( min, true, max, true );
+            this.visibleEvents = ( SortedMap<TimeStamp, Collection<Event>> ) visibleMap.asMap( );
         }
 
         public Set<Event> getOverlappingEvents( Event event )
         {
-            SortedSet<Event> s1 = startTimes.headSet( Event.createDummyEvent( event.getEndTime( ) ), false );
-            SortedSet<Event> s2 = endTimes.tailSet( Event.createDummyEvent( event.getStartTime( ) ), false );
-            return Sets.intersection( s1, s2 );
+            return this.events.getOverlapping( event );
+        }
+
+        public IntervalSortedMultimap getMap( )
+        {
+            return this.events;
         }
 
         public boolean isEmpty( )
         {
-            return startTimes.isEmpty( );
+            return this.events.isEmpty( );
         }
 
         public int size( )
         {
-            return startTimes.size( );
+            return this.events.size( );
         }
 
         public int getIndex( )
         {
-            return index;
+            return this.index;
         }
 
         public void setIndex( int index )
@@ -201,7 +191,7 @@ public class EventPainter extends GlimpseDataPainter1D
         this.shouldStack = stack;
 
         this.rebuildRows0( );
-        
+
         this.visibleEventsDirty = true;
         this.plot.updateSize( );
     }
@@ -257,10 +247,10 @@ public class EventPainter extends GlimpseDataPainter1D
     public void addEvent( Event event )
     {
         if ( event == null ) return;
-        
+
         // remove the event if it already exists
         this.removeEvent( event.getId( ) );
-        
+
         this.eventMap.put( event.getId( ), event );
         this.addEvent0( event );
         this.visibleEventsDirty = true;
@@ -333,8 +323,6 @@ public class EventPainter extends GlimpseDataPainter1D
             TimeStamp time = epoch.toTimeStamp( valueX );
             TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
             TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
-            Event eventStart = Event.createDummyEvent( timeStart );
-            Event eventEnd = Event.createDummyEvent( timeEnd );
 
             int rowIndex = ( int ) Math.floor( valueY / ( double ) ( getRowSize( ) + getRowBufferSize( ) ) );
             rowIndex = plot.getRowCount( ) - 1 - rowIndex;
@@ -342,10 +330,7 @@ public class EventPainter extends GlimpseDataPainter1D
             if ( rowIndex >= 0 && rowIndex < rows.size( ) )
             {
                 Row row = rows.get( rowIndex );
-                SortedSet<Event> s1 = row.startTimes.headSet( eventEnd );
-                SortedSet<Event> s2 = row.endTimes.tailSet( eventStart );
-
-                Set<Event> events = Sets.intersection( s1, s2 );
+                Set<Event> events = row.getMap( ).get( timeStart, timeEnd );
                 Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
                 return eventSelections;
             }
@@ -497,7 +482,7 @@ public class EventPainter extends GlimpseDataPainter1D
             displaceEvent0( overlapEvent );
         }
     }
-    
+
     // move an event which has been overlapped by another event
     protected void displaceEvent0( Event oldEvent )
     {
@@ -596,7 +581,7 @@ public class EventPainter extends GlimpseDataPainter1D
                 row = new Row( size );
                 rows.add( row );
             }
-            
+
             // put the event into the non-overlapping spot we've found for it
             row.addEvent( event );
         }
@@ -605,9 +590,9 @@ public class EventPainter extends GlimpseDataPainter1D
             int requestedRow = Math.max( 0, event.getFixedRow( ) );
             ensureRows0( requestedRow );
             row = rows.get( requestedRow );
-            
+
             row.addEvent( event );
-            
+
             // this spot might overlap with other events, move them out of the way
             if ( shouldStack )
             {
@@ -622,12 +607,9 @@ public class EventPainter extends GlimpseDataPainter1D
     {
         Epoch epoch = getEpoch( );
 
-        Event minTimestamp = Event.createDummyEvent( epoch.toTimeStamp( min ) );
-        Event maxTimestamp = Event.createDummyEvent( epoch.toTimeStamp( max ) );
-
         for ( Row row : rows )
         {
-            row.calculateVisibleEvents( minTimestamp, maxTimestamp );
+            row.calculateVisibleEvents( epoch.toTimeStamp( min ), epoch.toTimeStamp( max ) );
         }
 
         this.visibleEventsDirty = false;
@@ -665,15 +647,17 @@ public class EventPainter extends GlimpseDataPainter1D
             Row row = rows.get( i );
 
             Event prev = null;
-            NavigableSet<Event> set = row.visibleEvents;
-            for ( Event event : set )
+            for ( Collection<Event> eventsAtTime : row.visibleEvents.values( ) )
             {
-                if ( prev != null )
+                for ( Event event : eventsAtTime )
                 {
-                    prev.paint( gl, axis, this, event, width, height, sizeMin, sizeMax );
-                }
+                    if ( prev != null )
+                    {
+                        prev.paint( gl, axis, this, event, width, height, sizeMin, sizeMax );
+                    }
 
-                prev = event;
+                    prev = event;
+                }
             }
 
             // paint last event
