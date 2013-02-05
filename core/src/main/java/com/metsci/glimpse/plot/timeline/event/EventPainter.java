@@ -133,7 +133,7 @@ public class EventPainter extends GlimpseDataPainter1D
 
         public Set<Event> getOverlappingEvents( Event event )
         {
-            return this.events.getOverlapping( event );
+            return this.events.get( event.getStartTime( ), false, event.getEndTime( ), false );
         }
 
         public IntervalSortedMultimap getMap( )
