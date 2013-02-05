@@ -519,6 +519,9 @@ public class StackedPlot2D extends GlimpseLayout
         public void setLayoutDataUpdater( LayoutDataUpdater updater );
 
         public LayoutDataUpdater getLayoutDataUpdater( );
+    
+        @Override public int hashCode( );
+        @Override public boolean equals( Object o );
     }
 
     public static interface LayoutDataUpdater

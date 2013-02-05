@@ -49,7 +49,7 @@ public class GroupLayoutDataUpdater implements LayoutDataUpdater
     public int getSizePixels( List<PlotInfo> list, int index )
     {
         // if the info is part of a collapsed group, its size should be 0
-        GroupInfo group = plot.getGroup( info );
+        GroupInfo group = plot.getGroupForChild( info );
         if ( group != null && !group.isExpanded( ) )
         {
             return 0;

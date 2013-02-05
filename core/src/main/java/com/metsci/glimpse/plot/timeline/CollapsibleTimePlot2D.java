@@ -113,12 +113,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         return createGroup( id, list );
     }
 
-    public GroupInfo getGroupById( Object id )
+    public GroupInfo getGroupById( Object groupId )
     {
         this.lock.lock( );
         try
         {
-            return getGroup( getPlot( id ) );
+            return (GroupInfo) getPlot( groupId );
         }
         finally
         {
@@ -126,12 +126,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         }
     }
 
-    public GroupInfo getGroup( PlotInfo info )
+    public GroupInfo getGroupForChild( PlotInfo childPlot )
     {
         this.lock.lock( );
         try
         {
-            return childParentMap.get( info );
+            return childParentMap.get( childPlot );
         }
         finally
         {
@@ -309,6 +309,5 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             removeChildPlot0( this, childPlot );
             super.removeChildPlot( childPlot );
         }
-
     }
 }
