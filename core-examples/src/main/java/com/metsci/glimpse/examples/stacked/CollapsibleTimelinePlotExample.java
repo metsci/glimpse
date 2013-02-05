@@ -158,6 +158,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         e1.setResizeable( false );
         e2.setMinTimeSpan( Time.fromMinutes( 100 ) );
         e3.setMaxTimeSpan( Time.fromMinutes( 500 ) );
+        
+        // fix the "Cloudy" event on row 2
+        e2.setFixedRow( 2 );
 
         // load icons into the texture atlas for the plot
         TextureAtlas atlas = plot.getTextureAtlas( );

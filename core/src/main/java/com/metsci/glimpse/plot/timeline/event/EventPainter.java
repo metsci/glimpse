@@ -399,14 +399,16 @@ public class EventPainter extends GlimpseDataPainter1D
         Event event = getEvent( eventId );
         if ( event == null ) return;
 
+        int oldRowIndex = getRow( eventId );
+        Row oldRow = rows.get( oldRowIndex );
+        if ( oldRow != null ) oldRow.removeEvent( event );
+
         ensureRows0( rowIndex );
         Row newRow = rows.get( rowIndex );
+        newRow.addEvent( event );
 
-        rowMap.remove( eventId );
-        rowMap.put( eventId, newRow );
-
-        //XXX if row is set manually, don't automatically
-        //    adjust the other rows to avoid overlap
+        // row was set manually so don't automatically
+        // adjust the other rows to avoid overlap
 
         this.visibleEventsDirty = true;
         this.plot.updateSize( );
