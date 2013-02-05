@@ -29,71 +29,33 @@ package com.metsci.glimpse.plot.timeline;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfoImpl;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.group.GroupInfoImpl;
-import com.metsci.glimpse.plot.timeline.group.GroupLayoutDataUpdater;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.atlas.TextureAtlas;
 
 public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
-    protected Map<PlotInfo, GroupInfo> childParentMap;
-
     public CollapsibleTimePlot2D( )
     {
         super( Orientation.VERTICAL );
-
-        this.childParentMap = new HashMap<PlotInfo, GroupInfo>( );
     }
 
     public CollapsibleTimePlot2D( Epoch epoch )
     {
         super( Orientation.VERTICAL, epoch );
-
-        this.childParentMap = new HashMap<PlotInfo, GroupInfo>( );
     }
 
-    @Override
-    public PlotInfo createPlot( Object id, Axis1D axis )
+    public CollapsibleTimePlot2D( Epoch epoch, TaggedAxis1D commonAxis )
     {
-        PlotInfo info = super.createPlot( id, axis );
-        wrapLayoutDataUpdater( info );
-        return info;
-    }
-
-    @Override
-    protected TimePlotInfo createTimePlot0( PlotInfo plotInfo )
-    {
-        TimePlotInfo info = super.createTimePlot0( plotInfo );
-        wrapLayoutDataUpdater( info );
-        return info;
-    }
-
-    @Override
-    protected EventPlotInfo createEventPlot0( PlotInfo plotInfo, TextureAtlas atlas )
-    {
-        EventPlotInfo info = super.createEventPlot0( plotInfo, atlas );
-        wrapLayoutDataUpdater( info );
-        return info;
-    }
-
-    // wrap the layout updater with a group-aware updater which will
-    // set the size of the plot to 0 if its parent plot is collapsed
-    protected void wrapLayoutDataUpdater( PlotInfo info )
-    {
-        // wrap the layout updater with a group-aware updater which will
-        // set the size of the plot to 0 if its parent plot is collapsed
-        LayoutDataUpdater delegate = info.getLayoutDataUpdater( );
-        info.setLayoutDataUpdater( new GroupLayoutDataUpdater( this, info, delegate ) );
+        super( Orientation.VERTICAL, epoch, commonAxis );
     }
 
     /**
@@ -118,20 +80,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         this.lock.lock( );
         try
         {
-            return (GroupInfo) getPlot( groupId );
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    public GroupInfo getGroupForChild( PlotInfo childPlot )
-    {
-        this.lock.lock( );
-        try
-        {
-            return childParentMap.get( childPlot );
+            return ( GroupInfo ) getPlot( groupId );
         }
         finally
         {
@@ -145,40 +94,10 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         try
         {
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
-            GroupInfo group = new GroupInfoInner( this, plotInfo, subplots );
+            GroupInfo group = new GroupInfoImpl( this, plotInfo, subplots );
             stackedPlots.put( id, group );
-            for ( PlotInfo sub : subplots )
-            {
-                childParentMap.put( sub, group );
-            }
             validate( );
             return group;
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    protected void addChildPlot0( GroupInfo group, PlotInfo child )
-    {
-        this.lock.lock( );
-        try
-        {
-            childParentMap.put( child, group );
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    protected void removeChildPlot0( GroupInfo group, PlotInfo child )
-    {
-        this.lock.lock( );
-        try
-        {
-            childParentMap.remove( child );
         }
         finally
         {
@@ -204,51 +123,6 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             this.lock.unlock( );
         }
-    }
-
-    @Override
-    protected LayoutDataUpdater createTimelineLayoutDataUpdater( PlotInfo info )
-    {
-        return new LayoutDataUpdaterImpl( info, 1 )
-        {
-            protected int growingPlotCount( List<PlotInfo> list )
-            {
-                int count = 0;
-                for ( PlotInfo info : list )
-                {
-                    if ( info.getSize( ) < 0 )
-                    {
-                        count++;
-                    }
-
-                    // the children of non-expanded groups don't count
-                    // they will be counted above, so remove them from the count here
-                    if ( info instanceof GroupInfo )
-                    {
-                        GroupInfo groupInfo = ( GroupInfo ) info;
-
-                        if ( !groupInfo.isExpanded( ) )
-                        {
-                            for ( PlotInfo childInfo : groupInfo.getChildPlots( ) )
-                            {
-                                if ( childInfo.getSize( ) < 0 )
-                                {
-                                    count--;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return count;
-            }
-
-            @Override
-            public int getSizePixels( List<PlotInfo> list, int index )
-            {
-                return growingPlotCount( list ) == 0 ? -1 : this.info.getSize( );
-            }
-        };
     }
 
     @Override
@@ -287,27 +161,5 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         }
 
         return sortedPlots;
-    }
-
-    public class GroupInfoInner extends GroupInfoImpl
-    {
-        public GroupInfoInner( CollapsibleTimePlot2D plot, final PlotInfo group, Collection<? extends PlotInfo> subplots )
-        {
-            super( plot, group, subplots );
-        }
-
-        @Override
-        public void addChildPlot( PlotInfo childPlot )
-        {
-            addChildPlot0( this, childPlot );
-            super.addChildPlot( childPlot );
-        }
-
-        @Override
-        public void removeChildPlot( PlotInfo childPlot )
-        {
-            removeChildPlot0( this, childPlot );
-            super.removeChildPlot( childPlot );
-        }
     }
 }

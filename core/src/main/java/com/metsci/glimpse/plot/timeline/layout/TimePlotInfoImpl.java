@@ -28,7 +28,6 @@ package com.metsci.glimpse.plot.timeline.layout;
 
 import java.awt.Font;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
@@ -43,9 +42,8 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.TooltipPainter;
-import com.metsci.glimpse.plot.StackedPlot2D;
-import com.metsci.glimpse.plot.StackedPlot2D.LayoutDataUpdater;
-import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -57,7 +55,7 @@ import com.metsci.glimpse.util.units.time.format.TimeStampFormatStandard;
  * @see TimePlotInfo
  * @author ulman
  */
-public class TimePlotInfoImpl implements TimePlotInfo
+public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
 {
     protected GridPainter gridPainter;
     protected NumericXYAxisPainter axisPainter;
@@ -68,25 +66,19 @@ public class TimePlotInfoImpl implements TimePlotInfo
     protected DelegatePainter dataPainter;
 
     protected StackedTimePlot2D parent;
-    protected PlotInfo child;
 
     protected DataAxisMouseListener1D listener;
 
+    protected GlimpseAxisLayout2D plotLayout;
     protected GlimpseLayout labelLayout;
 
     protected TimeToolTipHandler timeToolTipHandler;
-
-    protected LayoutDataUpdater updater;
-
-    public interface TimeToolTipHandler
-    {
-        public void setToolTip( GlimpseMouseEvent e, TooltipPainter tooltipPainter );
-    }
 
     //@formatter:off
    
     public TimePlotInfoImpl( final StackedTimePlot2D parent,
                          final PlotInfo child,
+                         final GlimpseAxisLayout2D plotLayout,
                          final GlimpseLayout labelLayout,
                          final DataAxisMouseListener1D listener,
                          final GridPainter gridPainter,
@@ -97,8 +89,10 @@ public class TimePlotInfoImpl implements TimePlotInfo
                          final BackgroundPainter backgroundPainter,
                          final DelegatePainter dataPainter )
     {
+        super( child );
+        
         this.parent = parent;
-        this.child = child;
+        this.plotLayout = plotLayout;
         this.labelLayout = labelLayout;
         this.listener = listener;
         this.gridPainter = gridPainter;
@@ -108,8 +102,6 @@ public class TimePlotInfoImpl implements TimePlotInfo
         this.labelBorderPainter = labelBorderPainter;
         this.backgroundPainter = backgroundPainter;
         this.dataPainter = dataPainter;
-        
-        this.updater = new TimeLayoutDataUpdater( this );
         
         this.timeToolTipHandler = new TimeToolTipHandler( )
         {
@@ -126,7 +118,7 @@ public class TimePlotInfoImpl implements TimePlotInfo
             }
         };
         
-        this.child.getLayout( ).addGlimpseMouseAllListener( new GlimpseMouseAllListener( )
+        this.plotLayout.addGlimpseMouseAllListener( new GlimpseMouseAllListener( )
         {
             @Override
             public void mouseMoved( GlimpseMouseEvent e )
@@ -302,93 +294,56 @@ public class TimePlotInfoImpl implements TimePlotInfo
     }
 
     @Override
-    public StackedPlot2D getStackedPlot( )
-    {
-        return child.getStackedPlot( );
-    }
-
-    @Override
-    public Object getId( )
-    {
-        return child.getId( );
-    }
-
-    @Override
-    public int getOrder( )
-    {
-        return child.getOrder( );
-    }
-
-    @Override
-    public int getSize( )
-    {
-        return child.getSize( );
-    }
-
-    @Override
-    public void setOrder( int order )
-    {
-        child.setOrder( order );
-    }
-
-    @Override
-    public void setSize( int size )
-    {
-        child.setSize( size );
-    }
-
-    @Override
     public GlimpseAxisLayout2D getLayout( )
     {
-        return child.getLayout( );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
-    {
-        return child.getOrthogonalAxis( stack );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( )
-    {
-        return child.getOrthogonalAxis( );
+        return plotLayout;
     }
 
     @Override
     public void addLayout( GlimpseAxisLayout2D childLayout )
     {
-        child.addLayout( childLayout );
+        plotLayout.addLayout( childLayout );
     }
 
     @Override
     public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack )
     {
-        return ( TaggedAxis1D ) child.getCommonAxis( stack );
+        return ( TaggedAxis1D ) super.getCommonAxis( stack );
     }
 
     @Override
     public TaggedAxis1D getCommonAxis( )
     {
-        return ( TaggedAxis1D ) child.getCommonAxis( );
+        return ( TaggedAxis1D ) super.getCommonAxis( );
     }
 
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
-        child.setLookAndFeel( laf );
+        super.setLookAndFeel( laf );
         labelLayout.setLookAndFeel( laf );
     }
 
     @Override
-    public void setLayoutDataUpdater( LayoutDataUpdater updater )
+    public void updateLayout( int index )
     {
-        this.updater = updater;
-    }
+        super.updateLayout( index );
 
-    @Override
-    public LayoutDataUpdater getLayoutDataUpdater( )
-    {
-        return this.updater;
+        StackedTimePlot2D parent = getStackedTimePlot( );
+
+        int labelSize = parent.isShowLabels( ) ? parent.getLabelSize( ) : 0;
+
+        if ( parent.isTimeAxisHorizontal( ) )
+        {
+            plotLayout.setLayoutData( "cell 1 0 1 1, push, grow" );
+            labelLayout.setLayoutData( String.format( "cell 0 0, pushy, growy, width %d!", labelSize ) );
+            labelLayout.setVisible( parent.isShowLabels( ) );
+        }
+        else
+        {
+            plotLayout.setLayoutData( "cell 0 1 1 1, push, grow" );
+            labelLayout.setLayoutData( String.format( "cell 0 0, pushx, growx, height %d!", labelSize ) );
+            labelLayout.setVisible( parent.isShowLabels( ) );
+        }
     }
 }

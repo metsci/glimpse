@@ -29,29 +29,21 @@ package com.metsci.glimpse.plot.timeline.group;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.plot.StackedPlot2D;
-import com.metsci.glimpse.plot.StackedPlot2D.LayoutDataUpdater;
-import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
-import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.support.settings.LookAndFeel;
 
-public class GroupInfoImpl implements GroupInfo
+public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 {
     protected CollapsibleTimePlot2D plot;
 
     protected Set<PlotInfo> children;
-    protected PlotInfo group;
 
     protected GroupLabelPainter labelPainter;
     protected String label;
@@ -60,17 +52,18 @@ public class GroupInfoImpl implements GroupInfo
 
     public GroupInfoImpl( CollapsibleTimePlot2D plot, PlotInfo group, Collection<? extends PlotInfo> subplots )
     {
+        super( group );
+
         this.plot = plot;
-        this.group = group;
         this.labelPainter = new GroupLabelPainter( "" );
-        this.group.getLayout( ).addPainter( this.labelPainter );
-        this.group.setSize( 22 );
+        this.info.getLayout( ).addPainter( this.labelPainter );
+        this.info.setSize( 22 );
         this.expanded = true;
 
         this.children = new LinkedHashSet<PlotInfo>( );
         this.children.addAll( subplots );
 
-        GlimpseLayout layout = this.group.getLayout( );
+        GlimpseLayout layout = this.info.getLayout( );
         layout.setEventConsumer( false );
         layout.setEventGenerator( true );
         layout.addGlimpseMouseListener( new GlimpseMouseAdapter( )
@@ -85,43 +78,6 @@ public class GroupInfoImpl implements GroupInfo
                     setExpanded( !expanded );
                     event.setHandled( true );
                 }
-            }
-        } );
-
-        this.setLayoutDataUpdater( new LayoutDataUpdater( )
-        {
-            @Override
-            public int getSizePixels( List<PlotInfo> list, int index )
-            {
-                return getSize( );
-            }
-
-            @Override
-            public void updateLayoutData( List<PlotInfo> list, int index, int size )
-            {
-                Orientation orientation = getStackedPlot( ).getOrientation( );
-                int plotSpacing = getStackedPlot( ).getPlotSpacing( );
-
-                String layoutData = null;
-
-                if ( orientation == Orientation.HORIZONTAL )
-                {
-                    int gapTop = index == 0 ? 0 : plotSpacing;
-                    int gapBottom = index == list.size( ) - 1 ? 0 : plotSpacing;
-
-                    String format = "cell %d %d, spany, width %d!, gap 0 0 %d %d, id i%1$d";
-                    layoutData = String.format( format, index, 0, size, gapTop, gapBottom );
-                }
-                else if ( orientation == Orientation.VERTICAL )
-                {
-                    int gapLeft = index == 0 ? 0 : plotSpacing;
-                    int gapRight = index == list.size( ) - 1 ? 0 : plotSpacing;
-
-                    String format = "cell %d %d, spanx, growx, height %d!, gap %d %d 0 0, id i%2$d";
-                    layoutData = String.format( format, 0, index, size, gapLeft, gapRight );
-                }
-
-                getLayout( ).setLayoutData( layoutData );
             }
         } );
     }
@@ -172,12 +128,19 @@ public class GroupInfoImpl implements GroupInfo
     {
         this.expanded = expanded;
         this.labelPainter.setExpanded( expanded );
+        
+        for ( PlotInfo child : this.children )
+        {
+            child.setVisible( expanded );
+        }
+        
         this.plot.validateLayout( );
     }
 
     @Override
     public void addChildPlot( PlotInfo childPlot )
     {
+        childPlot.setVisible( this.expanded );
         this.children.add( childPlot );
         this.plot.validateLayout( );
     }
@@ -209,106 +172,11 @@ public class GroupInfoImpl implements GroupInfo
     }
 
     @Override
-    public StackedPlot2D getStackedPlot( )
-    {
-        return group.getStackedPlot( );
-    }
-
-    @Override
-    public Object getId( )
-    {
-        return group.getId( );
-    }
-
-    @Override
-    public int getOrder( )
-    {
-        return group.getOrder( );
-    }
-
-    @Override
-    public int getSize( )
-    {
-        return group.getSize( );
-    }
-
-    @Override
-    public void setOrder( int order )
-    {
-        group.setOrder( order );
-    }
-
-    @Override
-    public void setSize( int size )
-    {
-        group.setSize( size );
-    }
-
-    @Override
-    public GlimpseAxisLayout2D getLayout( )
-    {
-        return group.getLayout( );
-    }
-
-    @Override
-    public Axis1D getCommonAxis( GlimpseTargetStack stack )
-    {
-        return group.getCommonAxis( stack );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
-    {
-        return group.getOrthogonalAxis( stack );
-    }
-
-    @Override
-    public Axis1D getCommonAxis( )
-    {
-        return group.getCommonAxis( );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( )
-    {
-        return group.getOrthogonalAxis( );
-    }
-
-    @Override
-    public void addLayout( GlimpseAxisLayout2D childLayout )
-    {
-        group.addLayout( childLayout );
-    }
-
-    @Override
-    public void setLookAndFeel( LookAndFeel laf )
-    {
-        group.setLookAndFeel( laf );
-        for ( PlotInfo plot : children )
-        {
-            plot.setLookAndFeel( laf );
-        }
-    }
-
-    @Override
-    public void setLayoutDataUpdater( LayoutDataUpdater updater )
-    {
-        group.setLayoutDataUpdater( updater );
-    }
-
-    @Override
-    public LayoutDataUpdater getLayoutDataUpdater( )
-    {
-        return group.getLayoutDataUpdater( );
-    }
-    
-    
-    @Override
     public int hashCode( )
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( group == null ) ? 0 : group.hashCode( ) );
+        result = prime * result + ( ( info == null ) ? 0 : info.hashCode( ) );
         return result;
     }
 
@@ -319,11 +187,11 @@ public class GroupInfoImpl implements GroupInfo
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
         GroupInfoImpl other = ( GroupInfoImpl ) obj;
-        if ( group == null )
+        if ( info == null )
         {
-            if ( other.group != null ) return false;
+            if ( other.info != null ) return false;
         }
-        else if ( !group.equals( other.group ) ) return false;
+        else if ( !info.equals( other.info ) ) return false;
         return true;
     }
 }

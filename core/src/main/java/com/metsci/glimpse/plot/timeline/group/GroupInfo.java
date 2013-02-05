@@ -29,7 +29,7 @@ package com.metsci.glimpse.plot.timeline.group;
 import java.util.Collection;
 
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
 
 public interface GroupInfo extends PlotInfo
 {
