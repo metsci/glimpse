@@ -26,12 +26,11 @@
  */
 package com.metsci.glimpse.util.primitives.sorted;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 import java.math.BigInteger;
 
 import com.metsci.glimpse.util.primitives.Longs;
+
+import static java.lang.Math.*;
 
 /**
  * @author hogye
@@ -159,7 +158,7 @@ public class SortedLongsArithmetic implements SortedLongs
     public int indexNearest(long x)
     {
         long offset = x - v0;
-        if (offset < 0) return 0;
+        if (offset <= 0) return 0;
 
         long i = (offset + (vStep >>> 1)) / vStep;
         return min((int) i, n - 1);
@@ -315,14 +314,14 @@ public class SortedLongsArithmetic implements SortedLongs
         // Zip through any vs smaller than x(1)
         long x0 = xs.v(0);
         long x1 = xs.v(1);
-        float oneOverDenom1 = 1f / ((float) (x1 - x0));
+        double oneOverXStep1 = 1.0 / ((double) (x1 - x0));
         for (; i < n; i++)
         {
             long v = v(i);
             if (v >= x1) break;
 
-            float f = ((float) (v - x0)) * oneOverDenom1;
-            hs.put(i, 0, f);
+            float fx = (float) ((v - x0) * oneOverXStep1);
+            hs.put(i, 0, fx);
         }
 
 
@@ -339,13 +338,13 @@ public class SortedLongsArithmetic implements SortedLongs
             xb = xs.v(ixb);
             ib = indexAtOrAfter(xb);
 
-            float oneOverDenom = 1f / ((float) (xb - xa));
+            double oneOverXStep = 1.0 / ((double) (xb - xa));
 
             long va = v(ia);
             long vb = v(ib);
             for (long v = va; v < vb; v += vStep)
             {
-                float fx = ((float) (v - xa)) * oneOverDenom;
+                float fx = (float) ((v - xa) * oneOverXStep);
                 hs.put(i, ixa, fx);
                 i++;
             }
@@ -355,13 +354,13 @@ public class SortedLongsArithmetic implements SortedLongs
         // Zip through any vs larger than or equal to x(nx-2)
         long xLast = xs.v(nx - 1);
         long xNextToLast = xs.v(nx - 2);
-        float oneOverDenom2 = 1f / ((float) (xLast - xNextToLast));
+        double oneOverXStepLast = 1.0 / ((double) (xLast - xNextToLast));
         for (; i < n; i++)
         {
             long v = v(i);
 
-            float f = ((float) (v - xNextToLast)) * oneOverDenom2;
-            hs.put(i, nx-2, f);
+            float fx = (float) ((v - xNextToLast) * oneOverXStepLast);
+            hs.put(i, nx-2, fx);
         }
 
 
