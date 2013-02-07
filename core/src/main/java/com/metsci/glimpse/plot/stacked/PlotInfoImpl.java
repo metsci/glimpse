@@ -74,7 +74,8 @@ public class PlotInfoImpl implements PlotInfo
     public void setOrder( int order )
     {
         this.order = order;
-        this.parent.validate( );
+        
+        if ( this.parent.isAutoValidate( ) ) this.parent.validate( );
     }
 
     @Override
@@ -82,7 +83,8 @@ public class PlotInfoImpl implements PlotInfo
     {
         this.size = size;
         this.grow = size < 0;
-        this.parent.validate( );
+        
+        if ( this.parent.isAutoValidate( ) )  this.parent.validate( );
     }
 
     @Override

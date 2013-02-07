@@ -57,6 +57,12 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class StackedPlot2D extends GlimpseLayout
 {
+    // by default, StackedPlot2D automatically calls validate() when changes
+    // like the addition of new sub plots are performed
+    // however, this is not always desirable, such as when many changes are
+    // being made in rapid succession
+    protected boolean autoValidate = true;
+    
     protected int outerBorder = 10;
     protected int plotSpacing = 0;
 
@@ -254,6 +260,16 @@ public class StackedPlot2D extends GlimpseLayout
     //   Getter / Setter Methods        //
     //////////////////////////////////////
 
+    public boolean isAutoValidate( )
+    {
+        return this.isAutoValidate( );
+    }
+    
+    public void setAutoValidate( boolean autoValidate )
+    {
+        this.autoValidate = autoValidate;
+    }
+    
     public int getPlotSpacing( )
     {
         return this.plotSpacing;
@@ -300,7 +316,7 @@ public class StackedPlot2D extends GlimpseLayout
             info.setPlotSpacing( size );
         }
 
-        this.validate( );
+        if ( isAutoValidate( ) ) this.validate( );
     }
 
     public void setBackgroundColor( float[] color )
@@ -311,7 +327,7 @@ public class StackedPlot2D extends GlimpseLayout
     public void setBorderSize( int size )
     {
         this.outerBorder = size;
-        this.validate( );
+        if ( isAutoValidate( ) ) this.validate( );
     }
 
     public void validate( )
@@ -359,7 +375,7 @@ public class StackedPlot2D extends GlimpseLayout
             this.removeLayout( info.getLayout( ) );
             stackedPlots.remove( id );
 
-            validate( );
+            if ( isAutoValidate( ) ) validate( );
         }
         finally
         {
@@ -384,7 +400,9 @@ public class StackedPlot2D extends GlimpseLayout
         {
             PlotInfo info = createPlot0( id, axis );
             stackedPlots.put( id, info );
-            validate( );
+            
+            if ( isAutoValidate( ) ) validate( );
+            
             return info;
         }
         finally

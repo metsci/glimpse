@@ -96,7 +96,9 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
             GroupInfo group = new GroupInfoImpl( this, plotInfo, subplots );
             stackedPlots.put( id, group );
-            validate( );
+            
+            if ( isAutoValidate( ) ) validate( );
+            
             return group;
         }
         finally

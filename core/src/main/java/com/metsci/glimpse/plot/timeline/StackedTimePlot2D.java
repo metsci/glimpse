@@ -192,7 +192,8 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         this.showTimeline = showTimeline;
         this.timelineInfo.getLayout( ).setVisible( showTimeline );
-        this.validate( );
+        
+        if ( this.isAutoValidate( ) ) this.validate( );
     }
     
     public boolean isShowTimeline( )
@@ -225,7 +226,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             info.setPlotSpacing( size );
         }
 
-        this.validate( );
+        if ( this.isAutoValidate( ) ) this.validate( );
     }
 
     /**
@@ -777,7 +778,9 @@ public class StackedTimePlot2D extends StackedPlot2D
             PlotInfo plotInfo = createPlot0( id, axis );
             TimePlotInfo timePlotInfo = createTimePlot0( plotInfo );
             stackedPlots.put( id, timePlotInfo );
-            validate( );
+            
+            if ( isAutoValidate( ) ) validate( );
+            
             return timePlotInfo;
         }
         finally
@@ -814,7 +817,9 @@ public class StackedTimePlot2D extends StackedPlot2D
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
             EventPlotInfo timePlotInfo = createEventPlot0( plotInfo, atlas );
             stackedPlots.put( id, timePlotInfo );
-            validate( );
+            
+            if ( isAutoValidate( ) ) validate( );
+            
             return timePlotInfo;
         }
         finally
