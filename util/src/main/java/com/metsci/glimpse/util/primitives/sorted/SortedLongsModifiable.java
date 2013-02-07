@@ -39,6 +39,4 @@ public interface SortedLongsModifiable extends SortedLongs, LongsModifiable
      */
     int add(long v);
 
-    void ensureCapacity(int minCapacity);
-
 }
