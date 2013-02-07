@@ -40,6 +40,20 @@ import com.google.common.collect.Sets;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.metsci.glimpse.util.units.time.TimeStampPosixMillisInt64;
 
+/**
+ * <p>A data structure for storing {@link Event} objects. IntervalSortedMultimap
+ * supports querying for all events which contain a particular time, all
+ * events which overlap with a particular time window, or all events which
+ * are completely contained within a time window.</p>
+ * 
+ * <p>Although this collection is sorted based on the Event start and end
+ * TimeStamps, it uses {@link #equals(Object)} to satisfy the {@link Set} contract.
+ * If two Events have the same {@link Event#getId()} then they must also have
+ * the same start and end {@link TimeStamp}. However, two Events with different ids
+ * may have the same start and end TimeStamp.</p> 
+ * 
+ * @author ulman
+ */
 public class IntervalSortedMultimap
 {
     SetMultimap<TimeStamp, Event> startMultimap;

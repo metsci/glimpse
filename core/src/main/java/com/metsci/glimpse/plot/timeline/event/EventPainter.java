@@ -203,7 +203,7 @@ public class EventPainter extends GlimpseDataPainter1D
 
     public int getRowBufferSize( )
     {
-        return this.plot.getRowBufferSize( );
+        return this.plot.getEventPadding( );
     }
 
     public int getRowCount( )
@@ -637,7 +637,7 @@ public class EventPainter extends GlimpseDataPainter1D
             calculateVisibleEvents( axis.getMin( ), axis.getMax( ) );
         }
 
-        int buffer = plot.getRowBufferSize( );
+        int buffer = plot.getEventPadding( );
         int rowSize = plot.getRowSize( );
 
         int sizeMin = buffer;

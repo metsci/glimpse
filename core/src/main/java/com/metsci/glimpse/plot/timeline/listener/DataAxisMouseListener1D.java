@@ -30,7 +30,7 @@ import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
-import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 
 public class DataAxisMouseListener1D extends AxisMouseListener1D

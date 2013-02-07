@@ -38,9 +38,8 @@ import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl.TimeToolTipHandler;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 
 /**

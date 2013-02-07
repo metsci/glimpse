@@ -32,9 +32,9 @@ import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.plot.StackedPlot2D;
-import com.metsci.glimpse.plot.StackedPlot2D.PlotInfo;
-import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
+import com.metsci.glimpse.plot.stacked.PlotInfo;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 
 /**
  * @author ulman
@@ -51,7 +51,7 @@ public class StackedPlotExample implements GlimpseLayoutProvider
     public GlimpseLayout getLayout( )
     {
         // create a plot which arranges its sub-plots in a horizontal line
-        StackedPlot2D plot = new StackedPlot2D( Orientation.VERTICAL );
+        StackedPlot2D plot = new StackedPlot2D( Orientation.HORIZONTAL );
 
         // use the HeatMapExample to create a ColorAxisPlot2D
         ColorAxisPlot2D plot1 = new HeatMapExample( ).getLayout( );
