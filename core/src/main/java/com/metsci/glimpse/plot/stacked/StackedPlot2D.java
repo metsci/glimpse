@@ -262,7 +262,7 @@ public class StackedPlot2D extends GlimpseLayout
 
     public boolean isAutoValidate( )
     {
-        return this.isAutoValidate( );
+        return this.autoValidate;
     }
     
     public void setAutoValidate( boolean autoValidate )
