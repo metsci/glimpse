@@ -112,6 +112,8 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         GL gl = dc.getGL( );
         
         gl.glBindTexture( GL.GL_TEXTURE_2D, textureHandle );
+        
+        gl.glColor4f( 1.0f, 1.0f, 1.0f, 0.5f );
 
         // these settings make fine line drawing against a transparent background appear much more natural
         // but can make other rendering look too jagged/crisp
@@ -121,8 +123,8 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 //        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_BORDER);
 //        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_BORDER);
 //        
-//        gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
-//        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL.GL_BLEND );
         
         return true;
     }

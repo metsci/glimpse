@@ -151,9 +151,14 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
         if ( tile == null )
         {
-            int textureHandle = offscreenCanvas.getFrameBuffer( ).getTextureId( );
+            int textureHandle = getTextureHandle( );
             tile = newTextureSurfaceTile( textureHandle, corners );
         }
+    }
+    
+    protected int getTextureHandle( )
+    {
+        return offscreenCanvas.getFrameBuffer( ).getTextureId( );
     }
 
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
@@ -180,12 +185,12 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
         if ( tile != null )
         {
-            setAxes( axes, bounds );
+            setAxes( axes, bounds, projection );
             tile.setCorners( corners );
         }
     }
 
-    protected void setAxes( Axis2D axes, LatLonBounds bounds )
+    protected void setAxes( Axis2D axes, LatLonBounds bounds, GeoProjection projection )
     {
         Vector2d c1 = projection.project( LatLonGeo.fromDeg( bounds.minLat, bounds.minLon ) );
         Vector2d c2 = projection.project( LatLonGeo.fromDeg( bounds.maxLat, bounds.minLon ) );

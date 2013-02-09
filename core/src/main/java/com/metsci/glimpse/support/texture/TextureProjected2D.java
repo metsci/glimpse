@@ -68,6 +68,9 @@ public abstract class TextureProjected2D implements DrawableTexture
     // the number of physical OpenGL textures that this logical texture
     // was split into (because of maximum texture size limits)
     protected int numTextures;
+    protected int textureCountX;
+    protected int textureCountY;
+    protected int maxTextureSize;
 
     // OpenGL texture data handles (length numTextures)
     protected int[] textureHandles;
@@ -207,7 +210,9 @@ public abstract class TextureProjected2D implements DrawableTexture
         {
             if ( !glAllocated )
             {
-                allocate_genHandles( gl );
+                allocate_calcSizes( gl );
+                allocate_genTextureHandles( gl );
+                allocate_genBuffers( gl );
             }
 
             gl.glActiveTexture( getGLTextureUnit( texUnit ) );
@@ -290,29 +295,38 @@ public abstract class TextureProjected2D implements DrawableTexture
         if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
     }
 
-    protected void allocate_genHandles( GL gl )
+    protected void allocate_calcSizes( GL gl )
     {
-        if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
+        maxTextureSize = getMaxGLTextureSize( gl );
 
-        if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
-
-        if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
-
-        int maxTextureSize = getMaxGLTextureSize( gl );
-
-        int textureCountX = dataSizeX / maxTextureSize;
-        int textureCountY = dataSizeY / maxTextureSize;
+        textureCountX = dataSizeX / maxTextureSize;
+        textureCountY = dataSizeY / maxTextureSize;
 
         if ( dataSizeX % maxTextureSize != 0 ) textureCountX++;
         if ( dataSizeY % maxTextureSize != 0 ) textureCountY++;
 
-        numTextures = textureCountX * textureCountY;
+        numTextures = textureCountX * textureCountY;        
+    }
+    
+    protected void allocate_genTextureHandles( GL gl )
+    {
+        if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
 
         if ( numTextures == 0 || projection == null ) return;
-
+        
         textureHandles = new int[numTextures];
         gl.glGenTextures( numTextures, textureHandles, 0 );
+        
+    }
+    
+    protected void allocate_genBuffers( GL gl )
+    {
+        if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
 
+        if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
+
+        if ( numTextures == 0 || projection == null ) return;
+        
         vertexCoordHandles = new int[numTextures];
         gl.glGenBuffers( numTextures, vertexCoordHandles, 0 );
 

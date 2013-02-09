@@ -41,8 +41,8 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     protected int maxWidth;
     protected int maxHeight;
     
-    protected int previousWidth;
-    protected int previousHeight;
+    protected int currentWidth;
+    protected int currentHeight;
     
     protected double preferredPixelCount;
     
@@ -129,12 +129,17 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
                 calculatedHeight = (int) Math.min( maxHeight, calculatedWidth * ( 1 / ratio ) );
             }
             
-            if ( previousWidth != calculatedWidth || previousHeight != calculatedHeight )
+            if ( currentWidth != calculatedWidth || currentHeight != calculatedHeight )
             {
-                previousWidth = calculatedWidth;
-                previousHeight = calculatedHeight;
-                offscreenCanvas.resize( calculatedWidth, calculatedHeight );
+                currentWidth = calculatedWidth;
+                currentHeight = calculatedHeight;
+                resizeCanvas( calculatedWidth, calculatedHeight );
             }
         }
+    }
+    
+    protected void resizeCanvas( int width, int height )
+    {
+        offscreenCanvas.resize( width, height );
     }
 }
