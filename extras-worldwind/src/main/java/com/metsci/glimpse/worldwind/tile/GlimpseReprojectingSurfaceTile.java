@@ -158,8 +158,6 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         stack.pushModelview( gl );
         stack.pushProjection( gl );
         
-        System.out.println( "Reproject Axis: " + reprojectLayout.getAxis( ) );
-        
         fbo.bind( glContext );
         try
         {

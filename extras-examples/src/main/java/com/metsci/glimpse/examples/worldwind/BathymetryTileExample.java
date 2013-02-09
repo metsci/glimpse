@@ -55,9 +55,10 @@ import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
 import com.metsci.glimpse.worldwind.tile.GlimpseDynamicSurfaceTile;
-import com.metsci.glimpse.worldwind.tile.GlimpseResizingSurfaceTile;
+import com.metsci.glimpse.worldwind.tile.GlimpseReprojectingSurfaceTile;
 
 public class BathymetryTileExample
 {
@@ -84,9 +85,13 @@ public class BathymetryTileExample
         manager.setLayoutConstraints( String.format( "bottomtotop, gapx 0, gapy 0, insets 0 0 0 0" ) );
         baseLayout.setLayoutManager( manager );
 
-        // WorldWind tile images must be project using a PlateCarree projection in
+        // WorldWind tile images must be projected using a PlateCarree projection in
         // order to appear properly geo-registered on the globe
-        GeoProjection projection = new PlateCarreeProjection( );
+        GeoProjection projectionTo = new PlateCarreeProjection( );
+
+        // however, we can use another GeoProjection to render our graphics,
+        // and use GlimpseReprojectingSurfaceTile to automatically fix the projection
+        TangentPlane projection = new TangentPlane( LatLonGeo.fromDeg( -30.637005, 65.476074 ) );
 
         BathymetryExample example = new BathymetryExample( );
         MapPlot2D plot = example.getLayout( projection );
@@ -115,7 +120,7 @@ public class BathymetryTileExample
         corners.add( LatLon.fromDegrees( corner3.getLatDeg( ), corner3.getLonDeg( ) ) );
         corners.add( LatLon.fromDegrees( corner4.getLatDeg( ), corner4.getLonDeg( ) ) );
 
-        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseResizingSurfaceTile( baseLayout, wwaxis, projection, 3000, 3000, corners );
+        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseReprojectingSurfaceTile( baseLayout, wwaxis, projection, projectionTo, 3000, 3000, corners );
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
         // Create and install the view controls layer and register a controller for it with the World Window.
