@@ -156,6 +156,9 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         stack.pushTexture( gl );
         stack.pushModelview( gl );
         stack.pushProjection( gl );
+        
+        // don't blend when reprojecting texture
+        gl.glDisable( GL.GL_BLEND );
 
         fbo.bind( glContext );
         try
