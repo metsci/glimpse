@@ -167,10 +167,15 @@ public class PlotInfoImpl implements PlotInfo
         Orientation orient = getStackedPlot( ).getOrientation( );
 
         int plotCount = getStackedPlot( ).getAllPlots( ).size( );
+        
         int plotSpacing = getPlotSpacing( );
-
-        int size = isVisible( ) ? getSize( ) : 0;
-        boolean grow = isGrow( );
+        int plotSize = getSize( );
+        
+        if ( !isVisible( ) )
+        {
+            plotSpacing = 0;
+            plotSize = 0;
+        }
         
         // no spacing for the last plot (there's no plot beyond it and spacing between
         // it and the edge of the stacked plot is controlled by setBorderSize(int)
@@ -180,7 +185,7 @@ public class PlotInfoImpl implements PlotInfo
         String layoutData = null;
         if ( orient == VERTICAL )
         {
-            if ( grow )
+            if ( isGrow( ) )
             {
                 String format = "cell %d %d, push, grow, gaptop %d, id i%2$d";
                 layoutData = String.format( format, 0, index, plotSpacing );
@@ -188,12 +193,12 @@ public class PlotInfoImpl implements PlotInfo
             else
             {
                 String format = "cell %d %d, growx, pushx, height %d!, gaptop %d, id i%2$d";
-                layoutData = String.format( format, 0, index, size, plotSpacing );
+                layoutData = String.format( format, 0, index, plotSize, plotSpacing );
             }
         }
         else if ( orient == HORIZONTAL )
         {
-            if ( grow )
+            if ( isGrow( ) )
             {
                 String format = "cell %d %d, push, grow, gapright %d, id i%1$d";
                 layoutData = String.format( format, index, 0, plotSpacing );
@@ -201,7 +206,7 @@ public class PlotInfoImpl implements PlotInfo
             else
             {
                 String format = "cell %d %d, growy, pushy, width %d!, gapright %d, id i%1$d";
-                layoutData = String.format( format, index, 0, size, plotSpacing );
+                layoutData = String.format( format, index, 0, plotSize, plotSpacing );
             }
         }
 
