@@ -55,7 +55,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 
     public GlimpseReprojectingSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection from, GeoProjection to, int maxWidth, int maxHeight, int preferredWidth, int preferredHeight, double minLat, double maxLat, double minLon, double maxLon )
     {
-        super( layout, axes, from, preferredWidth, preferredHeight, minLat, maxLat, minLon, maxLon );
+        super( layout, axes, from, maxWidth, maxHeight, preferredWidth, preferredHeight, minLat, maxLat, minLon, maxLon );
 
         init( to );
     }
