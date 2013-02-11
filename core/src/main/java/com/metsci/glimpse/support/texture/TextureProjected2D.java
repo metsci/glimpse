@@ -26,12 +26,14 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
 import static java.util.logging.Level.WARNING;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
@@ -39,7 +41,6 @@ import javax.media.opengl.GLContext;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.support.projection.InvertibleProjection;
 import com.metsci.glimpse.support.projection.Projection;
-import java.util.logging.Logger;
 import com.sun.opengl.util.BufferUtil;
 
 public abstract class TextureProjected2D implements DrawableTexture
@@ -192,12 +193,12 @@ public abstract class TextureProjected2D implements DrawableTexture
     {
         switch ( n )
         {
-        case 0:
-            return dataSizeX;
-        case 1:
-            return dataSizeY;
-        default:
-            return 0;
+            case 0:
+                return dataSizeX;
+            case 1:
+                return dataSizeY;
+            default:
+                return 0;
         }
     }
 
@@ -217,9 +218,7 @@ public abstract class TextureProjected2D implements DrawableTexture
 
             gl.glActiveTexture( getGLTextureUnit( texUnit ) );
 
-            gl.glEnable( GL.GL_TEXTURE_2D );
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            prepare_glState( gl );
 
             if ( glAllocated && dirty )
             {
@@ -277,7 +276,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
         finally
         {
-        	gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0);
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
             gl.glDisableClientState( GL.GL_VERTEX_ARRAY );
             gl.glDisableClientState( GL.GL_TEXTURE_COORD_ARRAY );
         }
@@ -295,6 +294,13 @@ public abstract class TextureProjected2D implements DrawableTexture
         if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
     }
 
+    protected void prepare_glState( GL gl )
+    {
+        gl.glEnable( GL.GL_TEXTURE_2D );
+        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL.GL_BLEND );
+    }
+
     protected void allocate_calcSizes( GL gl )
     {
         maxTextureSize = getMaxGLTextureSize( gl );
@@ -305,20 +311,20 @@ public abstract class TextureProjected2D implements DrawableTexture
         if ( dataSizeX % maxTextureSize != 0 ) textureCountX++;
         if ( dataSizeY % maxTextureSize != 0 ) textureCountY++;
 
-        numTextures = textureCountX * textureCountY;        
+        numTextures = textureCountX * textureCountY;
     }
-    
+
     protected void allocate_genTextureHandles( GL gl )
     {
         if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
 
         if ( numTextures == 0 || projection == null ) return;
-        
+
         textureHandles = new int[numTextures];
         gl.glGenTextures( numTextures, textureHandles, 0 );
-        
+
     }
-    
+
     protected void allocate_genBuffers( GL gl )
     {
         if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
@@ -326,7 +332,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
 
         if ( numTextures == 0 || projection == null ) return;
-        
+
         vertexCoordHandles = new int[numTextures];
         gl.glGenBuffers( numTextures, vertexCoordHandles, 0 );
 

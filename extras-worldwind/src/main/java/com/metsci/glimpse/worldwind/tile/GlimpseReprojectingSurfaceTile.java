@@ -4,6 +4,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
+import java.awt.Dimension;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.projection.GeoReprojection;
+import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
@@ -131,7 +133,22 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         {
             reprojectCanvas.initialize( context );
 
-            texture = offscreenCanvas.getFrameBuffer( ).getGlimpseTexture( );
+            GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
+            Dimension dim = fbo.getDimension( );
+            int width = (int) dim.getWidth( );
+            int height = (int) dim.getHeight( );
+            int texHandle = fbo.getTextureId( );
+            
+            texture = new ExternalTextureProjected2D( texHandle, width, height, false )
+            {
+                @Override
+                protected void prepare_glState( GL gl )
+                {
+                    gl.glEnable( GL.GL_TEXTURE_2D );
+                    gl.glDisable( GL.GL_BLEND );
+                }
+            };
+            
             texturePainter.removeAllDrawableTextures( );
             texturePainter.addDrawableTexture( texture );
 
@@ -156,9 +173,6 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         stack.pushTexture( gl );
         stack.pushModelview( gl );
         stack.pushProjection( gl );
-        
-        // don't blend when reprojecting texture
-        gl.glDisable( GL.GL_BLEND );
 
         fbo.bind( glContext );
         try
