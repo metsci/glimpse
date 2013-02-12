@@ -23,12 +23,15 @@ import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
+import com.metsci.glimpse.util.geo.projection.TangentPlane;
 
 /**
  * Demonstrates using Glimpse offscreen rendering to distort an existing Glimpse plot.
- * This can be used to create graphical effects (like 
+ * This capability is used by {@link com.metsci.glimpse.examples.worldwind.BathymetryTileExample}
+ * to reproject Glimpse rendering performed using a {@link TangentPlane} onto the
+ * WorldWind globe, which expects a {@link PlateCarreeProjection}.
+ * 
  * @author ulman
- *
  */
 public class ReprojectionExample
 {
@@ -99,8 +102,6 @@ public class ReprojectionExample
 
                 if ( !initialized && offscreenCanvas.getFrameBuffer( ).isInitialized( ) )
                 {
-                    System.out.println( "initializing" );
-
                     TextureProjected2D texture = offscreenCanvas.getGlimpseTexture( );
                     texture.setProjection( new PolarProjection( 0, 10, 0, 360 ) );
                     addDrawableTexture( texture );
