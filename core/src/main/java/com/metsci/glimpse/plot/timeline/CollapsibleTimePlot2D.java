@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
@@ -125,6 +126,25 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             this.lock.unlock( );
         }
+    }
+    
+    @Override
+    public void validateLayout( )
+    {
+        // GroupInfos aren't directly told about deletion of PlotInfo
+        // so when validate is called, update groups by removing deleted PlotInfo
+        for ( GroupInfo group : getAllGroups( ) )
+        {
+            for ( PlotInfo plot : Lists.newArrayList( group.getChildPlots( ) ) )
+            {
+                if ( plot.getStackedPlot( ) == null )
+                {
+                    group.removeChildPlot( plot );
+                }
+            }
+        }
+        
+        super.validateLayout( );
     }
 
     @Override

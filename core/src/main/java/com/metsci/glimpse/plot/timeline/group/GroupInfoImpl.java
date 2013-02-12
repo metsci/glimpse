@@ -154,14 +154,14 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     {
         childPlot.setVisible( this.expanded );
         this.children.add( childPlot );
-        this.plot.validateLayout( );
+        if ( this.plot.isAutoValidate( ) ) this.plot.validateLayout( );
     }
 
     @Override
     public void removeChildPlot( PlotInfo childPlot )
     {
         this.children.remove( childPlot );
-        this.plot.validateLayout( );
+        if ( this.plot.isAutoValidate( ) ) this.plot.validateLayout( );
     }
 
     @Override

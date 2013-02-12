@@ -136,4 +136,10 @@ public class PlotInfoWrapper implements PlotInfo
     {
         return info.isVisible( );
     }
+
+    @Override
+    public void deletePlot( )
+    {
+        info.deletePlot( );
+    }
 }

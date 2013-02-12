@@ -135,6 +135,12 @@ public interface PlotInfo
      * @param childLayout
      */
     public void addLayout( GlimpseAxisLayout2D childLayout );
+    
+    /**
+     * Removes this plot from its StackedPlot2D. This has the same effect
+     * as calling StackedPlot2D.deletePlot( this.getId( ) )
+     */
+    public void deletePlot( );
 
     public void setLookAndFeel( LookAndFeel laf );
     

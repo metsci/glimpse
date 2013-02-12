@@ -160,6 +160,19 @@ public class PlotInfoImpl implements PlotInfo
     {
         return visible;
     }
+    
+    @Override
+    public void deletePlot( )
+    {
+        if ( this.parent != null )
+        {
+            StackedPlot2D oldParent = this.parent;
+            this.parent = null;
+            
+            oldParent.removeLayout( layout );
+            oldParent.deletePlot( id );
+        }
+    }
 
     @Override
     public void updateLayout( int index )

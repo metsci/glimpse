@@ -368,12 +368,10 @@ public class StackedPlot2D extends GlimpseLayout
         this.lock.lock( );
         try
         {
-            PlotInfo info = stackedPlots.get( id );
-
+            PlotInfo info = stackedPlots.remove( id );
             if ( info == null ) return;
 
-            this.removeLayout( info.getLayout( ) );
-            stackedPlots.remove( id );
+            info.deletePlot( );
 
             if ( isAutoValidate( ) ) validate( );
         }
