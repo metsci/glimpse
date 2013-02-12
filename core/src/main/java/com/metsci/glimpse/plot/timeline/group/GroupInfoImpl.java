@@ -128,13 +128,25 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     {
         this.expanded = expanded;
         this.labelPainter.setExpanded( expanded );
-        
-        for ( PlotInfo child : this.children )
-        {
-            child.setVisible( expanded );
-        }
-        
+        this.setVisible0( this, expanded );
         this.plot.validateLayout( );
+    }
+    
+    protected void setVisible0( GroupInfo parent, boolean visible )
+    {
+        for ( PlotInfo child : parent.getChildPlots( ) )
+        {
+            child.setVisible( visible );
+            
+            if ( child instanceof GroupInfo )
+            {
+                GroupInfo childGroup = (GroupInfo) child;
+                if ( childGroup.isExpanded( ) )
+                {
+                    setVisible0( childGroup, visible );
+                }
+            }
+        }
     }
 
     @Override

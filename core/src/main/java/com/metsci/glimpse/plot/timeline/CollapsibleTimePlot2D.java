@@ -96,9 +96,9 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
             GroupInfo group = new GroupInfoImpl( this, plotInfo, subplots );
             stackedPlots.put( id, group );
-            
+
             if ( isAutoValidate( ) ) validate( );
-            
+
             return group;
         }
         finally
@@ -130,8 +130,9 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     @Override
     protected List<PlotInfo> getSortedPlots( Collection<PlotInfo> unsorted )
     {
+
         // remove children of groups from list of all plots
-        List<PlotInfo> ungroupedPlots = new ArrayList<PlotInfo>( );
+        List<PlotInfo> ungroupedPlots = new ArrayList<PlotInfo>( unsorted.size( ) );
         ungroupedPlots.addAll( unsorted );
 
         for ( GroupInfo group : getAllGroups( ) )
@@ -139,29 +140,30 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             ungroupedPlots.removeAll( group.getChildPlots( ) );
         }
 
-        List<PlotInfo> sortedPlots = new ArrayList<PlotInfo>( );
-        sortedPlots.addAll( ungroupedPlots );
-        Collections.sort( sortedPlots, PlotInfoImpl.getComparator( ) );
+        ArrayList<PlotInfo> accumulator = new ArrayList<PlotInfo>( unsorted.size( ) );
+        getSortedPlots0( ungroupedPlots, accumulator );
 
-        List<PlotInfo> sortedPlotsCopy = new ArrayList<PlotInfo>( );
-        sortedPlotsCopy.addAll( sortedPlots );
+        return accumulator;
 
-        int totalChildren = 0;
-        for ( int i = 0; i < sortedPlotsCopy.size( ); i++ )
+    }
+
+    protected void getSortedPlots0( Collection<PlotInfo> toVisitUnsorted, List<PlotInfo> accumulator )
+    {
+        if ( toVisitUnsorted == null || toVisitUnsorted.isEmpty( ) ) return;
+
+        List<PlotInfo> toVisitSorted = new ArrayList<PlotInfo>( );
+        toVisitSorted.addAll( toVisitUnsorted );
+        Collections.sort( toVisitSorted, PlotInfoImpl.getComparator( ) );
+
+        for ( PlotInfo info : toVisitSorted )
         {
-            PlotInfo plot = sortedPlotsCopy.get( i );
+            accumulator.add( info );
 
-            if ( plot instanceof GroupInfo )
+            if ( info instanceof GroupInfo )
             {
-                GroupInfo group = ( GroupInfo ) plot;
-                List<PlotInfo> childPlots = new ArrayList<PlotInfo>( );
-                childPlots.addAll( group.getChildPlots( ) );
-                Collections.sort( childPlots, PlotInfoImpl.getComparator( ) );
-                sortedPlots.addAll( i + totalChildren + 1, childPlots );
-                totalChildren += childPlots.size( );
+                GroupInfo group = ( GroupInfo ) info;
+                getSortedPlots0( group.getChildPlots( ), accumulator );
             }
         }
-
-        return sortedPlots;
     }
 }
