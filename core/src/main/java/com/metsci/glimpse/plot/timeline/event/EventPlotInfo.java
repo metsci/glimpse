@@ -67,6 +67,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected EventPainter eventPainter;
     protected GlimpseAxisLayout1D layout1D;
 
+    protected int maxRowCount = Integer.MAX_VALUE;
     protected int minRowCount = 0;
     protected int rowSize;
     protected int eventPadding;
@@ -494,6 +495,17 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public int getEventPadding( )
     {
         return this.eventPadding;
+    }
+    
+    public void setRowMaxCount( int count )
+    {
+        this.maxRowCount = count;
+        this.eventPainter.validate( );
+    }
+    
+    public int getRowMaxCount( )
+    {
+        return this.maxRowCount;
     }
 
     public void setRowMinCount( int count )

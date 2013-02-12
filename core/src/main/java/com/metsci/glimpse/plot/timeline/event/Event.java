@@ -1136,6 +1136,24 @@ public class Event
     }
 
     /**
+     * @return the amount of overlap between this event and the given event in system units (minutes)
+     */
+    public double getOverlapTime( Event event )
+    {
+        double maxStart = Math.max( event.getStartTime( ).toPosixSeconds( ), getStartTime( ).toPosixSeconds( ) );
+        double minEnd = Math.min( event.getEndTime( ).toPosixSeconds( ), getEndTime( ).toPosixSeconds( ) );
+        return Math.max( 0, minEnd - maxStart );
+    }
+    
+    /**
+     * @return the duration of the event (time between start and end TimeStamps) in system units (minutes)
+     */
+    public double getDuration( )
+    {
+        return startTime.durationBefore( endTime );
+    }
+    
+    /**
      * The parent EventPlotInfo of an Event should be modified by
      * calling {@link EventPlotInfo#addEvent(Event)} and
      * {@link EventPlotInfo#removeEvent(Event)}.

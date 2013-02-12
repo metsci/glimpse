@@ -69,6 +69,7 @@ import com.sun.opengl.util.j2d.TextRenderer;
  */
 public class EventPainter extends GlimpseDataPainter1D
 {
+    protected static final double OVERLAP_HEURISTIC = 20.0;
     protected static final int PICK_BUFFER_PIXELS = 10;
 
     protected Map<Object, Event> eventMap;
@@ -189,11 +190,14 @@ public class EventPainter extends GlimpseDataPainter1D
     public void setStackOverlappingEvents( boolean stack )
     {
         this.shouldStack = stack;
-
+        this.validate( );
+    }
+    
+    public void validate( )
+    {
         this.rebuildRows0( );
-
         this.visibleEventsDirty = true;
-        this.plot.updateSize( );
+        this.plot.updateSize( );   
     }
 
     public int getRowSize( )
@@ -560,36 +564,18 @@ public class EventPainter extends GlimpseDataPainter1D
 
     protected Row addEvent0( Event event )
     {
-        int size = rows.size( );
-
         Row row = null;
         if ( shouldStack && !event.isFixedRow( ) )
         {
-            for ( int i = 0; i < size; i++ )
-            {
-                Row candidate = rows.get( i );
-
-                if ( candidate.getOverlappingEvents( event ).isEmpty( ) )
-                {
-                    row = candidate;
-                    break;
-                }
-            }
-
-            // add a row on top if we didn't find a non-overlapping
-            // place to put this event
-            if ( row == null )
-            {
-                row = new Row( size );
-                rows.add( row );
-            }
+            row = getRowWithLeastOverlaps( event );
 
             // put the event into the non-overlapping spot we've found for it
             row.addEvent( event );
         }
         else
         {
-            int requestedRow = Math.max( 0, event.getFixedRow( ) );
+            // the requested row index must be less than the maximum row count and greater than or equal to 0
+            int requestedRow = Math.min( Math.max( 0, event.getFixedRow( ) ), plot.getRowMaxCount( )-1 );
             ensureRows0( requestedRow );
             row = rows.get( requestedRow );
 
@@ -603,6 +589,68 @@ public class EventPainter extends GlimpseDataPainter1D
         }
 
         return row;
+    }
+    
+    // If plot.getMaxRowCount() is large, we'll always be able to simply
+    // make a new row (which will have no overlaps. If we're constrained
+    // regarding the number of rows we can create, we may have to accept
+    // some overlaps.
+    //
+    // "least" overlap is defined by the total amount of overlap time
+    // TODO: this doesn't work well with zero duration events...
+    protected Row getRowWithLeastOverlaps( Event event )
+    {
+        int size = rows.size( );
+        int max = plot.getRowMaxCount( );
+        
+        double leastTime = Double.POSITIVE_INFINITY;
+        Row leastRow = null;
+        
+        for ( int i = 0; i < size; i++ )
+        {
+            Row candidate = rows.get( i );
+
+            double overlapTime = getTotalOverlapTime( candidate, event );
+           
+            if ( overlapTime < leastTime )
+            {
+                leastTime = overlapTime;
+                leastRow = candidate;
+            }
+        }
+        
+        // if we didn't find an empty row, and there's room to make
+        // a new row, then make a new row, which will have 0 overlap
+        if ( leastTime != 0.0 && size < max )
+        {
+            leastTime = 0;
+            leastRow = new Row( size );
+            rows.add( leastRow );
+        }
+        
+        return leastRow;
+    }
+    
+    protected double getTotalOverlapTime( Row candidate, Event event )
+    {
+        double totalOverlap = 0;
+        
+        //XXX Heuristic: we want overlaps with very small events (in the
+        // limit we have 0 duration events) to count for something, so
+        // we make the minimum time penalty for any overlap be 1/20th
+        // of the total duration of either event
+        double minOverlap1 = event.getDuration( ) / OVERLAP_HEURISTIC;
+        
+        Set<Event> events = candidate.getOverlappingEvents( event );
+        for ( Event overlapEvent : events )
+        {
+            double minOverlap = Math.max( minOverlap1, overlapEvent.getDuration( ) / OVERLAP_HEURISTIC);
+            double overlap = event.getOverlapTime( overlapEvent );
+            
+            totalOverlap += Math.max( minOverlap, overlap );
+        }
+        
+        return totalOverlap;
     }
 
     protected void calculateVisibleEvents( double min, double max )
