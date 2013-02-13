@@ -34,7 +34,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.track.TrackPainter;
-import com.metsci.glimpse.plot.StackedPlot2D.Orientation;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
@@ -148,8 +148,6 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
                 // TimePlotInfo has the advantage of automatically casting to a TaggedAxis1D,
                 // which allows us to access the selected time range
                 TaggedAxis1D axisTaggedTime = plot1.getCommonAxis( event.getTargetStack( ) );
-
-                if ( axisTaggedTime != axisTime ) System.out.println( "Axis: this should never print!" );
 
                 // the StackedTimePlot2D allows access to the time selection region
                 StackedTimePlot2D parent = plot1.getStackedTimePlot( );

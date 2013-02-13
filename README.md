@@ -12,8 +12,7 @@ There's lots of information available at http://glimpse.metsci.com including:
 * [Getting Started Guide](http://metsci.github.com/glimpse/guide.html)
 * [Discussion Forums](https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse)
 * [Blog](http://metsci.github.com/glimpse/blog.html)
-* [Wiki](https://github.com/metsci/glimpse/wiki)
-* [Javadoc](http://metsci.github.com/glimpse/apidocs/1.0.x/index.html)
+* [Javadoc](http://glimpse.metsci.com/apidocs/1.3.x/index.html)
 
 ### License
 

@@ -26,11 +26,7 @@
  */
 package com.metsci.glimpse.gl;
 
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static java.util.logging.Level.WARNING;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -43,7 +39,8 @@ import java.util.logging.Logger;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
-import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
+import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.sun.opengl.util.texture.Texture;
 import com.sun.opengl.util.texture.TextureIO;
 
@@ -59,7 +56,7 @@ public class GLSimpleFrameBufferObject
 
     private boolean useStencil;
     private boolean useDepth;
-    
+
     private int[] textureId;
     private int[] renderBufferId;
     private int[] frameBufferId;
@@ -72,7 +69,7 @@ public class GLSimpleFrameBufferObject
     {
         this( width, height, true, false, context );
     }
-    
+
     public GLSimpleFrameBufferObject( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
     {
         this.context = context;
@@ -80,7 +77,7 @@ public class GLSimpleFrameBufferObject
         this.height = height;
         this.useDepth = useDepth;
         this.useStencil = useStencil;
-        
+
         this.listeners = new CopyOnWriteArrayList<GLSimpleFboListenerEntry>( );
         this.lock = new ReentrantLock( );
     }
@@ -187,21 +184,21 @@ public class GLSimpleFrameBufferObject
             {
                 gl.glGenRenderbuffersEXT( 2, renderBufferId, 0 );
             }
-                
+
             // initialize renderbuffer storing depth info
             if ( useDepth )
             {
                 gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
                 gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT, width, height );
             }
-            
+
             // initialize renderbuffer storing stencil info
             if ( useStencil )
             {
                 gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
                 gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_STENCIL_INDEX16_EXT, width, height );
             }
-            
+
             gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, 0 );
 
             if ( frameBufferId != null )
@@ -222,13 +219,13 @@ public class GLSimpleFrameBufferObject
             {
                 gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
             }
-            
+
             // attach the renderbuffer to stencil attachment point
             if ( useStencil )
             {
                 gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_STENCIL_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
             }
-            
+
             // check FBO status
             int status = gl.glCheckFramebufferStatusEXT( GL.GL_FRAMEBUFFER_EXT );
             if ( status != GL.GL_FRAMEBUFFER_COMPLETE_EXT )
@@ -295,115 +292,9 @@ public class GLSimpleFrameBufferObject
         return TextureIO.newTexture( textureId[0] );
     }
 
-    public DrawableTexture getGlimpseTexture( )
+    public TextureProjected2D getGlimpseTexture( )
     {
-        return new DrawableTexture( )
-        {
-
-            @Override
-            public void makeDirty( )
-            {
-                // do nothing
-            }
-
-            @Override
-            public boolean isDirty( )
-            {
-                // do nothing
-                return true;
-            }
-
-            @Override
-            public boolean prepare( GL gl, int texUnit )
-            {
-                return textureId != null;
-            }
-
-            @Override
-            public int getNumDimension( )
-            {
-                return 2;
-            }
-
-            @Override
-            public int getDimensionSize( int n )
-            {
-                switch ( n )
-                {
-                    case 0:
-                        return width;
-                    case 1:
-                        return height;
-                    default:
-                        return 0;
-                }
-            }
-
-            @Override
-            public boolean isResident( GL gl )
-            {
-                byte[] resident = new byte[1];
-                gl.glAreTexturesResident( 1, textureId, 0, resident, 0 );
-                return ( resident[0] > 0 );
-            }
-
-            @Override
-            public void dispose( GLContext context )
-            {
-                // do nothing, this texture simply points to a texture
-                // used by a GLSimpleFrameBufferObject and should be
-                // disposed through GLSimpleFrameBufferObject.dispose( )
-            }
-
-            @Override
-            public void draw( GL gl, int texUnit )
-            {
-                boolean ready = prepare( gl, texUnit );
-
-                if ( !ready )
-                {
-                    logger.log( WARNING, "Unable to make ready." );
-                    return;
-                }
-
-                lock.lock( );
-                try
-                {
-                    gl.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
-                    gl.glPolygonMode( GL.GL_FRONT_AND_BACK, GL.GL_FILL );
-
-                    gl.glEnable( GL_TEXTURE_2D );
-
-                    gl.glActiveTexture( getGLTextureUnit( 0 ) );
-                    gl.glBindTexture( getGLTextureDim( 2 ), textureId[0] );
-
-                    gl.glBegin( GL.GL_QUADS );
-                    try
-                    {
-                        gl.glTexCoord2f( 0.0f, 0.0f );
-                        gl.glVertex2f( 0.0f, 0.0f );
-
-                        gl.glTexCoord2f( 0.0f, 1.0f );
-                        gl.glVertex2f( 0.0f, 10.0f );
-
-                        gl.glTexCoord2f( 1.0f, 1.0f );
-                        gl.glVertex2f( 10.0f, 10.0f );
-
-                        gl.glTexCoord2f( 1.0f, 0.0f );
-                        gl.glVertex2f( 10.0f, 0.0f );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-                finally
-                {
-                    lock.unlock( );
-                }
-            }
-
-        };
+        return new ExternalTextureProjected2D( getTextureId( ), width, height, false );
     }
 
     public void dispose( GLContext context )

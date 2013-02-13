@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -37,12 +40,25 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo.EventPlotListener;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
 
+/**
+ * Event represents an occurrence with a start and end time and is usually created
+ * by an {@link com.metsci.glimpse.plot.timeline.event.EventPlotInfo} (which represents
+ * a row or column of a {@link com.metsci.glimpse.plot.timeline.StackedTimePlot2D}.
+ * 
+ * In addition to time bounds, Events can have text labels, icons, and tool tips associated
+ * with them. EventPlotInfo allows registering of listeners which report when the mouse
+ * interacts with an Event. Events can also be adjusted by the user by click and
+ * dragging on their bounds.
+ * 
+ * @author ulman
+ */
 public class Event
 {
     public static final int ARROW_TIP_BUFFER = 2;
@@ -52,7 +68,7 @@ public class Event
     protected EventPlotInfo info;
 
     protected Object id;
-    protected String name;
+    protected String label;
     protected Object iconId; // references id in associated TextureAtlas
     protected String toolTipText;
     
@@ -63,15 +79,18 @@ public class Event
 
     protected TimeStamp startTime;
     protected TimeStamp endTime;
+    
+    protected boolean fixedRow = false;
+    protected int fixedRowIndex = 0;
 
-    protected boolean showName = true;
+    protected boolean showLabel = true;
     protected boolean showIcon = true;
     protected boolean showBorder = true;
     protected boolean showBackground = true;
 
-    protected boolean hideOverfull;
-    protected boolean hideIntersecting;
-
+    protected TextRenderingMode textRenderingMode = Ellipsis;
+    protected OverlapRenderingMode overlapRenderingMode = Overfull;
+    
     protected boolean isIconVisible;
     protected boolean isTextVisible;
     protected TimeStamp iconStartTime;
@@ -87,6 +106,48 @@ public class Event
     protected double minTimeSpan = 0;
 
     protected List<EventConstraint> constraints;
+    
+    /**
+     * Indicates how text which is too large to fit in the Event box should be shortened.
+     * 
+     * @author ulman
+     */
+    public enum TextRenderingMode
+    {
+        /**
+         * Don't shorten the text at all. It will simply spill over the event box into adjacent event boxes.
+         */
+        ShowAll,
+        /**
+         * If any of the text does not fit, hide all the text.
+         */
+        HideAll,
+        /**
+         * Shorten the text to fit in the box and display ellipsis to indicate that the text has been shortened.
+         */
+        Ellipsis;
+    }
+    
+    /**
+     * Indicates what types of overlaps should be considered when determining whether to shorten Event box text.
+     * 
+     * @author ulman
+     */
+    public enum OverlapRenderingMode
+    {
+        /**
+         * Don't try to detect overlaps. When this mode is set, text will never be shortened regardless of the {@link ShortenMode}.
+         */
+        None,
+        /**
+         * Only shorten text when it overflows the box for this Event. Don't try to detect overlaps with other Events.
+         */
+        Overfull,
+        /**
+         * Shorten the text when it overflows the box for this Event or overlaps with another Event.
+         */
+        Intersecting;
+    }
 
     protected EventConstraint builtInConstraints = new EventConstraint( )
     {
@@ -149,12 +210,11 @@ public class Event
     public Event( Object id, String name, TimeStamp time )
     {
         this.id = id;
-        this.name = name;
+        this.label = name;
+        
         this.startTime = time;
         this.endTime = time;
-
-        this.hideIntersecting = true;
-        this.hideOverfull = false;
+        this.overlapRenderingMode = Intersecting;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -163,12 +223,11 @@ public class Event
     public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
     {
         this.id = id;
-        this.name = name;
+        this.label = name;
+        
         this.startTime = startTime;
         this.endTime = endTime;
-
-        this.hideIntersecting = true;
-        this.hideOverfull = true;
+        this.overlapRenderingMode = startTime.equals( endTime ) ? Intersecting : Overfull;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -182,13 +241,17 @@ public class Event
      * constraints by default via setEditable, setResizeable, setEndTimeMoveable,
      * setStartTimeMoveable, setMinTimeSpan, and setMaxTimeSpan.</p>
      * 
-     * @param constraint
+     * @param constraint the EventConstraint to add
      */
     public void addConstraint( EventConstraint constraint )
     {
         this.constraints.add( constraint );
     }
 
+    /**
+     * @see #addConstraint(EventConstraint)
+     * @param constraint the EventConstraint to remove
+     */
     public void removeConstrain( EventConstraint constraint )
     {
         this.constraints.remove( constraint );
@@ -198,7 +261,7 @@ public class Event
     {
         int size = sizeMax - sizeMin;
         double sizeCenter = sizeMin + size / 2.0;
-        int buffer = painter.getBufferSize( );
+        int buffer = painter.getRowBufferSize( );
         int arrowSize = Math.min( size, ARROW_SIZE );
         
         Epoch epoch = painter.getEpoch( );
@@ -226,7 +289,7 @@ public class Event
         arrowBaseMax = Math.max( timeMin, arrowBaseMax );
         arrowBaseMin = Math.min( timeMax, arrowBaseMin );
         
-        double timeSpan = timeMax - timeMin;
+        double timeSpan = arrowBaseMax - arrowBaseMin;
         double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
         int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
@@ -316,7 +379,7 @@ public class Event
                 }
             }
 
-            isIconVisible = isIconVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+            isIconVisible = showIcon && iconId != null && !isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
 
             if ( isIconVisible )
             {
@@ -342,47 +405,70 @@ public class Event
                 pixelX += size + buffer;
             }
 
-            TextRenderer textRenderer = painter.getTextRenderer( );
-            Rectangle2D bounds = showName ? textRenderer.getBounds( name ) : null;
-
-            isTextVisible = isTextVisible( size, buffer, remainingSpaceX, pixelX, nextStartPixel, bounds );
-
-            if ( isTextVisible )
+            if ( showLabel )
             {
-                double valueX = axis.screenPixelToValue( pixelX );
-                textStartTime = epoch.toTimeStamp( valueX );
-                textEndTime = textStartTime.add( bounds.getWidth( ) / axis.getPixelsPerValue( ) );
-
-                // use this event's text color if it has been set
-                if ( textColor != null )
-                {
-                    GlimpseColor.setColor( textRenderer, textColor );
-                }
-                // otherwise, use the default no background color if the background is not showing
-                // and if a color has not been explicitly set for the EventPainter
-                else if ( !painter.textColorSet && !showBackground )
-                {
-                    GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
-                }
-                // otherwise use the EventPainter's default text color
-                else
-                {
-                    GlimpseColor.setColor( textRenderer, painter.textColor );
-                }
+                TextRenderer textRenderer = painter.getTextRenderer( );
+                Rectangle2D labelBounds = textRenderer.getBounds( label );
+    
+                boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+                boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+                boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && textRenderingMode == HideAll );
+                double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
                 
-                textRenderer.beginRendering( width, height );
-                try
+                isTextVisible = !isTextOverlappingAndHidden;
+    
+                if ( isTextVisible )
                 {
-                    int pixelY = ( int ) ( size / 2.0 - bounds.getHeight( ) * 0.3 + sizeMin );
-                    textRenderer.draw( name, pixelX, pixelY );
-
-                    remainingSpaceX -= bounds.getWidth( ) + buffer;
-                    pixelX += bounds.getWidth( ) + buffer;
+                    Rectangle2D displayBounds = labelBounds;
+                    String displayText = label;
+                    
+                    if ( labelBounds.getWidth( ) > availableSpace && textRenderingMode != ShowAll )
+                    {
+                        displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
+                        displayBounds = textRenderer.getBounds( displayText );
+                    }
+                    
+                    double valueX = axis.screenPixelToValue( pixelX );
+                    textStartTime = epoch.toTimeStamp( valueX );
+                    textEndTime = textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
+    
+                    // use this event's text color if it has been set
+                    if ( textColor != null )
+                    {
+                        GlimpseColor.setColor( textRenderer, textColor );
+                    }
+                    // otherwise, use the default no background color if the background is not showing
+                    // and if a color has not been explicitly set for the EventPainter
+                    else if ( !painter.textColorSet && !showBackground )
+                    {
+                        GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
+                    }
+                    // otherwise use the EventPainter's default text color
+                    else
+                    {
+                        GlimpseColor.setColor( textRenderer, painter.textColor );
+                    }
+                    
+                    textRenderer.beginRendering( width, height );
+                    try
+                    {
+                        // use the labelBounds for the height (if the text shortening removed a character which
+                        // hangs below the line, we don't want the text position to move)
+                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + sizeMin );
+                        textRenderer.draw( displayText, pixelX, pixelY );
+    
+                        remainingSpaceX -= displayBounds.getWidth( ) + buffer;
+                        pixelX += displayBounds.getWidth( ) + buffer;
+                    }
+                    finally
+                    {
+                        textRenderer.endRendering( );
+                    }
                 }
-                finally
-                {
-                    textRenderer.endRendering( );
-                }
+            }
+            else
+            {
+                isTextVisible = false;
             }
         }
         else
@@ -419,15 +505,49 @@ public class Event
             }
         }
     }
-
-    protected boolean isTextVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    
+    protected String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
     {
-        return showName && ( bounds.getWidth( ) + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + bounds.getWidth( ) + buffer < nextStartPixel || !hideIntersecting );
+        for ( int endIndex = fullText.length( ) ; endIndex >= 0 ; endIndex-- )
+        {
+            String subText = fullText.substring( 0, endIndex ) + "...";
+            Rectangle2D bounds = textRenderer.getBounds( subText );
+            if ( bounds.getWidth( ) < availableSpace ) return subText;
+        }
+        
+        return "";
+    }
+    
+    protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    {
+        double insideBoxSpace = remainingSpaceX - buffer;
+        double outsideBoxSpace = nextStartPixel - pixelX - buffer;
+        
+        switch ( overlapRenderingMode )
+        {
+            case Overfull:
+                return insideBoxSpace;
+            case Intersecting:
+                return outsideBoxSpace;
+            case None:
+            default:
+                return Double.MAX_VALUE; 
+        }
     }
 
-    protected boolean isIconVisible( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return showIcon && iconId != null && ( size + buffer < remainingSpaceX || !hideOverfull ) && ( pixelX + size + buffer < nextStartPixel || !hideIntersecting );
+        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapRenderingMode == Overfull;
+    }
+    
+    protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    {
+        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapRenderingMode == Intersecting;
+    }
+    
+    protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    {
+        return ( size + buffer > remainingSpaceX && overlapRenderingMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapRenderingMode == Intersecting );
     }
     
     public void setToolTipText( String text )
@@ -440,16 +560,34 @@ public class Event
         return this.toolTipText;
     }
     
+    /**
+     * Sets whether or not the Event start and end times are modifiable by the user
+     * via mouse interaction. This does not prevent programmatically changing the
+     * mouse bounds.
+     * 
+     * For finer control over what the user is allowed to do when modifying the
+     * start and end time of an Event (without disallowing it completely) see
+     * {@link #setStartTimeMoveable(boolean)}, {@link #setResizeable(boolean)},
+     * and {@link #setMinTimeSpan(double)}.
+     */
     public void setEditable( boolean isEditable )
     {
         this.isEditable = isEditable;
     }
     
+    /**
+     * @see #setEditable(boolean)
+     * @return
+     */
     public boolean isEditable( )
     {
         return isEditable;
     }
 
+    /**
+     * @see #setEndTimeMoveable(boolean)
+     * @return
+     */
     public boolean isEndTimeMoveable( )
     {
         return isEndTimeMoveable;
@@ -463,6 +601,10 @@ public class Event
         this.isEndTimeMoveable = isEndTimeMoveable;
     }
 
+    /**
+     * @see #setStartTimeMoveable(boolean)
+     * @return
+     */
     public boolean isStartTimeMoveable( )
     {
         return isStartTimeMoveable;
@@ -476,6 +618,10 @@ public class Event
         this.isStartTimeMoveable = isStartTimeMoveable;
     }
 
+    /**
+     * {@link #setStartTimeMoveable(boolean)}
+     * @return
+     */
     public boolean isResizeable( )
     {
         return isResizeable;
@@ -491,6 +637,10 @@ public class Event
         this.isResizeable = isResizeable;
     }
 
+    /**
+     * {@link #setMaxTimeSpan(double)}
+     * @return
+     */
     public double getMaxTimeSpan( )
     {
         return maxTimeSpan;
@@ -505,6 +655,10 @@ public class Event
         this.maxTimeSpan = maxTimeSpan;
     }
 
+    /**
+     * {@link #setMinTimeSpan(double)}
+     * @return
+     */
     public double getMinTimeSpan( )
     {
         return minTimeSpan;
@@ -519,76 +673,141 @@ public class Event
         this.minTimeSpan = minTimeSpan;
     }
 
-    public EventPlotInfo getEventPlotInfo( )
-    {
-        return info;
-    }
-
-    public void setEventPlotInfo( EventPlotInfo info )
-    {
-        this.info = info;
-    }
-
+    /**
+     * @return the text displayed inside the Event box on the timeline.
+     */
     public String getLabel( )
     {
-        return name;
+        return label;
     }
 
+    /**
+     * Sets the text displayed inside the Event box on the timeline.
+     * @param name
+     */
+    public void setLabel( String name )
+    {
+        this.label = name;
+    }
+    
+    /**
+     * @deprecated use {@link #getLabel()}
+     * @return
+     */
+    public String getName( )
+    {
+        return label;
+    }
+    
+    /**
+     * @deprecated use {@link #setLabel(String)}
+     * @return
+     */
     public void setName( String name )
     {
-        this.name = name;
+        this.label = name;
     }
 
+    /**
+     * @see #setIconId(Object)
+     * @return the identifier for the icon displayed inside the Event box on the timeline.
+     */
     public Object getIconId( )
     {
         return iconId;
     }
 
+    /**
+     * Sets the icon displayed inside the Event box on the timeline. The iconId corresponds
+     * to an icon loaded into the {@link TextureAtlas} associated with the {@link EventPlotInfo}
+     * parent of this Event.
+     * 
+     * @param iconId  the identifier for the icon displayed inside the Event box on the timeline.
+     */
     public void setIconId( Object iconId )
     {
         this.iconId = iconId;
     }
 
+    /**
+     * @param thickness the thickness (in pixels) of the border around the box for this Event on the timeline.
+     */
     public void setBorderThickness( float thickness )
     {
         this.borderThickness = thickness;
     }
+    
+    /**
+     * @see #setBorderThickness(float)
+     * @return
+     */
+    public float getBorderThickness( )
+    {
+        return this.borderThickness;
+    }
 
+    /**
+     * {@link #setBackgroundColor(float[])}
+     * @return
+     */
     public float[] getBackgroundColor( )
     {
         return backgroundColor;
     }
 
+    /**
+     * @param backgroundColor the fill color of the box for this Event on the timeline.
+     */
     public void setBackgroundColor( float[] backgroundColor )
     {
         this.backgroundColor = backgroundColor;
     }
 
+    /**
+     * {@link #setBorderColor(float[])}
+     * @return
+     */
     public float[] getBorderColor( )
     {
         return borderColor;
     }
 
+    /**
+     * @param borderColor the border color of the box for this Event on the timeline.
+     */
     public void setBorderColor( float[] borderColor )
     {
         this.borderColor = borderColor;
     }
 
+    /**
+     * @see #setLabelColor(float[])
+     * @return
+     */
     public float[] getLabelColor( )
     {
         return textColor;
     }
 
+    /**
+     * @param textColor the color for the label text display for this Event on the timeline.
+     */
     public void setLabelColor( float[] textColor )
     {
         this.textColor = textColor;
     }
 
-    public TimeStamp getStartTime( )
-    {
-        return startTime;
-    }
-
+    /**
+     * <p>Sets the start and end time for this Event.</p>
+     * 
+     * <p>If force is false, then the constraints (see {@link #addConstraint(EventConstraint)})
+     * are taken into account and the final Event bounds might not be equal to
+     * the input arguments.</p>
+     * 
+     * @param startTime
+     * @param endTime
+     * @param force
+     */
     public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
         if ( !force )
@@ -610,6 +829,54 @@ public class Event
             this.info.updateEvent( this, startTime, endTime );
         }
     }
+    
+    public int getRow( )
+    {
+        if ( this.info != null )
+        {
+            return this.info.getRow( id );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    
+    public boolean isFixedRow( )
+    {
+        return this.fixedRow;
+    }
+    
+    protected int getFixedRow( )
+    {
+        return this.fixedRowIndex;
+    }
+    
+    /**
+     * The row this Event appears on will be managed by its {@link EventPlotInfo}
+     * parent. If {@link EventPlotInfo#setStackOverlappingEvents(boolean)} is set
+     * to true, then the row will be set to avoid overlaps with other events, otherwise
+     * the Event will be placed in the first row.
+     */
+    public void setFloatingRow( )
+    {
+        this.fixedRow = false;
+    }
+    
+    /**
+     * This event will appear on the requested row index in the timeline
+     * regardless of whether that causes it to overlap with other Events.
+     */
+    public void setFixedRow( int rowIndex )
+    {
+        this.fixedRow = true;
+        this.fixedRowIndex = rowIndex;
+        
+        if ( this.info != null )
+        {
+            this.info.updateEventRow( this, rowIndex );
+        }
+    }
 
     protected TimeSpan applyConstraints( TimeSpan span )
     {
@@ -621,38 +888,62 @@ public class Event
         return span;
     }
 
+    /**
+     * {@link #setTimes(TimeStamp, TimeStamp, boolean)}
+     * @param startTime
+     * @param endTime
+     */
     public void setTimes( TimeStamp startTime, TimeStamp endTime )
     {
         setTimes( startTime, endTime, false );
     }
 
-    void setTimes0( TimeStamp startTime, TimeStamp endTime )
+    protected void setTimes0( TimeStamp startTime, TimeStamp endTime )
     {
         this.startTime = startTime;
         this.endTime = endTime;
     }
+    
+    /**
+     * @return the start / earliest / left-edge TimeStamp for this Event.
+     */
+    public TimeStamp getStartTime( )
+    {
+        return startTime;
+    }
 
+    /**
+     * @see #setTimes(TimeStamp, TimeStamp, boolean)
+     * @param startTime
+     */
     public void setStartTime( TimeStamp startTime )
     {
         setTimes( startTime, this.endTime );
     }
 
-    void setStartTime0( TimeStamp startTime )
+    protected void setStartTime0( TimeStamp startTime )
     {
         this.startTime = startTime;
     }
 
+    /**
+     * @return the end / latest / right-edge TimeStamp for this Event.
+     */
     public TimeStamp getEndTime( )
     {
         return endTime;
     }
 
+    /**
+     * @see #setTimes(TimeStamp, TimeStamp, boolean)
+     * @param startTime
+     */
     public void setEndTime( TimeStamp endTime )
     {
         setTimes( this.startTime, endTime );
     }
 
-    void setEndTime0( TimeStamp endTime )
+    protected void setEndTime0( TimeStamp endTime )
     {
         this.endTime = endTime;
     }
@@ -662,95 +953,216 @@ public class Event
         return new TimeSpan( startTime, endTime );
     }
 
+    /**
+     * return whether the label associated with this event should be shown when room permits.
+     */
     public boolean isShowLabel( )
     {
-        return showName;
+        return showLabel;
     }
 
+    /**
+     * @return if false, the label is not visible, either because there is no room to show it,
+     *         or {@link #isShowLabel()} is set to false.
+     */
+    public boolean isLabelVisible( )
+    {
+        return isTextVisible;
+    }
+    
+    /**
+     * @param showName whether to show the label text in this Event's box on the timeline.
+     */
     public void setShowLabel( boolean showName )
     {
-        this.showName = showName;
+        this.showLabel = showName;
     }
 
     /**
-     * If true, hides labels and/or icons if they would intersect with other events.
+     * Set what types of overlaps should be considered when determining whether to shorten Event box text
+     * and whether to display the Event's icon.
+     * 
+     * @param mode
      */
-    public void setHideIntersecting( boolean hide )
+    public void setOverlapMode( OverlapRenderingMode mode )
     {
-        this.hideIntersecting = hide;
+        this.overlapRenderingMode = mode;
+    }
+    
+    /**
+     * @see #setOverlapMode(OverlapRenderingMode)
+     */
+    public OverlapRenderingMode getOverlapRenderingMode( )
+    {
+        return this.overlapRenderingMode;
+    }
+    
+    /**
+     * Sets how text and icons should be handled when this Event's box is too small or when it overlaps
+     * with another Event's box.
+     * 
+     * @param mode
+     */
+    public void setTextRenderingMode( TextRenderingMode mode )
+    {
+        this.textRenderingMode = mode;
     }
 
     /**
-     * If true, hides labels and/or icons if they would fall outside this event's time window.
+     * @see #setTextRenderingMode(TextRenderingMode)
      */
-    public void setHideOverfull( boolean hide )
+    public TextRenderingMode getTextRenderingMode( )
     {
-        this.hideOverfull = hide;
+        return this.textRenderingMode;
     }
-
+    
+    /**
+     * return whether the icon associated with this event should be shown when room permits.
+     */
     public boolean isShowIcon( )
     {
         return showIcon;
     }
 
+    /**
+     * @return if false, the icon is not visible, either because there is no room to show it,
+     *         or {@link #isShowIcon()} is set to false.
+     */
+    public boolean isIconVisible( )
+    {
+        return isIconVisible;
+    }
+    
+    /**
+     * @param showIcon whether to show the icon associated with this event.
+     */
     public void setShowIcon( boolean showIcon )
     {
         this.showIcon = showIcon;
     }
 
+    /**
+     * return if true, the event box is filled with the background color. If false, the box is transparent.
+     */
     public boolean isShowBackground( )
     {
         return showBackground;
     }
 
+    /**
+     * @param showBorder whether to fill the event box with the background color.
+     */
     public void setShowBackground( boolean showBorder )
     {
         this.showBackground = showBorder;
     }
     
+    /**
+     * @return if true, a line border is drawn around the event box.
+     */
     public boolean isShowBorder( )
     {
         return showBorder;
     }
 
+    /**
+     * @param showBorder whether to draw a line border around the event box.
+     */
     public void setShowBorder( boolean showBorder )
     {
         this.showBorder = showBorder;
     }
 
+    /**
+     * <p>An Event's id may be any Object, but its {@link #equals(Object)} and {@link #hashCode()}
+     * methods should be properly implemented and it should be unique among the Events of an
+     * {@link EventPlotInfo} timeline.</p>
+     * 
+     * <p>{@link EventPlotListener} will use this id when reporting events occurring on this Event.</p>
+     * 
+     * @return the unique id for this Event.
+     */
     public Object getId( )
     {
         return id;
     }
 
-    public boolean isIconVisible( )
-    {
-        return isIconVisible;
-    }
-
-    public boolean isLabelVisible( )
-    {
-        return isTextVisible;
-    }
-
+    /**
+     * Returns the timestamp associated with the left hand side of the icon. Because the icon
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getIconStartTime( )
     {
         return iconStartTime;
     }
 
+    /**
+     * Returns the timestamp associated with the right hand side of the icon. Because the icon
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getIconEndTime( )
     {
         return iconEndTime;
     }
 
+    /**
+     * Returns the timestamp associated with the left hand side of the label. Because the label
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getLabelStartTime( )
     {
         return textStartTime;
     }
 
+    /**
+     * Returns the timestamp associated with the right hand side of the label. Because the label
+     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
+     * in and out. This method is intended mainly for use by display routines.
+     */
     public TimeStamp getLabelEndTime( )
     {
         return textEndTime;
+    }
+    
+    /**
+     * @return the timeline which this Event is attached to.
+     */
+    public EventPlotInfo getEventPlotInfo( )
+    {
+        return info;
+    }
+
+    /**
+     * @return the amount of overlap between this event and the given event in system units (minutes)
+     */
+    public double getOverlapTime( Event event )
+    {
+        double maxStart = Math.max( event.getStartTime( ).toPosixSeconds( ), getStartTime( ).toPosixSeconds( ) );
+        double minEnd = Math.min( event.getEndTime( ).toPosixSeconds( ), getEndTime( ).toPosixSeconds( ) );
+        return Math.max( 0, minEnd - maxStart );
+    }
+    
+    /**
+     * @return the duration of the event (time between start and end TimeStamps) in system units (minutes)
+     */
+    public double getDuration( )
+    {
+        return startTime.durationBefore( endTime );
+    }
+    
+    /**
+     * The parent EventPlotInfo of an Event should be modified by
+     * calling {@link EventPlotInfo#addEvent(Event)} and
+     * {@link EventPlotInfo#removeEvent(Event)}.
+     * 
+     * @param info
+     */
+    protected void setEventPlotInfo( EventPlotInfo info )
+    {
+        this.info = info;
     }
 
     @Override
@@ -780,7 +1192,7 @@ public class Event
     @Override
     public String toString( )
     {
-        return String.format( "%s (%s)", name, id );
+        return String.format( "%s (%s)", label, id );
     }
 
     public static Event createDummyEvent( Event event )
@@ -802,7 +1214,34 @@ public class Event
             @Override
             public int compare( Event o1, Event o2 )
             {
-                return o1.getStartTime( ).compareTo( o2.getStartTime( ) );
+                int c_time = o1.getStartTime( ).compareTo( o2.getStartTime( ) );
+                
+                if ( c_time == 0 )
+                {
+                    // if the times are equal but object ids are not, the comparator
+                    // should not return 0 to remain consistent with equals
+                    // otherwise we make a rather arbitrary decision about ordering
+                    if ( o1.getId( ) == null && o2.getId( ) == null )
+                    {
+                        return 0;
+                    }
+                    else if ( o1.getId( ) == null )
+                    {
+                        return -1;
+                    }
+                    else if ( o2.getId( ) == null )
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    return c_time;
+                }
             }
         };
     }

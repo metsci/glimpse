@@ -46,13 +46,13 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D.GroupInfo;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -94,12 +94,12 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             GroupInfo group = plot.createGroup( String.format( "%s-group", row.getId( ) ), row );
 
             // set labels
-            row.getLabelPainter( ).setText( "Label Here" );
+            row.getLabelPainter( ).setText( "Label Here"  );
             group.setLabelText( "Group Name" );
 
             setPlotLookAndFeel( row );
         }
-
+        
         // create a 1D timeline to display event durations
         final EventPlotInfo events1 = plot.createEventPlot( "event-1" );
         EventPlotInfo events2 = plot.createEventPlot( "event-2" );
@@ -130,7 +130,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // order the event plots within the group
         events1.setOrder( 2 );
         events2.setOrder( 3 );
-        events3.setOrder( 1 );
+        events3.setOrder( 4 );
 
         // set default colors for the event plots
         events1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
@@ -158,6 +158,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         e1.setResizeable( false );
         e2.setMinTimeSpan( Time.fromMinutes( 100 ) );
         e3.setMaxTimeSpan( Time.fromMinutes( 500 ) );
+        
+        // fix the "Cloudy" event on row 2
+        e2.setFixedRow( 2 );
 
         // load icons into the texture atlas for the plot
         TextureAtlas atlas = plot.getTextureAtlas( );

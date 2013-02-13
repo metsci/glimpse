@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.support.projection;
 
+import com.metsci.glimpse.axis.Axis2D;
+
 /**
  * A simple projection which maps a texture onto a rectangle in physical
  * coordinates with bottom-left corner at (minX, minY) and upper-right
@@ -40,6 +42,11 @@ public class FlatProjection implements Projection, InvertibleProjection
 
     protected double diffX, diffY;
 
+    public FlatProjection( Axis2D axes )
+    {
+        this(  axes.getMinX( ), axes.getMaxX( ), axes.getMinY( ), axes.getMaxY( ) );
+    }
+    
     public FlatProjection( double minX, double maxX, double minY, double maxY )
     {
         this.minX = minX;

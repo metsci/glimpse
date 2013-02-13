@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.logging.format;
 
+import static com.metsci.glimpse.util.logging.format.TerseLogFormatter.LINE_SEPARATOR;
+
 import java.util.Date;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -40,8 +42,6 @@ import java.util.logging.LogRecord;
  */
 public class MultilineLogFormatter extends Formatter
 {
-    private static final String NEWLINE = System.getProperty("line.separator");
-
     @Override
     public String format(LogRecord rec)
     {
@@ -50,7 +50,7 @@ public class MultilineLogFormatter extends Formatter
         StringBuilder builder = new StringBuilder(1000);
 
         // give a red color to any messages with levels >= WARNING
-        builder.append(NEWLINE);
+        builder.append(LINE_SEPARATOR);
         builder.append("LEVEL  : ");
         if (rec.getLevel().intValue() >= Level.WARNING.intValue())
         {
@@ -64,23 +64,23 @@ public class MultilineLogFormatter extends Formatter
         }
 
         // builder.append(": ");
-        builder.append(NEWLINE);
+        builder.append(LINE_SEPARATOR);
         builder.append("CLASS  : ").append(rec.getSourceClassName());
 
         // builder.append('.');
-        builder.append(NEWLINE);
+        builder.append(LINE_SEPARATOR);
         builder.append("METHOD : ").append(rec.getSourceMethodName());
 
         // builder.append(": ");
-        builder.append(NEWLINE);
+        builder.append(LINE_SEPARATOR);
         builder.append("MSG    : ").append(formatMessage(rec));
 
         // builder.append('.');
-        builder.append(NEWLINE);
+        builder.append(LINE_SEPARATOR);
         builder.append("TIME   : ").append(new Date());
 
         // builder.append('\n');
-        builder.append(NEWLINE);
+        builder.append(LINE_SEPARATOR);
 
         return builder.toString();
     }
@@ -91,7 +91,7 @@ public class MultilineLogFormatter extends Formatter
     public String getHead(Handler h)
     {
         return "<HTML><HEAD> My Custom Log from " + new Date() +
-               "</HEAD><BODY><H1>The logs</H1><PRE>" + NEWLINE;
+               "</HEAD><BODY><H1>The logs</H1><PRE>" + LINE_SEPARATOR;
     }
 
     // This method is called when the handler is closed
@@ -99,7 +99,7 @@ public class MultilineLogFormatter extends Formatter
     @Override
     public String getTail(Handler h)
     {
-        return "</PRE></BODY></HTML>" + NEWLINE;
+        return "</PRE></BODY></HTML>" + LINE_SEPARATOR;
     }
 
 }

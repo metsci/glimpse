@@ -26,41 +26,50 @@
  */
 package com.metsci.glimpse.util.primitives.sorted;
 
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
-import com.metsci.glimpse.util.primitives.Longs;
+import com.metsci.glimpse.util.primitives.Doubles;
 
 import static java.lang.Math.*;
 
 /**
  * @author hogye
  */
-public class SortedLongsArithmetic implements SortedLongs
+public class SortedDoublesArithmetic implements SortedDoubles
 {
 
-    public final long v0;
-    public final long vStep;
+    public final double v0;
+    public final double vStep;
     public final int n;
 
     public final double oneOverVStep;
+    public final double halfVStep;
 
 
     /**
      * @throws IllegalArgumentException if
+     *         {@code v0} is NaN, or
+     *         {@code v0} is infinite, or
+     *         {@code vStep} is NaN, or
+     *         {@code vStep} is infinite, or
      *         {@code vStep} is non-positive, or
      *         {@code n} is negative, or
-     *         {@code (v0 + (n-1)*vStep)} is greater than {@link Long#MAX_VALUE}
+     *         {@code (v0 + (n-1)*vStep)} is greater than {@link Double#MAX_VALUE}
      */
-    public SortedLongsArithmetic(long v0, long vStep, int n)
+    public SortedDoublesArithmetic(double v0, double vStep, int n)
     {
+        if (Double.isNaN(v0)) throw new IllegalArgumentException("v0 must be not be NaN");
+        if (Double.isInfinite(v0)) throw new IllegalArgumentException("v0 must be finite: v0 = " + v0);
+        if (Double.isNaN(vStep)) throw new IllegalArgumentException("vStep must be not be NaN");
+        if (Double.isInfinite(vStep)) throw new IllegalArgumentException("vStep must be finite: vStep = " + vStep);
         if (vStep <= 0) throw new IllegalArgumentException("vStep must be positive: vStep = " + vStep);
         if (n < 0) throw new IllegalArgumentException("n must be non-negative: n = " + n);
 
         if (n > 0)
         {
             // vMax = v0 + (n-1)*vStep
-            BigInteger vMax = big(v0).add( big(n-1).multiply( big(vStep) ) );
-            if (vMax.compareTo( big(Long.MAX_VALUE) ) > 0) throw new IllegalArgumentException("Max value is larger than Long.MAX_VALUE: v0 = " + v0 + ", vStep = " + vStep + ", n = " + n);
+            BigDecimal vMax = big(v0).add( big(n-1).multiply( big(vStep) ) );
+            if (vMax.compareTo( big(Double.MAX_VALUE) ) > 0) throw new IllegalArgumentException("Max value is larger than Double.MAX_VALUE: v0 = " + v0 + ", vStep = " + vStep + ", n = " + n);
         }
 
         this.v0 = v0;
@@ -68,20 +77,16 @@ public class SortedLongsArithmetic implements SortedLongs
         this.n = n;
 
         this.oneOverVStep = 1.0 / ((double) vStep);
+        this.halfVStep = 0.5 * vStep;
     }
 
-    public static BigInteger big(long x)
+    public static BigDecimal big(double x)
     {
-        return BigInteger.valueOf(x);
-    }
-
-    public static BigInteger big(int x)
-    {
-        return BigInteger.valueOf(x);
+        return BigDecimal.valueOf(x);
     }
 
     @Override
-    public long v(int i)
+    public double v(int i)
     {
         // Skip bounds checks for speed
         //if (i < 0) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i);
@@ -97,9 +102,9 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public void copyTo(int i, long[] dest, int iDest, int c)
+    public void copyTo(int i, double[] dest, int iDest, int c)
     {
-        long v = v0 + i*vStep;
+        double v = v0 + i*vStep;
         for (int j = 0; j < c; j++)
         {
             dest[iDest + j] = v;
@@ -108,17 +113,17 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public long[] copyOf(int i, int c)
+    public double[] copyOf(int i, int c)
     {
-        long[] copy = new long[c];
+        double[] copy = new double[c];
         copyTo(i, copy, 0, c);
         return copy;
     }
 
     @Override
-    public long[] copyOf()
+    public double[] copyOf()
     {
-        long[] copy = new long[n];
+        double[] copy = new double[n];
         copyTo(0, copy, 0, n);
         return copy;
     }
@@ -130,80 +135,80 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public long first()
+    public double first()
     {
         return v0;
     }
 
     @Override
-    public long last()
+    public double last()
     {
         return v(n - 1);
     }
 
     @Override
-    public int indexOf(long x)
+    public int indexOf(double x)
     {
-        long offset = x - v0;
+        double offset = x - v0;
         if (offset < 0) return -1;
 
-        long i = (offset + vStep - 1) / vStep;
+        long i = (long) ceil(offset * oneOverVStep);
         if (i >= n) return -(n + 1);
 
-        boolean divisible = (i*vStep == offset);
-        return (int) (divisible ? i : -(i + 1));
+        boolean exact = (x == (v0 + i*vStep));
+        return (int) (exact ? i : -(i + 1));
     }
 
     @Override
-    public int indexNearest(long x)
+    public int indexNearest(double x)
     {
-        long offset = x - v0;
+        double offset = x - v0;
         if (offset <= 0) return 0;
 
-        long i = (offset + (vStep >>> 1)) / vStep;
-        return min((int) i, n - 1);
+        int i = (int) ((offset + halfVStep) * oneOverVStep);
+        return min(i, n - 1);
     }
 
     @Override
-    public int indexBefore(long x)
+    public int indexBefore(double x)
     {
         return indexAtOrBefore(x - 1);
     }
 
     @Override
-    public int indexAfter(long x)
+    public int indexAfter(double x)
     {
         return indexAtOrBefore(x) + 1;
     }
 
     @Override
-    public int indexAtOrBefore(long x)
+    public int indexAtOrBefore(double x)
     {
-        long offset = x - v0;
+        double offset = x - v0;
         if (offset < 0) return -1;
 
-        long i = offset / vStep;
-        return min((int) i, n - 1);
+        int i = (int) (offset * oneOverVStep);
+        return min(i, n - 1);
     }
 
     @Override
-    public int indexAtOrAfter(long x)
+    public int indexAtOrAfter(double x)
     {
         return indexAtOrBefore(x - 1) + 1;
     }
 
     @Override
-    public void continuousIndexOf(long x, ContinuousIndex result)
+    public void continuousIndexOf(double x, ContinuousIndex result)
     {
-        long offset = x - v0;
-        long i = max( 0, min( n-2, (offset / vStep) ) );
+        double offset = x - v0;
+        long i = max( 0, min( n-2, (int) (offset * oneOverVStep) ) );
         float f = (float) ((offset - i*vStep) * oneOverVStep);
 
         result.set((int) i, f);
     }
 
     @Override
-    public ContinuousIndex continuousIndexOf(long x)
+    public ContinuousIndex continuousIndexOf(double x)
     {
         ContinuousIndex h = new ContinuousIndex();
         continuousIndexOf(x, h);
@@ -211,15 +216,15 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public void continuousIndicesOf(Longs xs, ContinuousIndexArray result)
+    public void continuousIndicesOf(Doubles xs, ContinuousIndexArray result)
     {
         int nx = xs.n();
         for (int ix = 0; ix < nx; ix++)
         {
-            long x = xs.v(ix);
+            double x = xs.v(ix);
 
-            long offset = x - v0;
-            long i = max( 0, min( n-2, (offset / vStep) ) );
+            double offset = x - v0;
+            long i = max( 0, min( n-2, (int) (offset * oneOverVStep) ) );
             float f = (float) ((offset - i*vStep) * oneOverVStep);
 
             result.put(ix, (int) i, f);
@@ -227,7 +232,7 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public ContinuousIndexArray continuousIndicesOf(Longs xs)
+    public ContinuousIndexArray continuousIndicesOf(Doubles xs)
     {
         ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
         continuousIndicesOf(xs, hs);
@@ -235,10 +240,10 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public void continuousIndicesOf(SortedLongs xs, ContinuousIndexArray result)
+    public void continuousIndicesOf(SortedDoubles xs, ContinuousIndexArray result)
     {
-        long v0 = this.v0;
-        long vStep = this.vStep;
+        double v0 = this.v0;
+        double vStep = this.vStep;
         int n = this.n;
         double oneOverVStep = this.oneOverVStep;
 
@@ -247,10 +252,10 @@ public class SortedLongsArithmetic implements SortedLongs
 
 
         // Zip through any xs smaller than v(1)
-        long v1 = v(1);
+        double v1 = v(1);
         for (; ix < nx; ix++)
         {
-            long x = xs.v(ix);
+            double x = xs.v(ix);
             if (x >= v1) break;
 
             float f = (float) ((x - v0) * oneOverVStep);
@@ -259,14 +264,14 @@ public class SortedLongsArithmetic implements SortedLongs
 
 
         // Walk through the window where xs and vs overlap
-        long vNextToLast = v(n-2);
+        double vNextToLast = v(n-2);
         for (; ix < nx; ix++)
         {
-            long x = xs.v(ix);
+            double x = xs.v(ix);
             if (x >= vNextToLast) break;
 
-            long offset = x - v0;
-            long i = offset / vStep;
+            double offset = x - v0;
+            long i = (int) (offset * oneOverVStep);
             float f = (float) ((offset - i*vStep) * oneOverVStep);
 
             result.put(ix, (int) i, f);
@@ -276,7 +281,7 @@ public class SortedLongsArithmetic implements SortedLongs
         // Zip through any xs larger than or equal to v(n-2)
         for (; ix < nx; ix++)
         {
-            long x = xs.v(ix);
+            double x = xs.v(ix);
 
             float f = (float) ((x - vNextToLast) * oneOverVStep);
             result.put(ix, n-2, f);
@@ -284,7 +289,7 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
-    public ContinuousIndexArray continuousIndicesOf(SortedLongs xs)
+    public ContinuousIndexArray continuousIndicesOf(SortedDoubles xs)
     {
         ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
         continuousIndicesOf(xs, hs);
@@ -301,9 +306,9 @@ public class SortedLongsArithmetic implements SortedLongs
      * This may be faster than continuousIndicesOf when going from a sparser
      * sequence to a dense arithmetic sequence.
      */
-    public ContinuousIndexArray continuousIndicesIn(SortedLongs xs)
+    public ContinuousIndexArray continuousIndicesIn(SortedDoubles xs)
     {
-        long vStep = this.vStep;
+        double vStep = this.vStep;
         int n = this.n;
         ContinuousIndexArray hs = new ContinuousIndexArray(n);
 
@@ -312,12 +317,12 @@ public class SortedLongsArithmetic implements SortedLongs
 
 
         // Zip through any vs smaller than x(1)
-        long x0 = xs.v(0);
-        long x1 = xs.v(1);
-        double oneOverXStep1 = 1.0 / ((double) (x1 - x0));
+        double x0 = xs.v(0);
+        double x1 = xs.v(1);
+        double oneOverXStep1 = 1.0 / (x1 - x0);
         for (; i < n; i++)
         {
-            long v = v(i);
+            double v = v(i);
             if (v >= x1) break;
 
             float fx = (float) ((v - x0) * oneOverXStep1);
@@ -326,23 +331,23 @@ public class SortedLongsArithmetic implements SortedLongs
 
 
         // Walk through the window where xs and vs overlap
-        long xb = xs.v(1);
+        double xb = xs.v(1);
         int ib = indexAtOrAfter(xb);
         int nx = xs.n();
         for (int ixb = 2; ixb < nx-1 && ib < n; ixb++)
         {
             int ixa = ixb - 1;
-            long xa = xb;
+            double xa = xb;
             int ia = ib;
 
             xb = xs.v(ixb);
             ib = indexAtOrAfter(xb);
 
-            double oneOverXStep = 1.0 / ((double) (xb - xa));
+            double oneOverXStep = 1.0 / (xb - xa);
 
-            long va = v(ia);
-            long vb = v(ib);
-            for (long v = va; v < vb; v += vStep)
+            double va = v(ia);
+            double vb = v(ib);
+            for (double v = va; v < vb; v += vStep)
             {
                 float fx = (float) ((v - xa) * oneOverXStep);
                 hs.put(i, ixa, fx);
@@ -352,12 +357,12 @@ public class SortedLongsArithmetic implements SortedLongs
 
 
         // Zip through any vs larger than or equal to x(nx-2)
-        long xLast = xs.v(nx - 1);
-        long xNextToLast = xs.v(nx - 2);
-        double oneOverXStepLast = 1.0 / ((double) (xLast - xNextToLast));
+        double xLast = xs.v(nx - 1);
+        double xNextToLast = xs.v(nx - 2);
+        double oneOverXStepLast = 1.0 / (xLast - xNextToLast);
         for (; i < n; i++)
         {
-            long v = v(i);
+            double v = v(i);
 
             float fx = (float) ((v - xNextToLast) * oneOverXStepLast);
             hs.put(i, nx-2, fx);

@@ -45,10 +45,10 @@ import com.metsci.glimpse.gl.GLListenerInfo;
 import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.GLSimpleListener;
-import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.sun.opengl.util.texture.Texture;
 
 /**
@@ -80,7 +80,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     {
         this( width, height, true, false, context );
     }
-    
+
     public FrameBufferGlimpseCanvas( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
     {
         GLContext newContext = createPixelBuffer( 1, 1, context ).getContext( );
@@ -193,7 +193,7 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
         return fbo.getOpenGLTexture( );
     }
 
-    public DrawableTexture getGlimpseTexture( )
+    public TextureProjected2D getGlimpseTexture( )
     {
         return fbo.getGlimpseTexture( );
     }
@@ -324,13 +324,13 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     {
         // do nothing
     }
-    
+
     @Override
     public boolean isDisposed( )
     {
         return this.isDisposed;
     }
-    
+
     @Override
     public void dispose( RepaintManager manager )
     {
@@ -348,21 +348,21 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
                     {
                         layout.dispose( context );
                     }
-                    
+
                     fbo.dispose( glContext );
                 }
                 finally
                 {
                     glContext.release( );
                 }
-                
+
                 isDisposed = true;
             }
         };
-        
+
         if ( manager != null )
         {
-            manager.asyncExec( dispose );   
+            manager.asyncExec( dispose );
         }
         else
         {

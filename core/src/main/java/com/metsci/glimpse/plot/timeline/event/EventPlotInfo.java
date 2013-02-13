@@ -29,6 +29,7 @@ package com.metsci.glimpse.plot.timeline.event;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
 import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 import java.awt.Font;
 import java.util.Collections;
@@ -40,37 +41,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.painter.group.DelegatePainter;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.TooltipPainter;
-import com.metsci.glimpse.plot.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
+import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
+import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl.TimeToolTipHandler;
-import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
-public class EventPlotInfo implements TimePlotInfo
+public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 {
     public static final int DEFAULT_ROW_SIZE = 26;
     public static final int DEFAULT_BUFFER_SIZE = 2;
@@ -78,8 +67,10 @@ public class EventPlotInfo implements TimePlotInfo
     protected EventPainter eventPainter;
     protected GlimpseAxisLayout1D layout1D;
 
+    protected int maxRowCount = Integer.MAX_VALUE;
+    protected int minRowCount = 0;
     protected int rowSize;
-    protected int bufferSize;
+    protected int eventPadding;
 
     protected List<EventPlotListener> eventListeners;
 
@@ -89,7 +80,7 @@ public class EventPlotInfo implements TimePlotInfo
     protected DragListener dragListener;
     protected TooltipListener tooltipListener;
 
-    protected TimePlotInfo delegate;
+    protected TextRenderingMode textRenderingMode = Ellipsis;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -98,7 +89,7 @@ public class EventPlotInfo implements TimePlotInfo
 
     public EventPlotInfo( TimePlotInfo delegate, TextureAtlas atlas )
     {
-        this.delegate = delegate;
+        super( delegate );
 
         final Epoch epoch = getStackedTimePlot( ).getEpoch( );
         this.isHorizontal = getStackedTimePlot( ).isTimeAxisHorizontal( );
@@ -130,16 +121,13 @@ public class EventPlotInfo implements TimePlotInfo
         this.tooltipListener = new TooltipListener( );
         this.addEventPlotListener( tooltipListener );
 
-        this.delegate.setTimeToolTipHandler( null );
+        this.info.setTimeToolTipHandler( null );
         this.eventToolTipHandler = new EventToolTipHandler( )
         {
             @Override
             public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter )
             {
-
                 Event event = selection.getEvent( );
-
-                System.out.println( "setting " + event.getLabel( ) );
                 String label = event.getLabel( ) == null ? "" : event.getLabel( );
                 String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
                 String text = String.format( "%s\n%s", label, tip );
@@ -149,7 +137,7 @@ public class EventPlotInfo implements TimePlotInfo
         };
 
         this.rowSize = DEFAULT_ROW_SIZE;
-        this.bufferSize = DEFAULT_BUFFER_SIZE;
+        this.eventPadding = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
     }
 
@@ -371,7 +359,7 @@ public class EventPlotInfo implements TimePlotInfo
             {
                 for ( EventSelection selection : events )
                 {
-                    if ( selection.isLocation( Center, Start, End ) )
+                    if ( selection.isLocation( Center, Start, End ) && selection.getEvent( ).isEditable( ) )
                     {
                         dragEvent = selection.getEvent( );
                         eventStart = dragEvent.getStartTime( );
@@ -478,6 +466,11 @@ public class EventPlotInfo implements TimePlotInfo
         eventPainter.setStackOverlappingEvents( stack );
     }
 
+    public int getRow( Object eventId )
+    {
+        return this.eventPainter.getRow( eventId );
+    }
+
     /**
      * Sets the size of a single row of events. An EventPlotInfo may contain
      * multiple rows of events if some of those events overlap in time.
@@ -488,27 +481,54 @@ public class EventPlotInfo implements TimePlotInfo
         this.updateSize( );
     }
 
-    public void setBufferSize( int size )
-    {
-        this.bufferSize = size;
-        this.updateSize( );
-    }
-
-    public int getBufferSize( )
-    {
-        return this.bufferSize;
-    }
-
     public int getRowSize( )
     {
         return this.rowSize;
     }
 
+    public void setEventPadding( int size )
+    {
+        this.eventPadding = size;
+        this.updateSize( );
+    }
+
+    public int getEventPadding( )
+    {
+        return this.eventPadding;
+    }
+    
+    public void setRowMaxCount( int count )
+    {
+        this.maxRowCount = count;
+        this.eventPainter.validate( );
+    }
+    
+    public int getRowMaxCount( )
+    {
+        return this.maxRowCount;
+    }
+
+    public void setRowMinCount( int count )
+    {
+        this.minRowCount = count;
+        this.updateSize( );
+    }
+
+    public int getRowMinCount( )
+    {
+        return this.minRowCount;
+    }
+
+    public int getRowCount( )
+    {
+        return Math.max( minRowCount, this.eventPainter.getRowCount( ) );
+    }
+
     public void updateSize( )
     {
-        int rowCount = this.eventPainter.getRowCount( );
+        int rowCount = getRowCount( );
 
-        this.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.bufferSize );
+        this.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.eventPadding );
     }
 
     public TextureAtlas getTextureAtlas( )
@@ -536,26 +556,36 @@ public class EventPlotInfo implements TimePlotInfo
         this.eventPainter.setFont( font, antialias );
     }
 
-    public Event addEvent( String name, TimeStamp time )
+    public Set<Event> getEvents( )
     {
-        return addEvent( UUID.randomUUID( ), name, time );
+        return this.eventPainter.getEvents( );
     }
 
-    public Event addEvent( String name, TimeStamp startTime, TimeStamp endTime )
+    public Event getEvent( Object id )
     {
-        return addEvent( UUID.randomUUID( ), name, startTime, endTime );
+        return this.eventPainter.getEvent( id );
     }
 
-    public Event addEvent( Object id, String name, TimeStamp time )
+    public Event addEvent( String label, TimeStamp time )
     {
-        Event event = new Event( id, name, time );
+        return addEvent( UUID.randomUUID( ), label, time );
+    }
+
+    public Event addEvent( String label, TimeStamp startTime, TimeStamp endTime )
+    {
+        return addEvent( UUID.randomUUID( ), label, startTime, endTime );
+    }
+
+    public Event addEvent( Object id, String label, TimeStamp time )
+    {
+        Event event = new Event( id, label, time );
         addEvent( event );
         return event;
     }
 
-    public Event addEvent( Object id, String name, TimeStamp startTime, TimeStamp endTime )
+    public Event addEvent( Object id, String label, TimeStamp startTime, TimeStamp endTime )
     {
-        Event event = new Event( id, name, startTime, endTime );
+        Event event = new Event( id, label, startTime, endTime );
         addEvent( event );
         return event;
     }
@@ -563,6 +593,8 @@ public class EventPlotInfo implements TimePlotInfo
     public void addEvent( Event event )
     {
         event.setEventPlotInfo( this );
+        event.setTextRenderingMode( textRenderingMode );
+
         this.eventPainter.addEvent( event );
     }
 
@@ -581,211 +613,47 @@ public class EventPlotInfo implements TimePlotInfo
         }
     }
 
-    void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
+    /**
+     * Sets the TextRenderingMode for all {@link Event} children of this EventPlotInfo.
+     * This value will also be the default of any newly created Events. The value can be
+     * overridden on a per-Event basis using {@link Event#setTextRenderingMode(OverlapRenderingMode)}.
+     * However, the next call to {@link EventPlotInfo#setTextRenderingMode(OverlapRenderingMode)} will
+     * reset all Events to the same value.
+     * 
+     * @see Event#setOverlapMode(OverlapRenderingMode)
+     */
+    public void setTextRenderingMode( TextRenderingMode mode )
+    {
+        this.textRenderingMode = mode;
+    }
+
+    /**
+     * @see #setTextRenderingMode(TextRenderingMode)
+     */
+    public TextRenderingMode getTextRenderingMode( )
+    {
+        return this.textRenderingMode;
+    }
+
+    public void updateEventRow( Event event, int rowIndex )
+    {
+        this.eventPainter.setRow( event.getId( ), rowIndex );
+
+        this.notifyEventUpdated( event );
+    }
+
+    public void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
         this.eventPainter.moveEvent0( oldEvent, newStartTime, newEndTime );
 
+        this.notifyEventUpdated( oldEvent );
+    }
+
+    protected void notifyEventUpdated( Event event )
+    {
         for ( EventPlotListener listener : eventListeners )
         {
-            listener.eventUpdated( oldEvent );
+            listener.eventUpdated( event );
         }
-    }
-
-    @Override
-    public StackedPlot2D getStackedPlot( )
-    {
-        return delegate.getStackedPlot( );
-    }
-
-    @Override
-    public String getId( )
-    {
-        return delegate.getId( );
-    }
-
-    @Override
-    public int getOrder( )
-    {
-        return delegate.getOrder( );
-    }
-
-    @Override
-    public int getSize( )
-    {
-        return delegate.getSize( );
-    }
-
-    @Override
-    public void setOrder( int order )
-    {
-        delegate.setOrder( order );
-    }
-
-    @Override
-    public void setSize( int size )
-    {
-        delegate.setSize( size );
-    }
-
-    @Override
-    public GlimpseAxisLayout2D getLayout( )
-    {
-        return delegate.getLayout( );
-    }
-
-    @Override
-    public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack )
-    {
-        return delegate.getCommonAxis( );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
-    {
-        return delegate.getOrthogonalAxis( );
-    }
-
-    @Override
-    public TaggedAxis1D getCommonAxis( )
-    {
-        return delegate.getCommonAxis( );
-    }
-
-    @Override
-    public Axis1D getOrthogonalAxis( )
-    {
-        return delegate.getOrthogonalAxis( );
-    }
-
-    @Override
-    public void addLayout( GlimpseAxisLayout2D childLayout )
-    {
-        delegate.addLayout( childLayout );
-    }
-
-    @Override
-    public void setLookAndFeel( LookAndFeel laf )
-    {
-        delegate.setLookAndFeel( laf );
-    }
-
-    @Override
-    public void setTimeToolTipHandler( TimeToolTipHandler toolTipHandler )
-    {
-        delegate.setTimeToolTipHandler( toolTipHandler );
-    }
-
-    @Override
-    public DataAxisMouseListener1D getDataAxisMouseListener( )
-    {
-        return delegate.getDataAxisMouseListener( );
-    }
-
-    @Override
-    public void setBorderWidth( float width )
-    {
-        delegate.setBorderWidth( width );
-    }
-
-    @Override
-    public void setLabelBorderColor( float[] rgba )
-    {
-        delegate.setLabelBorderColor( rgba );
-    }
-
-    @Override
-    public void setLabelBorderWidth( float width )
-    {
-        delegate.setLabelBorderWidth( width );
-    }
-
-    @Override
-    public void setLabelText( String text )
-    {
-        delegate.setLabelText( text );
-    }
-
-    @Override
-    public void setLabelColor( float[] rgba )
-    {
-        delegate.setLabelColor( rgba );
-    }
-
-    @Override
-    public void setAxisColor( float[] rgba )
-    {
-        delegate.setAxisColor( rgba );
-    }
-
-    @Override
-    public void setAxisFont( Font font )
-    {
-        delegate.setAxisFont( font );
-    }
-
-    @Override
-    public GlimpseLayout getLabelLayout( )
-    {
-        return delegate.getLabelLayout( );
-    }
-
-    @Override
-    public BackgroundPainter getBackgroundPainter( )
-    {
-        return delegate.getBackgroundPainter( );
-    }
-
-    @Override
-    public GridPainter getGridPainter( )
-    {
-        return delegate.getGridPainter( );
-    }
-
-    @Override
-    public NumericXYAxisPainter getAxisPainter( )
-    {
-        return delegate.getAxisPainter( );
-    }
-
-    @Override
-    public SimpleTextPainter getLabelPainter( )
-    {
-        return delegate.getLabelPainter( );
-    }
-
-    @Override
-    public BorderPainter getBorderPainter( )
-    {
-        return delegate.getBorderPainter( );
-    }
-
-    @Override
-    public BorderPainter getLabelBorderPainter( )
-    {
-        return delegate.getLabelBorderPainter( );
-    }
-
-    @Override
-    public StackedTimePlot2D getStackedTimePlot( )
-    {
-        return delegate.getStackedTimePlot( );
-    }
-
-    @Override
-    public DelegatePainter getDataPainter( )
-    {
-        return delegate.getDataPainter( );
-    }
-
-    @Override
-    public void addPainter( GlimpsePainter painter )
-    {
-        delegate.addPainter( painter );
-    }
-
-    @Override
-    public void removePainter( GlimpsePainter painter )
-    {
-        delegate.removePainter( painter );
     }
 }

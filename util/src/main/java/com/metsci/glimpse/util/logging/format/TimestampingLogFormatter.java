@@ -55,7 +55,7 @@ public class TimestampingLogFormatter extends TerseLogFormatter
         {
             _previousDateString = dateString;
             StringBuilder stringBuilder = new StringBuilder(getFullFormatter().format(now));
-            stringBuilder.append("\n");
+            stringBuilder.append(LINE_SEPARATOR);
             stringBuilder.append(super.format(record));
             return stringBuilder.toString();
         }

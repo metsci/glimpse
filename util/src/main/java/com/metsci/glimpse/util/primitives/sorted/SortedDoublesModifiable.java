@@ -26,17 +26,17 @@
  */
 package com.metsci.glimpse.util.primitives.sorted;
 
-import com.metsci.glimpse.util.primitives.LongsModifiable;
+import com.metsci.glimpse.util.primitives.DoublesModifiable;
 
 /**
  * @author hogye
  */
-public interface SortedLongsModifiable extends SortedLongs, LongsModifiable
+public interface SortedDoublesModifiable extends SortedDoubles, DoublesModifiable
 {
 
     /**
      * @return The index at which v was inserted
      */
-    int add(long v);
+    int add(double v);
 
 }

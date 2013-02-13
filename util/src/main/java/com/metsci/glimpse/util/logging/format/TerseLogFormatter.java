@@ -41,10 +41,10 @@ import java.util.logging.LogRecord;
  */
 public class TerseLogFormatter extends Formatter
 {
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
-    private static final String LONGEST_NAMED_LEVEL = Level.WARNING.getName();
-    private static final int MAX_LEVEL_LENGTH = LONGEST_NAMED_LEVEL.length();
-    private static final String BLANKS = LONGEST_NAMED_LEVEL.replaceAll(".", " ");
+    static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+    static final String LONGEST_NAMED_LEVEL = Level.WARNING.getName();
+    static final int MAX_LEVEL_LENGTH = LONGEST_NAMED_LEVEL.length();
+    static final String BLANKS = LONGEST_NAMED_LEVEL.replaceAll(".", " ");
 
     @Override
     public String format(LogRecord record)
@@ -62,7 +62,7 @@ public class TerseLogFormatter extends Formatter
         Throwable thrown = record.getThrown();
         if (thrown != null)
         {
-            message.write("\n");
+            message.write(LINE_SEPARATOR);
             thrown.printStackTrace(new PrintWriter(message));
         }
 
