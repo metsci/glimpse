@@ -695,6 +695,14 @@ public class TrackPainter extends GlimpseDataPainter2D
     }
     
     /**
+     * @see #getPixelRange(Axis2D, double, double, int, int)
+     */
+    public Collection<Point> getTimePixelRange( Axis2D axis, double minTime, double maxTime, double centerX, double centerY, int pixelWidth, int pixelHeight )
+    {
+        return filter( getPixelRange( axis, centerX, centerY, pixelWidth, pixelHeight ) );
+    }
+    
+    /**
      * <p>Returns all the Points within the bounding box specified with a center in axis coordinates
      * and width/height specified in pixels.</p>
      * 

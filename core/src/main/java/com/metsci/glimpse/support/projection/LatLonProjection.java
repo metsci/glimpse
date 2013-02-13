@@ -34,7 +34,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
  * A projection which maps a texture with data values spaced uniformly in lat/lon
- * space onto a flat tangent plane defined by the provided TangentPlane object.
+ * space onto a flat plane defined by the provided GeoProjection.
  *
  * @author ulman
  */

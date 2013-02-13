@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.logging.format;
 
+import static com.metsci.glimpse.util.logging.format.TerseLogFormatter.LINE_SEPARATOR;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,7 +57,7 @@ public class TimestampingMethodNameLogFormatter extends TerseMethodNameLogFormat
         {
             _previousDateString = dateString;
             StringBuilder stringBuilder = new StringBuilder(getFullFormatter().format(now));
-            stringBuilder.append("\n");
+            stringBuilder.append(LINE_SEPARATOR);
             stringBuilder.append(super.format(record));
             return stringBuilder.toString();
         }

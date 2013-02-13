@@ -70,7 +70,7 @@
                             <includeScope>compile</includeScope>
                             <classifier>sources</classifier>
                             <outputDirectory>${project.build.directory}/sources</outputDirectory>
-                            <excludeArtifactIds>gluegen-rt-native-all,jogl,jogl-native-all,serializer,antlr,swt,jsr305,png-encoder,jts</excludeArtifactIds>
+                            <excludeArtifactIds>gluegen-rt-native-all,jogl,jogl-native-all,serializer,antlr,swt,jsr305,png-encoder,jts,worldwind-vpf-symbols</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>

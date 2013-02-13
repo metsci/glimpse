@@ -26,10 +26,13 @@
  */
 package com.metsci.glimpse.util.logging.format;
 
+import static com.metsci.glimpse.util.logging.format.TerseLogFormatter.BLANKS;
+import static com.metsci.glimpse.util.logging.format.TerseLogFormatter.LINE_SEPARATOR;
+import static com.metsci.glimpse.util.logging.format.TerseLogFormatter.MAX_LEVEL_LENGTH;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 
@@ -41,11 +44,6 @@ import java.util.logging.LogRecord;
  */
 public class TerseMethodNameLogFormatter extends Formatter
 {
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
-    private static final String LONGEST_NAMED_LEVEL = Level.WARNING.getName();
-    private static final int MAX_LEVEL_LENGTH = LONGEST_NAMED_LEVEL.length();
-    private static final String BLANKS = LONGEST_NAMED_LEVEL.replaceAll(".", " ");
-
     @Override
     public String format(LogRecord record)
     {
@@ -62,7 +60,7 @@ public class TerseMethodNameLogFormatter extends Formatter
         Throwable thrown = record.getThrown();
         if (thrown != null)
         {
-            message.write("\n");
+            message.write( LINE_SEPARATOR );
             thrown.printStackTrace(new PrintWriter(message));
         }
 
