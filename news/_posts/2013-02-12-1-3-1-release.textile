@@ -3,4 +3,5 @@ layout: default
 title: Glimpse 1.3.1 Release
 ---
 
-Glimpse 1.3.1 includes timeline bug fixes and new timeline functionality. Also included are enhancements to the experimental WorldWind integration, including support for drawing in Glimpse with one GeoProjection and reprojecting the scene onto a PlateCarreeProjection for undistorted display on WorldWind.
+<p>Glimpse 1.3.1 includes timeline bug fixes and new timeline functionality.</p>
+<p>Also included are enhancements to the experimental WorldWind integration, including support for drawing in Glimpse with one GeoProjection and reprojecting the scene onto a PlateCarreeProjection for undistorted display on WorldWind.</p>
