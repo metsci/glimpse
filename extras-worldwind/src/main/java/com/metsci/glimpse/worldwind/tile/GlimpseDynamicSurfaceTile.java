@@ -429,7 +429,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         }
     }
 
-    protected static class LatLonBounds
+    public static class LatLonBounds
     {
         public double minLat, maxLat, minLon, maxLon;
 
