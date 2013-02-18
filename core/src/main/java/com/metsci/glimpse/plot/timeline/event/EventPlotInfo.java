@@ -644,7 +644,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
-        this.eventPainter.moveEvent0( oldEvent, newStartTime, newEndTime );
+        this.eventPainter.moveEvent( oldEvent, newStartTime, newEndTime );
 
         this.notifyEventUpdated( oldEvent );
     }
