@@ -74,7 +74,7 @@ public class EventPainter extends GlimpseDataPainter1D
     protected static final int PICK_BUFFER_PIXELS = 10;
 
     protected ReentrantLock lock;
-    
+
     protected Map<Object, Event> eventMap;
     protected Map<Object, Row> rowMap;
     protected List<Row> rows;
@@ -172,7 +172,7 @@ public class EventPainter extends GlimpseDataPainter1D
         this.atlas = atlas;
 
         this.lock = new ReentrantLock( );
-        
+
         this.rows = new ArrayList<Row>( );
         this.eventMap = new HashMap<Object, Event>( );
         this.rowMap = new HashMap<Object, Row>( );
@@ -180,6 +180,26 @@ public class EventPainter extends GlimpseDataPainter1D
         this.isHorizontal = isHorizontal;
 
         this.newFont = FontUtils.getDefaultPlain( 12 );
+    }
+    
+    public float[] getSelectedEventBorderColor( )
+    {
+        return plot.getSelectedEventBorderColor( );
+    }
+    
+    public float[] getSelectedEventBackgroundColor( )
+    {
+        return plot.getSelectedEventBackgroundColor( );
+    }
+    
+    public float getSelectedEventBorderThickness( )
+    {
+        return plot.getSelectedEventBorderThickness( );
+    }
+    
+    public boolean isHighlightSelectedEvents( )
+    {
+        return plot.isHighlightSelectedEvents( );
     }
 
     public boolean isStackOverlappingEvents( )
@@ -269,7 +289,11 @@ public class EventPainter extends GlimpseDataPainter1D
         return this.plot.getStackedTimePlot( ).getEpoch( );
     }
     
-    
+    public EventPlotInfo getEventPlotInfo( )
+    {
+        return this.plot;
+    }
+
     public void validate( )
     {
         lock.lock( );
@@ -277,14 +301,14 @@ public class EventPainter extends GlimpseDataPainter1D
         {
             this.rebuildRows0( );
             this.visibleEventsDirty = true;
-            this.plot.updateSize( ); 
+            this.plot.updateSize( );
         }
         finally
         {
             lock.unlock( );
-        }  
+        }
     }
-    
+
     public int getRowCount( )
     {
         lock.lock( );
@@ -297,7 +321,7 @@ public class EventPainter extends GlimpseDataPainter1D
             lock.unlock( );
         }
     }
-    
+
     public void setRow( Object eventId, int rowIndex )
     {
         lock.lock( );
@@ -305,18 +329,18 @@ public class EventPainter extends GlimpseDataPainter1D
         {
             Event event = getEvent( eventId );
             if ( event == null ) return;
-    
+
             int oldRowIndex = getRow( eventId );
             Row oldRow = rows.get( oldRowIndex );
             if ( oldRow != null ) oldRow.removeEvent( event );
-    
+
             ensureRows0( rowIndex );
             Row newRow = rows.get( rowIndex );
             newRow.addEvent( event );
-    
+
             // row was set manually so don't automatically
             // adjust the other rows to avoid overlap
-    
+
             this.visibleEventsDirty = true;
             this.plot.updateSize( );
         }
@@ -325,7 +349,7 @@ public class EventPainter extends GlimpseDataPainter1D
             lock.unlock( );
         }
     }
-    
+
     public int getRow( Object eventId )
     {
         lock.lock( );
@@ -346,7 +370,7 @@ public class EventPainter extends GlimpseDataPainter1D
             lock.unlock( );
         }
     }
-    
+
     public void addEvent( Event event )
     {
         if ( event == null ) return;
@@ -423,23 +447,20 @@ public class EventPainter extends GlimpseDataPainter1D
         {
             if ( isHorizontal )
             {
-                Axis1D axis = e.getAxis1D( );
-                int valueY = e.getY( );
-                double valueX = axis.screenPixelToValue( e.getX( ) );
-                double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
+                Row row = getNearestRow( e );
 
-                Epoch epoch = getEpoch( );
-
-                TimeStamp time = epoch.toTimeStamp( valueX );
-                TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
-                TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
-
-                int rowIndex = ( int ) Math.floor( valueY / ( double ) ( getRowSize( ) + getRowBufferSize( ) ) );
-                rowIndex = plot.getRowCount( ) - 1 - rowIndex;
-
-                if ( rowIndex >= 0 && rowIndex < rows.size( ) )
+                if ( row != null )
                 {
-                    Row row = rows.get( rowIndex );
+                    Axis1D axis = e.getAxis1D( );
+                    double valueX = axis.screenPixelToValue( e.getX( ) );
+                    double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
+
+                    Epoch epoch = getEpoch( );
+
+                    TimeStamp time = epoch.toTimeStamp( valueX );
+                    TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
+                    TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
+
                     Set<Event> events = row.getMap( ).get( timeStart, timeEnd );
                     Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
                     return eventSelections;
@@ -453,19 +474,96 @@ public class EventPainter extends GlimpseDataPainter1D
             lock.unlock( );
         }
     }
+
+    // find the event which minimizes: abs(clickPos-eventEnd)+abs(clickPos-eventStart)
+    // this is a heuristic for the single event "closest" to the click position
+    // we don't want to require that the click be inside the event because we want
+    // to make selection of instantaneous events possible
+    // (but if the click *is* inside an event, it gets priority)
+    public EventSelection getNearestEvent( Set<EventSelection> events, GlimpseMouseEvent e )
+    {
+        lock.lock( );
+        try
+        {
+            Epoch epoch = getEpoch( );
+            Axis1D axis = e.getAxis1D( );
+            double valueX = axis.screenPixelToValue( e.getX( ) );
+            TimeStamp time = epoch.toTimeStamp( valueX );
+
+            double bestDist = Double.MAX_VALUE;
+            EventSelection bestEvent = null;
+
+            for ( EventSelection s : events )
+            {
+                Event event = s.getEvent( );
+                
+                if ( event.contains( time ) )
+                {
+                   return s;
+                }
+                else
+                {
+                    double dist = distance0( event, time );
+                    if ( bestEvent == null || dist < bestDist )
+                    {
+                        bestDist = dist;
+                        bestEvent = s;
+                    }
+                }
+            }
+            
+            return bestEvent;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
     
+    public EventSelection getNearestEvent( GlimpseMouseEvent e )
+    {
+        return getNearestEvent( getNearestEvents( e ), e );
+    }
+    
+    // heuristic distance measure for use in getNearestEvent( )
+    protected double distance0( Event event, TimeStamp time )
+    {
+        double startDiff = Math.abs( time.durationAfter( event.getStartTime( ) ) );
+        double endDiff = Math.abs( time.durationAfter( event.getEndTime( ) ) );
+        return Math.min( startDiff, endDiff );
+    }
+
+    // must be called while holding lock
+    protected Row getNearestRow( GlimpseMouseEvent e )
+    {
+        if ( isHorizontal )
+        {
+            int valueY = e.getY( );
+
+            int rowIndex = ( int ) Math.floor( valueY / ( double ) ( getRowSize( ) + getRowBufferSize( ) ) );
+            rowIndex = plot.getRowCount( ) - 1 - rowIndex;
+
+            if ( rowIndex >= 0 && rowIndex < rows.size( ) )
+            {
+                return rows.get( rowIndex );
+            }
+        }
+
+        return null;
+    }
+
     // must be called while holding lock
     public void moveEvent( Event event, TimeStamp newStartTime, TimeStamp newEndTime )
     {
         lock.lock( );
         try
         {
-        
+
             Event eventOld = Event.createDummyEvent( event );
-    
+
             Row oldRow = rowMap.get( event.getId( ) );
             if ( oldRow == null ) return;
-    
+
             if ( event.isFixedRow( ) )
             {
                 // update the event times (its row will stay the same)
@@ -473,7 +571,7 @@ public class EventPainter extends GlimpseDataPainter1D
                 oldRow.removeEvent( event );
                 event.setTimes0( newStartTime, newEndTime );
                 oldRow.addEvent( event );
-    
+
                 // displace the events this event has shifted on to
                 displaceEvents0( oldRow, event );
             }
@@ -481,23 +579,23 @@ public class EventPainter extends GlimpseDataPainter1D
             {
                 // remove the event from its old row
                 oldRow.removeEvent( event );
-    
+
                 // update the event times
                 event.setTimes0( newStartTime, newEndTime );
-    
+
                 // add the moved version of the event back in
                 // (which might land it on a different row if it
                 //  has been moved over top of another event)
                 addEvent0( event );
             }
-    
+
             // now shift events to fill the space left by moving the event
             shiftEvents0( eventOld, oldRow );
             clearEmptyRows0( );
-    
+
             this.visibleEventsDirty = true;
             this.plot.updateSize( );
-        
+
         }
         finally
         {
@@ -573,7 +671,6 @@ public class EventPainter extends GlimpseDataPainter1D
         }
     }
 
-
     // must be called while holding lock
     private void displaceEvents0( Row row, Event event )
     {
@@ -583,7 +680,6 @@ public class EventPainter extends GlimpseDataPainter1D
             displaceEvent0( overlapEvent );
         }
     }
-
 
     // must be called while holding lock
     // move an event which has been overlapped by another event
@@ -602,7 +698,6 @@ public class EventPainter extends GlimpseDataPainter1D
         }
     }
 
-
     // must be called while holding lock
     private void clearEmptyRows0( )
     {
@@ -620,7 +715,6 @@ public class EventPainter extends GlimpseDataPainter1D
         }
     }
 
-
     // must be called while holding lock
     private void removeEvent0( Event event )
     {
@@ -635,7 +729,6 @@ public class EventPainter extends GlimpseDataPainter1D
         shiftEvents0( event, row );
         clearEmptyRows0( );
     }
-
 
     // must be called while holding lock
     private void shiftEvents0( Event event, Row toRow )
@@ -654,7 +747,6 @@ public class EventPainter extends GlimpseDataPainter1D
         }
     }
 
-
     // must be called while holding lock
     private void moveEventIfRoom0( Event event, Row fromRow, Row toRow )
     {
@@ -666,7 +758,6 @@ public class EventPainter extends GlimpseDataPainter1D
             shiftEvents0( event, fromRow );
         }
     }
-
 
     // must be called while holding lock
     private Row addEvent0( Event event )
@@ -682,7 +773,7 @@ public class EventPainter extends GlimpseDataPainter1D
         else
         {
             // the requested row index must be less than the maximum row count and greater than or equal to 0
-            int requestedRow = Math.min( Math.max( 0, event.getFixedRow( ) ), plot.getRowMaxCount( )-1 );
+            int requestedRow = Math.min( Math.max( 0, event.getFixedRow( ) ), plot.getRowMaxCount( ) - 1 );
             ensureRows0( requestedRow );
             row = rows.get( requestedRow );
 
@@ -697,7 +788,7 @@ public class EventPainter extends GlimpseDataPainter1D
 
         return row;
     }
-    
+
     // must be called while holding lock
     //
     // If plot.getMaxRowCount() is large, we'll always be able to simply
@@ -711,23 +802,23 @@ public class EventPainter extends GlimpseDataPainter1D
     {
         int size = rows.size( );
         int max = plot.getRowMaxCount( );
-        
+
         double leastTime = Double.POSITIVE_INFINITY;
         Row leastRow = null;
-        
+
         for ( int i = 0; i < size; i++ )
         {
             Row candidate = rows.get( i );
 
             double overlapTime = getTotalOverlapTime( candidate, event );
-           
+
             if ( overlapTime < leastTime )
             {
                 leastTime = overlapTime;
                 leastRow = candidate;
             }
         }
-        
+
         // if we didn't find an empty row, and there's room to make
         // a new row, then make a new row, which will have 0 overlap
         if ( leastTime != 0.0 && size < max )
@@ -736,33 +827,32 @@ public class EventPainter extends GlimpseDataPainter1D
             leastRow = new Row( size );
             rows.add( leastRow );
         }
-        
+
         return leastRow;
     }
-    
+
     // must be called while holding lock
     private double getTotalOverlapTime( Row candidate, Event event )
     {
         double totalOverlap = 0;
-        
+
         //XXX Heuristic: we want overlaps with very small events (in the
         // limit we have 0 duration events) to count for something, so
         // we make the minimum time penalty for any overlap be 1/20th
         // of the total duration of either event
         double minOverlap1 = event.getDuration( ) / OVERLAP_HEURISTIC;
-        
+
         Set<Event> events = candidate.getOverlappingEvents( event );
         for ( Event overlapEvent : events )
         {
-            double minOverlap = Math.max( minOverlap1, overlapEvent.getDuration( ) / OVERLAP_HEURISTIC);
+            double minOverlap = Math.max( minOverlap1, overlapEvent.getDuration( ) / OVERLAP_HEURISTIC );
             double overlap = event.getOverlapTime( overlapEvent );
-            
+
             totalOverlap += Math.max( minOverlap, overlap );
         }
-        
+
         return totalOverlap;
     }
-
 
     // must be called while holding lock
     private void calculateVisibleEvents( double min, double max )

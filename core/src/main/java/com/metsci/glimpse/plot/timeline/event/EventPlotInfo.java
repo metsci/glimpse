@@ -26,13 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
 import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 import java.awt.Font;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -40,10 +38,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.MouseButton;
+import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
@@ -51,7 +48,6 @@ import com.metsci.glimpse.painter.info.TooltipPainter;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
-import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
 import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
 import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
@@ -59,6 +55,16 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
+/**
+ * <p>A handle to one of the plotting areas making up a {@link StackedTimePlot2D}. This
+ * is a specialized plotting area which supports display and manipulation of
+ * {@link Event} objects.</p>
+ * 
+ * <p>For an example of this plot in use, see
+ * {@link com.mcom.metsci.glimpse.examples.stacked.CollapsibleTimelinePlotExample}.</p>
+ * 
+ * @author ulman
+ */
 public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 {
     public static final int DEFAULT_ROW_SIZE = 26;
@@ -81,6 +87,12 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected TooltipListener tooltipListener;
 
     protected TextRenderingMode textRenderingMode = Ellipsis;
+
+    protected Set<Event> selectedEvents;
+    protected float[] selectedBorderColor;
+    protected float[] selectedBackgroundColor;
+    protected float selectedBorderThickness = 1.8f;
+    protected boolean highlightSelectedEvents = false;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -112,9 +124,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
 
+        this.selectedEvents = new LinkedHashSet<Event>( );
+
         this.layout1D.addGlimpseMouseAllListener( new EventListener( ) );
 
-        this.dragListener = new DragListener( );
+        this.dragListener = new DragListener( this );
         this.addEventPlotListener( dragListener );
         this.layout1D.addGlimpseMouseAllListener( dragListener );
 
@@ -169,11 +183,33 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             if ( isHorizontal )
             {
                 TimeStamp time = getTime( e );
-                Set<EventSelection> events = Collections.unmodifiableSet( eventPainter.getNearestEvents( e ) );
+                Set<EventSelection> tempEvents = Collections.unmodifiableSet( Sets.newHashSet( eventPainter.getNearestEvents( e ) ) );
 
                 for ( EventPlotListener listener : eventListeners )
                 {
-                    listener.eventsClicked( e, events, time );
+                    listener.eventsClicked( e, tempEvents, time );
+                }
+
+                EventSelection eventSelection = eventPainter.getNearestEvent( tempEvents, e );
+                if ( eventSelection != null )
+                {
+                    Event event = eventSelection.getEvent( );
+
+                    if ( e.isKeyDown( ModifierKey.Ctrl ) )
+                    {
+                        if ( selectedEvents.contains( event ) )
+                        {
+                            removeSelectedEvent( event );
+                        }
+                        else
+                        {
+                            addSelectedEvent( event );
+                        }
+                    }
+                    else
+                    {
+                        setSelectedEvents( Collections.singleton( event ) );
+                    }
                 }
             }
         }
@@ -194,7 +230,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             if ( isHorizontal )
             {
                 TimeStamp time = getTime( e );
-                Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( eventPainter.getNearestEvents( e ) );
+                Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( Sets.newHashSet( eventPainter.getNearestEvents( e ) ) );
 
                 SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
                 for ( EventPlotListener listener : eventListeners )
@@ -290,138 +326,10 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         {
         }
 
-    }
-
-    protected class DragListener implements EventPlotListener, GlimpseMouseAllListener
-    {
-        Location dragType = null;
-        TimeStamp anchorTime = null;
-        TimeStamp eventStart = null;
-        TimeStamp eventEnd = null;
-        Event dragEvent = null;
-
-        boolean enabled = true;
-
-        public boolean isEnabled( )
-        {
-            return this.enabled;
-        }
-
-        public void setEnabled( boolean enabled )
-        {
-            this.enabled = enabled;
-
-            reset( );
-        }
-
-        public void reset( )
-        {
-            dragType = null;
-            anchorTime = null;
-            eventStart = null;
-            eventEnd = null;
-            dragEvent = null;
-        }
-
         @Override
-        public void mouseMoved( GlimpseMouseEvent e )
+        public void eventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents )
         {
-            if ( !enabled ) return;
-
-            if ( e.isButtonDown( MouseButton.Button1 ) && dragEvent != null )
-            {
-                TimeStamp time = getTime( e );
-
-                if ( dragType == Location.Center )
-                {
-                    double diff = time.durationAfter( anchorTime );
-                    dragEvent.setTimes( eventStart.add( diff ), eventEnd.add( diff ) );
-                }
-                else if ( dragType == Location.End && eventStart.isBefore( time ) )
-                {
-                    dragEvent.setTimes( eventStart, time );
-                }
-                else if ( dragType == Location.Start && eventEnd.isAfter( time ) )
-                {
-                    dragEvent.setTimes( time, eventEnd );
-                }
-
-                e.setHandled( true );
-            }
         }
-
-        @Override
-        public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-        {
-            if ( !enabled ) return;
-
-            if ( e.isButtonDown( MouseButton.Button1 ) )
-            {
-                for ( EventSelection selection : events )
-                {
-                    if ( selection.isLocation( Center, Start, End ) && selection.getEvent( ).isEditable( ) )
-                    {
-                        dragEvent = selection.getEvent( );
-                        eventStart = dragEvent.getStartTime( );
-                        eventEnd = dragEvent.getEndTime( );
-                        anchorTime = time;
-                        e.setHandled( true );
-
-                        if ( selection.isCenterSelection( ) )
-                        {
-                            dragType = Center;
-                        }
-                        else if ( selection.isStartTimeSelection( ) )
-                        {
-                            dragType = Start;
-                        }
-                        else if ( selection.isEndTimeSelection( ) )
-                        {
-                            dragType = End;
-                        }
-
-                        return;
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void mouseReleased( GlimpseMouseEvent event )
-        {
-            if ( !enabled ) return;
-
-            reset( );
-        }
-
-        //@formatter:off
-        @Override public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-        @Override public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-        @Override public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-        @Override public void eventUpdated( Event event ) { }
-        @Override public void mouseEntered( GlimpseMouseEvent event ) { }
-        @Override public void mouseExited( GlimpseMouseEvent event ) { }
-        @Override public void mousePressed( GlimpseMouseEvent event ) { }
-        @Override public void mouseWheelMoved( GlimpseMouseEvent e ) { }
-        //@formatter:on
-    }
-
-    public interface EventPlotListener
-    {
-        public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
-
-        public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
-
-        public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
-
-        public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
-
-        public void eventUpdated( Event event );
-    }
-
-    public interface EventToolTipHandler
-    {
-        public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter );
     }
 
     public void setEventToolTipHandler( EventToolTipHandler toolTipHandler )
@@ -429,11 +337,98 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.eventToolTipHandler = toolTipHandler;
     }
 
+    public Set<Event> getSelectedEvents( )
+    {
+        return Collections.unmodifiableSet( Sets.newHashSet( selectedEvents ) );
+    }
+
+    public void setSelectedEvents( Set<Event> events )
+    {
+        // set of deselected events
+        Set<Event> deselectedEvents = Sets.difference( selectedEvents, events ).immutableCopy( );
+        // set of newly selected events
+        Set<Event> newSelectedEvents = Sets.difference( events, selectedEvents ).immutableCopy( );
+        
+        selectedEvents.clear( );
+        selectedEvents.addAll( events );
+        
+        notifyEventsSelected( newSelectedEvents, deselectedEvents );
+    }
+
+    public void clearSelectedEvents( )
+    {
+        Set<Event> tempDeselectedEvents = Collections.unmodifiableSet( Sets.newHashSet( selectedEvents ) );
+
+        selectedEvents.clear( );
+        
+        notifyEventsSelected( Collections.<Event>emptySet( ), tempDeselectedEvents );
+    }
+
+    public void addSelectedEvent( Event event )
+    {
+        selectedEvents.add( event );
+        
+        notifyEventsSelected( Collections.singleton( event ), Collections.<Event>emptySet( ) );
+    }
+
+    public void removeSelectedEvent( Event event )
+    {
+        selectedEvents.remove( event );
+        
+        notifyEventsSelected( Collections.<Event>emptySet( ), Collections.singleton( event ) );
+    }
+
+    public boolean isEventSelected( Event event )
+    {
+        return selectedEvents.contains( event );
+    }
+
+    public float[] getSelectedEventBorderColor( )
+    {
+        return selectedBorderColor;
+    }
+
+    public float[] getSelectedEventBackgroundColor( )
+    {
+        return selectedBackgroundColor;
+    }
+
+    public float getSelectedEventBorderThickness( )
+    {
+        return selectedBorderThickness;
+    }
+
+    public boolean isHighlightSelectedEvents( )
+    {
+        return highlightSelectedEvents;
+    }
+
+    public void setSelectedEventBorderColor( float[] color )
+    {
+        selectedBorderColor = color;
+        highlightSelectedEvents = true;
+    }
+
+    public void setSelectedEventBackgroundColor( float[] color )
+    {
+        selectedBackgroundColor = color;
+        highlightSelectedEvents = true;
+    }
+
+    public void setSelectedEventBorderThickness( float thickness )
+    {
+        selectedBorderThickness = thickness;
+        highlightSelectedEvents = true;
+    }
+
+    public void setHighlightSelectedEvents( boolean highlight )
+    {
+        highlightSelectedEvents = highlight;
+    }
+
     public TimeStamp getTime( GlimpseMouseEvent e )
     {
-        Axis1D axis = e.getAxis1D( );
-        double valueX = axis.screenPixelToValue( e.getX( ) );
-        return getStackedTimePlot( ).getEpoch( ).toTimeStamp( valueX );
+        return getStackedTimePlot( ).getTime( e );
     }
 
     public boolean isMouseDragEnabled( )
@@ -496,13 +491,13 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.eventPadding;
     }
-    
+
     public void setRowMaxCount( int count )
     {
         this.maxRowCount = count;
         this.eventPainter.validate( );
     }
-    
+
     public int getRowMaxCount( )
     {
         return this.maxRowCount;
@@ -654,6 +649,14 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         for ( EventPlotListener listener : eventListeners )
         {
             listener.eventUpdated( event );
+        }
+    }
+
+    protected void notifyEventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents )
+    {
+        for ( EventPlotListener listener : eventListeners )
+        {
+            listener.eventsSelected( selectedEvents, deselectedEvents );
         }
     }
 }

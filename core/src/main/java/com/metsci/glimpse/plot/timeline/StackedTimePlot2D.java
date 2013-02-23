@@ -938,6 +938,13 @@ public class StackedTimePlot2D extends StackedPlot2D
         TimeStamp minTime = maxTime.subtract( diff );
         setTimeSelection( minTime, maxTime, maxTime );
     }
+    
+    public TimeStamp getTime( GlimpseMouseEvent e )
+    {
+        Axis1D axis = e.getAxis1D( );
+        double valueX = axis.screenPixelToValue( e.getX( ) );
+        return getEpoch( ).toTimeStamp( valueX );
+    }
 
     protected void initializeOverlayPainters( )
     {

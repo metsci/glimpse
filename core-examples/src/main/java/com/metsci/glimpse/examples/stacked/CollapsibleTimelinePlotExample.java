@@ -51,7 +51,7 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -94,12 +94,12 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             GroupInfo group = plot.createGroup( String.format( "%s-group", row.getId( ) ), row );
 
             // set labels
-            row.getLabelPainter( ).setText( "Label Here"  );
+            row.getLabelPainter( ).setText( "Label Here" );
             group.setLabelText( "Group Name" );
 
             setPlotLookAndFeel( row );
         }
-        
+
         // create a 1D timeline to display event durations
         final EventPlotInfo events1 = plot.createEventPlot( "event-1" );
         EventPlotInfo events2 = plot.createEventPlot( "event-2" );
@@ -131,7 +131,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.setOrder( 2 );
         events2.setOrder( 3 );
         events3.setOrder( 4 );
-
+        
         // set default colors for the event plots
         events1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
         events1.setBorderColor( GlimpseColor.getGreen( ) );
@@ -141,8 +141,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Epoch e = plot.getEpoch( );
         TimeStamp t0 = e.toTimeStamp( 0 );
 
-        // add some events
+        // add some events and set their display characteristics
         Event e0 = events1.addEvent( "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
+        e0.setShowBackground( false );
         events1.addEvent( "Spread Slime On Stuff", t0.add( Time.fromMinutes( 30 ) ), t0.add( Time.fromMinutes( 200 ) ) );
         Event e1 = events1.addEvent( "Chill", t0.add( Time.fromMinutes( 290 ) ), t0.add( Time.fromMinutes( 320 ) ) );
         e1.setBackgroundColor( GlimpseColor.getRed( 0.6f ) );
@@ -151,14 +152,12 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
 
-        e0.setShowBackground( false );
-
         // add constraints on how the user can adjust the various events
         e0.setEndTimeMoveable( false );
         e1.setResizeable( false );
         e2.setMinTimeSpan( Time.fromMinutes( 100 ) );
         e3.setMaxTimeSpan( Time.fromMinutes( 500 ) );
-        
+
         // fix the "Cloudy" event on row 2
         e2.setFixedRow( 2 );
 
@@ -198,13 +197,13 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             @Override
             public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                logInfo( logger, "Events Hovered: %s Time: %s", events, time );
+                if ( !events.isEmpty( ) ) logInfo( logger, "Events Hovered: %s Time: %s", events, time );
             }
 
             @Override
             public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                logInfo( logger, "Events Clicked: %s Time: %s", events, time );
+                if ( !events.isEmpty( ) ) logInfo( logger, "Events Clicked: %s Time: %s", events, time );
             }
 
             @Override
@@ -224,7 +223,21 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             {
                 logInfo( logger, "Event Updated: %s", event );
             }
+
+            @Override
+            public void eventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents )
+            {
+                logInfo( logger, "Selected: %s%nDeselected: %s", selectedEvents, deselectedEvents );
+            }
         } );
+        
+        // events may be selected by clicking on them (normally this has no visible effect)
+        // here we cause the border of selected events to become thicker
+        // the border or background color may also be set to change for selected events
+        // in addition, client code may use the eventsSelected() callback of EventPlotListener
+        // to make arbitrary display changes to selected events (in this case the client code
+        // is also responsible for resetting the event display characteristics when it is deselected
+        events1.setSelectedEventBorderThickness( 3.0f );
 
         // use middle click to switch between stacking and not stacking events (just for demonstration purposes)
         plot.getOverlayLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
