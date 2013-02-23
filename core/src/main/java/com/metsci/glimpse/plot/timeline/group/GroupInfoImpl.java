@@ -50,11 +50,11 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 
     protected boolean expanded;
 
-    public GroupInfoImpl( CollapsibleTimePlot2D plot, PlotInfo group, Collection<? extends PlotInfo> subplots )
+    public GroupInfoImpl( CollapsibleTimePlot2D _plot, PlotInfo group, Collection<? extends PlotInfo> subplots )
     {
         super( group );
 
-        this.plot = plot;
+        this.plot = _plot;
         this.labelPainter = new GroupLabelPainter( "" );
         this.info.getLayout( ).addPainter( this.labelPainter );
         this.info.setSize( 22 );
@@ -73,7 +73,11 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
             {
                 int x = event.getScreenPixelsX( );
 
-                if ( x < labelPainter.getArrowSize( ) + labelPainter.getArrowSpacing( ) * 2 )
+                // collapse/expand via clicks on arrow button only
+                //if ( x < labelPainter.getArrowSize( ) + labelPainter.getArrowSpacing( ) * 2 )
+                
+                // collapse/expand via clicks on button or label
+                if ( x < plot.getLabelSize( ) )
                 {
                     setExpanded( !expanded );
                     event.setHandled( true );
