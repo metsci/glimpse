@@ -181,25 +181,25 @@ public class EventPainter extends GlimpseDataPainter1D
 
         this.newFont = FontUtils.getDefaultPlain( 12 );
     }
-    
+
     public float[] getSelectedEventBorderColor( )
     {
-        return plot.getSelectedEventBorderColor( );
+        return plot.getEventSelectionHandler( ).getSelectedEventBorderColor( );
     }
-    
+
     public float[] getSelectedEventBackgroundColor( )
     {
-        return plot.getSelectedEventBackgroundColor( );
+        return plot.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
     }
-    
+
     public float getSelectedEventBorderThickness( )
     {
-        return plot.getSelectedEventBorderThickness( );
+        return plot.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
     }
-    
+
     public boolean isHighlightSelectedEvents( )
     {
-        return plot.isHighlightSelectedEvents( );
+        return plot.getEventSelectionHandler( ).isHighlightSelectedEvents( );
     }
 
     public boolean isStackOverlappingEvents( )
@@ -288,7 +288,7 @@ public class EventPainter extends GlimpseDataPainter1D
     {
         return this.plot.getStackedTimePlot( ).getEpoch( );
     }
-    
+
     public EventPlotInfo getEventPlotInfo( )
     {
         return this.plot;
@@ -496,10 +496,10 @@ public class EventPainter extends GlimpseDataPainter1D
             for ( EventSelection s : events )
             {
                 Event event = s.getEvent( );
-                
+
                 if ( event.contains( time ) )
                 {
-                   return s;
+                    return s;
                 }
                 else
                 {
@@ -511,7 +511,7 @@ public class EventPainter extends GlimpseDataPainter1D
                     }
                 }
             }
-            
+
             return bestEvent;
         }
         finally
@@ -519,12 +519,12 @@ public class EventPainter extends GlimpseDataPainter1D
             lock.unlock( );
         }
     }
-    
+
     public EventSelection getNearestEvent( GlimpseMouseEvent e )
     {
         return getNearestEvent( getNearestEvents( e ), e );
     }
-    
+
     // heuristic distance measure for use in getNearestEvent( )
     protected double distance0( Event event, TimeStamp time )
     {

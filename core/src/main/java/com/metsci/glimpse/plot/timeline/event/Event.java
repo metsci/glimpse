@@ -359,8 +359,9 @@ public class Event
         double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : axis.getMax( );
         int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : width;
 
-        boolean highlightSelected = painter.getEventPlotInfo( ).isHighlightSelectedEvents( );
-        boolean isSelected = highlightSelected ? painter.getEventPlotInfo( ).isEventSelected( this ) : false;
+        EventSelectionHandler selectionHandler = painter.getEventPlotInfo( ).getEventSelectionHandler( );
+        boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
+        boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( this ) : false;
 
         if ( painter.isHorizontal( ) )
         {

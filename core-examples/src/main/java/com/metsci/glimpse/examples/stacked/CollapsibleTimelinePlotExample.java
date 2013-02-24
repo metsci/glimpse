@@ -52,6 +52,7 @@ import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -151,12 +152,23 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Event e2 = events1.addEvent( "Cloudy", t0.add( Time.fromMinutes( -200 ) ), t0.add( Time.fromMinutes( 100 ) ) );
         Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
-
+        
+        // add some events to the other event timeline
+        events2.addEvent( "Event 1", t0.add( Time.fromMinutes( -250 ) ), t0.add( Time.fromMinutes( -240 ) ) );
+        events2.addEvent( "Event 2", t0.add( Time.fromMinutes( -220 ) ), t0.add( Time.fromMinutes( -200 ) ) );
+        events2.addEvent( "Event 3", t0.add( Time.fromMinutes( -170 ) ), t0.add( Time.fromMinutes( -100 ) ) );
+        
         // add constraints on how the user can adjust the various events
         e0.setEndTimeMoveable( false );
         e1.setResizeable( false );
         e2.setMinTimeSpan( Time.fromMinutes( 100 ) );
         e3.setMaxTimeSpan( Time.fromMinutes( 500 ) );
+        
+        // cause clicks which hit no events to deselect all selected events
+        events1.getEventSelectionHandler( ).setClearSelectionOnClick( true );
+        
+        // make the "Cloudy" even unselectable
+        e2.setSelectable( false );
 
         // fix the "Cloudy" event on row 2
         e2.setFixedRow( 2 );
@@ -223,13 +235,17 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             {
                 logInfo( logger, "Event Updated: %s", event );
             }
-
+        } );
+        
+        // add a listener for notifications of event selections and deselections
+        plot.getEventSelectionHander( ).addEventSelectionListener( new EventSelectionListener( )
+        {
             @Override
             public void eventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents )
             {
                 logInfo( logger, "Selected: %s%nDeselected: %s", selectedEvents, deselectedEvents );
-            }
-        } );
+            }   
+        });
         
         // events may be selected by clicking on them (normally this has no visible effect)
         // here we cause the border of selected events to become thicker
@@ -237,7 +253,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // in addition, client code may use the eventsSelected() callback of EventPlotListener
         // to make arbitrary display changes to selected events (in this case the client code
         // is also responsible for resetting the event display characteristics when it is deselected
-        events1.setSelectedEventBorderThickness( 3.0f );
+        events1.getEventSelectionHandler( ).setSelectedEventBorderThickness( 3.0f );
 
         // use middle click to switch between stacking and not stacking events (just for demonstration purposes)
         plot.getOverlayLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )

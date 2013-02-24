@@ -70,6 +70,7 @@ import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.event.EventSelectionHandler;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
@@ -119,7 +120,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected SimpleTextPainter timeUnitsPainter;
     protected BorderPainter timeAxisBorderPainter;
     protected SelectedTimeRegionPainter selectedTimePainter;
-
     protected TooltipPainter tooltipPainter;
 
     // default settings for TimelineMouseListeners of new plots
@@ -133,10 +133,15 @@ public class StackedTimePlot2D extends StackedPlot2D
     // the size of the label layout area in pixels
     protected int labelLayoutSize;
     protected boolean showLabelLayout = false;
-    
     protected boolean showTimeline = true;
 
     protected TextureAtlas defaultTextureAtlas;
+    
+    // the default selection handler for all EventPlotInfo
+    // if client code would like individual EventPlotInfo to maintain
+    // their own set of selected events, individual SelectionHandlers
+    // can be set for each EventPlotInfo
+    protected EventSelectionHandler commonSelectionHandler;
 
     public StackedTimePlot2D( )
     {
@@ -183,9 +188,20 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         this.epoch = epoch;
         this.defaultTextureAtlas = atlas;
+        
+        this.commonSelectionHandler = new EventSelectionHandler( );
 
         this.initializeTimePlot( );
         this.initializeOverlayPainters( );
+    }
+    
+    /**
+     * Returns the common EventSelectionHandler shared between all {@link EventPlotInfo}
+     * sub-plots for this StackedTimePlot2D.
+     */
+    public EventSelectionHandler getEventSelectionHander( )
+    {
+        return this.commonSelectionHandler;
     }
     
     public void setShowTimeline( boolean showTimeline )
@@ -1162,6 +1178,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         EventPlotInfo eventPlotInfo = new EventPlotInfo( timePlot, atlas );
         eventPlotInfo.setLookAndFeel( laf );
+        eventPlotInfo.setSelectionHandler( commonSelectionHandler );
 
         return eventPlotInfo;
     }
