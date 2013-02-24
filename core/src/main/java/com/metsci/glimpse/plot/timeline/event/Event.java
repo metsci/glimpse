@@ -100,6 +100,7 @@ public class Event
     protected TimeStamp textStartTime;
     protected TimeStamp textEndTime;
 
+    protected boolean isSelectable = true;
     protected boolean isEditable = true;
     protected boolean isEndTimeMoveable = true;
     protected boolean isStartTimeMoveable = true;
@@ -621,6 +622,23 @@ public class Event
     public String getToolTipText( )
     {
         return this.toolTipText;
+    }
+    
+    /**
+     * Sets whether or not this Event can be selected via mouse clicks. Setting
+     * selectable to false does not prevent the event from being selected 
+     * programmatically via {@link EventPlotInfo#setSelectedEvents(java.util.Set)}.
+     * 
+     * @param isSelectable
+     */
+    public void setSelectable( boolean isSelectable )
+    {
+        this.isSelectable = isSelectable;
+    }
+    
+    public boolean isSelectable( )
+    {
+        return this.isSelectable;
     }
 
     /**
