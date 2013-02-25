@@ -101,8 +101,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             if ( orientation == Orientation.VERTICAL )
             {
                 gl.glVertex2f( min, 0 );
-                gl.glVertex2f( min, height );
-                gl.glVertex2f( max, height );
+                gl.glVertex2f( min, height-1 );
+                gl.glVertex2f( max, height-1 );
                 gl.glVertex2f( max, 0 );
             }
             else
@@ -126,8 +126,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             if ( orientation == Orientation.VERTICAL)
             {
                 gl.glVertex2f( min, 0 );
-                gl.glVertex2f( min, height );
-                gl.glVertex2f( max, height );
+                gl.glVertex2f( min, height-1 );
+                gl.glVertex2f( max, height-1 );
                 gl.glVertex2f( max, 0 );
             }
             else
