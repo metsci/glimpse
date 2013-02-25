@@ -136,6 +136,8 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         lineColor[2] = b;
         lineColor[3] = a;
 
+        this.tickColorSet = true;
+        
         return this;
     }
 
