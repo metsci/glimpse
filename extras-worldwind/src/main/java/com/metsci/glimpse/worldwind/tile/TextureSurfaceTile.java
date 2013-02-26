@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
 
 /**
  * A SurfaceTile which renders imagery from an OpenGL texture handle.
@@ -51,6 +52,9 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     protected int textureHandle;
     protected Sector sector;
     protected List<LatLon> corners;
+
+    protected float scaleX = 1.0f;
+    protected float scaleY = 1.0f;
 
     protected List<TextureSurfaceTile> thisList = Collections.singletonList( this );
 
@@ -65,10 +69,26 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 
         this.initializeGeometry( corners );
     }
-    
+
+    public void setTextureScale( float scaleX, float scaleY )
+    {
+        this.scaleX = scaleX;
+        this.scaleY = scaleY;
+    }
+
+    public float getTextureScaleX( )
+    {
+        return this.scaleX;
+    }
+
+    public float getTextureScaleY( )
+    {
+        return this.scaleY;
+    }
+
     public void setCorners( Iterable<? extends LatLon> corners )
     {
-    	this.initializeGeometry( corners );
+        this.initializeGeometry( corners );
     }
 
     protected void initializeGeometry( Iterable<? extends LatLon> corners )
@@ -110,27 +130,37 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     public boolean bind( DrawContext dc )
     {
         GL gl = dc.getGL( );
-        
+
         gl.glBindTexture( GL.GL_TEXTURE_2D, textureHandle );
-        
+
         // these settings make fine line drawing against a transparent background appear much more natural
         // but can make other rendering look too jagged/crisp
-        
-//        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-//        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
-//        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_BORDER);
-//        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_BORDER);
-//        
-//        gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
-//        gl.glEnable( GL.GL_BLEND );
-        
+
+        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
+        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_BORDER );
+        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_BORDER );
+        //
+        //gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
+        //gl.glEnable( GL.GL_BLEND );
+        //
+        //GlimpseColor.glColor( gl, GlimpseColor.getWhite( 0.5f ) );
+
         return true;
     }
 
     @Override
     public void applyInternalTransform( DrawContext dc, boolean textureIdentityActive )
     {
-        // do nothing
+        GL gl = GLContext.getCurrent( ).getGL( );
+
+        if ( !textureIdentityActive )
+        {
+            gl.glMatrixMode( GL.GL_TEXTURE );
+            gl.glLoadIdentity( );
+        }
+
+        gl.glScaled( scaleX, scaleY, 1 );
     }
 
     @Override

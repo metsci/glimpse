@@ -78,6 +78,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
     
     TaggedHeatMapPainter bathymetryPainter;
     ContourPainter contourPainter;
+    AnnotationPainter annotationPainter;
     
     public TaggedHeatMapPainter getBathymetryPainter( )
     {
@@ -87,6 +88,11 @@ public class BathymetryExample implements GlimpseLayoutProvider
     public ContourPainter getContourPainter( )
     {
         return this.contourPainter;
+    }
+    
+    public AnnotationPainter getAnnotationPainter( )
+    {
+        return this.annotationPainter;
     }
     
     @Override
@@ -208,7 +214,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         cursorPainter.setTexture( texture );
 
         // create a painter to display text annotations
-        AnnotationPainter annotationPainter = new AnnotationPainter( );
+        annotationPainter = new AnnotationPainter( );
         plot.addPainter( annotationPainter );
 
         // create a painter to display "buoy" positions

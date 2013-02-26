@@ -92,6 +92,7 @@ public class BathymetryTileExample
         // however, we can use another GeoProjection to render our graphics,
         // and use GlimpseReprojectingSurfaceTile to automatically fix the projection
         TangentPlane projection = new TangentPlane( LatLonGeo.fromDeg( -30.637005, 65.476074 ) );
+        //TangentPlane projection = new TangentPlane( LatLonGeo.fromDeg( 24, -76 ) );
 
         BathymetryExample example = new BathymetryExample( );
         MapPlot2D plot = example.getLayout( projection );
@@ -104,7 +105,6 @@ public class BathymetryTileExample
 
         layout.addPainter( example.getBathymetryPainter( ) );
         layout.addPainter( example.getContourPainter( ) );
-        //layout.addPainter( plot.getCrosshairPainter( ) );
 
         baseLayout.addPainter( new BackgroundPainter( ).setColor( 0, 0, 0, 0 ) );
         baseLayout.addLayout( layout );

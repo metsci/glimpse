@@ -94,6 +94,14 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         reprojectCanvas.resize( width, height );
         updateProjection( width, height );
     }
+    
+    @Override
+    protected void setTextureScale( TextureSurfaceTile tile, float scaleX, float scaleY )
+    {
+        // do nothing -- keep the TextureSurfaceTile scale at 1.0
+        // (GlimpseReprojectingSurfaceTile fills the entire canvas
+        //  when it reprojects the offscreen rendered texture)
+    }
 
     protected void updateProjection( int width, int height )
     {
@@ -105,7 +113,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         // the scene was drawn onto the offscreenCanvas using the bounds specified by axes
         // create a projection which allows us to map to axis coordinates given
         // a 0.0 to 1.0 relative coordinate in the offscreenCanvas texture
-        FlatProjection flat = new FlatProjection( axes );
+        FlatProjection flat = new FlatProjection( axes, 0, scaleX, 0, scaleY );
 
         // build the reprojection (an instance of com.metsci.glimpse.support.projection.Projection)
         reproject = new GeoReprojection( flat, projection, projectionTo, REPROJECT_DISCRETIZE_FRACTION );
@@ -135,12 +143,24 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 
             GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
             Dimension dim = fbo.getDimension( );
-            int width = (int) dim.getWidth( );
-            int height = (int) dim.getHeight( );
+            int width = ( int ) dim.getWidth( );
+            int height = ( int ) dim.getHeight( );
             int texHandle = fbo.getTextureId( );
-            
+
             texture = new ExternalTextureProjected2D( texHandle, width, height, false )
             {
+                @Override
+                protected void putVertexCoords( int texIndex, double texFracX, double texFracY, float[] temp )
+                {
+                    super.putVertexCoords( texIndex, ( float ) texFracX * scaleX, ( float ) texFracY * scaleY, temp );
+                }
+                
+                @Override
+                protected void putVertexTexCoords( int texIndex, double texFracX, double texFracY )
+                {
+                    super.putVertexTexCoords( texIndex, ( float ) texFracX * scaleX, ( float ) texFracY * scaleY );
+                }
+                
                 @Override
                 protected void prepare_glState( GL gl )
                 {
@@ -148,7 +168,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
                     gl.glDisable( GL.GL_BLEND );
                 }
             };
-            
+
             texturePainter.removeAllDrawableTextures( );
             texturePainter.addDrawableTexture( texture );
 
@@ -171,6 +191,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         stack.pushAttrib( gl, GL.GL_ALL_ATTRIB_BITS );
         stack.pushClientAttrib( gl, ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
         stack.pushTexture( gl );
+        gl.glLoadIdentity();
         stack.pushModelview( gl );
         stack.pushProjection( gl );
 
