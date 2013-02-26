@@ -110,7 +110,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.mask.addLayout( layout );
         
         this.background = new GlimpseLayout( );
-        this.background.addPainter( new BackgroundPainter( ).setColor( 1f, 0f, 0f, 1f ) ); //0f, 0f, 0f, 0f ) );
+        this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.background.addLayout( mask );
         
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
