@@ -29,8 +29,6 @@ package com.metsci.glimpse.plot.timeline.event;
 import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
 import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
 import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.HideAll;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.ShowAll;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -39,15 +37,10 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.atlas.support.ImageData;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -65,10 +58,6 @@ import com.sun.opengl.util.j2d.TextRenderer;
  */
 public class Event
 {
-    public static final int ARROW_TIP_BUFFER = 2;
-    public static final int ARROW_SIZE = 10;
-    public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
-
     protected EventPlotInfo info;
 
     protected Object id;
@@ -111,6 +100,8 @@ public class Event
     protected double minTimeSpan = 0;
 
     protected List<EventConstraint> constraints;
+
+    protected EventPainter painter;
 
     /**
      * Indicates how text which is too large to fit in the Event box should be shortened.
@@ -237,6 +228,26 @@ public class Event
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
     }
+    
+    /**
+     * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, int, int)
+     */
+    public void paint( EventPainter defaultPainter, GL gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
+    {
+        EventPainter eventPainter = painter != null ? painter : defaultPainter;
+        
+        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
+    }
+
+    public void setEventPainter( EventPainter painter )
+    {
+        this.painter = painter;
+    }
+
+    public EventPainter getEventPainter( )
+    {
+        return this.painter;
+    }
 
     /**
      * <p>Adds an EventConstraint which determines whether proposed changes to the min
@@ -317,276 +328,6 @@ public class Event
         else
         {
             return borderThickness;
-        }
-    }
-
-    /**
-     * Renders the provided Event (potentially displaying its icon, label, time extents, etc...).
-     * 
-     * @param gl OpenGL handle
-     * @param info parent EventPlotInfo of Event to be painted
-     * @param bounds width, height, and position of GlimpseLayout containing EventPlotInfo
-     * @param posMin the min y (or x, depending on orientation) in pixel coordinates of the Event
-     * @param posMax the max y (or x, depending on orientation) in pixel coordinates of the Event
-     * @param nextEvent the next Event to be painted (as ordered by start time) 
-     */
-    public void paint( GL gl, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax, Event nextEvent )
-    {
-        StackedTimePlot2D plot = info.getStackedTimePlot( );
-        TaggedAxis1D axis = info.getCommonAxis( );
-
-        int height = bounds.getHeight( );
-        int width = bounds.getWidth( );
-
-        int buffer = info.getEventPadding( );
-
-        int size = posMax - posMin;
-        double sizeCenter = posMin + size / 2.0;
-        int arrowSize = Math.min( size, ARROW_SIZE );
-
-        Epoch epoch = plot.getEpoch( );
-        double timeMin = epoch.fromTimeStamp( startTime );
-        double timeMax = epoch.fromTimeStamp( endTime );
-
-        double arrowBaseMin = timeMin;
-        boolean offEdgeMin = false;
-        if ( axis.getMin( ) > timeMin )
-        {
-            offEdgeMin = true;
-            timeMin = axis.getMin( ) + ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
-            arrowBaseMin = timeMin + arrowSize / axis.getPixelsPerValue( );
-        }
-
-        double arrowBaseMax = timeMax;
-        boolean offEdgeMax = false;
-        if ( axis.getMax( ) < timeMax )
-        {
-            offEdgeMax = true;
-            timeMax = axis.getMax( ) - ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
-            arrowBaseMax = timeMax - arrowSize / axis.getPixelsPerValue( );
-        }
-
-        arrowBaseMax = Math.max( timeMin, arrowBaseMax );
-        arrowBaseMin = Math.min( timeMax, arrowBaseMin );
-
-        double timeSpan = arrowBaseMax - arrowBaseMin;
-        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
-
-        int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
-
-        // start positions of the next event in this row
-        double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : axis.getMax( );
-        int nextStartPixel = nextEvent != null ? axis.valueToScreenPixel( nextStartValue ) : width;
-
-        EventSelectionHandler selectionHandler = info.getEventSelectionHandler( );
-        boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
-        boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( this ) : false;
-
-        if ( plot.isTimeAxisHorizontal( ) )
-        {
-            if ( !offEdgeMin && !offEdgeMax )
-            {
-                if ( showBackground )
-                {
-                    GlimpseColor.glColor( gl, getBackgroundColor( info, isSelected ) );
-                    gl.glBegin( GL.GL_QUADS );
-                    try
-                    {
-                        gl.glVertex2d( timeMin, posMin );
-                        gl.glVertex2d( timeMin, posMax );
-                        gl.glVertex2d( timeMax, posMax );
-                        gl.glVertex2d( timeMax, posMin );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-
-                if ( showBorder )
-                {
-                    GlimpseColor.glColor( gl, getBorderColor( info, isSelected ) );
-                    gl.glLineWidth( getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL.GL_LINE_LOOP );
-                    try
-                    {
-                        gl.glVertex2d( timeMin, posMin );
-                        gl.glVertex2d( timeMin, posMax );
-                        gl.glVertex2d( timeMax, posMax );
-                        gl.glVertex2d( timeMax, posMin );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-            }
-            else
-            {
-                if ( showBackground )
-                {
-                    GlimpseColor.glColor( gl, getBackgroundColor( info, isSelected ) );
-                    gl.glBegin( GL.GL_POLYGON );
-                    try
-                    {
-                        gl.glVertex2d( arrowBaseMin, posMax );
-                        gl.glVertex2d( arrowBaseMax, posMax );
-                        gl.glVertex2d( timeMax, sizeCenter );
-                        gl.glVertex2d( arrowBaseMax, posMin );
-                        gl.glVertex2d( arrowBaseMin, posMin );
-                        gl.glVertex2d( timeMin, sizeCenter );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-
-                if ( showBorder )
-                {
-                    GlimpseColor.glColor( gl, getBorderColor( info, isSelected ) );
-                    gl.glLineWidth( getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL.GL_LINE_LOOP );
-                    try
-                    {
-                        gl.glVertex2d( arrowBaseMin, posMax );
-                        gl.glVertex2d( arrowBaseMax, posMax );
-                        gl.glVertex2d( timeMax, sizeCenter );
-                        gl.glVertex2d( arrowBaseMax, posMin );
-                        gl.glVertex2d( arrowBaseMin, posMin );
-                        gl.glVertex2d( timeMin, sizeCenter );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-            }
-
-            isIconVisible = showIcon && iconId != null && !isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-
-            if ( isIconVisible )
-            {
-                double valueX = axis.screenPixelToValue( pixelX );
-                iconStartTime = epoch.toTimeStamp( valueX );
-                iconEndTime = iconStartTime.add( size / axis.getPixelsPerValue( ) );
-
-                TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( );
-                try
-                {
-                    ImageData iconData = atlas.getImageData( iconId );
-                    double iconScale = size / ( double ) iconData.getHeight( );
-
-                    atlas.drawImageAxisX( gl, iconId, axis, valueX, posMin, iconScale, iconScale, 0, iconData.getHeight( ) );
-                }
-                finally
-                {
-                    atlas.endRendering( );
-                }
-
-                remainingSpaceX -= size + buffer;
-                pixelX += size + buffer;
-            }
-
-            if ( showLabel )
-            {
-                TextRenderer textRenderer = info.getTextRenderer( );
-                Rectangle2D labelBounds = textRenderer.getBounds( label );
-
-                boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && textRenderingMode == HideAll );
-                double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-
-                isTextVisible = !isTextOverlappingAndHidden;
-
-                if ( isTextVisible )
-                {
-                    Rectangle2D displayBounds = labelBounds;
-                    String displayText = label;
-
-                    if ( labelBounds.getWidth( ) > availableSpace && textRenderingMode != ShowAll )
-                    {
-                        displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
-                        displayBounds = textRenderer.getBounds( displayText );
-                    }
-
-                    double valueX = axis.screenPixelToValue( pixelX );
-                    textStartTime = epoch.toTimeStamp( valueX );
-                    textEndTime = textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
-
-                    // use this event's text color if it has been set
-                    if ( textColor != null )
-                    {
-                        GlimpseColor.setColor( textRenderer, textColor );
-                    }
-                    // otherwise, use the default no background color if the background is not showing
-                    // and if a color has not been explicitly set for the EventPainter
-                    else if ( !info.isTextColorSet( ) && !showBackground )
-                    {
-                        GlimpseColor.setColor( textRenderer, info.getTextColorNoBackground( ) );
-                    }
-                    // otherwise use the EventPainter's default text color
-                    else
-                    {
-                        GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
-                    }
-
-                    textRenderer.beginRendering( width, height );
-                    try
-                    {
-                        // use the labelBounds for the height (if the text shortening removed a character which
-                        // hangs below the line, we don't want the text position to move)
-                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
-                        textRenderer.draw( displayText, pixelX, pixelY );
-
-                        remainingSpaceX -= displayBounds.getWidth( ) + buffer;
-                        pixelX += displayBounds.getWidth( ) + buffer;
-                    }
-                    finally
-                    {
-                        textRenderer.endRendering( );
-                    }
-                }
-            }
-            else
-            {
-                isTextVisible = false;
-            }
-        }
-        else
-        {
-            //TODO handle drawing text and icons in HORIZONTAL orientation
-
-            GlimpseColor.glColor( gl, getBackgroundColor( info, isSelected ) );
-            gl.glBegin( GL.GL_QUADS );
-            try
-            {
-                gl.glVertex2d( posMin, timeMin );
-                gl.glVertex2d( posMax, timeMin );
-                gl.glVertex2d( posMax, timeMax );
-                gl.glVertex2d( posMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-
-            GlimpseColor.glColor( gl, getBorderColor( info, isSelected ) );
-            gl.glLineWidth( getBorderThickness( info, isSelected ) );
-            gl.glBegin( GL.GL_LINE_LOOP );
-            try
-            {
-                gl.glVertex2d( posMin, timeMin );
-                gl.glVertex2d( posMax, timeMin );
-                gl.glVertex2d( posMax, timeMax );
-                gl.glVertex2d( posMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
         }
     }
 

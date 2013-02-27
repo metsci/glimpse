@@ -71,7 +71,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public static final int DEFAULT_BUFFER_SIZE = 2;
 
     protected EventManager eventManager;
-    protected EventPainter eventPainter;
+    protected EventPainterManager eventPainterManager;
     protected GlimpseAxisLayout1D layout1D;
 
     protected int maxRowCount = Integer.MAX_VALUE;
@@ -117,8 +117,8 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         // un-handled events should be passed on to the parent layout
         this.layout1D.setEventConsumer( false );
         this.eventManager = new EventManager( this );
-        this.eventPainter = new EventPainter( this, eventManager, epoch, atlas );
-        this.layout1D.addPainter( this.eventPainter );
+        this.eventPainterManager = new EventPainterManager( this, eventManager, epoch, atlas );
+        this.layout1D.addPainter( this.eventPainterManager );
 
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
 
@@ -329,6 +329,16 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         {
         }
     }
+    
+    public void setEventPainter( EventPainter painter )
+    {
+        this.eventPainterManager.setEventPainter( painter );
+    }
+
+    public EventPainter getEventPainter( )
+    {
+        return this.eventPainterManager.getEventPainter( );
+    }
 
     public void setSelectionHandler( EventSelectionHandler selectionHandler )
     {
@@ -447,67 +457,67 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     
     public boolean isTextColorSet( )
     {
-        return this.eventPainter.isTextColorSet( );
+        return this.eventPainterManager.isTextColorSet( );
     }
     
     public boolean isBackgroundColorSet( )
     {
-        return this.eventPainter.isBackgroundColorSet( );
+        return this.eventPainterManager.isBackgroundColorSet( );
     }
     
     public boolean isBorderColorSet( )
     {
-        return this.eventPainter.isBorderColorSet( );
+        return this.eventPainterManager.isBorderColorSet( );
     }
     
     public TextRenderer getTextRenderer( )
     {
-        return this.eventPainter.getTextRenderer( );
+        return this.eventPainterManager.getTextRenderer( );
     }
 
     public TextureAtlas getTextureAtlas( )
     {
-        return this.eventPainter.getTextureAtlas( );
+        return this.eventPainterManager.getTextureAtlas( );
     }
 
     public void setBackgroundColor( float[] backgroundColor )
     {
-        this.eventPainter.setBackgroundColor( backgroundColor );
+        this.eventPainterManager.setBackgroundColor( backgroundColor );
     }
 
     public float[] getBackgroundColor( )
     {
-        return this.eventPainter.getBackgroundColor( );
+        return this.eventPainterManager.getBackgroundColor( );
     }
     
     public void setBorderColor( float[] borderColor )
     {
-        this.eventPainter.setBorderColor( borderColor );
+        this.eventPainterManager.setBorderColor( borderColor );
     }
 
     public float[] getBorderColor( )
     {
-        return this.eventPainter.getBorderColor( );
+        return this.eventPainterManager.getBorderColor( );
     }
 
     public void setTextColor( float[] textColor )
     {
-        this.eventPainter.setTextColor( textColor );
+        this.eventPainterManager.setTextColor( textColor );
     }
     
     public float[] getTextColorNoBackground( )
     {
-        return this.eventPainter.getTextColorNoBackground( );
+        return this.eventPainterManager.getTextColorNoBackground( );
     }
     
     public float[] getTextColor( )
     {
-        return this.eventPainter.getTextColor( );
+        return this.eventPainterManager.getTextColor( );
     }
 
     public void setFont( Font font, boolean antialias )
     {
-        this.eventPainter.setFont( font, antialias );
+        this.eventPainterManager.setFont( font, antialias );
     }
 
     public Set<Event> getEvents( )

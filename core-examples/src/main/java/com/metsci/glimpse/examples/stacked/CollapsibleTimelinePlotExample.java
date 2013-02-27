@@ -34,11 +34,13 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
@@ -50,12 +52,14 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
+import com.metsci.glimpse.plot.timeline.event.EventPainter;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
 import com.metsci.glimpse.plot.timeline.event.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
@@ -255,19 +259,6 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // is also responsible for resetting the event display characteristics when it is deselected
         events1.getEventSelectionHandler( ).setSelectedEventBorderThickness( 3.0f );
 
-        // use middle click to switch between stacking and not stacking events (just for demonstration purposes)
-        plot.getOverlayLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
-        {
-            @Override
-            public void mousePressed( GlimpseMouseEvent event )
-            {
-                if ( event.isButtonDown( MouseButton.Button2 ) )
-                {
-                    events1.setStackOverlappingEvents( !events1.isStackOverlappingEvents( ) );
-                }
-            }
-        } );
-
         // replace the default StackedTimePlot2D mouse listener behavior with
         // the default tagged axis behavior (the selected area will not follow
         // the mouse, but the user can move it by clicking and dragging inside
@@ -293,7 +284,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
                 }
             }
         } );
-
+        
         return plot;
     }
 
