@@ -39,7 +39,9 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
-import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
@@ -260,10 +262,10 @@ public class Event
         this.constraints.remove( constraint );
     }
 
-    protected float[] getBackgroundColor( EventPainter painter, boolean isSelected )
+    protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
     {
-        float[] defaultColor = painter.getBackgroundColor( );
-        float[] selectedColor = painter.getSelectedEventBackgroundColor( );
+        float[] defaultColor = info.getBackgroundColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
 
         if ( isSelected )
         {
@@ -283,10 +285,10 @@ public class Event
         }
     }
 
-    protected float[] getBorderColor( EventPainter painter, boolean isSelected )
+    protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )
     {
-        float[] defaultColor = painter.getBorderColor( );
-        float[] selectedColor = painter.getSelectedEventBorderColor( );
+        float[] defaultColor = info.getBorderColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
 
         if ( isSelected )
         {
@@ -306,11 +308,11 @@ public class Event
         }
     }
 
-    protected float getBorderThickness( EventPainter painter, boolean isSelected )
+    protected float getBorderThickness( EventPlotInfo info, boolean isSelected )
     {
         if ( isSelected )
         {
-            return painter.getSelectedEventBorderThickness( );
+            return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
         }
         else
         {
@@ -318,14 +320,31 @@ public class Event
         }
     }
 
-    public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
+    /**
+     * Renders the provided Event (potentially displaying its icon, label, time extents, etc...).
+     * 
+     * @param gl OpenGL handle
+     * @param info parent EventPlotInfo of Event to be painted
+     * @param bounds width, height, and position of GlimpseLayout containing EventPlotInfo
+     * @param posMin the min y (or x, depending on orientation) in pixel coordinates of the Event
+     * @param posMax the max y (or x, depending on orientation) in pixel coordinates of the Event
+     * @param nextEvent the next Event to be painted (as ordered by start time) 
+     */
+    public void paint( GL gl, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax, Event nextEvent )
     {
-        int size = sizeMax - sizeMin;
-        double sizeCenter = sizeMin + size / 2.0;
-        int buffer = painter.getRowBufferSize( );
+        StackedTimePlot2D plot = info.getStackedTimePlot( );
+        TaggedAxis1D axis = info.getCommonAxis( );
+
+        int height = bounds.getHeight( );
+        int width = bounds.getWidth( );
+
+        int buffer = info.getEventPadding( );
+
+        int size = posMax - posMin;
+        double sizeCenter = posMin + size / 2.0;
         int arrowSize = Math.min( size, ARROW_SIZE );
 
-        Epoch epoch = painter.getEpoch( );
+        Epoch epoch = plot.getEpoch( );
         double timeMin = epoch.fromTimeStamp( startTime );
         double timeMax = epoch.fromTimeStamp( endTime );
 
@@ -356,27 +375,27 @@ public class Event
         int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
 
         // start positions of the next event in this row
-        double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : axis.getMax( );
-        int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : width;
+        double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : axis.getMax( );
+        int nextStartPixel = nextEvent != null ? axis.valueToScreenPixel( nextStartValue ) : width;
 
-        EventSelectionHandler selectionHandler = painter.getEventPlotInfo( ).getEventSelectionHandler( );
+        EventSelectionHandler selectionHandler = info.getEventSelectionHandler( );
         boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
         boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( this ) : false;
 
-        if ( painter.isHorizontal( ) )
+        if ( plot.isTimeAxisHorizontal( ) )
         {
             if ( !offEdgeMin && !offEdgeMax )
             {
                 if ( showBackground )
                 {
-                    GlimpseColor.glColor( gl, getBackgroundColor( painter, isSelected ) );
+                    GlimpseColor.glColor( gl, getBackgroundColor( info, isSelected ) );
                     gl.glBegin( GL.GL_QUADS );
                     try
                     {
-                        gl.glVertex2d( timeMin, sizeMin );
-                        gl.glVertex2d( timeMin, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMin );
+                        gl.glVertex2d( timeMin, posMin );
+                        gl.glVertex2d( timeMin, posMax );
+                        gl.glVertex2d( timeMax, posMax );
+                        gl.glVertex2d( timeMax, posMin );
                     }
                     finally
                     {
@@ -386,15 +405,15 @@ public class Event
 
                 if ( showBorder )
                 {
-                    GlimpseColor.glColor( gl, getBorderColor( painter, isSelected ) );
-                    gl.glLineWidth( getBorderThickness( painter, isSelected ) );
+                    GlimpseColor.glColor( gl, getBorderColor( info, isSelected ) );
+                    gl.glLineWidth( getBorderThickness( info, isSelected ) );
                     gl.glBegin( GL.GL_LINE_LOOP );
                     try
                     {
-                        gl.glVertex2d( timeMin, sizeMin );
-                        gl.glVertex2d( timeMin, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMin );
+                        gl.glVertex2d( timeMin, posMin );
+                        gl.glVertex2d( timeMin, posMax );
+                        gl.glVertex2d( timeMax, posMax );
+                        gl.glVertex2d( timeMax, posMin );
                     }
                     finally
                     {
@@ -406,15 +425,15 @@ public class Event
             {
                 if ( showBackground )
                 {
-                    GlimpseColor.glColor( gl, getBackgroundColor( painter, isSelected ) );
+                    GlimpseColor.glColor( gl, getBackgroundColor( info, isSelected ) );
                     gl.glBegin( GL.GL_POLYGON );
                     try
                     {
-                        gl.glVertex2d( arrowBaseMin, sizeMax );
-                        gl.glVertex2d( arrowBaseMax, sizeMax );
+                        gl.glVertex2d( arrowBaseMin, posMax );
+                        gl.glVertex2d( arrowBaseMax, posMax );
                         gl.glVertex2d( timeMax, sizeCenter );
-                        gl.glVertex2d( arrowBaseMax, sizeMin );
-                        gl.glVertex2d( arrowBaseMin, sizeMin );
+                        gl.glVertex2d( arrowBaseMax, posMin );
+                        gl.glVertex2d( arrowBaseMin, posMin );
                         gl.glVertex2d( timeMin, sizeCenter );
                     }
                     finally
@@ -425,16 +444,16 @@ public class Event
 
                 if ( showBorder )
                 {
-                    GlimpseColor.glColor( gl, getBorderColor( painter, isSelected ) );
-                    gl.glLineWidth( getBorderThickness( painter, isSelected ) );
+                    GlimpseColor.glColor( gl, getBorderColor( info, isSelected ) );
+                    gl.glLineWidth( getBorderThickness( info, isSelected ) );
                     gl.glBegin( GL.GL_LINE_LOOP );
                     try
                     {
-                        gl.glVertex2d( arrowBaseMin, sizeMax );
-                        gl.glVertex2d( arrowBaseMax, sizeMax );
+                        gl.glVertex2d( arrowBaseMin, posMax );
+                        gl.glVertex2d( arrowBaseMax, posMax );
                         gl.glVertex2d( timeMax, sizeCenter );
-                        gl.glVertex2d( arrowBaseMax, sizeMin );
-                        gl.glVertex2d( arrowBaseMin, sizeMin );
+                        gl.glVertex2d( arrowBaseMax, posMin );
+                        gl.glVertex2d( arrowBaseMin, posMin );
                         gl.glVertex2d( timeMin, sizeCenter );
                     }
                     finally
@@ -452,14 +471,14 @@ public class Event
                 iconStartTime = epoch.toTimeStamp( valueX );
                 iconEndTime = iconStartTime.add( size / axis.getPixelsPerValue( ) );
 
-                TextureAtlas atlas = painter.getTextureAtlas( );
+                TextureAtlas atlas = info.getTextureAtlas( );
                 atlas.beginRendering( );
                 try
                 {
                     ImageData iconData = atlas.getImageData( iconId );
                     double iconScale = size / ( double ) iconData.getHeight( );
 
-                    atlas.drawImageAxisX( gl, iconId, axis, valueX, sizeMin, iconScale, iconScale, 0, iconData.getHeight( ) );
+                    atlas.drawImageAxisX( gl, iconId, axis, valueX, posMin, iconScale, iconScale, 0, iconData.getHeight( ) );
                 }
                 finally
                 {
@@ -472,7 +491,7 @@ public class Event
 
             if ( showLabel )
             {
-                TextRenderer textRenderer = painter.getTextRenderer( );
+                TextRenderer textRenderer = info.getTextRenderer( );
                 Rectangle2D labelBounds = textRenderer.getBounds( label );
 
                 boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
@@ -504,14 +523,14 @@ public class Event
                     }
                     // otherwise, use the default no background color if the background is not showing
                     // and if a color has not been explicitly set for the EventPainter
-                    else if ( !painter.textColorSet && !showBackground )
+                    else if ( !info.isTextColorSet( ) && !showBackground )
                     {
-                        GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
+                        GlimpseColor.setColor( textRenderer, info.getTextColorNoBackground( ) );
                     }
                     // otherwise use the EventPainter's default text color
                     else
                     {
-                        GlimpseColor.setColor( textRenderer, painter.textColor );
+                        GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
                     }
 
                     textRenderer.beginRendering( width, height );
@@ -519,7 +538,7 @@ public class Event
                     {
                         // use the labelBounds for the height (if the text shortening removed a character which
                         // hangs below the line, we don't want the text position to move)
-                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + sizeMin );
+                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
                         textRenderer.draw( displayText, pixelX, pixelY );
 
                         remainingSpaceX -= displayBounds.getWidth( ) + buffer;
@@ -540,29 +559,29 @@ public class Event
         {
             //TODO handle drawing text and icons in HORIZONTAL orientation
 
-            GlimpseColor.glColor( gl, getBackgroundColor( painter, isSelected ) );
+            GlimpseColor.glColor( gl, getBackgroundColor( info, isSelected ) );
             gl.glBegin( GL.GL_QUADS );
             try
             {
-                gl.glVertex2d( sizeMin, timeMin );
-                gl.glVertex2d( sizeMax, timeMin );
-                gl.glVertex2d( sizeMax, timeMax );
-                gl.glVertex2d( sizeMin, timeMax );
+                gl.glVertex2d( posMin, timeMin );
+                gl.glVertex2d( posMax, timeMin );
+                gl.glVertex2d( posMax, timeMax );
+                gl.glVertex2d( posMin, timeMax );
             }
             finally
             {
                 gl.glEnd( );
             }
 
-            GlimpseColor.glColor( gl, getBorderColor( painter, isSelected ) );
-            gl.glLineWidth( getBorderThickness( painter, isSelected ) );
+            GlimpseColor.glColor( gl, getBorderColor( info, isSelected ) );
+            gl.glLineWidth( getBorderThickness( info, isSelected ) );
             gl.glBegin( GL.GL_LINE_LOOP );
             try
             {
-                gl.glVertex2d( sizeMin, timeMin );
-                gl.glVertex2d( sizeMax, timeMin );
-                gl.glVertex2d( sizeMax, timeMax );
-                gl.glVertex2d( sizeMin, timeMax );
+                gl.glVertex2d( posMin, timeMin );
+                gl.glVertex2d( posMax, timeMin );
+                gl.glVertex2d( posMax, timeMax );
+                gl.glVertex2d( posMin, timeMax );
             }
             finally
             {
@@ -624,7 +643,7 @@ public class Event
     {
         return this.toolTipText;
     }
-    
+
     /**
      * Sets whether or not this Event can be selected via mouse clicks. Setting
      * selectable to false does not prevent the event from being selected 
@@ -636,7 +655,7 @@ public class Event
     {
         this.isSelectable = isSelectable;
     }
-    
+
     public boolean isSelectable( )
     {
         return this.isSelectable;

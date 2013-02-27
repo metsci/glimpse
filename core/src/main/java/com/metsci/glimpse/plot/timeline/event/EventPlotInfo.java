@@ -53,6 +53,7 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
+import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * <p>A handle to one of the plotting areas making up a {@link StackedTimePlot2D}. This
@@ -69,6 +70,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public static final int DEFAULT_ROW_SIZE = 26;
     public static final int DEFAULT_BUFFER_SIZE = 2;
 
+    protected EventManager eventManager;
     protected EventPainter eventPainter;
     protected GlimpseAxisLayout1D layout1D;
 
@@ -114,7 +116,8 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.layout1D.setLayoutData( "pos container.x container.y container.x2 container.y2" );
         // un-handled events should be passed on to the parent layout
         this.layout1D.setEventConsumer( false );
-        this.eventPainter = new EventPainter( this, epoch, atlas, isHorizontal );
+        this.eventManager = new EventManager( this );
+        this.eventPainter = new EventPainter( this, eventManager, epoch, atlas );
         this.layout1D.addPainter( this.eventPainter );
 
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
@@ -176,14 +179,14 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             if ( isHorizontal )
             {
                 TimeStamp time = getTime( e );
-                Set<EventSelection> tempEvents = Collections.unmodifiableSet( Sets.newHashSet( eventPainter.getNearestEvents( e ) ) );
+                Set<EventSelection> tempEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
 
                 for ( EventPlotListener listener : eventListeners )
                 {
                     listener.eventsClicked( e, tempEvents, time );
                 }
 
-                EventSelection eventSelection = eventPainter.getNearestEvent( tempEvents, e );
+                EventSelection eventSelection = eventManager.getNearestEvent( tempEvents, e );
                 if ( eventSelection != null )
                 {
                     Event event = eventSelection.getEvent( );
@@ -230,7 +233,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             if ( isHorizontal )
             {
                 TimeStamp time = getTime( e );
-                Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( Sets.newHashSet( eventPainter.getNearestEvents( e ) ) );
+                Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
 
                 SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
                 for ( EventPlotListener listener : eventListeners )
@@ -369,17 +372,17 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public boolean isStackOverlappingEvents( )
     {
-        return eventPainter.isStackOverlappingEvents( );
+        return eventManager.isStackOverlappingEvents( );
     }
 
     public void setStackOverlappingEvents( boolean stack )
     {
-        eventPainter.setStackOverlappingEvents( stack );
+        eventManager.setStackOverlappingEvents( stack );
     }
 
     public int getRow( Object eventId )
     {
-        return this.eventPainter.getRow( eventId );
+        return this.eventManager.getRow( eventId );
     }
 
     /**
@@ -411,7 +414,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public void setRowMaxCount( int count )
     {
         this.maxRowCount = count;
-        this.eventPainter.validate( );
+        this.eventManager.validate( );
     }
 
     public int getRowMaxCount( )
@@ -432,7 +435,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public int getRowCount( )
     {
-        return Math.max( minRowCount, this.eventPainter.getRowCount( ) );
+        return Math.max( minRowCount, this.eventManager.getRowCount( ) );
     }
 
     public void updateSize( )
@@ -440,6 +443,26 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         int rowCount = getRowCount( );
 
         this.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.eventPadding );
+    }
+    
+    public boolean isTextColorSet( )
+    {
+        return this.eventPainter.isTextColorSet( );
+    }
+    
+    public boolean isBackgroundColorSet( )
+    {
+        return this.eventPainter.isBackgroundColorSet( );
+    }
+    
+    public boolean isBorderColorSet( )
+    {
+        return this.eventPainter.isBorderColorSet( );
+    }
+    
+    public TextRenderer getTextRenderer( )
+    {
+        return this.eventPainter.getTextRenderer( );
     }
 
     public TextureAtlas getTextureAtlas( )
@@ -452,14 +475,34 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.eventPainter.setBackgroundColor( backgroundColor );
     }
 
+    public float[] getBackgroundColor( )
+    {
+        return this.eventPainter.getBackgroundColor( );
+    }
+    
     public void setBorderColor( float[] borderColor )
     {
         this.eventPainter.setBorderColor( borderColor );
     }
 
+    public float[] getBorderColor( )
+    {
+        return this.eventPainter.getBorderColor( );
+    }
+
     public void setTextColor( float[] textColor )
     {
         this.eventPainter.setTextColor( textColor );
+    }
+    
+    public float[] getTextColorNoBackground( )
+    {
+        return this.eventPainter.getTextColorNoBackground( );
+    }
+    
+    public float[] getTextColor( )
+    {
+        return this.eventPainter.getTextColor( );
     }
 
     public void setFont( Font font, boolean antialias )
@@ -469,12 +512,12 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public Set<Event> getEvents( )
     {
-        return this.eventPainter.getEvents( );
+        return this.eventManager.getEvents( );
     }
 
     public Event getEvent( Object id )
     {
-        return this.eventPainter.getEvent( id );
+        return this.eventManager.getEvent( id );
     }
 
     public Event addEvent( String label, TimeStamp time )
@@ -506,18 +549,18 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         event.setEventPlotInfo( this );
         event.setTextRenderingMode( textRenderingMode );
 
-        this.eventPainter.addEvent( event );
+        this.eventManager.addEvent( event );
     }
 
     public void removeEvent( Event event )
     {
         event.setEventPlotInfo( null );
-        this.eventPainter.removeEvent( event.getId( ) );
+        this.eventManager.removeEvent( event.getId( ) );
     }
 
     public void removeEvent( Object id )
     {
-        Event event = this.eventPainter.removeEvent( id );
+        Event event = this.eventManager.removeEvent( id );
         if ( event != null )
         {
             event.setEventPlotInfo( null );
@@ -548,14 +591,14 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public void updateEventRow( Event event, int rowIndex )
     {
-        this.eventPainter.setRow( event.getId( ), rowIndex );
+        this.eventManager.setRow( event.getId( ), rowIndex );
 
         this.notifyEventUpdated( event );
     }
 
     public void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
-        this.eventPainter.moveEvent( oldEvent, newStartTime, newEndTime );
+        this.eventManager.moveEvent( oldEvent, newStartTime, newEndTime );
 
         this.notifyEventUpdated( oldEvent );
     }
