@@ -30,10 +30,9 @@ public class EventManager
 {
     protected static final double OVERLAP_HEURISTIC = 20.0;
     protected static final int PICK_BUFFER_PIXELS = 10;
-
-    protected ReentrantLock lock;
-
+    
     protected EventPlotInfo info;
+    protected ReentrantLock lock;
 
     protected Map<Object, Event> eventMap;
     protected Map<Object, Row> rowMap;
@@ -112,7 +111,7 @@ public class EventManager
     {
         this.info = info;
 
-        this.lock = new ReentrantLock( );
+        this.lock = info.getStackedPlot( ).getLock( );
 
         this.rows = new ArrayList<Row>( );
         this.eventMap = new HashMap<Object, Event>( );
