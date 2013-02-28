@@ -171,6 +171,11 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
         return ticks;
     }
 
+    public void setTickCalculator( AxisLabelHandler ticks )
+    {
+    	this.ticks = ticks;
+    }
+    
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
