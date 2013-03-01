@@ -142,4 +142,16 @@ public class PlotInfoWrapper implements PlotInfo
     {
         info.deletePlot( );
     }
+
+    @Override
+    public void setIndentLevel( int level )
+    {
+        info.setIndentLevel( level );
+    }
+
+    @Override
+    public int getIndentLevel( )
+    {
+        return info.getIndentLevel( );
+    }
 }

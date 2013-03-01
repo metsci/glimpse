@@ -141,6 +141,14 @@ public interface PlotInfo
      * as calling StackedPlot2D.deletePlot( this.getId( ) )
      */
     public void deletePlot( );
+    
+    /**
+     * Sets the indentation level of this plot. This can be
+     * @param level
+     */
+    public void setIndentLevel( int level );
+    
+    public int getIndentLevel( );
 
     public void setLookAndFeel( LookAndFeel laf );
     

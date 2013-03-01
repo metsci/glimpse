@@ -85,7 +85,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
             }
         } );
     }
-
+    
     public SimpleTextPainter getTextPainter( )
     {
         return this.labelPainter.getTextPainter( );

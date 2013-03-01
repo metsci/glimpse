@@ -19,6 +19,7 @@ public class PlotInfoImpl implements PlotInfo
     protected int order;
     protected int size;
     protected int spacing;
+    protected int indentLevel;
     protected GlimpseAxisLayout2D layout;
     protected StackedPlot2D parent;
 
@@ -32,6 +33,18 @@ public class PlotInfoImpl implements PlotInfo
         this.layout = layout;
         this.grow = size < 0;
         this.visible = true;
+    }
+    
+    @Override
+    public void setIndentLevel( int level )
+    {
+        this.indentLevel = Math.max( 0, level );
+    }
+    
+    @Override
+    public int getIndentLevel( )
+    {
+        return this.indentLevel;
     }
 
     @Override
@@ -200,26 +213,26 @@ public class PlotInfoImpl implements PlotInfo
         {
             if ( isGrow( ) )
             {
-                String format = "cell %d %d, push, grow, gaptop %d, id i%2$d";
-                layoutData = String.format( format, 0, index, plotSpacing );
+                String format = "cell %d %d, spanx %d, growx, pushy, growy, gaptop %d, id i%2$d";
+                layoutData = String.format( format, indentLevel, index, Integer.MAX_VALUE, plotSpacing );
             }
             else
             {
-                String format = "cell %d %d, growx, pushx, height %d!, gaptop %d, id i%2$d";
-                layoutData = String.format( format, 0, index, plotSize, plotSpacing );
+                String format = "cell %d %d, spanx %d, growx, height %d!, gaptop %d, id i%2$d";
+                layoutData = String.format( format, indentLevel, index, Integer.MAX_VALUE, plotSize, plotSpacing );
             }
         }
         else if ( orient == HORIZONTAL )
         {
             if ( isGrow( ) )
             {
-                String format = "cell %d %d, push, grow, gapright %d, id i%1$d";
-                layoutData = String.format( format, index, 0, plotSpacing );
+                String format = "cell %d %d, spany %d, growy, pushx, growx, gapright %d, id i%1$d";
+                layoutData = String.format( format, index, indentLevel, Integer.MAX_VALUE, plotSpacing );
             }
             else
             {
-                String format = "cell %d %d, growy, pushy, width %d!, gapright %d, id i%1$d";
-                layoutData = String.format( format, index, 0, plotSize, plotSpacing );
+                String format = "cell %d %d, spany %d, growy, width %d!, gapright %d, id i%1$d";
+                layoutData = String.format( format, index, indentLevel, Integer.MAX_VALUE, plotSize, plotSpacing );
             }
         }
 

@@ -185,6 +185,7 @@ public class StackedPlot2D extends GlimpseLayout
         this.lock.lock( );
         try
         {
+            setRowColumnConstraints( );
             setLayoutConstraints( );
 
             List<PlotInfo> list = getSortedPlots( stackedPlots.values( ) );
@@ -249,6 +250,30 @@ public class StackedPlot2D extends GlimpseLayout
     protected int getOverlayLayoutOffsetY2( )
     {
         return 0;
+    }
+    
+    protected void setRowColumnConstraints( )
+    {
+        setRowColumnConstraints( 0, 0 );
+    }
+    
+    protected void setRowColumnConstraints( int maxLevel, int indentSize )
+    {
+        StringBuilder b = new StringBuilder( );
+        for ( int i = 0; i < maxLevel; i++ )
+        {
+            b.append( String.format( "[%d]", indentSize ) );
+        }
+        b.append( "[grow,fill]" );
+        
+        if ( getOrientation( ) == VERTICAL )
+        {
+            layout.setColumnConstraints( b.toString( ) );
+        }
+        else if ( getOrientation( ) == HORIZONTAL )
+        {
+            layout.setRowConstraints( b.toString( ) );
+        }
     }
 
     protected void setLayoutConstraints( )

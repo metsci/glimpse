@@ -44,6 +44,9 @@ import com.metsci.glimpse.plot.timeline.group.GroupInfoImpl;
 
 public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
+    
+    protected boolean indentSubplots = false;
+    
     public CollapsibleTimePlot2D( )
     {
         super( Orientation.VERTICAL );
@@ -57,6 +60,17 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     public CollapsibleTimePlot2D( Epoch epoch, TaggedAxis1D commonAxis )
     {
         super( Orientation.VERTICAL, epoch, commonAxis );
+    }
+    
+    public boolean isIndentSubplots( )
+    {
+        return indentSubplots;
+    }
+    
+    public void setIndentSubplots( boolean indent )
+    {
+        this.indentSubplots = indent;
+        this.validate( );
     }
 
     /**
@@ -127,9 +141,55 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.lock.unlock( );
         }
     }
-    
+
     @Override
     public void validateLayout( )
+    {
+        updateRemovedChildren0( );
+
+        super.validateLayout( );
+    }
+
+    @Override
+    protected void setRowColumnConstraints( )
+    {
+        if ( indentSubplots )
+        {
+            int maxLevel = setIndentLevel0( );
+            setRowColumnConstraints( maxLevel, labelLayoutSize );   
+        }
+        else
+        {
+            resetIndentLevel0( 0 );
+            setRowColumnConstraints( 0, labelLayoutSize );   
+        }
+    }
+    
+    @Override
+    protected List<PlotInfo> getSortedPlots( Collection<PlotInfo> unsorted )
+    {
+        List<PlotInfo> ungroupedPlots = getUngroupedPlots( unsorted );
+        ArrayList<PlotInfo> accumulator = new ArrayList<PlotInfo>( unsorted.size( ) );
+        getSortedPlots0( ungroupedPlots, accumulator );
+
+        return accumulator;
+    }
+
+    protected List<PlotInfo> getUngroupedPlots( Collection<PlotInfo> unsorted )
+    {
+        // remove children of groups from list of all plots
+        List<PlotInfo> ungroupedPlots = new ArrayList<PlotInfo>( unsorted.size( ) );
+        ungroupedPlots.addAll( unsorted );
+
+        for ( GroupInfo group : getAllGroups( ) )
+        {
+            ungroupedPlots.removeAll( group.getChildPlots( ) );
+        }
+
+        return ungroupedPlots;
+    }
+
+    protected void updateRemovedChildren0( )
     {
         // GroupInfos aren't directly told about deletion of PlotInfo
         // so when validate is called, update groups by removing deleted PlotInfo
@@ -143,28 +203,40 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
                 }
             }
         }
-        
-        super.validateLayout( );
+    }
+    
+    protected void resetIndentLevel0( int level )
+    {
+        for ( PlotInfo info : getAllPlots( ) )
+        {
+            info.setIndentLevel( 0 );
+        }
     }
 
-    @Override
-    protected List<PlotInfo> getSortedPlots( Collection<PlotInfo> unsorted )
+    protected int setIndentLevel0( )
     {
+        List<PlotInfo> ungroupedPlots = getUngroupedPlots( getAllPlots( ) );
+        return setIndentLevel0( ungroupedPlots, -1 );
+    }
 
-        // remove children of groups from list of all plots
-        List<PlotInfo> ungroupedPlots = new ArrayList<PlotInfo>( unsorted.size( ) );
-        ungroupedPlots.addAll( unsorted );
-
-        for ( GroupInfo group : getAllGroups( ) )
+    protected int setIndentLevel0( Collection<PlotInfo> plots, int level )
+    {
+        int maxLevel = level;
+        for ( PlotInfo info : plots )
         {
-            ungroupedPlots.removeAll( group.getChildPlots( ) );
+            if ( info instanceof GroupInfo )
+            {
+                GroupInfo group = ( GroupInfo ) info;
+                info.setIndentLevel( level + 1 );
+                int levelReached = setIndentLevel0( group.getChildPlots( ), level + 1 );
+                if ( levelReached > maxLevel ) maxLevel = levelReached;
+            }
+            else
+            {
+                info.setIndentLevel( level );
+            }
         }
-
-        ArrayList<PlotInfo> accumulator = new ArrayList<PlotInfo>( unsorted.size( ) );
-        getSortedPlots0( ungroupedPlots, accumulator );
-
-        return accumulator;
-
+        return maxLevel;
     }
 
     protected void getSortedPlots0( Collection<PlotInfo> toVisitUnsorted, List<PlotInfo> accumulator )

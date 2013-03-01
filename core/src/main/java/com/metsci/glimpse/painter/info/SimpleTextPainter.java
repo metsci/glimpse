@@ -500,7 +500,15 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             gl.glRotated( 90, 0, 0, 1.0f );
             gl.glTranslated( -xShift, -yShift, 0 );
 
-            GlimpseColor.setColor( textRenderer, textColor );
+            if ( !textColorSet && !paintBackground )
+            {
+                GlimpseColor.setColor( textRenderer, textColorNoBackground );
+            }
+            else
+            {
+                GlimpseColor.setColor( textRenderer, textColor );
+            }
+            
             textRenderer.draw( text, xText, yText );
         }
         finally
