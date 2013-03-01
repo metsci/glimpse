@@ -35,6 +35,7 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
@@ -55,6 +56,9 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 
         // set a blue color scheme look and feel for the plot
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+        
+        // allow the user to rearrange plots by dragging on their labels
+        DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ), example.getManager( ) );
     }
 
     @Override
@@ -62,8 +66,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     {
         StackedTimePlot2D plot = super.getLayout( );
 
-        plot.setPlotSpacing( 10 );
-        plot.setPlotSpacing( 10 );
+        plot.setPlotSpacing( 20 );
 
         // display horizontal labels
         for ( TimePlotInfo info : plot.getAllTimePlots( ) )

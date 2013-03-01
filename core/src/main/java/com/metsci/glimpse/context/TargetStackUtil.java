@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+
 /**
  * <p>Utility method for manipulating {@link GlimpseTargetStack} instances.</p>
  *
@@ -129,5 +131,55 @@ public class TargetStackUtil
         }
 
         return true;
+    }
+    
+    public static GlimpseTargetStack popTo( GlimpseTargetStack stack, GlimpseTarget target )
+    {
+        // short circuit of the event is already relative to the target
+        if ( stack.getTarget( ) == target ) return stack;
+        
+        stack = newTargetStack( stack );
+        
+        while ( stack.getSize( ) > 0 )
+        {
+            stack.pop( );
+            
+            if ( stack.getTarget( ) == target ) return stack;
+        }
+        
+        return null;
+    }
+    
+    public static GlimpseMouseEvent translateCoordinates( GlimpseMouseEvent event, GlimpseTarget target )
+    {
+        // short circuit of the event is already relative to the target
+        if ( event.getTargetStack( ).getTarget( ) == target ) return event;
+        
+        GlimpseTargetStack stack = newTargetStack( event.getTargetStack( ) );
+        
+        // coordinates relative to the GlimpseTarget at the top of the stack
+        int x = event.getX( );
+        int y = event.getY( );
+        
+        GlimpseBounds topBounds = stack.getBounds( );
+        
+        while ( stack.getSize( ) > 0 )
+        {
+            stack.pop( );
+            
+            if ( stack.getTarget( ) == target )
+            {
+                GlimpseBounds targetBounds = stack.getBounds( );
+                
+                x += topBounds.getX( ) - targetBounds.getX( );
+                y += targetBounds.getHeight( ) - ( topBounds.getY( ) - targetBounds.getY( ) + topBounds.getHeight( ) );
+                
+                return new GlimpseMouseEvent( event, stack, x, y );
+            }
+        }
+        
+        // the provided GlimpseTarget was not in the GlimpseMouseEvent hierarchy
+        // (the click was not on top of the provided GlimpseTarget)
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package com.metsci.glimpse.plot.stacked;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 
@@ -14,6 +15,18 @@ public class PlotInfoWrapper implements PlotInfo
     public PlotInfoWrapper( PlotInfo info )
     {
         this.info = info;
+    }
+    
+    @Override
+    public String getLayoutData( )
+    {
+        return info.getLayoutData( );
+    }
+    
+    @Override
+    public void setLayoutData( String layoutData )
+    {
+        info.setLayoutData( layoutData );
     }
 
     @Override
@@ -81,6 +94,12 @@ public class PlotInfoWrapper implements PlotInfo
     public GlimpseAxisLayout2D getLayout( )
     {
         return info.getLayout( );
+    }
+    
+    @Override
+    public GlimpseLayout getBaseLayout( )
+    {
+        return info.getBaseLayout( );
     }
 
     @Override

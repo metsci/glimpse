@@ -8,6 +8,7 @@ import java.util.Comparator;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -20,9 +21,10 @@ public class PlotInfoImpl implements PlotInfo
     protected int size;
     protected int spacing;
     protected int indentLevel;
+    protected String layoutData;
     protected GlimpseAxisLayout2D layout;
     protected StackedPlot2D parent;
-
+    
     public PlotInfoImpl( StackedPlot2D parent, Object id, int order, int size, int spacing, GlimpseAxisLayout2D layout )
     {
         this.parent = parent;
@@ -33,6 +35,18 @@ public class PlotInfoImpl implements PlotInfo
         this.layout = layout;
         this.grow = size < 0;
         this.visible = true;
+    }
+    
+    @Override
+    public String getLayoutData( )
+    {
+        return this.layoutData;
+    }
+    
+    @Override
+    public void setLayoutData( String layoutData )
+    {
+        this.layoutData = layoutData;
     }
     
     @Override
@@ -117,6 +131,12 @@ public class PlotInfoImpl implements PlotInfo
     {
         return this.layout;
     }
+    
+    @Override
+    public GlimpseLayout getBaseLayout( )
+    {
+        return this.layout;
+    }
 
     @Override
     public Axis1D getCommonAxis( GlimpseTargetStack stack )
@@ -186,7 +206,7 @@ public class PlotInfoImpl implements PlotInfo
             oldParent.deletePlot( id );
         }
     }
-
+    
     @Override
     public void updateLayout( int index )
     {
@@ -213,12 +233,12 @@ public class PlotInfoImpl implements PlotInfo
         {
             if ( isGrow( ) )
             {
-                String format = "cell %d %d, spanx %d, growx, pushy, growy, gaptop %d, id i%2$d";
+                String format = "cell %d %d, spanx %d, growx, pushy, growy, gaptop %d";
                 layoutData = String.format( format, indentLevel, index, Integer.MAX_VALUE, plotSpacing );
             }
             else
             {
-                String format = "cell %d %d, spanx %d, growx, height %d!, gaptop %d, id i%2$d";
+                String format = "cell %d %d, spanx %d, growx, height %d!, gaptop %d";
                 layoutData = String.format( format, indentLevel, index, Integer.MAX_VALUE, plotSize, plotSpacing );
             }
         }
@@ -226,12 +246,12 @@ public class PlotInfoImpl implements PlotInfo
         {
             if ( isGrow( ) )
             {
-                String format = "cell %d %d, spany %d, growy, pushx, growx, gapright %d, id i%1$d";
+                String format = "cell %d %d, spany %d, growy, pushx, growx, gapright %d";
                 layoutData = String.format( format, index, indentLevel, Integer.MAX_VALUE, plotSpacing );
             }
             else
             {
-                String format = "cell %d %d, spany %d, growy, width %d!, gapright %d, id i%1$d";
+                String format = "cell %d %d, spany %d, growy, width %d!, gapright %d";
                 layoutData = String.format( format, index, indentLevel, Integer.MAX_VALUE, plotSize, plotSpacing );
             }
         }

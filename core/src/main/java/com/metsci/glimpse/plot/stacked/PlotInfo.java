@@ -3,6 +3,7 @@ package com.metsci.glimpse.plot.stacked;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -56,7 +57,7 @@ public interface PlotInfo
      * @param size the size of the plot in pixels.
      */
     public void setSize( int size );
-    
+
     /**
      * <p>Sets the plot to fill all available space. First, fixed size plots
      * are given their space (set by {@link #setSize(int)}) and then
@@ -69,16 +70,16 @@ public interface PlotInfo
      * @param grow
      */
     public void setGrow( boolean grow );
-    
+
     /**
      * @see #setGrow(boolean)
      */
     public boolean isGrow( );
-    
+
     public void setVisible( boolean visible );
-    
+
     public boolean isVisible( );
-    
+
     /**
      * Sets the spacing between this plot and those above and below it. This value
      * overrides the default set via {@link StackedTimePlot2D#setPlotSpacing(int)}.
@@ -87,17 +88,26 @@ public interface PlotInfo
      * controlled by the other plots spacing.
      */
     public void setPlotSpacing( int spacing );
-    
+
     /**
      * @see #setPlotSpacing(int)
      */
     public int getPlotSpacing( );
-    
+
     /**
-     * Returns the {@code GlimpseLayout} for this plot. This can be used
+     * Returns the {@code GlimpseAxisLayout2D} for this plot. This can be used
      * to add subplots of painters to the plotting area.
      */
     public GlimpseAxisLayout2D getLayout( );
+
+    /**
+     * Returns the base {@code GlimpseLayout}. If this plot is made of a single GlimpseLayout,
+     * {@code #getLayout()} and {@code #getBaseLayout()} will return the same GlimpseLayout.
+     * Otherwise, the result of {@code #getLayout()} will be a child of {@code #getBaseLayout()}.
+     * Further, {@code #getBaseLayout()} will be a direct child of the {@link StackedPlot2D}
+     * that this {@code PlotInfo} is part of.
+     */
+    public GlimpseLayout getBaseLayout( );
 
     /**
      * Returns the common axis associated with the given GlimpseTargetStack.
@@ -135,22 +145,45 @@ public interface PlotInfo
      * @param childLayout
      */
     public void addLayout( GlimpseAxisLayout2D childLayout );
-    
+
     /**
      * Removes this plot from its StackedPlot2D. This has the same effect
      * as calling StackedPlot2D.deletePlot( this.getId( ) )
      */
     public void deletePlot( );
-    
+
     /**
      * Sets the indentation level of this plot. This can be
      * @param level
      */
     public void setIndentLevel( int level );
-    
-    public int getIndentLevel( );
 
-    public void setLookAndFeel( LookAndFeel laf );
+    /**
+     * 
+     * @see #setIndentLevel(int)
+     */
+    public int getIndentLevel( );
     
+    /**
+     * <p>Sets the MIG Layout constraints which position this PlotInfo within the
+     * StackedPlot2D. Normally, calling this method is not necessary because
+     * the StackedPlot2D automatically positions its PlotInfo. However, this method
+     * can be used to override this default position.</p>
+     * 
+     * <p>Calling {@link #setLayoutData(String)} with {@code null} as the argument
+     * will cause the StackedPlot2D to resume automatically positioning this PlotInfo.
+     * 
+     * @param layoutData
+     */
+    public void setLayoutData( String layoutData );
+
+    /**
+     * 
+     * @see #setLayoutData(String)
+     */
+    public String getLayoutData( );
+    
+    public void setLookAndFeel( LookAndFeel laf );
+
     public void updateLayout( int index );
 }

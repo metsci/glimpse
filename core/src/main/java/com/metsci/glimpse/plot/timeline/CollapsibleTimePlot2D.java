@@ -28,7 +28,6 @@ package com.metsci.glimpse.plot.timeline;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -37,16 +36,16 @@ import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
-import com.metsci.glimpse.plot.stacked.PlotInfoImpl;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.group.GroupInfoImpl;
+import com.metsci.glimpse.plot.timeline.group.GroupUtilities;
 
 public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
-    
+
     protected boolean indentSubplots = false;
-    
+
     public CollapsibleTimePlot2D( )
     {
         super( Orientation.VERTICAL );
@@ -61,12 +60,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     {
         super( Orientation.VERTICAL, epoch, commonAxis );
     }
-    
+
     public boolean isIndentSubplots( )
     {
         return indentSubplots;
     }
-    
+
     public void setIndentSubplots( boolean indent )
     {
         this.indentSubplots = indent;
@@ -110,6 +109,9 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
             GroupInfo group = new GroupInfoImpl( this, plotInfo, subplots );
+
+            addPlotInfoListeners( group );
+
             stackedPlots.put( id, group );
 
             if ( isAutoValidate( ) ) validate( );
@@ -141,6 +143,19 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.lock.unlock( );
         }
     }
+    
+    public List<PlotInfo> getUngroupedPlots( )
+    {
+        this.lock.lock( );
+        try
+        {
+            return getUngroupedPlots( getAllPlots( ) );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
 
     @Override
     public void validateLayout( )
@@ -156,21 +171,21 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         if ( indentSubplots )
         {
             int maxLevel = setIndentLevel0( );
-            setRowColumnConstraints( maxLevel, labelLayoutSize );   
+            setRowColumnConstraints( maxLevel, labelLayoutSize );
         }
         else
         {
             resetIndentLevel0( 0 );
-            setRowColumnConstraints( 0, labelLayoutSize );   
+            setRowColumnConstraints( 0, labelLayoutSize );
         }
     }
-    
+
     @Override
     protected List<PlotInfo> getSortedPlots( Collection<PlotInfo> unsorted )
     {
         List<PlotInfo> ungroupedPlots = getUngroupedPlots( unsorted );
         ArrayList<PlotInfo> accumulator = new ArrayList<PlotInfo>( unsorted.size( ) );
-        getSortedPlots0( ungroupedPlots, accumulator );
+        GroupUtilities.getSortedPlots( ungroupedPlots, accumulator );
 
         return accumulator;
     }
@@ -204,7 +219,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             }
         }
     }
-    
+
     protected void resetIndentLevel0( int level )
     {
         for ( PlotInfo info : getAllPlots( ) )
@@ -237,25 +252,5 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             }
         }
         return maxLevel;
-    }
-
-    protected void getSortedPlots0( Collection<PlotInfo> toVisitUnsorted, List<PlotInfo> accumulator )
-    {
-        if ( toVisitUnsorted == null || toVisitUnsorted.isEmpty( ) ) return;
-
-        List<PlotInfo> toVisitSorted = new ArrayList<PlotInfo>( );
-        toVisitSorted.addAll( toVisitUnsorted );
-        Collections.sort( toVisitSorted, PlotInfoImpl.getComparator( ) );
-
-        for ( PlotInfo info : toVisitSorted )
-        {
-            accumulator.add( info );
-
-            if ( info instanceof GroupInfo )
-            {
-                GroupInfo group = ( GroupInfo ) info;
-                getSortedPlots0( group.getChildPlots( ), accumulator );
-            }
-        }
     }
 }

@@ -69,6 +69,11 @@ public class BackgroundPainter implements GlimpsePainter
         return displayOn;
     }
     
+    public float[] getColor( )
+    {
+        return this.backgroundColor;
+    }
+    
     public BackgroundPainter setColor( float[] rgba )
     {
         backgroundColor = rgba;
