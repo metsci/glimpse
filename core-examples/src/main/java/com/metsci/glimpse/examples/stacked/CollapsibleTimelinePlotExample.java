@@ -86,7 +86,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     public StackedTimePlot2D getLayout( )
     {
         final CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
-
+        
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
@@ -159,6 +159,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events2.addEvent( "Event 2", t0.add( Time.fromMinutes( -220 ) ), t0.add( Time.fromMinutes( -200 ) ) );
         events2.addEvent( "Event 3", t0.add( Time.fromMinutes( -170 ) ), t0.add( Time.fromMinutes( -100 ) ) );
 
+        events1.setAggregateNearbyEvents( true );
+        events2.setAggregateNearbyEvents( true );
+        
         // add constraints on how the user can adjust the various events
         e0.setEndTimeMoveable( false );
         e1.setResizeable( false );

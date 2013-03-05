@@ -26,14 +26,15 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.media.opengl.GL;
 
@@ -200,10 +201,10 @@ public class Event
 
     private Event( TimeStamp time )
     {
-        this( null, null, time );
+        this( ( Object ) null, ( String ) null, time );
     }
 
-    public Event( Object id, String name, TimeStamp time )
+    protected Event( Object id, String name, TimeStamp time )
     {
         this.id = id;
         this.label = name;
@@ -216,7 +217,7 @@ public class Event
         this.constraints.add( builtInConstraints );
     }
 
-    public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
+    protected Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
     {
         this.id = id;
         this.label = name;
@@ -228,15 +229,34 @@ public class Event
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
     }
-    
+
     /**
      * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, int, int)
      */
     public void paint( EventPainter defaultPainter, GL gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
     {
         EventPainter eventPainter = painter != null ? painter : defaultPainter;
-        
+
         if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
+    }
+
+    /**
+     * EventPlotInfo can automatically create synthetic groups of Events when the timeline
+     * is zoomed out far enough that a bunch of Events are crowded into the same space.
+     * The individual constituent Events can be accessed via this method.
+     * User created Events never have children.
+     */
+    public Set<Event> getChildren( )
+    {
+        return Collections.emptySet( );
+    }
+
+    /**
+     * @see #getChildren()
+     */
+    public boolean hasChildren( )
+    {
+        return false;
     }
 
     public void setEventPainter( EventPainter painter )
@@ -350,13 +370,13 @@ public class Event
 
         switch ( overlapRenderingMode )
         {
-        case Overfull:
-            return insideBoxSpace;
-        case Intersecting:
-            return outsideBoxSpace;
-        case None:
-        default:
-            return Double.MAX_VALUE;
+            case Overfull:
+                return insideBoxSpace;
+            case Intersecting:
+                return outsideBoxSpace;
+            case None:
+            default:
+                return Double.MAX_VALUE;
         }
     }
 

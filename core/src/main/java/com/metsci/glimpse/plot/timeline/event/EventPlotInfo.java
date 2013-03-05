@@ -27,13 +27,21 @@
 package com.metsci.glimpse.plot.timeline.event;
 
 import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Font;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
@@ -52,6 +60,7 @@ import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -67,6 +76,8 @@ import com.sun.opengl.util.j2d.TextRenderer;
  */
 public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 {
+    private static final Logger logger = Logger.getLogger( EventPlotInfo.class.getName( ) );
+    
     public static final int DEFAULT_ROW_SIZE = 26;
     public static final int DEFAULT_BUFFER_SIZE = 2;
 
@@ -82,7 +93,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected List<EventPlotListener> eventListeners;
 
     protected boolean isHorizontal;
-
+    
     protected EventToolTipHandler eventToolTipHandler;
     protected DragListener dragListener;
     protected TooltipListener tooltipListener;
@@ -90,6 +101,8 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected TextRenderingMode textRenderingMode = Ellipsis;
 
     protected EventSelectionHandler selectionHandler;
+    
+    protected Object defaultIconId;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -100,6 +113,17 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         super( delegate );
 
+        try
+        {
+            defaultIconId = UUID.randomUUID( );
+            BufferedImage defaultImage = ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/timeline/dot.png" ) );
+            atlas.loadImage( defaultIconId, defaultImage );
+        }
+        catch ( IOException e )
+        {
+            logWarning( logger, "Trouble loading default icon.", e );
+        }
+        
         final Epoch epoch = getStackedTimePlot( ).getEpoch( );
         this.isHorizontal = getStackedTimePlot( ).isTimeAxisHorizontal( );
 
@@ -118,6 +142,9 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.layout1D.setEventConsumer( false );
         this.eventManager = new EventManager( this );
         this.eventPainterManager = new EventPainterManager( this, eventManager, epoch, atlas );
+        DefaultEventPainter defaultPainter = new DefaultEventPainter( );
+        defaultPainter.setDefaultIconId( defaultIconId );
+        this.eventPainterManager.setEventPainter( defaultPainter );
         this.layout1D.addPainter( this.eventPainterManager );
 
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
@@ -138,11 +165,45 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter )
             {
                 Event event = selection.getEvent( );
-                String label = event.getLabel( ) == null ? "" : event.getLabel( );
-                String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
-                String text = String.format( "%s\n%s", label, tip );
-                tooltipPainter.setText( text );
-                tooltipPainter.setIcon( event.getIconId( ) );
+                
+                if ( event.hasChildren( ) )
+                {
+                    Set<Event> children = event.getChildren( );
+                    List<Object> icons = new ArrayList<Object>( children.size( ) );
+                    List<float[]> colors = new ArrayList<float[]>( children.size( ) );
+                    StringBuilder b = new StringBuilder( );
+                    
+                    Iterator<Event> iter = children.iterator( );
+                    while ( iter.hasNext( ) )
+                    {
+                        Event child = iter.next( );
+                        
+                        Object iconId = child.getIconId( );
+                        float[] iconColor = null;
+                        if ( iconId == null )
+                        {
+                            iconId = defaultIconId;
+                            iconColor = child.getBackgroundColor( child.getEventPlotInfo( ), selectionHandler.isEventSelected( child ) );
+                        }
+                        
+                        icons.add( iconId );
+                        colors.add( iconColor );
+                        
+                        b.append( child.getLabel( ) );
+                        if ( iter.hasNext( ) ) b.append( "\n" );
+                    }
+                    
+                    tooltipPainter.setText( b.toString( ) );
+                    tooltipPainter.setIcons( icons, colors );
+                }
+                else
+                {
+                    String label = event.getLabel( ) == null ? "" : event.getLabel( );
+                    String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
+                    String text = String.format( "%s\n%s", label, tip );
+                    tooltipPainter.setText( text );
+                    tooltipPainter.setIcon( event.getIconId( ) );   
+                }
             }
         };
 
@@ -328,6 +389,16 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         public void eventUpdated( Event event )
         {
         }
+    }
+    
+    public void setAggregateNearbyEvents( boolean aggregate )
+    {
+        this.eventManager.setAggregateNearbyEvents( aggregate );
+    }
+    
+    public boolean isAggregateNearbyEvents( )
+    {
+        return this.eventManager.isAggregateNearbyEvents( );
     }
     
     public void setEventPainter( EventPainter painter )

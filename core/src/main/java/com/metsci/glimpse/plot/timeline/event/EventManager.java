@@ -20,6 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.collect.SetMultimap;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
@@ -28,15 +29,20 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class EventManager
 {
+    protected static final double BUFFER_MULTIPLIER = 2;
     protected static final double OVERLAP_HEURISTIC = 20.0;
     protected static final int PICK_BUFFER_PIXELS = 10;
-    
+
     protected EventPlotInfo info;
     protected ReentrantLock lock;
 
     protected Map<Object, Event> eventMap;
     protected Map<Object, Row> rowMap;
     protected List<Row> rows;
+
+    protected boolean aggregateNearbyEvents = false;
+    protected int maxAggregateSize = 30;
+    protected int maxAggregateGap = 5;
 
     protected boolean shouldStack = true;
     protected boolean isHorizontal = true;
@@ -48,8 +54,17 @@ public class EventManager
     protected class Row
     {
         int index;
+
+        // all Events in the Row
         IntervalSortedMultimap events;
-        // sorted by event start time
+
+        // all visible Events in the Row (some Events may be aggregated)
+        // will not be filled in if aggregation is not turned on (in that
+        // case it is unneeded because the events map can be queried instead)
+        IntervalSortedMultimap visibleAggregateEvents;
+
+        // all visible Events (including aggregated events, if turned on)
+        // sorted by starting timestamp
         SortedMap<TimeStamp, Collection<Event>> visibleEvents;
 
         public Row( int index )
@@ -70,7 +85,116 @@ public class EventManager
             rowMap.remove( event.getId( ) );
         }
 
-        public void calculateVisibleEvents( TimeStamp min, TimeStamp max )
+        public void calculateVisibleEvents( Axis1D axis, TimeStamp min, TimeStamp max )
+        {
+            if ( aggregateNearbyEvents )
+            {
+                calculateVisibleEventsAggregated( axis, min, max );
+            }
+            else
+            {
+                calculateVisibleEventsNormal( min, max );
+            }
+        }
+
+        public void calculateVisibleEventsAggregated( Axis1D axis, TimeStamp min, TimeStamp max )
+        {
+            // 1) break the row up into aggregateSize bins starting with the first event in the row
+            //    (this is a computational convenience, it would be better to do agglomerative grouping
+            //     by finding the closest two events, combining them, then the next two closest, etc...
+            //     until everything is farther away than aggregateSize)
+            //
+            // 2) then form aggregate groups if there are more than two events in a bin
+            // 3) (possibly) combine any aggregate groups in adjacent bins
+
+            // calculate size of bin in system (time) units
+            double ppv = axis.getPixelsPerValue( );
+            double maxDuration = maxAggregateSize / ppv;
+            double maxGap = maxAggregateGap / ppv;
+
+            // expand the visible window slightly
+            // since we only aggregate visible Events, we don't want weird
+            // visual artifacts (aggregate groups appearing and disappearing)
+            // as Events scroll off the screen
+            TimeStamp expandedMin = min.subtract( maxDuration * BUFFER_MULTIPLIER );
+            TimeStamp expandedMax = max.add( maxDuration * BUFFER_MULTIPLIER );
+
+            SetMultimap<TimeStamp, Event> visibleMultimap = this.events.getMap( expandedMin, true, expandedMax, true );
+            SortedMap<TimeStamp, Collection<Event>> visibleMap = ( SortedMap<TimeStamp, Collection<Event>> ) visibleMultimap.asMap( );
+
+            IntervalSortedMultimap map = new IntervalSortedMultimap( );
+
+            Set<Event> children = new HashSet<Event>( );
+            TimeStamp childrenMin = null;
+            TimeStamp childrenMax = null;
+            for ( Collection<Event> events : visibleMap.values( ) )
+            {
+                for ( Event event : events )
+                {
+                    // only aggregate small events
+                    boolean isDurationSmall = event.getDuration( ) < maxDuration;
+
+                    // only aggregate events with small gaps between them
+                    double gap = childrenMax == null ? 0 : childrenMax.durationBefore( event.getStartTime( ) );
+                    boolean isGapSmall = gap < maxGap;
+
+                    // if the gap is large, end the current aggregate group
+                    if ( !isGapSmall )
+                    {
+                        addAggregateEvent( map, children, childrenMin, childrenMax, min, max );
+                        children.clear( );
+                        childrenMin = null;
+                        childrenMax = null;
+                    }
+
+                    // if the event is small enough to be aggregated, add it to the child list
+                    if ( isDurationSmall )
+                    {
+                        children.add( event );
+
+                        // events are in start time order, so this will never change after being set
+                        if ( childrenMin == null ) childrenMin = event.getStartTime( );
+
+                        if ( childrenMax == null || childrenMax.isBefore( event.getEndTime( ) ) ) childrenMax = event.getEndTime( );
+                    }
+                    // otherwise just add it to the result map
+                    else
+                    {
+                        if ( isVisible( event, min, max ) ) map.addEvent( event );
+                    }
+                }
+            }
+
+            // add any remaining child events
+            addAggregateEvent( map, children, childrenMin, childrenMax, min, max );
+
+            this.visibleAggregateEvents = map;
+            this.visibleEvents = map.getStartMap( );
+        }
+
+        protected void addAggregateEvent( IntervalSortedMultimap map, Set<Event> children, TimeStamp childrenMin, TimeStamp childrenMax, TimeStamp min, TimeStamp max )
+        {
+            // if there is only one or zero events in the current group, just add a regular event
+            if ( children.size( ) <= 1 )
+            {
+                for ( Event child : children )
+                    if ( isVisible( child, min, max ) ) map.addEvent( child );
+            }
+            // otherwise create an aggregate group and add it to the result map
+            else
+            {
+                AggregateEvent aggregate = new AggregateEvent( children, childrenMin, childrenMax );
+
+                if ( isVisible( aggregate, min, max ) ) map.addEvent( aggregate );
+            }
+        }
+
+        protected boolean isVisible( Event event, TimeStamp min, TimeStamp max )
+        {
+            return ! ( event.getEndTime( ).isBefore( min ) || event.getStartTime( ).isAfter( max ) );
+        }
+
+        public void calculateVisibleEventsNormal( TimeStamp min, TimeStamp max )
         {
             SetMultimap<TimeStamp, Event> visibleMap = this.events.getMap( min, true, max, true );
             this.visibleEvents = ( SortedMap<TimeStamp, Collection<Event>> ) visibleMap.asMap( );
@@ -81,9 +205,16 @@ public class EventManager
             return this.events.get( event.getStartTime( ), false, event.getEndTime( ), false );
         }
 
-        public IntervalSortedMultimap getMap( )
+        public Set<Event> getNearestVisibleEvents( TimeStamp timeStart, TimeStamp timeEnd )
         {
-            return this.events;
+            if ( aggregateNearbyEvents )
+            {
+                return this.visibleAggregateEvents.get( timeStart, timeEnd );
+            }
+            else
+            {
+                return this.events.get( timeStart, timeEnd );
+            }
         }
 
         public boolean isEmpty( )
@@ -135,6 +266,9 @@ public class EventManager
         return Collections.unmodifiableList( rows );
     }
 
+    /**
+     * @see #setStackOverlappingEvents(boolean)
+     */
     public boolean isStackOverlappingEvents( )
     {
         return this.shouldStack;
@@ -148,6 +282,62 @@ public class EventManager
     public void setStackOverlappingEvents( boolean stack )
     {
         this.shouldStack = stack;
+        this.validate( );
+    }
+
+    /**
+     * @see #setMaxAggregatedGroupSize(int)
+     */
+    public int getMaxAggregatedGroupSize( )
+    {
+        return this.maxAggregateSize;
+    }
+
+    /**
+     * Sets the maximum pixel size above which an Event will not be aggregated
+     * with nearby Events (in order to reduce visual clutter).
+     * 
+     * @see #setAggregateNearbyEvents(boolean)
+     */
+    public void setMaxAggregatedGroupSize( int size )
+    {
+        this.maxAggregateSize = size;
+        this.validate( );
+    }
+
+    public int getMaxAggregatedEventGapSize( )
+    {
+        return this.maxAggregateGap;
+    }
+
+    /**
+     * Sets the maximum pixel distance between adjacent events above which
+     * events will not be aggregated into a single Event (in order to reduce
+     * visual clutter).
+     * 
+     * @param size
+     */
+    public void setMaxAggregatedEventGapSize( int size )
+    {
+        this.maxAggregateGap = size;
+        this.validate( );
+    }
+
+    /**
+     * @see #setAggregateNearbyEvents(boolean)
+     */
+    public boolean isAggregateNearbyEvents( )
+    {
+        return this.aggregateNearbyEvents;
+    }
+
+    /**
+     * If true, nearby events in the same row will be combined into one
+     * event to reduce visual clutter.
+     */
+    public void setAggregateNearbyEvents( boolean aggregate )
+    {
+        this.aggregateNearbyEvents = aggregate;
         this.validate( );
     }
 
@@ -368,7 +558,7 @@ public class EventManager
                     TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
                     TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
 
-                    Set<Event> events = row.getMap( ).get( timeStart, timeEnd );
+                    Set<Event> events = row.getNearestVisibleEvents( timeStart, timeEnd );
                     Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
                     return eventSelections;
                 }
@@ -730,10 +920,11 @@ public class EventManager
     private void calculateVisibleEvents( double min, double max )
     {
         Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
+        TaggedAxis1D axis = info.getStackedTimePlot( ).getTimeAxis( );
 
         for ( Row row : rows )
         {
-            row.calculateVisibleEvents( epoch.toTimeStamp( min ), epoch.toTimeStamp( max ) );
+            row.calculateVisibleEvents( axis, epoch.toTimeStamp( min ), epoch.toTimeStamp( max ) );
         }
 
         this.visibleEventsDirty = false;

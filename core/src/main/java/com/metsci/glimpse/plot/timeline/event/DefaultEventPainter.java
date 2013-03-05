@@ -3,7 +3,11 @@ package com.metsci.glimpse.plot.timeline.event;
 import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.HideAll;
 import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.ShowAll;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.media.opengl.GL;
 
@@ -18,9 +22,47 @@ import com.sun.opengl.util.j2d.TextRenderer;
 
 public class DefaultEventPainter implements EventPainter
 {
+    public static final Object DEFAULT_ICON = UUID.randomUUID( );
+    public static final int DEFAULT_ICON_SIZE = 64;
+    public static final Color DEFAULT_ICON_COLOR = Color.BLACK;
+    public static final int DEFAULT_NUM_ICONS_ROWS = 3;
+
     public static final int ARROW_TIP_BUFFER = 2;
     public static final int ARROW_SIZE = 10;
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
+
+    protected Object defaultIconId = DEFAULT_ICON;
+    protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
+
+    /**
+     * Sets the default icon which is used when no icon is set for an aggregate event.
+     * 
+     * @param id
+     */
+    public void setDefaultIconId( Object id )
+    {
+        this.defaultIconId = id;
+    }
+
+    public Object getDefaultIconId( )
+    {
+        return this.defaultIconId;
+    }
+
+    /**
+     * Sets the maximum number of rows used to display icons in aggregate groups.
+     * 
+     * @param rows
+     */
+    public void setMaxIconRows( int rows )
+    {
+        this.maxIconRows = rows;
+    }
+
+    public int getMaxIconRows( )
+    {
+        return this.maxIconRows;
+    }
 
     @Override
     public void paint( GL gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
@@ -156,33 +198,105 @@ public class DefaultEventPainter implements EventPainter
                 }
             }
 
-            //XXX there is currently no way for custom subclasses of EventPainter to properly
-            //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
-            //    EventSelection callbacks to incorrectly indicate the visibility of 
-            event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-
-            if ( event.isIconVisible )
+            if ( event.hasChildren( ) )
             {
-                double valueX = axis.screenPixelToValue( pixelX );
-                event.iconStartTime = epoch.toTimeStamp( valueX );
-                event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
+                Set<Event> children = event.getChildren( );
+                final int numChildren = children.size( );
+                final int numRows = maxIconRows;
+                int iconSizePixels = size / numRows;
 
-                TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( );
-                try
+                int columnsByAvailableSpace = ( int ) Math.floor( remainingSpaceX / ( double ) iconSizePixels );
+                int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
+                int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
+
+                double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
+                int totalIconWidthPixels = iconSizePixels * numColumns;
+
+                event.isIconVisible = !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
+                if ( event.isIconVisible )
                 {
-                    ImageData iconData = atlas.getImageData( event.getIconId( ) );
-                    double iconScale = size / ( double ) iconData.getHeight( );
+                    double valueX = axis.screenPixelToValue( pixelX );
+                    event.iconStartTime = epoch.toTimeStamp( valueX );
+                    event.iconEndTime = event.iconStartTime.add( totalIconWidthPixels / axis.getPixelsPerValue( ) );
 
-                    atlas.drawImageAxisX( gl, event.getIconId( ), axis, valueX, posMin, iconScale, iconScale, 0, iconData.getHeight( ) );
+                    TextureAtlas atlas = info.getTextureAtlas( );
+                    atlas.beginRendering( );
+                    try
+                    {
+                        Iterator<Event> iter = children.iterator( );
+
+                        outer: for ( int c = 0; c < numColumns; c++ )
+                        {
+                            for ( int r = numRows - 1; r >= 0; r-- )
+                            {
+                                if ( iter.hasNext( ) )
+                                {
+                                    Event child = iter.next( );
+                                    Object icon = child.getIconId( );
+                                    if ( icon == null )
+                                    {
+                                        GlimpseColor.glColor( gl, child.getBackgroundColor( info, isSelected ), 0.5f );
+                                        icon = defaultIconId;
+                                    }
+                                    else
+                                    {
+                                        GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
+                                    }
+
+                                    ImageData iconData = atlas.getImageData( icon );
+                                    double iconScale = iconSizePixels / ( double ) iconData.getHeight( );
+
+                                    double x = valueX + c * iconSizeValue;
+                                    double y = posMin + r * iconSizePixels;
+
+                                    atlas.drawImageAxisX( gl, icon, axis, x, y, iconScale, iconScale, 0, iconData.getHeight( ) );
+                                }
+                                else
+                                {
+                                    break outer;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        atlas.endRendering( );
+                    }
+
+                    remainingSpaceX -= totalIconWidthPixels + buffer;
+                    pixelX += totalIconWidthPixels + buffer;
                 }
-                finally
+            }
+            else
+            {
+                //XXX there is currently no way for custom subclasses of EventPainter to properly
+                //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
+                //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
+                event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+
+                if ( event.isIconVisible )
                 {
-                    atlas.endRendering( );
-                }
+                    double valueX = axis.screenPixelToValue( pixelX );
+                    event.iconStartTime = epoch.toTimeStamp( valueX );
+                    event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
 
-                remainingSpaceX -= size + buffer;
-                pixelX += size + buffer;
+                    TextureAtlas atlas = info.getTextureAtlas( );
+                    atlas.beginRendering( );
+                    try
+                    {
+                        ImageData iconData = atlas.getImageData( event.getIconId( ) );
+                        double iconScale = size / ( double ) iconData.getHeight( );
+
+                        atlas.drawImageAxisX( gl, event.getIconId( ), axis, valueX, posMin, iconScale, iconScale, 0, iconData.getHeight( ) );
+                    }
+                    finally
+                    {
+                        atlas.endRendering( );
+                    }
+
+                    remainingSpaceX -= size + buffer;
+                    pixelX += size + buffer;
+                }
             }
 
             if ( event.isShowLabel( ) )
