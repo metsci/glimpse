@@ -29,9 +29,11 @@ package com.metsci.glimpse.worldwind.tile;
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.globes.EllipsoidalGlobe;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.SurfaceTile;
+import gov.nasa.worldwind.render.SurfaceTileRenderer;
 import gov.nasa.worldwind.util.Logging;
 
 import java.util.ArrayList;
@@ -58,6 +60,9 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 
     protected List<TextureSurfaceTile> thisList = Collections.singletonList( this );
 
+    protected EllipsoidalGlobe globe;
+    protected SurfaceTileRenderer renderer;
+
     public TextureSurfaceTile( int textureHandle, Sector sector )
     {
         this( textureHandle, ( Iterable<? extends LatLon> ) sector );
@@ -68,6 +73,11 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         this.textureHandle = textureHandle;
 
         this.initializeGeometry( corners );
+    }
+
+    public void setSurfaceTileRenderer( SurfaceTileRenderer renderer )
+    {
+        this.renderer = renderer;
     }
 
     public void setTextureScale( float scaleX, float scaleY )
@@ -114,9 +124,11 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         gl.glEnable( GL.GL_CULL_FACE );
         gl.glCullFace( GL.GL_BACK );
 
+        SurfaceTileRenderer r = renderer != null ? renderer : dc.getGeographicSurfaceTileRenderer( );
+
         try
         {
-            dc.getGeographicSurfaceTileRenderer( ).renderTiles( dc, this.thisList );
+            r.renderTiles( dc, this.thisList );
         }
         finally
         {

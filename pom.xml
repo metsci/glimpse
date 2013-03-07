@@ -151,6 +151,8 @@
                         <exclude>**/AttributedTextRenderer.java</exclude>
                         <exclude>**/MD5Checksum.java</exclude>
                         <exclude>**/TextureAtlas.java</exclude>
+                        <exclude>**/ElevatedSurfaceTileRenderer.java</exclude>
+                        <exclude>**/ElevatedSectorGeometryList.java</exclude>
                     </excludes>
                     <useDefaultExcludes>true</useDefaultExcludes>
                     <useDefaultMapping>true</useDefaultMapping>
