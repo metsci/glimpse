@@ -120,7 +120,7 @@ public class BathymetryTileExample
         corners.add( LatLon.fromDegrees( corner3.getLatDeg( ), corner3.getLonDeg( ) ) );
         corners.add( LatLon.fromDegrees( corner4.getLatDeg( ), corner4.getLonDeg( ) ) );
 
-        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseReprojectingSurfaceTile( baseLayout, wwaxis, projection, projectionTo, 3000, 3000, corners );
+        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseReprojectingSurfaceTile( baseLayout, wwaxis, projection, projectionTo, 4500, 4500, 3000, 3000, corners );
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
         // Create and install the view controls layer and register a controller for it with the World Window.
