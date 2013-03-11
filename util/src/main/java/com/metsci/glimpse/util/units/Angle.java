@@ -47,9 +47,19 @@ public class Angle
         return degrees * degreesToRadians;
     }
 
+    public static double[] fromDeg( double... degrees )
+    {
+        return multiply(degrees, degreesToRadians);
+    }
+
     public static double fromRad( double radians )
     {
         return radians;
+    }
+
+    public static double[] fromRad( double... radians )
+    {
+        return multiply(radians, 1);
     }
 
     public static double toDeg( double su )
@@ -57,9 +67,19 @@ public class Angle
         return su * radiansToDegrees;
     }
 
+    public static double[] toDeg( double... su )
+    {
+        return multiply(su, radiansToDegrees);
+    }
+
     public static double toRad( double su )
     {
         return su;
+    }
+
+    public static double[] toRad( double... su )
+    {
+        return multiply(su, 1);
     }
 
     /**
@@ -73,6 +93,16 @@ public class Angle
     }
 
     /**
+     * Converts angle from degrees to radians.
+     *
+     * NOTE: The angle returned is not normalized.
+     */
+    public static double[] degreesToRadians( double... degrees )
+    {
+        return multiply(degrees, degreesToRadians);
+    }
+
+    /**
      * Converts angle from radians to degrees.
      *
      * NOTE: The angle returned is not normalized.
@@ -80,6 +110,16 @@ public class Angle
     public static double radiansToDegrees( double radians )
     {
         return radians * radiansToDegrees;
+    }
+
+    /**
+     * Converts angle from radians to degrees.
+     *
+     * NOTE: The angle returned is not normalized.
+     */
+    public static double[] radiansToDegrees( double... radians )
+    {
+        return multiply(radians, radiansToDegrees);
     }
 
     /**
@@ -133,4 +173,12 @@ public class Angle
 
         return (radians > Math.PI) ? (radians - twoPi) : radians;
     }
+
+    private static double[] multiply(double[] array, double factor)
+    {
+        double[] result = new double[array.length];
+        for (int i = 0; i < result.length; i++) result[i] = factor * array[i];
+        return result;
+    }
+
 }
