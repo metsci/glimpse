@@ -168,12 +168,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                 
                 if ( event.hasChildren( ) )
                 {
-                    Set<Event> children = event.getChildren( );
-                    List<Object> icons = new ArrayList<Object>( children.size( ) );
-                    List<float[]> colors = new ArrayList<float[]>( children.size( ) );
+                    List<Object> icons = new ArrayList<Object>( event.getEventCount( ) );
+                    List<float[]> colors = new ArrayList<float[]>( event.getEventCount( ) );
                     StringBuilder b = new StringBuilder( );
                     
-                    Iterator<Event> iter = children.iterator( );
+                    Iterator<Event> iter = event.iterator( );
                     while ( iter.hasNext( ) )
                     {
                         Event child = iter.next( );

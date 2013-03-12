@@ -462,8 +462,6 @@ public class TooltipPainter extends SimpleTextPainter
                             }
                         }
                         
-                        System.out.println( Arrays.toString( color ) );
-                        
                         GlimpseColor.glColor( gl, color );
                         
                         atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );

@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import java.util.Set;
-import java.util.UUID;
-
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.units.time.TimeStamp;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.UUID;
 
 public class AggregateEvent extends Event
 {
@@ -55,18 +56,18 @@ public class AggregateEvent extends Event
      * User created Events never have children.
      */
     @Override
-    public Set<Event> getChildren( )
+    public Iterator<Event> iterator( )
     {
-        return this.children;
+        return this.children.iterator();
     }
 
     /**
-     * @see #getChildren()
+     * @see #iterator()
      */
     @Override
-    public boolean hasChildren( )
+    public int getEventCount( )
     {
-        return this.children != null && !this.children.isEmpty( );
+        return this.children.size();
     }
 
     @Override

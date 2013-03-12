@@ -226,8 +226,7 @@ public class DefaultEventPainter implements EventPainter
 
             if ( event.hasChildren( ) )
             {
-                Set<Event> children = event.getChildren( );
-                final int numChildren = children.size( );
+                final int numChildren = event.getEventCount();
                 final int numRows = maxIconRows;
                 int iconSizePixels = size / numRows;
 
@@ -238,7 +237,7 @@ public class DefaultEventPainter implements EventPainter
                 double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
                 int totalIconWidthPixels = iconSizePixels * numColumns;
 
-                event.isIconVisible = !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
+                event.isIconVisible = event.isShowIcon() && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
                 if ( event.isIconVisible )
                 {
                     double valueX = axis.screenPixelToValue( pixelX );
@@ -249,7 +248,7 @@ public class DefaultEventPainter implements EventPainter
                     atlas.beginRendering( );
                     try
                     {
-                        Iterator<Event> iter = children.iterator( );
+                        Iterator<Event> iter = event.iterator( );
 
                         outer: for ( int c = 0; c < numColumns; c++ )
                         {

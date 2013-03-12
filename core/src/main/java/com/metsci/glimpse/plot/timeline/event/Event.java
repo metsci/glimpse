@@ -26,24 +26,20 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
-
-import java.awt.geom.Rectangle2D;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import javax.media.opengl.GL;
-
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
+
+import javax.media.opengl.GL;
+import java.awt.geom.Rectangle2D;
+import java.util.*;
+
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 /**
  * Event represents an occurrence with a start and end time and is usually created
@@ -57,7 +53,7 @@ import com.sun.opengl.util.j2d.TextRenderer;
  * 
  * @author ulman
  */
-public class Event
+public class Event implements Iterable<Event>
 {
     protected EventPlotInfo info;
 
@@ -240,23 +236,50 @@ public class Event
         if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
     }
 
+    public boolean hasChildren( )
+    {
+        return getEventCount() > 1;
+    }
+
+    /**
+     * Gets the number of aggregated events that make up this event.
+     */
+    public int getEventCount( )
+    {
+        return 1;
+    }
+
     /**
      * EventPlotInfo can automatically create synthetic groups of Events when the timeline
      * is zoomed out far enough that a bunch of Events are crowded into the same space.
      * The individual constituent Events can be accessed via this method.
      * User created Events never have children.
      */
-    public Set<Event> getChildren( )
+    public Iterator<Event> iterator( )
     {
-        return Collections.emptySet( );
-    }
+        return new Iterator<Event>()
+        {
+            boolean movedNext;
 
-    /**
-     * @see #getChildren()
-     */
-    public boolean hasChildren( )
-    {
-        return false;
+            @Override
+            public boolean hasNext()
+            {
+                return !movedNext;
+            }
+
+            @Override
+            public Event next()
+            {
+                movedNext = true;
+                return Event.this;
+            }
+
+            @Override
+            public void remove()
+            {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     public void setEventPainter( EventPainter painter )
