@@ -166,7 +166,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             {
                 Event event = selection.getEvent( );
                 
-                if ( event.hasChildren( ) )
+                if ( event.hasChildren( ) && event.getLabel( ) == null && event.getToolTipText( ) == null )
                 {
                     List<Object> icons = new ArrayList<Object>( event.getEventCount( ) );
                     List<float[]> colors = new ArrayList<float[]>( event.getEventCount( ) );
