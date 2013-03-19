@@ -32,6 +32,10 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
+/**
+ * @author ulman
+ * @see EventPlotListener
+ */
 public class EventPlotAdapter implements EventPlotListener
 {
     @Override

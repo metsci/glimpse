@@ -26,13 +26,22 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import com.google.common.collect.ImmutableSet;
-import com.metsci.glimpse.util.units.time.TimeStamp;
-
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.common.collect.ImmutableSet;
+import com.metsci.glimpse.util.units.time.TimeStamp;
+
+/**
+ * When a {@code StackedTimePlot2D} is zoomed out very far, Events
+ * can be squashed very close together in pixel space, making them hard
+ * to see. {@code EventPlotInfo} can alleviate this problem by automatically
+ * creating combined Events which represent aggregations of many user created
+ * Events.
+ * 
+ * @author ulman
+ */
 public class AggregateEvent extends Event
 {
     // events can be nested (when many events are very close together
@@ -58,7 +67,7 @@ public class AggregateEvent extends Event
     @Override
     public Iterator<Event> iterator( )
     {
-        return this.children.iterator();
+        return this.children.iterator( );
     }
 
     /**
@@ -67,7 +76,7 @@ public class AggregateEvent extends Event
     @Override
     public int getEventCount( )
     {
-        return this.children.size();
+        return this.children.size( );
     }
 
     @Override
@@ -129,7 +138,7 @@ public class AggregateEvent extends Event
     {
         throw new UnsupportedOperationException( "Aggregate events cannot be edited." );
     }
-    
+
     @Override
     public void setStartTime( TimeStamp startTime )
     {

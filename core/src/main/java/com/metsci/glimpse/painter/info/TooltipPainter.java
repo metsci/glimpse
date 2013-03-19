@@ -29,7 +29,6 @@ package com.metsci.glimpse.painter.info;
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.text.BreakIterator;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,7 +53,7 @@ import com.metsci.glimpse.support.font.SimpleTextLayoutCenter;
 public class TooltipPainter extends SimpleTextPainter
 {
     protected static final float[] defaultIconColor = GlimpseColor.getWhite( );
-    
+
     // if true, tooltip text will be wrapped if it extends past the edge of the box
     protected boolean isFixedWidth = false;
     protected int fixedWidth = 50;
@@ -75,7 +74,7 @@ public class TooltipPainter extends SimpleTextPainter
     protected List<ImageData> icons;
     protected List<float[]> iconColors;
     protected boolean noIcons = false;
-    
+
     protected boolean wrapTextAroundIcon = false;
 
     protected int x;
@@ -108,7 +107,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
-    
+
     /**
      * Sets the TooltipPainter to display multiple icons, one per line,
      * down the left hand side of the tooltip window.
@@ -118,7 +117,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.iconIds = Lists.newArrayList( iconIds );
         this.icons = Lists.newArrayListWithCapacity( iconIds.size( ) );
         this.noIcons = true;
-        for ( int i = 0 ; i < iconIds.size( ) ; i++ )
+        for ( int i = 0; i < iconIds.size( ); i++ )
         {
             Object iconId = this.iconIds.get( i );
             ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
@@ -129,7 +128,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.lines = null;
         return this;
     }
-    
+
     /**
      * Sets icons and associated colors.
      * 
@@ -281,13 +280,17 @@ public class TooltipPainter extends SimpleTextPainter
     {
         //XXX another spacing heuristic which it would be nice to eliminate
         Object iconId = iconIds != null && i < iconIds.size( ) ? iconIds.get( i ) : null;
-        
-        float indent = (float) ( textLayout.getAscent( ) + borderSize );
-        
-        if ( noIcons ) return 0;
-        else if ( iconId != null ) return indent;
-        else if ( iconId == null && !wrapTextAroundIcon ) return indent;
-        else return 0;
+
+        float indent = ( float ) ( textLayout.getAscent( ) + borderSize );
+
+        if ( noIcons )
+            return 0;
+        else if ( iconId != null )
+            return indent;
+        else if ( iconId == null && !wrapTextAroundIcon )
+            return indent;
+        else
+            return 0;
     }
 
     protected void updateLayout( )
@@ -437,21 +440,21 @@ public class TooltipPainter extends SimpleTextPainter
             atlas.beginRendering( );
             try
             {
-                for ( int i = 0 ; i < iconIds.size( ) ; i++ )
+                for ( int i = 0; i < iconIds.size( ); i++ )
                 {
                     Object iconId = iconIds.get( i );
                     ImageData iconData = icons.get( i );
                     TextBoundingBox line = lines.get( i );
-                    
+
                     if ( iconId != null && iconData != null && line != null )
                     {
                         float iconSize = getIconSize( );
                         double iconScale = iconSize / ( double ) iconData.getWidth( );
-        
+
                         int posX = ( int ) ( x + line.leftX + clampX + offsetX );
                         //XXX another spacing heuristic which it would be nice to eliminate
                         int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY - textLayout.getDescent( ) * 0.25 );
-        
+
                         float[] color = defaultIconColor;
                         if ( iconColors != null && i < iconColors.size( ) )
                         {
@@ -461,9 +464,9 @@ public class TooltipPainter extends SimpleTextPainter
                                 color = iconColor;
                             }
                         }
-                        
+
                         GlimpseColor.glColor( gl, color );
-                        
+
                         atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
                     }
                 }

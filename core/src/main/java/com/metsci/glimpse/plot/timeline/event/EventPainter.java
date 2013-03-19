@@ -30,6 +30,11 @@ import javax.media.opengl.GL;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 
+/**
+ * A painter responsible for making OpenGL calls to visualize an {@code Event}.
+ * 
+ * @author ulman
+ */
 public interface EventPainter
 {
     /**

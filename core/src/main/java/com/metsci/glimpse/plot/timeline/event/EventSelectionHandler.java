@@ -35,6 +35,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 
+/**
+ * Helper class which manages keeping track of selected Events for {@code EventPlotInfo}.
+ * 
+ * @author ulman
+ */
 public class EventSelectionHandler
 {
     protected List<EventSelectionListener> eventListeners;

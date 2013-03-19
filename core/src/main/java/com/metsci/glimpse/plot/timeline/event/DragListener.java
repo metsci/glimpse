@@ -39,6 +39,10 @@ import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
+/**
+ * Helper class which supports user dragging of Events to adjust their start/end times.
+ * @author ulman
+ */
 public class DragListener implements EventPlotListener, GlimpseMouseAllListener
 {
     protected Location dragType = null;

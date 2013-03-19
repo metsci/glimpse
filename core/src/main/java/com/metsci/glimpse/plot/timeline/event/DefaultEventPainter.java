@@ -26,13 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.HideAll;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.ShowAll;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.media.opengl.GL;
@@ -46,6 +44,17 @@ import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.sun.opengl.util.j2d.TextRenderer;
 
+/**
+ * <p>Paints the default visualization for provided {@code Event} objects. Paints
+ * a box with configurable border and background color and an optional icon
+ * and text description.</p>
+ * 
+ * <p>The appearance of a single Event can be customized via
+ * {@code Event#setEventPainter(EventPainter)} and the default appearance of all
+ * Events can be customized via {@code EventPlotInfo#setEventPainter(EventPainter)}.</p>
+ * 
+ * @author ulman
+ */
 public class DefaultEventPainter implements EventPainter
 {
     public static final Object DEFAULT_ICON = UUID.randomUUID( );
@@ -226,7 +235,7 @@ public class DefaultEventPainter implements EventPainter
 
             if ( event.hasChildren( ) )
             {
-                final int numChildren = event.getEventCount();
+                final int numChildren = event.getEventCount( );
                 final int numRows = maxIconRows;
                 int iconSizePixels = size / numRows;
 
@@ -237,7 +246,7 @@ public class DefaultEventPainter implements EventPainter
                 double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
                 int totalIconWidthPixels = iconSizePixels * numColumns;
 
-                event.isIconVisible = event.isShowIcon() && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
+                event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
                 if ( event.isIconVisible )
                 {
                     double valueX = axis.screenPixelToValue( pixelX );

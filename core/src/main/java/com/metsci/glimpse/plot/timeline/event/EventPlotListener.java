@@ -32,15 +32,52 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
+/**
+ * Listener interface for receiving notifications when the mouse interacts with Events or when
+ * Event start and end times are updated.
+ * 
+ * @author ulman
+ */
 public interface EventPlotListener
 {
+    /**
+     * Indicates the mouse moved outside of the events contained in the EventSelection Set.
+     * 
+     * @param e the original MouseEvent which caused this eventsExited call
+     * @param events the events which the mouse moved outside of
+     * @param time the time corresponding to the mouse's current position
+     */
     public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
+    /**
+     * Indicates the mouse moved into of the Events contained in the EventSelection Set.
+     * 
+     * @see EventPlotListener#eventsExited(GlimpseMouseEvent, Set, TimeStamp)
+     */
     public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
+    /**
+     * Indicates that the mouse moved while inside the Events contained in the EventSelection Set.
+     * EventSelection also provides information about what part of each Event the mouse is near
+     * (the start or end edge, the icon, the text label, etc...).
+     * 
+     * @see EventPlotListener#eventsExited(GlimpseMouseEvent, Set, TimeStamp)
+     */
     public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
+    /**
+     * Indicates the mouse clicked on the Events contained in the EventSelection Set.
+     * 
+     * @see EventPlotListener#eventsExited(GlimpseMouseEvent, Set, TimeStamp)
+     */
     public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
+    /**
+     * Indicates that the provided Event was updated by the user. If enabled, the user can click
+     * and drag to change the start and/or end time of Events. When the user does this, eventUpdated
+     * is called.
+     * 
+     * @param event
+     */
     public void eventUpdated( Event event );
 }

@@ -53,6 +53,11 @@ import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
+/**
+ * Helper class which maintains sorted Event data structures for {@code EventPlotInfo}.
+ * 
+ * @author ulman
+ */
 public class EventManager
 {
     protected static final double BUFFER_MULTIPLIER = 2;
@@ -125,14 +130,6 @@ public class EventManager
 
         public void calculateVisibleEventsAggregated( Axis1D axis, TimeStamp min, TimeStamp max )
         {
-            // 1) break the row up into aggregateSize bins starting with the first event in the row
-            //    (this is a computational convenience, it would be better to do agglomerative grouping
-            //     by finding the closest two events, combining them, then the next two closest, etc...
-            //     until everything is farther away than aggregateSize)
-            //
-            // 2) then form aggregate groups if there are more than two events in a bin
-            // 3) (possibly) combine any aggregate groups in adjacent bins
-
             // calculate size of bin in system (time) units
             double ppv = axis.getPixelsPerValue( );
             double maxDuration = maxAggregateSize / ppv;
