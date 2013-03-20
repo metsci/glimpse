@@ -130,8 +130,8 @@ public class Conrec
 
         for ( i = ilb; i <= iub - 1; i++ )
         {
-            final float[] d_i0 = d[i];
-            final float[] d_i1 = d[i + 1];
+            final double[] d_i0 = d[i];
+            final double[] d_i1 = d[i + 1];
 
             for ( j = jlb; j <= jub - 1; j++ )
             {
