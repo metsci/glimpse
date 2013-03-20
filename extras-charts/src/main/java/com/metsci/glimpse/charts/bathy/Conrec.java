@@ -154,6 +154,9 @@ public class Conrec
                     {
                         z_k = z[k];
 
+                        if ( dmin == z_k && z_k == dmax )
+                            continue;
+
                         if ( dmin <= z_k && z_k <= dmax )
                         {
                             for ( m = 4; m >= 0; m-- )
