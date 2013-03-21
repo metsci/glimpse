@@ -89,12 +89,13 @@ public class DragManager
     protected List<DragInfo> dragging;
     protected volatile boolean dragHappening = false;
 
-    // fake/blank PlotInfos which are acting as spacing (to control the animation)
-    // and are shrinking to make room for the new growing PlotInfo
+    // PlotInfos which had extra spacing added above or below them to make
+    // room for the dragged plot. The dragged plot has since moved away from
+    // these PlotInfos and their extra spacing is now shrinking.
     protected Map<DragKey, DragInfo> shrinking;
 
-    // fake/blank PlotInfo representing where the PlotInfos being dragged will be
-    // placed when the user lets up the mouse
+    // PlotInfo whose above/below spacing is currently growing to indicate
+    // where the dragged plot will be placed if it is dropped
     protected DragInfo growing;
 
     // background layout used to mask things behind dragged plots
