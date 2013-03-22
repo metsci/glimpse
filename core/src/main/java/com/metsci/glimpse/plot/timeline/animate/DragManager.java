@@ -100,6 +100,7 @@ public class DragManager
 
     // background layout used to mask things behind dragged plots
     protected GlimpseLayout backgroundLayout;
+    protected BackgroundPainter backgroundPainter;
 
     // update thread used to control animation
     protected ScheduledExecutorService executor;
@@ -118,7 +119,8 @@ public class DragManager
         this.orient = plot.getOrientation( );
 
         this.backgroundLayout = new GlimpseLayout( );
-        this.backgroundLayout.addPainter( new BackgroundPainter( ).setColor( plot.getBackgroundColor( ) ) );
+        this.backgroundPainter = new BackgroundPainter( ).setColor( plot.getBackgroundColor( ) );
+        this.backgroundLayout.addPainter( this.backgroundPainter );
 
         // create a listener which is notified when MouseEvents happen inside
         // any of the StackedPlot2D's PlotInfo
@@ -497,8 +499,10 @@ public class DragManager
         }
         else
         {
-            this.backgroundLayout.setLayoutData( String.format( "pos %d container.x+%3$d %d container.x2-%3$d", pos - backgroundSize, pos, plot.getBorderSize( ) ) );
+            this.backgroundLayout.setLayoutData( String.format( "pos %d container.y+%3$d %d container.y2-%3$d", pos - backgroundSize, pos, plot.getBorderSize( ) ) );
         }
+        
+        this.backgroundPainter.setColor( plot.getBackgroundColor( ) );
 
         // set the position of each PlotInfo being dragged (absolute position
         // instead of cell-based like usual)
