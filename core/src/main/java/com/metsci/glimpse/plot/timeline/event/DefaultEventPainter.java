@@ -333,7 +333,7 @@ public class DefaultEventPainter implements EventPainter
                 }
             }
 
-            if ( event.isShowLabel( ) )
+            if ( event.isShowLabel( ) && event.getLabel( ) != null )
             {
                 TextRenderer textRenderer = info.getTextRenderer( );
                 Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );

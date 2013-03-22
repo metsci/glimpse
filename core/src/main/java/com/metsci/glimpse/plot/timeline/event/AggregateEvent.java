@@ -51,7 +51,7 @@ public class AggregateEvent extends Event
     // constructor used to create aggregate events
     protected AggregateEvent( Set<Event> children, TimeStamp startTime, TimeStamp endTime )
     {
-        super( UUID.randomUUID( ), "", startTime, endTime );
+        super( UUID.randomUUID( ), null, startTime, endTime );
 
         this.children = ImmutableSet.copyOf( children );
 
