@@ -682,6 +682,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
         this.notifyEventUpdated( oldEvent );
     }
+    
+    public void validate( )
+    {
+        this.eventManager.validate( );
+    }
 
     protected void notifyEventUpdated( Event event )
     {

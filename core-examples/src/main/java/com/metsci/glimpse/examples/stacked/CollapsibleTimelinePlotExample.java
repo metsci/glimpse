@@ -176,6 +176,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         // fix the "Cloudy" event on row 2
         e2.setFixedRow( 2 );
+        
+        // recalculate the positions of events
+        events1.validate( );
 
         // load icons into the texture atlas for the plot
         TextureAtlas atlas = plot.getTextureAtlas( );
