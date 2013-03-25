@@ -834,7 +834,7 @@ public class PolygonPainter extends GlimpsePainter2D
                 // to be updated again and give it extra memory
                 if ( initialized )
                 {
-                    gl.glDeleteBuffers( 1, new int[] { handle }, 0 );
+                    if ( handle > 0 ) gl.glDeleteBuffers( 1, new int[] { handle }, 0 );
                     maxSize = Math.max( ( int ) ( maxSize * 1.5 ), totalSize );
                 }
                 else
@@ -1529,8 +1529,9 @@ public class PolygonPainter extends GlimpsePainter2D
             // release opengl vertex buffers
             if ( glLineBufferInitialized )
             {
-                gl.glDeleteBuffers( 1, new int[] { glLineBufferHandle }, 0 );
-                gl.glDeleteBuffers( 1, new int[] { glFillBufferHandle }, 0 );
+                // zero is a reserved buffer object name and is never returned by glGenBuffers
+                if ( glLineBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineBufferHandle }, 0 );
+                if ( glFillBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glFillBufferHandle }, 0 );
             }
         }
     }
