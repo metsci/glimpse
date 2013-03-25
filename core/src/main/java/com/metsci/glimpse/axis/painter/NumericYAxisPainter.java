@@ -31,6 +31,7 @@ import static java.lang.Math.round;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -57,12 +58,12 @@ public class NumericYAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
         
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
@@ -71,7 +72,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
         paintSelectionLine( gl, axis, width, height );
     }
 
-    protected void paintTicks( GL gl, Axis1D axis, int width, int height )
+    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
     {
         double[] yTicks = ticks.getTickPositions( axis );
         String[] yLabels = ticks.getTickLabels( axis, yTicks );
@@ -169,7 +170,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintAxisLabel( GL gl, Axis1D axis, int width, int height )
+    protected void paintAxisLabel( GL2 gl, Axis1D axis, int width, int height )
     {
         // Axis label
         if ( showLabel )
@@ -183,7 +184,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
                 int iAxisLabel = getAxisLabelPositionX( width, ( int ) labelSize.getHeight( ) );
                 int jAxisLabel = round( 0.5f * ( height - ( int ) labelSize.getWidth( ) ) );
 
-                gl.glMatrixMode( GL.GL_PROJECTION );
+                gl.glMatrixMode( GL2.GL_PROJECTION );
                 gl.glTranslatef( iAxisLabel, jAxisLabel, 0 );
                 gl.glRotatef( 90, 0, 0, 1.0f );
 
@@ -196,7 +197,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintSelectionLine( GL gl, Axis1D axis, int width, int height )
+    protected void paintSelectionLine( GL2 gl, Axis1D axis, int width, int height )
     {
         AxisUnitConverter converter = ticks.getAxisUnitConverter( );
 

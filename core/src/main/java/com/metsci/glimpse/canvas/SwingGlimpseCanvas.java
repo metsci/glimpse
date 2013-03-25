@@ -39,10 +39,12 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -319,7 +321,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         // transfer all contexts to a holding drawable
         if ( tempDrawable == null )
         {
-            tempDrawable = GLDrawableFactory.getFactory( ).createGLPbuffer( glCanvas.getChosenGLCapabilities( ), null, 10, 10, glCanvas.getContext( ) );
+        	// TODO: If this isn't correct then we might need to use the deprecated createGLPbuffer() method instead -- ttran17
+        	GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
+        	caps.setFBO(false);
+        	caps.setPBuffer(true);
+        	tempDrawable = GLDrawableFactory.getFactory(caps.getGLProfile()).createOffscreenAutoDrawable(null, caps, null, 10, 10, glCanvas.getContext());
         }
 
         attachAllGLListeners( tempDrawable );
@@ -388,11 +394,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 }
             }
 
-            @Override
-            public void displayChanged( GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged )
-            {
-                // do nothing
-            }
+			@Override
+			public void dispose(GLAutoDrawable drawable) {
+				// TODO Auto-generated method stub -- ttran17
+				
+			}
         } );
     }
 

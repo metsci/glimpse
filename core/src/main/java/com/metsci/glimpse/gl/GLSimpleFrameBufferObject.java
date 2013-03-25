@@ -37,12 +37,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
 
 public class GLSimpleFrameBufferObject
 {
@@ -168,67 +169,67 @@ public class GLSimpleFrameBufferObject
             gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR );
             gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE );
             gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE );
-            gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE ); // automatic mipmap
+            gl.glTexParameteri( GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP, GL.GL_TRUE ); // automatic mipmap
             //            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null );
             gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, width, height, 0, GL.GL_RGBA, GL.GL_FLOAT, null );
             gl.glBindTexture( GL.GL_TEXTURE_2D, 0 );
 
             if ( renderBufferId != null )
             {
-                gl.glDeleteRenderbuffersEXT( 2, renderBufferId, 0 );
+                gl.glDeleteRenderbuffers( 2, renderBufferId, 0 );
             }
 
             // create a renderbuffer objects
             renderBufferId = new int[2];
             if ( useDepth || useStencil )
             {
-                gl.glGenRenderbuffersEXT( 2, renderBufferId, 0 );
+                gl.glDeleteRenderbuffers( 2, renderBufferId, 0 );
             }
 
             // initialize renderbuffer storing depth info
             if ( useDepth )
             {
-                gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
-                gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT, width, height );
+                gl.glBindRenderbuffer( GL.GL_RENDERBUFFER, renderBufferId[0] );
+                gl.glRenderbufferStorage( GL.GL_RENDERBUFFER, GL2.GL_DEPTH_COMPONENT, width, height );
             }
 
             // initialize renderbuffer storing stencil info
             if ( useStencil )
             {
-                gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
-                gl.glRenderbufferStorageEXT( GL.GL_RENDERBUFFER_EXT, GL.GL_STENCIL_INDEX16_EXT, width, height );
+                gl.glBindRenderbuffer( GL.GL_RENDERBUFFER, renderBufferId[1] );
+                gl.glRenderbufferStorage( GL.GL_RENDERBUFFER, GL2.GL_STENCIL_INDEX16, width, height );
             }
 
-            gl.glBindRenderbufferEXT( GL.GL_RENDERBUFFER_EXT, 0 );
+            gl.glBindRenderbuffer( GL.GL_RENDERBUFFER, 0 );
 
             if ( frameBufferId != null )
             {
-                gl.glDeleteFramebuffersEXT( 1, frameBufferId, 0 );
+                gl.glDeleteFramebuffers( 1, frameBufferId, 0 );
             }
 
             // create a framebuffer object
             frameBufferId = new int[1];
-            gl.glGenFramebuffersEXT( 1, frameBufferId, 0 );
-            gl.glBindFramebufferEXT( GL.GL_FRAMEBUFFER_EXT, frameBufferId[0] );
+            gl.glGenFramebuffers( 1, frameBufferId, 0 );
+            gl.glBindFramebuffer( GL.GL_FRAMEBUFFER, frameBufferId[0] );
 
             // attach the texture to FBO color attachment point
-            gl.glFramebufferTexture2DEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_TEXTURE_2D, textureId[0], 0 );
+            gl.glFramebufferTexture2D( GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, textureId[0], 0 );
 
             // attach the renderbuffer to depth attachment point
             if ( useDepth )
             {
-                gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[0] );
+                gl.glFramebufferRenderbuffer( GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT, GL.GL_RENDERBUFFER, renderBufferId[0] );
             }
 
             // attach the renderbuffer to stencil attachment point
             if ( useStencil )
             {
-                gl.glFramebufferRenderbufferEXT( GL.GL_FRAMEBUFFER_EXT, GL.GL_STENCIL_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, renderBufferId[1] );
+                gl.glFramebufferRenderbuffer( GL.GL_FRAMEBUFFER, GL.GL_STENCIL_ATTACHMENT, GL.GL_RENDERBUFFER, renderBufferId[1] );
             }
 
             // check FBO status
-            int status = gl.glCheckFramebufferStatusEXT( GL.GL_FRAMEBUFFER_EXT );
-            if ( status != GL.GL_FRAMEBUFFER_COMPLETE_EXT )
+            int status = gl.glCheckFramebufferStatus( GL.GL_FRAMEBUFFER );
+            if ( status != GL.GL_FRAMEBUFFER_COMPLETE )
             {
                 logWarning( logger, "Framebuffer not initialized (status=%d)", status );
             }
@@ -237,7 +238,7 @@ public class GLSimpleFrameBufferObject
         }
         else
         {
-            gl.glBindFramebufferEXT( GL.GL_FRAMEBUFFER_EXT, frameBufferId[0] );
+            gl.glBindFramebuffer( GL.GL_FRAMEBUFFER, frameBufferId[0] );
         }
     }
 
@@ -246,14 +247,14 @@ public class GLSimpleFrameBufferObject
         GL gl = context.getGL( );
 
         // switch back to window-system-provided framebuffer
-        gl.glBindFramebufferEXT( GL.GL_FRAMEBUFFER_EXT, 0 );
+        gl.glBindFramebuffer( GL.GL_FRAMEBUFFER, 0 );
 
         // trigger mipmaps generation explicitly
         // NOTE: If GL_GENERATE_MIPMAP is set to GL_TRUE, then glCopyTexSubImage2D()
         // triggers mipmap generation automatically. However, the texture attached
         // onto a FBO should generate mipmaps manually via glGenerateMipmapEXT().
         gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
-        gl.glGenerateMipmapEXT( GL.GL_TEXTURE_2D );
+        gl.glGenerateMipmap( GL.GL_TEXTURE_2D );
         gl.glBindTexture( GL.GL_TEXTURE_2D, 0 );
     }
 
@@ -308,8 +309,8 @@ public class GLSimpleFrameBufferObject
 
         if ( textureId != null ) gl.glDeleteTextures( 1, textureId, 0 );
 
-        if ( renderBufferId != null ) gl.glDeleteRenderbuffersEXT( 2, renderBufferId, 0 );
+        if ( renderBufferId != null ) gl.glDeleteRenderbuffers( 2, renderBufferId, 0 );
 
-        if ( frameBufferId != null ) gl.glDeleteFramebuffersEXT( 1, frameBufferId, 0 );
+        if ( frameBufferId != null ) gl.glDeleteFramebuffers( 1, frameBufferId, 0 );
     }
 }

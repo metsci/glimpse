@@ -30,6 +30,7 @@ import java.awt.Font;
 
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -41,7 +42,6 @@ import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * A painter for displaying timeline axes. Axis values are interpreted as offsets

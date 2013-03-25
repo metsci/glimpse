@@ -26,8 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.HideAll;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.ShowAll;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -35,7 +38,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
@@ -45,7 +50,6 @@ import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Event represents an occurrence with a start and end time and is usually created
@@ -257,7 +261,7 @@ public class Event
         this.constraints.remove( constraint );
     }
 
-    public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
+    public void paint( GL2 gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
     {
         int size = sizeMax - sizeMin;
         double sizeCenter = sizeMin + size / 2.0;
@@ -305,7 +309,7 @@ public class Event
                 if ( showBackground )
                 {
                     GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-                    gl.glBegin( GL.GL_QUADS );
+                    gl.glBegin( GL2.GL_QUADS );
                     try
                     {
                         gl.glVertex2d( timeMin, sizeMin );
@@ -342,7 +346,7 @@ public class Event
                 if ( showBackground )
                 {
                     GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-                    gl.glBegin( GL.GL_POLYGON );
+                    gl.glBegin( GL2.GL_POLYGON );
                     try
                     {
                         gl.glVertex2d( arrowBaseMin, sizeMax );
@@ -476,7 +480,7 @@ public class Event
             //TODO handle drawing text and icons in HORIZONTAL orientation
 
             GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-            gl.glBegin( GL.GL_QUADS );
+            gl.glBegin( GL2.GL_QUADS );
             try
             {
                 gl.glVertex2d( sizeMin, timeMin );

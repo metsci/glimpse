@@ -31,6 +31,7 @@ import static java.lang.Math.round;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -56,7 +57,7 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
     }
 
     @Override
-    protected void paintTicks( GL gl, Axis1D axis, int width, int height )
+    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
     {
         double[] yTicks = ticks.getTickPositions( axis );
         String[] yLabels = ticks.getTickLabels( axis, yTicks );
@@ -145,7 +146,7 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
             textRenderer.beginRendering( width, height );
             try
             {
-                gl.glMatrixMode( GL.GL_PROJECTION );
+                gl.glMatrixMode( GL2.GL_PROJECTION );
                 gl.glTranslatef( iTickText, jTickText, 0 );
                 gl.glRotatef( -90, 0, 0, 1.0f );
 

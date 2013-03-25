@@ -27,6 +27,7 @@
 package com.metsci.glimpse.axis.tagged.painter;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.ColorXAxisPainter;
@@ -107,12 +108,12 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         {
             TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
 
-            GL gl = context.getGL( );
+            GL2 gl = context.getGL( ).getGL2();
 
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
@@ -128,7 +129,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         }
     }
 
-    protected void paintTags( GL gl, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTags( GL2 gl, TaggedAxis1D taggedAxis, int width, int height )
     {
         for ( Tag tag : taggedAxis.getSortedTags( ) )
         {
@@ -136,7 +137,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         }
     }
 
-    protected void paintTag( GL gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTag( GL2 gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
     {
         int x = taggedAxis.valueToScreenPixel( tag.getValue( ) );
         int yMin = getTagMinY( height );
@@ -156,7 +157,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
             gl.glEnd( );
         }
 
-        gl.glBegin( GL.GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             gl.glVertex2f( x - tagHalfWidth, yMax );

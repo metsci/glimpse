@@ -88,6 +88,7 @@ public class LandSegmentFactory
                     ghostVertices.add(new LandVertex(box.northLat, end.lon));
                     ghostVertices.add(new LandVertex(box.northLat, start.lon));
                     break;
+                case NONE:
             }
         }
         else if (startEdge.isAdjacent(endEdge))
@@ -103,6 +104,7 @@ public class LandSegmentFactory
                 case WEST:
                     ghostVertices.add(new LandVertex(end.lat, start.lon));
                     break;
+                case NONE:
             }
         }
 

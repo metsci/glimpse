@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.base;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -47,7 +48,7 @@ import com.metsci.glimpse.context.GlimpseContext;
  */
 public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
 {
-    public abstract void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis );
+    public abstract void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis );
 
     protected volatile boolean pointSmooth = true;
     protected volatile boolean lineSmooth = true;
@@ -88,9 +89,9 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
     {
         if ( axis == null || axis.getAxisX( ) == null || axis.getAxisY( ) == null || !bounds.isValid( ) ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
 
@@ -111,8 +112,8 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
         }
         
         if ( lineSmooth ) gl.glEnable( GL.GL_LINE_SMOOTH );
-        if ( pointSmooth ) gl.glEnable( GL.GL_POINT_SMOOTH );
+        if ( pointSmooth ) gl.glEnable( GL2.GL_POINT_SMOOTH );
 
-        paintTo( context.getGL( ), bounds, axis );
+        paintTo( context.getGL( ).getGL2(), bounds, axis );
     }
 }

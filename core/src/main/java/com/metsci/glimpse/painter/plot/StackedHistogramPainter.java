@@ -39,12 +39,13 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * Plots a simple frequency histogram. Binning of data can be handled
@@ -212,7 +213,7 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
 
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < numQuads * FLOATS_PER_BAR )
             {
-                dataBuffer = BufferUtil.newFloatBuffer( numQuads * FLOATS_PER_BAR );
+                dataBuffer = Buffers.newDirectFloatBuffer( numQuads * FLOATS_PER_BAR );
             }
 
             /*
@@ -311,7 +312,7 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( dataSeries == null || dataSeries.isEmpty( ) )
         {
@@ -347,12 +348,12 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
 
         gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
         gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         for ( HistogramEntry entry : dataSeries )
         {
             gl.glColor4fv( entry.color, 0 );
-            gl.glDrawArrays( GL.GL_QUADS, entry.quadsFloatStart, entry.numQuads * 4 );
+            gl.glDrawArrays( GL2.GL_QUADS, entry.quadsFloatStart, entry.numQuads * 4 );
         }
     }
 

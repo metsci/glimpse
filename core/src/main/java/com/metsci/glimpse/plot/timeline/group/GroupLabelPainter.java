@@ -26,12 +26,13 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
-import static javax.media.opengl.GL.GL_MODELVIEW;
-import static javax.media.opengl.GL.GL_PROJECTION;
+import static javax.media.opengl.GL2.GL_MODELVIEW;
+import static javax.media.opengl.GL2.GL_PROJECTION;
 
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -143,7 +144,7 @@ public class GroupLabelPainter extends GlimpsePainterImpl
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         gl.glMatrixMode( GL_PROJECTION );
         gl.glLoadIdentity( );
@@ -181,7 +182,7 @@ public class GroupLabelPainter extends GlimpsePainterImpl
             float centerY = height / 2.0f;
 
             // Paint Expand/Collapse Button
-            gl.glBegin( GL.GL_POLYGON );
+            gl.glBegin( GL2.GL_POLYGON );
             try
             {
                 if ( isExpanded )

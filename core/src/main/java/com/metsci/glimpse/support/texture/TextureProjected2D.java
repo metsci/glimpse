@@ -36,12 +36,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.support.projection.InvertibleProjection;
 import com.metsci.glimpse.support.projection.Projection;
-import com.sun.opengl.util.BufferUtil;
 
 public abstract class TextureProjected2D implements DrawableTexture
 {
@@ -114,7 +115,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         this.data = newByteBuffer( );
     }
 
-    protected abstract void prepare_setData( GL gl );
+    protected abstract void prepare_setData( GL2 gl );
 
     protected abstract int getRequiredCapacityBytes( );
 
@@ -203,7 +204,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     }
 
     @Override
-    public boolean prepare( GL gl, int texUnit )
+    public boolean prepare( GL2 gl, int texUnit )
     {
         // should we check for dirtiness and allocation before lock to speed up?
         lock.lock( );
@@ -242,7 +243,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     }
 
     @Override
-    public void draw( GL gl, int texUnit )
+    public void draw( GL2 gl, int texUnit )
     {
         boolean ready = prepare( gl, texUnit );
 
@@ -252,11 +253,11 @@ public abstract class TextureProjected2D implements DrawableTexture
             return;
         }
 
-        gl.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
-        gl.glPolygonMode( GL.GL_FRONT, GL.GL_FILL );
+        gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
+        gl.glPolygonMode( GL.GL_FRONT, GL2.GL_FILL );
 
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
-        gl.glEnableClientState( GL.GL_TEXTURE_COORD_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
 
         try
         {
@@ -271,14 +272,14 @@ public abstract class TextureProjected2D implements DrawableTexture
                 gl.glTexCoordPointer( 2, GL.GL_FLOAT, 0, 0 );
 
                 int vertexCount = VERTICES_PER_QUAD * texQuadCounts[i];
-                gl.glDrawArrays( GL.GL_QUADS, 0, vertexCount );
+                gl.glDrawArrays( GL2.GL_QUADS, 0, vertexCount );
             }
         }
         finally
         {
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
-            gl.glDisableClientState( GL.GL_VERTEX_ARRAY );
-            gl.glDisableClientState( GL.GL_TEXTURE_COORD_ARRAY );
+            gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+            gl.glDisableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
         }
     }
 
@@ -396,7 +397,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         for ( int i = 0; i < numTextures; i++ )
         {
             int projectFloats = texQuadCounts[i] * VERTICES_PER_QUAD * floatsPerVertex;
-            if ( coordBuffer == null || coordBuffer.capacity( ) < projectFloats ) coordBuffer = BufferUtil.newFloatBuffer( projectFloats );
+            if ( coordBuffer == null || coordBuffer.capacity( ) < projectFloats ) coordBuffer = Buffers.newDirectFloatBuffer( projectFloats );
 
             coordBuffer.rewind( );
             putVerticesCoords( i, texStartsX[i], texStartsY[i], texSizesX[i], texSizesY[i], temp );
@@ -483,16 +484,16 @@ public abstract class TextureProjected2D implements DrawableTexture
         gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
         gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
 
-        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP );
-        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP );
+        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
     }
 
     protected ByteBuffer newByteBuffer( )
     {
-        return BufferUtil.newByteBuffer( getRequiredCapacityBytes( ) );
+        return Buffers.newDirectByteBuffer( getRequiredCapacityBytes( ) );
     }
 
-    public boolean isResident( GL gl )
+    public boolean isResident( GL2 gl )
     {
         lock.lock( );
         try

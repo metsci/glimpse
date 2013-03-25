@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -171,12 +171,12 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         lock.lock( );
         try
         {
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
 
@@ -204,12 +204,12 @@ public class ShadedTexturePainter extends GlimpsePainter2D
         }
     }
 
-    protected void draw( TextureUnit<DrawableTexture> textureUnit, GL gl )
+    protected void draw( TextureUnit<DrawableTexture> textureUnit, GL2 gl )
     {
         textureUnit.texture.draw( gl, textureUnit.textureUnit );
     }
 
-    protected void prepare( TextureUnit<Texture> textureUnit, GL gl )
+    protected void prepare( TextureUnit<Texture> textureUnit, GL2 gl )
     {
         textureUnit.texture.prepare( gl, textureUnit.textureUnit );
     }

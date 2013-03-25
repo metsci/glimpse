@@ -27,6 +27,7 @@
 package com.metsci.glimpse.support.atlas.shader;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.shader.ShaderArg;
@@ -54,7 +55,7 @@ public class TextureAtlasIconShaderFragment extends Shader
     }
 
     @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public boolean preLink( GL2 gl, int glProgramHandle )
     {
         this.textureUnitArg = getArg( "tex" );
         this.textureUnitArg.setValue( textureUnit );

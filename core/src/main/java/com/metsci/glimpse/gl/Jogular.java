@@ -28,8 +28,10 @@ package com.metsci.glimpse.gl;
 
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.jnlu.NativeLibUtils;
+import com.metsci.glimpse.util.logging.LoggerUtils;
 
 import static com.metsci.glimpse.util.jnlu.FileUtils.*;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
@@ -48,10 +50,16 @@ import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
  * Use of this class may cause the creation of temporary files and/or directories.
  *
  * @author hogye
+ * 
+ * Deprecated this class. It will compile but nativeLibResourceSearchPath() 
+ * needs updating for particular jar one is using.
+ * 
+ * @author ttran17
  */
 public class Jogular
 {
-
+	private static final Logger logger = LoggerUtils.getLogger(Jogular.class);
+	
     public static final String jogularPlatformProperty = "jogular.platform";
 
     public static String joglPlatformString()
@@ -83,10 +91,11 @@ public class Jogular
 
     public static String nativeLibResourceSearchPath()
     {
+    	// TODO: this resource path isn't going to work with jogl-all-platforms jar ...
         return "META-INF/lib/" + joglPlatformString();
     }
 
-    public static class JogularLoaderAction implements com.sun.opengl.impl.NativeLibLoader.LoaderAction
+    public static class JogularLoaderAction implements com.jogamp.common.jvm.JNILibLoaderBase.LoaderAction
     {
         protected final String resourceSearchPath;
         protected File tempDir;
@@ -97,39 +106,47 @@ public class Jogular
             this.tempDir = null;
         }
 
-        @Override
-        public void loadLibrary(String libName, String[] preloads, boolean doPreload, boolean ignoreError)
-        {
-            if (doPreload)
+		@Override
+		public void loadLibrary(String libName, String[] preloads, boolean preloadIgnoreError, ClassLoader cl) 
+		{
+            if (preloads != null & preloads.length > 0)
             {
                 for (String preload : preloads)
                 {
                     try
                     {
-                        loadLibrary(preload);
+                        loadLibrary(preload, false, cl);
                     }
                     catch (UnsatisfiedLinkError e)
                     {
-                        if (!ignoreError && e.getMessage().contains("already loaded")) throw e;
+                        if (!preloadIgnoreError && e.getMessage().contains("already loaded")) throw e;
                     }
                 }
             }
 
-            loadLibrary(libName);
+            loadLibrary(libName, false, cl);
         }
 
-        public void loadLibrary(String libName)
-        {
+		@Override
+		public boolean loadLibrary(String libName, boolean ignoreError, ClassLoader cl) 
+		{
             try
             {
                 if (tempDir == null) tempDir = createTempDir("jogular");
                 NativeLibUtils.loadLibs(resourceSearchPath, tempDir, libName);
+                return true;
             }
             catch (Exception e)
             {
-                System.loadLibrary(libName);
+            	try {
+            		System.loadLibrary(libName);
+            		return true;
+            	} catch (Exception e2) {
+            		if (!ignoreError) throw e2;
+            	}
             }
-        }
+            return false;
+		}
     }
 
     /**
@@ -146,14 +163,44 @@ public class Jogular
         return true;
     }
 
+	/**
+	 * JOGL 2.0 claims:
+	 * 
+	 * JOGL 2.0 has a brand new feature allowing to automatically extract the proper native libraries 
+	 * required to use JOGL from JARs containing them without relying on the Java library path or any 
+	 * platform-dependent environment variable allowing to set the location of native libraries. 
+	 * <p>
+	 * This allows desktop applications as well as traditional Applets as traditional Applets to 
+	 * utilize the native library JAR files the same way Webstart/JNLP does.
+	 * <p>
+	 * To allow the native JAR file library loading to work, ensure that all JogAmp JAR files are left 
+	 * unmodified within their common directory. In case the native library JAR files cannot be opened, 
+	 * it falls back to the traditional native library loading mechanism via the java library path. 
+	 * <p>
+	 * This feature is enabled by default and - for whatever reason - it can be disabled by setting 
+	 * the property jogamp.gluegen.UseTempJarCache to false 
+	 * (as a VM argument, -Djogamp.gluegen.UseTempJarCache=false in command line).
+	 * 
+	 * @author ttran17
+	 */
+    @Deprecated
     public static void initJogl()
     {
+    	// JOGL 2.0 native lib loader is enabled by default
+    	// To turn it off, set the System property as shown below ...
+    	// System.setProperty("jogamp.gluegen.UseTempJarCache", "false");
+    	if ( com.jogamp.common.os.Platform.USE_TEMP_JAR_CACHE ) {
+    		LoggerUtils.logWarning(logger, "Jogular is deprecated. Using JOGL 2.0 built-in native lib loader functionality.");
+    		return;
+    	}
+    	LoggerUtils.logWarning(logger, "Jogular is deprecated. Next time, why not give JOGL 2.0 auto native lib loader a try?");
+    	
         JogularLoaderAction loader = new JogularLoaderAction(nativeLibResourceSearchPath());
 
         // There is no mechanism for customizing how gluegen loads its native lib,
         // so we have to do it manually.
         //
-        com.sun.gluegen.runtime.NativeLibLoader.disableLoading();
+        com.jogamp.common.jvm.JNILibLoaderBase.disableLoading();
 
         // Gluegen's native lib doesn't work under 64-bit Windows 7 (it depends on
         // msvcr80.dll). This version of gluegen is out of date, and unlikely to get
@@ -162,12 +209,13 @@ public class Jogular
         // Fortunately, the gluegen native lib is only used by the X11 implementation
         // of JOGL, so we don't have to load it at all on Windows.
         //
-        if (needGluegen()) loader.loadLibrary("gluegen-rt");
+        if (needGluegen()) loader.loadLibrary("gluegen-rt", false, null);
 
         // Use JOGL's LoaderAction mechanism to customize how JOGL's native
         // libs are loaded.
         //
-        com.sun.opengl.impl.NativeLibLoader.setLoadingAction(loader);
+        com.jogamp.common.jvm.JNILibLoaderBase.setLoadingAction(loader);
+        
     }
 
 }

@@ -48,6 +48,7 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -209,7 +210,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
     public PolygonPainter( )
     {
-        this.tessellator = new PolygonTessellator( glu );
+        this.tessellator = new PolygonTessellator( );
 
         this.groups = new LinkedHashMap<Integer, Group>( );
         this.updatedGroups = new LinkedHashSet<Group>( );
@@ -713,7 +714,7 @@ public class PolygonPainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         // something in a Group has changed so we must copy these
         // changes to the corresponding LoadedGroup (which is accessed
@@ -782,7 +783,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
         if ( loadedGroups.isEmpty( ) ) return;
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1 << 23, 1 );
 
@@ -790,7 +791,7 @@ public class PolygonPainter extends GlimpsePainter2D
         gl.glEnable( GL.GL_BLEND );
         gl.glEnable( GL.GL_LINE_SMOOTH );
 
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         for ( LoadedGroup loaded : loadedGroups.values( ) )
         {
@@ -918,7 +919,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    protected void drawGroup( GL gl, LoadedGroup loaded )
+    protected void drawGroup( GL2 gl, LoadedGroup loaded )
     {
         if ( !isGroupReady( loaded ) ) return;
 
@@ -928,7 +929,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             if ( loaded.polyStippleOn )
             {
-                gl.glEnable( GL.GL_POLYGON_STIPPLE );
+                gl.glEnable( GL2.GL_POLYGON_STIPPLE );
                 gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
             }
 
@@ -961,7 +962,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             if ( loaded.polyStippleOn )
             {
-                gl.glDisable( GL.GL_POLYGON_STIPPLE );
+                gl.glDisable( GL2.GL_POLYGON_STIPPLE );
             }
         }
 
@@ -972,7 +973,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             if ( loaded.lineStippleOn )
             {
-                gl.glEnable( GL.GL_LINE_STIPPLE );
+                gl.glEnable( GL2.GL_LINE_STIPPLE );
                 gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
             }
 
@@ -1005,7 +1006,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             if ( loaded.lineStippleOn )
             {
-                gl.glDisable( GL.GL_LINE_STIPPLE );
+                gl.glDisable( GL2.GL_LINE_STIPPLE );
             }
         }
     }

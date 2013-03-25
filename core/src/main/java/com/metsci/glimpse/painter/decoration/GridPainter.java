@@ -29,6 +29,7 @@ package com.metsci.glimpse.painter.decoration;
 import static java.lang.Integer.parseInt;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -144,14 +145,14 @@ public class GridPainter extends GlimpseDataPainter2D
     }
     
     // make the stipple look like it's translating during drags
-    protected void glLineStipple( GL gl, Axis1D axis, AxisUnitConverter converter )
+    protected void glLineStipple( GL2 gl, Axis1D axis, AxisUnitConverter converter )
     {
         int stipplePhase = ( int ) ( axis.valueToScreenPixelUnits( converter.fromAxisUnits( 0 ) ) ) % 4;
         stipplePhase = stipplePhase < 0 ? stipplePhase + 4 : stipplePhase;
         glLineStipple( gl, stipplePhase );
     }
     
-    protected void glLineStipple( GL gl, int stipplePhase )
+    protected void glLineStipple( GL2 gl, int stipplePhase )
     {
         switch ( stipplePhase )
         {
@@ -173,12 +174,12 @@ public class GridPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         // we want crisp lines
         gl.glDisable( GL.GL_LINE_SMOOTH );
-        gl.glDisable( GL.GL_POINT_SMOOTH );
-        if ( this.stipple ) gl.glEnable( GL.GL_LINE_STIPPLE );
+        gl.glDisable( GL2.GL_POINT_SMOOTH );
+        if ( this.stipple ) gl.glEnable( GL2.GL_LINE_STIPPLE );
 
         if ( ticksX == null || ticksY == null ) return;
 

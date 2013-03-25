@@ -30,11 +30,11 @@ import java.awt.Font;
 
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays a discrete copyright notice at the bottom of right corner of the screen.

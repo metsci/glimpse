@@ -33,15 +33,16 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays a text box which follows the cursor and displays the
@@ -223,15 +224,15 @@ public class CursorTextPainter extends GlimpsePainter2D
     {
         if ( textRenderer == null ) return;
         
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
         gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
@@ -242,7 +243,7 @@ public class CursorTextPainter extends GlimpsePainter2D
         String zText = getTextZ( axis );
 
         // Draw Coordinate Values
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glPushMatrix( );
         gl.glLoadIdentity( );
 
@@ -260,7 +261,7 @@ public class CursorTextPainter extends GlimpsePainter2D
 
         float[] corners = getCorners( axis, xBackBounds, yBackBounds, zBackBounds );
 
-        gl.glBegin( GL.GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             // CW from SW
@@ -306,7 +307,7 @@ public class CursorTextPainter extends GlimpsePainter2D
         {
             textRenderer.endRendering( );
 
-            gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glPopMatrix( );
         }
     }

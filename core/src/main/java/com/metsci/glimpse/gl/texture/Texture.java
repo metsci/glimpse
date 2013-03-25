@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 /**
@@ -83,7 +83,7 @@ public interface Texture
      * @param gl a GL handle for the active GLContext
      * @return whether this texture is resident in texture memory
      */
-    public boolean isResident( GL gl );
+    public boolean isResident( GL2 gl );
 
     /**
      * Allocates space for the texture in GPU texture memory (once, if this is the
@@ -99,7 +99,7 @@ public interface Texture
      * @param texUnit the texture unit to bind to this texture
      * @return whether the preparation succeeded
      */
-    public boolean prepare( GL gl, int texUnit );
+    public boolean prepare( GL2 gl, int texUnit );
 
     /**
      * Disposes all Java heap and GPU resources associated with this texture.

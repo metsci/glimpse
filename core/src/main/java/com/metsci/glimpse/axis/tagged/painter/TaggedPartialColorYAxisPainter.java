@@ -32,12 +32,13 @@ import java.nio.FloatBuffer;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * A vertical (y) axis painter which displays positions of tags in addition
@@ -58,7 +59,7 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
     }
 
     @Override
-    protected void paintColorScale( GL gl, Axis1D axis, int width, int height )
+    protected void paintColorScale( GL2 gl, Axis1D axis, int width, int height )
     {
         if ( colorTexture != null && axis instanceof TaggedAxis1D )
         {
@@ -68,30 +69,30 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
 
             int count = updateCoordinateBuffers( taggedAxis, width, height );
 
-            gl.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
-            gl.glPolygonMode( GL.GL_FRONT, GL.GL_FILL );
+            gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
+            gl.glPolygonMode( GL.GL_FRONT, GL2.GL_FILL );
 
-            gl.glEnable( GL.GL_TEXTURE_1D );
+            gl.glEnable( GL2.GL_TEXTURE_1D );
 
-            gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
-            gl.glEnableClientState( GL.GL_TEXTURE_COORD_ARRAY );
+            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+            gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
 
             gl.glVertexPointer( 2, GL.GL_FLOAT, 0, vertexCoords.rewind( ) );
             gl.glTexCoordPointer( 1, GL.GL_FLOAT, 0, textureCoords.rewind( ) );
 
             try
             {
-                gl.glDrawArrays( GL.GL_QUAD_STRIP, 0, count );
+                gl.glDrawArrays( GL2.GL_QUAD_STRIP, 0, count );
             }
             finally
             {
-                gl.glDisableClientState( GL.GL_VERTEX_ARRAY );
-                gl.glDisableClientState( GL.GL_TEXTURE_COORD_ARRAY );
-                gl.glDisable( GL.GL_TEXTURE_1D );
+                gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+                gl.glDisableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
+                gl.glDisable( GL2.GL_TEXTURE_1D );
             }
         }
 
-        gl.glDisable( GL.GL_TEXTURE_1D );
+        gl.glDisable( GL2.GL_TEXTURE_1D );
 
         outlineColorQuad( gl, axis, width, height );
     }
@@ -102,9 +103,9 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
 
         int size = tags.size( );
 
-        if ( vertexCoords == null || vertexCoords.capacity( ) < size * 4 ) vertexCoords = BufferUtil.newFloatBuffer( size * 4 );
+        if ( vertexCoords == null || vertexCoords.capacity( ) < size * 4 ) vertexCoords = Buffers.newDirectFloatBuffer( size * 4 );
 
-        if ( textureCoords == null || textureCoords.capacity( ) < size * 2 ) textureCoords = BufferUtil.newFloatBuffer( size * 2 );
+        if ( textureCoords == null || textureCoords.capacity( ) < size * 2 ) textureCoords = Buffers.newDirectFloatBuffer( size * 2 );
 
         vertexCoords.rewind( );
         textureCoords.rewind( );

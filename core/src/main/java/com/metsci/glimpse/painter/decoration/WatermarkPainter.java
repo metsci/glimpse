@@ -33,19 +33,22 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.support.texture.WatermarkTextureData;
 import com.metsci.glimpse.util.io.StreamOpener;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
 
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.sun.opengl.util.texture.TextureIO.*;
+import static com.jogamp.opengl.util.texture.TextureIO.*;
 import static java.lang.Math.*;
 import static javax.media.opengl.GL.*;
 
@@ -116,8 +119,21 @@ public class WatermarkPainter extends GlimpsePainterImpl
 
         try
         {
+        	logInfo( logger, "Creating TextureData for Watermark Image using old JOGL 1.1.1a code. Your mileage may vary ...");
             BufferedImage image = imageSupplier.get( );
-            texture = newTexture( new TextureData( 0, 0, false, image ) );
+            WatermarkTextureData w = new WatermarkTextureData(0, 0, false, image);
+            texture = newTexture( new TextureData(
+            		GLProfile.get(GLProfile.GL2), 
+            		w.getInternalFormat(), 
+            		w.getWidth(), 
+            		w.getHeight(), 
+            		w.getBorder(), 
+            		w.getPixelFormat(), 
+            		w.getPixelType(), 
+            		w.isDataCompressed(), 
+            		w.getMustFlipVertically(), 
+            		w.getMipmapData(), 
+            		w.getFlusher()) );
         }
         catch ( Exception e )
         {
@@ -157,9 +173,9 @@ public class WatermarkPainter extends GlimpsePainterImpl
         initIfNecessary( );
         if ( texture == null ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
-        gl.glMatrixMode( GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
 
@@ -167,22 +183,22 @@ public class WatermarkPainter extends GlimpsePainterImpl
         gl.glActiveTexture( GL.GL_TEXTURE0 );
         gl.glLoadIdentity( );
 
-        gl.glMatrixMode( GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
-        texture.setTexParameteri( GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-        texture.setTexParameteri( GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-        texture.enable( );
-        texture.bind( );
+        texture.setTexParameteri( gl, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        texture.setTexParameteri( gl, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        texture.enable( gl );
+        texture.bind( gl );
 
 
         // See the "Alpha premultiplication" section in Texture's class comment
         gl.glEnable( GL_BLEND );
         gl.glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        gl.glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        gl.glTexEnvi( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
 
-        gl.glBegin( GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             double[] quadGeometry = computeQuadGeometry( texture.getWidth( ), texture.getHeight( ), bounds.getWidth( ), bounds.getHeight( ) );
@@ -210,8 +226,7 @@ public class WatermarkPainter extends GlimpsePainterImpl
         finally
         {
             gl.glEnd( );
-            texture.disable( );
+            texture.disable( gl );
         }
     }
-
 }

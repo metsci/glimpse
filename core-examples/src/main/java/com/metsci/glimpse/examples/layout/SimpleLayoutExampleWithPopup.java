@@ -37,7 +37,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
@@ -52,8 +51,6 @@ public class SimpleLayoutExampleWithPopup
 
     public static void main( String[] args ) throws Exception
     {
-        Jogular.initJogl( );
-
         final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true );
         GlimpseLayout plot = buildPlot( canvas );
         canvas.addLayout( plot );

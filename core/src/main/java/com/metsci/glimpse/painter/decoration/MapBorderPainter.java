@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.decoration;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -99,7 +100,7 @@ public class MapBorderPainter extends GlimpsePainter2D
         outerColor = rgba;
     }
 
-    private void glDrawCorners( GL gl, int type, int width, int height )
+    private void glDrawCorners( GL2 gl, int type, int width, int height )
     {
         gl.glBegin( type );
         try
@@ -154,7 +155,7 @@ public class MapBorderPainter extends GlimpsePainter2D
         }
     }
 
-    private void glSetColor( GL gl, int i, boolean orient )
+    private void glSetColor( GL2 gl, int i, boolean orient )
     {
         if ( i % 2 == 0 )
         {
@@ -237,12 +238,12 @@ public class MapBorderPainter extends GlimpsePainter2D
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
         double[] xPositions = ticksX.getTickPositions( axis.getAxisX( ) );
@@ -258,7 +259,7 @@ public class MapBorderPainter extends GlimpsePainter2D
             int pos1X = axisX.valueToScreenPixel( xPositions[i] );
             int pos2X = i == xPositions.length - 1 ? width : axisX.valueToScreenPixel( xPositions[i + 1] );
 
-            gl.glBegin( GL.GL_POLYGON );
+            gl.glBegin( GL2.GL_POLYGON );
             try
             {
                 gl.glVertex2d( pos1X, borderSize );
@@ -273,7 +274,7 @@ public class MapBorderPainter extends GlimpsePainter2D
 
             glSetColor( gl, i, !orientX );
 
-            gl.glBegin( GL.GL_POLYGON );
+            gl.glBegin( GL2.GL_POLYGON );
             try
             {
                 gl.glVertex2d( pos1X, height - borderSize );
@@ -294,7 +295,7 @@ public class MapBorderPainter extends GlimpsePainter2D
             int pos1Y = axisY.valueToScreenPixel( yPositions[i] );
             int pos2Y = i == yPositions.length - 1 ? height : axisY.valueToScreenPixel( yPositions[i + 1] );
 
-            gl.glBegin( GL.GL_POLYGON );
+            gl.glBegin( GL2.GL_POLYGON );
             try
             {
                 gl.glVertex2d( borderSize, pos1Y );
@@ -309,7 +310,7 @@ public class MapBorderPainter extends GlimpsePainter2D
 
             glSetColor( gl, i, !orientY );
 
-            gl.glBegin( GL.GL_POLYGON );
+            gl.glBegin( GL2.GL_POLYGON );
             try
             {
                 gl.glVertex2d( width - borderSize, pos1Y );
@@ -324,7 +325,7 @@ public class MapBorderPainter extends GlimpsePainter2D
         }
 
         gl.glColor4fv( innerColor, 0 );
-        glDrawCorners( gl, GL.GL_POLYGON, width, height );
+        glDrawCorners( gl, GL2.GL_POLYGON, width, height );
 
         gl.glColor4fv( outerColor, 0 );
         glDrawCorners( gl, GL.GL_LINE_LOOP, width, height );

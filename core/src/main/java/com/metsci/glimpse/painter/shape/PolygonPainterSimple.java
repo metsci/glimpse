@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -70,7 +71,7 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
 
     public PolygonPainterSimple( )
     {
-        this.tessellator = new PolygonTessellator( glu );
+        this.tessellator = new PolygonTessellator( );
     }
 
     public void setShowOn( int[] ids )
@@ -243,7 +244,7 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         lock.lock( );
         try

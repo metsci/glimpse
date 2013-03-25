@@ -32,7 +32,6 @@ import javax.media.opengl.GLContext;
 import javax.swing.JFrame;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
@@ -75,8 +74,6 @@ public class Example
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
-        Jogular.initJogl( );
-
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
         final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, context );
 
@@ -107,8 +104,6 @@ public class Example
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
-        Jogular.initJogl( );
-
         SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( true );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 

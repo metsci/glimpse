@@ -37,48 +37,46 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop;
 
 public class PolygonTessellator
 {
-    private final GLU glu;
     private final GLUtessellator tess;
     private final TessellatorCallback tessCallback;
 
-    public PolygonTessellator( GLU glu )
+    public PolygonTessellator( )
     {
-        this.glu = glu;
-        this.tess = glu.gluNewTess( );
+        this.tess = GLU.gluNewTess( );
 
-        glu.gluTessProperty( tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD );
+        GLU.gluTessProperty( tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD );
 
         tessCallback = new TessellatorCallback( );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_BEGIN, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_END, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_VERTEX, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_COMBINE, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_EDGE_FLAG, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_ERROR, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_BEGIN, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_END, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_VERTEX, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_COMBINE, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_EDGE_FLAG, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_ERROR, tessCallback );
     }
 
     public final int tessellate( Polygon poly, VertexAccumulator accumulator ) throws TessellationException
     {
         tessCallback.reset( accumulator );
-        glu.gluTessBeginPolygon( tess, null );
+        GLU.gluTessBeginPolygon( tess, null );
 
         Iterator<Loop> loops = poly.getIterator( );
         while ( loops.hasNext( ) )
         {
-            glu.gluTessBeginContour( tess );
+        	GLU.gluTessBeginContour( tess );
 
             Loop loop = loops.next( );
             for ( int i = 0, n = loop.size( ); i < n; i++ )
             {
                 double[] p = loop.get( i );
-                glu.gluTessVertex( tess, p, 0, p );
+                GLU.gluTessVertex( tess, p, 0, p );
                 tessCallback.checkErrorFlag( );
             }
 
-            glu.gluTessEndContour( tess );
+            GLU.gluTessEndContour( tess );
         }
 
-        glu.gluTessEndPolygon( tess );
+        GLU.gluTessEndPolygon( tess );
         tessCallback.checkErrorFlag( );
 
         return tessCallback.getNumTrianglesGenerated( );
@@ -86,7 +84,7 @@ public class PolygonTessellator
 
     public final void destroy( )
     {
-        glu.gluDeleteTess( tess );
+    	GLU.gluDeleteTess( tess );
     }
 
     private static class TessellatorCallback implements GLUtessellatorCallback

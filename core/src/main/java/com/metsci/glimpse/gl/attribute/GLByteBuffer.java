@@ -28,7 +28,7 @@ package com.metsci.glimpse.gl.attribute;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 public class GLByteBuffer extends GLBuffer
 {
@@ -46,6 +46,6 @@ public class GLByteBuffer extends GLBuffer
     @Override
     public int getBytesPerElement( )
     {
-        return BufferUtil.SIZEOF_BYTE;
+        return Buffers.SIZEOF_BYTE;
     }
 }

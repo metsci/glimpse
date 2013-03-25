@@ -37,7 +37,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -45,7 +47,6 @@ import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays a simple color based legend floating on top of the plot.
@@ -229,7 +230,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         this.itemWidth = width;
     }
 
-    private void displayLegend( GL gl, int width, int height )
+    private void displayLegend( GL2 gl, int width, int height )
     {
         //Figure out dimensions and position
         int lw = 0;
@@ -247,7 +248,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
         //draw a white box and black border
         gl.glColor4fv( GlimpseColor.getWhite( ), 0 );
-        gl.glBegin( GL.GL_POLYGON );
+        gl.glBegin( GL2.GL_POLYGON );
         try
         {
             gl.glVertex2f( lx, ly );
@@ -348,7 +349,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
     }
 
-    protected abstract void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height );
+    protected abstract void drawLegendItem( GL2 gl, String label, int xpos, int ypos, float[] rgba, int height );
 
     public static class BlockLegendPainter extends LegendPainter
     {
@@ -358,10 +359,10 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
 
         @Override
-        protected void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height )
+        protected void drawLegendItem( GL2 gl, String label, int xpos, int ypos, float[] rgba, int height )
         {
             gl.glColor4fv( rgba, 0 );
-            gl.glBegin( GL.GL_POLYGON );
+            gl.glBegin( GL2.GL_POLYGON );
             try
             {
                 gl.glVertex2d( xpos, ypos );
@@ -388,19 +389,19 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
 
         @Override
-        protected void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height )
+        protected void drawLegendItem( GL2 gl, String label, int xpos, int ypos, float[] rgba, int height )
         {
             gl.glColor4fv( rgba, 0 );
 
             LineLegendPainterItem item = items.get( label );
             if ( item.doStipple )
             {
-                gl.glEnable( GL.GL_LINE_STIPPLE );
+                gl.glEnable( GL2.GL_LINE_STIPPLE );
                 gl.glLineStipple( item.stippleFactor, item.stipplePattern );
             }
             else
             {
-                gl.glDisable( GL.GL_LINE_STIPPLE );
+                gl.glDisable( GL2.GL_LINE_STIPPLE );
             }
             gl.glLineWidth( item.lineWidth );
             gl.glBegin( GL.GL_LINE_STRIP );
@@ -485,21 +486,21 @@ public abstract class LegendPainter extends GlimpsePainter2D
         
         if ( textRenderer == null ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
         gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_BLEND );
         gl.glEnable( GL.GL_LINE_SMOOTH );
-        gl.glEnable( GL.GL_POINT_SMOOTH );
+        gl.glEnable( GL2.GL_POINT_SMOOTH );
 
         if ( isVisible( ) && !list.isEmpty( ) )
         {

@@ -32,6 +32,7 @@ import java.util.EnumSet;
 import java.util.Random;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
@@ -133,7 +134,7 @@ public class GeometryShaderExample implements GlimpseLayoutProvider
             int nRandom = 1000;
 
             @Override
-            public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axes )
+            public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axes )
             {
                 {
                     RGBA color = colors[2];

@@ -44,8 +44,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -56,7 +58,6 @@ import com.metsci.glimpse.support.selection.SpatialSelectionAxisListener;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.metsci.glimpse.support.selection.TemporalSelectionListener;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Paints groups of line segments of points with associated timestamps.
@@ -994,7 +995,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
 
         int width = bounds.getWidth( );
@@ -1101,7 +1102,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         if ( loadedTracks.isEmpty( ) ) return;
 
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         boolean labelOn = false;
 
@@ -1122,7 +1123,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
                 if ( loaded.stippleOn )
                 {
-                    gl.glEnable( GL.GL_LINE_STIPPLE );
+                    gl.glEnable( GL2.GL_LINE_STIPPLE );
                     gl.glLineStipple( loaded.stippleFactor, loaded.stipplePattern );
                 }
 
@@ -1130,7 +1131,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
                 if ( loaded.stippleOn )
                 {
-                    gl.glDisable( GL.GL_LINE_STIPPLE );
+                    gl.glDisable( GL2.GL_LINE_STIPPLE );
                 }
             }
 
@@ -1181,10 +1182,10 @@ public class TrackPainter extends GlimpseDataPainter2D
                 fontRenderer.endRendering( );
             }
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( 0, width, 0, height, -1, 1 );
-            gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glLoadIdentity( );
 
             for ( LoadedTrack loaded : loadedTracks.values( ) )

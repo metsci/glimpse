@@ -29,6 +29,7 @@ package com.metsci.glimpse.support.shader;
 import java.io.IOException;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -139,7 +140,7 @@ public class SimplePointShader extends Shader
     }
 
     @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public boolean preLink( GL2 gl, int glProgramHandle )
     {
         gl.glBindAttribLocation( glProgramHandle, colorAttributeIndex, "valColor" );
         gl.glBindAttribLocation( glProgramHandle, sizeAttributeIndex, "valSize" );

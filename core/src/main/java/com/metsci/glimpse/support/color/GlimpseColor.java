@@ -30,8 +30,9 @@ import java.awt.Color;
 import java.text.ParseException;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * A simple color utility class for converting various color wrapper classes/formats
@@ -155,13 +156,13 @@ public class GlimpseColor
     }
 
     // a convenience method wrapper for glColor4fv
-    public static void glColor( GL gl, float[] color )
+    public static void glColor( GL2 gl, float[] color )
     {
         gl.glColor4fv( color, 0 );
     }
 
     // a convenience method wrapper for glColor4fv (with alpha override)
-    public static void glColor( GL gl, float[] color, float alphaOverride )
+    public static void glColor( GL2 gl, float[] color, float alphaOverride )
     {
         gl.glColor4f( color[0], color[1], color[2], alphaOverride );
     }

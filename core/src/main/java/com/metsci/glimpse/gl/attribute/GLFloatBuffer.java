@@ -30,7 +30,7 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 public class GLFloatBuffer extends GLBuffer
 {
@@ -48,7 +48,7 @@ public class GLFloatBuffer extends GLBuffer
     @Override
     public int getBytesPerElement( )
     {
-        return BufferUtil.SIZEOF_FLOAT;
+        return Buffers.SIZEOF_FLOAT;
     }
 
     public void mutate( Mutator mutator )

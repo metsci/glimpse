@@ -31,14 +31,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
+import com.jogamp.opengl.util.gl2.GLUT;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.sun.opengl.util.GLUT;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays text annotations at specified locations on a plot.
@@ -391,7 +391,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );

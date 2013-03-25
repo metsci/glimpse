@@ -36,9 +36,9 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.awt.GLCanvas;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -325,11 +325,12 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 }
             }
 
-            @Override
-            public void displayChanged( GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged )
-            {
-                // do nothing
-            }
+			@Override
+			public void dispose(GLAutoDrawable drawable) {
+				// TODO Auto-generated method stub -- what to do? --ttran17
+			    //      Looks like in JOGL 2.0 you can dispose of the layouts
+				//      here but who knows ...
+			}
         } );
     }
 

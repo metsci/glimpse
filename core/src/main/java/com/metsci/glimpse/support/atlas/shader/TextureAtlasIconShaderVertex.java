@@ -29,6 +29,7 @@ package com.metsci.glimpse.support.atlas.shader;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.shader.ShaderType;
@@ -59,7 +60,7 @@ public class TextureAtlasIconShaderVertex extends Shader
     //@formatter:on
 
     @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public boolean preLink( GL2 gl, int glProgramHandle )
     {
         gl.glBindAttribLocation( glProgramHandle, pixelCoordsAttributeIndex, "pixelCoords" );
         gl.glBindAttribLocation( glProgramHandle, texCoordsAttributeIndex, "texCoords" );

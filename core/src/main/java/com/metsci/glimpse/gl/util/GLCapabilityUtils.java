@@ -33,6 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 
 
@@ -63,13 +65,13 @@ public class GLCapabilityUtils
         int gBits = queryGLInteger( GL.GL_GREEN_BITS, gl );
         int bBits = queryGLInteger( GL.GL_BLUE_BITS, gl );
         int aBits = queryGLInteger( GL.GL_ALPHA_BITS, gl );
-        int iBits = queryGLInteger( GL.GL_INDEX_BITS, gl );
+        int iBits = queryGLInteger( GL2.GL_INDEX_BITS, gl );
         int dBits = queryGLInteger( GL.GL_DEPTH_BITS, gl );
         int sBits = queryGLInteger( GL.GL_STENCIL_BITS, gl );
-        int arBits = queryGLInteger( GL.GL_ACCUM_RED_BITS, gl );
-        int agBits = queryGLInteger( GL.GL_ACCUM_GREEN_BITS, gl );
-        int abBits = queryGLInteger( GL.GL_ACCUM_BLUE_BITS, gl );
-        int aaBits = queryGLInteger( GL.GL_ACCUM_ALPHA_BITS, gl );
+        int arBits = queryGLInteger( GL2.GL_ACCUM_RED_BITS, gl );
+        int agBits = queryGLInteger( GL2.GL_ACCUM_GREEN_BITS, gl );
+        int abBits = queryGLInteger( GL2.GL_ACCUM_BLUE_BITS, gl );
+        int aaBits = queryGLInteger( GL2.GL_ACCUM_ALPHA_BITS, gl );
         int totalBits = iBits + rBits + gBits + bBits + aBits + arBits + agBits + abBits + aaBits + dBits + sBits;
 
         log(logger, level, "%sbuffer-properties: %2d bits depth", prefix, dBits );
@@ -85,10 +87,10 @@ public class GLCapabilityUtils
         log(logger, level, "%sbuffer-properties: %2d bits accum alpha", prefix, aaBits );
         log(logger, level, "%sbuffer-properties: %d bits TOTAL", prefix, totalBits );
 
-        boolean isDoubleBuffered = queryGLBoolean( GL.GL_DOUBLEBUFFER, gl );
+        boolean isDoubleBuffered = queryGLBoolean( GL2.GL_DOUBLEBUFFER, gl );
         log(logger, level, "%sbuffer-properties: %s double buffered", prefix, isDoubleBuffered ? "is" : "is NOT" );
 
-        boolean isStereo = queryGLBoolean( GL.GL_STEREO, gl );
+        boolean isStereo = queryGLBoolean( GL2.GL_STEREO, gl );
         log(logger, level, "%sbuffer-properties: %s stereo", prefix, isStereo ? "is" : "is NOT" );
     }
 
@@ -188,7 +190,7 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxVertexAttributes( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_VERTEX_ATTRIBS, gl );
+        return queryGLInteger( GL2.GL_MAX_VERTEX_ATTRIBS, gl );
     }
 
     /**
@@ -197,7 +199,8 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxGeometryShaderOutput( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT, gl );
+    	// TODO: Figure out this GLProfile business -- ttran17
+        return queryGLInteger( GL3.GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, gl );
     }
 
     /**
@@ -217,17 +220,17 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxTextureBufferSize( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_TEXTURE_BUFFER_SIZE_EXT, gl );
+        return queryGLInteger( GL2.GL_MAX_TEXTURE_BUFFER_SIZE, gl );
     }
 
     public static int getGLMaxElementsIndices( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_ELEMENTS_INDICES, gl );
+        return queryGLInteger( GL2.GL_MAX_ELEMENTS_INDICES, gl );
     }
 
     public static int getGLMaxElementsVertices( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_ELEMENTS_VERTICES, gl );
+        return queryGLInteger( GL2.GL_MAX_ELEMENTS_VERTICES, gl );
     }
 
 
@@ -263,7 +266,7 @@ public class GLCapabilityUtils
      */
     public static String getGLShaderVersionString( GL gl )
     {
-        return gl.glGetString( GL.GL_SHADING_LANGUAGE_VERSION );
+        return gl.glGetString( GL2.GL_SHADING_LANGUAGE_VERSION );
     }
 
     /**

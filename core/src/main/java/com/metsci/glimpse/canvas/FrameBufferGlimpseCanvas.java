@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.texture.Texture;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
@@ -49,7 +50,6 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
-import com.sun.opengl.util.texture.Texture;
 
 /**
  * An offscreen GlimpseCanvas which renders its

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.atlas.support;
 
-import com.sun.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 /**
  * Metadata for each image in the TextureAtlas. Used to store data about images which

@@ -27,6 +27,8 @@
 package com.metsci.glimpse.support.shader.geometry;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.gl.shader.ShaderType;
 
@@ -103,13 +105,14 @@ public class SimpleGeometryShader extends SimpleShader
     }
 
     @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public boolean preLink( GL2 gl, int glProgramHandle )
     {
-        gl.glProgramParameteriEXT( glProgramHandle, GL.GL_GEOMETRY_INPUT_TYPE_EXT, inType );
+    	// TODO: GL2 vs. GL3 -- don't think it matters here --ttran17
+        gl.glProgramParameteri( glProgramHandle, GL3.GL_GEOMETRY_INPUT_TYPE, inType );
         logGlError( gl );
-        gl.glProgramParameteriEXT( glProgramHandle, GL.GL_GEOMETRY_OUTPUT_TYPE_EXT, outType );
+        gl.glProgramParameteri( glProgramHandle, GL3.GL_GEOMETRY_OUTPUT_TYPE, outType );
         logGlError( gl );
-        gl.glProgramParameteriEXT( glProgramHandle, GL.GL_GEOMETRY_VERTICES_OUT_EXT, maxVertices );
+        gl.glProgramParameteri( glProgramHandle, GL3.GL_GEOMETRY_VERTICES_OUT, maxVertices );
         logGlError( gl );
         return true;
     }

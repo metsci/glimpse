@@ -44,9 +44,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.google.common.collect.SetMultimap;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -60,7 +61,6 @@ import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Paints 1D events with associated color, time span, icon, and label information.
@@ -666,7 +666,7 @@ public class EventPainter extends GlimpseDataPainter1D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis1D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis1D axis )
     {
         int height = bounds.getHeight( );
         int width = bounds.getWidth( );

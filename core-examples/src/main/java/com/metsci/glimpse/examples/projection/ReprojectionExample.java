@@ -12,7 +12,6 @@ import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -37,8 +36,6 @@ public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Jogular.initJogl( );
-
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
         final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, context );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );

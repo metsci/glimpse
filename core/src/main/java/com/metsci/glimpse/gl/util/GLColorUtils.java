@@ -26,29 +26,29 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.support.color.RGBA;
 
 
 public class GLColorUtils
 {
-    public static void setClearColor( GL gl, RGBA color )
+    public static void setClearColor( GL2 gl, RGBA color )
     {
         gl.glClearColor( color.r, color.g, color.b, color.a );
     }
 
-    public static void setColor3f( GL gl, RGBA color )
+    public static void setColor3f( GL2 gl, RGBA color )
     {
         gl.glColor3f( color.r, color.g, color.b );
     }
 
-    public static void setColor4f( GL gl, RGBA color )
+    public static void setColor4f( GL2 gl, RGBA color )
     {
         gl.glColor4f( color.r, color.g, color.b, color.a );
     }
 
-    public static void setColor4f( GL gl, RGBA color, float a )
+    public static void setColor4f( GL2 gl, RGBA color, float a )
     {
         gl.glColor4f( color.r, color.g, color.b, a );
     }

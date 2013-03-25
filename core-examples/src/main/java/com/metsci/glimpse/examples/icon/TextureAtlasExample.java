@@ -31,7 +31,7 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
@@ -88,7 +88,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
         }
 
         @Override
-        public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+        public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
         {
             this.atlas.beginRendering( );
             try
