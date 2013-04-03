@@ -31,6 +31,20 @@ a variety of licenses. Most are BSD, LGPL, or Apache 2.0 and all allow
 distribution of binary jars. The following enumerates the various Glimpse 
 dependencies and their licences.
 
+
+-----------------------------------------------------------------------------
+
+NASA WorldWind is released under the NOSA license.
+
+The full text of the license is available at:
+
+http://ti.arc.nasa.gov/opensource/nosa/
+
+The following Glimpse files are modified from WorldWind source files:
+
+extras-worldwind/src/main/java/com/metsci/glimpse/worldwind/tile/ElevatedSectorGeometryList.java
+extras-worldwind/src/main/java/com/metsci/glimpse/worldwind/tile/ElevatedSurfaceTileRenderer.java
+
 -----------------------------------------------------------------------------
 
 The following file:
