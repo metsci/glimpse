@@ -1,0 +1,14 @@
+---
+layout: default
+title: Glimpse 1.3.2 Release
+---
+
+<p>Glimpse 1.3.2 includes timeline bug fixes and new timeline functionality.</p>
+
+<p>Timeline events are (optionally) aggregated into a single event when the timeline is zoomed out far enough. Tooltips and miniature icons identify the constituent events.</p>
+
+<p>Timeline plots can be rearragned by clicking and dragging on their label area.</p>
+
+<center><img src="/glimpse/images/EventAggregation2.png" border="1" width="600px"/></center>
+
+<center><img src="/glimpse/images/EventAggregation1.png" border="1" width="600px"/></center>
