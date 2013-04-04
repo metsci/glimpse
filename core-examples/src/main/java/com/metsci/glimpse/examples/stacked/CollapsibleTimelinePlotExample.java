@@ -39,19 +39,19 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -72,6 +72,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         // use the ocean look and feel
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+
+        new DragManager( ( CollapsibleTimePlot2D ) example.getLayout( ), example.getManager( ) );
     }
 
     @Override
@@ -84,7 +86,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     public StackedTimePlot2D getLayout( )
     {
         final CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
-
+        
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
@@ -94,12 +96,12 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             GroupInfo group = plot.createGroup( String.format( "%s-group", row.getId( ) ), row );
 
             // set labels
-            row.getLabelPainter( ).setText( "Label Here"  );
+            row.getLabelPainter( ).setText( "Label Here" );
             group.setLabelText( "Group Name" );
 
             setPlotLookAndFeel( row );
         }
-        
+
         // create a 1D timeline to display event durations
         final EventPlotInfo events1 = plot.createEventPlot( "event-1" );
         EventPlotInfo events2 = plot.createEventPlot( "event-2" );
@@ -141,8 +143,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Epoch e = plot.getEpoch( );
         TimeStamp t0 = e.toTimeStamp( 0 );
 
-        // add some events
+        // add some events and set their display characteristics
         Event e0 = events1.addEvent( "Wax Shell", t0, t0.add( Time.fromMinutes( 20 ) ) );
+        e0.setShowBackground( false );
         events1.addEvent( "Spread Slime On Stuff", t0.add( Time.fromMinutes( 30 ) ), t0.add( Time.fromMinutes( 200 ) ) );
         Event e1 = events1.addEvent( "Chill", t0.add( Time.fromMinutes( 290 ) ), t0.add( Time.fromMinutes( 320 ) ) );
         e1.setBackgroundColor( GlimpseColor.getRed( 0.6f ) );
@@ -151,16 +154,31 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         Event e3 = events1.addEvent( "Sunny", t0.add( Time.fromMinutes( 100 ) ), t0.add( Time.fromMinutes( 300 ) ) );
         Event e4 = events1.addEvent( "Wake Up", t0.subtract( Time.fromMinutes( 40 ) ) );
 
-        e0.setShowBackground( false );
+        // add some events to the other event timeline
+        events2.addEvent( "Event 1", t0.add( Time.fromMinutes( -250 ) ), t0.add( Time.fromMinutes( -240 ) ) );
+        events2.addEvent( "Event 2", t0.add( Time.fromMinutes( -220 ) ), t0.add( Time.fromMinutes( -200 ) ) );
+        events2.addEvent( "Event 3", t0.add( Time.fromMinutes( -170 ) ), t0.add( Time.fromMinutes( -100 ) ) );
 
+        events1.setAggregateNearbyEvents( true );
+        events2.setAggregateNearbyEvents( true );
+        
         // add constraints on how the user can adjust the various events
         e0.setEndTimeMoveable( false );
         e1.setResizeable( false );
         e2.setMinTimeSpan( Time.fromMinutes( 100 ) );
         e3.setMaxTimeSpan( Time.fromMinutes( 500 ) );
-        
+
+        // cause clicks which hit no events to deselect all selected events
+        events1.getEventSelectionHandler( ).setClearSelectionOnClick( true );
+
+        // make the "Cloudy" even unselectable
+        e2.setSelectable( false );
+
         // fix the "Cloudy" event on row 2
         e2.setFixedRow( 2 );
+        
+        // recalculate the positions of events
+        events1.validate( );
 
         // load icons into the texture atlas for the plot
         TextureAtlas atlas = plot.getTextureAtlas( );
@@ -198,13 +216,13 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             @Override
             public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                logInfo( logger, "Events Hovered: %s Time: %s", events, time );
+                if ( !events.isEmpty( ) ) logInfo( logger, "Events Hovered: %s Time: %s", events, time );
             }
 
             @Override
             public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
             {
-                logInfo( logger, "Events Clicked: %s Time: %s", events, time );
+                if ( !events.isEmpty( ) ) logInfo( logger, "Events Clicked: %s Time: %s", events, time );
             }
 
             @Override
@@ -226,24 +244,30 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             }
         } );
 
-        // use middle click to switch between stacking and not stacking events (just for demonstration purposes)
-        plot.getOverlayLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
+        // add a listener for notifications of event selections and deselections
+        plot.getEventSelectionHander( ).addEventSelectionListener( new EventSelectionListener( )
         {
             @Override
-            public void mousePressed( GlimpseMouseEvent event )
+            public void eventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents )
             {
-                if ( event.isButtonDown( MouseButton.Button2 ) )
-                {
-                    events1.setStackOverlappingEvents( !events1.isStackOverlappingEvents( ) );
-                }
+                logInfo( logger, "Selected: %s%nDeselected: %s", selectedEvents, deselectedEvents );
             }
         } );
+
+        // events may be selected by clicking on them (normally this has no visible effect)
+        // here we cause the border of selected events to become thicker
+        // the border or background color may also be set to change for selected events
+        // in addition, client code may use the eventsSelected() callback of EventPlotListener
+        // to make arbitrary display changes to selected events (in this case the client code
+        // is also responsible for resetting the event display characteristics when it is deselected
+        events1.getEventSelectionHandler( ).setSelectedEventBorderThickness( 3.0f );
 
         // replace the default StackedTimePlot2D mouse listener behavior with
         // the default tagged axis behavior (the selected area will not follow
         // the mouse, but the user can move it by clicking and dragging inside
         // the selected area)
         plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
+        
         // don't draw text indicating whether the selection is locked
         plot.getSelectedTimePainter( ).setShowLockedStatus( false );
 

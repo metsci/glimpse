@@ -33,6 +33,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
@@ -62,15 +63,30 @@ public class GlimpseMouseEvent
 
     public GlimpseMouseEvent( GlimpseTargetStack stack, int x, int y , int wheelIncrement )
     {
-        this( stack, EnumSet.noneOf( ModifierKey.class ), EnumSet.noneOf( MouseButton.class ), x, y, wheelIncrement, 0 );
+        this( stack, EnumSet.noneOf( ModifierKey.class ), EnumSet.noneOf( MouseButton.class ), x, y, wheelIncrement, 0, false );
     }
 
     public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y )
     {
-        this( stack, modifiers, buttons, x, y, 0, 0 );
+        this( stack, modifiers, buttons, x, y, 0, 0, false );
     }
 
+    public GlimpseMouseEvent( GlimpseMouseEvent event )
+    {
+        this( TargetStackUtil.newTargetStack( event.stack ), EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), event.x, event.y, event.wheelIncrement, event.clickCount, event.handled );
+    }
+    
+    public GlimpseMouseEvent( GlimpseMouseEvent event, GlimpseTargetStack stack, int x, int y )
+    {
+        this( stack, EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), x, y, event.wheelIncrement, event.clickCount, event.handled );
+    }
+    
     public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, int wheelIncrement, int clickCount )
+    {
+        this( stack, modifiers, buttons, x, y, wheelIncrement, clickCount, false );
+    }
+    
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, int wheelIncrement, int clickCount, boolean handled )
     {
         super( );
         this.stack = stack;

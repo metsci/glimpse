@@ -1,3 +1,29 @@
+/*
+ * Copyright (c) 2012, Metron, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Metron, Inc. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.metsci.glimpse.worldwind.tile;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
@@ -94,6 +120,14 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         reprojectCanvas.resize( width, height );
         updateProjection( width, height );
     }
+    
+    @Override
+    protected void setTextureScale( TextureSurfaceTile tile, float scaleX, float scaleY )
+    {
+        // do nothing -- keep the TextureSurfaceTile scale at 1.0
+        // (GlimpseReprojectingSurfaceTile fills the entire canvas
+        //  when it reprojects the offscreen rendered texture)
+    }
 
     protected void updateProjection( int width, int height )
     {
@@ -105,7 +139,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         // the scene was drawn onto the offscreenCanvas using the bounds specified by axes
         // create a projection which allows us to map to axis coordinates given
         // a 0.0 to 1.0 relative coordinate in the offscreenCanvas texture
-        FlatProjection flat = new FlatProjection( axes );
+        FlatProjection flat = new FlatProjection( axes, 0, scaleX, 0, scaleY );
 
         // build the reprojection (an instance of com.metsci.glimpse.support.projection.Projection)
         reproject = new GeoReprojection( flat, projection, projectionTo, REPROJECT_DISCRETIZE_FRACTION );
@@ -135,12 +169,24 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 
             GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
             Dimension dim = fbo.getDimension( );
-            int width = (int) dim.getWidth( );
-            int height = (int) dim.getHeight( );
+            int width = ( int ) dim.getWidth( );
+            int height = ( int ) dim.getHeight( );
             int texHandle = fbo.getTextureId( );
-            
+
             texture = new ExternalTextureProjected2D( texHandle, width, height, false )
             {
+                @Override
+                protected void putVertexCoords( int texIndex, double texFracX, double texFracY, float[] temp )
+                {
+                    super.putVertexCoords( texIndex, ( float ) texFracX * scaleX, ( float ) texFracY * scaleY, temp );
+                }
+                
+                @Override
+                protected void putVertexTexCoords( int texIndex, double texFracX, double texFracY )
+                {
+                    super.putVertexTexCoords( texIndex, ( float ) texFracX * scaleX, ( float ) texFracY * scaleY );
+                }
+                
                 @Override
                 protected void prepare_glState( GL gl )
                 {
@@ -148,7 +194,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
                     gl.glDisable( GL.GL_BLEND );
                 }
             };
-            
+
             texturePainter.removeAllDrawableTextures( );
             texturePainter.addDrawableTexture( texture );
 
@@ -171,6 +217,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         stack.pushAttrib( gl, GL.GL_ALL_ATTRIB_BITS );
         stack.pushClientAttrib( gl, ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
         stack.pushTexture( gl );
+        gl.glLoadIdentity();
         stack.pushModelview( gl );
         stack.pushProjection( gl );
 

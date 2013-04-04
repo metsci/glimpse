@@ -78,7 +78,7 @@ public class ContourData
 
         for ( int i = 0; i < imageHeight; i++ )
         {
-            latitudes[i] = startLat + i * heightStep;
+            latitudes[i] = startLat + ( i + 0.5 ) * heightStep;
         }
 
         return latitudes;
@@ -94,7 +94,7 @@ public class ContourData
 
         for ( int i = 0; i < imageWidth; i++ )
         {
-            longitudes[i] = startLon + i * widthStep;
+            longitudes[i] = startLon + ( i + 0.5 ) * widthStep;
         }
 
         return longitudes;

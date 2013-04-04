@@ -33,6 +33,7 @@ import javax.swing.JFrame;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.gl.Jogular;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
@@ -49,13 +50,15 @@ public class Example
     private SwingGlimpseCanvas canvas;
     private RepaintManager manager;
     private JFrame frame;
+    private GlimpseLayout layout;
 
-    public Example( SwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame )
+    public Example( SwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
     {
         super( );
         this.canvas = canvas;
         this.manager = manager;
         this.frame = frame;
+        this.layout = layout;
     }
 
     public SwingGlimpseCanvas getCanvas( )
@@ -72,6 +75,11 @@ public class Example
     {
         return frame;
     }
+    
+    public GlimpseLayout getLayout( )
+    {
+        return layout;
+    }
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
@@ -80,7 +88,8 @@ public class Example
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
         final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, context );
 
-        canvas.addLayout( layoutProvider.getLayout( ) );
+        GlimpseLayout layout = layoutProvider.getLayout( );
+        canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
@@ -102,7 +111,7 @@ public class Example
             }
         } );
 
-        return new Example( canvas, manager, frame );
+        return new Example( canvas, manager, frame, layout );
     }
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception

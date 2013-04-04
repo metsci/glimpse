@@ -91,7 +91,7 @@ public class Speed
     /**
      * Converts speed from system-units to meters-per-second.
      */
-    public static double[] toMetersPerSecond(double... speeds_SU) { return multiply(speeds_SU,  suToMetersPerSecond); }
+    public static double[] toMetersPerSecond(double... speeds_SU) { return multiply(speeds_SU, suToMetersPerSecond); }
 
     /**
      * Converts speed from knots to system-units.

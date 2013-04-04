@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter.label;
 
+import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.units.Speed;
 import com.metsci.glimpse.util.units.time.Time;
@@ -133,5 +134,25 @@ public class AxisUnitConverters
         public double toAxisUnits(double value) { return Time.toWeeks(value); }
     };
 
+    
+    
+    // Angle
+
+    public static final AxisUnitConverter suShownAsDegrees = new AxisUnitConverter()
+    {
+        public double fromAxisUnits(double value) { return Angle.toDeg(value); }
+        public double toAxisUnits(double value) { return Angle.fromDeg(value); }
+    };
+
+    public static final AxisUnitConverter suShownAsNavigationDegrees = new AxisUnitConverter()
+    {
+        public double fromAxisUnits(double value) 
+        { 
+        	double ans = 90 - Angle.toDeg(value);
+        	if ( ans <= 0 ) ans += 360;
+        	return ans;
+        }
+        public double toAxisUnits(double value) { return Angle.fromDeg(value); }
+    };
 
 }

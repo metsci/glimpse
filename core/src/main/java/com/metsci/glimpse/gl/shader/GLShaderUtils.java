@@ -90,6 +90,10 @@ public class GLShaderUtils
         int[] logLength = new int[1];
         gl.glGetShaderiv( glShaderHandle, GL.GL_INFO_LOG_LENGTH, logLength, 0 );
 
+        if ( logLength[0] == 0 ) {
+            return "No message found!";
+        }
+
         int[] log1 = new int[logLength[0]];
         byte[] log2 = new byte[logLength[0]];
 
@@ -106,6 +110,10 @@ public class GLShaderUtils
     {
         int[] logLength = new int[1];
         gl.glGetProgramiv( glProgramHandle, GL.GL_INFO_LOG_LENGTH, logLength, 0 );
+
+        if ( logLength[0] == 0 ) {
+            return "No message found!";
+        }
 
         int[] log1 = new int[logLength[0]];
         byte[] log2 = new byte[logLength[0]];

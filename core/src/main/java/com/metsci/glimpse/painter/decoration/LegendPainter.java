@@ -136,6 +136,18 @@ public abstract class LegendPainter extends GlimpsePainter2D
         return this;
     }
 
+    public Font getFont( )
+    {
+        if ( textRenderer == null )
+        {
+            return newFont;
+        }
+        else
+        {
+            return textRenderer.getFont( );
+        }
+    }
+
     public LegendPainter setTextColor( float[] rgba )
     {
         textColor = rgba;
@@ -482,7 +494,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
             textRenderer = new TextRenderer( newFont, antialias, false );
             newFont = null;
         }
-        
+
         if ( textRenderer == null ) return;
 
         GL gl = context.getGL( );

@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -50,6 +51,7 @@ import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
@@ -70,9 +72,11 @@ import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.event.EventSelectionHandler;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
+import com.metsci.glimpse.plot.timeline.listener.PlotMouseListener;
 import com.metsci.glimpse.plot.timeline.listener.TimeAxisMouseListener1D;
 import com.metsci.glimpse.plot.timeline.painter.SelectedTimeRegionPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -119,7 +123,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected SimpleTextPainter timeUnitsPainter;
     protected BorderPainter timeAxisBorderPainter;
     protected SelectedTimeRegionPainter selectedTimePainter;
-
     protected TooltipPainter tooltipPainter;
 
     // default settings for TimelineMouseListeners of new plots
@@ -133,10 +136,17 @@ public class StackedTimePlot2D extends StackedPlot2D
     // the size of the label layout area in pixels
     protected int labelLayoutSize;
     protected boolean showLabelLayout = false;
-    
     protected boolean showTimeline = true;
 
     protected TextureAtlas defaultTextureAtlas;
+    
+    // the default selection handler for all EventPlotInfo
+    // if client code would like individual EventPlotInfo to maintain
+    // their own set of selected events, individual SelectionHandlers
+    // can be set for each EventPlotInfo
+    protected EventSelectionHandler commonSelectionHandler;
+    
+    protected List<PlotMouseListener> plotMouseListeners;
 
     public StackedTimePlot2D( )
     {
@@ -183,9 +193,32 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         this.epoch = epoch;
         this.defaultTextureAtlas = atlas;
+        
+        this.commonSelectionHandler = new EventSelectionHandler( );
+        
+        this.plotMouseListeners = new CopyOnWriteArrayList<PlotMouseListener>( );
 
         this.initializeTimePlot( );
         this.initializeOverlayPainters( );
+    }
+    
+    public void addPlotMouseListener( PlotMouseListener listener )
+    {
+        this.plotMouseListeners.add( listener );
+    }
+    
+    public void removePlotMouseListener( PlotMouseListener listener )
+    {
+        this.plotMouseListeners.remove( listener );
+    }
+    
+    /**
+     * Returns the common EventSelectionHandler shared between all {@link EventPlotInfo}
+     * sub-plots for this StackedTimePlot2D.
+     */
+    public EventSelectionHandler getEventSelectionHander( )
+    {
+        return this.commonSelectionHandler;
     }
     
     public void setShowTimeline( boolean showTimeline )
@@ -210,7 +243,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     @Override
     protected int getOverlayLayoutOffsetY2( )
     {
-        return orient == VERTICAL ? 0 : -labelLayoutSize;
+        return orient == VERTICAL ? 0 : labelLayoutSize;
     }
 
     @Override
@@ -241,6 +274,11 @@ public class StackedTimePlot2D extends StackedPlot2D
     public GlimpseAxisLayout1D getOverlayLayout( )
     {
         return this.overlayLayout;
+    }
+    
+    public GlimpseLayout getFullOverlayLayout( )
+    {
+        return this.fullOverlayLayout;
     }
 
     public GlimpseAxisLayout1D getUnderlayLayout( )
@@ -778,6 +816,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             PlotInfo plotInfo = createPlot0( id, axis );
             TimePlotInfo timePlotInfo = createTimePlot0( plotInfo );
             stackedPlots.put( id, timePlotInfo );
+            addTimePlotInfoListeners( timePlotInfo );
             
             if ( isAutoValidate( ) ) validate( );
             
@@ -802,30 +841,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     public EventPlotInfo createEventPlot( Object id )
     {
         return createEventPlot( id, defaultTextureAtlas );
-    }
-
-    protected EventPlotInfo createEventPlot( Object id, TextureAtlas atlas )
-    {
-        if ( !isTimeAxisHorizontal( ) )
-        {
-            throw new UnsupportedOperationException( "Event Plots are currently not supported by HORIZTONAL StackedTimePlot2D" );
-        }
-
-        this.lock.lock( );
-        try
-        {
-            PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
-            EventPlotInfo timePlotInfo = createEventPlot0( plotInfo, atlas );
-            stackedPlots.put( id, timePlotInfo );
-            
-            if ( isAutoValidate( ) ) validate( );
-            
-            return timePlotInfo;
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
     }
 
     public boolean isLocked( )
@@ -938,7 +953,14 @@ public class StackedTimePlot2D extends StackedPlot2D
         TimeStamp minTime = maxTime.subtract( diff );
         setTimeSelection( minTime, maxTime, maxTime );
     }
-
+    
+    public TimeStamp getTime( GlimpseMouseEvent e )
+    {
+        Axis1D axis = e.getAxis1D( );
+        double valueX = axis.screenPixelToValue( e.getX( ) );
+        return getEpoch( ).toTimeStamp( valueX );
+    }
+    
     protected void initializeOverlayPainters( )
     {
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
@@ -1137,6 +1159,31 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return new TaggedAxis1D( );
     }
+    
+    protected EventPlotInfo createEventPlot( Object id, TextureAtlas atlas )
+    {
+        if ( !isTimeAxisHorizontal( ) )
+        {
+            throw new UnsupportedOperationException( "Event Plots are currently not supported by HORIZTONAL StackedTimePlot2D" );
+        }
+
+        this.lock.lock( );
+        try
+        {
+            PlotInfo plotInfo = createPlot0( id, new Axis1D( ) );
+            EventPlotInfo eventPlotInfo = createEventPlot0( plotInfo, atlas );
+            stackedPlots.put( id, eventPlotInfo );
+            addTimePlotInfoListeners( eventPlotInfo );
+            
+            if ( isAutoValidate( ) ) validate( );
+            
+            return eventPlotInfo;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
 
     protected EventPlotInfo createEventPlot0( PlotInfo plotInfo, TextureAtlas atlas )
     {
@@ -1155,6 +1202,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         EventPlotInfo eventPlotInfo = new EventPlotInfo( timePlot, atlas );
         eventPlotInfo.setLookAndFeel( laf );
+        eventPlotInfo.setSelectionHandler( commonSelectionHandler );
 
         return eventPlotInfo;
     }
@@ -1294,7 +1342,86 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
 
         timePlotInfo.setLookAndFeel( laf );
-
+        
         return timePlotInfo;
+    }
+    
+    @Override
+    public PlotInfo createPlot( Object id, Axis1D axis )
+    {
+        PlotInfo info = super.createPlot( id, axis );
+        addPlotInfoListeners( info );
+        return info;
+    }
+    
+    protected void addPlotInfoListeners( PlotInfo info )
+    {
+        info.getLayout( ).addGlimpseMouseAllListener( createPlotMouseListener( info, PlotMouseListener.PlotLocation.Plot ) );
+    }
+    
+    protected void addTimePlotInfoListeners( TimePlotInfo info )
+    {
+        info.getLabelLayout( ).addGlimpseMouseAllListener( createPlotMouseListener( info, PlotMouseListener.PlotLocation.Label ) );
+        info.getLayout( ).addGlimpseMouseAllListener( createPlotMouseListener( info, PlotMouseListener.PlotLocation.Plot ) );
+    }
+    
+    protected GlimpseMouseAllListener createPlotMouseListener( final PlotInfo info, final PlotMouseListener.PlotLocation location )
+    {
+        return new GlimpseMouseAllListener( )
+        {
+            @Override
+            public void mouseWheelMoved( GlimpseMouseEvent e )
+            {
+                for ( PlotMouseListener listener : plotMouseListeners )
+                {
+                    listener.mouseWheelMoved( e, info, location );
+                }
+            }
+            
+            @Override
+            public void mouseMoved( GlimpseMouseEvent e )
+            {
+                for ( PlotMouseListener listener : plotMouseListeners )
+                {
+                    listener.mouseMoved( e, info, location );
+                }
+            }
+            
+            @Override
+            public void mouseReleased( GlimpseMouseEvent e )
+            {
+                for ( PlotMouseListener listener : plotMouseListeners )
+                {
+                    listener.mouseReleased( e, info, location );
+                }
+            }
+            
+            @Override
+            public void mousePressed( GlimpseMouseEvent e )
+            {
+                for ( PlotMouseListener listener : plotMouseListeners )
+                {
+                    listener.mousePressed( e, info, location );
+                }
+            }
+            
+            @Override
+            public void mouseExited( GlimpseMouseEvent e )
+            {
+                for ( PlotMouseListener listener : plotMouseListeners )
+                {
+                    listener.mouseExited( e, info, location );
+                }
+            }
+            
+            @Override
+            public void mouseEntered( GlimpseMouseEvent e )
+            {
+                for ( PlotMouseListener listener : plotMouseListeners )
+                {
+                    listener.mouseEntered( e, info, location );
+                }
+            }
+        };
     }
 }

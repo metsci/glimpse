@@ -228,6 +228,24 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
     }
 
     @Override
+    public GlimpseAxisLayout2D getLayout( )
+    {
+        return plotLayout;
+    }
+
+    @Override
+    public void addLayout( GlimpseAxisLayout2D childLayout )
+    {
+        plotLayout.addLayout( childLayout );
+    }
+
+    @Override
+    public GlimpseLayout getBaseLayout( )
+    {
+        return info.getBaseLayout( );
+    }
+
+    @Override
     public GlimpseLayout getLabelLayout( )
     {
         return labelLayout;
@@ -291,18 +309,6 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
     public void removePainter( GlimpsePainter painter )
     {
         this.dataPainter.removePainter( painter );
-    }
-
-    @Override
-    public GlimpseAxisLayout2D getLayout( )
-    {
-        return plotLayout;
-    }
-
-    @Override
-    public void addLayout( GlimpseAxisLayout2D childLayout )
-    {
-        plotLayout.addLayout( childLayout );
     }
 
     @Override

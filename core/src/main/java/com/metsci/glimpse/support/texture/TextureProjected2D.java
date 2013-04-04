@@ -287,11 +287,20 @@ public abstract class TextureProjected2D implements DrawableTexture
     {
         GL gl = context.getGL( );
 
-        if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
+        if ( textureHandles != null && textureHandles.length != 0 )
+        {
+            gl.glDeleteTextures( textureHandles.length, textureHandles, 0 );
+        }
 
-        if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
-
-        if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
+        if ( vertexCoordHandles != null && vertexCoordHandles.length != 0 )
+        {
+            gl.glDeleteBuffers( vertexCoordHandles.length, vertexCoordHandles, 0 );
+        }
+        
+        if ( texCoordHandles != null && texCoordHandles.length != 0 )
+        {
+            gl.glDeleteBuffers( texCoordHandles.length, texCoordHandles, 0 );
+        }
     }
 
     protected void prepare_glState( GL gl )
@@ -316,7 +325,10 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     protected void allocate_genTextureHandles( GL gl )
     {
-        if ( textureHandles != null ) gl.glDeleteTextures( numTextures, textureHandles, 0 );
+        if ( textureHandles != null && textureHandles.length != 0 )
+        {
+            gl.glDeleteTextures( textureHandles.length, textureHandles, 0 );
+        }
 
         if ( numTextures == 0 || projection == null ) return;
 
@@ -327,9 +339,15 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     protected void allocate_genBuffers( GL gl )
     {
-        if ( vertexCoordHandles != null ) gl.glDeleteBuffers( numTextures, vertexCoordHandles, 0 );
+        if ( vertexCoordHandles != null && vertexCoordHandles.length != 0 )
+        {
+            gl.glDeleteBuffers( vertexCoordHandles.length, vertexCoordHandles, 0 );
+        }
 
-        if ( texCoordHandles != null ) gl.glDeleteBuffers( numTextures, texCoordHandles, 0 );
+        if ( texCoordHandles != null && texCoordHandles.length != 0 )
+        {
+            gl.glDeleteBuffers( texCoordHandles.length, texCoordHandles, 0 );
+        }
 
         if ( numTextures == 0 || projection == null ) return;
 

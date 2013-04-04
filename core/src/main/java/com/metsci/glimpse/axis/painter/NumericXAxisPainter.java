@@ -69,6 +69,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
         paintTicks( gl, axis, width, height );
+        paintAxisLabel( gl, axis, width, height );
         paintSelectionLine( gl, axis, width, height );
     }
 
@@ -166,21 +167,33 @@ public class NumericXAxisPainter extends NumericAxisPainter
                 textRenderer.draw( xLabel, iTickText, jTickText );
             }
 
-            // Axis Label
-            if ( showLabel )
-            {
-                String label = ticks.getAxisLabel( axis );
-                Rectangle2D axisLabelBounds = textRenderer.getBounds( label );
-                int iAxisLabel = round( 0.5f * ( width - ( int ) axisLabelBounds.getWidth( ) ) );
-                int jAxisLabel = getAxisLabelPositionY( height, ( int ) axisLabelBounds.getHeight( ) );
-
-                GlimpseColor.setColor( textRenderer, axisLabelColor );
-                textRenderer.draw( label, iAxisLabel, jAxisLabel );
-            }
         }
         finally
         {
             textRenderer.endRendering( );
+        }
+    }
+
+    protected void paintAxisLabel( GL gl, Axis1D axis, int width, int height )
+    {
+        // Axis Label
+        if ( showLabel )
+        {
+            GlimpseColor.setColor( textRenderer, axisLabelColor );
+            textRenderer.beginRendering( width, height );
+            try
+            {
+	            String label = ticks.getAxisLabel( axis );
+	            Rectangle2D axisLabelBounds = textRenderer.getBounds( label );
+	            int iAxisLabel = round( 0.5f * ( width - ( int ) axisLabelBounds.getWidth( ) ) );
+	            int jAxisLabel = getAxisLabelPositionY( height, ( int ) axisLabelBounds.getHeight( ) );
+
+	            textRenderer.draw( label, iAxisLabel, jAxisLabel );
+            }
+            finally
+            {
+                textRenderer.endRendering( );
+            }
         }
     }
 

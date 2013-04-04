@@ -41,7 +41,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JPanel;
 
@@ -68,7 +67,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     private static final long serialVersionUID = -5279064113986688397L;
 
     protected GLCanvas glCanvas;
-    protected GLAutoDrawable tempDrawable;
+    protected FrameBufferGlimpseCanvas offscreenCanvas;
 
     protected LayoutManager layoutManager;
 
@@ -316,14 +315,21 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     @Override
     public void removeNotify( )
     {
-        // transfer all contexts to a holding drawable
-        if ( tempDrawable == null )
+        // transfer context to a holding drawable
+        if ( offscreenCanvas == null )
         {
-            tempDrawable = GLDrawableFactory.getFactory( ).createGLPbuffer( glCanvas.getChosenGLCapabilities( ), null, 10, 10, glCanvas.getContext( ) );
+            offscreenCanvas = new FrameBufferGlimpseCanvas( getWidth( ), getHeight( ), glCanvas.getContext( ) );
         }
 
-        attachAllGLListeners( tempDrawable );
-        tempDrawable.display( );
+        // add the layouts
+        offscreenCanvas.removeAllLayouts( );
+        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+        {
+            offscreenCanvas.addLayout( layout );
+        }
+
+        // paint so that all the buffers get added to the context
+        offscreenCanvas.paint( );
 
         // remove the canvas (will destroy the context)
         boolean autoSwap = glCanvas.getAutoSwapBufferMode( );
@@ -331,7 +337,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         super.removeNotify( );
 
         // initialize the new canvas, share the temp context
-        this.glCanvas = new GLCanvas( tempDrawable.getChosenGLCapabilities( ), null, tempDrawable.getContext( ), null );
+        this.glCanvas = new GLCanvas( null, null, offscreenCanvas.getGLContext( ), null );
         this.glCanvas.setAutoSwapBufferMode( autoSwap );
         attachAllGLListeners( glCanvas );
         add( this.glCanvas, BorderLayout.CENTER );

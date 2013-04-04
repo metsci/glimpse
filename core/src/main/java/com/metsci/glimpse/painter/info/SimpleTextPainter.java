@@ -289,8 +289,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             xText = ( int ) horizontalPadding;
             break;
         case Center:
-            // 0.3 looks more "centered" for most fonts than 0.5
-            xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.3 );
+            xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.5 );
             break;
         case Right:
             xText = ( int ) ( width - textBounds.getWidth( ) - horizontalPadding );
@@ -303,14 +302,13 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             yText = ( int ) verticalPadding;
             break;
         case Center:
-         // 0.3 looks more "centered" for most fonts than 0.5
-            yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.3 );
+            yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.5 );
             break;
         case Top:
             yText = ( int ) ( height - textBounds.getHeight( ) - verticalPadding );
             break;
         }
-
+        
         if (  paintBackground ||  paintBorder )
         {
             gl.glMatrixMode( GL.GL_PROJECTION );
@@ -500,7 +498,15 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             gl.glRotated( 90, 0, 0, 1.0f );
             gl.glTranslated( -xShift, -yShift, 0 );
 
-            GlimpseColor.setColor( textRenderer, textColor );
+            if ( !textColorSet && !paintBackground )
+            {
+                GlimpseColor.setColor( textRenderer, textColorNoBackground );
+            }
+            else
+            {
+                GlimpseColor.setColor( textRenderer, textColor );
+            }
+            
             textRenderer.draw( text, xText, yText );
         }
         finally

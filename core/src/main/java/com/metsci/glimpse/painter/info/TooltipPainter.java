@@ -29,10 +29,12 @@ package com.metsci.glimpse.painter.info;
 import java.awt.Font;
 import java.awt.font.FontRenderContext;
 import java.text.BreakIterator;
+import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GL;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -50,6 +52,8 @@ import com.metsci.glimpse.support.font.SimpleTextLayoutCenter;
  */
 public class TooltipPainter extends SimpleTextPainter
 {
+    protected static final float[] defaultIconColor = GlimpseColor.getWhite( );
+
     // if true, tooltip text will be wrapped if it extends past the edge of the box
     protected boolean isFixedWidth = false;
     protected int fixedWidth = 50;
@@ -66,8 +70,11 @@ public class TooltipPainter extends SimpleTextPainter
     protected Bounds linesBounds;
 
     protected TextureAtlas atlas;
-    protected Object iconId;
-    protected ImageData icon;
+    protected List<Object> iconIds;
+    protected List<ImageData> icons;
+    protected List<float[]> iconColors;
+    protected boolean noIcons = false;
+
     protected boolean wrapTextAroundIcon = false;
 
     protected int x;
@@ -92,9 +99,45 @@ public class TooltipPainter extends SimpleTextPainter
      */
     public TooltipPainter setIcon( Object iconId )
     {
-        this.iconId = iconId;
-        this.icon = iconId != null ? atlas.getImageData( iconId ) : null;
+        this.iconIds = Collections.singletonList( iconId );
+        ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
+        this.icons = Collections.singletonList( icon );
+        this.iconColors = null;
+        this.noIcons = icon == null;
         this.lines = null; // signal that layout should be recalculated
+        return this;
+    }
+
+    /**
+     * Sets the TooltipPainter to display multiple icons, one per line,
+     * down the left hand side of the tooltip window.
+     */
+    public TooltipPainter setIcons( List<Object> iconIds )
+    {
+        this.iconIds = Lists.newArrayList( iconIds );
+        this.icons = Lists.newArrayListWithCapacity( iconIds.size( ) );
+        this.noIcons = true;
+        for ( int i = 0; i < iconIds.size( ); i++ )
+        {
+            Object iconId = this.iconIds.get( i );
+            ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
+            if ( icon != null ) noIcons = false;
+            this.icons.add( icon );
+        }
+        this.iconColors = null;
+        this.lines = null;
+        return this;
+    }
+
+    /**
+     * Sets icons and associated colors.
+     * 
+     * @see #setIcons(List)
+     */
+    public TooltipPainter setIcons( List<Object> iconIds, List<float[]> colors )
+    {
+        setIcons( iconIds );
+        this.iconColors = Lists.newArrayList( colors );
         return this;
     }
 
@@ -236,7 +279,18 @@ public class TooltipPainter extends SimpleTextPainter
     protected float getIconSpacing( int i )
     {
         //XXX another spacing heuristic which it would be nice to eliminate
-        return ( float ) ( iconId != null && ( !wrapTextAroundIcon || i == 0 ) ? textLayout.getAscent( ) + borderSize : 0 );
+        Object iconId = iconIds != null && i < iconIds.size( ) ? iconIds.get( i ) : null;
+
+        float indent = ( float ) ( textLayout.getAscent( ) + borderSize );
+
+        if ( noIcons )
+            return 0;
+        else if ( iconId != null )
+            return indent;
+        else if ( iconId == null && !wrapTextAroundIcon )
+            return indent;
+        else
+            return 0;
     }
 
     protected void updateLayout( )
@@ -381,22 +435,41 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         // draw icon
-        if ( !lines.isEmpty( ) && iconId != null )
+        if ( !lines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
         {
-            TextBoundingBox line = lines.get( 0 );
-            float iconSize = getIconSize( );
-
             atlas.beginRendering( );
             try
             {
-                ImageData iconData = atlas.getImageData( iconId );
-                double iconScale = iconSize / ( double ) iconData.getWidth( );
+                for ( int i = 0; i < iconIds.size( ); i++ )
+                {
+                    Object iconId = iconIds.get( i );
+                    ImageData iconData = icons.get( i );
+                    TextBoundingBox line = lines.get( i );
 
-                int posX = ( int ) ( x + line.leftX + clampX + offsetX );
-                //XXX another spacing heuristic which it would be nice to eliminate
-                int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY - textLayout.getDescent( ) * 0.25 );
+                    if ( iconId != null && iconData != null && line != null )
+                    {
+                        float iconSize = getIconSize( );
+                        double iconScale = iconSize / ( double ) iconData.getWidth( );
 
-                atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
+                        int posX = ( int ) ( x + line.leftX + clampX + offsetX );
+                        //XXX another spacing heuristic which it would be nice to eliminate
+                        int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY - textLayout.getDescent( ) * 0.25 );
+
+                        float[] color = defaultIconColor;
+                        if ( iconColors != null && i < iconColors.size( ) )
+                        {
+                            float[] iconColor = iconColors.get( i );
+                            if ( iconColor != null )
+                            {
+                                color = iconColor;
+                            }
+                        }
+
+                        GlimpseColor.glColor( gl, color );
+
+                        atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
+                    }
+                }
             }
             finally
             {

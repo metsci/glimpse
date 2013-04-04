@@ -145,6 +145,11 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     {
         this( null, null );
     }
+    
+    public ReentrantLock getLock( )
+    {
+        return lock;
+    }
 
     public String getName( )
     {
