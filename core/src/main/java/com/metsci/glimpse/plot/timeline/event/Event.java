@@ -26,26 +26,20 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
-
-import java.awt.geom.Rectangle2D;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.media.opengl.GL;
-
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo.EventPlotListener;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.atlas.support.ImageData;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.sun.opengl.util.j2d.TextRenderer;
+
+import javax.media.opengl.GL;
+import java.awt.geom.Rectangle2D;
+import java.util.*;
+
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 /**
  * Event represents an occurrence with a start and end time and is usually created
@@ -59,19 +53,15 @@ import com.sun.opengl.util.j2d.TextRenderer;
  * 
  * @author ulman
  */
-public class Event
+public class Event implements Iterable<Event>
 {
-    public static final int ARROW_TIP_BUFFER = 2;
-    public static final int ARROW_SIZE = 10;
-    public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
-
     protected EventPlotInfo info;
 
     protected Object id;
     protected String label;
     protected Object iconId; // references id in associated TextureAtlas
     protected String toolTipText;
-    
+
     protected float[] backgroundColor;
     protected float[] borderColor;
     protected float[] textColor;
@@ -79,7 +69,7 @@ public class Event
 
     protected TimeStamp startTime;
     protected TimeStamp endTime;
-    
+
     protected boolean fixedRow = false;
     protected int fixedRowIndex = 0;
 
@@ -90,7 +80,7 @@ public class Event
 
     protected TextRenderingMode textRenderingMode = Ellipsis;
     protected OverlapRenderingMode overlapRenderingMode = Overfull;
-    
+
     protected boolean isIconVisible;
     protected boolean isTextVisible;
     protected TimeStamp iconStartTime;
@@ -98,6 +88,7 @@ public class Event
     protected TimeStamp textStartTime;
     protected TimeStamp textEndTime;
 
+    protected boolean isSelectable = true;
     protected boolean isEditable = true;
     protected boolean isEndTimeMoveable = true;
     protected boolean isStartTimeMoveable = true;
@@ -106,7 +97,9 @@ public class Event
     protected double minTimeSpan = 0;
 
     protected List<EventConstraint> constraints;
-    
+
+    protected EventPainter painter;
+
     /**
      * Indicates how text which is too large to fit in the Event box should be shortened.
      * 
@@ -127,7 +120,7 @@ public class Event
          */
         Ellipsis;
     }
-    
+
     /**
      * Indicates what types of overlaps should be considered when determining whether to shorten Event box text.
      * 
@@ -155,7 +148,7 @@ public class Event
         public TimeSpan applyConstraint( Event event, TimeSpan proposedTimeSpan )
         {
             if ( !isEditable ) return event.getTimeSpan( );
-            
+
             TimeStamp oldStart = event.getStartTime( );
             TimeStamp oldEnd = event.getEndTime( );
 
@@ -204,14 +197,14 @@ public class Event
 
     private Event( TimeStamp time )
     {
-        this( null, null, time );
+        this( ( Object ) null, ( String ) null, time );
     }
 
-    public Event( Object id, String name, TimeStamp time )
+    protected Event( Object id, String name, TimeStamp time )
     {
         this.id = id;
         this.label = name;
-        
+
         this.startTime = time;
         this.endTime = time;
         this.overlapRenderingMode = Intersecting;
@@ -220,17 +213,83 @@ public class Event
         this.constraints.add( builtInConstraints );
     }
 
-    public Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
+    protected Event( Object id, String name, TimeStamp startTime, TimeStamp endTime )
     {
         this.id = id;
         this.label = name;
-        
+
         this.startTime = startTime;
         this.endTime = endTime;
         this.overlapRenderingMode = startTime.equals( endTime ) ? Intersecting : Overfull;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
+    }
+
+    /**
+     * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, int, int)
+     */
+    public void paint( EventPainter defaultPainter, GL gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
+    {
+        EventPainter eventPainter = painter != null ? painter : defaultPainter;
+
+        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
+    }
+
+    public boolean hasChildren( )
+    {
+        return getEventCount() > 1;
+    }
+
+    /**
+     * Gets the number of aggregated events that make up this event.
+     */
+    public int getEventCount( )
+    {
+        return 1;
+    }
+
+    /**
+     * EventPlotInfo can automatically create synthetic groups of Events when the timeline
+     * is zoomed out far enough that a bunch of Events are crowded into the same space.
+     * The individual constituent Events can be accessed via this method.
+     * User created Events never have children.
+     */
+    public Iterator<Event> iterator( )
+    {
+        return new Iterator<Event>()
+        {
+            boolean movedNext;
+
+            @Override
+            public boolean hasNext()
+            {
+                return !movedNext;
+            }
+
+            @Override
+            public Event next()
+            {
+                movedNext = true;
+                return Event.this;
+            }
+
+            @Override
+            public void remove()
+            {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    public void setEventPainter( EventPainter painter )
+    {
+        this.painter = painter;
+    }
+
+    public EventPainter getEventPainter( )
+    {
+        return this.painter;
     }
 
     /**
@@ -257,272 +316,81 @@ public class Event
         this.constraints.remove( constraint );
     }
 
-    public void paint( GL gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
+    protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
     {
-        int size = sizeMax - sizeMin;
-        double sizeCenter = sizeMin + size / 2.0;
-        int buffer = painter.getRowBufferSize( );
-        int arrowSize = Math.min( size, ARROW_SIZE );
-        
-        Epoch epoch = painter.getEpoch( );
-        double timeMin = epoch.fromTimeStamp( startTime );
-        double timeMax = epoch.fromTimeStamp( endTime );
+        float[] defaultColor = info.getBackgroundColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
 
-        double arrowBaseMin = timeMin;
-        boolean offEdgeMin = false;
-        if ( axis.getMin( ) > timeMin )
+        if ( isSelected )
         {
-            offEdgeMin = true;
-            timeMin = axis.getMin( ) + ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
-            arrowBaseMin = timeMin + arrowSize / axis.getPixelsPerValue( );
-        }
-        
-        double arrowBaseMax = timeMax;
-        boolean offEdgeMax = false;
-        if ( axis.getMax( ) < timeMax )
-        {
-            offEdgeMax = true;
-            timeMax = axis.getMax( ) - ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
-            arrowBaseMax = timeMax - arrowSize / axis.getPixelsPerValue( );
-        }
-        
-        arrowBaseMax = Math.max( timeMin, arrowBaseMax );
-        arrowBaseMin = Math.min( timeMax, arrowBaseMin );
-        
-        double timeSpan = arrowBaseMax - arrowBaseMin;
-        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
-
-        int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
-
-        // start positions of the next event in this row
-        double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : axis.getMax( );
-        int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : width;
-
-        if ( painter.isHorizontal( ) )
-        {   
-            if ( !offEdgeMin && !offEdgeMax )
-            {
-                if ( showBackground )
-                {
-                    GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-                    gl.glBegin( GL.GL_QUADS );
-                    try
-                    {
-                        gl.glVertex2d( timeMin, sizeMin );
-                        gl.glVertex2d( timeMin, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMin );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-    
-                if ( showBorder )
-                {
-                    GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
-                    gl.glLineWidth( borderThickness );
-                    gl.glBegin( GL.GL_LINE_LOOP );
-                    try
-                    {
-                        gl.glVertex2d( timeMin, sizeMin );
-                        gl.glVertex2d( timeMin, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMax );
-                        gl.glVertex2d( timeMax, sizeMin );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-            }
+            if ( selectedColor != null )
+                return selectedColor;
+            else if ( backgroundColor != null )
+                return backgroundColor;
             else
-            {
-                if ( showBackground )
-                {
-                    GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-                    gl.glBegin( GL.GL_POLYGON );
-                    try
-                    {
-                        gl.glVertex2d( arrowBaseMin, sizeMax );
-                        gl.glVertex2d( arrowBaseMax, sizeMax );
-                        gl.glVertex2d( timeMax, sizeCenter );
-                        gl.glVertex2d( arrowBaseMax, sizeMin );
-                        gl.glVertex2d( arrowBaseMin, sizeMin );
-                        gl.glVertex2d( timeMin, sizeCenter );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-                
-                if ( showBorder )
-                {
-                    GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
-                    gl.glLineWidth( borderThickness );
-                    gl.glBegin( GL.GL_LINE_LOOP );
-                    try
-                    {
-                        gl.glVertex2d( arrowBaseMin, sizeMax );
-                        gl.glVertex2d( arrowBaseMax, sizeMax );
-                        gl.glVertex2d( timeMax, sizeCenter );
-                        gl.glVertex2d( arrowBaseMax, sizeMin );
-                        gl.glVertex2d( arrowBaseMin, sizeMin );
-                        gl.glVertex2d( timeMin, sizeCenter );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
-                }
-            }
-
-            isIconVisible = showIcon && iconId != null && !isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-
-            if ( isIconVisible )
-            {
-                double valueX = axis.screenPixelToValue( pixelX );
-                iconStartTime = epoch.toTimeStamp( valueX );
-                iconEndTime = iconStartTime.add( size / axis.getPixelsPerValue( ) );
-
-                TextureAtlas atlas = painter.getTextureAtlas( );
-                atlas.beginRendering( );
-                try
-                {
-                    ImageData iconData = atlas.getImageData( iconId );
-                    double iconScale = size / ( double ) iconData.getHeight( );
-
-                    atlas.drawImageAxisX( gl, iconId, axis, valueX, sizeMin, iconScale, iconScale, 0, iconData.getHeight( ) );
-                }
-                finally
-                {
-                    atlas.endRendering( );
-                }
-
-                remainingSpaceX -= size + buffer;
-                pixelX += size + buffer;
-            }
-
-            if ( showLabel )
-            {
-                TextRenderer textRenderer = painter.getTextRenderer( );
-                Rectangle2D labelBounds = textRenderer.getBounds( label );
-    
-                boolean isTextOverfull = isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextIntersecting = isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && textRenderingMode == HideAll );
-                double availableSpace = getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-                
-                isTextVisible = !isTextOverlappingAndHidden;
-    
-                if ( isTextVisible )
-                {
-                    Rectangle2D displayBounds = labelBounds;
-                    String displayText = label;
-                    
-                    if ( labelBounds.getWidth( ) > availableSpace && textRenderingMode != ShowAll )
-                    {
-                        displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
-                        displayBounds = textRenderer.getBounds( displayText );
-                    }
-                    
-                    double valueX = axis.screenPixelToValue( pixelX );
-                    textStartTime = epoch.toTimeStamp( valueX );
-                    textEndTime = textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
-    
-                    // use this event's text color if it has been set
-                    if ( textColor != null )
-                    {
-                        GlimpseColor.setColor( textRenderer, textColor );
-                    }
-                    // otherwise, use the default no background color if the background is not showing
-                    // and if a color has not been explicitly set for the EventPainter
-                    else if ( !painter.textColorSet && !showBackground )
-                    {
-                        GlimpseColor.setColor( textRenderer, painter.textColorNoBackground );
-                    }
-                    // otherwise use the EventPainter's default text color
-                    else
-                    {
-                        GlimpseColor.setColor( textRenderer, painter.textColor );
-                    }
-                    
-                    textRenderer.beginRendering( width, height );
-                    try
-                    {
-                        // use the labelBounds for the height (if the text shortening removed a character which
-                        // hangs below the line, we don't want the text position to move)
-                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + sizeMin );
-                        textRenderer.draw( displayText, pixelX, pixelY );
-    
-                        remainingSpaceX -= displayBounds.getWidth( ) + buffer;
-                        pixelX += displayBounds.getWidth( ) + buffer;
-                    }
-                    finally
-                    {
-                        textRenderer.endRendering( );
-                    }
-                }
-            }
-            else
-            {
-                isTextVisible = false;
-            }
+                return defaultColor;
         }
         else
         {
-            //TODO handle drawing text and icons in HORIZONTAL orientation
-
-            GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
-            gl.glBegin( GL.GL_QUADS );
-            try
-            {
-                gl.glVertex2d( sizeMin, timeMin );
-                gl.glVertex2d( sizeMax, timeMin );
-                gl.glVertex2d( sizeMax, timeMax );
-                gl.glVertex2d( sizeMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-
-            GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
-            gl.glLineWidth( borderThickness );
-            gl.glBegin( GL.GL_LINE_LOOP );
-            try
-            {
-                gl.glVertex2d( sizeMin, timeMin );
-                gl.glVertex2d( sizeMax, timeMin );
-                gl.glVertex2d( sizeMax, timeMax );
-                gl.glVertex2d( sizeMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
+            if ( backgroundColor != null )
+                return backgroundColor;
+            else
+                return defaultColor;
         }
     }
-    
+
+    protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )
+    {
+        float[] defaultColor = info.getBorderColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
+
+        if ( isSelected )
+        {
+            if ( selectedColor != null )
+                return selectedColor;
+            else if ( borderColor != null )
+                return borderColor;
+            else
+                return defaultColor;
+        }
+        else
+        {
+            if ( borderColor != null )
+                return borderColor;
+            else
+                return defaultColor;
+        }
+    }
+
+    protected float getBorderThickness( EventPlotInfo info, boolean isSelected )
+    {
+        if ( isSelected )
+        {
+            return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
+        }
+        else
+        {
+            return borderThickness;
+        }
+    }
+
     protected String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
     {
-        for ( int endIndex = fullText.length( ) ; endIndex >= 0 ; endIndex-- )
+        for ( int endIndex = fullText.length( ); endIndex >= 0; endIndex-- )
         {
             String subText = fullText.substring( 0, endIndex ) + "...";
             Rectangle2D bounds = textRenderer.getBounds( subText );
             if ( bounds.getWidth( ) < availableSpace ) return subText;
         }
-        
+
         return "";
     }
-    
+
     protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
         double insideBoxSpace = remainingSpaceX - buffer;
         double outsideBoxSpace = nextStartPixel - pixelX - buffer;
-        
+
         switch ( overlapRenderingMode )
         {
             case Overfull:
@@ -531,7 +399,7 @@ public class Event
                 return outsideBoxSpace;
             case None:
             default:
-                return Double.MAX_VALUE; 
+                return Double.MAX_VALUE;
         }
     }
 
@@ -539,27 +407,44 @@ public class Event
     {
         return bounds.getWidth( ) + buffer > remainingSpaceX && overlapRenderingMode == Overfull;
     }
-    
+
     protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
         return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapRenderingMode == Intersecting;
     }
-    
+
     protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
         return ( size + buffer > remainingSpaceX && overlapRenderingMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapRenderingMode == Intersecting );
     }
-    
+
     public void setToolTipText( String text )
     {
         this.toolTipText = text;
     }
-    
+
     public String getToolTipText( )
     {
         return this.toolTipText;
     }
-    
+
+    /**
+     * Sets whether or not this Event can be selected via mouse clicks. Setting
+     * selectable to false does not prevent the event from being selected 
+     * programmatically via {@link EventPlotInfo#setSelectedEvents(java.util.Set)}.
+     * 
+     * @param isSelectable
+     */
+    public void setSelectable( boolean isSelectable )
+    {
+        this.isSelectable = isSelectable;
+    }
+
+    public boolean isSelectable( )
+    {
+        return this.isSelectable;
+    }
+
     /**
      * Sets whether or not the Event start and end times are modifiable by the user
      * via mouse interaction. This does not prevent programmatically changing the
@@ -574,7 +459,7 @@ public class Event
     {
         this.isEditable = isEditable;
     }
-    
+
     /**
      * @see #setEditable(boolean)
      * @return
@@ -689,7 +574,7 @@ public class Event
     {
         this.label = name;
     }
-    
+
     /**
      * @deprecated use {@link #getLabel()}
      * @return
@@ -698,7 +583,7 @@ public class Event
     {
         return label;
     }
-    
+
     /**
      * @deprecated use {@link #setLabel(String)}
      * @return
@@ -736,7 +621,7 @@ public class Event
     {
         this.borderThickness = thickness;
     }
-    
+
     /**
      * @see #setBorderThickness(float)
      * @return
@@ -829,7 +714,7 @@ public class Event
             this.info.updateEvent( this, startTime, endTime );
         }
     }
-    
+
     public int getRow( )
     {
         if ( this.info != null )
@@ -841,17 +726,17 @@ public class Event
             return 0;
         }
     }
-    
+
     public boolean isFixedRow( )
     {
         return this.fixedRow;
     }
-    
+
     protected int getFixedRow( )
     {
         return this.fixedRowIndex;
     }
-    
+
     /**
      * The row this Event appears on will be managed by its {@link EventPlotInfo}
      * parent. If {@link EventPlotInfo#setStackOverlappingEvents(boolean)} is set
@@ -862,7 +747,7 @@ public class Event
     {
         this.fixedRow = false;
     }
-    
+
     /**
      * This event will appear on the requested row index in the timeline
      * regardless of whether that causes it to overlap with other Events.
@@ -871,7 +756,7 @@ public class Event
     {
         this.fixedRow = true;
         this.fixedRowIndex = rowIndex;
-        
+
         if ( this.info != null )
         {
             this.info.updateEventRow( this, rowIndex );
@@ -903,7 +788,7 @@ public class Event
         this.startTime = startTime;
         this.endTime = endTime;
     }
-    
+
     /**
      * @return the start / earliest / left-edge TimeStamp for this Event.
      */
@@ -947,7 +832,7 @@ public class Event
     {
         this.endTime = endTime;
     }
-    
+
     public TimeSpan getTimeSpan( )
     {
         return new TimeSpan( startTime, endTime );
@@ -969,7 +854,7 @@ public class Event
     {
         return isTextVisible;
     }
-    
+
     /**
      * @param showName whether to show the label text in this Event's box on the timeline.
      */
@@ -988,7 +873,7 @@ public class Event
     {
         this.overlapRenderingMode = mode;
     }
-    
+
     /**
      * @see #setOverlapMode(OverlapRenderingMode)
      */
@@ -996,7 +881,7 @@ public class Event
     {
         return this.overlapRenderingMode;
     }
-    
+
     /**
      * Sets how text and icons should be handled when this Event's box is too small or when it overlaps
      * with another Event's box.
@@ -1015,7 +900,7 @@ public class Event
     {
         return this.textRenderingMode;
     }
-    
+
     /**
      * return whether the icon associated with this event should be shown when room permits.
      */
@@ -1032,7 +917,7 @@ public class Event
     {
         return isIconVisible;
     }
-    
+
     /**
      * @param showIcon whether to show the icon associated with this event.
      */
@@ -1056,7 +941,7 @@ public class Event
     {
         this.showBackground = showBorder;
     }
-    
+
     /**
      * @return if true, a line border is drawn around the event box.
      */
@@ -1126,7 +1011,7 @@ public class Event
     {
         return textEndTime;
     }
-    
+
     /**
      * @return the timeline which this Event is attached to.
      */
@@ -1144,7 +1029,7 @@ public class Event
         double minEnd = Math.min( event.getEndTime( ).toPosixSeconds( ), getEndTime( ).toPosixSeconds( ) );
         return Math.max( 0, minEnd - maxStart );
     }
-    
+
     /**
      * @return the duration of the event (time between start and end TimeStamps) in system units (minutes)
      */
@@ -1152,7 +1037,23 @@ public class Event
     {
         return startTime.durationBefore( endTime );
     }
-    
+
+    /**
+     * <p>Returns whether the provided Timestamp is inside the bounds of this Event. The startTime
+     * is treated as inclusive and the endTime is treated as exclusive. This means that instantaneous
+     * events (with startTime equal to endTime) will always return false.</p>
+     * 
+     * <p>This method is equivalent to
+     * event.getStartTime().isBeforeOrEquals( time ) && event.getEndTime().isAfter( time )</p>
+     * 
+     * @param time the TimeStamp to test
+     * @return whether the TimeStamp is inside this Event's time bounds
+     */
+    public boolean contains( TimeStamp time )
+    {
+        return startTime.isBeforeOrEquals( time ) && endTime.isAfter( time );
+    }
+
     /**
      * The parent EventPlotInfo of an Event should be modified by
      * calling {@link EventPlotInfo#addEvent(Event)} and
@@ -1215,7 +1116,7 @@ public class Event
             public int compare( Event o1, Event o2 )
             {
                 int c_time = o1.getStartTime( ).compareTo( o2.getStartTime( ) );
-                
+
                 if ( c_time == 0 )
                 {
                     // if the times are equal but object ids are not, the comparator

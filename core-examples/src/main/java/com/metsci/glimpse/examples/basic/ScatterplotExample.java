@@ -138,12 +138,12 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         plot.getAxisInfo( "size_axis" ).setAxisPainter( sizeTagPainter );
 
         // add some tags to the axis
-        sizeAxis.addTag( "Tag1", 0.8 ).setAttribute( TEX_COORD_ATTR, 0.0f );
-        sizeAxis.addTag( "Tag2", 4.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        sizeAxis.addTag( "Tag1", 0.2 ).setAttribute( TEX_COORD_ATTR, 0.0f );
+        sizeAxis.addTag( "Tag2", 0.8 ).setAttribute( TEX_COORD_ATTR, 1.0f );
 
         // set the bounds of the size axis
-        sizeAxis.setMin( -2.0 );
-        sizeAxis.setMax( 5.0 );
+        sizeAxis.setMin( 0.0 );
+        sizeAxis.setMax( 1.0 );
 
         // set the label and size of the size axis
         as.getAxisPainter( ).setAxisLabel( "Size Axis" );
@@ -201,7 +201,9 @@ public class ScatterplotExample implements GlimpseLayoutProvider
                 data.clear( );
                 for ( int i = 0; i < data.capacity( ); i++ )
                 {
-                    data.put( ( float ) ( minSize + dSize * ( ( float ) i / ( float ) data.capacity( ) ) ) );
+                    float step = ( ( float ) i / ( float ) data.capacity( ) );
+                    float size = ( float ) ( minSize + dSize * step * step );
+                    data.put( size );
                 }
             }
         };

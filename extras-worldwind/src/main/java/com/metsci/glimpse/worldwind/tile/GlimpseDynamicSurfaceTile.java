@@ -51,6 +51,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
@@ -71,6 +72,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected static final int HEURISTIC_ALTITUDE_CUTOFF = 800;
 
+    protected GlimpseLayout background;
+    protected GlimpseLayout mask;
     protected GlimpseLayout layout;
     protected Axis2D axes;
     protected GeoProjection projection;
@@ -101,9 +104,17 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.height = height;
 
         updateMaxCorners( corners );
-
+        
+        this.mask = new GlimpseLayout( );
+        this.mask.setLayoutData( String.format( "pos 0 0 %d %d", width, height ) );
+        this.mask.addLayout( layout );
+        
+        this.background = new GlimpseLayout( );
+        this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
+        this.background.addLayout( mask );
+        
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
-        this.offscreenCanvas.addLayout( layout );
+        this.offscreenCanvas.addLayout( this.background );
     }
 
     public void updateMaxCorners( List<LatLon> corners )
@@ -416,7 +427,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         fbo.bind( glContext );
         try
         {
-            layout.paintTo( offscreenCanvas.getGlimpseContext( ) );
+            background.paintTo( offscreenCanvas.getGlimpseContext( ) );
         }
         catch ( Exception e )
         {
@@ -429,7 +440,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         }
     }
 
-    protected static class LatLonBounds
+    public static class LatLonBounds
     {
         public double minLat, maxLat, minLon, maxLon;
 

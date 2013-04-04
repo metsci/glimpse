@@ -108,6 +108,7 @@ public class LineSetPainter extends GlimpseDataPainter2D
         {
             lineCount = Math.min( dataX.length, dataY.length );
 
+            totalPointCount = 0;
             for ( int trackId = 0; trackId < lineCount; trackId++ )
             {
                 int pointCount = Math.min( dataX[trackId].length, dataY[trackId].length );

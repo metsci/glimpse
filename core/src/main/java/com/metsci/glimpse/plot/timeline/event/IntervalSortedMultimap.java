@@ -27,6 +27,7 @@
 package com.metsci.glimpse.plot.timeline.event;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -66,7 +67,7 @@ public class IntervalSortedMultimap
     {
         this.startMultimap = buildMap( );
         this.endMultimap = buildMap( );
-        
+
         this.startMap = ( SortedMap<TimeStamp, Collection<Event>> ) startMultimap.asMap( );
         this.endMap = ( SortedMap<TimeStamp, Collection<Event>> ) endMultimap.asMap( );
     }
@@ -103,6 +104,44 @@ public class IntervalSortedMultimap
         endMultimap.remove( event.getEndTime( ), event );
     }
 
+    public SetMultimap<TimeStamp, Event> getEndMultimap( )
+    {
+        return Multimaps.unmodifiableSetMultimap( endMultimap );
+    }
+
+    public SetMultimap<TimeStamp, Event> getStartMultimap( )
+    {
+        return Multimaps.unmodifiableSetMultimap( startMultimap );
+    }
+
+    public SortedMap<TimeStamp, Collection<Event>> getStartMap( )
+    {
+        return Collections.unmodifiableSortedMap( startMap );
+    }
+
+    public SortedMap<TimeStamp, Collection<Event>> getEndMap( )
+    {
+        return Collections.unmodifiableSortedMap( endMap );
+    }
+
+    /**
+     * Returns the earliest start TimeStamp among Events in the map. There may be multiple
+     * Events with this earliest start time.
+     */
+    public TimeStamp earliestTime( )
+    {
+        return startMap.firstKey( );
+    }
+
+    /**
+     * Returns the latest end TimeStamp among Events in the map. There may be multiple
+     * Events with this latest end time.
+     */
+    public TimeStamp latestTime( )
+    {
+        return endMap.lastKey( );
+    }
+
     /**
      * Return all Events which contain the provided TimeStamp (inclusive on the
      * start time and end time).
@@ -137,17 +176,18 @@ public class IntervalSortedMultimap
 
         return Sets.intersection( headSet, tailSet );
     }
-    
+
     public SetMultimap<TimeStamp, Event> getMap( TimeStamp start, boolean startInclusive, TimeStamp end, boolean endInclusive )
     {
         Set<Event> set = get( start, startInclusive, end, endInclusive );
         SetMultimap<TimeStamp, Event> map = buildMap( );
-        
-        for ( Event e : set ) map.put( e.getStartTime( ), e );
-        
+
+        for ( Event e : set )
+            map.put( e.getStartTime( ), e );
+
         return map;
     }
-    
+
     /**
      * Returns all the Events which overlap in time with the provided Event.
      */
@@ -155,7 +195,7 @@ public class IntervalSortedMultimap
     {
         return get( event.getStartTime( ), event.getEndTime( ) );
     }
-    
+
     /**
      * Return all Events whose time span is strictly contained within the provided bounds.
      * The start TimeStamp is inclusive and the TimeStamp is exclusive.
@@ -181,35 +221,35 @@ public class IntervalSortedMultimap
 
         return Sets.intersection( headSet, tailSet );
     }
-    
+
     public boolean isEmpty( )
     {
         return size( ) == 0;
     }
-    
+
     public int size( )
     {
         // startMap and endMap should always be the same size
         return startMap.size( );
     }
-    
+
     public static void main( String[] args )
     {
-        Event a = new Event( "a", "a",  TimeStamp.fromPosixMillis( 0 ) , TimeStamp.fromPosixMillis( 1 ) );
-        Event b = new Event( "b", "b",  TimeStamp.fromPosixMillis( 2 ) , TimeStamp.fromPosixMillis( 4 ) );
-        Event c = new Event( "c", "c",  TimeStamp.fromPosixMillis( 0 ) , TimeStamp.fromPosixMillis( 2 ) );
-        Event d = new Event( "d", "d",  TimeStamp.fromPosixMillis( 1 ) , TimeStamp.fromPosixMillis( 1 ) );
-        
+        Event a = new Event( "a", "a", TimeStamp.fromPosixMillis( 0 ), TimeStamp.fromPosixMillis( 1 ) );
+        Event b = new Event( "b", "b", TimeStamp.fromPosixMillis( 2 ), TimeStamp.fromPosixMillis( 4 ) );
+        Event c = new Event( "c", "c", TimeStamp.fromPosixMillis( 0 ), TimeStamp.fromPosixMillis( 2 ) );
+        Event d = new Event( "d", "d", TimeStamp.fromPosixMillis( 1 ), TimeStamp.fromPosixMillis( 1 ) );
+
         IntervalSortedMultimap map = new IntervalSortedMultimap( );
         map.addEvent( a );
         map.addEvent( b );
         map.addEvent( c );
         map.addEvent( d );
         map.addEvent( a );
-        
+
         System.out.println( map.getInterior( TimeStamp.fromPosixMillis( 1 ), TimeStamp.fromPosixMillis( 4 ) ) );
     }
-    
+
     public static SetMultimap<TimeStamp, Event> buildMap( )
     {
         TreeMap<TimeStamp, Collection<Event>> map = new TreeMap<TimeStamp, Collection<Event>>( );

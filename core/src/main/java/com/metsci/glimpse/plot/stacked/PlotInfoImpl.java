@@ -1,3 +1,29 @@
+/*
+ * Copyright (c) 2012, Metron, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Metron, Inc. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.metsci.glimpse.plot.stacked;
 
 import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
@@ -8,6 +34,7 @@ import java.util.Comparator;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -19,9 +46,11 @@ public class PlotInfoImpl implements PlotInfo
     protected int order;
     protected int size;
     protected int spacing;
+    protected int indentLevel;
+    protected String layoutData;
     protected GlimpseAxisLayout2D layout;
     protected StackedPlot2D parent;
-
+    
     public PlotInfoImpl( StackedPlot2D parent, Object id, int order, int size, int spacing, GlimpseAxisLayout2D layout )
     {
         this.parent = parent;
@@ -32,6 +61,30 @@ public class PlotInfoImpl implements PlotInfo
         this.layout = layout;
         this.grow = size < 0;
         this.visible = true;
+    }
+    
+    @Override
+    public String getLayoutData( )
+    {
+        return this.layoutData;
+    }
+    
+    @Override
+    public void setLayoutData( String layoutData )
+    {
+        this.layoutData = layoutData;
+    }
+    
+    @Override
+    public void setIndentLevel( int level )
+    {
+        this.indentLevel = Math.max( 0, level );
+    }
+    
+    @Override
+    public int getIndentLevel( )
+    {
+        return this.indentLevel;
     }
 
     @Override
@@ -104,6 +157,12 @@ public class PlotInfoImpl implements PlotInfo
     {
         return this.layout;
     }
+    
+    @Override
+    public GlimpseLayout getBaseLayout( )
+    {
+        return this.layout;
+    }
 
     @Override
     public Axis1D getCommonAxis( GlimpseTargetStack stack )
@@ -173,7 +232,7 @@ public class PlotInfoImpl implements PlotInfo
             oldParent.deletePlot( id );
         }
     }
-
+    
     @Override
     public void updateLayout( int index )
     {
@@ -200,26 +259,26 @@ public class PlotInfoImpl implements PlotInfo
         {
             if ( isGrow( ) )
             {
-                String format = "cell %d %d, push, grow, gaptop %d, id i%2$d";
-                layoutData = String.format( format, 0, index, plotSpacing );
+                String format = "cell %d %d, spanx %d, growx, pushy, growy, gaptop %d";
+                layoutData = String.format( format, indentLevel, index, Integer.MAX_VALUE, plotSpacing );
             }
             else
             {
-                String format = "cell %d %d, growx, pushx, height %d!, gaptop %d, id i%2$d";
-                layoutData = String.format( format, 0, index, plotSize, plotSpacing );
+                String format = "cell %d %d, spanx %d, growx, height %d!, gaptop %d";
+                layoutData = String.format( format, indentLevel, index, Integer.MAX_VALUE, plotSize, plotSpacing );
             }
         }
         else if ( orient == HORIZONTAL )
         {
             if ( isGrow( ) )
             {
-                String format = "cell %d %d, push, grow, gapright %d, id i%1$d";
-                layoutData = String.format( format, index, 0, plotSpacing );
+                String format = "cell %d %d, spany %d, growy, pushx, growx, gapright %d";
+                layoutData = String.format( format, index, indentLevel, Integer.MAX_VALUE, plotSpacing );
             }
             else
             {
-                String format = "cell %d %d, growy, pushy, width %d!, gapright %d, id i%1$d";
-                layoutData = String.format( format, index, 0, plotSize, plotSpacing );
+                String format = "cell %d %d, spany %d, growy, width %d!, gapright %d";
+                layoutData = String.format( format, index, indentLevel, Integer.MAX_VALUE, plotSize, plotSpacing );
             }
         }
 

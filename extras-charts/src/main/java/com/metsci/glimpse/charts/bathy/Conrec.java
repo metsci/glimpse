@@ -45,10 +45,10 @@ package com.metsci.glimpse.charts.bathy;
 public class Conrec
 {
 
-    private double[] h = new double[5];
-    private int[] sh = new int[5];
+    private int[] sh    = new int[5];
     private double[] xh = new double[5];
     private double[] yh = new double[5];
+    private double[] h  = new double[5];
 
     // Object that knows how to draw the contour
     private Render render = null;
@@ -108,25 +108,56 @@ public class Conrec
         // Note that castab is arranged differently from the FORTRAN code because
         // Fortran and C/C++ arrays are transposed of each other, in this case
         // it is more tricky as castab is in 3 dimension
-        int[][][] castab = { { { 0, 0, 8 }, { 0, 2, 5 }, { 7, 6, 9 } }, { { 0, 3, 4 }, { 1, 3, 1 }, { 4, 3, 0 } }, { { 9, 6, 7 }, { 5, 2, 0 }, { 8, 0, 0 } } };
-
-        for ( j = ( jub - 1 ); j >= jlb; j-- )
-        {
-            for ( i = ilb; i <= iub - 1; i++ )
+        int[][][] castab =
             {
-                double temp1, temp2;
-                temp1 = Math.min( d[i][j], d[i][j + 1] );
-                temp2 = Math.min( d[i + 1][j], d[i + 1][j + 1] );
-                dmin = Math.min( temp1, temp2 );
-                temp1 = Math.max( d[i][j], d[i][j + 1] );
-                temp2 = Math.max( d[i + 1][j], d[i + 1][j + 1] );
-                dmax = Math.max( temp1, temp2 );
+                {
+                    { 0, 0, 8 }, { 0, 2, 5 }, { 7, 6, 9 }
+                },
+                {
+                    { 0, 3, 4 }, { 1, 3, 1 }, { 4, 3, 0 }
+                },
+                {
+                    { 9, 6, 7 }, { 5, 2, 0 }, { 8, 0, 0 }
+                }
+            };
 
-                if ( dmax >= z[0] && dmin <= z[nc - 1] )
+        double z_0 = z[0];
+        double z_n = z[nc - 1];
+        double z_k;
+        double d_i0j0, d_i0j1, d_i1j0, d_i1j1;
+        double temp1, temp2;
+
+
+        for ( i = ilb; i <= iub - 1; i++ )
+        {
+            final double[] d_i0 = d[i];
+            final double[] d_i1 = d[i + 1];
+
+            for ( j = jlb; j <= jub - 1; j++ )
+            {
+                d_i0j0 = d_i0[j];
+                d_i0j1 = d_i0[j + 1];
+
+                d_i1j0 = d_i1[j];
+                d_i1j1 = d_i1[j + 1];
+
+                temp1 = Math.min( d_i0j0, d_i0j1 );
+                temp2 = Math.min( d_i1j0, d_i1j1 );
+                dmin  = Math.min( temp1, temp2 );
+                temp1 = Math.max( d_i0j0, d_i0j1 );
+                temp2 = Math.max( d_i1j0, d_i1j1 );
+                dmax  = Math.max( temp1, temp2 );
+
+                if ( z_0 <= dmax && dmin <= z_n )
                 {
                     for ( k = 0; k < nc; k++ )
                     {
-                        if ( z[k] >= dmin && z[k] <= dmax )
+                        z_k = z[k];
+
+                        if ( dmin == z_k && z_k == dmax )
+                            continue;
+
+                        if ( dmin <= z_k && z_k <= dmax )
                         {
                             for ( m = 4; m >= 0; m-- )
                             {
@@ -134,7 +165,7 @@ public class Conrec
                                 {
                                     // The indexing of im and jm should be noted as it has to
                                     // start from zero
-                                    h[m] = d[i + im[m - 1]][j + jm[m - 1]] - z[k];
+                                    h[m] = d[i + im[m - 1]][j + jm[m - 1]] - z_k;
                                     xh[m] = x[i + im[m - 1]];
                                     yh[m] = y[j + jm[m - 1]];
                                 }
@@ -161,9 +192,8 @@ public class Conrec
                             // in the xh and yh arrays. The centre of the box is indexed by 0
                             // and the 4 corners by 1 to 4 as shown below.
                             // Each triangle is then indexed by the parameter m, and the 3
-                            // vertices of each triangle are indexed by parameters m1,m2,and
-                            // m3.
-                            // It is assumed that the centre of the box is always vertex 2
+                            // vertices of each triangle are indexed by parameters m1,m2,and m3.
+                            // It is assumed that the centre of the box is always vertex m2
                             // though this isimportant only when all 3 vertices lie exactly on
                             // the same contour level, in which case only the side of the box
                             // is drawn.
@@ -171,7 +201,7 @@ public class Conrec
                             //
                             //      vertex 4 +-------------------+ vertex 3
                             //               | \               / |
-                            //               |   \    m-3    /   |
+                            //               |   \    m=3    /   |
                             //               |     \       /     |
                             //               |       \   /       |
                             //               |  m=2    X   m=2   |       the centre is vertex 0

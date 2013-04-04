@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -50,11 +50,11 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 
     protected boolean expanded;
 
-    public GroupInfoImpl( CollapsibleTimePlot2D plot, PlotInfo group, Collection<? extends PlotInfo> subplots )
+    public GroupInfoImpl( CollapsibleTimePlot2D _plot, PlotInfo group, Collection<? extends PlotInfo> subplots )
     {
         super( group );
 
-        this.plot = plot;
+        this.plot = _plot;
         this.labelPainter = new GroupLabelPainter( "" );
         this.info.getLayout( ).addPainter( this.labelPainter );
         this.info.setSize( 22 );
@@ -66,18 +66,58 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         GlimpseLayout layout = this.info.getLayout( );
         layout.setEventConsumer( false );
         layout.setEventGenerator( true );
-        layout.addGlimpseMouseListener( new GlimpseMouseAdapter( )
+        layout.addGlimpseMouseAllListener( new GlimpseMouseAllListener( )
         {
+            protected boolean click = false;
+
             @Override
             public void mousePressed( GlimpseMouseEvent event )
             {
-                int x = event.getScreenPixelsX( );
+                click = true;
+            }
 
-                if ( x < labelPainter.getArrowSize( ) + labelPainter.getArrowSpacing( ) * 2 )
+            @Override
+            public void mouseEntered( GlimpseMouseEvent event )
+            {
+                click = false;
+            }
+
+            @Override
+            public void mouseExited( GlimpseMouseEvent event )
+            {
+                click = false;
+            }
+
+            @Override
+            public void mouseReleased( GlimpseMouseEvent event )
+            {
+                if ( click )
                 {
-                    setExpanded( !expanded );
-                    event.setHandled( true );
+                    int x = event.getScreenPixelsX( );
+    
+                    // collapse/expand via clicks on arrow button only
+                    //if ( x < labelPainter.getArrowSize( ) + labelPainter.getArrowSpacing( ) * 2 )
+    
+                    // collapse/expand via clicks on button or label
+                    if ( x < plot.getLabelSize( ) )
+                    {
+                        setExpanded( !expanded );
+                        event.setHandled( true );
+                    }
+                    
+                    click = false;
                 }
+            }
+
+            @Override
+            public void mouseMoved( GlimpseMouseEvent e )
+            {
+                click = false;
+            }
+
+            @Override
+            public void mouseWheelMoved( GlimpseMouseEvent e )
+            {
             }
         } );
     }
@@ -131,16 +171,16 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         this.setVisible0( this, expanded );
         this.plot.validateLayout( );
     }
-    
+
     protected void setVisible0( GroupInfo parent, boolean visible )
     {
         for ( PlotInfo child : parent.getChildPlots( ) )
         {
             child.setVisible( visible );
-            
+
             if ( child instanceof GroupInfo )
             {
-                GroupInfo childGroup = (GroupInfo) child;
+                GroupInfo childGroup = ( GroupInfo ) child;
                 if ( childGroup.isExpanded( ) )
                 {
                     setVisible0( childGroup, visible );

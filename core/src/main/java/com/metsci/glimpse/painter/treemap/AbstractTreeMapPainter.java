@@ -55,15 +55,16 @@ import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
 {
     protected NestedTreeMap tree;
-    protected int treeVersionId;
 
     protected TreeMapLayout treeLayout = new SquarifiedLayout( );
     protected LayoutCache layoutCache;
 
+    protected NestedTreeMap newTree;
+    protected TreeMapLayout newTreeLayout;
+
     public void setLayout( TreeMapLayout layout )
     {
-        treeLayout = layout;
-        flushLayoutCache( );
+        newTreeLayout = layout;
     }
 
     public TreeMapLayout getTreeMapLayout( )
@@ -73,8 +74,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
 
     public void setTreeMapData( NestedTreeMap tree )
     {
-        this.tree = tree;
-        flushLayoutCache( );
+        newTree = tree;
     }
 
     public NestedTreeMap getTreeMapData( )
@@ -108,9 +108,28 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
         return node;
     }
 
+    protected void flushChanges( )
+    {
+        if ( newTree != null )
+        {
+            tree = newTree;
+            newTree = null;
+            flushLayoutCache( );
+        }
+
+        if ( newTreeLayout != null )
+        {
+            treeLayout = newTreeLayout;
+            newTreeLayout = null;
+            flushLayoutCache( );
+        }
+    }
+
     @Override
     public void paintTo( GL gl, GlimpseBounds layoutBounds, Axis2D axis )
     {
+        flushChanges( );
+
         if ( tree == null || tree.isEmpty( ) || treeLayout == null )
         {
             return;
@@ -132,32 +151,24 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
         // nothing to dispose
     }
 
-    /**
-     * Flushes the layout cache. This is only necessary if the layout
-     * implementation doesn't depend exclusively on the inputs. If the layout can
-     * change without the tree changing, this should be called. Otherwise, don't
-     * call this.
-     */
     protected void flushLayoutCache( )
     {
-        if ( tree != null )
+        if ( layoutCache != null )
         {
-            treeVersionId = tree.getVersion( ) - 1;
+            layoutCache.setInvalid( );
         }
     }
 
     protected void updateLayoutCache( Axis2D axis )
     {
-        if ( layoutCache == null || !layoutCache.isValid( axis ) || treeVersionId != tree.getVersion( ) )
+        if ( layoutCache == null || !layoutCache.isValid( axis ) )
         {
-
             double width = axis.getAxisX( ).getAbsoluteMax( ) - axis.getAxisY( ).getAbsoluteMin( );
             double height = axis.getAxisY( ).getAbsoluteMax( ) - axis.getAxisY( ).getAbsoluteMin( );
             Rectangle2D boundary = new Rectangle2D.Double( 0, 0, width, height );
 
             layoutCache = new LayoutCache( axis );
             populateLayout( tree.getRoot( ), boundary );
-            treeVersionId = tree.getVersion( );
         }
     }
 
@@ -364,6 +375,14 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
             absoluteMaxX = axis.getAxisX( ).getAbsoluteMax( );
             absoluteMinY = axis.getAxisY( ).getAbsoluteMin( );
             absoluteMaxY = axis.getAxisY( ).getAbsoluteMax( );
+        }
+
+        public void setInvalid( )
+        {
+            absoluteMinX = Double.NaN;
+            absoluteMaxX = Double.NaN;
+            absoluteMinY = Double.NaN;
+            absoluteMaxY = Double.NaN;
         }
 
         public boolean isValid( Axis2D axis )
