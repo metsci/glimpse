@@ -26,11 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Icon;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Label;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,6 +97,7 @@ public class EventManager
         public Row( int index )
         {
             this.index = index;
+            this.visibleAggregateEvents = new IntervalSortedMultimap( );
             this.events = new IntervalSortedMultimap( );
         }
 
