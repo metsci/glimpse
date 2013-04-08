@@ -218,7 +218,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return false;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toLocalGlimpseWheelEvent( event, stack );
             mouseTarget.mouseWheelMoved( glimpseEvent );
 
             if ( glimpseEvent.isHandled( ) ) return true;

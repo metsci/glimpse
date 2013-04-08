@@ -93,29 +93,15 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
 
         return localEvent;
     }
-
+    
     @Override
-    protected GlimpseMouseEvent toGlimpseEvent( MouseEvent e )
-    {
-        return GlimpseMouseWrapper.fromMouseEvent( e );
-    }
-
-    @Override
-    protected GlimpseMouseEvent toLocalGlimpseEvent( MouseEvent e, GlimpseTargetStack stack )
-    {
-        if ( e instanceof MouseWheelEvent )
-        {
-            return GlimpseMouseWrapper.fromMouseWheelEvent( toLocalCoords( ( MouseWheelEvent ) e, stack ) );
-        }
-        else
-        {
-            return super.toLocalGlimpseEvent( e, stack );
-        }
-    }
-
-    protected MouseWheelEvent toLocalCoords( MouseWheelEvent e, GlimpseTargetStack stack )
+    protected MouseWheelEvent toLocalCoordsWheel( MouseEvent e, GlimpseTargetStack stack )
     {
         if ( stack == null ) return null;
+        
+        if ( !(e instanceof MouseWheelEvent) ) return null;
+        
+        MouseWheelEvent wheelEvent = (MouseWheelEvent) e; 
 
         GlimpseBounds bounds = stack.getBounds( );
 
@@ -133,13 +119,25 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
         int local_y = e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) );
         int clickCount = e.getClickCount( );
         boolean popupTrigger = e.isPopupTrigger( );
-        int scrollType = e.getScrollType( );
-        int scrollAmount = e.getScrollAmount( );
-        int wheelRotation = e.getWheelRotation( );
+        int scrollType = wheelEvent.getScrollType( );
+        int scrollAmount = wheelEvent.getScrollAmount( );
+        int wheelRotation = wheelEvent.getWheelRotation( );
 
         MouseWheelEvent localEvent = new GlimpseSwingMouseWheelEvent( stack, source, id, when, modifiers, local_x, local_y, clickCount, popupTrigger, scrollType, scrollAmount, wheelRotation );
 
         return localEvent;
+    }
+
+    @Override
+    protected GlimpseMouseEvent toGlimpseEvent( MouseEvent e )
+    {
+        return GlimpseMouseWrapper.fromMouseEvent( e );
+    }
+
+    @Override
+    protected GlimpseMouseEvent toGlimpseEventWheel( MouseEvent e )
+    {
+        return GlimpseMouseWrapper.fromMouseWheelEvent( (MouseWheelEvent) e );
     }
 
     @Override

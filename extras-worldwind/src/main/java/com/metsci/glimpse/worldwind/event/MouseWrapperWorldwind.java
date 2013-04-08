@@ -130,9 +130,21 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
     {
         return e;
     }
-
+    
+    @Override
+    protected GlimpseMouseEvent toLocalCoordsWheel( GlimpseMouseEvent e, GlimpseTargetStack stack )
+    {
+        return e;
+    }
+    
     @Override
     protected GlimpseMouseEvent toGlimpseEvent( GlimpseMouseEvent e )
+    {
+        return e;
+    }
+    
+    @Override
+    protected GlimpseMouseEvent toGlimpseEventWheel( GlimpseMouseEvent e )
     {
         return e;
     }

@@ -245,6 +245,18 @@ public abstract class MouseWrapper<E>
         event.setHandled( handled );
         return event;
     }
+    
+    protected GlimpseMouseEvent toLocalGlimpseWheelEvent( E e, GlimpseTargetStack stack )
+    {
+        return toLocalGlimpseWheelEvent( e, stack, false );
+    }
+
+    protected GlimpseMouseEvent toLocalGlimpseWheelEvent( E e, GlimpseTargetStack stack, boolean handled )
+    {
+        GlimpseMouseEvent event = toGlimpseEventWheel( toLocalCoordsWheel( e, stack ) );
+        event.setHandled( handled );
+        return event;
+    }
 
     protected abstract boolean isButtonDown( E e );
 
@@ -253,8 +265,12 @@ public abstract class MouseWrapper<E>
     protected abstract boolean isValid( E e, GlimpseBounds bounds );
 
     protected abstract E toLocalCoords( E e, GlimpseTargetStack stack );
+    
+    protected abstract E toLocalCoordsWheel( E e, GlimpseTargetStack stack );
 
     protected abstract GlimpseMouseEvent toGlimpseEvent( E e );
+    
+    protected abstract GlimpseMouseEvent toGlimpseEventWheel( E e );
 
     public void notifyMouseEnteredExited( E event, List<GlimpseTargetStack> oldStacks, List<GlimpseTargetStack> newStacks )
     {
