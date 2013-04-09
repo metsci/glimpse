@@ -480,6 +480,29 @@ public class EventManager
             lock.unlock( );
         }
     }
+    
+    public void removeAllEvents( )
+    {
+        lock.lock( );
+        try
+        {
+            for ( Event event : this.eventMap.values( ) )
+            {
+                event.setEventPlotInfo( null );
+            }
+            
+            this.eventMap.clear( );
+            this.rowMap.clear( );
+            this.rows.clear( );
+            
+            this.visibleEventsDirty = true;
+            this.info.updateSize( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
 
     public void moveEvent( Event event, TimeStamp newStartTime, TimeStamp newEndTime )
     {

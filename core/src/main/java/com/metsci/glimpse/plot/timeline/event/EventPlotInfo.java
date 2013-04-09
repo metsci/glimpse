@@ -646,6 +646,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             event.setEventPlotInfo( null );
         }
     }
+    
+    public void removeAllEvents( )
+    {
+        this.eventManager.removeAllEvents( );
+    }
 
     /**
      * Sets the TextRenderingMode for all {@link Event} children of this EventPlotInfo.
