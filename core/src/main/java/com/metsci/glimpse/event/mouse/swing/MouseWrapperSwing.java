@@ -39,7 +39,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
-public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
+public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent,MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
 {
     public static final int ANY_BUTTON_DOWN_MASK = MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
 
@@ -66,7 +66,6 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
         return e.getComponent( ) != null;
     }
 
-    @Override
     protected MouseEvent toLocalCoords( MouseEvent e, GlimpseTargetStack stack )
     {
         if ( stack == null ) return null;
@@ -94,7 +93,6 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
         return localEvent;
     }
     
-    @Override
     protected MouseWheelEvent toLocalCoordsWheel( MouseEvent e, GlimpseTargetStack stack )
     {
         if ( stack == null ) return null;
@@ -128,18 +126,28 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
         return localEvent;
     }
 
-    @Override
     protected GlimpseMouseEvent toGlimpseEvent( MouseEvent e )
     {
         return GlimpseMouseWrapper.fromMouseEvent( e );
     }
 
-    @Override
     protected GlimpseMouseEvent toGlimpseEventWheel( MouseEvent e )
     {
         return GlimpseMouseWrapper.fromMouseWheelEvent( (MouseWheelEvent) e );
     }
 
+    @Override
+    protected GlimpseMouseEvent toGlimpseEvent( MouseEvent e, GlimpseTargetStack stack )
+    {
+        return toGlimpseEvent( toLocalCoords( e, stack ) );
+    }
+
+    @Override
+    protected GlimpseMouseEvent toGlimpseEventWheel( MouseEvent e, GlimpseTargetStack stack )
+    {
+        return toGlimpseEventWheel( toLocalCoordsWheel( e, stack ) );
+    }
+    
     @Override
     public void mouseWheelMoved( MouseWheelEvent e )
     {

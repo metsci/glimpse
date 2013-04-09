@@ -59,7 +59,7 @@ import com.metsci.glimpse.worldwind.tile.GlimpseSurfaceTile;
  * @see com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing
  * @see com.metsci.glimpse.event.mouse.MouseWrapper
  */
-public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
+public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent,GlimpseMouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
 {
     protected WorldWindow wwd;
     protected GeoProjection projection;
@@ -124,27 +124,15 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
     {
         return e != null && bounds != null;
     }
+    
+    @Override
+    protected GlimpseMouseEvent toGlimpseEvent( GlimpseMouseEvent e, GlimpseTargetStack stack )
+    {
+        return e;
+    }
 
     @Override
-    protected GlimpseMouseEvent toLocalCoords( GlimpseMouseEvent e, GlimpseTargetStack stack )
-    {
-        return e;
-    }
-    
-    @Override
-    protected GlimpseMouseEvent toLocalCoordsWheel( GlimpseMouseEvent e, GlimpseTargetStack stack )
-    {
-        return e;
-    }
-    
-    @Override
-    protected GlimpseMouseEvent toGlimpseEvent( GlimpseMouseEvent e )
-    {
-        return e;
-    }
-    
-    @Override
-    protected GlimpseMouseEvent toGlimpseEventWheel( GlimpseMouseEvent e )
+    protected GlimpseMouseEvent toGlimpseEventWheel( GlimpseMouseEvent e, GlimpseTargetStack stack )
     {
         return e;
     }

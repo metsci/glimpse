@@ -27,18 +27,78 @@
 package com.metsci.glimpse.swt.event.mouse;
 
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import org.eclipse.swt.widgets.Display;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
+import com.metsci.glimpse.event.mouse.swing.GlimpseMouseWrapper;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 
-public class MouseWrapperSWTBridge extends MouseWrapperSwing
+public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.MouseEvent, org.eclipse.swt.events.MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
 {
     public MouseWrapperSWTBridge( GlimpseCanvas canvas )
     {
         super( canvas );
+    }
+
+    @Override
+    protected boolean isInterior( MouseEvent e, GlimpseBounds bounds )
+    {
+        return bounds.contains( e.getX( ), e.getComponent( ).getBounds( ).height - e.getY( ) );
+    }
+
+    @Override
+    protected boolean isButtonDown( MouseEvent e )
+    {
+        return ( e.getModifiersEx( ) & MouseWrapperSwing.ANY_BUTTON_DOWN_MASK ) > 0;
+    }
+
+    @Override
+    protected boolean isValid( MouseEvent e, GlimpseBounds bounds )
+    {
+        return e.getComponent( ) != null;
+    }
+
+    @Override
+    protected GlimpseMouseEvent toGlimpseEvent( MouseEvent e, GlimpseTargetStack stack )
+    {
+        if ( stack == null ) return null;
+
+        GlimpseBounds bounds = stack.getBounds( );
+
+        if ( bounds == null ) return null;
+
+        int parentHeight = canvas.getTargetBounds( ).getHeight( );
+
+        int local_x = e.getX( ) - bounds.getX( );
+        int local_y = e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) );
+
+        return GlimpseMouseWrapper.fromMouseEvent( e, stack, local_x, local_y );
+    }
+
+    @Override
+    protected GlimpseMouseEvent toGlimpseEventWheel( MouseEvent e, GlimpseTargetStack stack )
+    {
+        if ( stack == null ) return null;
+
+        GlimpseBounds bounds = stack.getBounds( );
+
+        if ( bounds == null ) return null;
+
+        int parentHeight = canvas.getTargetBounds( ).getHeight( );
+
+        int local_x = e.getX( ) - bounds.getX( );
+        int local_y = e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) );
+
+        return GlimpseMouseWrapper.fromMouseWheelEvent( ( MouseWheelEvent ) e, stack, local_x, local_y );
     }
 
     @Override
