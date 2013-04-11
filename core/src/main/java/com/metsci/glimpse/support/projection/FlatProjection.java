@@ -119,7 +119,7 @@ public class FlatProjection implements Projection, InvertibleProjection
     @Override
     public double getTextureFractionY( double vertexX, double vertexY )
     {
-        double texFracUnnormY = ( vertexY - minX ) / diffY;
+        double texFracUnnormY = ( vertexY - minY ) / diffY;
         return texFracUnnormY * diffTexY + minTexY;
     }
 
