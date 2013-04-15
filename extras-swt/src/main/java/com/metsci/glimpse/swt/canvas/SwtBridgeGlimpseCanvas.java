@@ -39,6 +39,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
@@ -268,20 +269,17 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
         // freezing the application.
         glCanvas.addMouseListener( new MouseAdapter( )
         {
-            public void requestFocus( )
+            @Override
+            public void mouseEntered( MouseEvent e )
             {
-                Display.getDefault( ).asyncExec( new Runnable( )
+                SwingUtilities.invokeLater( new Runnable( )
                 {
+                    @Override
                     public void run( )
                     {
                         glCanvas.requestFocus( );
                     }
-                } );
-            }
-
-            public void mouseEntered( MouseEvent e )
-            {
-                requestFocus( );
+                });
             }
         } );
     }
