@@ -418,6 +418,20 @@ public class DoublesArray implements DoublesModifiable
             }
         }
     }
+    
+    @Override
+    public void removeRange( int from, int to )
+    {
+        int length = n-to;
+        System.arraycopy( a, to, a, from, length );
+        n -= to-from;
+    }
+    
+    @Override
+    public void removeIndex( int index )
+    {
+        removeRange( index, index+1 );
+    }
 
 
 

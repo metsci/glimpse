@@ -88,6 +88,21 @@ public interface BytesModifiable extends Bytes
      * are present, there is no guarantee which one will be removed.
      */
     void remove(byte v);
+    
+    /**
+     * Removes values starting at index from (inclusive) to index to (exclusive).
+     * All other values with indices greater than or equal to index to have
+     * their index in the array decreased by to-from and the size of the array is
+     * decreased by to-from.
+     */
+    void removeRange(int from, int to);
+    
+    /**
+     * Remove value at index. All other values with indices greater than index have
+     * their index in the array decreased by one and the size of the array is
+     * decreased by one.
+     */
+    void removeIndex(int index);
 
 
 
