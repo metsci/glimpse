@@ -33,7 +33,9 @@ public interface BooleansModifiable extends Booleans
 {
 
     void set(int i, boolean v);
-
+    void set(int i, boolean[] vs);
+    void set(int i, boolean[] vs, int from, int to);
+    
 
 
     void insert(int i, boolean v);

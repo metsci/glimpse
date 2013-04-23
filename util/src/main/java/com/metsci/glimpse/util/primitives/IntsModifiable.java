@@ -35,7 +35,9 @@ public interface IntsModifiable extends Ints
 {
 
     void set(int i, int v);
-
+    void set(int i, int[] vs);
+    void set(int i, int[] vs, int from, int to);
+    
 
 
     void insert(int i, int v);

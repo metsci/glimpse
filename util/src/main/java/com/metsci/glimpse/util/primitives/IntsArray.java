@@ -30,6 +30,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 /**
  * @author hogye
@@ -151,6 +152,21 @@ public class IntsArray implements IntsModifiable
     public void set(int i, int v)
     {
         a[i] = v;
+    }
+    
+    @Override
+    public void set(int i, int[] vs)
+    {
+        set( i, vs, 0, vs.length );
+    }
+    
+    @Override
+    public void set(int i, int[] vs, int from, int to)
+    {
+        int c = to - from;
+        ensureCapacity( i + c );
+        System.arraycopy( vs, from, a, i, c );
+        n = i + c;
     }
 
     @Override
@@ -469,5 +485,4 @@ public class IntsArray implements IntsModifiable
         int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
         return new int[newCapacity];
     }
-
 }

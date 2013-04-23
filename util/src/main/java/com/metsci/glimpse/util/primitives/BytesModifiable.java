@@ -38,7 +38,9 @@ public interface BytesModifiable extends Bytes
 {
 
     void set(int i, byte v);
-
+    void set(int i, byte[] vs);
+    void set(int i, byte[] vs, int from, int to);
+    
 
 
     void insert(int i, byte v);

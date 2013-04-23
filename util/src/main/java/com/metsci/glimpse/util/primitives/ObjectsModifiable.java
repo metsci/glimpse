@@ -34,7 +34,9 @@ public interface ObjectsModifiable extends Objects
 {
 
     void set(int i, Object v);
-
+    void set(int i, Object[] vs);
+    void set(int i, Object[] vs, int from, int to);
+    
 
 
     void insert(int i, Object v);

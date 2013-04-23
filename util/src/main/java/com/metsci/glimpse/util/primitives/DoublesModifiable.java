@@ -35,7 +35,9 @@ public interface DoublesModifiable extends Doubles
 {
 
     void set(int i, double v);
-
+    void set(int i, double[] vs);
+    void set(int i, double[] vs, int from, int to);
+    
 
 
     void insert(int i, double v);

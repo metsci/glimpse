@@ -151,6 +151,21 @@ public class FloatsArray implements FloatsModifiable
     {
         a[i] = v;
     }
+    
+    @Override
+    public void set(int i, float[] vs)
+    {
+        set( i, vs, 0, vs.length );
+    }
+    
+    @Override
+    public void set(int i, float[] vs, int from, int to)
+    {
+        int c = to - from;
+        ensureCapacity( i + c );
+        System.arraycopy( vs, from, a, i, c );
+        n = i + c;
+    }
 
     @Override
     public void insert(int i, float v)

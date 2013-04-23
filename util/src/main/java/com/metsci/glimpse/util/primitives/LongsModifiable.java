@@ -35,7 +35,9 @@ public interface LongsModifiable extends Longs
 {
 
     void set(int i, long v);
-
+    void set(int i, long[] vs);
+    void set(int i, long[] vs, int from, int to);
+    
 
 
     void insert(int i, long v);

@@ -35,7 +35,8 @@ public interface FloatsModifiable extends Floats
 {
 
     void set(int i, float v);
-
+    void set(int i, float[] vs);
+    void set(int i, float[] vs, int from, int to);
 
 
     void insert(int i, float v);

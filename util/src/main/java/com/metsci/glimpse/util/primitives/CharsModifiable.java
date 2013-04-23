@@ -35,7 +35,9 @@ public interface CharsModifiable extends Chars
 {
 
     void set(int i, char v);
-
+    void set(int i, char[] vs);
+    void set(int i, char[] vs, int from, int to);
+    
 
 
     void insert(int i, char v);
