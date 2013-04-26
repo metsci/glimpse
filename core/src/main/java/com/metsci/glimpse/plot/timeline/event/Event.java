@@ -318,7 +318,7 @@ public class Event implements Iterable<Event>
 
     protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
     {
-        float[] defaultColor = info.getBackgroundColor( );
+        float[] defaultColor = info.getDefaultEventBackgroundColor( );
         float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
 
         if ( isSelected )
@@ -341,7 +341,7 @@ public class Event implements Iterable<Event>
 
     protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )
     {
-        float[] defaultColor = info.getBorderColor( );
+        float[] defaultColor = info.getDefaultEventBorderColor( );
         float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
 
         if ( isSelected )
