@@ -187,9 +187,11 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
                 for ( int i = size - 1; i >= 0; i-- )
                 {
                     Tag tag = tags.get( i );
-                    Object attribute = tag.getAttribute( TEX_COORD_ATTR );
-
-                    if ( attribute != null ) data.put( ( Float ) attribute );
+                    
+                    if ( tag.hasAttribute( TEX_COORD_ATTR ) )
+                    {
+                        data.put( tag.getAttributeFloat( TEX_COORD_ATTR ) );
+                    }
                 }
             }
         } );

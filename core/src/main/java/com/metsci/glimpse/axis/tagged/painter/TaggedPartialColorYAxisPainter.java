@@ -115,10 +115,9 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
         int count = 0;
         for ( Tag tag : tags )
         {
-            Object attr = tag.getAttribute( TEX_COORD_ATTR );
-            if ( attr != null && attr.getClass( ) == Float.class )
+            if ( tag.hasAttribute( TEX_COORD_ATTR ) )
             {
-                float textureCoord = ( Float ) attr;
+                float textureCoord = tag.getAttributeFloat( TEX_COORD_ATTR );
                 float vertexCoord = ( float ) taggedAxis.valueToScreenPixel( tag.getValue( ) );
 
                 vertexCoords.put( x1 ).put( vertexCoord ).put( x2 ).put( vertexCoord );

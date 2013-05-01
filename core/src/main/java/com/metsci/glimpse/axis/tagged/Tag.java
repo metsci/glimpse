@@ -128,6 +128,24 @@ public class Tag
 
         return this.attributeMap.get( key );
     }
+    
+    public float getAttributeFloat( String key )
+    {
+        if ( this.attributeMap == null )
+        {
+            throw new IllegalArgumentException( "No value for key: " + key );
+        }
+        
+        Object value = this.attributeMap.get( key );
+    
+        if ( !(value instanceof Number) )
+        {
+            String message = String.format( "Value for key: %s of type: %s required type: %s", key, value.getClass( ), Number.class );
+            throw new ClassCastException( message );
+        }
+        
+        return ( ( Number ) value ).floatValue( );
+    }
 
     @Override
     public int hashCode( )
