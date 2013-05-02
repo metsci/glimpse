@@ -179,17 +179,15 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected void updateGeometry( DrawContext dc )
     {
-        List<LatLon> screenCorners = getCorners( dc );
+        corners = maxCorners;
+        bounds = maxBounds;
 
-        if ( !isValid( screenCorners ) )
-        {
-            corners = maxCorners;
-            bounds = maxBounds;
-        }
-        else
+        List<LatLon> screenCorners = getCorners0( dc );
+
+        if ( isValid( screenCorners ))
         {
             // two heuristic methods of calculating the screen corners
-            LatLonBounds screenBounds = bufferCorners( getCorners( getCorners0( dc ) ), 0.5 );
+            LatLonBounds screenBounds = bufferCorners( getCorners( screenCorners ), 0.5 );
             bounds = getIntersectedCorners( maxBounds, screenBounds );
             corners = getCorners( bounds );
         }
