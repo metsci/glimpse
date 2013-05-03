@@ -51,7 +51,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
     // IODH idiom avoids cycles in class initialization
     private static class Instances
     {
-        private static final TimeStampFactory<?> factory = TimeStampPosixMillisInt64.factory;
+        public static final TimeStampFactory<?> factory = TimeStampPosixMillisInt64.factory;
     }
 
     /**
