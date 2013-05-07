@@ -13,24 +13,29 @@ import com.metsci.glimpse.axis.Axis1D;
  */
 public class FixedAxisLabelHandler implements AxisLabelHandler
 {
-    protected final static AxisUnitConverter converter = new AxisUnitConverter( )
-    {
-        @Override
-        public double toAxisUnits( double value )
-        {
-            return value;
-        }
-
-        @Override
-        public double fromAxisUnits( double value )
-        {
-            return value;
-        }
-    };
-
     protected Double2ObjectSortedMap<String> labels;
 
     protected String axisLabel = "";
+
+    protected AxisUnitConverter converter;
+
+    public FixedAxisLabelHandler( )
+    {
+        setAxisUnitConverter( new AxisUnitConverter( )
+        {
+            @Override
+            public double toAxisUnits( double value )
+            {
+                return value;
+            }
+
+            @Override
+            public double fromAxisUnits( double value )
+            {
+                return value;
+            }
+        } );
+    }
 
     @Override
     public double[] getTickPositions( Axis1D axis )
@@ -40,7 +45,10 @@ public class FixedAxisLabelHandler implements AxisLabelHandler
             return new double[0];
         }
 
-        DoubleSortedSet subset = labels.keySet( ).subSet( axis.getMin( ), axis.getMax( ) );
+        double min = getAxisUnitConverter( ).fromAxisUnits( axis.getMin( ) );
+        double max = getAxisUnitConverter( ).fromAxisUnits( axis.getMax( ) );
+
+        DoubleSortedSet subset = labels.keySet( ).subSet( min, max );
         return subset.toDoubleArray( );
     }
 
@@ -89,7 +97,7 @@ public class FixedAxisLabelHandler implements AxisLabelHandler
     @Override
     public void setAxisUnitConverter( AxisUnitConverter converter )
     {
-        // nop
+        this.converter = converter;
     }
 
     public void clearLabels( )
