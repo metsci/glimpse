@@ -26,20 +26,22 @@
  */
 package com.metsci.glimpse.support.settings;
 
+import javax.swing.UIManager;
+
 import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 import static com.metsci.glimpse.support.color.GlimpseColor.*;
-
-import java.awt.SystemColor;
 
 public class SwingLookAndFeel extends AbstractLookAndFeel
 {
     public SwingLookAndFeel( )
     {
+        float[] swingBackground = fromColorAwt( UIManager.getColor( "Panel.background" ) );
+        
         map.put( CROSSHAIR_COLOR, getBlack( ) );
         map.put( BORDER_COLOR, getBlack( ) );
         
-        map.put( PLOT_BACKGROUND_COLOR, addRgb( fromColorAwt( SystemColor.window ), -0.1f ) );
-        map.put( FRAME_BACKGROUND_COLOR, fromColorAwt( SystemColor.window ) );
+        map.put( PLOT_BACKGROUND_COLOR, addRgb( swingBackground, -0.1f ) );
+        map.put( FRAME_BACKGROUND_COLOR, swingBackground );
         
         map.put( AXIS_TEXT_COLOR, getBlack( ) );
         map.put( AXIS_TICK_COLOR, getBlack( ) );
