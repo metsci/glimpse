@@ -1,4 +1,4 @@
-// $ANTLR 3.5 ../core/src/main/resources/shader/antlr/GlslArg.g 2013-05-29 11:08:42
+// $ANTLR 3.5 ../core/src/main/resources/shader/antlr/GlslArg.g 2013-05-29 11:26:33
 
 package com.metsci.glimpse.gl.shader.grammar;
 
@@ -1011,10 +1011,10 @@ public class GlslArgLexer extends Lexer {
 		try {
 			int _type = SAMPLER1DARRAY;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// ../core/src/main/resources/shader/antlr/GlslArg.g:147:23: ( 'sampler1Darray' )
-			// ../core/src/main/resources/shader/antlr/GlslArg.g:147:25: 'sampler1Darray'
+			// ../core/src/main/resources/shader/antlr/GlslArg.g:147:23: ( 'sampler1DArray' )
+			// ../core/src/main/resources/shader/antlr/GlslArg.g:147:25: 'sampler1DArray'
 			{
-			match("sampler1Darray"); 
+			match("sampler1DArray"); 
 
 			}
 
@@ -1032,10 +1032,10 @@ public class GlslArgLexer extends Lexer {
 		try {
 			int _type = SAMPLER2DARRAY;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// ../core/src/main/resources/shader/antlr/GlslArg.g:148:23: ( 'sampler2Darray' )
-			// ../core/src/main/resources/shader/antlr/GlslArg.g:148:25: 'sampler2Darray'
+			// ../core/src/main/resources/shader/antlr/GlslArg.g:148:23: ( 'sampler2DArray' )
+			// ../core/src/main/resources/shader/antlr/GlslArg.g:148:25: 'sampler2DArray'
 			{
-			match("sampler2Darray"); 
+			match("sampler2DArray"); 
 
 			}
 
@@ -2212,8 +2212,8 @@ public class GlslArgLexer extends Lexer {
 			"\1\u00ec",
 			"\1\u00ed",
 			"\12\30\7\uffff\32\30\4\uffff\1\30\1\uffff\32\30",
-			"\12\30\7\uffff\32\30\4\uffff\1\30\1\uffff\1\u00ef\31\30",
-			"\12\30\7\uffff\32\30\4\uffff\1\30\1\uffff\1\u00f1\31\30",
+			"\12\30\7\uffff\1\u00ef\31\30\4\uffff\1\30\1\uffff\32\30",
+			"\12\30\7\uffff\1\u00f1\31\30\4\uffff\1\30\1\uffff\32\30",
 			"\1\u00f3",
 			"\1\u00f4",
 			"\1\u00f5",
