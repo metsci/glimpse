@@ -27,17 +27,14 @@
 package com.metsci.glimpse.util.geo.projection;
 
 
+import java.io.Serializable;
+
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.geo.datum.DatumWgs84;
+import com.metsci.glimpse.util.geo.datum.DatumSphereWgs84;
 import com.metsci.glimpse.util.math.fast.PolynomialApprox;
 import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.util.vector.Vector3d;
-
-
-
-
-import java.io.Serializable;
 
 
 /**
@@ -50,7 +47,7 @@ public final class TangentPlane implements GeoProjection, Serializable
 {
     public static final long serialVersionUID = -6802219476339525122L;
     private static final Vector2d defaultTangentPointOnPlane = new Vector2d(0.0, 0.0);
-    private static final double earthRadius = DatumWgs84.meanRadius;
+    private static final double earthRadius = DatumSphereWgs84.avgGeodesicRadius;
 
     // reference LatLon at point of tangency as a LatLon instance and also represented as point on
     // unit sphere (Earth units: radius of earth = 1.0)
