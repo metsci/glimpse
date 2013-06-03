@@ -31,7 +31,7 @@ import java.util.List;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 
-public abstract class MouseWrapperImpl<I,O> extends MouseWrapper<I,O>
+public abstract class MouseWrapperImpl<I> extends MouseWrapper<I>
 {
 
     public MouseWrapperImpl( GlimpseCanvas canvas )

@@ -45,6 +45,7 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
     protected boolean allowSelectionZoom = true;
     protected boolean allowPan = true;
     protected boolean allowZoom = true;
+    protected boolean allowSelect = true;
 
     public void addAxisGestureListener( Touchable touchable )
     {
@@ -69,6 +70,11 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
     public void setAllowPan( boolean b )
     {
         allowPan = b;
+    }
+
+    public void setAllowSelect( boolean b )
+    {
+        allowSelect = b;
     }
 
     protected int getDim( boolean horizontal, int x, int y )
@@ -108,6 +114,17 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
 
         axis.setMin( newMinValue );
         axis.setMax( newMaxValue );
+    }
+
+    public void select( Axis1D axis, boolean horizontal, float posX, float posY )
+    {
+        if ( !allowSelect ) return;
+        if ( axis.isSelectionLocked( ) ) return;
+
+        double posPixels = getDim( horizontal, posX, posY );
+        double posData = posPixels / axis.getPixelsPerValue( );
+
+        axis.setSelectionCenter( posData );
     }
 
     public void zoomSelection( Axis1D axis, boolean horizontal, int zoomIncrements, int posX, int posY )

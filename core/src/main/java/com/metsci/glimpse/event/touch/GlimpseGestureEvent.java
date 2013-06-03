@@ -26,7 +26,83 @@
  */
 package com.metsci.glimpse.event.touch;
 
+import com.metsci.glimpse.context.GlimpseTargetStack;
+
+/**
+ * Gesture implementations vary, but this event implementation should
+ * be flexible enough for most platforms. Just like GlimpseMouseEvent,
+ * this event class does not update a previous event. Gestures events
+ * can be thought of as updates to a single gesture.  But we will
+ * treat each event as self-contained (e.g. a lon pan is comprised of
+ * multiple small pan events with small dx/dy).
+ *
+ * <p>
+ * The source string can contain generic information about the source
+ * of the touch.
+ * </p>
+ *
+ * <p>
+ * There is a reference point x,y for each event. For tap/long press
+ * this is where the finger pressed the screen (in pixels).
+ * For pan/swipe, this is where the finger was at the start of this
+ * event. For pinch, this is the center X coordinate.
+ * </p>
+ */
 public class GlimpseGestureEvent
 {
+    protected String source;
+    protected GlimpseTargetStack stack;
 
+    protected int x;
+    protected int y;
+
+    protected boolean handled;
+
+    public GlimpseGestureEvent( String source, GlimpseTargetStack stack, int x, int y )
+    {
+        this.source = source;
+        this.stack = stack;
+        this.x = x;
+        this.y = y;
+    }
+
+    /**
+     * Can be some information about where the gesture/touch event came
+     * from.
+     */
+    public String getSource( )
+    {
+        return source;
+    }
+
+    public GlimpseTargetStack getTargetStack( )
+    {
+        return stack;
+    }
+
+    /**
+     * A reference point X for the touch event. See the class comments.
+     */
+    public int getX( )
+    {
+        return x;
+    }
+
+    /**
+     * A reference point Y for the touch event. See the class comments.
+     */
+    public int getY( )
+    {
+        return y;
+    }
+
+    public void setHandled( boolean handled )
+    {
+        this.handled = handled;
+    }
+
+    public boolean isHandled( )
+    {
+        return handled;
+    }
 }

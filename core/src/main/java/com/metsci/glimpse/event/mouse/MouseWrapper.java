@@ -40,8 +40,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
 
 // I = input event
-// O = output (adjusted to local coordinates) event
-public abstract class MouseWrapper<I,O>
+public abstract class MouseWrapper<I>
 {
     protected GlimpseCanvas canvas;
     // set of hovered stacks which does not change during drags
@@ -243,7 +242,7 @@ public abstract class MouseWrapper<I,O>
     protected abstract boolean isValid( I e, GlimpseBounds bounds );
 
     protected abstract GlimpseMouseEvent toGlimpseEvent( I e, GlimpseTargetStack stack );
-    
+
     protected abstract GlimpseMouseEvent toGlimpseEventWheel( I e, GlimpseTargetStack stack );
 
     public void notifyMouseEnteredExited( I event, List<GlimpseTargetStack> oldStacks, List<GlimpseTargetStack> newStacks )

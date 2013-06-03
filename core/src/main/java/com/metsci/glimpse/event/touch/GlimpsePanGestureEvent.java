@@ -35,38 +35,24 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
 public class GlimpsePanGestureEvent extends GlimpseGestureEvent
 {
-    protected String source;
-    protected GlimpseTargetStack stack;
+    protected float dx;
+    protected float dy;
 
-    protected float dxPixels;
-    protected float dyPixels;
-
-    public GlimpsePanGestureEvent( String source, GlimpseTargetStack stack, float dxPixels, float dyPixels )
+    public GlimpsePanGestureEvent( String source, GlimpseTargetStack stack, int x, int y, float dx, float dy )
     {
-        this.source = source;
-        this.stack = stack;
-        this.dxPixels = dxPixels;
-        this.dyPixels = dyPixels;
+        super( source, stack, x, y );
+        this.dx = dx;
+        this.dy = dy;
     }
 
-    public String getSource( )
+    public float getDx( )
     {
-        return source;
+        return dx;
     }
 
-    public float getDxPixels( )
+    public float getDy( )
     {
-        return dxPixels;
-    }
-
-    public float getDyPixels( )
-    {
-        return dyPixels;
-    }
-
-    public GlimpseTargetStack getTargetStack( )
-    {
-        return this.stack;
+        return dy;
     }
 
     public Axis1D getAxis1D( )
@@ -104,6 +90,6 @@ public class GlimpsePanGestureEvent extends GlimpseGestureEvent
     @Override
     public String toString( )
     {
-        return String.format( "dx: %f dy: %f", dxPixels, dyPixels );
+        return String.format( "x,y = %d,%d dx: %f dy: %f", x, y, dx, dy );
     }
 }

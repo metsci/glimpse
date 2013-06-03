@@ -67,8 +67,8 @@ public class AxisGestureListener2D extends AxisGestureListener
         if ( layout == null ) return;
 
         Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        pan( targetAxis.getAxisX( ), true, event.getDxPixels( ), event.getDyPixels( ) );
-        pan( targetAxis.getAxisY( ), false, event.getDxPixels( ), event.getDyPixels( ) );
+        pan( targetAxis.getAxisX( ), true, event.getDx( ), event.getDy( ) );
+        pan( targetAxis.getAxisY( ), false, event.getDx( ), event.getDy( ) );
 
         applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }
@@ -80,8 +80,8 @@ public class AxisGestureListener2D extends AxisGestureListener
         if ( layout == null ) return;
 
         Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        zoom( targetAxis.getAxisX( ), true, event.getCenterPixelX( ), event.getCenterPixelY( ), event.getScale( ) );
-        zoom( targetAxis.getAxisY( ), false, event.getCenterPixelX( ), event.getCenterPixelY( ), event.getScale( ) );
+        zoom( targetAxis.getAxisX( ), true, event.getX( ), event.getX( ), event.getScale( ) );
+        zoom( targetAxis.getAxisY( ), false, event.getX( ), event.getX( ), event.getScale( ) );
 
         applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }
@@ -98,7 +98,14 @@ public class AxisGestureListener2D extends AxisGestureListener
     @Override
     public void tapDetected( GlimpseTapGestureEvent event )
     {
+        GlimpseAxisLayout2D layout = getAxisLayout( event.getTargetStack( ) );
+        if ( layout == null ) return;
 
+        Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
+        select( targetAxis.getAxisX( ), true, event.getX( ), event.getY( ) );
+        select( targetAxis.getAxisY( ), false, event.getX( ), event.getY( ) );
+
+        applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }
 
     @Override

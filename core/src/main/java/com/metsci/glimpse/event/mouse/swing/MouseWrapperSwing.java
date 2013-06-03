@@ -39,7 +39,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
-public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent,MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
+public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
 {
     public static final int ANY_BUTTON_DOWN_MASK = MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK;
 
@@ -92,14 +92,14 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent,MouseEvent> i
 
         return localEvent;
     }
-    
+
     protected MouseWheelEvent toLocalCoordsWheel( MouseEvent e, GlimpseTargetStack stack )
     {
         if ( stack == null ) return null;
-        
+
         if ( !(e instanceof MouseWheelEvent) ) return null;
-        
-        MouseWheelEvent wheelEvent = (MouseWheelEvent) e; 
+
+        MouseWheelEvent wheelEvent = (MouseWheelEvent) e;
 
         GlimpseBounds bounds = stack.getBounds( );
 
@@ -147,11 +147,11 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent,MouseEvent> i
     {
         return toGlimpseEventWheel( toLocalCoordsWheel( e, stack ) );
     }
-    
+
     @Override
     public void mouseWheelMoved( MouseWheelEvent e )
     {
-        mouseWheelMoved0( ( MouseEvent ) e );
+        mouseWheelMoved0( e );
     }
 
     @Override

@@ -26,8 +26,17 @@
  */
 package com.metsci.glimpse.event.touch;
 
-public interface Touchable
+import java.util.Collection;
+
+public interface Touchable extends GlimpseGestureListener, GlimpseTouchListener
 {
-    public void addGlimpseGestureListener( GlimpseGestureListener listener );
-    public void addGlimpseTouchListener( GlimpseTouchListener listener );
+  public void addGlimpseGestureListener(GlimpseGestureListener listener);
+  public void addGlimpseTouchListener(GlimpseTouchListener listener);
+  public void removeGlimpseGestureListener(GlimpseGestureListener listener);
+  public void removeGlimpseTouchListener(GlimpseTouchListener listener);
+
+  public Collection<GlimpseGestureListener> getGlimpseGestureListeners();
+  public Collection<GlimpseTouchListener> getGlimpseTouchListeners();
+
+  public void removeAllGlimpseGestureListeners();
 }

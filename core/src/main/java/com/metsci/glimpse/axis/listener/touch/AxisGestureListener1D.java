@@ -60,7 +60,7 @@ public class AxisGestureListener1D extends AxisGestureListener
         if ( layout == null ) return;
 
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        pan( targetAxis, layout.isHorizontal( ), event.getDxPixels( ), event.getDyPixels( ) );
+        pan( targetAxis, layout.isHorizontal( ), event.getDx( ), event.getDy( ) );
 
         this.validateAxes( targetAxis );
     }
@@ -72,7 +72,7 @@ public class AxisGestureListener1D extends AxisGestureListener
         if ( layout == null ) return;
 
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        zoom( targetAxis, layout.isHorizontal( ), event.getCenterPixelX( ), event.getCenterPixelY( ), event.getScale( ) );
+        zoom( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ), event.getScale( ) );
 
         this.validateAxes( targetAxis );
     }
@@ -91,7 +91,13 @@ public class AxisGestureListener1D extends AxisGestureListener
     @Override
     public void tapDetected( GlimpseTapGestureEvent event )
     {
+        GlimpseAxisLayout1D layout = getAxisLayout( event.getTargetStack( ) );
+        if ( layout == null ) return;
 
+        Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
+        select( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ) );
+
+        this.validateAxes( targetAxis );
     }
 
     @Override
