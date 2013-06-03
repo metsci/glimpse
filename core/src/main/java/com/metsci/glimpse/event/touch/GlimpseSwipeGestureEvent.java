@@ -88,6 +88,12 @@ public class GlimpseSwipeGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpseSwipeGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpseSwipeGestureEvent( source, targetStack, x, y, direction, ntouches );
+    }
+
+    @Override
     public String toString( )
     {
         return String.format( "x,y = %d,%d direction: %d  ntouches: %d", x, y, direction, ntouches );

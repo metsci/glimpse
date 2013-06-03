@@ -81,6 +81,12 @@ public class GlimpsePinchGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpsePinchGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpsePinchGestureEvent( source, targetStack, x, y, scale );
+    }
+
+    @Override
     public String toString( )
     {
         return String.format( "x,y = %d,%d scale: %f ", x, y, scale );

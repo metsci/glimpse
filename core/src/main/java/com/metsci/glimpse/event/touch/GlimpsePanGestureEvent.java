@@ -88,6 +88,12 @@ public class GlimpsePanGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpsePanGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpsePanGestureEvent( source, targetStack, x, y, dx, dy );
+    }
+
+    @Override
     public String toString( )
     {
         return String.format( "x,y = %d,%d dx: %f dy: %f", x, y, dx, dy );

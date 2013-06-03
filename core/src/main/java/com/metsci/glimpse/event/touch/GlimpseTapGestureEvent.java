@@ -75,6 +75,12 @@ public class GlimpseTapGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpseTapGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpseTapGestureEvent( source, targetStack, x, y );
+    }
+
+    @Override
     public String toString( )
     {
         return String.format( "x,y = %d,%d", x, y );

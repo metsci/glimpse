@@ -105,4 +105,9 @@ public class GlimpseGestureEvent
     {
         return handled;
     }
+
+    public GlimpseGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpseGestureEvent( source, targetStack, x, y );
+    }
 }
