@@ -239,18 +239,19 @@ public final class Vector2d implements Serializable
     }
 
     /**
-     * Returns the projection of this vector onto the vector v.
+     * Returns the projection of this vector onto the vector v.  Lenient version treats zero vector for v as (1,0)
+     * in order to avoid returning vector containing NaN values.
      */
-    public Vector2d projectionOnto(Vector2d v)
+    public Vector2d projectionOnto(Vector2d v, boolean isLenient)
     {
-        if (isZero())
+        if (isLenient && v.isZero())
         {
-            return this;
+             v = new Vector2d(1, 0);
         }
 
-        double scale = dotProduct(v) / norm();
+        double scale = dotProduct(v) / v.normSquared();
 
-        return scaledBy(scale);
+        return v.scaledBy(scale);
     }
 
     /**
