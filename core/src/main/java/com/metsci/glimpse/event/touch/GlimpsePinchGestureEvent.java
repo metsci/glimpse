@@ -36,16 +36,29 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 public class GlimpsePinchGestureEvent extends GlimpseGestureEvent
 {
     protected float scale;
+    protected float angle;
 
-    public GlimpsePinchGestureEvent( String source, GlimpseTargetStack stack, int centerX, int centerY, float scale )
+    public GlimpsePinchGestureEvent( String source, GlimpseTargetStack stack, int centerX, int centerY, float scale, float angle )
     {
         super( source, stack, centerX, centerY );
         this.scale = scale;
+        this.angle = angle;
     }
 
+    /**
+     * The ratio of the current pinch distance to the start pinch distance.
+     */
     public float getScale( )
     {
         return scale;
+    }
+
+    /**
+     * The angle of the pinch in MATH RADIANS.
+     */
+    public float getAngle( )
+    {
+        return angle;
     }
 
     public Axis1D getAxis1D( )
@@ -83,12 +96,12 @@ public class GlimpsePinchGestureEvent extends GlimpseGestureEvent
     @Override
     public GlimpsePinchGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
     {
-        return new GlimpsePinchGestureEvent( source, targetStack, x, y, scale );
+        return new GlimpsePinchGestureEvent( source, targetStack, x, y, scale, angle );
     }
 
     @Override
     public String toString( )
     {
-        return String.format( "x,y = %d,%d scale: %f ", x, y, scale );
+        return String.format( "x,y = %d,%d scale: %f angle: %f", x, y, scale, angle );
     }
 }
