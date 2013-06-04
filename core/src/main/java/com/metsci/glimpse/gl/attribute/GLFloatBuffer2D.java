@@ -62,7 +62,7 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 return;
             }
 
-            if ( xyIndex == null || updateIndex > getNumVertices( ) )
+            if ( xyIndex == null || updateIndex == 0 )
             {
                 xyIndex = null;
             }

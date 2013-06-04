@@ -49,5 +49,7 @@ public enum ShaderArgType
     SAMPLER_2D,
     ISAMPLER_2D,
     USAMPLER_2D,
-    SAMPLER_CUBE;
+    SAMPLER_CUBE,
+    SAMPLER_1D_ARRAY,
+    SAMPLER_2D_ARRAY;
 }

@@ -52,11 +52,11 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     protected static final int DEFAULT_DATA_COORD_UNIT = 2;
     protected static final int DEFAULT_TEX_COORD_UNIT = 3;
 
-    private FloatTexture1D vertexCoordTex;
-    private FloatTexture1D textureCoordTex;
+    protected FloatTexture1D vertexCoordTex;
+    protected FloatTexture1D textureCoordTex;
 
-    private TaggedColorScaleShader fragShader;
-    private TaggedAxis1D taggedAxis;
+    protected TaggedColorScaleShader fragShader;
+    protected TaggedAxis1D taggedAxis;
 
     public TaggedHeatMapPainter( TaggedAxis1D taggedAxis )
     {

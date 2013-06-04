@@ -33,7 +33,7 @@ import com.metsci.glimpse.util.units.Length;
  */
 public class DatumSphereWgs84 extends DatumSphere
 {
-    private static final double avgGeodesicRadius = Length.fromMeters( 6372795d );
+    public static final double avgGeodesicRadius = Length.fromMeters( 6372795d );
 
     public DatumSphereWgs84( )
     {
