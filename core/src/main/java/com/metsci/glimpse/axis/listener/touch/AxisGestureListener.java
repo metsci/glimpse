@@ -119,12 +119,16 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
     public void select( Axis1D axis, boolean horizontal, float posX, float posY )
     {
         if ( !allowSelect ) return;
-        if ( axis.isSelectionLocked( ) ) return;
 
         double posPixels = getDim( horizontal, posX, posY );
-        double posData = posPixels / axis.getPixelsPerValue( );
+        double posData = axis.screenPixelToValue( posPixels );
 
-        axis.setSelectionCenter( posData );
+        axis.setMouseValue( posData );
+
+        if ( !axis.isSelectionLocked( ) )
+        {
+            axis.setSelectionCenter( posData );
+        }
     }
 
     public void zoomSelection( Axis1D axis, boolean horizontal, int zoomIncrements, int posX, int posY )

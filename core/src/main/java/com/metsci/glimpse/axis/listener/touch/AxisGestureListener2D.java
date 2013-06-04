@@ -45,7 +45,6 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
  */
 public class AxisGestureListener2D extends AxisGestureListener
 {
-
     protected GlimpseAxisLayout2D getAxisLayout( GlimpseTargetStack stack )
     {
         GlimpseTarget target = stack.getTarget( );
@@ -111,12 +110,10 @@ public class AxisGestureListener2D extends AxisGestureListener
     @Override
     public void longPressDetected( GlimpseLongPressGestureEvent event )
     {
-
     }
 
     @Override
     public void swipeDetected( GlimpseSwipeGestureEvent event )
     {
-
     }
 }

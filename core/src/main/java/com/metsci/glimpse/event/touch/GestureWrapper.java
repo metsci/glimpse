@@ -144,14 +144,12 @@ public abstract class GestureWrapper<I>
         }
 
         GlimpseTarget target = stack.getTarget( );
-        if ( target == null || ! ( target instanceof Touchable ) )
+        if ( target instanceof Touchable )
         {
-            return null;
+            return ( Touchable ) target;
         }
 
-        Touchable touchTarget = ( Touchable ) target;
-
-        return touchTarget;
+        return null;
     }
 
     protected abstract boolean isInterior( I e, GlimpseBounds bounds );
@@ -201,7 +199,7 @@ public abstract class GestureWrapper<I>
             Touchable touchTarget = getTouchTarget( stack );
             if ( touchTarget == null )
             {
-                return false;
+                continue;
             }
 
             GlimpseGestureEvent glimpseEvent = toGlimpseEvent( event, stack );

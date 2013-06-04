@@ -38,7 +38,6 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 
 public class AxisGestureListener1D extends AxisGestureListener
 {
-
     protected GlimpseAxisLayout1D getAxisLayout( GlimpseTargetStack stack )
     {
         GlimpseTarget target = stack.getTarget( );
@@ -62,7 +61,7 @@ public class AxisGestureListener1D extends AxisGestureListener
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
         pan( targetAxis, layout.isHorizontal( ), event.getDx( ), event.getDy( ) );
 
-        this.validateAxes( targetAxis );
+        validateAxes( targetAxis );
     }
 
     @Override
@@ -74,7 +73,7 @@ public class AxisGestureListener1D extends AxisGestureListener
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
         zoom( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ), event.getScale( ) );
 
-        this.validateAxes( targetAxis );
+        validateAxes( targetAxis );
     }
 
     protected void validateAxes( Axis1D axis )
@@ -97,18 +96,16 @@ public class AxisGestureListener1D extends AxisGestureListener
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
         select( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ) );
 
-        this.validateAxes( targetAxis );
+        validateAxes( targetAxis );
     }
 
     @Override
     public void longPressDetected( GlimpseLongPressGestureEvent event )
     {
-
     }
 
     @Override
     public void swipeDetected( GlimpseSwipeGestureEvent event )
     {
-
     }
 }

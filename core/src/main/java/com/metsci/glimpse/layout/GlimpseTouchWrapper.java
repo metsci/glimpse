@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.layout;
 
+import static com.metsci.glimpse.context.TargetStackUtil.popTo;
+import static com.metsci.glimpse.context.TargetStackUtil.pushToBottom;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.listener.touch.AxisGestureListener;
 import com.metsci.glimpse.axis.listener.touch.AxisGestureListener1D;
@@ -40,7 +44,6 @@ import com.metsci.glimpse.axis.listener.touch.AxisGestureListener2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.event.touch.GlimpseGestureEvent;
 import com.metsci.glimpse.event.touch.GlimpseGestureListener;
 import com.metsci.glimpse.event.touch.GlimpseLongPressGestureEvent;
@@ -51,68 +54,57 @@ import com.metsci.glimpse.event.touch.GlimpseTapGestureEvent;
 import com.metsci.glimpse.event.touch.GlimpseTouchEvent;
 import com.metsci.glimpse.event.touch.GlimpseTouchListener;
 import com.metsci.glimpse.event.touch.Touchable;
-import com.metsci.glimpse.plot.Plot2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 
-public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchable
+public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
 {
+    private static final Logger LOGGER = Logger.getLogger( GlimpseTouchWrapper.class.getName( ) );
+
     protected Map<GlimpseLayout, List<GlimpseGestureListener>> gestureListeners;
 
-    protected Plot2D plot2d;
-
-    /**
-     * Provided for subclasses which want to set fields before initialize is called (although they are
-     * then responsible for calling initialize( )).
-     */
-    protected GlimpseTouchPlot2DWrapper( )
+    public GlimpseTouchWrapper( GlimpseLayout parent )
     {
+        super( parent );
         gestureListeners = new HashMap<GlimpseLayout, List<GlimpseGestureListener>>( );
     }
 
-    public GlimpseTouchPlot2DWrapper( Plot2D plot2d )
+    protected void addGestureListenersRecursive( GlimpseLayout layout )
     {
-        this( );
-        this.plot2d = plot2d;
+        layout.setEventGenerator( false );
+        layout.setEventConsumer( false );
 
-        initialize( );
-        setName( plot2d.getName( ) + "-touchwrapper" );
+        addGestureListenerVarying( layout );
+        for ( GlimpseTarget child : layout.getTargetChildren( ) )
+        {
+            if ( child instanceof GlimpseLayout )
+            {
+                addGestureListenersRecursive( ( GlimpseLayout ) child );
+            }
+        }
     }
 
-    protected void initialize( )
+    protected void addGestureListenerVarying( GlimpseLayout layout )
     {
-        initializeGestureListeners( );
+        if ( layout instanceof GlimpseAxisLayoutX )
+        {
+            addGestureListener( createAxisGestureListener1D( true ), layout );
+        }
+        else if ( layout instanceof GlimpseAxisLayoutY )
+        {
+            addGestureListener( createAxisGestureListener1D( false ), layout );
+        }
+        else if ( layout instanceof GlimpseAxisLayout2D )
+        {
+            addGestureListener( createAxisGestureListener2D( ), layout );
+        }
     }
 
-    protected void initializeGestureListeners( )
-    {
-        GlimpseGestureListener listener = createAxisGestureListenerX( );
-        gestureListeners.get( plot2d.getLayoutX( ) ).add( listener );
-
-        listener = createAxisGestureListenerY( );
-        gestureListeners.get( plot2d.getLayoutY( ) ).add( listener );
-
-        listener = createAxisGestureListenerZ( );
-        gestureListeners.get( plot2d.getLayoutZ( ) ).add( listener );
-
-        listener = createAxisGestureListenerXY( );
-        gestureListeners.get( plot2d.getLayoutCenter( ) ).add( listener );
-    }
-
-    protected AxisGestureListener createAxisGestureListenerX( )
-    {
-        return new AxisGestureListener1D( );
-    }
-
-    protected AxisGestureListener createAxisGestureListenerY( )
+    protected AxisGestureListener createAxisGestureListener1D( boolean horizontal )
     {
         return new AxisGestureListener1D( );
     }
 
-    protected AxisGestureListener createAxisGestureListenerZ( )
-    {
-        return new AxisGestureListener1D( );
-    }
-
-    protected AxisGestureListener createAxisGestureListenerXY( )
+    protected AxisGestureListener createAxisGestureListener2D( )
     {
         return new AxisGestureListener2D( );
     }
@@ -129,26 +121,6 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
         list.add( listener );
     }
 
-    public void addGestureListenerX( GlimpseGestureListener listener )
-    {
-        addGestureListener( listener, plot2d.getLayoutX( ) );
-    }
-
-    public void addGestureListenerY( GlimpseGestureListener listener )
-    {
-        addGestureListener( listener, plot2d.getLayoutY( ) );
-    }
-
-    public void addGestureListenerZ( GlimpseGestureListener listener )
-    {
-        addGestureListener( listener, plot2d.getLayoutZ( ) );
-    }
-
-    public void addGestureListenerCenter( GlimpseGestureListener listener )
-    {
-        addGestureListener( listener, plot2d.getLayoutCenter( ) );
-    }
-
     @Override
     public String toString( )
     {
@@ -158,65 +130,60 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
     @Override
     public void addGlimpseGestureListener( GlimpseGestureListener listener )
     {
-        addGestureListenerCenter( listener );
+        LOGGER.fine( "Do not add gesture listeners directly, use addGestureListener(GlimpseGestureListener, GlimpseLayout)" );
     }
 
     @Override
     public void addGlimpseTouchListener( GlimpseTouchListener listener )
     {
-        // nop
+        LOGGER.finer( "This class does not support touch listeners" );
     }
 
-    protected GlimpseTarget getActualTarget( GlimpseGestureEvent event )
+    protected GlimpseTargetStack getActualTargetStack( GlimpseGestureEvent event )
     {
-        int x = event.getX( );
-        int y = event.getY( );
+        GlimpseTargetStack stack = event.getTargetStack( );
+        int x = event.getX( ) + stack.getBounds( ).getX( );
+        int y = event.getY( ) + stack.getBounds( ).getY( );
 
-        GlimpseTargetStack copyStack = TargetStackUtil.newTargetStack( event.getTargetStack( ) );
-
-        for ( GlimpseTarget child : plot2d.getTargetChildren( ) )
+        stack = popTo( stack, this );
+        if ( stack == null )
         {
-            copyStack.push( child );
-
-            GlimpseBounds bounds = child.getTargetBounds( copyStack );
-            if ( bounds.contains( x, y ) )
-            {
-                return child;
-            }
-
-            copyStack.pop( );
+            return null;
         }
 
-        return null;
+        stack = pushToBottom( stack, x, y );
+
+        return stack;
     }
 
     @SuppressWarnings( "unchecked" )
-    protected <E extends GlimpseGestureEvent> E convertEvent( E event, GlimpseTarget target )
+    protected <E extends GlimpseGestureEvent> E convertEvent( E event, GlimpseTargetStack stack )
     {
         int x = event.getX( );
         int y = event.getY( );
 
-        GlimpseTargetStack newStack = TargetStackUtil.newTargetStack( event.getTargetStack( ) );
-        newStack.push( target );
+        GlimpseBounds bounds = event.getTargetStack( ).getBounds( );
+        x += bounds.getX( );
+        y += bounds.getY( );
 
-        GlimpseBounds bounds = target.getTargetBounds( newStack );
+        bounds = stack.getBounds( );
         x -= bounds.getX( );
         y -= bounds.getY( );
 
-        return ( E ) event.withNewTarget( newStack, x, y );
+        return ( E ) event.withNewTarget( stack, x, y );
     }
 
     @Override
     public void panDetected( GlimpsePanGestureEvent event )
     {
-        GlimpseTarget target = getActualTarget( event );
-        if ( target == null )
+        GlimpseTargetStack stack = getActualTargetStack( event );
+        if ( stack == null )
         {
             return;
         }
 
-        GlimpsePanGestureEvent e = convertEvent( event, target );
-        List<GlimpseGestureListener> listeners = gestureListeners.get( target );
+        GlimpsePanGestureEvent e = convertEvent( event, stack );
+        List<GlimpseGestureListener> listeners = gestureListeners.get( stack.getTarget( ) );
         if ( listeners == null )
         {
             return;
@@ -231,14 +198,14 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
     @Override
     public void pinchDetected( GlimpsePinchGestureEvent event )
     {
-        GlimpseTarget target = getActualTarget( event );
-        if ( target == null )
+        GlimpseTargetStack stack = getActualTargetStack( event );
+        if ( stack == null )
         {
             return;
         }
 
-        GlimpsePinchGestureEvent e = convertEvent( event, target );
-        List<GlimpseGestureListener> listeners = gestureListeners.get( target );
+        GlimpsePinchGestureEvent e = convertEvent( event, stack );
+        List<GlimpseGestureListener> listeners = gestureListeners.get( stack.getTarget( ) );
         if ( listeners == null )
         {
             return;
@@ -253,14 +220,14 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
     @Override
     public void tapDetected( GlimpseTapGestureEvent event )
     {
-        GlimpseTarget target = getActualTarget( event );
-        if ( target == null )
+        GlimpseTargetStack stack = getActualTargetStack( event );
+        if ( stack == null )
         {
             return;
         }
 
-        GlimpseTapGestureEvent e = convertEvent( event, target );
-        List<GlimpseGestureListener> listeners = gestureListeners.get( target );
+        GlimpseTapGestureEvent e = convertEvent( event, stack );
+        List<GlimpseGestureListener> listeners = gestureListeners.get( stack.getTarget( ) );
         if ( listeners == null )
         {
             return;
@@ -275,14 +242,14 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
     @Override
     public void longPressDetected( GlimpseLongPressGestureEvent event )
     {
-        GlimpseTarget target = getActualTarget( event );
-        if ( target == null )
+        GlimpseTargetStack stack = getActualTargetStack( event );
+        if ( stack == null )
         {
             return;
         }
 
-        GlimpseLongPressGestureEvent e = convertEvent( event, target );
-        List<GlimpseGestureListener> listeners = gestureListeners.get( target );
+        GlimpseLongPressGestureEvent e = convertEvent( event, stack );
+        List<GlimpseGestureListener> listeners = gestureListeners.get( stack.getTarget( ) );
         if ( listeners == null )
         {
             return;
@@ -297,14 +264,14 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
     @Override
     public void swipeDetected( GlimpseSwipeGestureEvent event )
     {
-        GlimpseTarget target = getActualTarget( event );
-        if ( target == null )
+        GlimpseTargetStack stack = getActualTargetStack( event );
+        if ( stack == null )
         {
             return;
         }
 
-        GlimpseSwipeGestureEvent e = convertEvent( event, target );
-        List<GlimpseGestureListener> listeners = gestureListeners.get( target );
+        GlimpseSwipeGestureEvent e = convertEvent( event, stack );
+        List<GlimpseGestureListener> listeners = gestureListeners.get( stack.getTarget( ) );
         if ( listeners == null )
         {
             return;
@@ -374,5 +341,33 @@ public class GlimpseTouchPlot2DWrapper extends GlimpseLayout implements Touchabl
         {
             listeners.clear( );
         }
+    }
+
+    @Override
+    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
+    {
+        super.addLayout( layout, callback, zOrder );
+        addGestureListenersRecursive( layout );
+    }
+
+    @Override
+    public void removeLayout( GlimpseLayout layout )
+    {
+        super.removeLayout( layout );
+        gestureListeners.remove( layout );
+    }
+
+    @Override
+    public void removeAll( )
+    {
+        super.removeAll( );
+        gestureListeners.clear( );
+    }
+
+    public static GlimpseTouchWrapper wrap( GlimpseLayout parent, GlimpseLayout childAsTouchable )
+    {
+        GlimpseTouchWrapper wrapper = new GlimpseTouchWrapper( parent );
+        wrapper.addLayout( childAsTouchable );
+        return wrapper;
     }
 }

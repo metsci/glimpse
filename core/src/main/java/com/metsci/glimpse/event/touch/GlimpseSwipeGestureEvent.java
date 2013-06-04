@@ -45,6 +45,9 @@ public class GlimpseSwipeGestureEvent extends GlimpseGestureEvent
         this.direction = direction;
     }
 
+    /**
+     * The angle of the swipe, in MATH RADIANS.
+     */
     public int getDirection( )
     {
         return direction;
