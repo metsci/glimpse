@@ -42,7 +42,7 @@ import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 import com.metsci.glimpse.event.mouse.swing.GlimpseMouseWrapper;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 
-public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.MouseEvent, org.eclipse.swt.events.MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
+public class MouseWrapperSWTBridge extends MouseWrapperImpl<MouseEvent> implements MouseWheelListener, MouseMotionListener, MouseListener
 {
     public MouseWrapperSWTBridge( GlimpseCanvas canvas )
     {
@@ -106,6 +106,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseClicked0( event );
@@ -118,6 +119,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseEntered0( event );
@@ -130,6 +132,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseExited0( event );
@@ -142,6 +145,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mousePressed0( event );
@@ -154,6 +158,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseReleased0( event );
@@ -166,6 +171,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseDragged0( event );
@@ -178,6 +184,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseMoved0( event );
@@ -190,6 +197,7 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<java.awt.event.Mouse
     {
         Display.getDefault( ).asyncExec( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 mouseWheelMoved0( event );

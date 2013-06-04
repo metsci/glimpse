@@ -42,7 +42,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
-public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent,MouseEvent> implements MouseListener, MouseMoveListener, MouseTrackListener, MouseWheelListener
+public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent> implements MouseListener, MouseMoveListener, MouseTrackListener, MouseWheelListener
 {
     public MouseWrapperSWT( GlimpseCanvas canvas )
     {
@@ -99,7 +99,7 @@ public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent,MouseEvent> imp
 
         return new MouseEvent( localEvent );
     }
-    
+
     protected MouseEvent toLocalCoordsWheel( MouseEvent e, GlimpseTargetStack stack )
     {
         return toLocalCoords( e, stack );
@@ -114,7 +114,7 @@ public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent,MouseEvent> imp
     {
         return GlimpseMouseWrapper.fromMouseWheelEvent( event );
     }
-    
+
     @Override
     protected GlimpseMouseEvent toGlimpseEvent( MouseEvent e, GlimpseTargetStack stack )
     {
@@ -126,7 +126,7 @@ public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent,MouseEvent> imp
     {
         return toGlimpseEventWheel( toLocalCoordsWheel( e, stack ) );
     }
-    
+
     @Override
     public void mouseEnter( MouseEvent event )
     {
@@ -154,7 +154,7 @@ public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent,MouseEvent> imp
         }
         else
         {
-            mouseMoved0( event );   
+            mouseMoved0( event );
         }
     }
 
