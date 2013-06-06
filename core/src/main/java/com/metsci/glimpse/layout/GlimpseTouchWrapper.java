@@ -56,6 +56,20 @@ import com.metsci.glimpse.event.touch.GlimpseTouchListener;
 import com.metsci.glimpse.event.touch.Touchable;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 
+/**
+ * Provides a layout wrapper to augment any layout (and descendants) with
+ * gesture support.  This wrapper sets EventConsumer and EventGenerator to
+ * false for any child layouts.  Then, all the touch events get sent to this
+ * layout.  Then this layout will find the actual target and get the gesture
+ * listeners associated with that layout and execute them.
+ *
+ * <p>
+ * We may want to preemptively add touch support to all layouts, like we do
+ * mouse support. In that case, this class should be removed.
+ * </p>
+ *
+ * @author borkholder
+ */
 public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
 {
     private static final Logger LOGGER = Logger.getLogger( GlimpseTouchWrapper.class.getName( ) );

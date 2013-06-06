@@ -38,7 +38,12 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 
-// I = input event
+/**
+ * Dispatches touch events and converts them into GlimpseGestureEvents.  This class
+ * closely mirrors the mouse equivalent.
+ *
+ * @param <I> The input event
+ */
 public abstract class GestureWrapper<I>
 {
     protected GlimpseCanvas canvas;
