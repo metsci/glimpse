@@ -78,12 +78,12 @@ public class AxisGestureListener2D extends AxisGestureListener
         GlimpseAxisLayout2D layout = getAxisLayout( event.getTargetStack( ) );
         if ( layout == null ) return;
 
-        double scaleX = Math.cos( event.getAngle( ) ) * event.getScale( );
-        double scaleY = Math.sin( event.getAngle( ) ) * event.getScale( );
+        float scaleX = getScale( true, event.getScale( ), event.getAngle( ) );
+        float scaleY = getScale( false, event.getScale( ), event.getAngle( ) );
 
         Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        zoom( targetAxis.getAxisX( ), true, event.getX( ), event.getX( ), ( float ) scaleX );
-        zoom( targetAxis.getAxisY( ), false, event.getX( ), event.getX( ), ( float ) scaleY );
+        zoom( targetAxis.getAxisX( ), true, event.getX( ), event.getX( ), scaleX );
+        zoom( targetAxis.getAxisY( ), false, event.getX( ), event.getX( ), scaleY );
 
         applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }

@@ -70,11 +70,9 @@ public class AxisGestureListener1D extends AxisGestureListener
         GlimpseAxisLayout1D layout = getAxisLayout( event.getTargetStack( ) );
         if ( layout == null ) return;
 
-        double scale = event.getScale( );
-        scale *= layout.isHorizontal( ) ? Math.cos( event.getAngle( ) ) : Math.sin( event.getAngle( ) );
-
+        float scale = getScale( layout.isHorizontal( ), event.getScale( ), event.getAngle( ) );
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        zoom( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ), ( float ) scale );
+        zoom( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ), scale );
 
         validateAxes( targetAxis );
     }

@@ -77,6 +77,17 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
         allowSelect = b;
     }
 
+    /**
+     * Adjust the scaling so that it can be split between horizonal and vertical.
+     */
+    protected float getScale( boolean horizontal, float scale, float angle )
+    {
+        double diff = scale - 1;
+        double scaleAdjMult = horizontal ? Math.abs( Math.cos( angle ) ) : Math.abs( Math.sin( angle ) );
+
+        return ( float )( diff * scaleAdjMult + 1 );
+    }
+
     protected int getDim( boolean horizontal, int x, int y )
     {
         return horizontal ? x : y;
