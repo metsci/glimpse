@@ -83,19 +83,31 @@ public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
         }
     }
 
+    protected void removeGestureListenersRecursive( GlimpseLayout layout )
+    {
+        gestureListeners.remove( layout );
+        for ( GlimpseTarget child : layout.getTargetChildren( ) )
+        {
+            if ( child instanceof GlimpseLayout )
+            {
+                removeGestureListenersRecursive( ( GlimpseLayout ) child );
+            }
+        }
+    }
+
     protected void addGestureListenerVarying( GlimpseLayout layout )
     {
         if ( layout instanceof GlimpseAxisLayoutX )
         {
-            addGestureListener( createAxisGestureListener1D( true ), layout );
+            addGlimpseGestureListener( createAxisGestureListener1D( true ), layout );
         }
         else if ( layout instanceof GlimpseAxisLayoutY )
         {
-            addGestureListener( createAxisGestureListener1D( false ), layout );
+            addGlimpseGestureListener( createAxisGestureListener1D( false ), layout );
         }
         else if ( layout instanceof GlimpseAxisLayout2D )
         {
-            addGestureListener( createAxisGestureListener2D( ), layout );
+            addGlimpseGestureListener( createAxisGestureListener2D( ), layout );
         }
     }
 
@@ -109,7 +121,7 @@ public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
         return new AxisGestureListener2D( );
     }
 
-    protected void addGestureListener( GlimpseGestureListener listener, GlimpseLayout child )
+    public void addGlimpseGestureListener( GlimpseGestureListener listener, GlimpseLayout child )
     {
         List<GlimpseGestureListener> list = gestureListeners.get( child );
         if ( list == null )
@@ -130,7 +142,7 @@ public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
     @Override
     public void addGlimpseGestureListener( GlimpseGestureListener listener )
     {
-        LOGGER.fine( "Do not add gesture listeners directly, use addGestureListener(GlimpseGestureListener, GlimpseLayout)" );
+        LOGGER.fine( "Do not add gesture listeners directly, use addGlimpseGestureListener(GlimpseGestureListener, GlimpseLayout)" );
     }
 
     @Override
@@ -310,6 +322,11 @@ public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
         }
     }
 
+    public void removeGlimpseGestureListeners( GlimpseLayout layout )
+    {
+        gestureListeners.remove( layout );
+    }
+
     @Override
     public void removeGlimpseTouchListener( GlimpseTouchListener listener )
     {
@@ -354,7 +371,7 @@ public class GlimpseTouchWrapper extends GlimpseLayout implements Touchable
     public void removeLayout( GlimpseLayout layout )
     {
         super.removeLayout( layout );
-        gestureListeners.remove( layout );
+        removeGestureListenersRecursive( layout );
     }
 
     @Override
