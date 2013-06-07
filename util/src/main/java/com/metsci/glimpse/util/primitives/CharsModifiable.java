@@ -103,6 +103,7 @@ public interface CharsModifiable extends Chars
      */
     void removeIndex(int index);
 
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

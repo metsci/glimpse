@@ -531,7 +531,11 @@ public class BytesArray implements BytesModifiable
         removeRange( index, index+1 );
     }
 
-
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
     @Override

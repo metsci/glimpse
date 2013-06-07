@@ -97,6 +97,7 @@ public interface LongsModifiable extends Longs
      */
     void removeIndex(int index);
 
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

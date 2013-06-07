@@ -88,7 +88,8 @@ public interface BooleansModifiable extends Booleans
      * decreased by one.
      */
     void removeIndex(int index);
-
+    
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

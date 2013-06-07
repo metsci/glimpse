@@ -509,6 +509,11 @@ public class CharsArray implements CharsModifiable
         removeRange( index, index+1 );
     }
 
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 

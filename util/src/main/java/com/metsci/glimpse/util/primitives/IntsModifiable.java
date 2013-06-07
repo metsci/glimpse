@@ -96,6 +96,8 @@ public interface IntsModifiable extends Ints
      * decreased by one.
      */
     void removeIndex(int index);
+    
+    void clear( );
 
 
 

@@ -447,6 +447,11 @@ public class FloatsArray implements FloatsModifiable
         removeRange( index, index+1 );
     }
 
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 

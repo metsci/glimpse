@@ -407,6 +407,11 @@ public class BooleansArray implements BooleansModifiable
         removeRange( index, index+1 );
     }
 
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 

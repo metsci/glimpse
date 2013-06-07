@@ -106,6 +106,7 @@ public interface BytesModifiable extends Bytes
      */
     void removeIndex(int index);
 
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

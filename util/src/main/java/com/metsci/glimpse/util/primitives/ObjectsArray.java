@@ -411,6 +411,11 @@ public class ObjectsArray implements ObjectsModifiable
         removeRange( index, index+1 );
     }
 
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 

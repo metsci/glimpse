@@ -90,6 +90,7 @@ public interface ObjectsModifiable extends Objects
      */
     void removeIndex(int index);
 
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

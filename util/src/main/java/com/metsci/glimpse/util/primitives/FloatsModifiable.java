@@ -96,6 +96,7 @@ public interface FloatsModifiable extends Floats
      */
     void removeIndex(int index);
 
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

@@ -448,6 +448,11 @@ public class LongsArray implements LongsModifiable
         removeRange( index, index+1 );
     }
 
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 
