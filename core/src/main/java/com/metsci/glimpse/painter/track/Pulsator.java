@@ -235,6 +235,19 @@ public class Pulsator
             this.lock.unlock( );
         }
     }
+    
+    public void removeAllIds( )
+    {
+        this.lock.lock( );
+        try
+        {
+            this.ids.clear( );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
 
     public void addId( int id )
     {
