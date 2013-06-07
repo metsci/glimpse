@@ -44,6 +44,8 @@ public class Pulsator
     protected float direction;
     protected boolean paused;
     
+    protected float defaultSize;
+    
     protected IntsArray ids;
 
     protected ReentrantLock lock;
@@ -55,6 +57,7 @@ public class Pulsator
 
         this.delayMillis = delayMillis;
 
+        this.defaultSize = minSize;
         this.min = minSize;
         this.max = maxSize;
         this.step = stepSize;
@@ -72,6 +75,20 @@ public class Pulsator
     public Pulsator( TrackPainter painter )
     {
         this( painter, 10, 10f, 0.1f, 15f );
+    }
+    
+    /**
+     * When an id is removed from the Pulsator, its point size is reset to the default size.
+     * @param size
+     */
+    public void setDefaultSize( float size )
+    {
+        this.defaultSize = size;
+    }
+    
+    public float getDefaultSize( )
+    {
+        return this.defaultSize;
     }
     
     public void resetSize( )
@@ -241,6 +258,9 @@ public class Pulsator
         this.lock.lock( );
         try
         {
+            for ( int i = 0 ; i < ids.n( ) ; i++ )
+                this.painter.setPointSize( ids.v( i ), defaultSize );
+            
             this.ids.clear( );
         }
         finally
@@ -268,6 +288,7 @@ public class Pulsator
         try
         {
             this.ids.remove( id );
+            this.painter.setPointSize( id, defaultSize );
         }
         finally
         {
