@@ -43,6 +43,7 @@ public class Pulsator
     protected float size;
     protected float direction;
     protected boolean paused;
+    protected boolean stopped;
     
     protected float defaultSize;
     
@@ -65,6 +66,7 @@ public class Pulsator
         this.start = maxSize;
         this.direction = -1.0f;
         this.paused = false;
+        this.stopped = false;
 
         this.ids = new IntsArray( );
         
@@ -295,6 +297,20 @@ public class Pulsator
             this.lock.unlock( );
         }
     }
+    
+    public void stop( )
+    {
+        this.lock.lock( );
+        try
+        {
+            setPaused( false );
+            this.stopped = true;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
 
     public void start( )
     {
@@ -318,6 +334,9 @@ public class Pulsator
                             {
                             }
                         }
+                        
+                        if ( stopped )
+                            return;
                         
                         if ( size > max )
                         {
