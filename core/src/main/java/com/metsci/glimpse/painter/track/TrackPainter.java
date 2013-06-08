@@ -783,7 +783,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         double centerX = axisX.screenPixelToValue( centerPixelX );
         double centerY = axisY.screenPixelToValue( axisY.getSizePixels( ) - centerPixelY );
         
-        Collection<Point> points = getPixelRange( axis, centerX, centerY, maxPixelDistance * 2, maxPixelDistance * 2 );
+        Collection<Point> points = getTimePixelRange( axis, startTimeRange.time, endTimeRange.time, centerX, centerY, maxPixelDistance * 2, maxPixelDistance * 2 );
         
         Point minPoint = null;
         double minDistance = 0;
