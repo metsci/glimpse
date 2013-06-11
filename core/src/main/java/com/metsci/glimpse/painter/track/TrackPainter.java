@@ -1366,6 +1366,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         {
             if ( glBufferInitialized )
             {
+                glBufferInitialized = false;
                 gl.glDeleteBuffers( 1, new int[] { glBufferHandle }, 0 );
             }
         }
