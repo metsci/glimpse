@@ -39,7 +39,7 @@ public abstract class Datum
 {
     public final static Datum wgs84 = new DatumWgs84();
     public final static DatumSphere wgs84sphere = new DatumSphereWgs84();
-    public final static DatumSphere unitSphere = new DatumSphereUnit();
+    public final static DatumSphere unitSphere = new DatumSphereUnit();   
 
     private final double equatorialRadius;
     private final double flattening;
