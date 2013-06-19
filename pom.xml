@@ -51,6 +51,7 @@
         <module>core-examples</module>
 
         <module>docking</module>
+        <module>docking-examples</module>
 
         <module>extras-charts</module>
         <module>extras-dspl</module>
