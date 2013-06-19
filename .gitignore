@@ -9,6 +9,10 @@ target
 /core-examples/.settings
 /core-examples/target
 /core-examples/.classpath
+/docking/.project
+/docking/.settings
+/docking/target
+/docking/.classpath
 /extras-charts/target
 /extras-charts/.classpath
 /extras-charts/.project
