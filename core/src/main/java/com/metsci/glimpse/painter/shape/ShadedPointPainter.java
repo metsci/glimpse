@@ -375,10 +375,10 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         {
             try
             {
-                pipeline.endUse( gl );
-                positionBuffer.unbind( gl );
-                if ( !constantColor ) colorAttributeBuffer.unbind( gl );
-                if ( !constantSize ) sizeAttributeBuffer.unbind( gl );
+                if ( pipeline != null ) pipeline.endUse( gl );
+                if ( positionBuffer != null ) positionBuffer.unbind( gl );
+                if ( !constantColor && colorAttributeBuffer != null ) colorAttributeBuffer.unbind( gl );
+                if ( !constantSize  && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
             }
             finally
             {

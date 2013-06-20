@@ -22,8 +22,8 @@ public class TimeShadedPointPainter extends ShadedPointPainter
 {
     protected FloatBuffer timeAttributeBuffer;
 
-    protected float startTime;
-    protected float endTime;
+    protected float startTime = Float.NEGATIVE_INFINITY;
+    protected float endTime = Float.POSITIVE_INFINITY;
 
     protected int startIndex;
     protected int endIndex;
@@ -44,16 +44,16 @@ public class TimeShadedPointPainter extends ShadedPointPainter
      * provided by a {@ StackedTimePlot2D}. The same Epoch should be used to fill the point
      * time values in the data buffer passed to {@code #useTimeAttribData(FloatBuffer)}.
      */
-    public void setSelectedTime( Epoch epoch, TimeStamp startTime, TimeStamp endTime )
+    public void displayTimeRange( Epoch epoch, TimeStamp startTime, TimeStamp endTime )
     {
-        setSelectedTime( epoch.fromTimeStamp( startTime ), epoch.fromTimeStamp( endTime ) );
+        displayTimeRange( epoch.fromTimeStamp( startTime ), epoch.fromTimeStamp( endTime ) );
     }
     
     /**
      * Sets the selected range of times which will be displayed by this painter. Times should generally
      * be provided via {@code Epoch#fromTimeStamp(TimeStamp)}.
      */
-    public void setSelectedTime( double startTime, double endTime )
+    public void displayTimeRange( double startTime, double endTime )
     {
         lock.lock( );
         try
