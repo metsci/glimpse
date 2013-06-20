@@ -369,10 +369,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
             gl.glEnable( GL.GL_BLEND );
 
-            gl.glDrawArrays( GL.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
-
-            // don't need to cleanup here, gl state was saved in
-            // com.metsci.glimpse.painter.base.GlimpsePainter.display()
+            drawArrays( gl );
         }
         finally
         {
@@ -388,6 +385,11 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
                 lock.unlock( );
             }
         }
+    }
+    
+    protected void drawArrays( GL gl )
+    {
+        gl.glDrawArrays( GL.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
     }
 
     @Override
