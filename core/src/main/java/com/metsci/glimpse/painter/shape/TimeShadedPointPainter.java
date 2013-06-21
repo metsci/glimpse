@@ -170,7 +170,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
     @Override
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL.GL_POINTS, startIndex, endIndex );
+        gl.glDrawArrays( GL.GL_POINTS, startIndex, endIndex - startIndex );
     }
 
 }
