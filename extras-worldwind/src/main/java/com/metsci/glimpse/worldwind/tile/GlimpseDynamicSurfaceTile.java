@@ -197,7 +197,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         }
         else
         {
-            updateGeometry( screenCorners1 );
+            updateGeometryDefault( );
         }
     }
     
