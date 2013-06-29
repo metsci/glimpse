@@ -39,7 +39,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
 import java.util.List;
 import java.util.Map;
 
@@ -307,9 +306,9 @@ public class CustomTile extends JComponent implements Tile
                 selectView( view );
             }
         } );
-        for ( MouseAdapter dockingMouseAdapter : dockingMouseAdapters )
+        for ( MouseAdapter mouseAdapter : dockingMouseAdapters )
         {
-            addMouseAdapter( tab, dockingMouseAdapter );
+            addMouseAdapter( tab, mouseAdapter );
         }
         tabBar.add( tab, viewNum );
 
@@ -385,19 +384,8 @@ public class CustomTile extends JComponent implements Tile
     {
         for ( int viewNum = 0; viewNum < numViews( ); viewNum++ )
         {
-            CustomTab tab = viewEntry( viewNum ).tab;
-            if ( !tab.isVisible( ) ) continue;
-
-            // Tab position relative to tile
-            int xTab = 0;
-            int yTab = 0;
-            for ( Component c = tab; c != this; c = c.getParent( ) )
-            {
-                xTab += c.getX( );
-                yTab += c.getY( );
-            }
-
-            if ( 0 <= xTab && xTab < tab.getWidth( ) && 0 <= yTab && yTab < tab.getHeight( ) )
+            Rectangle tabBounds = viewTabBounds( viewNum );
+            if ( tabBounds != null && tabBounds.contains( x, y ) )
             {
                 return viewNum;
             }
@@ -409,6 +397,7 @@ public class CustomTile extends JComponent implements Tile
     public Rectangle viewTabBounds( int viewNum )
     {
         CustomTab tab = viewEntry( viewNum ).tab;
+        if ( !tab.isVisible( ) ) return null;
 
         // Tab position relative to tile
         int x = 0;
@@ -423,27 +412,15 @@ public class CustomTile extends JComponent implements Tile
     }
 
     @Override
-    public void addDockingMouseAdapter( final MouseAdapter mouseAdapter )
+    public void addDockingMouseAdapter( MouseAdapter mouseAdapter )
     {
-        MouseAdapter dockingMouseAdapter = new MouseAdapter( )
-        {
-            public void mouseMoved( MouseEvent ev ) { mouseAdapter.mouseMoved( makeXyRelativeToTile( ev ) ); }
-            public void mouseExited( MouseEvent ev ) { mouseAdapter.mouseExited( makeXyRelativeToTile( ev ) ); }
-            public void mouseEntered( MouseEvent ev ) { mouseAdapter.mouseEntered( makeXyRelativeToTile( ev ) ); }
-            public void mouseDragged( MouseEvent ev ) { mouseAdapter.mouseDragged( makeXyRelativeToTile( ev ) ); }
-            public void mouseClicked( MouseEvent ev ) { mouseAdapter.mouseClicked( makeXyRelativeToTile( ev ) ); }
-            public void mousePressed( MouseEvent ev ) { mouseAdapter.mousePressed( makeXyRelativeToTile( ev ) ); }
-            public void mouseReleased( MouseEvent ev ) { mouseAdapter.mouseReleased( makeXyRelativeToTile( ev ) ); }
-            public void mouseWheelMoved( MouseWheelEvent ev ) { mouseAdapter.mouseWheelMoved( makeXyRelativeToTile( ev ) ); }
-        };
-
         for ( View view : views )
         {
             CustomTab tab = viewMap.get( view.viewKey ).tab;
-            addMouseAdapter( tab, dockingMouseAdapter );
+            addMouseAdapter( tab, mouseAdapter );
         }
 
-        this.dockingMouseAdapters.add( dockingMouseAdapter );
+        this.dockingMouseAdapters.add( mouseAdapter );
     }
 
     public static void addMouseAdapter( Component c, MouseAdapter mouseAdapter )
@@ -451,26 +428,6 @@ public class CustomTile extends JComponent implements Tile
         c.addMouseListener( mouseAdapter );
         c.addMouseMotionListener( mouseAdapter );
         c.addMouseWheelListener( mouseAdapter );
-    }
-
-    /**
-     * Mutates {@code ev}, then returns it for convenience. Specifically,
-     * {@code ev}'s {@link MouseEvent#translatePoint(int, int)} method is
-     * called.
-     */
-    protected <E extends MouseEvent> E makeXyRelativeToTile( E ev )
-    {
-        // Source position relative to tile
-        int xSource = 0;
-        int ySource = 0;
-        for ( Component c = ev.getComponent( ); c != this; c = c.getParent( ) )
-        {
-            xSource += c.getX( );
-            ySource += c.getY( );
-        }
-        ev.translatePoint( xSource, ySource );
-
-        return ev;
     }
 
     protected ViewEntry viewEntry( int viewNum )
