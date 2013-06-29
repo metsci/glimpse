@@ -641,12 +641,8 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             int buttonsDown = ( ev.getModifiersEx( ) & ( BUTTON1_DOWN_MASK | BUTTON2_DOWN_MASK | BUTTON3_DOWN_MASK ) );
             if ( buttonsDown == BUTTON1_DOWN_MASK )
             {
-                // Find coords relative to tile
-                Point p = pointRelativeToAncestor( ev, splitPane );
-                int i = p.x - tile.getX( );
-                int j = p.y - tile.getY( );
-
-                int viewNum = tile.viewNumForTabAt( i, j );
+                Point p = pointRelativeToAncestor( ev, tile );
+                int viewNum = tile.viewNumForTabAt( p.x, p.y );
                 if ( 0 <= viewNum && viewNum < tile.numViews( ) )
                 {
                     this.draggedViewKey = tile.view( viewNum ).viewKey;
