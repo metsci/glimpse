@@ -42,7 +42,6 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -54,6 +53,7 @@ import javax.swing.JToolBar;
 
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.lang.Math.*;
+import static javax.swing.BorderFactory.*;
 
 public class CustomTile extends JComponent implements Tile
 {
@@ -66,13 +66,14 @@ public class CustomTile extends JComponent implements Tile
 
         public CustomTab( View view )
         {
-            super( view.title );
+            super( view.title, view.icon, LEFT );
+            setToolTipText( view.tooltip );
 
             this.view = view;
             this.selected = false;
-            setForeground( Color.gray );
+            setForeground( Color.lightGray );
 
-            setBorder( BorderFactory.createEmptyBorder( 0, 2, 0, 2 ) );
+            setBorder( createEmptyBorder( 0, 4, 0, 4 ) );
 
         }
 
@@ -81,7 +82,7 @@ public class CustomTile extends JComponent implements Tile
             if ( selected != this.selected )
             {
                 this.selected = selected;
-                setForeground( selected ? Color.black : Color.gray );
+                setForeground( selected ? Color.black : Color.lightGray );
             }
         }
     }
