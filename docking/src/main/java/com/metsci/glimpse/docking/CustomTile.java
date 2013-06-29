@@ -39,6 +39,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.List;
 import java.util.Map;
 
@@ -103,6 +104,8 @@ public class CustomTile extends JComponent implements Tile
     protected final CardLayout cardLayout;
     protected final JPanel cardPanel;
 
+    protected final List<MouseAdapter> dockingMouseAdapters;
+
     protected final Map<ViewKey,ViewEntry> viewMap;
     protected final List<View> views;
     protected View selectedView;
@@ -125,6 +128,8 @@ public class CustomTile extends JComponent implements Tile
 
         this.cardLayout = new CardLayout( );
         this.cardPanel = new JPanel( cardLayout );
+
+        this.dockingMouseAdapters = newArrayList( );
 
 
         this.viewMap = newHashMap( );
@@ -302,6 +307,10 @@ public class CustomTile extends JComponent implements Tile
                 selectView( view );
             }
         } );
+        for ( MouseAdapter dockingMouseAdapter : dockingMouseAdapters )
+        {
+            addMouseAdapter( tab, dockingMouseAdapter );
+        }
         tabBar.add( tab, viewNum );
 
         JMenuItem overflowMenuItem = new JMenuItem( view.title, view.icon );
@@ -327,9 +336,11 @@ public class CustomTile extends JComponent implements Tile
     @Override
     public void removeView( View view )
     {
-        if ( selectedView == view )
+        boolean removingSelectedView = ( view == selectedView );
+
+        if ( removingSelectedView )
         {
-            selectView( views.isEmpty( ) ? null : views.get( 0 ) );
+            selectView( null );
         }
 
         ViewEntry viewEntry = viewMap.remove( view.viewKey );
@@ -337,6 +348,11 @@ public class CustomTile extends JComponent implements Tile
         tabBar.remove( viewEntry.tab );
         cardPanel.remove( viewEntry.card );
         views.remove( view );
+
+        if ( removingSelectedView && !views.isEmpty( ) )
+        {
+            selectView( views.get( 0 ) );
+        }
     }
 
     @Override
@@ -372,8 +388,16 @@ public class CustomTile extends JComponent implements Tile
             CustomTab tab = viewEntry( viewNum ).tab;
             if ( !tab.isVisible( ) ) continue;
 
-            // XXX: Coords relative to ...?
-            if ( tab.getBounds( ).contains( x, y ) )
+            // Tab position relative to tile
+            int xTab = 0;
+            int yTab = 0;
+            for ( Component c = tab; c != this; c = c.getParent( ) )
+            {
+                xTab += c.getX( );
+                yTab += c.getY( );
+            }
+
+            if ( 0 <= xTab && xTab < tab.getWidth( ) && 0 <= yTab && yTab < tab.getHeight( ) )
             {
                 return viewNum;
             }
@@ -384,13 +408,69 @@ public class CustomTile extends JComponent implements Tile
     @Override
     public Rectangle viewTabBounds( int viewNum )
     {
-        return viewEntry( viewNum ).tab.getBounds( );
+        CustomTab tab = viewEntry( viewNum ).tab;
+
+        // Tab position relative to tile
+        int x = 0;
+        int y = 0;
+        for ( Component c = tab; c != this; c = c.getParent( ) )
+        {
+            x += c.getX( );
+            y += c.getY( );
+        }
+
+        return new Rectangle( x, y, tab.getWidth( ), tab.getHeight( ) );
     }
 
     @Override
-    public void addDockingMouseAdapter( MouseAdapter mouseAdapter )
+    public void addDockingMouseAdapter( final MouseAdapter mouseAdapter )
     {
-        // XXX
+        MouseAdapter dockingMouseAdapter = new MouseAdapter( )
+        {
+            public void mouseMoved( MouseEvent ev ) { mouseAdapter.mouseMoved( makeXyRelativeToTile( ev ) ); }
+            public void mouseExited( MouseEvent ev ) { mouseAdapter.mouseExited( makeXyRelativeToTile( ev ) ); }
+            public void mouseEntered( MouseEvent ev ) { mouseAdapter.mouseEntered( makeXyRelativeToTile( ev ) ); }
+            public void mouseDragged( MouseEvent ev ) { mouseAdapter.mouseDragged( makeXyRelativeToTile( ev ) ); }
+            public void mouseClicked( MouseEvent ev ) { mouseAdapter.mouseClicked( makeXyRelativeToTile( ev ) ); }
+            public void mousePressed( MouseEvent ev ) { mouseAdapter.mousePressed( makeXyRelativeToTile( ev ) ); }
+            public void mouseReleased( MouseEvent ev ) { mouseAdapter.mouseReleased( makeXyRelativeToTile( ev ) ); }
+            public void mouseWheelMoved( MouseWheelEvent ev ) { mouseAdapter.mouseWheelMoved( makeXyRelativeToTile( ev ) ); }
+        };
+
+        for ( View view : views )
+        {
+            CustomTab tab = viewMap.get( view.viewKey ).tab;
+            addMouseAdapter( tab, dockingMouseAdapter );
+        }
+
+        this.dockingMouseAdapters.add( dockingMouseAdapter );
+    }
+
+    public static void addMouseAdapter( Component c, MouseAdapter mouseAdapter )
+    {
+        c.addMouseListener( mouseAdapter );
+        c.addMouseMotionListener( mouseAdapter );
+        c.addMouseWheelListener( mouseAdapter );
+    }
+
+    /**
+     * Mutates {@code ev}, then returns it for convenience. Specifically,
+     * {@code ev}'s {@link MouseEvent#translatePoint(int, int)} method is
+     * called.
+     */
+    protected <E extends MouseEvent> E makeXyRelativeToTile( E ev )
+    {
+        // Source position relative to tile
+        int xSource = 0;
+        int ySource = 0;
+        for ( Component c = ev.getComponent( ); c != this; c = c.getParent( ) )
+        {
+            xSource += c.getX( );
+            ySource += c.getY( );
+        }
+        ev.translatePoint( xSource, ySource );
+
+        return ev;
     }
 
     protected ViewEntry viewEntry( int viewNum )
