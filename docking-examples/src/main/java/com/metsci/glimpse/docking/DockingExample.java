@@ -28,6 +28,8 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.logging.Logger;
 
@@ -123,13 +125,13 @@ public class DockingExample
 
         swingRun( dockingPane.restoreArrangement, loadDockingArrangement( "docking-example" ) );
 
-//        frame.addWindowListener( new WindowAdapter( )
-//        {
-//            public void windowClosing( WindowEvent ev )
-//            {
-//                saveDockingArrangement( "docking-example", dockingPane.captureArrangement( ) );
-//            }
-//        } );
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            public void windowClosing( WindowEvent ev )
+            {
+                saveDockingArrangement( "docking-example", dockingPane.captureArrangement( ) );
+            }
+        } );
 
         frame.setVisible( true );
     }
