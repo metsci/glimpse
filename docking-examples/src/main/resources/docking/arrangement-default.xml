@@ -4,44 +4,44 @@
     <isRow>true</isRow>
     <children>
         <child xsi:type="Leaf">
-            <extent>331.0</extent>
+            <extent>332.0</extent>
             <views>
                 <view>aView</view>
             </views>
             <selectedView>aView</selectedView>
         </child>
         <child xsi:type="Split">
-            <extent>1249.0</extent>
+            <extent>1251.0</extent>
             <isRow>false</isRow>
             <children>
                 <child xsi:type="Split">
-                    <extent>695.0</extent>
+                    <extent>697.0</extent>
                     <isRow>true</isRow>
                     <children>
                         <child xsi:type="Leaf">
-                            <extent>907.0</extent>
+                            <extent>898.0</extent>
                             <views>
-								<view>bView</view>
-								<view>cView</view>
+                                <view>bView</view>
+                                <view>cView</view>
                             </views>
-                            <selectedView>bView</selectedView>
+                            <selectedView>cView</selectedView>
                         </child>
                         <child xsi:type="Leaf">
-                            <extent>100.0</extent>
+                            <extent>346.0</extent>
                             <views>
-								<view>dView</view>
-								<view>eView</view>
-								<view>fView</view>
+                                <view>fView</view>
+                                <view>dView</view>
+                                <view>eView</view>
                             </views>
                             <selectedView>dView</selectedView>
                         </child>
                     </children>
                 </child>
                 <child xsi:type="Leaf">
-                    <extent>165.0</extent>
+                    <extent>166.0</extent>
                     <views>
-                        <view>gView</view>
                         <view>hView</view>
+                        <view>gView</view>
                     </views>
                     <selectedView>gView</selectedView>
                 </child>
