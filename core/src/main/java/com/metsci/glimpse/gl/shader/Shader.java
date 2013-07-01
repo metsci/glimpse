@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLException;
 
@@ -160,7 +161,7 @@ public abstract class Shader
      * @return false if any problems specific to this shader are found, true
      *         otherwise
      */
-    public abstract boolean preLink( GL gl, int glProgramHandle );
+    public abstract boolean preLink( GL2 gl, int glProgramHandle );
 
     /**
      * Called right after this shader is made current as part of the pipeline.
@@ -186,7 +187,7 @@ public abstract class Shader
      *
      * @return true if the compilation completes without error, false otherwise
      */
-    protected boolean compileAndAttach( GL gl, int glProgramHandle )
+    protected boolean compileAndAttach( GL2 gl, int glProgramHandle )
     {
         int segmentIndex = 0;
         glShaderHandles = new int[sources.length];
@@ -220,7 +221,7 @@ public abstract class Shader
      *
      * @return true if all goes well
      */
-    protected boolean getShaderArgHandles( GL gl, int glProgramHandle )
+    protected boolean getShaderArgHandles( GL2 gl, int glProgramHandle )
     {
         glArgHandles = new int[args.length];
 
@@ -243,7 +244,7 @@ public abstract class Shader
     /**
      * Called by the pipeline.
      */
-    protected void updateArgValues( GL gl )
+    protected void updateArgValues( GL2 gl )
     {
         for( int i = 0; i < args.length; i++ )
         {
@@ -257,7 +258,7 @@ public abstract class Shader
 
     public void dispose( GLContext context )
     {
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         if ( glShaderHandles != null )
         {

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl;
 
-import static com.sun.opengl.util.Screenshot.readToBufferedImage;
+import static com.jogamp.opengl.util.awt.Screenshot.readToBufferedImage;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -39,14 +39,14 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 
 import com.metsci.glimpse.gl.util.GLPBufferUtils;
 
 
 public class GLSimplePixelBuffer
 {
-    private GLPbuffer buffer;
+    private GLOffscreenAutoDrawable buffer;
 
     private final static Logger logger = Logger.getLogger(GLSimplePixelBuffer.class.getName());
 
@@ -156,7 +156,7 @@ public class GLSimplePixelBuffer
 
         if( currHeight != height || currWidth != width )
         {
-            GLPbuffer oldBuffer = buffer;
+            GLOffscreenAutoDrawable oldBuffer = buffer;
             createPixelBuffer( width, height, context );
             oldBuffer.destroy();
 

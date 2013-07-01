@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -445,8 +446,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         OGLStackHandler stack = new OGLStackHandler( );
         GL gl = glContext.getGL( );
 
-        stack.pushAttrib( gl, GL.GL_ALL_ATTRIB_BITS );
-        stack.pushClientAttrib( gl, ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
+        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
         stack.pushTexture( gl );
         stack.pushModelview( gl );
         stack.pushProjection( gl );

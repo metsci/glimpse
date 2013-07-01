@@ -39,9 +39,11 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.awt.GLCanvas;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -394,11 +396,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 }
             }
 
-            @Override
-            public void displayChanged( GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged )
-            {
-                // do nothing
-            }
+			@Override
+			public void dispose(GLAutoDrawable drawable) {
+				// TODO Auto-generated method stub -- ttran17
+				
+			}
         } );
     }
 

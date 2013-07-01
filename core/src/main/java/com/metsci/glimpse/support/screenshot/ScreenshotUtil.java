@@ -38,7 +38,7 @@ import com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.sun.opengl.util.Screenshot;
+import com.jogamp.opengl.util.awt.Screenshot;
 
 public class ScreenshotUtil
 {

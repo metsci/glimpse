@@ -172,6 +172,7 @@ public final class BsbRasterData
         int width_PIXELS = Integer.parseInt( results.group( 1 ) );
         int height_PIXELS = Integer.parseInt( results.group( 2 ) );
 
+        s.close();
         return new int[] { width_PIXELS, height_PIXELS };
     }
 
@@ -182,7 +183,10 @@ public final class BsbRasterData
 
         Scanner s = new Scanner( tokenData );
         s.findWithinHorizon( "NA=([\\w;\\s]+)", tokenData.length( ) );
-        return s.match( ).group( 1 );
+        
+        String imageName = s.match( ).group( 1 );
+        s.close();
+        return imageName;
     }
 
     private static Set<Pair<IntPoint2d, LatLonGeo>> extractRegistrationPoints( String header )
@@ -192,7 +196,9 @@ public final class BsbRasterData
         Vector<Pair<String, String>> allTokenData = extractTokenData( header, "REF" );
         for ( Pair<String, String> tokenData : allTokenData )
         {
-            Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
+        	// No resource leak -- useDelimiter does not create a new instance. --ttran17
+            @SuppressWarnings("resource")
+			Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
 
             s.nextInt( );
             int x = s.nextInt( );
@@ -201,6 +207,7 @@ public final class BsbRasterData
             double lon_DEG = s.nextDouble( );
 
             refPoints.add( new Pair<IntPoint2d, LatLonGeo>( new IntPoint2d( x, y ), new LatLonGeo( lat_DEG, lon_DEG ) ) );
+            s.close();
         }
 
         return refPoints;
@@ -229,6 +236,8 @@ public final class BsbRasterData
             r[i] = ( byte ) color.getRed( );
             g[i] = ( byte ) color.getGreen( );
             b[i] = ( byte ) color.getBlue( );
+            
+            s.close();
         }
 
         return new IndexColorModel( 8, 16, r, g, b );

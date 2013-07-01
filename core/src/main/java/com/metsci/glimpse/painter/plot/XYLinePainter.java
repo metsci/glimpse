@@ -30,13 +30,14 @@ import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.colormap.ColorMap;
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * Plots a simple x-y lineplot. Provides options for modifying
@@ -114,7 +115,7 @@ public class XYLinePainter extends GlimpseDataPainter2D
 
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < dataSize * 2 )
             {
-                this.dataBuffer = BufferUtil.newFloatBuffer( dataSize * 2 );
+                this.dataBuffer = Buffers.newDirectFloatBuffer( dataSize * 2 );
             }
 
             // copy data from the provided arrays into the host memory buffer
@@ -140,7 +141,7 @@ public class XYLinePainter extends GlimpseDataPainter2D
 
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < dataSize * 2 )
             {
-                this.dataBuffer = BufferUtil.newFloatBuffer( dataSize * 2 );
+                this.dataBuffer = Buffers.newDirectFloatBuffer( dataSize * 2 );
             }
 
             // copy data from the provided arrays into the host memory buffer
@@ -164,7 +165,7 @@ public class XYLinePainter extends GlimpseDataPainter2D
         {
             if ( colorBuffer == null || colorBuffer.rewind( ).capacity( ) < dataSize * 4 )
             {
-                this.colorBuffer = BufferUtil.newFloatBuffer( dataSize * 4 );
+                this.colorBuffer = Buffers.newDirectFloatBuffer( dataSize * 4 );
             }
 
             float[] color = new float[4];
@@ -192,7 +193,7 @@ public class XYLinePainter extends GlimpseDataPainter2D
         {
             if ( colorBuffer == null || colorBuffer.rewind( ).capacity( ) < dataSize * 4 )
             {
-                this.colorBuffer = BufferUtil.newFloatBuffer( dataSize * 4 );
+                this.colorBuffer = Buffers.newDirectFloatBuffer( dataSize * 4 );
             }
 
             float[] color = new float[4];
@@ -268,7 +269,7 @@ public class XYLinePainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( dataSize == 0 ) return;
 
@@ -316,18 +317,18 @@ public class XYLinePainter extends GlimpseDataPainter2D
             }
         }
 
-        gl.glShadeModel( GL.GL_FLAT );
+        gl.glShadeModel( GL2.GL_FLAT );
 
         if ( useColorDevice )
         {
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorHandle[0] );
             gl.glColorPointer( 4, GL.GL_FLOAT, 0, 0 );
-            gl.glEnableClientState( GL.GL_COLOR_ARRAY );
+            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
         }
 
         gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
         gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         gl.glColor4fv( lineColor, 0 );
         gl.glLineWidth( lineThickness );
@@ -336,7 +337,7 @@ public class XYLinePainter extends GlimpseDataPainter2D
         {
             if ( stippleOn )
             {
-                gl.glEnable( GL.GL_LINE_STIPPLE );
+                gl.glEnable( GL2.GL_LINE_STIPPLE );
                 gl.glLineStipple( stippleFactor, stipplePattern );
             }
 

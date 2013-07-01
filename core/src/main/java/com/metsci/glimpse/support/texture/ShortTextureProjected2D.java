@@ -33,6 +33,7 @@ import java.nio.ShortBuffer;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * A texture class which stores 16 bit integer values (uncapped). Must be used
@@ -59,9 +60,9 @@ public class ShortTextureProjected2D extends TextureProjected2D
 
     protected Buffer prepare_setPixelStore( GL gl, int i )
     {
-        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
-        gl.glPixelStorei( GL.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
-        gl.glPixelStorei( GL.GL_UNPACK_ROW_LENGTH, dataSizeX );
+        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
+        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
         //gl.glPixelStorei( GL.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
@@ -70,7 +71,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL gl )
+    protected void prepare_setData( GL2 gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {
@@ -79,12 +80,12 @@ public class ShortTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_LUMINANCE16I_EXT, texSizesX[i], texSizesY[i], 0, GL.GL_LUMINANCE_INTEGER_EXT, GL.GL_SHORT, positionedBuffer );
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16I, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE_INTEGER, GL.GL_SHORT, positionedBuffer );
         }
 
-        gl.glPixelStorei( GL.GL_UNPACK_SKIP_PIXELS, 0 );
-        gl.glPixelStorei( GL.GL_UNPACK_SKIP_ROWS, 0 );
-        gl.glPixelStorei( GL.GL_UNPACK_ROW_LENGTH, 0 );
+        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
+        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, 0 );
+        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, 0 );
     }
 
     @Override

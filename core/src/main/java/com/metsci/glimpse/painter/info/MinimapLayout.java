@@ -29,6 +29,7 @@ package com.metsci.glimpse.painter.info;
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.factory.DefaultAxisFactory2D;
@@ -218,9 +219,9 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             Axis2D miniMapAxis = getMiniMapAxis0( context );
             Axis2D mainMapAxis = getMainMapAxis0( context );
 
-            GL gl = context.getGL( );
+            GL2 gl = context.getGL( ).getGL2();
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( miniMapAxis.getMinX( ), miniMapAxis.getMaxX( ), miniMapAxis.getMinY( ), miniMapAxis.getMaxY( ), -1, 1 );
 
@@ -250,7 +251,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             }
 
             gl.glColor4fv( shadeColor, 0 );
-            gl.glBegin( GL.GL_QUADS );
+            gl.glBegin( GL2.GL_QUADS );
             try
             {
                 gl.glVertex2d( minX, minY );

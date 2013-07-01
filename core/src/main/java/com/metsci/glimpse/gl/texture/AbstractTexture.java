@@ -31,6 +31,7 @@ import static com.metsci.glimpse.gl.util.GLUtils.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 /**
@@ -94,7 +95,7 @@ public abstract class AbstractTexture implements Texture
     }
 
     // TODO: Figure out if this is expensive to call.
-    public boolean isResident( GL gl )
+    public boolean isResident( GL2 gl )
     {
         lock.lock();
         try
@@ -114,7 +115,7 @@ public abstract class AbstractTexture implements Texture
         }
     }
 
-    public boolean prepare( GL gl, int texUnit )
+    public boolean prepare( GL2 gl, int texUnit )
     {
         // should we check for dirtiness and allocation before lock to speed up?
         lock.lock();
@@ -165,5 +166,5 @@ public abstract class AbstractTexture implements Texture
 
     protected abstract void prepare_setTexParameters( GL gl );
     protected abstract void prepare_setPixelStore( GL gl );
-    protected abstract void prepare_setData( GL gl );
+    protected abstract void prepare_setData( GL2 gl );
 }

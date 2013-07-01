@@ -60,9 +60,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.opengl.util.awt.TextureRenderer;
+import com.jogamp.opengl.util.packrect.BackingStoreManager;
+import com.jogamp.opengl.util.packrect.Rect;
+import com.jogamp.opengl.util.packrect.RectVisitor;
+import com.jogamp.opengl.util.packrect.RectanglePacker;
+import com.jogamp.opengl.util.texture.TextureCoords;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.support.atlas.support.ImageData;
@@ -70,12 +77,6 @@ import com.metsci.glimpse.support.atlas.support.ImageDataExternal;
 import com.metsci.glimpse.support.atlas.support.ImageDataInternal;
 import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.atlas.support.TextureAtlasUpdateListener;
-import com.sun.opengl.impl.packrect.BackingStoreManager;
-import com.sun.opengl.impl.packrect.Rect;
-import com.sun.opengl.impl.packrect.RectVisitor;
-import com.sun.opengl.impl.packrect.RectanglePacker;
-import com.sun.opengl.util.j2d.TextureRenderer;
-import com.sun.opengl.util.texture.TextureCoords;
 
 /**
  * Stores a large number of images or icons which are packed into a single
@@ -383,7 +384,7 @@ public class TextureAtlas
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY )
+    public void drawImage( GL2 gl, Object id, Axis2D axis, double positionX, double positionY )
     {
         drawImage( gl, id, axis, positionX, positionY, 1.0 );
     }
@@ -391,7 +392,7 @@ public class TextureAtlas
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scale )
+    public void drawImage( GL2 gl, Object id, Axis2D axis, double positionX, double positionY, double scale )
     {
         drawImage( gl, id, axis, positionX, positionY, scale, scale );
     }
@@ -399,7 +400,7 @@ public class TextureAtlas
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY )
+    public void drawImage( GL2 gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
@@ -427,7 +428,7 @@ public class TextureAtlas
      * @param offsetX overrides the image x offset specified when the image was loaded
      * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImage( GL2 gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
@@ -438,7 +439,7 @@ public class TextureAtlas
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY )
+    public void drawImageAxisX( GL2 gl, Object id, Axis1D axis, double positionX, double positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
@@ -462,7 +463,7 @@ public class TextureAtlas
      * @param offsetX overrides the image x offset specified when the image was loaded
      * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImageAxisX( GL2 gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
@@ -478,7 +479,7 @@ public class TextureAtlas
      * 
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY )
+    public void drawImageAxisY( GL2 gl, Object id, Axis1D axis, double positionX, double positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
@@ -488,32 +489,32 @@ public class TextureAtlas
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImageAxisY( GL2 gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
         drawImage( gl, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
     
-    public void drawImage( GL gl, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImage( GL2 gl, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
     
-    public void drawImage( GL gl, Object id, int positionX, int positionY, double scaleX, double scaleY )
+    public void drawImage( GL2 gl, Object id, int positionX, int positionY, double scaleX, double scaleY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
     }
     
-    public void drawImage( GL gl, Object id, int positionX, int positionY )
+    public void drawImage( GL2 gl, Object id, int positionX, int positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         drawImage( gl, 1.0, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
 
-    protected void drawImage( GL gl, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    protected void drawImage( GL2 gl, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         double vppX = 1.0 / ppvX;
         double vppY = 1.0 / ppvY;
@@ -538,7 +539,7 @@ public class TextureAtlas
         float maxY = minY + ( float ) ( height * vppY * scaleY );
 
         // copied from com.sun.opengl.util.j2d.TextureRenderer#draw3DRect
-        gl.glBegin( GL.GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             gl.glTexCoord2f( texCoords.left( ), texCoords.bottom( ) );
@@ -640,10 +641,10 @@ public class TextureAtlas
             getBackingStore( ).begin3DRendering( );
         }
 
-        GL gl = GLU.getCurrentGL( );
+        GL2 gl = GLU.getCurrentGL( ).getGL2();
 
         // Push client attrib bits used by the pipelined quad renderer
-        gl.glPushClientAttrib( ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+        gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
 
         if ( !haveMaxSize )
         {
@@ -795,7 +796,7 @@ public class TextureAtlas
     {
         inBeginEndPair = false;
 
-        GL gl = GLU.getCurrentGL( );
+        GL2 gl = GLU.getCurrentGL( ).getGL2();
 
         // Pop client attrib bits used by the pipelined quad renderer
         gl.glPopClientAttrib( );
@@ -931,11 +932,17 @@ public class TextureAtlas
             return false;
         }
 
-        public void additionFailed( Rect cause, int attemptNumber )
+        public boolean additionFailed( Rect cause, int attemptNumber )
         {
             // Heavy hammer -- might consider doing something different
             packer.clear( );
             imageMap.clear( );
+            
+            if (attemptNumber == 0) {
+                return true;
+            }
+
+            return false;
         }
 
         public void beginMovement( Object oldBackingStore, Object newBackingStore )
@@ -943,7 +950,7 @@ public class TextureAtlas
             // Exit the begin / end pair if necessary
             if ( inBeginEndPair )
             {
-                GL gl = GLU.getCurrentGL( );
+                GL2 gl = GLU.getCurrentGL( ).getGL2();
 
                 // Pop client attrib bits used by the pipelined quad renderer
                 gl.glPopClientAttrib( );
@@ -1025,8 +1032,8 @@ public class TextureAtlas
 
                 //XXX is this necessary? we're not using pipelined quad renderer...
                 // Push client attrib bits used by the pipelined quad renderer
-                GL gl = GLU.getCurrentGL( );
-                gl.glPushClientAttrib( ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
             }
 
             // notify update listeners that the TextureAtlas was reorganized
@@ -1035,5 +1042,11 @@ public class TextureAtlas
                 listener.reorganized( );
             }
         }
+
+		@Override
+		public boolean canCompact() {
+			// TODO Not sure about this one. --ttran17
+			return true;
+		}
     }
 }

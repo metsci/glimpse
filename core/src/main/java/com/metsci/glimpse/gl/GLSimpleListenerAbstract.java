@@ -63,6 +63,12 @@ public abstract class GLSimpleListenerAbstract implements GLSimpleListener
         {
             handler.displayChanged(drawable.getContext(), modeChanged, deviceChanged);
         }
+
+		@Override
+		public void dispose(GLAutoDrawable drawable) {
+			// TODO Hmmm. Pretty sure this is correct. --ttran17
+			handler.dispose(drawable.getContext());
+		}
     }
 
     public GLEventListener asJoglListener()

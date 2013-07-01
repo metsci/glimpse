@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.gl.shader.ShaderType.*;
@@ -152,7 +153,7 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
     }
 
     @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public boolean preLink( GL2 gl, int glProgramHandle )
     {
         return true;
     }

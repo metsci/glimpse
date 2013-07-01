@@ -32,8 +32,10 @@ import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
@@ -46,7 +48,6 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.Length;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays a simple distance scale in the lower right corner of the plot.
@@ -291,18 +292,18 @@ public class ScalePainter extends GlimpsePainterImpl
 
         double totalSize = scalePixelSize * tickCount;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
         gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_BLEND );
 
-        gl.glBegin( GL.GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             for ( int i = 0; i < tickCount; i++ )

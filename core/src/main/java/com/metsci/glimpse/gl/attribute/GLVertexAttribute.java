@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.gl.attribute;
 
-import static javax.media.opengl.GL.GL_COLOR_ARRAY;
+import static javax.media.opengl.GL2.GL_COLOR_ARRAY;
 import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_NORMAL_ARRAY;
-import static javax.media.opengl.GL.GL_TEXTURE_COORD_ARRAY;
-import static javax.media.opengl.GL.GL_VERTEX_ARRAY;
+import static javax.media.opengl.GL2.GL_NORMAL_ARRAY;
+import static javax.media.opengl.GL2.GL_TEXTURE_COORD_ARRAY;
+import static javax.media.opengl.GL2.GL_VERTEX_ARRAY;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * According to NVIDIA:
@@ -87,17 +87,17 @@ public enum GLVertexAttribute
         this.length = length;
     }
 
-    public void bind( GL gl, int stride, int offset )
+    public void bind( GL2 gl, int stride, int offset )
     {
         toggle( gl, true, stride, offset );
     }
 
-    public void unbind( GL gl )
+    public void unbind( GL2 gl )
     {
         toggle( gl, false, 0, 0 );
     }
 
-    private final void toggle( GL gl, boolean bind, int stride, int offset )
+    private final void toggle( GL2 gl, boolean bind, int stride, int offset )
     {
         switch( this )
         {
@@ -161,13 +161,13 @@ public enum GLVertexAttribute
         }
     }
 
-    public static void bind( GL gl, int index, int length, int stride, int offset )
+    public static void bind( GL2 gl, int index, int length, int stride, int offset )
     {
         gl.glEnableVertexAttribArray( index );
         gl.glVertexAttribPointer( index, length, GL_FLOAT, false, stride, offset );
     }
 
-    public static void unbind( GL gl, int index )
+    public static void unbind( GL2 gl, int index )
     {
         gl.glDisableVertexAttribArray( index );
     }

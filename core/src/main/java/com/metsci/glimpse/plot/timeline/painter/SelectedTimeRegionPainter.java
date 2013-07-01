@@ -29,7 +29,7 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.tagged.Tag;
@@ -55,7 +55,7 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
         this.showLockedStatus = show;
     }
 
-    protected void paint( GL gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
+    protected void paint( GL2 gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
     {
         super.paint( gl, taggedAxis, tags, min, max, current, width, height );
 

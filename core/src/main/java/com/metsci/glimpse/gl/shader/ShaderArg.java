@@ -31,7 +31,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * A wrapper for a shader variable declared in an GLSL source file.
@@ -111,7 +111,7 @@ public class ShaderArg
         }
     }
 
-    protected void update( GL gl, int glArgHandle )
+    protected void update( GL2 gl, int glArgHandle )
     {
         lock.lock();
         try

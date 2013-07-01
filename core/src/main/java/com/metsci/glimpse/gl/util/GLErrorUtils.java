@@ -27,7 +27,7 @@
 package com.metsci.glimpse.gl.util;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.sun.opengl.impl.error.Error.gluErrorString;
+import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

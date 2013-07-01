@@ -43,7 +43,6 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.repaint.RepaintManager;
@@ -61,8 +60,6 @@ public class ScreenCaptureExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Jogular.initJogl( );
-
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
         final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, context );
 

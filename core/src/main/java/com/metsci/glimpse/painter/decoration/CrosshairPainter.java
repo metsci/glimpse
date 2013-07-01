@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.decoration;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -128,7 +129,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
         this.paintXor = xor;
     }
 
-    private void conditionallyEnableXor( GL gl )
+    private void conditionallyEnableXor( GL2 gl )
     {
         if ( paintXor )
         {
@@ -157,7 +158,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( axis == null || axis.getAxisX( ) == null || axis.getAxisY( ) == null ) return;
 
@@ -198,7 +199,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
             if ( shadeSelectionBox )
             {
                 gl.glColor4fv( shadeColor, 0 );
-                gl.glBegin( GL.GL_QUADS );
+                gl.glBegin( GL2.GL_QUADS );
                 try
                 {
                     gl.glVertex2d( centerX - sizeX, centerY - sizeY );

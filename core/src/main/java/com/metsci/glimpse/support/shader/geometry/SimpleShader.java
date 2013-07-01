@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.support.shader.geometry;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.sun.opengl.impl.error.Error.gluErrorString;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.shader.ShaderSource;
@@ -81,7 +82,7 @@ public class SimpleShader extends Shader
     }
 
     @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public boolean preLink( GL2 gl, int glProgramHandle )
     {
         return true;
     }

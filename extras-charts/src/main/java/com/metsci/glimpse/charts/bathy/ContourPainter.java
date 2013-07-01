@@ -29,13 +29,14 @@ package com.metsci.glimpse.charts.bathy;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * @author ulman
@@ -66,7 +67,7 @@ public class ContourPainter extends GlimpsePainter2D
 
         int size = Math.min( coordsX.length, coordsY.length );
         this.totalPointCount = size;
-        this.dataBuffer = BufferUtil.newFloatBuffer( size * 2 );
+        this.dataBuffer = Buffers.newDirectFloatBuffer( size * 2 );
 
         for ( int i = 0; i < size; i++ )
         {
@@ -77,7 +78,7 @@ public class ContourPainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         if ( !initialized )
         {
@@ -96,9 +97,9 @@ public class ContourPainter extends GlimpsePainter2D
 
         gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
         gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
 
@@ -114,7 +115,7 @@ public class ContourPainter extends GlimpsePainter2D
         gl.glDisable( GL.GL_BLEND );
         gl.glDisable( GL.GL_LINE_SMOOTH );
 
-        gl.glDisableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
     }
 
     public void setLineColor( float r, float g, float b, float a )

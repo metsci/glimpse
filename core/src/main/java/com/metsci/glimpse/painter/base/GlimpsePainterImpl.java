@@ -30,8 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.glu.GLU;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -43,8 +43,6 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     public static final Logger logger = Logger.getLogger( GlimpsePainterImpl.class.getName( ) );
 
     public static final int BYTES_PER_FLOAT = 4;
-
-    protected final GLU glu = new GLU( );
 
     protected boolean disposed = false;
     protected boolean displayOn = true;
@@ -90,15 +88,15 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
         if ( width <= 0 || height <= 0 ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
-        gl.glPushClientAttrib( ( int ) GL.GL_CLIENT_ALL_ATTRIB_BITS );
-        gl.glPushAttrib( GL.GL_ALL_ATTRIB_BITS );
+        gl.glPushClientAttrib( ( int ) GL2.GL_CLIENT_ALL_ATTRIB_BITS );
+        gl.glPushAttrib( GL2.GL_ALL_ATTRIB_BITS );
         
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glPushMatrix( );
         
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glPushMatrix( );
 
         try
@@ -108,10 +106,10 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         }
         finally
         {
-            gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glPopMatrix( );
             
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glPopMatrix( );
             
             gl.glPopAttrib( );

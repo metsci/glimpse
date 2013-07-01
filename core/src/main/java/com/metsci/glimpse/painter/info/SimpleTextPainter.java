@@ -33,14 +33,15 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * A painter which displays arbitrary text at a fixed pixel
@@ -278,7 +279,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         return sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
     }
 
-    protected void paintToHorizontal( GL gl, int width, int height, Rectangle2D textBounds )
+    protected void paintToHorizontal( GL2 gl, int width, int height, Rectangle2D textBounds )
     {
         int xText = horizontalPadding;
         int yText = verticalPadding;
@@ -311,10 +312,10 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         
         if (  paintBackground ||  paintBorder )
         {
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5, -0.5, height - 1 + 0.5, -1, 1 );
-            gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glLoadIdentity( );
 
             gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
@@ -330,7 +331,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
 	            // Draw Text Background
 	            gl.glColor4fv( backgroundColor, 0 );
 	
-	            gl.glBegin( GL.GL_QUADS );
+	            gl.glBegin( GL2.GL_QUADS );
 	            try
 	            {
 	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
@@ -388,7 +389,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
         }
     }
 
-    protected void paintToVertical( GL gl, int width, int height, Rectangle2D textBounds )
+    protected void paintToVertical( GL2 gl, int width, int height, Rectangle2D textBounds )
     {
         int xText = horizontalPadding;
         int yText = verticalPadding;
@@ -427,10 +428,10 @@ public class SimpleTextPainter extends GlimpsePainterImpl
 
         if ( this.paintBackground || this.paintBorder )
         {
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( 0, width, 0, height, -1, 1 );
-            gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glLoadIdentity( );
 
             gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
@@ -449,7 +450,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
                 // Draw Text Background
                 gl.glColor4fv( backgroundColor, 0 );
 
-                gl.glBegin( GL.GL_QUADS );
+                gl.glBegin( GL2.GL_QUADS );
                 try
                 {
                     gl.glVertex2f( xTextMin, yTextMin );
@@ -493,7 +494,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             double xShift = xText + halfTextWidth;
             double yShift = yText + halfTextHeight;
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glTranslated( xShift, yShift, 0 );
             gl.glRotated( 90, 0, 0, 1.0f );
             gl.glTranslated( -xShift, -yShift, 0 );
@@ -525,7 +526,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
 
         if ( text == null || textRenderer == null ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 

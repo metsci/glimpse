@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.decoration;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -122,14 +123,14 @@ public class BorderPainter extends GlimpsePainterImpl
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int x = bounds.getX( );
         int y = bounds.getY( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( x - 0.5, x + width + 0.5f, y - 0.5, y + height + 0.5f, -1, 1 );
 
@@ -141,7 +142,7 @@ public class BorderPainter extends GlimpsePainterImpl
 
         if ( stippleOn )
         {
-            gl.glEnable( GL.GL_LINE_STIPPLE );
+            gl.glEnable( GL2.GL_LINE_STIPPLE );
             gl.glLineStipple( stippleFactor, stipplePattern );
         }
 

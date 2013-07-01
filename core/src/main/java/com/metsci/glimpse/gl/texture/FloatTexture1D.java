@@ -29,8 +29,9 @@ package com.metsci.glimpse.gl.texture;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * A one dimensional texture storing float values.
@@ -44,22 +45,22 @@ public class FloatTexture1D extends AbstractTexture
     public FloatTexture1D( int n0 )
     {
         super( n0 );
-        this.data = BufferUtil.newFloatBuffer( n0 );
+        this.data = Buffers.newDirectFloatBuffer( n0 );
     }
 
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
-        gl.glTexParameteri( GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
 
-        gl.glTexParameteri( GL.GL_TEXTURE_1D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
     }
 
     @Override
-    protected void prepare_setData( GL gl )
+    protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage1D( GL.GL_TEXTURE_1D, 0, GL.GL_LUMINANCE32F_ARB, dim[0], 0, GL.GL_LUMINANCE, GL.GL_FLOAT,
+        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL.GL_LUMINANCE32F_ARB, dim[0], 0, GL.GL_LUMINANCE, GL.GL_FLOAT,
                          data.rewind() );
     }
 

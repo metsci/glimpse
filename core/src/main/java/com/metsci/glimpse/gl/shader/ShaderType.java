@@ -26,14 +26,16 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 
 public enum ShaderType
 {
-    vertex( GL.GL_VERTEX_SHADER ),
-    geometry( GL.GL_GEOMETRY_SHADER_EXT ),
-    fragment( GL.GL_FRAGMENT_SHADER );
+	// TODO: I need to better understand the significance of using GL2 vs. (e.g.) GL3 
+	//       Don't think it matters here though ... -- ttran17
+    vertex( GL3.GL_VERTEX_SHADER ),
+    geometry( GL3.GL_GEOMETRY_SHADER ),
+    fragment( GL3.GL_FRAGMENT_SHADER );
 
 
     private final int glShaderTypeCode;

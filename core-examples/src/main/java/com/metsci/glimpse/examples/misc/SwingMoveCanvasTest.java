@@ -34,7 +34,6 @@ import javax.swing.Timer;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
@@ -50,8 +49,6 @@ public class SwingMoveCanvasTest
 {
     public static void main( String[] args ) throws Exception
     {
-        Jogular.initJogl( );
-
         // create a canvas and a plot
         final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, null );
         GlimpseLayout plot = new HeatMapExample( ).getLayout( );

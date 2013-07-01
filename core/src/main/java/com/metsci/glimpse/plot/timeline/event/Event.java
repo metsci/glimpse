@@ -26,20 +26,32 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import com.metsci.glimpse.context.GlimpseBounds;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.HideAll;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.ShowAll;
+
+import java.awt.geom.Rectangle2D;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
+import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.metsci.glimpse.context.GlimpseBounds;
 
 import javax.media.opengl.GL;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
-
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 /**
  * Event represents an occurrence with a start and end time and is usually created
@@ -318,9 +330,6 @@ public class Event implements Iterable<Event>
 
     protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
     {
-        float[] defaultColor = info.getDefaultEventBackgroundColor( );
-        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
-
         if ( isSelected )
         {
             if ( selectedColor != null )
@@ -337,6 +346,148 @@ public class Event implements Iterable<Event>
             else
                 return defaultColor;
         }
+    }
+
+    public void paint( GL2 gl, Axis1D axis, EventPainter painter, Event next, int width, int height, int sizeMin, int sizeMax )
+    {
+        float[] defaultColor = info.getDefaultEventBackgroundColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
+
+        offEdgeMax = true;
+        timeMax = axis.getMax( ) - ARROW_TIP_BUFFER / axis.getPixelsPerValue( );
+        arrowBaseMax = timeMax - arrowSize / axis.getPixelsPerValue( );
+
+        arrowBaseMax = Math.max( timeMin, arrowBaseMax );
+        arrowBaseMin = Math.min( timeMax, arrowBaseMin );
+        
+        double timeSpan = arrowBaseMax - arrowBaseMin;
+        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
+
+        int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
+
+        // start positions of the next event in this row
+        double nextStartValue = next != null ? epoch.fromTimeStamp( next.getStartTime( ) ) : axis.getMax( );
+        int nextStartPixel = next != null ? axis.valueToScreenPixel( nextStartValue ) : width;
+
+        if ( painter.isHorizontal( ) )
+        {   
+            if ( !offEdgeMin && !offEdgeMax )
+            {
+                if ( showBackground )
+                {
+                    GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
+                    gl.glBegin( GL2.GL_QUADS );
+                    try
+                    {
+                        gl.glVertex2d( timeMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMin );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+    
+                if ( showBorder )
+                {
+                    GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+                    gl.glLineWidth( borderThickness );
+                    gl.glBegin( GL.GL_LINE_LOOP );
+                    try
+                    {
+                        gl.glVertex2d( timeMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeMin );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+            }
+            else
+            {
+                if ( showBackground )
+                {
+                    GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
+                    gl.glBegin( GL2.GL_POLYGON );
+                    try
+                    {
+                        gl.glVertex2d( arrowBaseMin, sizeMax );
+                        gl.glVertex2d( arrowBaseMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeCenter );
+                        gl.glVertex2d( arrowBaseMax, sizeMin );
+                        gl.glVertex2d( arrowBaseMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeCenter );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+                
+                if ( showBorder )
+                {
+                    GlimpseColor.glColor( gl, borderColor != null ? borderColor : painter.getBorderColor( ) );
+                    gl.glLineWidth( borderThickness );
+                    gl.glBegin( GL.GL_LINE_LOOP );
+                    try
+                    {
+                        gl.glVertex2d( arrowBaseMin, sizeMax );
+                        gl.glVertex2d( arrowBaseMax, sizeMax );
+                        gl.glVertex2d( timeMax, sizeCenter );
+                        gl.glVertex2d( arrowBaseMax, sizeMin );
+                        gl.glVertex2d( arrowBaseMin, sizeMin );
+                        gl.glVertex2d( timeMin, sizeCenter );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+            }
+
+            isIconVisible = showIcon && iconId != null && !isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+
+            if ( isIconVisible )
+            {
+                double valueX = axis.screenPixelToValue( pixelX );
+                iconStartTime = epoch.toTimeStamp( valueX );
+                iconEndTime = iconStartTime.add( size / axis.getPixelsPerValue( ) );
+
+                TextureAtlas atlas = painter.getTextureAtlas( );
+                atlas.beginRendering( );
+                try
+                {
+                    ImageData iconData = atlas.getImageData( iconId );
+                    double iconScale = size / ( double ) iconData.getHeight( );
+
+                    atlas.drawImageAxisX( gl, iconId, axis, valueX, sizeMin, iconScale, iconScale, 0, iconData.getHeight( ) );
+                }
+                finally
+                {
+                    atlas.endRendering( );
+                }
+           }
+
+            //TODO handle drawing text and icons in HORIZONTAL orientation
+
+            GlimpseColor.glColor( gl, backgroundColor != null ? backgroundColor : painter.getBackgroundColor( ) );
+            gl.glBegin( GL2.GL_QUADS );
+            try
+            {
+                gl.glVertex2d( sizeMin, timeMin );
+                gl.glVertex2d( sizeMax, timeMin );
+                gl.glVertex2d( sizeMax, timeMax );
+                gl.glVertex2d( sizeMin, timeMax );
+            }
+            finally
+            {
+                gl.glEnd( );
+            }
     }
 
     protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )

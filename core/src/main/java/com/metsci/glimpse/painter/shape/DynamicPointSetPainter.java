@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -221,7 +222,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         lock.lock( );
         try
