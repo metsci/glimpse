@@ -74,7 +74,6 @@ public class CustomTile extends JComponent implements Tile
             setForeground( Color.lightGray );
 
             setBorder( createEmptyBorder( 0, 4, 0, 4 ) );
-
         }
 
         public void setSelected( boolean selected )
