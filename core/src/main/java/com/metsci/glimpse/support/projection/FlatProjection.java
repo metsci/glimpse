@@ -46,35 +46,34 @@ public class FlatProjection implements Projection, InvertibleProjection
 
     public FlatProjection( Axis2D axes )
     {
-        this(  axes.getMinX( ), axes.getMaxX( ), axes.getMinY( ), axes.getMaxY( ) );
+        this( axes.getMinX( ), axes.getMaxX( ), axes.getMinY( ), axes.getMaxY( ) );
     }
-    
+
     public FlatProjection( double minX, double maxX, double minY, double maxY )
     {
         this( minX, maxX, minY, maxY, 0.0, 1.0, 0.0, 1.0 );
     }
-    
+
     public FlatProjection( Axis2D axes, double minTexX, double maxTexX, double minTexY, double maxTexY )
     {
         this( axes.getMinX( ), axes.getMaxX( ), axes.getMinY( ), axes.getMaxY( ), minTexX, maxTexX, minTexY, maxTexY );
     }
-    
-    public FlatProjection( double minX, double maxX, double minY, double maxY,
-                           double minTexX, double maxTexX, double minTexY, double maxTexY )
+
+    public FlatProjection( double minX, double maxX, double minY, double maxY, double minTexX, double maxTexX, double minTexY, double maxTexY )
     {
         this.minTexX = minTexX;
         this.maxTexX = maxTexX;
         this.minTexY = minTexY;
         this.maxTexY = maxTexY;
-        
+
         this.diffTexX = ( maxTexX - minTexX );
         this.diffTexY = ( maxTexY - minTexY );
-        
+
         this.minX = minX;
         this.maxX = maxX;
         this.minY = minY;
         this.maxY = maxY;
-        
+
         this.diffX = ( maxX - minX );
         this.diffY = ( maxY - minY );
     }
@@ -82,9 +81,9 @@ public class FlatProjection implements Projection, InvertibleProjection
     @Override
     public void getVertexXY( double textureFractionX, double textureFractionY, float[] resultXY )
     {
-        float texFracNormX = (float) ( ( textureFractionX - minTexX ) / diffTexX );
-        float texFracNormY = (float) ( ( textureFractionY - minTexY ) / diffTexY );
-        
+        float texFracNormX = ( float ) ( ( textureFractionX - minTexX ) / diffTexX );
+        float texFracNormY = ( float ) ( ( textureFractionY - minTexY ) / diffTexY );
+
         resultXY[0] = ( float ) ( minX + diffX * texFracNormX );
         resultXY[1] = ( float ) ( minY + diffY * texFracNormY );
     }

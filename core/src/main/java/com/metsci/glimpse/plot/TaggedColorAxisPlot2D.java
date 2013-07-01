@@ -53,10 +53,10 @@ public class TaggedColorAxisPlot2D extends ColorAxisPlot2D
     {
         return new TaggedPartialColorYAxisPainter( tickHandler );
     }
-    
+
     @Override
     public TaggedAxis1D getAxisZ( )
     {
-        return (TaggedAxis1D) axisZ;
+        return ( TaggedAxis1D ) axisZ;
     }
 }

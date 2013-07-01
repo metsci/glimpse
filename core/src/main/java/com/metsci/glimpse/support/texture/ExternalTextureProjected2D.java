@@ -45,7 +45,7 @@ public class ExternalTextureProjected2D extends TextureProjected2D
     public ExternalTextureProjected2D( int texHandle, int dataSizeX, int dataSizeY, boolean useVertexZCoord )
     {
         super( dataSizeX, dataSizeY, useVertexZCoord );
-        
+
         this.numTextures = 1;
         this.textureHandles = new int[] { texHandle };
     }
@@ -55,7 +55,7 @@ public class ExternalTextureProjected2D extends TextureProjected2D
     {
         // do nothing, the texture handle has already been created externally
     }
-    
+
     @Override
     protected void prepare_setData( GL2 gl )
     {
@@ -68,7 +68,7 @@ public class ExternalTextureProjected2D extends TextureProjected2D
         // don't allocate any space, texture data is handled externally
         return null;
     }
-    
+
     @Override
     protected int getRequiredCapacityBytes( )
     {
@@ -80,7 +80,7 @@ public class ExternalTextureProjected2D extends TextureProjected2D
     {
         throw new UnsupportedOperationException( "getData() is not supported by ExternalTextureProjected2D because its underlying OpenGL texture is handled externally." );
     }
-    
+
     @Override
     public void resize( int dataSizeX, int dataSizeY )
     {

@@ -277,13 +277,13 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
     {
         // do nothing
     }
-    
+
     @Override
     public boolean isDisposed( )
     {
         return this.isDisposed;
     }
-    
+
     @Override
     public void dispose( RepaintManager manager )
     {
@@ -301,9 +301,9 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
                     {
                         layout.dispose( context );
                     }
-                    
+
                     pixelBuffer.dispose( );
-                    
+
                     isDisposed = true;
                 }
                 finally
@@ -312,10 +312,10 @@ public class OffscreenGlimpseCanvas implements GlimpseCanvas
                 }
             }
         };
-        
+
         if ( manager != null )
         {
-            manager.asyncExec( dispose );   
+            manager.asyncExec( dispose );
         }
         else
         {

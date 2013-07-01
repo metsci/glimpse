@@ -89,7 +89,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     {
         this( parent, null, null );
     }
-    
+
     public GlimpseAxisLayout1D( )
     {
         this( null, null, null );
@@ -100,8 +100,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     {
         Axis1D contextAxis = getAxis( stack );
 
-        if ( contextAxis == null )
-            throw new AxisNotSetException( stack );
+        if ( contextAxis == null ) throw new AxisNotSetException( stack );
 
         contextAxis.setSizePixels( getSize( bounds ) );
     }
@@ -109,6 +108,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     public abstract boolean isHorizontal( );
 
     protected abstract Axis1D getAxis( Axis2D axis );
+
     protected abstract int getSize( GlimpseBounds bounds );
 
     public void clearCache( )
@@ -189,7 +189,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         {
             if ( target instanceof GlimpseAxisLayout2D )
             {
-                GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+                GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
                 if ( layout.isAxisSet( ) )
                 {
                     return getCachedAxis0( getAxis( layout.getAxis( ) ), factory, stack );
@@ -197,7 +197,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
             }
             else if ( target instanceof GlimpseAxisLayout1D )
             {
-                GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+                GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
                 if ( layout.isAxisSet( ) )
                 {
                     return getCachedAxis0( layout.getAxis( ), factory, stack );
@@ -214,7 +214,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         {
             if ( target instanceof GlimpseAxisLayout2D )
             {
-                GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+                GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
                 if ( layout.isAxisFactorySet( ) )
                 {
                     AxisFactory2D factory = layout.getAxisFactory( );
@@ -223,7 +223,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
             }
             else if ( target instanceof GlimpseAxisLayout1D )
             {
-                GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+                GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
                 if ( layout.isAxisFactorySet( ) )
                 {
                     return layout.getAxisFactory( );

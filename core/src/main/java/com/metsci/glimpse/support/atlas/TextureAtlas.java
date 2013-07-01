@@ -380,7 +380,7 @@ public class TextureAtlas
     //////////////////////////////////////////////////////////////
     ///                Image Rendering Methods                 ///
     //////////////////////////////////////////////////////////////
-    
+
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
@@ -435,7 +435,7 @@ public class TextureAtlas
         double ppvY = axis.getAxisY( ).getPixelsPerValue( );
         drawImage( gl, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
-    
+
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
@@ -445,7 +445,7 @@ public class TextureAtlas
         double ppvX = axis.getPixelsPerValue( );
         drawImage( gl, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
-    
+
     /**
      * Draws an image from the TextureAtlas with the x position specified in axis space
      * and the y position specified in pixel space.
@@ -469,7 +469,7 @@ public class TextureAtlas
         double ppvX = axis.getPixelsPerValue( );
         drawImage( gl, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
-    
+
     /**
      * Draws an image from the TextureAtlas with the y position specified in axis space
      * and the x position specified in pixel space.
@@ -485,7 +485,7 @@ public class TextureAtlas
         double ppvY = axis.getPixelsPerValue( );
         drawImage( gl, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
-    
+
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
@@ -495,19 +495,19 @@ public class TextureAtlas
         double ppvY = axis.getPixelsPerValue( );
         drawImage( gl, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
-    
+
     public void drawImage( GL2 gl, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
-    
+
     public void drawImage( GL2 gl, Object id, int positionX, int positionY, double scaleX, double scaleY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
     }
-    
+
     public void drawImage( GL2 gl, Object id, int positionX, int positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
@@ -607,7 +607,7 @@ public class TextureAtlas
 
         return ( ImageDataInternal ) rect.getUserData( );
     }
-    
+
     private Graphics2D getGraphics2D( )
     {
         TextureRenderer renderer = getBackingStore( );
@@ -641,7 +641,7 @@ public class TextureAtlas
             getBackingStore( ).begin3DRendering( );
         }
 
-        GL2 gl = GLU.getCurrentGL( ).getGL2();
+        GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
         // Push client attrib bits used by the pipelined quad renderer
         gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
@@ -796,7 +796,7 @@ public class TextureAtlas
     {
         inBeginEndPair = false;
 
-        GL2 gl = GLU.getCurrentGL( ).getGL2();
+        GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
         // Pop client attrib bits used by the pipelined quad renderer
         gl.glPopClientAttrib( );
@@ -937,8 +937,9 @@ public class TextureAtlas
             // Heavy hammer -- might consider doing something different
             packer.clear( );
             imageMap.clear( );
-            
-            if (attemptNumber == 0) {
+
+            if ( attemptNumber == 0 )
+            {
                 return true;
             }
 
@@ -950,7 +951,7 @@ public class TextureAtlas
             // Exit the begin / end pair if necessary
             if ( inBeginEndPair )
             {
-                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
                 // Pop client attrib bits used by the pipelined quad renderer
                 gl.glPopClientAttrib( );
@@ -1032,7 +1033,7 @@ public class TextureAtlas
 
                 //XXX is this necessary? we're not using pipelined quad renderer...
                 // Push client attrib bits used by the pipelined quad renderer
-                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
                 gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
             }
 
@@ -1043,10 +1044,11 @@ public class TextureAtlas
             }
         }
 
-		@Override
-		public boolean canCompact() {
-			// TODO Not sure about this one. --ttran17
-			return true;
-		}
+        @Override
+        public boolean canCompact( )
+        {
+            // TODO Not sure about this one. --ttran17
+            return true;
+        }
     }
 }

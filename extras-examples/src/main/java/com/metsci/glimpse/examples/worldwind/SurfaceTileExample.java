@@ -42,7 +42,6 @@ import javax.swing.JPanel;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
@@ -60,10 +59,7 @@ public class SurfaceTileExample
 
     public static void main( String[] args ) throws IOException
     {
-        Jogular.initJogl( );
-
         // create a Worldwind Frame
-
         JFrame worldwindFrame = new JFrame( "Worldwind" );
 
         JPanel panel = new JPanel( );

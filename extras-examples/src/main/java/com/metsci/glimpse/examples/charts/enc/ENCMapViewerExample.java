@@ -51,7 +51,6 @@ import com.metsci.glimpse.charts.vector.parser.autogen.ENCAttributeValues;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObjectType;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCShape;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.painter.decoration.CopyrightPainter;
@@ -233,8 +232,6 @@ public class ENCMapViewerExample
 
     public static void main( String[] args )
     {
-        Jogular.initJogl( );
-
         try
         {
             String root = null;

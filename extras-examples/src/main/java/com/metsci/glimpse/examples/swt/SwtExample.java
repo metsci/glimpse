@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.swt;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
 import java.util.logging.Logger;
 
@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.swt.canvas.SwtGlimpseCanvas;
@@ -56,8 +55,6 @@ public abstract class SwtExample
 
     public static void showWithSwt( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
-        Jogular.initJogl( );
-
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
 
         Display display = new Display( );
@@ -96,8 +93,6 @@ public abstract class SwtExample
 
     public static void showWithSwt( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
-        Jogular.initJogl( );
-
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
 
         Display display = new Display( );

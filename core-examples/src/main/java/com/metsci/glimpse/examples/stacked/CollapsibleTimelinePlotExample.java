@@ -86,7 +86,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     public StackedTimePlot2D getLayout( )
     {
         final CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
-        
+
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
@@ -121,7 +121,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events2.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events3.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
-        
+
         // create a collapsible/expandable group for all the event plots
         GroupInfo group = plot.createGroup( "events-group", events1, events2, events3 );
         group.setLabelText( "Event Group" );
@@ -161,7 +161,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         events1.setAggregateNearbyEvents( true );
         events2.setAggregateNearbyEvents( true );
-        
+
         // add constraints on how the user can adjust the various events
         e0.setEndTimeMoveable( false );
         e1.setResizeable( false );
@@ -176,7 +176,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         // fix the "Cloudy" event on row 2
         e2.setFixedRow( 2 );
-        
+
         // recalculate the positions of events
         events1.validate( );
 
@@ -267,7 +267,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // the mouse, but the user can move it by clicking and dragging inside
         // the selected area)
         plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
-        
+
         // don't draw text indicating whether the selection is locked
         plot.getSelectedTimePainter( ).setShowLockedStatus( false );
 

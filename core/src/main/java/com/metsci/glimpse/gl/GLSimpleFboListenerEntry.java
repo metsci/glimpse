@@ -32,7 +32,6 @@ import java.util.logging.Level;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
-
 import java.util.logging.Logger;
 
 public class GLSimpleFboListenerEntry

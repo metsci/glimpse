@@ -104,7 +104,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
 
         }
     }
-    
+
     public static void loadTextureAtlas( TextureAtlas atlas ) throws IOException
     {
         atlas.loadImage( "image1", 30, 30, new ImageDrawer( )
@@ -168,7 +168,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
                 g.drawLine( 0, 0, width, height );
             }
         } );
-        
+
         atlas.loadImage( "image7", 100, 100, new ImageDrawer( )
         {
             @Override
@@ -198,25 +198,24 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
                 g.fillRect( width / 2, 0, width / 2, height / 2 );
             }
         } );
-        
+
         atlas.loadImage( "image9", 100, 100, 0, 0, new ImageDrawer( )
         {
             @Override
             public void drawImage( Graphics2D g, int width, int height )
             {
                 g.setColor( Color.black );
-                
-                for ( int x = 0 ; x < width ; x++ )
+
+                for ( int x = 0; x < width; x++ )
                 {
-                    for ( int y = 0 ; y < height ; y++ )
+                    for ( int y = 0; y < height; y++ )
                     {
-                        if ( ( x % 2 == 0 && y % 2 == 0 ) || ( x % 2 != 0 && y % 2 != 0 ) )
-                            g.fillRect( x,y,1,1 );
+                        if ( ( x % 2 == 0 && y % 2 == 0 ) || ( x % 2 != 0 && y % 2 != 0 ) ) g.fillRect( x, y, 1, 1 );
                     }
                 }
-                
+
                 g.setColor( Color.red );
-                g.drawRect( 0, 0, width-1, height-1 );
+                g.drawRect( 0, 0, width - 1, height - 1 );
             }
         } );
 

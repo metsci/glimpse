@@ -70,7 +70,6 @@ import com.metsci.glimpse.charts.vector.iteration.GeoFilterableRecordList;
 import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
@@ -489,8 +488,6 @@ public class DNCObjectViewerExample extends JPanel
     {
         try
         {
-            Jogular.initJogl( );
-
             List<String> roots = new ArrayList<String>( );
             String dirPath = "/path/to/dnc_dir/";
 

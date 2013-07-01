@@ -34,25 +34,25 @@ public abstract class AbstractLookAndFeel implements LookAndFeel
 {
     public static String TOOLTIP_BACKGROUND_COLOR = "tooltip.background.color";
     public static String TOOLTIP_TEXT_COLOR = "tooltip.text.color";
-    
+
     public static String AXIS_TEXT_COLOR = "axis.text.color";
     public static String AXIS_TICK_COLOR = "axis.tick.color";
     public static String AXIS_TAG_COLOR = "axis.tag.color";
-    
+
     public static String AXIS_FONT = "axis.font";
     public static String TITLE_FONT = "title.font";
-    
+
     public static String CROSSHAIR_COLOR = "crosshair.color";
     public static String BORDER_COLOR = "border.color";
-    
+
     public static String FRAME_BACKGROUND_COLOR = "frame.background.color";
     public static String PLOT_BACKGROUND_COLOR = "plot.background.color";
 
-    public Map<String,Object> map;
+    public Map<String, Object> map;
 
     public AbstractLookAndFeel( )
     {
-        map = new HashMap<String,Object>( );
+        map = new HashMap<String, Object>( );
     }
 
     @Override
@@ -64,18 +64,18 @@ public abstract class AbstractLookAndFeel implements LookAndFeel
     @Override
     public float[] getColor( String key )
     {
-        return (float[]) map.get( key );
+        return ( float[] ) map.get( key );
     }
 
     @Override
     public float getFloat( String key )
     {
-        return (Float) map.get( key );
+        return ( Float ) map.get( key );
     }
 
     @Override
     public Font getFont( String key )
     {
-        return (Font) map.get( key );
+        return ( Font ) map.get( key );
     }
 }

@@ -49,10 +49,7 @@ package com.metsci.glimpse.axis;
  */
 public enum UpdateMode
 {
-    MinMax(false),
-    MinScale(true),
-    CenterScale(true),
-    FixedPixel(true);
+    MinMax(false), MinScale(true), CenterScale(true), FixedPixel(true);
 
     private boolean isScalePerserving;
 

@@ -46,7 +46,6 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.examples.charts.bathy.BathymetryExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -64,8 +63,6 @@ public class BathymetryTileExample
 {
     public static void main( String[] args ) throws IOException
     {
-        Jogular.initJogl( );
-
         // create a Worldwind Frame
         JFrame worldwindFrame = new JFrame( "Worldwind" );
 

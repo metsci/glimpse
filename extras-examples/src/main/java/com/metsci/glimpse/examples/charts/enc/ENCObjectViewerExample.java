@@ -69,7 +69,6 @@ import com.metsci.glimpse.charts.vector.iteration.GeoIntAttributeFilter.Operator
 import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
 import com.metsci.glimpse.charts.vector.parser.autogen.ENCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
@@ -491,8 +490,6 @@ public class ENCObjectViewerExample extends JPanel
     {
         try
         {
-            Jogular.initJogl( );
-
             String dirPath = "data/";
             String root = null;
             if ( args.length > 0 )

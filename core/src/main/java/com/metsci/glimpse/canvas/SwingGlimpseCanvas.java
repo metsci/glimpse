@@ -77,7 +77,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
-    
+
     public SwingGlimpseCanvas( )
     {
         this( true );
@@ -396,11 +396,12 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 }
             }
 
-			@Override
-			public void dispose(GLAutoDrawable drawable) {
-				// TODO Auto-generated method stub -- ttran17
-				
-			}
+            @Override
+            public void dispose( GLAutoDrawable drawable )
+            {
+                // TODO Auto-generated method stub -- ttran17
+
+            }
         } );
     }
 
@@ -409,7 +410,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         return this.isDisposed;
     }
-    
+
     @Override
     public void dispose( RepaintManager manager )
     {
@@ -432,14 +433,14 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 {
                     glContext.release( );
                 }
-                
+
                 isDisposed = true;
             }
         };
-        
+
         if ( manager != null )
         {
-            manager.asyncExec( dispose );   
+            manager.asyncExec( dispose );
         }
         else
         {

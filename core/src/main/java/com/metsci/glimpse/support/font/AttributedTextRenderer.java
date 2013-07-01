@@ -704,7 +704,7 @@ public class AttributedTextRenderer
             getBackingStore( ).begin3DRendering( );
         }
 
-        GL2 gl = GLU.getCurrentGL( ).getGL2();
+        GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
         // Push client attrib bits used by the pipelined quad renderer
         gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
@@ -759,7 +759,7 @@ public class AttributedTextRenderer
 
         inBeginEndPair = false;
 
-        GL2 gl = GLU.getCurrentGL( ).getGL2();
+        GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
         // Pop client attrib bits used by the pipelined quad renderer
         gl.glPopClientAttrib( );
@@ -1033,7 +1033,7 @@ public class AttributedTextRenderer
     {
         dbgFrame = new Frame( "TextRenderer Debug Output" );
 
-        GLCanvas dbgCanvas = new GLCanvas( new GLCapabilities( GLProfile.get(GLProfile.GL2) ), null, GLContext.getCurrent( ), null );
+        GLCanvas dbgCanvas = new GLCanvas( new GLCapabilities( GLProfile.get( GLProfile.GL2 ) ), null, GLContext.getCurrent( ), null );
         dbgCanvas.addGLEventListener( new DebugListener( dbgFrame ) );
         dbgFrame.add( dbgCanvas );
 
@@ -1388,7 +1388,7 @@ public class AttributedTextRenderer
                 // Draw any outstanding glyphs
                 flush( );
 
-                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
                 // Pop client attrib bits used by the pipelined quad renderer
                 gl.glPopClientAttrib( );
@@ -1461,7 +1461,7 @@ public class AttributedTextRenderer
                 }
 
                 // Push client attrib bits used by the pipelined quad renderer
-                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
                 gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
 
                 if ( haveCachedColor )
@@ -1482,11 +1482,12 @@ public class AttributedTextRenderer
             }
         }
 
-		@Override
-		public boolean canCompact() {
-			// TODO Auto-generated method stub
-			return false;
-		}
+        @Override
+        public boolean canCompact( )
+        {
+            // TODO Auto-generated method stub
+            return false;
+        }
     }
 
     public static class DefaultRenderDelegate implements RenderDelegate
@@ -1940,8 +1941,8 @@ public class AttributedTextRenderer
 
         Pipelined_QuadRenderer( )
         {
-            GL2 gl = GLU.getCurrentGL( ).getGL2();
-            mVertCoords = Buffers.newDirectFloatBuffer(kTotalBufferSizeCoordsVerts);
+            GL2 gl = GLU.getCurrentGL( ).getGL2( );
+            mVertCoords = Buffers.newDirectFloatBuffer( kTotalBufferSizeCoordsVerts );
             mTexCoords = Buffers.newDirectFloatBuffer( kTotalBufferSizeCoordsTex );
 
             usingVBOs = is15Available( gl );
@@ -2006,7 +2007,7 @@ public class AttributedTextRenderer
         {
             if ( mOutstandingGlyphsVerticesPipeline > 0 )
             {
-                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
                 TextureRenderer renderer = getBackingStore( );
                 Texture texture = renderer.getTexture( ); // triggers texture uploads.  Maybe this should be more obvious?
@@ -2055,7 +2056,7 @@ public class AttributedTextRenderer
                 TextureRenderer renderer = getBackingStore( );
                 Texture texture = renderer.getTexture( ); // triggers texture uploads.  Maybe this should be more obvious?
 
-                GL2 gl = GLU.getCurrentGL( ).getGL2();
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
                 gl.glBegin( GL2.GL_QUADS );
 
                 try
@@ -2146,11 +2147,12 @@ public class AttributedTextRenderer
         {
         }
 
-		@Override
-		public void dispose(GLAutoDrawable drawable) {
-			// TODO Auto-generated method stub -- ttran17
-			
-		}
+        @Override
+        public void dispose( GLAutoDrawable drawable )
+        {
+            // TODO Auto-generated method stub -- ttran17
+
+        }
     }
 
     /**

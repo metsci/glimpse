@@ -67,7 +67,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
     public GlimpseAxisLayout2D getLayout( )
     {
         // random number generator
-        final Random r = new Random();
+        final Random r = new Random( );
 
         // create a premade heat map window
         ColorAxisPlot2D plot = new ColorAxisPlot2D( );

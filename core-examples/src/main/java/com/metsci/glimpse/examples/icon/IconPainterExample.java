@@ -106,7 +106,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
 
         // use the IconPainter to draw the icon "image7" from the TextureAtlas
         // four times at four different positions on the screen: (0,0), (20,20), (30,30), and (40,40)
-        iconPainter.addIcons( "group1", "image9", new float[] { 0, 20, 30, 40 }, new float[] { 0, 20, 30, 40 }, new float[] { (float) Math.PI/3, (float) -Math.PI/3, 0, 0 }, new float[] { 1, 1, 1, 1 } );
+        iconPainter.addIcons( "group1", "image9", new float[] { 0, 20, 30, 40 }, new float[] { 0, 20, 30, 40 }, new float[] { ( float ) Math.PI / 3, ( float ) -Math.PI / 3, 0, 0 }, new float[] { 1, 1, 1, 1 } );
 
         // respond to mouse clicks by adding new icons
         layout.addGlimpseMouseListener( new GlimpseMouseListener( )
@@ -142,7 +142,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
                     iconPainter.addIcon( "group2", "image9", x, y, rot, 1 );
                 }
 
-                rot += Math.PI/12;
+                rot += Math.PI / 12;
             }
 
             @Override

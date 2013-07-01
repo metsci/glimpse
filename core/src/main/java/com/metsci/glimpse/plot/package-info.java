@@ -7,3 +7,4 @@
  * data plotting area (usually simply by calling {@code addPainter( GlimpsePainter )}.
  */
 package com.metsci.glimpse.plot;
+

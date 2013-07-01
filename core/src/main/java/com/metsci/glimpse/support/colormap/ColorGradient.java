@@ -37,6 +37,6 @@ public interface ColorGradient extends ColorMap
     /**
      * Compute the color for a fraction on [0,1].
      */
-    void toColor(float fraction, float[] rgba);
+    void toColor( float fraction, float[] rgba );
 
 }

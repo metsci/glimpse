@@ -134,7 +134,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         // create a painter to display information about the selected point
         final CustomCursorTextPainter cursorText = new CustomCursorTextPainter( );
         plot.addPainter( cursorText );
-        
+
         // create a pulsator, a threaded convenience class which pulses
         // the point size of a given set of track ids in a TrackPainter
         final Pulsator pulsator = new Pulsator( selectionDotPainter );
@@ -153,7 +153,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
 
                 // update the cursor text painter for the newly selected point
                 cursorText.setPoint( point );
-                
+
                 // use track id 0 to draw a large dot on the selected point
                 selectionDotPainter.clearTrack( 0 );
                 pulsator.resetSize( );
@@ -164,25 +164,25 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
                 }
             }
         } );
-        
+
         return plot;
     }
 
     private static class CustomCursorTextPainter extends CursorTextPainter
     {
         protected Point point;
-        
+
         public void setPoint( Point point )
         {
             this.point = point;
-            
+
         }
-        
+
         @Override
         public String getTextX( Axis2D axis )
         {
             Point temp = point;
-            
+
             if ( temp != null )
             {
                 return String.format( "Track: %d Point: %d", temp.getTrackId( ), temp.getPointId( ) );
@@ -192,12 +192,12 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
                 return "Id: (none)";
             }
         }
-        
+
         @Override
         public String getTextY( Axis2D axis )
         {
             Point temp = point;
-            
+
             if ( temp != null )
             {
                 return String.format( "(%.2f, %.2f)", temp.getX( ), temp.getY( ) );
@@ -208,7 +208,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
             }
         }
     };
-    
+
     // a custom listener which changes the selected time range for
     // all GeoPlot tracks based on the min and max values of the z axis
     private static class TimeAxisListener extends RateLimitedAxisListener1D

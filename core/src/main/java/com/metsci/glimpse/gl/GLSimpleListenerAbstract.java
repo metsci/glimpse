@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.gl;
 
-
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
@@ -39,45 +38,46 @@ public abstract class GLSimpleListenerAbstract implements GLSimpleListener
     {
         private final GLSimpleListenerAbstract handler;
 
-        public GLSimpleListenerBridge(GLSimpleListenerAbstract handler)
+        public GLSimpleListenerBridge( GLSimpleListenerAbstract handler )
         {
             this.handler = handler;
         }
 
-        public void init(GLAutoDrawable drawable)
+        public void init( GLAutoDrawable drawable )
         {
-            handler.init(drawable.getContext());
+            handler.init( drawable.getContext( ) );
         }
 
-        public void display(GLAutoDrawable drawable)
+        public void display( GLAutoDrawable drawable )
         {
-            handler.display(drawable.getContext());
+            handler.display( drawable.getContext( ) );
         }
 
-        public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
+        public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
         {
-            handler.reshape(drawable.getContext(), x, y, width, height);
+            handler.reshape( drawable.getContext( ), x, y, width, height );
         }
 
-        public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged)
+        public void displayChanged( GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged )
         {
-            handler.displayChanged(drawable.getContext(), modeChanged, deviceChanged);
+            handler.displayChanged( drawable.getContext( ), modeChanged, deviceChanged );
         }
 
-		@Override
-		public void dispose(GLAutoDrawable drawable) {
-			// TODO Hmmm. Pretty sure this is correct. --ttran17
-			handler.dispose(drawable.getContext());
-		}
+        @Override
+        public void dispose( GLAutoDrawable drawable )
+        {
+            // TODO Hmmm. Pretty sure this is correct. --ttran17
+            handler.dispose( drawable.getContext( ) );
+        }
     }
 
-    public GLEventListener asJoglListener()
+    public GLEventListener asJoglListener( )
     {
-        return new GLSimpleListenerBridge(this);
+        return new GLSimpleListenerBridge( this );
     }
 
     @Override
-    public boolean isDisposed()
+    public boolean isDisposed( )
     {
         return isDisposed;
     }

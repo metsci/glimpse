@@ -306,7 +306,7 @@ public class Axis1D
     {
         this.orthogonalAxis = null;
     }
-    
+
     /**
      * Locks the minimum value of this axis to a fixed value.
      *
@@ -328,7 +328,7 @@ public class Axis1D
         this.lockMax = true;
         this.lockMaxValue = value;
     }
-    
+
     /**
      * Locks both the minimum and maximum value of this axis to their current values.
      */
@@ -337,7 +337,7 @@ public class Axis1D
         this.lockMin( );
         this.lockMax( );
     }
-    
+
     /**
      * Locks the minimum value of this axis to its current min value.
      */
@@ -346,7 +346,7 @@ public class Axis1D
         this.lockMin = true;
         this.lockMinValue = this.minValue;
     }
-    
+
     /**
      * Locks the maximum value of this axis to its current max value.
      */
@@ -364,7 +364,7 @@ public class Axis1D
         this.unlockMin( );
         this.unlockMax( );
     }
-    
+
     /**
      * Unlocks the minimum value of this axis.
      */

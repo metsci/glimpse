@@ -66,7 +66,7 @@ public class RepaintManager
 
     protected ScheduledExecutorService executor;
     protected Thread thread;
-    
+
     protected boolean started;
     protected boolean shutdown;
     protected boolean paused;
@@ -131,7 +131,7 @@ public class RepaintManager
             lock.unlock( );
         }
     }
-    
+
     public void shutdown( )
     {
         lock.lock( );
@@ -214,7 +214,7 @@ public class RepaintManager
     {
         return Thread.currentThread( ).equals( thread );
     }
-    
+
     public Runnable newRepaintRunnable( )
     {
         return new RepaintRunnable( );

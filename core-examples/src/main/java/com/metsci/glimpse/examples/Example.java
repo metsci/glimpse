@@ -74,7 +74,7 @@ public class Example
     {
         return frame;
     }
-    
+
     public GlimpseLayout getLayout( )
     {
         return layout;

@@ -74,7 +74,7 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
 
         // create a GlimpseLayout to contain the floating plot
         final GlimpseLayout floatingLayout = new GlimpseLayout( );
-        
+
         // create a new plot for the floating layout area
         // it uses a vertical text orientation for its y axis painter to save space
         final SimplePlot2D floatingPlot = new SimplePlot2D( )

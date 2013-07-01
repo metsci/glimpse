@@ -145,16 +145,16 @@ public class ColorGradients
         public void toColor( float fraction, float[] rgba )
         {
             float[] rgb;
-            
+
             if ( fraction < 0.5 )
             {
-                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f, 2 * fraction );       
+                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f, 2 * fraction );
             }
             else
             {
-                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f-((fraction-0.5f)*2), 1.0f );
+                rgb = GlimpseColor.fromColorHsb( 0.749f, 1.0f - ( ( fraction - 0.5f ) * 2 ), 1.0f );
             }
-            
+
             rgba[0] = rgb[0];
             rgba[1] = rgb[1];
             rgba[2] = rgb[2];

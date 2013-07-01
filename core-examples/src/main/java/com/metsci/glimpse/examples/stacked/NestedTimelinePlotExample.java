@@ -38,7 +38,7 @@ public class NestedTimelinePlotExample extends HorizontalTimelinePlotExample
     public static void main( String[] args ) throws Exception
     {
         Example example = Example.showWithSwing( new NestedTimelinePlotExample( ) );
-        
+
         new DragManager( ( CollapsibleTimePlot2D ) example.getLayout( ), example.getManager( ) );
     }
 

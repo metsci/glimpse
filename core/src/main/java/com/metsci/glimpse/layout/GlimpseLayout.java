@@ -145,7 +145,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     {
         this( null, null );
     }
-    
+
     public ReentrantLock getLock( )
     {
         return lock;
@@ -736,7 +736,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mouseEntered( event );
-            
+
             if ( event.isHandled( ) ) break;
         }
     }
@@ -747,7 +747,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mouseExited( event );
-            
+
             if ( event.isHandled( ) ) break;
         }
     }
@@ -758,7 +758,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mousePressed( event );
-            
+
             if ( event.isHandled( ) ) break;
         }
     }
@@ -769,7 +769,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseListener listener : mouseListeners )
         {
             listener.mouseReleased( event );
-            
+
             if ( event.isHandled( ) ) break;
         }
     }
@@ -780,7 +780,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseMotionListener listener : mouseMotionListeners )
         {
             listener.mouseMoved( event );
-            
+
             if ( event.isHandled( ) ) break;
         }
     }
@@ -791,7 +791,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseWheelListener listener : mouseWheelListeners )
         {
             listener.mouseWheelMoved( event );
-            
+
             if ( event.isHandled( ) ) break;
         }
     }

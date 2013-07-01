@@ -55,7 +55,6 @@ public class TargetStackUtil
         return newTargetStack( ).push( stack );
     }
 
-
     /**
      * Creates a new target stack which is the concatenation of the provided GlimpseTargets.
      * The first provided GlimpseTarget is placed at the bottom of the new GlimpseTargetStack.
@@ -81,8 +80,7 @@ public class TargetStackUtil
         int suffixSize = suffix.getSize( );
         int querySize = query.getSize( );
 
-        if ( suffixSize > querySize )
-            return false;
+        if ( suffixSize > querySize ) return false;
 
         List<GlimpseTarget> suffixList = suffix.getTargetList( );
         ListIterator<GlimpseTarget> suffixIter = suffixList.listIterator( suffixList.size( ) );
@@ -95,8 +93,7 @@ public class TargetStackUtil
             GlimpseTarget suffixTarget = suffixIter.previous( );
             GlimpseTarget queryTarget = queryIter.previous( );
 
-            if ( !queryTarget.equals( suffixTarget ) )
-                return false;
+            if ( !queryTarget.equals( suffixTarget ) ) return false;
         }
 
         return true;
@@ -115,8 +112,7 @@ public class TargetStackUtil
         int prefixSize = prefix.getSize( );
         int querySize = query.getSize( );
 
-        if ( prefixSize > querySize )
-            return false;
+        if ( prefixSize > querySize ) return false;
 
         Iterator<GlimpseTarget> prefixIter = prefix.getTargetList( ).iterator( );
         Iterator<GlimpseTarget> queryIter = query.getTargetList( ).iterator( );
@@ -126,8 +122,7 @@ public class TargetStackUtil
             GlimpseTarget prefixTarget = prefixIter.next( );
             GlimpseTarget queryTarget = queryIter.next( );
 
-            if ( !queryTarget.equals( prefixTarget ) )
-                return false;
+            if ( !queryTarget.equals( prefixTarget ) ) return false;
         }
 
         return true;

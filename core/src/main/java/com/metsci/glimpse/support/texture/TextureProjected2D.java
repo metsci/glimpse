@@ -297,7 +297,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         {
             gl.glDeleteBuffers( vertexCoordHandles.length, vertexCoordHandles, 0 );
         }
-        
+
         if ( texCoordHandles != null && texCoordHandles.length != 0 )
         {
             gl.glDeleteBuffers( texCoordHandles.length, texCoordHandles, 0 );
@@ -308,7 +308,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     {
         return getGLTextureDim( NUM_DIMENSIONS );
     }
-    
+
     protected void prepare_glState( GL gl )
     {
         gl.glEnable( GL.GL_TEXTURE_2D );

@@ -43,7 +43,7 @@ public class SwingRepaintManager extends RepaintManager
         manager.start( );
         return manager;
     }
-    
+
     public void asyncExec( Runnable runnable )
     {
         SwingUtilities.invokeLater( runnable );

@@ -56,7 +56,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 
         // set a blue color scheme look and feel for the plot
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
-        
+
         // allow the user to rearrange plots by dragging on their labels
         DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ), example.getManager( ) );
     }

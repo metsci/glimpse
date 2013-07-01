@@ -140,11 +140,11 @@ public class TreeMapExample implements GlimpseLayoutProvider
         while ( ( line = reader.readLine( ) ) != null )
         {
             String[] parts = line.split( "\t" );
-            String level = parts[ 0 ];
-            String county = parts[ 1 ];
-            String city = parts[ 2 ];
-            String state = parts[ 3 ];
-            int population = Integer.parseInt( parts[ 15 ] );
+            String level = parts[0];
+            String county = parts[1];
+            String city = parts[2];
+            String state = parts[3];
+            int population = Integer.parseInt( parts[15] );
 
             String text = "Total Pop: " + population;
 

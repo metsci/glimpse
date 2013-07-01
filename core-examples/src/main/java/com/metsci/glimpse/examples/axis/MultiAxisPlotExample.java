@@ -178,7 +178,7 @@ public class MultiAxisPlotExample implements GlimpseLayoutProvider
 
         // create grid lines which are linked to two specific axes (different than those
         // two linked to the central plot mouse controls)
-        
+
         // to accomplish this, we need to create a new Axis2D from the two Axis1D we wish to use
         Axis2D gridAxis = new Axis2D( plot.getAxis( axisB1 ), plot.getAxis( axisR1 ) );
         // then create a GlimpseAxisLayout2D using the Axis2D
@@ -190,8 +190,8 @@ public class MultiAxisPlotExample implements GlimpseLayoutProvider
         gridLayout.setEventGenerator( false );
         // finally, add the GridPainter and add the new GlimpseAxisLayout2D to the plot layout
         gridLayout.addPainter( new GridPainter( ) );
-        plot.getLayoutCenter( ).addLayout( gridLayout );        
-        
+        plot.getLayoutCenter( ).addLayout( gridLayout );
+
         // add a simple border painter to the main plot area
         plot.addPainter( new BorderPainter( ) );
 

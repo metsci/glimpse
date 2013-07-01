@@ -63,7 +63,7 @@ public class PolygonTessellator
         Iterator<Loop> loops = poly.getIterator( );
         while ( loops.hasNext( ) )
         {
-        	GLU.gluTessBeginContour( tess );
+            GLU.gluTessBeginContour( tess );
 
             Loop loop = loops.next( );
             for ( int i = 0, n = loop.size( ); i < n; i++ )
@@ -84,7 +84,7 @@ public class PolygonTessellator
 
     public final void destroy( )
     {
-    	GLU.gluDeleteTess( tess );
+        GLU.gluDeleteTess( tess );
     }
 
     private static class TessellatorCallback implements GLUtessellatorCallback

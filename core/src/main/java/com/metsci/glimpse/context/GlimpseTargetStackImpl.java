@@ -199,7 +199,7 @@ public class GlimpseTargetStackImpl implements GlimpseTargetStack
         if ( targetStack.isEmpty( ) )
         {
             // Drop the trailing comma
-            b.setLength( b.length() - 1 );
+            b.setLength( b.length( ) - 1 );
         }
 
         b.append( "]" );

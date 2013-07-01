@@ -41,25 +41,24 @@ public class ColorMapLinear implements ColorMap
     private final float invExtent;
     private final ColorGradient gradient;
 
-
-    public ColorMapLinear(float min, float max, ColorGradient gradient)
+    public ColorMapLinear( float min, float max, ColorGradient gradient )
     {
         this.min = min;
-        this.invExtent = 1f / (max - min);
+        this.invExtent = 1f / ( max - min );
         this.gradient = gradient;
     }
 
     @Override
-    public void toColor(float value, float[] rgba)
+    public void toColor( float value, float[] rgba )
     {
         // (value - min) / (max - min)
-        float unclipped = (value - min) * invExtent;
+        float unclipped = ( value - min ) * invExtent;
 
-        if( unclipped > 1 )
+        if ( unclipped > 1 )
         {
             gradient.toColor( 1, rgba );
         }
-        else if( unclipped < 0 )
+        else if ( unclipped < 0 )
         {
             gradient.toColor( 0, rgba );
         }

@@ -107,7 +107,7 @@ public class Axis2D
         applyConstraints( );
         updateLinkedAxes( );
     }
-    
+
     public void applyConstraints( )
     {
         x.applyConstraints( );
@@ -156,19 +156,19 @@ public class Axis2D
         y.setMin( minY );
         y.setMax( maxY );
     }
-    
+
     public void lock( )
     {
         x.lock( );
         y.lock( );
     }
-    
+
     public void unlock( )
     {
         x.unlock( );
         y.unlock( );
     }
-    
+
     public double getMinX( )
     {
         return x.getMin( );

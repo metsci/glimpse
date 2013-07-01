@@ -39,7 +39,7 @@ public class SpatialSelectionAxisListener extends RateLimitedAxisListener2D
 {
     protected TrackPainter painter;
     protected SpatialSelectionListener<Point> listener;
-    
+
     public SpatialSelectionAxisListener( TrackPainter painter, SpatialSelectionListener<Point> listener )
     {
         this.painter = painter;

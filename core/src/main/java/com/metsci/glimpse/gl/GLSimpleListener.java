@@ -26,9 +26,7 @@
  */
 package com.metsci.glimpse.gl;
 
-
 import javax.media.opengl.GLContext;
-
 
 /**
  * A substitute for GLEventListener that is easy to use from SWT as well as

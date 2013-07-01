@@ -88,7 +88,7 @@ public class ImageExample implements GlimpseLayoutProvider
         }
         catch ( IOException e )
         {
-            e.printStackTrace();
+            e.printStackTrace( );
             throw new RuntimeException( e );
         }
 
