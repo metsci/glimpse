@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JPopupMenu;
@@ -142,19 +143,24 @@ public class DockingUtils
         return Math.round( ( float ) d );
     }
 
-    public static final <E> ArrayList<E> newArrayList( )
+    public static <E> ArrayList<E> newArrayList( )
     {
         return new ArrayList<E>( );
     }
 
-    public static final <E> ArrayList<E> newArrayList( Collection<? extends E> c )
+    public static <E> ArrayList<E> newArrayList( Collection<? extends E> c )
     {
         return new ArrayList<E>( c );
     }
 
-    public static final <K,V> HashMap<K,V> newHashMap( )
+    public static <K,V> HashMap<K,V> newHashMap( )
     {
         return new HashMap<K,V>( );
+    }
+
+    public static <K,V> HashMap<K,V> newHashMap( Map<? extends K,? extends V> m )
+    {
+        return new HashMap<K,V>( m );
     }
 
     public static boolean areEqual( Object a, Object b )

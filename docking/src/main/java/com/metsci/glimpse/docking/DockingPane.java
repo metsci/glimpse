@@ -38,7 +38,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +85,6 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
     protected final Map<ViewKey,View> viewsByKey;
     protected final Map<ViewKey,TileKey> tileKeys;
 
-    protected final Map<ViewKey,TileKey> defaultTileKeys;
-
     protected final DockingIndicatorOverlay indicatorOverlay;
     protected final JXMultiSplitPane splitPane;
 
@@ -100,8 +97,6 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         this.viewsByKey = newHashMap( );
         this.tileKeys = newHashMap( );
-
-        this.defaultTileKeys = newHashMap( );
 
 
         this.indicatorOverlay = new DockingIndicatorOverlay( black, 2, true );
@@ -279,9 +274,6 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
     protected TileKey chooseDefaultTile( ViewKey viewKey )
     {
-        TileKey defaultTileKey = defaultTileKeys.get( viewKey );
-        if ( tileExists( defaultTileKey ) ) return defaultTileKey;
-
         Leaf tileLeaf = firstTileLeaf( splitPane.getMultiSplitLayout( ).getModel( ) );
         if ( tileLeaf != null ) return new TileKey( tileLeaf.getName( ) );
 
@@ -992,23 +984,32 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
     {
         requireSwingThread( );
 
-        Collection<View> views = newArrayList( viewsByKey.values( ) );
-        for ( View view : views ) removeView( view.viewKey );
 
-        Map<ViewKey,String> leafIds = newHashMap( );
-        splitPane.setModel( fromConfigNode( config, new Rectangle( 0, 0, splitPane.getWidth( ), splitPane.getHeight( ) ), leafIds ) );
+        Map<ViewKey,View> views = newHashMap( viewsByKey );
 
-        defaultTileKeys.clear( );
-        for ( Entry<ViewKey,String> en : leafIds.entrySet( ) )
+        for ( ViewKey viewKey : views.keySet( ) ) removeView( viewKey );
+
+        Map<String,ConfigLeaf> leavesById = newHashMap( );
+        splitPane.setModel( fromConfigNode( config, new Rectangle( 0, 0, splitPane.getWidth( ), splitPane.getHeight( ) ), leavesById ) );
+
+        for ( Entry<String,ConfigLeaf> en : leavesById.entrySet( ) )
         {
-            ViewKey viewKey = en.getKey( );
-            String leafId = en.getValue( );
-            defaultTileKeys.put( viewKey, initTile( leafId ) );
+            String leafId = en.getKey( );
+            ConfigLeaf cLeaf = en.getValue( );
+
+            TileKey tileKey = initTile( leafId );
+            for ( String viewId : cLeaf.viewIds )
+            {
+                View view = views.get( new ViewKey( viewId ) );
+                if ( view != null ) addView( view, tileKey );
+            }
+
+            View selectedView = views.get( new ViewKey( cLeaf.selectedViewId ) );
+            if ( selectedView != null ) tile( tileKey ).selectView( selectedView );
         }
 
-        for ( View view : views ) addView( view );
 
-        // Some old tabbed-pane borders remain visible in the dividers
+        // Old tile borders sometimes remain visible in the dividers
         repaint( );
     }
 
@@ -1056,7 +1057,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         }
     }
 
-    protected Node fromConfigNode( ConfigNode cNode, Rectangle bounds, Map<ViewKey,String> leafIdsOut )
+    protected Node fromConfigNode( ConfigNode cNode, Rectangle bounds, Map<String,ConfigLeaf> leavesById_OUT )
     {
         if ( cNode instanceof ConfigSplit )
         {
@@ -1100,7 +1101,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
                 int wChild = ( cSplit.isRow ? endPixel-startPixel : bounds.width );
                 int hChild = ( cSplit.isRow ? bounds.height       : endPixel-startPixel );
 
-                Node child = fromConfigNode( cChild, new Rectangle( xChild, yChild, wChild, hChild ), leafIdsOut );
+                Node child = fromConfigNode( cChild, new Rectangle( xChild, yChild, wChild, hChild ), leavesById_OUT );
                 children.add( child );
 
                 startPixel = endPixel;
@@ -1117,14 +1118,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             ConfigLeaf cLeaf = ( ConfigLeaf ) cNode;
             String leafId = nextLeafId( );
 
-            // XXX: Honor tab order
-            for ( String viewId : cLeaf.viewIds )
-            {
-                ViewKey viewKey = new ViewKey( viewId );
-                leafIdsOut.put( viewKey, leafId );
-            }
-
-            // XXX: Honor selectedViewKey
+            leavesById_OUT.put( leafId, cLeaf );
 
             Leaf leaf = new Leaf( leafId );
             leaf.setBounds( bounds );
