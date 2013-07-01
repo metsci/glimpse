@@ -45,6 +45,7 @@ import javax.imageio.ImageIO;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
@@ -62,7 +63,6 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * <p>A handle to one of the plotting areas making up a {@link StackedTimePlot2D}. This

@@ -41,8 +41,8 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
 
 /**
  * A SurfaceTile which renders imagery from an OpenGL texture handle.
@@ -118,7 +118,7 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     @Override
     public void render( DrawContext dc )
     {
-        GL2 gl = dc.getGL( ).getGL2();
+        GL2 gl = dc.getGL( ).getGL2( );
 
         gl.glPushAttrib( GL2.GL_POLYGON_BIT );
         gl.glPolygonMode( GL.GL_FRONT, GL2.GL_FILL );
@@ -165,7 +165,7 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     @Override
     public void applyInternalTransform( DrawContext dc, boolean textureIdentityActive )
     {
-        GL gl = GLContext.getCurrent( ).getGL( );
+        GL2 gl = GLContext.getCurrent( ).getGL( ).getGL2( );
 
         if ( !textureIdentityActive )
         {

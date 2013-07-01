@@ -32,6 +32,7 @@ import javax.media.opengl.GLContext;
 import javax.swing.JFrame;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.repaint.SwingRepaintManager;

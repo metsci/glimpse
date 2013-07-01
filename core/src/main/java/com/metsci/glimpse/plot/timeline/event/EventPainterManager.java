@@ -30,8 +30,9 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
@@ -42,7 +43,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Paints 1D events with associated color, time span, icon, and label information.
@@ -71,7 +71,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
     protected boolean borderColorSet = false;
 
     protected boolean isHorizontal = true;
-    
+
     protected EventPainter defaultPainter;
 
     public EventPainterManager( EventPlotInfo plot, EventManager manager, Epoch epoch, TextureAtlas atlas )
@@ -82,10 +82,10 @@ public class EventPainterManager extends GlimpseDataPainter1D
         this.atlas = atlas;
         this.newFont = FontUtils.getDefaultPlain( 12 );
         this.isHorizontal = plot.getStackedTimePlot( ).isTimeAxisHorizontal( );
-        
+
         this.defaultPainter = new DefaultEventPainter( );
     }
-    
+
     public void setEventPainter( EventPainter painter )
     {
         this.defaultPainter = painter;
@@ -183,7 +183,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis1D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis1D axis )
     {
         if ( newFont != null )
         {

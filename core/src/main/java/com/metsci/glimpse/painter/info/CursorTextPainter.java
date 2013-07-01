@@ -33,15 +33,16 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays a text box which follows the cursor and displays the
