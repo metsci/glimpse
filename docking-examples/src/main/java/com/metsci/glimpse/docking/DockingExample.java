@@ -37,12 +37,12 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigNode;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.TinyLookAndFeel;
 
-import static com.metsci.glimpse.docking.DockingPane.Config.*;
+import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.util.logging.Level.*;
 import static javax.swing.BorderFactory.*;
@@ -121,25 +121,25 @@ public class DockingExample
         frame.setPreferredSize( new Dimension( 1600, 900 ) );
         frame.pack( );
 
-        swingRun( dockingPane.restoreConfig, loadDockingArrangement( "docking-example" ) );
+        swingRun( dockingPane.restoreArrangement, loadDockingArrangement( "docking-example" ) );
 
 //        frame.addWindowListener( new WindowAdapter( )
 //        {
 //            public void windowClosing( WindowEvent ev )
 //            {
-//                saveDockingArrangement( "docking-example", dockingPane.captureConfig( ) );
+//                saveDockingArrangement( "docking-example", dockingPane.captureArrangement( ) );
 //            }
 //        } );
 
         frame.setVisible( true );
     }
 
-    public static void saveDockingArrangement( String appName, ConfigNode arrangement )
+    public static void saveDockingArrangement( String appName, ArrangementNode arrangement )
     {
         try
         {
             File arrangementFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeDockingConfigXml( arrangement, arrangementFile );
+            writeDockingArrangementXml( arrangement, arrangementFile );
         }
         catch ( Exception e )
         {
@@ -147,14 +147,14 @@ public class DockingExample
         }
     }
 
-    public static ConfigNode loadDockingArrangement( String appName )
+    public static ArrangementNode loadDockingArrangement( String appName )
     {
         try
         {
             File arrangementFile = new File( createAppDir( appName ), "arrangement.xml" );
             if ( arrangementFile.exists( ) )
             {
-                return readDockingConfigXml( arrangementFile );
+                return readDockingArrangementXml( arrangementFile );
             }
         }
         catch ( Exception e )
@@ -164,7 +164,7 @@ public class DockingExample
 
         try
         {
-            return readDockingConfigXml( DockingExample.class.getClassLoader( ).getResourceAsStream( "docking/arrangement-default.xml" ) );
+            return readDockingArrangementXml( DockingExample.class.getClassLoader( ).getResourceAsStream( "docking/arrangement-default.xml" ) );
         }
         catch ( Exception e )
         {

@@ -63,9 +63,9 @@ import org.jdesktop.swingx.MultiSplitLayout.Node;
 import org.jdesktop.swingx.MultiSplitLayout.RowSplit;
 import org.jdesktop.swingx.MultiSplitLayout.Split;
 
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigLeaf;
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigNode;
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigSplit;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementLeaf;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementSplit;
 import com.metsci.glimpse.docking.DockingUtils.IntAndIndex;
 import com.metsci.glimpse.docking.DockingUtils.Runnable1;
 import com.metsci.glimpse.docking.DockingUtils.Supplier;
@@ -957,30 +957,30 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
 
 
-    public final Supplier<ConfigNode> captureConfig = new Supplier<ConfigNode>( )
+    public final Supplier<ArrangementNode> captureArrangement = new Supplier<ArrangementNode>( )
     {
-        public ConfigNode get( )
+        public ArrangementNode get( )
         {
-            return captureConfig( );
+            return captureArrangement( );
         }
     };
 
-    public final Runnable1<ConfigNode> restoreConfig = new Runnable1<ConfigNode>( )
+    public final Runnable1<ArrangementNode> restoreArrangement = new Runnable1<ArrangementNode>( )
     {
-        public void run( ConfigNode config )
+        public void run( ArrangementNode arrangement )
         {
-            restoreConfig( config );
+            restoreArrangement( arrangement );
         }
     };
 
-    public ConfigNode captureConfig( )
+    public ArrangementNode captureArrangement( )
     {
         requireSwingThread( );
 
-        return toConfigNode( splitPane.getMultiSplitLayout( ).getModel( ) );
+        return toArrangement( splitPane.getMultiSplitLayout( ).getModel( ) );
     }
 
-    public void restoreConfig( ConfigNode config )
+    public void restoreArrangement( ArrangementNode arrangement )
     {
         requireSwingThread( );
 
@@ -989,22 +989,22 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         for ( ViewKey viewKey : views.keySet( ) ) removeView( viewKey );
 
-        Map<String,ConfigLeaf> leavesById = newHashMap( );
-        splitPane.setModel( fromConfigNode( config, new Rectangle( 0, 0, splitPane.getWidth( ), splitPane.getHeight( ) ), leavesById ) );
+        Map<String,ArrangementLeaf> leavesById = newHashMap( );
+        splitPane.setModel( fromArrangement( arrangement, new Rectangle( 0, 0, splitPane.getWidth( ), splitPane.getHeight( ) ), leavesById ) );
 
-        for ( Entry<String,ConfigLeaf> en : leavesById.entrySet( ) )
+        for ( Entry<String,ArrangementLeaf> en : leavesById.entrySet( ) )
         {
             String leafId = en.getKey( );
-            ConfigLeaf cLeaf = en.getValue( );
+            ArrangementLeaf arrLeaf = en.getValue( );
 
             TileKey tileKey = initTile( leafId );
-            for ( String viewId : cLeaf.viewIds )
+            for ( String viewId : arrLeaf.viewIds )
             {
                 View view = views.get( new ViewKey( viewId ) );
                 if ( view != null ) addView( view, tileKey );
             }
 
-            View selectedView = views.get( new ViewKey( cLeaf.selectedViewId ) );
+            View selectedView = views.get( new ViewKey( arrLeaf.selectedViewId ) );
             if ( selectedView != null ) tile( tileKey ).selectView( selectedView );
         }
 
@@ -1013,43 +1013,43 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         repaint( );
     }
 
-    protected ConfigNode toConfigNode( Node node )
+    protected ArrangementNode toArrangement( Node node )
     {
         if ( node instanceof Split )
         {
             Split split = ( Split ) node;
-            ConfigSplit cSplit = new ConfigSplit( );
+            ArrangementSplit arrSplit = new ArrangementSplit( );
 
-            cSplit.isRow = split.isRowLayout( );
+            arrSplit.isRow = split.isRowLayout( );
 
             for ( Node child : split.getChildren( ) )
             {
-                ConfigNode cChild = toConfigNode( child );
-                if ( cChild != null )
+                ArrangementNode arrChild = toArrangement( child );
+                if ( arrChild != null )
                 {
-                    cChild.extent = ( cSplit.isRow ? child.getBounds( ).width : child.getBounds( ).height );
-                    cSplit.childNodes.add( cChild );
+                    arrChild.extent = ( arrSplit.isRow ? child.getBounds( ).width : child.getBounds( ).height );
+                    arrSplit.childNodes.add( arrChild );
                 }
             }
 
-            return cSplit;
+            return arrSplit;
         }
         else if ( node instanceof Leaf )
         {
             Leaf leaf = ( Leaf ) node;
-            ConfigLeaf cLeaf = new ConfigLeaf( );
+            ArrangementLeaf arrLeaf = new ArrangementLeaf( );
 
             Tile tile = tile( new TileKey( leaf.getName( ) ) );
             for ( int viewNum = 0; viewNum < tile.numViews( ); viewNum++ )
             {
                 View view = tile.view( viewNum );
-                cLeaf.viewIds.add( view.viewKey.viewId );
+                arrLeaf.viewIds.add( view.viewKey.viewId );
             }
 
             View selectedView = tile.selectedView( );
-            cLeaf.selectedViewId = ( selectedView == null ? null : selectedView.viewKey.viewId );
+            arrLeaf.selectedViewId = ( selectedView == null ? null : selectedView.viewKey.viewId );
 
-            return cLeaf;
+            return arrLeaf;
         }
         else
         {
@@ -1057,18 +1057,18 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         }
     }
 
-    protected Node fromConfigNode( ConfigNode cNode, Rectangle bounds, Map<String,ConfigLeaf> leavesById_OUT )
+    protected Node fromArrangement( ArrangementNode arrNode, Rectangle bounds, Map<String,ArrangementLeaf> leavesById_OUT )
     {
-        if ( cNode instanceof ConfigSplit )
+        if ( arrNode instanceof ArrangementSplit )
         {
-            ConfigSplit cSplit = ( ConfigSplit ) cNode;
+            ArrangementSplit arrSplit = ( ArrangementSplit ) arrNode;
 
             int divPixels = splitPane.getDividerSize( );
-            int totalDivs = max( 0, cSplit.childNodes.size( ) - 1 );
-            int totalContentPixels = ( cSplit.isRow ? bounds.width : bounds.height ) - totalDivs*divPixels;
+            int totalDivs = max( 0, arrSplit.childNodes.size( ) - 1 );
+            int totalContentPixels = ( arrSplit.isRow ? bounds.width : bounds.height ) - totalDivs*divPixels;
 
             double totalContent = 0;
-            for ( ConfigNode cChild : cSplit.childNodes )
+            for ( ArrangementNode cChild : arrSplit.childNodes )
             {
                 totalContent += cChild.extent;
             }
@@ -1077,14 +1077,14 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             int startPixel = 0;
             double contentSoFar = 0;
             List<Node> children = newArrayList( );
-            for ( ConfigNode cChild : cSplit.childNodes )
+            for ( ArrangementNode arrChild : arrSplit.childNodes )
             {
                 if ( !children.isEmpty( ) )
                 {
-                    int xDiv = ( cSplit.isRow ? startPixel    : 0            ) + bounds.x;
-                    int yDiv = ( cSplit.isRow ? 0             : startPixel   ) + bounds.y;
-                    int wDiv = ( cSplit.isRow ? divPixels     : bounds.width );
-                    int hDiv = ( cSplit.isRow ? bounds.height : divPixels    );
+                    int xDiv = ( arrSplit.isRow ? startPixel    : 0            ) + bounds.x;
+                    int yDiv = ( arrSplit.isRow ? 0             : startPixel   ) + bounds.y;
+                    int wDiv = ( arrSplit.isRow ? divPixels     : bounds.width );
+                    int hDiv = ( arrSplit.isRow ? bounds.height : divPixels    );
 
                     Divider divider = new Divider( );
                     divider.setBounds( new Rectangle( xDiv, yDiv, wDiv, hDiv ) );
@@ -1094,31 +1094,31 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
                     divsSoFar++;
                 }
 
-                int endPixel = iround( ( ( contentSoFar + cChild.extent ) / totalContent ) * totalContentPixels ) + divsSoFar*divPixels;
+                int endPixel = iround( ( ( contentSoFar + arrChild.extent ) / totalContent ) * totalContentPixels ) + divsSoFar*divPixels;
 
-                int xChild = ( cSplit.isRow ? startPixel          : 0                   ) + bounds.x;
-                int yChild = ( cSplit.isRow ? 0                   : startPixel          ) + bounds.y;
-                int wChild = ( cSplit.isRow ? endPixel-startPixel : bounds.width        );
-                int hChild = ( cSplit.isRow ? bounds.height       : endPixel-startPixel );
+                int xChild = ( arrSplit.isRow ? startPixel          : 0                   ) + bounds.x;
+                int yChild = ( arrSplit.isRow ? 0                   : startPixel          ) + bounds.y;
+                int wChild = ( arrSplit.isRow ? endPixel-startPixel : bounds.width        );
+                int hChild = ( arrSplit.isRow ? bounds.height       : endPixel-startPixel );
 
-                Node child = fromConfigNode( cChild, new Rectangle( xChild, yChild, wChild, hChild ), leavesById_OUT );
+                Node child = fromArrangement( arrChild, new Rectangle( xChild, yChild, wChild, hChild ), leavesById_OUT );
                 children.add( child );
 
                 startPixel = endPixel;
-                contentSoFar += cChild.extent;
+                contentSoFar += arrChild.extent;
             }
 
-            Split split = ( cSplit.isRow ? new RowSplit( ) : new ColSplit( ) );
+            Split split = ( arrSplit.isRow ? new RowSplit( ) : new ColSplit( ) );
             split.setChildren( children );
             split.setBounds( bounds );
             return split;
         }
-        else if ( cNode instanceof ConfigLeaf )
+        else if ( arrNode instanceof ArrangementLeaf )
         {
-            ConfigLeaf cLeaf = ( ConfigLeaf ) cNode;
+            ArrangementLeaf arrLeaf = ( ArrangementLeaf ) arrNode;
             String leafId = nextLeafId( );
 
-            leavesById_OUT.put( leafId, cLeaf );
+            leavesById_OUT.put( leafId, arrLeaf );
 
             Leaf leaf = new Leaf( leafId );
             leaf.setBounds( bounds );
@@ -1126,30 +1126,30 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         }
         else
         {
-            throw new RuntimeException( "Unrecognized subclass of ConfigNode: " + cNode.getClass( ).getName( ) );
+            throw new RuntimeException( "Unrecognized subclass of ArrangementNode: " + arrNode.getClass( ).getName( ) );
         }
     }
 
-    public static class Config
+    public static class Arrangement
     {
         @XmlType( name="Node" )
-        public static class ConfigNode
+        public static class ArrangementNode
         {
             public double extent = 1;
         }
 
         @XmlType( name="Split" )
-        public static class ConfigSplit extends ConfigNode
+        public static class ArrangementSplit extends ArrangementNode
         {
             public boolean isRow = false;
 
             @XmlElementWrapper( name="children" )
             @XmlElement( name="child" )
-            public List<ConfigNode> childNodes = newArrayList( );
+            public List<ArrangementNode> childNodes = newArrayList( );
         }
 
         @XmlType( name="Leaf" )
-        public static class ConfigLeaf extends ConfigNode
+        public static class ArrangementLeaf extends ArrangementNode
         {
             @XmlElementWrapper( name="views" )
             @XmlElement( name="view" )
@@ -1161,71 +1161,71 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         public static Marshaller newJaxbMarshaller( ) throws IOException, JAXBException
         {
-            Marshaller marshaller = JAXBContext.newInstance( ConfigNode.class, ConfigSplit.class, ConfigLeaf.class ).createMarshaller( );
+            Marshaller marshaller = JAXBContext.newInstance( ArrangementNode.class, ArrangementSplit.class, ArrangementLeaf.class ).createMarshaller( );
             marshaller.setProperty( JAXB_FORMATTED_OUTPUT, true );
             return marshaller;
         }
 
-        public static JAXBElement<ConfigNode> newJaxbRoot( ConfigNode model )
+        public static JAXBElement<ArrangementNode> newJaxbRoot( ArrangementNode model )
         {
-            return new JAXBElement<ConfigNode>( new QName( "model" ), ConfigNode.class, model );
+            return new JAXBElement<ArrangementNode>( new QName( "model" ), ArrangementNode.class, model );
         }
 
-        public static void writeDockingConfigXml( ConfigNode model, File file ) throws JAXBException, IOException
+        public static void writeDockingArrangementXml( ArrangementNode model, File file ) throws JAXBException, IOException
         {
             newJaxbMarshaller( ).marshal( newJaxbRoot( model ), file );
         }
 
-        public static void writeDockingConfigXml( ConfigNode model, Writer writer ) throws JAXBException, IOException
+        public static void writeDockingArrangementXml( ArrangementNode model, Writer writer ) throws JAXBException, IOException
         {
             newJaxbMarshaller( ).marshal( newJaxbRoot( model ), writer );
         }
 
-        public static void writeDockingConfigXml( ConfigNode model, OutputStream stream ) throws JAXBException, IOException
+        public static void writeDockingArrangementXml( ArrangementNode model, OutputStream stream ) throws JAXBException, IOException
         {
             newJaxbMarshaller( ).marshal( newJaxbRoot( model ), stream );
         }
 
         public static Unmarshaller newJaxbUnmarshaller( ) throws JAXBException, IOException
         {
-            Unmarshaller unmarshaller = JAXBContext.newInstance( ConfigNode.class, ConfigSplit.class, ConfigLeaf.class ).createUnmarshaller( );
+            Unmarshaller unmarshaller = JAXBContext.newInstance( ArrangementNode.class, ArrangementSplit.class, ArrangementLeaf.class ).createUnmarshaller( );
             return unmarshaller;
         }
 
-        protected static ConfigNode castToConfigNode( Object object )
+        protected static ArrangementNode castToArrangementNode( Object object )
         {
-            if ( object instanceof ConfigNode )
+            if ( object instanceof ArrangementNode )
             {
-                return ( ConfigNode ) object;
+                return ( ArrangementNode ) object;
             }
             else if ( object instanceof JAXBElement )
             {
-                return castToConfigNode( ( ( JAXBElement<?> ) object ).getValue( ) );
+                return castToArrangementNode( ( ( JAXBElement<?> ) object ).getValue( ) );
             }
             else
             {
-                throw new ClassCastException( "Object is neither a ConfigNode nor a JAXBElement: classname = " + object.getClass( ).getName( ) );
+                throw new ClassCastException( "Object is neither an ArrangementNode nor a JAXBElement: classname = " + object.getClass( ).getName( ) );
             }
         }
 
-        public static ConfigNode readDockingConfigXml( URL url ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( URL url ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( url ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( url ) );
         }
 
-        public static ConfigNode readDockingConfigXml( File file ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( File file ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( file ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( file ) );
         }
 
-        public static ConfigNode readDockingConfigXml( Reader reader ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( Reader reader ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( reader ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( reader ) );
         }
 
-        public static ConfigNode readDockingConfigXml( InputStream stream ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( InputStream stream ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( stream ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( stream ) );
         }
     }
 
