@@ -43,3 +43,10 @@ Session.vim
 
 # HotSpot
 hs_err*.log
+
+# Glimpse Specific
+ignore-strings
+results-filtered
+results-unfiltered
+search-strings
+search-git.sh
