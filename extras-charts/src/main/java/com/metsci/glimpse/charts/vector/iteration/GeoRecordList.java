@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.charts.vector.iteration;
 
-import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-
 import java.io.IOException;
 import java.util.Iterator;
+
+import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
 
 
 public interface GeoRecordList<V extends GeoObject>  {

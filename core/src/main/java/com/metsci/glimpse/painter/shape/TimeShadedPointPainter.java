@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
@@ -37,7 +38,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
     {
         super( colorAxis, sizeAxis );
     }
-    
+
     /**
      * Sets the selected range of times which will be displayed by this painter. The Epoch
      * argument is used to convert from absolute TimeStamps to relative times. It is generally
@@ -48,7 +49,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
     {
         displayTimeRange( epoch.fromTimeStamp( startTime ), epoch.fromTimeStamp( endTime ) );
     }
-    
+
     /**
      * Sets the selected range of times which will be displayed by this painter. Times should generally
      * be provided via {@code Epoch#fromTimeStamp(TimeStamp)}.
@@ -58,9 +59,9 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         lock.lock( );
         try
         {
-            this.startTime = (float) startTime;
-            this.endTime = (float) endTime;
-            
+            this.startTime = ( float ) startTime;
+            this.endTime = ( float ) endTime;
+
             updateSelectedTime( );
         }
         finally
@@ -68,7 +69,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
             lock.unlock( );
         }
     }
-    
+
     /**
      * Assigns a time value to each point painted by the time painter. Points
      * must be added in increasing time order for time selection to function.
@@ -134,10 +135,10 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         if ( timeAttributeBuffer != null )
         {
             startIndex = binarySearch0( timeAttributeBuffer, 0, timeAttributeBuffer.limit( ), startTime );
-            if ( startIndex < 0 ) startIndex = -( startIndex + 1 );
-            
+            if ( startIndex < 0 ) startIndex = - ( startIndex + 1 );
+
             endIndex = binarySearch0( timeAttributeBuffer, 0, timeAttributeBuffer.limit( ), endTime );
-            if ( endIndex < 0 ) endIndex = -( endIndex + 1 );
+            if ( endIndex < 0 ) endIndex = - ( endIndex + 1 );
         }
         else if ( positionBuffer != null )
         {
@@ -166,11 +167,11 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         return - ( low + 1 ); // key not found.
     }
-    
+
     @Override
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL.GL_POINTS, startIndex, endIndex - startIndex );
+        gl.glDrawArrays( GL2.GL_POINTS, startIndex, endIndex - startIndex );
     }
 
 }

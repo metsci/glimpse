@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.*;
+
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.util.Map;
 
 import javax.swing.JTabbedPane;
-
-import static com.metsci.glimpse.docking.DockingUtils.*;
 
 public class BasicTile extends JTabbedPane implements Tile
 {

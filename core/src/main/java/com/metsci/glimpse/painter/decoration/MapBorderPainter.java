@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -328,9 +327,9 @@ public class MapBorderPainter extends GlimpsePainter2D
         glDrawCorners( gl, GL2.GL_POLYGON, width, height );
 
         gl.glColor4fv( outerColor, 0 );
-        glDrawCorners( gl, GL.GL_LINE_LOOP, width, height );
+        glDrawCorners( gl, GL2.GL_LINE_LOOP, width, height );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             gl.glVertex2d( borderSize, borderSize );
@@ -343,7 +342,7 @@ public class MapBorderPainter extends GlimpsePainter2D
             gl.glEnd( );
         }
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             gl.glVertex2d( 0.5, 0.5 );

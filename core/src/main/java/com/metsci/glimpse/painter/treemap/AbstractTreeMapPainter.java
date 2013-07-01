@@ -136,7 +136,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
             return;
         }
 
-        gl.glEnable( GL.GL_SCISSOR_TEST );
+        gl.glEnable( GL2.GL_SCISSOR_TEST );
 
         updateLayoutCache( axis );
 

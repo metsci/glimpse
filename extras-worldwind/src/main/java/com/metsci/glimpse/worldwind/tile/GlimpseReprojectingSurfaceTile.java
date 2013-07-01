@@ -191,8 +191,8 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
                 @Override
                 protected void prepare_glState( GL gl )
                 {
-                    gl.glEnable( GL.GL_TEXTURE_2D );
-                    gl.glDisable( GL.GL_BLEND );
+                    gl.glEnable( GL2.GL_TEXTURE_2D );
+                    gl.glDisable( GL2.GL_BLEND );
                 }
             };
 

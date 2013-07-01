@@ -26,6 +26,25 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+
+import org.xml.sax.SAXException;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.AnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.FeatureSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.Geoskinspec;
@@ -39,23 +58,6 @@ import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoShape;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoShapeType;
 import com.metsci.glimpse.util.io.StreamOpener;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import org.xml.sax.SAXException;
 
 public class BasicSkin< V extends GeoObject > implements Skin< V >
 {

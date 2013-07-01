@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.charts.raster;
 
+import static com.metsci.glimpse.util.geo.datum.Datum.*;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -63,8 +65,6 @@ import com.metsci.glimpse.util.geo.LatLonRect;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.math.stat.StatCollectorNDim;
 import com.metsci.glimpse.util.vector.Vector2d;
-
-import static com.metsci.glimpse.util.geo.datum.Datum.*;
 
 /**
  * Data structures and data IO utilities for displaying Electronic Navigation Chart

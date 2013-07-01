@@ -714,7 +714,7 @@ public class AttributedTextRenderer
             // Query OpenGL for the maximum texture size and set it in the
             // RectanglePacker to keep it from expanding too large
             int[] sz = new int[1];
-            gl.glGetIntegerv( GL.GL_MAX_TEXTURE_SIZE, sz, 0 );
+            gl.glGetIntegerv( GL2.GL_MAX_TEXTURE_SIZE, sz, 0 );
             packer.setMaxSize( sz[0], sz[0] );
             haveMaxSize = true;
         }
@@ -771,7 +771,7 @@ public class AttributedTextRenderer
         {
             try
             {
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
             }
             catch ( Exception e )
             {
@@ -1400,7 +1400,7 @@ public class AttributedTextRenderer
                 {
                     try
                     {
-                        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+                        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
                     }
                     catch ( Exception e )
                     {
@@ -1957,11 +1957,11 @@ public class AttributedTextRenderer
                     mVBO_For_ResuableTileVertices = vbos[0];
                     mVBO_For_ResuableTileTexCoords = vbos[1];
 
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
-                    gl.glBufferData( GL.GL_ARRAY_BUFFER, kTotalBufferSizeBytesVerts, null, GL2.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
+                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, kTotalBufferSizeBytesVerts, null, GL2.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
 
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
-                    gl.glBufferData( GL.GL_ARRAY_BUFFER, kTotalBufferSizeBytesTex, null, GL2.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
+                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, kTotalBufferSizeBytesTex, null, GL2.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
                 }
                 catch ( Exception e )
                 {
@@ -2019,26 +2019,26 @@ public class AttributedTextRenderer
 
                 if ( usingVBOs )
                 {
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
-                    gl.glBufferSubData( GL.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_VertexData, mVertCoords ); // upload only the new stuff
-                    gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
+                    gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_VertexData, mVertCoords ); // upload only the new stuff
+                    gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
                 }
                 else
                 {
-                    gl.glVertexPointer( 3, GL.GL_FLOAT, 0, mVertCoords );
+                    gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, mVertCoords );
                 }
 
                 gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
 
                 if ( usingVBOs )
                 {
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
-                    gl.glBufferSubData( GL.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_TexData, mTexCoords ); // upload only the new stuff
-                    gl.glTexCoordPointer( 2, GL.GL_FLOAT, 0, 0 );
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
+                    gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_TexData, mTexCoords ); // upload only the new stuff
+                    gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, 0 );
                 }
                 else
                 {
-                    gl.glTexCoordPointer( 2, GL.GL_FLOAT, 0, mTexCoords );
+                    gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, mTexCoords );
                 }
 
                 gl.glDrawArrays( GL2.GL_QUADS, 0, mOutstandingGlyphsVerticesPipeline );
@@ -2108,7 +2108,7 @@ public class AttributedTextRenderer
         public void display( GLAutoDrawable drawable )
         {
             GL gl = drawable.getGL( );
-            gl.glClear( GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT );
+            gl.glClear( GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT );
 
             if ( packer == null )
             {

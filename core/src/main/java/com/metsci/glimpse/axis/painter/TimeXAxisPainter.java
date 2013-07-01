@@ -26,13 +26,12 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.util.units.time.TimeStamp.currentTime;
+import static com.metsci.glimpse.util.units.time.TimeStamp.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -101,7 +100,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         double tickInterval = handler.tickInterval( tickTimes );
 
         // Tick marks
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         for ( TimeStamp t : tickTimes )
         {
             double x = axis.valueToScreenPixel( fromTimeStamp( t ) );
@@ -225,7 +224,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
         gl.glColor4fv( currentTimeTickColor, 0 );
         gl.glLineWidth( currentTimeLineThickness );
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         gl.glVertex2d( iTick, height );
         gl.glVertex2d( iTick, 0 );
         gl.glEnd( );

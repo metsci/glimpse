@@ -179,7 +179,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
 
         gl.glLineWidth( 1 );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         gl.glVertex2d( nodeBounds.getMinX( ), nodeBounds.getMinY( ) );
         gl.glVertex2d( nodeBounds.getMinX( ), nodeBounds.getMaxY( ) );
         gl.glVertex2d( nodeBounds.getMaxX( ), nodeBounds.getMaxY( ) );
@@ -239,7 +239,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         color = getTitleBorderColor( nodeId, selected );
         gl.glColor4f( color[0], color[1], color[2], color[3] );
         gl.glLineWidth( 0.5f );
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         gl.glVertex2d( boundary.getMinX( ), boundary.getMaxY( ) - borderHeight );
         gl.glVertex2d( boundary.getMinX( ), boundary.getMaxY( ) );
         gl.glVertex2d( boundary.getMaxX( ), boundary.getMaxY( ) );

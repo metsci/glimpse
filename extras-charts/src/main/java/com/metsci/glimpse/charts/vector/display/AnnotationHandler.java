@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.AnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.EncAnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.painter.EncPainterUtils;
@@ -40,9 +42,6 @@ import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.math.stat.StatCollectorNDim;
 import com.metsci.glimpse.util.vector.Vector2d;
-
-import java.util.Arrays;
-import java.util.logging.Logger;
 
 
 /**

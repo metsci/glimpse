@@ -72,8 +72,8 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
             return;
         }
 
-        gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
-        gl.glPolygonMode( GL.GL_FRONT, GL2.GL_FILL );
+        gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
+        gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
 
         double tminmax[][] = computeDrawMinMax();
         double tmin[] = tminmax[0];
@@ -124,24 +124,24 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
-        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
 
-        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-        gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
     }
 
     @Override
     protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_LUMINANCE32F_ARB, dim[0], dim[1], 0, GL.GL_LUMINANCE, GL.GL_FLOAT,
+        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F_ARB, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT,
                          data.rewind() );
     }
 
     @Override
     protected void prepare_setPixelStore( GL gl )
     {
-        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
     }
 
 

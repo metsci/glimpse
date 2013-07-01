@@ -26,6 +26,13 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.awt.Color.*;
+import static java.awt.event.InputEvent.*;
+import static java.awt.event.MouseEvent.*;
+import static java.lang.Math.*;
+import static javax.xml.bind.Marshaller.*;
+
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -69,13 +76,6 @@ import com.metsci.glimpse.docking.DockingPane.Config.ConfigSplit;
 import com.metsci.glimpse.docking.DockingUtils.IntAndIndex;
 import com.metsci.glimpse.docking.DockingUtils.Runnable1;
 import com.metsci.glimpse.docking.DockingUtils.Supplier;
-
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.awt.Color.*;
-import static java.awt.event.InputEvent.*;
-import static java.awt.event.MouseEvent.*;
-import static java.lang.Math.*;
-import static javax.xml.bind.Marshaller.*;
 
 public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 {

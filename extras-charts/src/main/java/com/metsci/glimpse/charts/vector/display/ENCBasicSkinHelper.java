@@ -26,6 +26,18 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.xml.XMLConstants;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.xml.sax.SAXException;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.AnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.EncAnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.Geoskinspec;
@@ -37,16 +49,6 @@ import com.metsci.glimpse.charts.vector.parser.autogen.ENCAttributeValues;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObjectType;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoFeatureType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-import javax.xml.XMLConstants;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import org.xml.sax.SAXException;
 
 
 public class ENCBasicSkinHelper implements BasicSkinHelper<ENCObject>

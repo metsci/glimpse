@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.axis.tagged.shader;
 
+import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.gl.shader.ShaderType.*;
+
 import java.io.IOException;
 import java.util.List;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static com.metsci.glimpse.gl.shader.ShaderType.*;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -47,7 +46,7 @@ import com.metsci.glimpse.util.io.StreamOpener;
 public class TaggedColorScaleShader extends Shader implements AxisListener1D
 {
     public static final String DEFAULT_SHADER_SOURCE = "shaders/colormap/tagged_colorscale_shader.fs";
-    
+
     private ShaderArg dataTexUnit;
     private ShaderArg colorTexUnit;
 
@@ -96,9 +95,9 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
         this.discardBelow = getArg( "discardBelow" );
         discardBelow.setValue( false );
 
-        this.taggedAxis.addAxisListener( this ); 
+        this.taggedAxis.addAxisListener( this );
     }
-    
+
     public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
     {
         this( axis, dataTexUnit, colorTexUnit, vertexTexUnit, textureTexUnit, DEFAULT_SHADER_SOURCE );
@@ -121,12 +120,11 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
         int size = tags.size( );
 
         int count = 0;
-        for ( int i = size-1 ; i >= 0 ; i-- )
+        for ( int i = size - 1; i >= 0; i-- )
         {
             Tag tag = tags.get( i );
 
-            if ( tag.hasAttribute( TEX_COORD_ATTR ) )
-                count++;
+            if ( tag.hasAttribute( TEX_COORD_ATTR ) ) count++;
         }
 
         this.sizeArg.setValue( count );
@@ -153,7 +151,7 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
     }
 
     @Override
-    public boolean preLink( GL2 gl, int glProgramHandle )
+    public boolean preLink( GL gl, int glProgramHandle )
     {
         return true;
     }

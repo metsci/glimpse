@@ -787,9 +787,9 @@ public class PolygonPainter extends GlimpsePainter2D
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1 << 23, 1 );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
 
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
@@ -800,9 +800,9 @@ public class PolygonPainter extends GlimpsePainter2D
 
         glHandleError( gl, "Draw Error" );
 
-        gl.glDisable( GL.GL_DEPTH_TEST );
-        gl.glDisable( GL.GL_BLEND );
-        gl.glDisable( GL.GL_LINE_SMOOTH );
+        gl.glDisable( GL2.GL_DEPTH_TEST );
+        gl.glDisable( GL2.GL_BLEND );
+        gl.glDisable( GL2.GL_LINE_SMOOTH );
     }
 
     protected void updateVertices( GL gl, LoadedGroup loaded, Group group, boolean fill )
@@ -864,9 +864,9 @@ public class PolygonPainter extends GlimpsePainter2D
             }
 
             // copy data from the host buffer into the device buffer
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, handle );
             glHandleError( gl, "glBindBuffer Error  (Case 1)" );
-            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+            gl.glBufferData( GL2.GL_ARRAY_BUFFER, maxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
             glHandleError( gl, "glBufferData Error" );
 
             if ( fill )
@@ -903,9 +903,9 @@ public class PolygonPainter extends GlimpsePainter2D
             }
 
             // update the device buffer with the new data
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, handle );
             glHandleError( gl, "glBindBuffer Error  (Case 2)" );
-            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
             glHandleError( gl, "glBufferSubData Error" );
 
             if ( fill )
@@ -933,8 +933,8 @@ public class PolygonPainter extends GlimpsePainter2D
                 gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
             }
 
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-            gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
+            gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
 
             loaded.glFillOffsetBuffer.rewind( );
             loaded.glFillCountBuffer.rewind( );
@@ -952,13 +952,13 @@ public class PolygonPainter extends GlimpsePainter2D
                 {
                     int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
                     int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                    gl.glDrawArrays( GL.GL_TRIANGLES, offset, fillCount );
+                    gl.glDrawArrays( GL2.GL_TRIANGLES, offset, fillCount );
                     fillCountRemaining -= fillCount;
                 }
             }
 
             // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-            // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
+            // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
 
             if ( loaded.polyStippleOn )
             {
@@ -977,8 +977,8 @@ public class PolygonPainter extends GlimpsePainter2D
                 gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
             }
 
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-            gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
+            gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
 
             loaded.glLineOffsetBuffer.rewind( );
             loaded.glLineCountBuffer.rewind( );
@@ -996,13 +996,13 @@ public class PolygonPainter extends GlimpsePainter2D
                 {
                     int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 2
                     int offset = loaded.glLineOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                    gl.glDrawArrays( GL.GL_LINE_LOOP, offset, fillCount );
+                    gl.glDrawArrays( GL2.GL_LINE_LOOP, offset, fillCount );
                     fillCountRemaining -= fillCount;
                 }
             }
 
             // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-            // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
+            // gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
 
             if ( loaded.lineStippleOn )
             {

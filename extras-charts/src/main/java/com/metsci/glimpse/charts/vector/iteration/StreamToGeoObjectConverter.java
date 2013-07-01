@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.charts.vector.iteration;
 
-import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-
 import java.io.DataInputStream;
 import java.io.IOException;
+
+import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
 
 /**
  * Given a DataInputStream, implementing classes will parse the stream for 

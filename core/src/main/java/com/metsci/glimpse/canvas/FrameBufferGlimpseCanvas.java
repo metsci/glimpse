@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.util.List;

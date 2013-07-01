@@ -367,8 +367,8 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             pipeline.beginUse( gl );
 
             gl.glEnable( GL2.GL_POINT_SMOOTH );
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             drawArrays( gl );
         }
@@ -390,7 +390,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
+        gl.glDrawArrays( GL2.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
     }
 
     @Override

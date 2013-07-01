@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -36,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -274,7 +272,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
         gl.glColor4fv( GlimpseColor.getBlack( ), 0 );
         gl.glLineWidth( 2f );
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             gl.glVertex2f( lx, ly );
@@ -325,19 +323,19 @@ public abstract class LegendPainter extends GlimpsePainter2D
     {
         switch ( placement )
         {
-        case N:
-        case S:
-            return ( width - lw ) / 2;
-        case NE:
-        case E:
-        case SE:
-            return width - ( lw + offsetX );
-        case NW:
-        case SW:
-        case W:
-            return offsetX;
-        default:
-            return 0;
+            case N:
+            case S:
+                return ( width - lw ) / 2;
+            case NE:
+            case E:
+            case SE:
+                return width - ( lw + offsetX );
+            case NW:
+            case SW:
+            case W:
+                return offsetX;
+            default:
+                return 0;
         }
     }
 
@@ -345,19 +343,19 @@ public abstract class LegendPainter extends GlimpsePainter2D
     {
         switch ( placement )
         {
-        case NW:
-        case N:
-        case NE:
-            return height - offsetY;
-        case SW:
-        case S:
-        case SE:
-            return lh + offsetY;
-        case E:
-        case W:
-            return ( height + lh ) / 2;
-        default:
-            return 0;
+            case NW:
+            case N:
+            case NE:
+                return height - offsetY;
+            case SW:
+            case S:
+            case SE:
+                return lh + offsetY;
+            case E:
+            case W:
+                return ( height + lh ) / 2;
+            default:
+                return 0;
         }
     }
 
@@ -416,7 +414,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
                 gl.glDisable( GL2.GL_LINE_STIPPLE );
             }
             gl.glLineWidth( item.lineWidth );
-            gl.glBegin( GL.GL_LINE_STRIP );
+            gl.glBegin( GL2.GL_LINE_STRIP );
             double ymid = ypos - ( height / 2. );
             try
             {
@@ -498,7 +496,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -509,9 +507,9 @@ public abstract class LegendPainter extends GlimpsePainter2D
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
         gl.glEnable( GL2.GL_POINT_SMOOTH );
 
         if ( isVisible( ) && !list.isEmpty( ) )

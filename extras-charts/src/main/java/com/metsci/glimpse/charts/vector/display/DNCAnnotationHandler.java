@@ -26,12 +26,13 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.DncAnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoAttributeType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This content handler renders text attributes for DNCObjects. It delegates

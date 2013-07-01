@@ -29,17 +29,16 @@ package com.metsci.glimpse.charts.vector.parser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 import com.metsci.glimpse.charts.vector.parser.attributes.GenericAttribute;
 import com.metsci.glimpse.charts.vector.parser.autogen.ENCUnit;
 import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
 import com.metsci.glimpse.util.io.StreamOpener;
-
-import java.io.InputStreamReader;
-import java.util.List;
 
 public class ENCUnitInterpreter {
 

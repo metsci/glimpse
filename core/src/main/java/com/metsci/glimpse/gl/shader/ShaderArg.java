@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;

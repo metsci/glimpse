@@ -595,10 +595,10 @@ public class IconPainter extends GlimpseDataPainter2D
             /*
             Texture tex = this.pickFrameBuffer.getOpenGLTexture( );
 
-            gl.glEnable( GL.GL_TEXTURE_2D );
-            gl.glBindTexture( GL.GL_TEXTURE_2D, tex.getTarget( ) );
+            gl.glEnable( GL2.GL_TEXTURE_2D );
+            gl.glBindTexture( GL2.GL_TEXTURE_2D, tex.getTarget( ) );
 
-            gl.glBegin( GL.GL_TRIANGLE_STRIP );
+            gl.glBegin( GL2.GL_TRIANGLE_STRIP );
             try
             {
                 gl.glTexCoord2d( 0.0, 0.0 );
@@ -668,7 +668,7 @@ public class IconPainter extends GlimpseDataPainter2D
                         group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
                         group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
 
-                        gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
+                        gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
                     }
                 }
                 finally
@@ -726,7 +726,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
                         resetPickFrameBuffer( glContext );
 
-                        gl.glDrawArrays( GL.GL_POINTS, 0, group.getCurrentSize( ) );
+                        gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
 
                         checkPickFrameBuffer( context, group, pickedIcons );
                     }
@@ -742,7 +742,7 @@ public class IconPainter extends GlimpseDataPainter2D
             this.pipeline.endUse( gl );
             this.pickFrameBuffer.unbind( glContext );
             // restore the scissor and viewport
-            gl.glEnable( GL.GL_SCISSOR_TEST );
+            gl.glEnable( GL2.GL_SCISSOR_TEST );
             gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
         }
 
@@ -756,7 +756,7 @@ public class IconPainter extends GlimpseDataPainter2D
         GL gl = glContext.getGL( );
 
         gl.glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-        gl.glClear( GL.GL_COLOR_BUFFER_BIT );
+        gl.glClear( GL2.GL_COLOR_BUFFER_BIT );
 
     }
 
@@ -781,7 +781,7 @@ public class IconPainter extends GlimpseDataPainter2D
         // reduce the size of the viewport to the pick buffer size
         gl.glViewport( 0, 0, WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
         // no need to scissor, we want to paint to the whole pick buffer
-        gl.glDisable( GL.GL_SCISSOR_TEST );
+        gl.glDisable( GL2.GL_SCISSOR_TEST );
     }
 
     // look through the returned frame buffer and and append unique icons to the result set
@@ -792,7 +792,7 @@ public class IconPainter extends GlimpseDataPainter2D
         int width = WIDTH_BUFFER * 2 + 1;
         int height = HEIGHT_BUFFER * 2 + 1;
 
-        context.getGL( ).glReadPixels( 0, 0, width, height, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, pickResultBuffer.rewind( ) );
+        context.getGL( ).glReadPixels( 0, 0, width, height, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, pickResultBuffer.rewind( ) );
 
         for ( int i = 0; i < width * height; i++ )
         {

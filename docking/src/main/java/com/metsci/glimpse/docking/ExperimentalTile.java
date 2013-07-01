@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.lang.Math.*;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -48,9 +51,6 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.lang.Math.*;
 
 public class ExperimentalTile extends JPanel implements Tile
 {

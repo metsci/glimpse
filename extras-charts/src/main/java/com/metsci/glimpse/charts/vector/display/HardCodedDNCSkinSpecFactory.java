@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.ColorSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.FeatureSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.Geoskinspec;
@@ -35,8 +38,6 @@ import com.metsci.glimpse.charts.vector.display.xmlgen.ShapeTypeSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.TrackPainterSpec;
 import com.metsci.glimpse.charts.vector.painter.EncPainterUtils;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCFeatureCode;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class HardCodedDNCSkinSpecFactory
 {

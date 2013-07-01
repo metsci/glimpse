@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Font;
 import java.awt.image.BufferedImage;

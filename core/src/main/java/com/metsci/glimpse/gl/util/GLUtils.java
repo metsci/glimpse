@@ -73,7 +73,7 @@ public class GLUtils
             case 1:
                 return GL2.GL_TEXTURE_1D;
             case 2:
-                return GL.GL_TEXTURE_2D;
+                return GL2.GL_TEXTURE_2D;
             case 3:
                 return GL2.GL_TEXTURE_3D;
             default:
@@ -86,6 +86,6 @@ public class GLUtils
         if( texUnit > 31 || texUnit < 0 )
             throw new IllegalArgumentException( "Only 31 texture units supported." );
 
-        return GL.GL_TEXTURE0 + texUnit;
+        return GL2.GL_TEXTURE0 + texUnit;
     }
 }

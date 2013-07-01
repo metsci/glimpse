@@ -51,23 +51,23 @@ public class FloatTexture1D extends AbstractTexture
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
-        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
 
-        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
     }
 
     @Override
     protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL.GL_LUMINANCE32F_ARB, dim[0], 0, GL.GL_LUMINANCE, GL.GL_FLOAT,
+        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_LUMINANCE32F_ARB, dim[0], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT,
                          data.rewind() );
     }
 
     @Override
     protected void prepare_setPixelStore( GL gl )
     {
-        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
     }
 
     public void mutate( MutatorFloat1D mutator )

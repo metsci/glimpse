@@ -26,13 +26,11 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -318,8 +316,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glLoadIdentity( );
 
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             Rectangle2D bound = sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
 
@@ -349,9 +347,9 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             {
 	            // Draw Text Border
 	            gl.glColor4fv( borderColor, 0 );
-            	gl.glEnable(GL.GL_LINE_SMOOTH);
+            	gl.glEnable(GL2.GL_LINE_SMOOTH);
 	
-	            gl.glBegin( GL.GL_LINE_STRIP );
+	            gl.glBegin( GL2.GL_LINE_STRIP );
 	            try
 	            {
 	                gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
@@ -367,7 +365,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             }
         }
         
-        gl.glDisable( GL.GL_BLEND );
+        gl.glDisable( GL2.GL_BLEND );
 
         textRenderer.beginRendering( width, height );
         try
@@ -434,8 +432,8 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glLoadIdentity( );
 
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             int buffer = 2;
 
@@ -468,9 +466,9 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             {
                 // Draw Text Background
                 gl.glColor4fv( borderColor, 0 );
-                gl.glEnable( GL.GL_LINE_SMOOTH );
+                gl.glEnable( GL2.GL_LINE_SMOOTH );
 
-                gl.glBegin( GL.GL_LINE_STRIP );
+                gl.glBegin( GL2.GL_LINE_STRIP );
                 try
                 {
                     gl.glVertex2f( xTextMin, yTextMin );
@@ -486,7 +484,7 @@ public class SimpleTextPainter extends GlimpsePainterImpl
             }
         }
 
-        gl.glDisable( GL.GL_BLEND );
+        gl.glDisable( GL2.GL_BLEND );
 
         textRenderer.beginRendering( width, height );
         try

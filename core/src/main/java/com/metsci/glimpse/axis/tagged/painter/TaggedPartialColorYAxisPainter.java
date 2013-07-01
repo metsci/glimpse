@@ -31,14 +31,13 @@ import static com.metsci.glimpse.axis.tagged.Tag.*;
 import java.nio.FloatBuffer;
 import java.util.List;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.jogamp.common.nio.Buffers;
 
 /**
  * A vertical (y) axis painter which displays positions of tags in addition
@@ -69,16 +68,16 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
 
             int count = updateCoordinateBuffers( taggedAxis, width, height );
 
-            gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
-            gl.glPolygonMode( GL.GL_FRONT, GL2.GL_FILL );
+            gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
+            gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
 
             gl.glEnable( GL2.GL_TEXTURE_1D );
 
             gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
             gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
 
-            gl.glVertexPointer( 2, GL.GL_FLOAT, 0, vertexCoords.rewind( ) );
-            gl.glTexCoordPointer( 1, GL.GL_FLOAT, 0, textureCoords.rewind( ) );
+            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, vertexCoords.rewind( ) );
+            gl.glTexCoordPointer( 1, GL2.GL_FLOAT, 0, textureCoords.rewind( ) );
 
             try
             {

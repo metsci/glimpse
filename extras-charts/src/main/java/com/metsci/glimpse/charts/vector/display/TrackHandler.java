@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.List;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.TrackPainterSpec;
 import com.metsci.glimpse.charts.vector.painter.EncPainterUtils;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoFeatureType;
@@ -35,8 +37,6 @@ import com.metsci.glimpse.charts.vector.parser.objects.GeoShapeType;
 import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-
-import java.util.List;
 
 
 /**

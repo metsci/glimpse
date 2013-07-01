@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -117,8 +116,8 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             paintColorScale( gl, taggedAxis, width, height );
 
@@ -145,7 +144,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         int yMax = getTagMaxY( height );
 
         GlimpseColor.glColor( gl, tagColor );
-        gl.glBegin( GL.GL_TRIANGLES );
+        gl.glBegin( GL2.GL_TRIANGLES );
         try
         {
             gl.glVertex2f( x, yMin );
@@ -172,8 +171,8 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         GlimpseColor.glColor( gl, tagColor, 1f );
         gl.glLineWidth( tagPointerOutlineWidth );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             gl.glVertex2f( x, yMin );

@@ -28,7 +28,6 @@ package com.metsci.glimpse.charts.bathy;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
@@ -85,18 +84,18 @@ public class ContourPainter extends GlimpsePainter2D
             bufferHandle = new int[1];
             gl.glGenBuffers( 1, bufferHandle, 0 );
 
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
             // copy data from the host memory buffer to the device
-            gl.glBufferData( GL.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_STATIC_DRAW );
+            gl.glBufferData( GL2.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_STATIC_DRAW );
 
             glHandleError( gl );
 
             initialized = true;
         }
 
-        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
@@ -106,14 +105,14 @@ public class ContourPainter extends GlimpsePainter2D
         gl.glColor4fv( lineColor, 0 );
         gl.glLineWidth( lineWidth );
 
-        gl.glEnable( GL.GL_LINE_SMOOTH );
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
-        gl.glDrawArrays( GL.GL_LINES, 0, totalPointCount );
+        gl.glDrawArrays( GL2.GL_LINES, 0, totalPointCount );
 
-        gl.glDisable( GL.GL_BLEND );
-        gl.glDisable( GL.GL_LINE_SMOOTH );
+        gl.glDisable( GL2.GL_BLEND );
+        gl.glDisable( GL2.GL_LINE_SMOOTH );
 
         gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
     }

@@ -26,11 +26,10 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.round;
+import static java.lang.Math.*;
 
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -88,7 +87,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
         // Tick marks
         GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             for ( int i = 0; i < xTicks.length; i++ )
@@ -207,7 +206,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
             int x0 = axis.valueToScreenPixel( axis.getSelectionCenter( ) );
 
-            gl.glBegin( GL.GL_LINES );
+            gl.glBegin( GL2.GL_LINES );
             try
             {
                 gl.glVertex2f( x0, 0 );

@@ -29,7 +29,6 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.Font;
 import java.util.List;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -121,7 +120,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
 
         GlimpseColor.glColor( gl, selectionBorderColor );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             if ( orientation == Orientation.VERTICAL)
@@ -149,7 +148,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             GlimpseColor.glColor( gl, currentTimeMarkerColor );
             gl.glLineWidth( currentTimeMarkerWidth );
     
-            gl.glBegin( GL.GL_LINES );
+            gl.glBegin( GL2.GL_LINES );
             try
             {
                 if ( orientation == Orientation.VERTICAL )
@@ -194,8 +193,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             gl.glOrtho( -0.5, width - 1 + 0.5f, taggedAxis.getMin( ), taggedAxis.getMax( ), -1, 1 );
         }
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );

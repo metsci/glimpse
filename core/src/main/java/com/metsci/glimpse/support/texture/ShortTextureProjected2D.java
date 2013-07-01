@@ -65,7 +65,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
         gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
-        //gl.glPixelStorei( GL.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
+        //gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
         // however, skipping rows manually using data.position works
         return data.asShortBuffer( ).position( texStartsY[i] * dataSizeX );
     }
@@ -80,7 +80,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16I, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE_INTEGER, GL.GL_SHORT, positionedBuffer );
+            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16I, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE_INTEGER, GL2.GL_SHORT, positionedBuffer );
         }
 
         gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );

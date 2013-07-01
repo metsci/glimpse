@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -148,7 +147,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            int newPoints = accumulator.getSize();
+            int newPoints = accumulator.getSize( );
             int currentSize = idMap.size( );
             if ( bufferSize < currentSize + newPoints )
             {
@@ -162,7 +161,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
-    
+
     public void putColors( BulkColorAccumulator accumulator )
     {
         lock.lock( );
@@ -232,7 +231,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             try
             {
                 gl.glPointSize( pointSize );
-                gl.glDrawArrays( GL.GL_POINTS, 0, idMap.size( ) );
+                gl.glDrawArrays( GL2.GL_POINTS, 0, idMap.size( ) );
             }
             finally
             {
@@ -281,13 +280,13 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
         } );
     }
-    
+
     protected int getIndexArray( List<Object> ids, boolean grow, int[] listIndex )
     {
-        int size = ids.size();
+        int size = ids.size( );
         int minIndex = size;
 
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
             int index = getIndex( ids.get( i ), grow );
             listIndex[i] = index;
@@ -302,8 +301,8 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         final List<Object> ids = accumulator.getIds( );
         final float[] v = accumulator.getVertices( );
         final int stride = accumulator.getStride( );
-        final int size = accumulator.getSize();
-        
+        final int size = accumulator.getSize( );
+
         final int[] indexList = new int[size];
         final int minIndex = getIndexArray( ids, true, indexList );
 
@@ -318,10 +317,10 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                for ( int i = 0 ; i < size ; i++ )
+                for ( int i = 0; i < size; i++ )
                 {
                     data.position( indexList[i] * length );
-                    data.put( v, i*stride, length );
+                    data.put( v, i * stride, length );
                 }
             }
         } );
@@ -331,34 +330,34 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                for ( int i = 0 ; i < size ; i++ )
+                for ( int i = 0; i < size; i++ )
                 {
                     data.position( indexList[i] * length );
-                    data.put( v, i*stride+2, length );
+                    data.put( v, i * stride + 2, length );
                 }
             }
         } );
     }
-    
+
     protected void mutateColors( BulkColorAccumulator accumulator )
     {
         final List<Object> ids = accumulator.getIds( );
         final float[] v = accumulator.getVertices( );
         final int stride = accumulator.getStride( );
-        final int size = accumulator.getSize();
-        
+        final int size = accumulator.getSize( );
+
         final int[] indexList = new int[size];
         getIndexArray( ids, false, indexList );
-        
+
         this.colorBuffer.mutate( new Mutator( )
         {
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                for ( int i = 0 ; i < size ; i++ )
+                for ( int i = 0; i < size; i++ )
                 {
                     data.position( indexList[i] * length );
-                    data.put( v, i*stride, length );
+                    data.put( v, i * stride, length );
                 }
             }
         } );
@@ -377,7 +376,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
             else
             {
-                throw new IllegalArgumentException( String.format(  "Id %s does not exist.", id ) );
+                throw new IllegalArgumentException( String.format( "Id %s does not exist.", id ) );
             }
         }
 
@@ -391,108 +390,108 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.pointBuffer.ensureCapacity( bufferSize );
         this.colorBuffer.ensureCapacity( bufferSize );
     }
-    
+
     public static class BulkColorAccumulator
     {
         List<Object> ids;
         FloatsArray v;
-        
+
         public BulkColorAccumulator( )
         {
             ids = new ArrayList<Object>( );
             v = new FloatsArray( );
         }
-        
+
         public void add( Object id, float[] color )
         {
             if ( color.length != 3 && color.length != 4 )
             {
                 throw new IllegalArgumentException( "Color array must be size 3 or 4" );
             }
-            
+
             // grow the FloatsArray if necessary (4 for color)
             if ( v.n == v.a.length )
             {
-                v.ensureCapacity( (int) Math.max( v.n + getStride( ) , v.n * GROWTH_FACTOR ) );
+                v.ensureCapacity( ( int ) Math.max( v.n + getStride( ), v.n * GROWTH_FACTOR ) );
             }
-            
+
             ids.add( id );
             v.append( color );
             if ( color.length == 3 ) v.append( 1.0f );
         }
-        
+
         int getStride( )
         {
             return 4;
         }
-        
+
         List<Object> getIds( )
         {
             return ids;
         }
-        
+
         float[] getVertices( )
         {
             return v.a;
         }
-        
+
         int getSize( )
         {
             return ids.size( );
         }
     }
-    
+
     public static class BulkPointAccumulator
     {
         List<Object> ids;
         FloatsArray v;
-        
+
         public BulkPointAccumulator( )
         {
             ids = new ArrayList<Object>( );
             v = new FloatsArray( );
         }
-        
+
         public void add( Object id, float x, float y, float[] color )
         {
             if ( color.length != 3 && color.length != 4 )
             {
                 throw new IllegalArgumentException( "Color array must be size 3 or 4" );
             }
-            
+
             // grow the FloatsArray if necessary (2 for x/y and 4 for color)
             if ( v.n == v.a.length )
             {
-                v.ensureCapacity( (int) Math.max( v.n + getStride( ) , v.n * GROWTH_FACTOR ) );
+                v.ensureCapacity( ( int ) Math.max( v.n + getStride( ), v.n * GROWTH_FACTOR ) );
             }
-            
+
             ids.add( id );
             v.append( x );
             v.append( y );
             v.append( color );
             if ( color.length == 3 ) v.append( 1.0f );
         }
-        
+
         public void add( Object id, float x, float y )
         {
             add( id, x, y, DEFAULT_COLOR );
         }
-        
+
         int getStride( )
         {
             return 6;
         }
-        
+
         List<Object> getIds( )
         {
             return ids;
         }
-        
+
         float[] getVertices( )
         {
             return v.a;
         }
-        
+
         int getSize( )
         {
             return ids.size( );

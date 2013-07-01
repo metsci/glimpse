@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.charts.vector.iteration;
 
-import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
-
 import java.util.Comparator;
+
+import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
 
 /**
  * Compare DNCObjects by feature code name alphabetically

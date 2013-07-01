@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -68,7 +67,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected boolean lineStipple = false;
     protected int stippleFactor = 1;
     protected short stipplePattern = ( short ) 0x00FF;
-    
+
     protected float lineWidth;
 
     // number of floats in pointBuffer
@@ -105,7 +104,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
         this.searchResults = new IntsArray( );
     }
-    
+
     public void setDotted( boolean dotted )
     {
         lock.lock( );
@@ -240,9 +239,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
                     gl.glEnable( GL2.GL_LINE_STIPPLE );
                     gl.glLineStipple( stippleFactor, stipplePattern );
                 }
-                
+
                 gl.glLineWidth( lineWidth );
-                gl.glDrawArrays( GL.GL_LINES, 0, idMap.size( ) * 2 );
+                gl.glDrawArrays( GL2.GL_LINES, 0, idMap.size( ) * 2 );
             }
             finally
             {
@@ -433,7 +432,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             {
                 throw new IllegalArgumentException( "Color array must be size 3 or 4" );
             }
-            
+
             // grow the FloatsArray if necessary (4 for x/y and 4 for color)
             if ( v.n == v.a.length )
             {

@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.painter.base;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -62,9 +61,9 @@ public abstract class GlimpseDataPainter1D extends GlimpsePainter1D
             gl.glOrtho( 0, width, axis.getMin( ), axis.getMax( ), -1, 1 );
         }
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
         gl.glEnable( GL2.GL_POINT_SMOOTH );
 
         paintTo( context.getGL( ).getGL2(), bounds, axis );

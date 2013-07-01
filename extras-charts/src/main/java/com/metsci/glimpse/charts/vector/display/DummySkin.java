@@ -26,17 +26,17 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
-import com.metsci.glimpse.charts.vector.parser.objects.ENCShape;
-import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-import com.metsci.glimpse.charts.vector.parser.objects.GeoShape;
-import com.metsci.glimpse.charts.vector.parser.objects.GeoShapeType;
-
 import java.awt.Color;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.logging.Logger;
+
+import com.metsci.glimpse.charts.vector.parser.objects.ENCShape;
+import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
+import com.metsci.glimpse.charts.vector.parser.objects.GeoShape;
+import com.metsci.glimpse.charts.vector.parser.objects.GeoShapeType;
 
 public class DummySkin < V extends GeoObject > implements Skin< V >
 {

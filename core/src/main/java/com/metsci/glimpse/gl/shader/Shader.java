@@ -29,7 +29,7 @@ package com.metsci.glimpse.gl.shader;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static com.metsci.glimpse.gl.shader.ShaderArgInOut.*;
 import static com.metsci.glimpse.gl.shader.ShaderArgQualifier.*;
-import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -161,7 +161,7 @@ public abstract class Shader
      * @return false if any problems specific to this shader are found, true
      *         otherwise
      */
-    public abstract boolean preLink( GL2 gl, int glProgramHandle );
+    public abstract boolean preLink( GL gl, int glProgramHandle );
 
     /**
      * Called right after this shader is made current as part of the pipeline.
@@ -187,19 +187,21 @@ public abstract class Shader
      *
      * @return true if the compilation completes without error, false otherwise
      */
-    protected boolean compileAndAttach( GL2 gl, int glProgramHandle )
+    protected boolean compileAndAttach( GL gl, int glProgramHandle )
     {
+        GL2 gl2 = gl.getGL2( );
+        
         int segmentIndex = 0;
         glShaderHandles = new int[sources.length];
         for( ShaderSource segment: sources )
         {
-            int handle = gl.glCreateShader( type.glTypeCode() );
+            int handle = gl2.glCreateShader( type.glTypeCode() );
             glShaderHandles[segmentIndex++] = handle;
 
-            gl.glShaderSource( handle, 1, segment.getSourceLines(), null );
-            gl.glCompileShader( handle );
+            gl2.glShaderSource( handle, 1, segment.getSourceLines(), null );
+            gl2.glCompileShader( handle );
 
-            boolean success = logGLShaderInfoLog( logger, gl, handle, toString() );
+            boolean success = logGLShaderInfoLog( logger, gl2, handle, toString() );
 
             // TODO: Clean up if compilation fails.
             if( !success )
@@ -209,7 +211,7 @@ public abstract class Shader
         for( int i = 0; i < glShaderHandles.length; i++ )
         {
             logger.info( "Attached " + toString() + " to GL program handle " + glProgramHandle + "." );
-            gl.glAttachShader( glProgramHandle, glShaderHandles[i] );
+            gl2.glAttachShader( glProgramHandle, glShaderHandles[i] );
         }
 
         return preLink( gl, glProgramHandle );
@@ -221,8 +223,10 @@ public abstract class Shader
      *
      * @return true if all goes well
      */
-    protected boolean getShaderArgHandles( GL2 gl, int glProgramHandle )
+    protected boolean getShaderArgHandles( GL gl, int glProgramHandle )
     {
+        GL2 gl2 = gl.getGL2( );
+        
         glArgHandles = new int[args.length];
 
         for( int i = 0; i < args.length; i++ )
@@ -230,11 +234,11 @@ public abstract class Shader
             ShaderArg arg = args[i];
             if( arg.getQual() == UNIFORM )
             {
-                glArgHandles[i] = gl.glGetUniformLocation( glProgramHandle, arg.getName() );
+                glArgHandles[i] = gl2.glGetUniformLocation( glProgramHandle, arg.getName() );
             }
             else if( arg.getInOut() == IN )
             {
-                glArgHandles[i] = gl.glGetAttribLocation( glProgramHandle, arg.getName() );
+                glArgHandles[i] = gl2.glGetAttribLocation( glProgramHandle, arg.getName() );
             }
         }
 
@@ -244,14 +248,16 @@ public abstract class Shader
     /**
      * Called by the pipeline.
      */
-    protected void updateArgValues( GL2 gl )
+    protected void updateArgValues( GL gl )
     {
+        GL2 gl2 = gl.getGL2( );
+        
         for( int i = 0; i < args.length; i++ )
         {
             ShaderArg arg = args[i];
             if( arg.getQual() == UNIFORM )
             {
-                arg.update( gl, glArgHandles[i] );
+                arg.update( gl2, glArgHandles[i] );
             }
         }
     }

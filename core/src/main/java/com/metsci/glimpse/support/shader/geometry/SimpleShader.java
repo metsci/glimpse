@@ -74,7 +74,7 @@ public class SimpleShader extends Shader
     protected void logGlError( GL gl )
     {
         int error = gl.glGetError( );
-        if ( error != GL.GL_NO_ERROR )
+        if ( error != GL2.GL_NO_ERROR )
         {
             String errorString = gluErrorString( error );
             logWarning( logger, "GL error (%d): %s", error, errorString );
@@ -82,7 +82,7 @@ public class SimpleShader extends Shader
     }
 
     @Override
-    public boolean preLink( GL2 gl, int glProgramHandle )
+    public boolean preLink( GL gl, int glProgramHandle )
     {
         return true;
     }

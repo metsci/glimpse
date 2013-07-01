@@ -26,31 +26,30 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import static com.jogamp.opengl.util.texture.TextureIO.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.lang.Math.*;
+import static javax.media.opengl.GL.*;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLProfile;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.texture.WatermarkTextureData;
 import com.metsci.glimpse.util.io.StreamOpener;
-import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureData;
-
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.jogamp.opengl.util.texture.TextureIO.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
 
 public class WatermarkPainter extends GlimpsePainterImpl
 {
@@ -180,7 +179,7 @@ public class WatermarkPainter extends GlimpsePainterImpl
         gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
 
         gl.glMatrixMode( GL_TEXTURE );
-        gl.glActiveTexture( GL.GL_TEXTURE0 );
+        gl.glActiveTexture( GL2.GL_TEXTURE0 );
         gl.glLoadIdentity( );
 
         gl.glMatrixMode( GL2.GL_MODELVIEW );

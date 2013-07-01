@@ -178,11 +178,11 @@ public abstract class GLBuffer
                 makeDirty( );
             }
 
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, glHandle );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, glHandle );
 
             if ( isDirty( ) )
             {
-                gl.glBufferData( GL.GL_ARRAY_BUFFER, data.limit( ), data.rewind( ), GL.GL_STATIC_DRAW );
+                gl.glBufferData( GL2.GL_ARRAY_BUFFER, data.limit( ), data.rewind( ), GL2.GL_STATIC_DRAW );
                 dirty = false;
             }
 

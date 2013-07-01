@@ -26,13 +26,11 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
@@ -235,8 +233,8 @@ public class CursorTextPainter extends GlimpsePainter2D
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         String xText = getTextX( axis );
         String yText = getTextY( axis );
@@ -288,7 +286,7 @@ public class CursorTextPainter extends GlimpsePainter2D
             gl.glEnd( );
         }
 
-        gl.glDisable( GL.GL_BLEND );
+        gl.glDisable( GL2.GL_BLEND );
 
         gl.glTranslatef( 0.375f, 0.375f, 0 );
 

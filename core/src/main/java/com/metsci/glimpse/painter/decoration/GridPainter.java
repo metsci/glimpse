@@ -26,9 +26,8 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static java.lang.Integer.parseInt;
+import static java.lang.Integer.*;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -52,7 +51,7 @@ public class GridPainter extends GlimpseDataPainter2D
     protected static final short CASE2 = ( short ) parseInt( "0110011001100110", 2 );
     protected static final short CASE1 = ( short ) parseInt( "0011001100110011", 2 );
     protected static final short CASE0 = ( short ) parseInt( "1001100110011001", 2 );
-    
+
     protected float[] majorLineColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
     protected int majorLineThickness = 1;
 
@@ -65,10 +64,10 @@ public class GridPainter extends GlimpseDataPainter2D
     protected boolean showMinorTicks = true;
 
     protected boolean stipple = true;
-    
+
     protected AxisLabelHandler ticksX;
     protected AxisLabelHandler ticksY;
-    
+
     public GridPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
@@ -79,7 +78,7 @@ public class GridPainter extends GlimpseDataPainter2D
     {
         this( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) );
     }
-    
+
     public void setDotted( boolean dotted )
     {
         this.stipple = dotted;
@@ -143,7 +142,7 @@ public class GridPainter extends GlimpseDataPainter2D
 
         return this;
     }
-    
+
     // make the stipple look like it's translating during drags
     protected void glLineStipple( GL2 gl, Axis1D axis, AxisUnitConverter converter )
     {
@@ -151,7 +150,7 @@ public class GridPainter extends GlimpseDataPainter2D
         stipplePhase = stipplePhase < 0 ? stipplePhase + 4 : stipplePhase;
         glLineStipple( gl, stipplePhase );
     }
-    
+
     protected void glLineStipple( GL2 gl, int stipplePhase )
     {
         switch ( stipplePhase )
@@ -177,7 +176,7 @@ public class GridPainter extends GlimpseDataPainter2D
     public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         // we want crisp lines
-        gl.glDisable( GL.GL_LINE_SMOOTH );
+        gl.glDisable( GL2.GL_LINE_SMOOTH );
         gl.glDisable( GL2.GL_POINT_SMOOTH );
         if ( this.stipple ) gl.glEnable( GL2.GL_LINE_STIPPLE );
 
@@ -204,7 +203,7 @@ public class GridPainter extends GlimpseDataPainter2D
             gl.glColor4fv( majorLineColor, 0 );
             if ( this.stipple ) glLineStipple( gl, axisY, converterY );
 
-            gl.glBegin( GL.GL_LINES );
+            gl.glBegin( GL2.GL_LINES );
             try
             {
                 for ( int i = 0; i < xTicks.length; i++ )
@@ -224,7 +223,7 @@ public class GridPainter extends GlimpseDataPainter2D
                 GlimpseColor.glColor( gl, majorLineColor, 0.1f );
                 double[] xMinor = ticksX.getMinorTickPositions( xTicks );
 
-                gl.glBegin( GL.GL_LINES );
+                gl.glBegin( GL2.GL_LINES );
                 try
                 {
 
@@ -253,7 +252,7 @@ public class GridPainter extends GlimpseDataPainter2D
             gl.glColor4fv( majorLineColor, 0 );
             if ( this.stipple ) glLineStipple( gl, axisX, converterX );
 
-            gl.glBegin( GL.GL_LINES );
+            gl.glBegin( GL2.GL_LINES );
             try
             {
                 for ( int i = 0; i < yTicks.length; i++ )
@@ -273,7 +272,7 @@ public class GridPainter extends GlimpseDataPainter2D
                 GlimpseColor.glColor( gl, majorLineColor, 0.1f );
                 double[] yMinor = ticksY.getMinorTickPositions( yTicks );
 
-                gl.glBegin( GL.GL_LINES );
+                gl.glBegin( GL2.GL_LINES );
                 try
                 {
                     for ( int i = 0; i < yMinor.length; i++ )

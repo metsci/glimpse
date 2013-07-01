@@ -29,9 +29,8 @@ package com.metsci.glimpse.canvas;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseTarget;
-
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 
 /**

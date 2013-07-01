@@ -26,14 +26,15 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.EncAnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.EncAttributeTypeSpec;
 import com.metsci.glimpse.charts.vector.parser.attributes.ENCIntAttribute;
 import com.metsci.glimpse.charts.vector.parser.autogen.ENCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoAttributeType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**

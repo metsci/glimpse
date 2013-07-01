@@ -155,7 +155,7 @@ public class GLSimpleFrameBufferObject
 
             // check if the video card supports this size of texture
             int[] maxTextureSize = new int[1];
-            gl.glGetIntegerv( GL.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0 );
+            gl.glGetIntegerv( GL2.GL_MAX_TEXTURE_SIZE, maxTextureSize, 0 );
             if ( maxTextureSize[0] < width || maxTextureSize[0] < height )
             {
                 logWarning( logger, "Texture (%dx%d) has dimensions larger than maximum supported (%d)", width, height, maxTextureSize[0] );
@@ -164,15 +164,15 @@ public class GLSimpleFrameBufferObject
             // create a texture object
             textureId = new int[1];
             gl.glGenTextures( 1, textureId, 0 );
-            gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
-            gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR );
-            gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR );
-            gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE );
-            gl.glTexParameterf( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE );
-            gl.glTexParameteri( GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP, GL.GL_TRUE ); // automatic mipmap
-            //            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null );
-            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, width, height, 0, GL.GL_RGBA, GL.GL_FLOAT, null );
-            gl.glBindTexture( GL.GL_TEXTURE_2D, 0 );
+            gl.glBindTexture( GL2.GL_TEXTURE_2D, textureId[0] );
+            gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR );
+            gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR );
+            gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE );
+            gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE );
+            gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP, GL2.GL_TRUE ); // automatic mipmap
+            //            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA8, width, height, 0, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, null );
+            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, width, height, 0, GL2.GL_RGBA, GL2.GL_FLOAT, null );
+            gl.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
 
             if ( renderBufferId != null )
             {
@@ -189,18 +189,18 @@ public class GLSimpleFrameBufferObject
             // initialize renderbuffer storing depth info
             if ( useDepth )
             {
-                gl.glBindRenderbuffer( GL.GL_RENDERBUFFER, renderBufferId[0] );
-                gl.glRenderbufferStorage( GL.GL_RENDERBUFFER, GL2.GL_DEPTH_COMPONENT, width, height );
+                gl.glBindRenderbuffer( GL2.GL_RENDERBUFFER, renderBufferId[0] );
+                gl.glRenderbufferStorage( GL2.GL_RENDERBUFFER, GL2.GL_DEPTH_COMPONENT, width, height );
             }
 
             // initialize renderbuffer storing stencil info
             if ( useStencil )
             {
-                gl.glBindRenderbuffer( GL.GL_RENDERBUFFER, renderBufferId[1] );
-                gl.glRenderbufferStorage( GL.GL_RENDERBUFFER, GL2.GL_STENCIL_INDEX16, width, height );
+                gl.glBindRenderbuffer( GL2.GL_RENDERBUFFER, renderBufferId[1] );
+                gl.glRenderbufferStorage( GL2.GL_RENDERBUFFER, GL2.GL_STENCIL_INDEX16, width, height );
             }
 
-            gl.glBindRenderbuffer( GL.GL_RENDERBUFFER, 0 );
+            gl.glBindRenderbuffer( GL2.GL_RENDERBUFFER, 0 );
 
             if ( frameBufferId != null )
             {
@@ -210,26 +210,26 @@ public class GLSimpleFrameBufferObject
             // create a framebuffer object
             frameBufferId = new int[1];
             gl.glGenFramebuffers( 1, frameBufferId, 0 );
-            gl.glBindFramebuffer( GL.GL_FRAMEBUFFER, frameBufferId[0] );
+            gl.glBindFramebuffer( GL2.GL_FRAMEBUFFER, frameBufferId[0] );
 
             // attach the texture to FBO color attachment point
-            gl.glFramebufferTexture2D( GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_TEXTURE_2D, textureId[0], 0 );
+            gl.glFramebufferTexture2D( GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0, GL2.GL_TEXTURE_2D, textureId[0], 0 );
 
             // attach the renderbuffer to depth attachment point
             if ( useDepth )
             {
-                gl.glFramebufferRenderbuffer( GL.GL_FRAMEBUFFER, GL.GL_DEPTH_ATTACHMENT, GL.GL_RENDERBUFFER, renderBufferId[0] );
+                gl.glFramebufferRenderbuffer( GL2.GL_FRAMEBUFFER, GL2.GL_DEPTH_ATTACHMENT, GL2.GL_RENDERBUFFER, renderBufferId[0] );
             }
 
             // attach the renderbuffer to stencil attachment point
             if ( useStencil )
             {
-                gl.glFramebufferRenderbuffer( GL.GL_FRAMEBUFFER, GL.GL_STENCIL_ATTACHMENT, GL.GL_RENDERBUFFER, renderBufferId[1] );
+                gl.glFramebufferRenderbuffer( GL2.GL_FRAMEBUFFER, GL2.GL_STENCIL_ATTACHMENT, GL2.GL_RENDERBUFFER, renderBufferId[1] );
             }
 
             // check FBO status
-            int status = gl.glCheckFramebufferStatus( GL.GL_FRAMEBUFFER );
-            if ( status != GL.GL_FRAMEBUFFER_COMPLETE )
+            int status = gl.glCheckFramebufferStatus( GL2.GL_FRAMEBUFFER );
+            if ( status != GL2.GL_FRAMEBUFFER_COMPLETE )
             {
                 logWarning( logger, "Framebuffer not initialized (status=%d)", status );
             }
@@ -238,7 +238,7 @@ public class GLSimpleFrameBufferObject
         }
         else
         {
-            gl.glBindFramebuffer( GL.GL_FRAMEBUFFER, frameBufferId[0] );
+            gl.glBindFramebuffer( GL2.GL_FRAMEBUFFER, frameBufferId[0] );
         }
     }
 
@@ -247,15 +247,15 @@ public class GLSimpleFrameBufferObject
         GL gl = context.getGL( );
 
         // switch back to window-system-provided framebuffer
-        gl.glBindFramebuffer( GL.GL_FRAMEBUFFER, 0 );
+        gl.glBindFramebuffer( GL2.GL_FRAMEBUFFER, 0 );
 
         // trigger mipmaps generation explicitly
         // NOTE: If GL_GENERATE_MIPMAP is set to GL_TRUE, then glCopyTexSubImage2D()
         // triggers mipmap generation automatically. However, the texture attached
         // onto a FBO should generate mipmaps manually via glGenerateMipmapEXT().
-        gl.glBindTexture( GL.GL_TEXTURE_2D, textureId[0] );
-        gl.glGenerateMipmap( GL.GL_TEXTURE_2D );
-        gl.glBindTexture( GL.GL_TEXTURE_2D, 0 );
+        gl.glBindTexture( GL2.GL_TEXTURE_2D, textureId[0] );
+        gl.glGenerateMipmap( GL2.GL_TEXTURE_2D );
+        gl.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
     }
 
     public void addListener( GLSimpleListener listener )

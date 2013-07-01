@@ -133,8 +133,8 @@ public class CrosshairPainter extends GlimpseDataPainter2D
     {
         if ( paintXor )
         {
-            gl.glEnable( GL.GL_COLOR_LOGIC_OP );
-            gl.glLogicOp( GL.GL_XOR );
+            gl.glEnable( GL2.GL_COLOR_LOGIC_OP );
+            gl.glLogicOp( GL2.GL_XOR );
         }
     }
 
@@ -142,7 +142,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
     {
         if ( paintXor )
         {
-            gl.glDisable( GL.GL_COLOR_LOGIC_OP );
+            gl.glDisable( GL2.GL_COLOR_LOGIC_OP );
         }
     }
 
@@ -182,7 +182,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
 
             conditionallyEnableXor( gl );
 
-            gl.glBegin( GL.GL_LINE_LOOP );
+            gl.glBegin( GL2.GL_LINE_LOOP );
             try
             {
                 gl.glVertex2d( centerX - sizeX, centerY - sizeY );
@@ -223,7 +223,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
 
                 conditionallyEnableXor( gl );
 
-                gl.glBegin( GL.GL_LINES );
+                gl.glBegin( GL2.GL_LINES );
                 try
                 {
                     if ( !hideVerticalHairs )
@@ -257,7 +257,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
 
                 conditionallyEnableXor( gl );
 
-                gl.glBegin( GL.GL_LINES );
+                gl.glBegin( GL2.GL_LINES );
                 try
                 {
                     if ( !hideVerticalHairs )

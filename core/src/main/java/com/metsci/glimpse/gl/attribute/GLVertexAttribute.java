@@ -27,7 +27,7 @@
 package com.metsci.glimpse.gl.attribute;
 
 import static javax.media.opengl.GL2.GL_COLOR_ARRAY;
-import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL2.GL_FLOAT;
 import static javax.media.opengl.GL2.GL_NORMAL_ARRAY;
 import static javax.media.opengl.GL2.GL_TEXTURE_COORD_ARRAY;
 import static javax.media.opengl.GL2.GL_VERTEX_ARRAY;

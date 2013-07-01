@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.*;
+
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-
-import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.*;
 
 /**
  * Paints a simple solid color background.
@@ -44,7 +45,7 @@ public class BackgroundPainter implements GlimpsePainter
     protected float[] backgroundColor = new float[4];
     protected boolean colorSet = false;
     protected String lafColorKey;
-    
+
     protected boolean displayOn = true;
 
     public BackgroundPainter( )
@@ -68,12 +69,12 @@ public class BackgroundPainter implements GlimpsePainter
     {
         return displayOn;
     }
-    
+
     public float[] getColor( )
     {
         return this.backgroundColor;
     }
-    
+
     public BackgroundPainter setColor( float[] rgba )
     {
         backgroundColor = rgba;
@@ -103,10 +104,10 @@ public class BackgroundPainter implements GlimpsePainter
     public void paintTo( GlimpseContext context )
     {
         if ( !displayOn ) return;
-        
+
         GL gl = context.getGL( );
         gl.glClearColor( backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] );
-        gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
+        gl.glClear( GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT );
     }
 
     @Override

@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.charts.vector.parser;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,12 +42,6 @@ import java.util.logging.Logger;
 import com.metsci.glimpse.charts.vector.parser.ResourceLister.DefaultResourceFilter;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
-
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 
 /**

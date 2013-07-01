@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util;
 
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

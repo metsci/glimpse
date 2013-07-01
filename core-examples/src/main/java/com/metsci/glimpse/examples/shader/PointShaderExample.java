@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.shader;
 
+import static java.lang.Math.*;
+
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
@@ -48,8 +50,6 @@ import com.metsci.glimpse.painter.shape.ShadedPointPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-
-import static java.lang.Math.*;
 
 /**
  * @author osborn

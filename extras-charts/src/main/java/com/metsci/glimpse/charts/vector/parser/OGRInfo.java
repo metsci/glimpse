@@ -27,8 +27,6 @@
 package com.metsci.glimpse.charts.vector.parser;
 
 
-import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,6 +36,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.logging.Logger;
+
+import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
 
 
 /**

@@ -27,8 +27,6 @@
 package com.metsci.glimpse.charts.vector.parser;
 
 import java.io.IOException;
-
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -36,8 +34,6 @@ import java.util.logging.Logger;
 
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
-
-import java.util.LinkedList;
 
 public class OGRToENCParser  {
 

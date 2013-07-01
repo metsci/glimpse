@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.charts.vector.iteration;
 
-import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
-
 import java.io.DataInputStream;
 import java.io.IOException;
+
+import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 
 /**
  * Given a DataInputStream, this class will parse the next DNCObject

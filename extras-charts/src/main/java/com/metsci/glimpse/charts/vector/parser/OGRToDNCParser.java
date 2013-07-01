@@ -27,8 +27,6 @@
 package com.metsci.glimpse.charts.vector.parser;
 
 import java.io.IOException;
-
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;

@@ -30,7 +30,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -102,7 +101,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
         double tickInterval = handler.tickInterval( tickTimes );
 
         // Tick marks
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         for ( TimeStamp t : tickTimes )
         {
             double y = axis.valueToScreenPixel( fromTimeStamp( t ) );

@@ -27,7 +27,6 @@
 package com.metsci.glimpse.support.atlas.shader;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.shader.ShaderArg;
@@ -46,7 +45,7 @@ public class TextureAtlasIconShaderFragment extends Shader
     protected ShaderArg textureUnitArg;
     protected ShaderArg isPickModeArg;
     protected boolean enablePicking;
-    
+
     public TextureAtlasIconShaderFragment( int textureUnit, boolean enablePicking )
     {
         super( "Texture Atlas Icon Fragment Shader", ShaderType.fragment, "shaders/atlas/texture_atlas_icon_shader.fs" );
@@ -55,14 +54,14 @@ public class TextureAtlasIconShaderFragment extends Shader
     }
 
     @Override
-    public boolean preLink( GL2 gl, int glProgramHandle )
+    public boolean preLink( GL gl, int glProgramHandle )
     {
         this.textureUnitArg = getArg( "tex" );
         this.textureUnitArg.setValue( textureUnit );
-        
+
         this.isPickModeArg = getArg( "isPickMode" );
         this.isPickModeArg.setValue( this.enablePicking );
-        
+
         return true;
     }
 
@@ -75,7 +74,7 @@ public class TextureAtlasIconShaderFragment extends Shader
     public void postDisplay( GL gl )
     {
     }
-    
+
     public void setPickMode( boolean pickMode )
     {
         this.enablePicking = pickMode;

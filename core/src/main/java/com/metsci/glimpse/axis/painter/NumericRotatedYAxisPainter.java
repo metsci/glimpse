@@ -26,11 +26,10 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.round;
+import static java.lang.Math.*;
 
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -72,7 +71,7 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
 
         // Tick marks
         GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             for ( int i = 0; i < yTicks.length; i++ )

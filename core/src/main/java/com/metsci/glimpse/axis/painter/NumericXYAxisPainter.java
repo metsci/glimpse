@@ -26,12 +26,11 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
@@ -362,7 +361,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         double labelBufferX = labelBuffer / axisX.getPixelsPerValue( );
         double labelBufferY = labelBuffer / axisY.getPixelsPerValue( );
         
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             if ( showHorizontal )

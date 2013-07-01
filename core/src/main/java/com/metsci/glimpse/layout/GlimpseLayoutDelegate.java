@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import net.miginfocom.layout.ComponentWrapper;
 import net.miginfocom.layout.ContainerWrapper;
@@ -160,7 +161,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         {
             try
             {
-                gl.glEnable( GL.GL_SCISSOR_TEST );
+                gl.glEnable( GL2.GL_SCISSOR_TEST );
 
                 gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
                 gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
@@ -172,7 +173,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
             }
             finally
             {
-                gl.glDisable( GL.GL_SCISSOR_TEST );
+                gl.glDisable( GL2.GL_SCISSOR_TEST );
             }
         }
     }

@@ -26,6 +26,16 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.xml.XMLConstants;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.xml.sax.SAXException;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.AnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.DncAnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.display.xmlgen.Geoskinspec;
@@ -34,13 +44,6 @@ import com.metsci.glimpse.charts.vector.iteration.StreamToGeoObjectConverter;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCFeatureCode;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoFeatureType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-import javax.xml.XMLConstants;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import org.xml.sax.SAXException;
 
 
 public class DNCBasicSkinHelper implements BasicSkinHelper<DNCObject>

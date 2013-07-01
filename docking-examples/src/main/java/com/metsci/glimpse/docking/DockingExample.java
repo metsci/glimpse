@@ -26,6 +26,12 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingPane.Config.*;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.util.logging.Level.*;
+import static javax.swing.BorderFactory.*;
+import static javax.swing.JFrame.*;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
@@ -41,12 +47,6 @@ import com.metsci.glimpse.docking.DockingPane.Config.ConfigNode;
 
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.TinyLookAndFeel;
-
-import static com.metsci.glimpse.docking.DockingPane.Config.*;
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.util.logging.Level.*;
-import static javax.swing.BorderFactory.*;
-import static javax.swing.JFrame.*;
 
 public class DockingExample
 {

@@ -28,8 +28,8 @@ package com.metsci.glimpse.painter.base;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
-import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 

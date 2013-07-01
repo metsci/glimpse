@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.charts.vector.parser;
 
+import java.util.Collection;
+
 import com.metsci.glimpse.charts.vector.iteration.GeoFilterableRecordList;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-
-import java.util.Collection;
 
 /**
  *

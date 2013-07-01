@@ -28,7 +28,7 @@ package com.metsci.glimpse.gl.attribute;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
 
@@ -42,7 +42,7 @@ public class GLFloatBuffer extends GLBuffer
     @Override
     public final int getGlType( )
     {
-        return GL.GL_FLOAT;
+        return GL2.GL_FLOAT;
     }
 
     @Override
@@ -60,14 +60,14 @@ public class GLFloatBuffer extends GLBuffer
             // between position and limit, we want a view of the whole
             data.clear( );
             FloatBuffer floatData = data.asFloatBuffer( );
-            
+
             mutator.mutate( floatData, elementSize );
 
             // the limit/position of floatData and data are independent
             // update data.limit() to reflect changes made to floatData
             data.position( 0 );
             data.limit( floatData.limit( ) * getBytesPerElement( ) );
-            
+
             makeDirty( );
         }
         finally

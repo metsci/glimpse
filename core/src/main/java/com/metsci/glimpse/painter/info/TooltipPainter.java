@@ -32,7 +32,6 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.google.common.collect.Lists;
@@ -373,8 +372,8 @@ public class TooltipPainter extends SimpleTextPainter
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         if ( this.paintBackground || this.paintBorder )
         {
@@ -398,9 +397,9 @@ public class TooltipPainter extends SimpleTextPainter
             {
                 // Draw Text Background
                 gl.glColor4fv( borderColor, 0 );
-                gl.glEnable( GL.GL_LINE_SMOOTH );
+                gl.glEnable( GL2.GL_LINE_SMOOTH );
 
-                gl.glBegin( GL.GL_LINE_LOOP );
+                gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
                     borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
@@ -412,7 +411,7 @@ public class TooltipPainter extends SimpleTextPainter
             }
         }
 
-        gl.glDisable( GL.GL_BLEND );
+        gl.glDisable( GL2.GL_BLEND );
 
         // draw text
         GlimpseColor.setColor( textRenderer, textColor );

@@ -26,13 +26,16 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.List;
+
+import javax.xml.validation.Schema;
+
+import org.xml.sax.SAXException;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.AnnotationPainterSpec;
 import com.metsci.glimpse.charts.vector.iteration.StreamToGeoObjectConverter;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoFeatureType;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-import java.util.List;
-import javax.xml.validation.Schema;
-import org.xml.sax.SAXException;
 
 /**
  * Most of the vector chart classes work on generalized GeoObjects.

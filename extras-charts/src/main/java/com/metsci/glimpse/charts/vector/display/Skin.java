@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
-import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-
 import java.util.List;
+
+import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
 
 /**
  * A skin determines how the enc/dnc vector chart is rendered.  Which features 

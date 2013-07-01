@@ -33,7 +33,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.UUID;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -178,7 +177,7 @@ public class DefaultEventPainter implements EventPainter
                 {
                     GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
                     gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL.GL_LINE_LOOP );
+                    gl.glBegin( GL2.GL_LINE_LOOP );
                     try
                     {
                         gl.glVertex2d( timeMin, posMin );
@@ -217,7 +216,7 @@ public class DefaultEventPainter implements EventPainter
                 {
                     GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
                     gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL.GL_LINE_LOOP );
+                    gl.glBegin( GL2.GL_LINE_LOOP );
                     try
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
@@ -420,7 +419,7 @@ public class DefaultEventPainter implements EventPainter
 
             GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
             gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-            gl.glBegin( GL.GL_LINE_LOOP );
+            gl.glBegin( GL2.GL_LINE_LOOP );
             try
             {
                 gl.glVertex2d( posMin, timeMin );

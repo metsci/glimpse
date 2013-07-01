@@ -27,6 +27,8 @@
 package com.metsci.glimpse.charts.vector.parser;
 
 
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.charts.vector.parser.attributes.DNCAbstractAttribute;
 import com.metsci.glimpse.charts.vector.parser.attributes.DNCFloatAttribute;
 import com.metsci.glimpse.charts.vector.parser.attributes.DNCFreeAttribute;
@@ -34,8 +36,6 @@ import com.metsci.glimpse.charts.vector.parser.attributes.DNCIntAttribute;
 import com.metsci.glimpse.charts.vector.parser.attributes.GenericAttribute;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
-
-import java.util.logging.Logger;
 
 
 public class DNCAttributeInterpreter {

@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.painter.base;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -107,11 +106,11 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
             //
             // So that's why the third and fourth args here are (1) and (1-A_s).
             //
-            gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
         }
         
-        if ( lineSmooth ) gl.glEnable( GL.GL_LINE_SMOOTH );
+        if ( lineSmooth ) gl.glEnable( GL2.GL_LINE_SMOOTH );
         if ( pointSmooth ) gl.glEnable( GL2.GL_POINT_SMOOTH );
 
         paintTo( context.getGL( ).getGL2(), bounds, axis );

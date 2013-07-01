@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.charts.vector.iteration;
 
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
+
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObjectType;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoFeatureType;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoObject;
-
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
 
 
 /**

@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.lang.Math.*;
+import static javax.swing.BorderFactory.*;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -50,10 +54,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.lang.Math.*;
-import static javax.swing.BorderFactory.*;
 
 public class CustomTile extends JComponent implements Tile
 {

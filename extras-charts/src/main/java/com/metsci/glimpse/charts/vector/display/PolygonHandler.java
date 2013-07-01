@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.charts.vector.display;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.metsci.glimpse.charts.vector.display.xmlgen.PolygonPainterSpec;
 import com.metsci.glimpse.charts.vector.painter.EncPainterUtils;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoFeatureType;
@@ -34,10 +38,6 @@ import com.metsci.glimpse.charts.vector.parser.objects.GeoShape;
 import com.metsci.glimpse.painter.shape.PolygonPainter;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 
 /**

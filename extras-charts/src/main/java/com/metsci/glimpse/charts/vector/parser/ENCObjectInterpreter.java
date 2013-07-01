@@ -28,6 +28,8 @@ package com.metsci.glimpse.charts.vector.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -39,9 +41,6 @@ import com.metsci.glimpse.charts.vector.parser.objects.ENCShape;
 import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GeoShapeType;
 import com.metsci.glimpse.util.io.StreamOpener;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 
 public class ENCObjectInterpreter {

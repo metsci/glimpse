@@ -26,27 +26,26 @@
  */
 package com.metsci.glimpse.charts.vector.parser;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.charts.vector.iteration.DNCComparatorByFeatureName;
-import com.metsci.glimpse.charts.vector.parser.DNCHarvest.LibraryType;
 import com.metsci.glimpse.charts.vector.parser.ResourceLister.DefaultResourceFilter;
 import com.metsci.glimpse.charts.vector.parser.ResourceLister.ResourceFilter;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
 import com.metsci.glimpse.charts.vector.parser.objects.GenericObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
 
 
 /**

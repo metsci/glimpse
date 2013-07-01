@@ -40,11 +40,31 @@ package com.metsci.glimpse.support.texture;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Transparency;
-import java.awt.color.*;
-import java.awt.image.*;
-import java.nio.*;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferDouble;
+import java.awt.image.DataBufferFloat;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferShort;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.MultiPixelPackedSampleModel;
+import java.awt.image.SampleModel;
+import java.awt.image.SinglePixelPackedSampleModel;
+import java.awt.image.WritableRaster;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
 
-import javax.media.opengl.*;
+import javax.media.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.TextureData.Flusher;
@@ -122,7 +142,7 @@ public class WatermarkTextureData
     {
         if ( internalFormat == 0 )
         {
-            this.internalFormat = image.getColorModel( ).hasAlpha( ) ? GL.GL_RGBA : GL.GL_RGB;
+            this.internalFormat = image.getColorModel( ).hasAlpha( ) ? GL2.GL_RGBA : GL2.GL_RGB;
         }
         else
         {
@@ -457,7 +477,7 @@ public class WatermarkTextureData
         switch ( image.getType( ) )
         {
             case BufferedImage.TYPE_INT_RGB:
-                pixelFormat = GL.GL_BGRA;
+                pixelFormat = GL2.GL_BGRA;
                 pixelType = GL2.GL_UNSIGNED_INT_8_8_8_8_REV;
                 rowLength = scanlineStride;
                 alignment = 4;
@@ -465,7 +485,7 @@ public class WatermarkTextureData
                 setupLazyCustomConversion( image );
                 break;
             case BufferedImage.TYPE_INT_ARGB_PRE:
-                pixelFormat = GL.GL_BGRA;
+                pixelFormat = GL2.GL_BGRA;
                 pixelType = GL2.GL_UNSIGNED_INT_8_8_8_8_REV;
                 rowLength = scanlineStride;
                 alignment = 4;
@@ -473,7 +493,7 @@ public class WatermarkTextureData
                 setupLazyCustomConversion( image );
                 break;
             case BufferedImage.TYPE_INT_BGR:
-                pixelFormat = GL.GL_RGBA;
+                pixelFormat = GL2.GL_RGBA;
                 pixelType = GL2.GL_UNSIGNED_INT_8_8_8_8_REV;
                 rowLength = scanlineStride;
                 alignment = 4;
@@ -487,7 +507,7 @@ public class WatermarkTextureData
                 if ( ( scanlineStride % 3 ) == 0 )
                 {
                     pixelFormat = GL2.GL_BGR;
-                    pixelType = GL.GL_UNSIGNED_BYTE;
+                    pixelType = GL2.GL_UNSIGNED_BYTE;
                     rowLength = scanlineStride / 3;
                     alignment = 1;
                 }
@@ -507,7 +527,7 @@ public class WatermarkTextureData
                 // TODO: Completely commented out for now (?) --ttran17
                 //			if ((scanlineStride % 4) == 0 && false) {
                 //				pixelFormat = GL2.GL_ABGR_EXT;
-                //				pixelType = GL.GL_UNSIGNED_BYTE;
+                //				pixelType = GL2.GL_UNSIGNED_BYTE;
                 //				rowLength = scanlineStride / 4;
                 //				alignment = 4;
                 //
@@ -523,15 +543,15 @@ public class WatermarkTextureData
                 //			}
             }
             case BufferedImage.TYPE_USHORT_565_RGB:
-                pixelFormat = GL.GL_RGB;
-                pixelType = GL.GL_UNSIGNED_SHORT_5_6_5;
+                pixelFormat = GL2.GL_RGB;
+                pixelType = GL2.GL_UNSIGNED_SHORT_5_6_5;
                 rowLength = scanlineStride;
                 alignment = 2;
                 expectingGL12 = true;
                 setupLazyCustomConversion( image );
                 break;
             case BufferedImage.TYPE_USHORT_555_RGB:
-                pixelFormat = GL.GL_BGRA;
+                pixelFormat = GL2.GL_BGRA;
                 pixelType = GL2.GL_UNSIGNED_SHORT_1_5_5_5_REV;
                 rowLength = scanlineStride;
                 alignment = 2;
@@ -539,14 +559,14 @@ public class WatermarkTextureData
                 setupLazyCustomConversion( image );
                 break;
             case BufferedImage.TYPE_BYTE_GRAY:
-                pixelFormat = GL.GL_LUMINANCE;
-                pixelType = GL.GL_UNSIGNED_BYTE;
+                pixelFormat = GL2.GL_LUMINANCE;
+                pixelType = GL2.GL_UNSIGNED_BYTE;
                 rowLength = scanlineStride;
                 alignment = 1;
                 break;
             case BufferedImage.TYPE_USHORT_GRAY:
-                pixelFormat = GL.GL_LUMINANCE;
-                pixelType = GL.GL_UNSIGNED_SHORT;
+                pixelFormat = GL2.GL_LUMINANCE;
+                pixelType = GL2.GL_UNSIGNED_SHORT;
                 rowLength = scanlineStride;
                 alignment = 2;
                 break;
@@ -562,15 +582,15 @@ public class WatermarkTextureData
                 ColorModel cm = image.getColorModel( );
                 if ( cm.equals( rgbColorModel ) )
                 {
-                    pixelFormat = GL.GL_RGB;
-                    pixelType = GL.GL_UNSIGNED_BYTE;
+                    pixelFormat = GL2.GL_RGB;
+                    pixelType = GL2.GL_UNSIGNED_BYTE;
                     rowLength = scanlineStride / 3;
                     alignment = 1;
                 }
                 else if ( cm.equals( rgbaColorModel ) )
                 {
-                    pixelFormat = GL.GL_RGBA;
-                    pixelType = GL.GL_UNSIGNED_BYTE;
+                    pixelFormat = GL2.GL_RGBA;
+                    pixelType = GL2.GL_UNSIGNED_BYTE;
                     rowLength = scanlineStride / 4; // FIXME: correct?
                     alignment = 4;
                 }
@@ -591,7 +611,7 @@ public class WatermarkTextureData
         boolean hasAlpha = image.getColorModel( ).hasAlpha( );
         if ( pixelFormat == 0 )
         {
-            pixelFormat = hasAlpha ? GL.GL_RGBA : GL.GL_RGB;
+            pixelFormat = hasAlpha ? GL2.GL_RGBA : GL2.GL_RGB;
         }
         alignment = 1; // FIXME: do we need better?
         rowLength = width; // FIXME: correct in all cases?
@@ -602,7 +622,7 @@ public class WatermarkTextureData
         if ( data instanceof DataBufferByte || isPackedInt( image ) )
         {
             // Don't use GL_UNSIGNED_INT for BufferedImage packed int images
-            if ( pixelType == 0 ) pixelType = GL.GL_UNSIGNED_BYTE;
+            if ( pixelType == 0 ) pixelType = GL2.GL_UNSIGNED_BYTE;
         }
         else if ( data instanceof DataBufferDouble )
         {
@@ -610,20 +630,20 @@ public class WatermarkTextureData
         }
         else if ( data instanceof DataBufferFloat )
         {
-            if ( pixelType == 0 ) pixelType = GL.GL_FLOAT;
+            if ( pixelType == 0 ) pixelType = GL2.GL_FLOAT;
         }
         else if ( data instanceof DataBufferInt )
         {
             // FIXME: should we support signed ints?
-            if ( pixelType == 0 ) pixelType = GL.GL_UNSIGNED_INT;
+            if ( pixelType == 0 ) pixelType = GL2.GL_UNSIGNED_INT;
         }
         else if ( data instanceof DataBufferShort )
         {
-            if ( pixelType == 0 ) pixelType = GL.GL_SHORT;
+            if ( pixelType == 0 ) pixelType = GL2.GL_SHORT;
         }
         else if ( data instanceof DataBufferUShort )
         {
-            if ( pixelType == 0 ) pixelType = GL.GL_UNSIGNED_SHORT;
+            if ( pixelType == 0 ) pixelType = GL2.GL_UNSIGNED_SHORT;
         }
         else
         {

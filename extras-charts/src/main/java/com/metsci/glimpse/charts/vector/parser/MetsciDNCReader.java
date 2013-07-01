@@ -26,11 +26,6 @@
  */
 package com.metsci.glimpse.charts.vector.parser;
 
-import com.metsci.glimpse.charts.vector.iteration.GeoFilterableRecordList;
-import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
-import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
-import com.metsci.glimpse.util.io.StreamOpener;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +33,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import com.metsci.glimpse.charts.vector.iteration.GeoFilterableRecordList;
+import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
+import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
+import com.metsci.glimpse.util.io.StreamOpener;
 
 
 public class MetsciDNCReader implements GeoReader<DNCObject> {

@@ -26,12 +26,11 @@
  */
 package com.metsci.glimpse.painter.geo;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
@@ -300,8 +299,8 @@ public class ScalePainter extends GlimpsePainterImpl
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         gl.glBegin( GL2.GL_QUADS );
         try
@@ -330,7 +329,7 @@ public class ScalePainter extends GlimpsePainterImpl
         gl.glLineWidth( 1f );
         gl.glColor4fv( borderColor, 0 );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             gl.glVertex2d( width - bufferX, bufferY );
@@ -343,7 +342,7 @@ public class ScalePainter extends GlimpsePainterImpl
             gl.glEnd( );
         }
 
-        gl.glDisable( GL.GL_BLEND );
+        gl.glDisable( GL2.GL_BLEND );
         gl.glTranslatef( 0.375f, 0.375f, 0 );
 
         if ( order < 2 )

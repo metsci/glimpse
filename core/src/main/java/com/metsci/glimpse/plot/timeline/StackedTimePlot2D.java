@@ -26,10 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.util.Collection;

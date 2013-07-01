@@ -60,11 +60,13 @@ public class TextureAtlasIconShaderVertex extends Shader
     //@formatter:on
 
     @Override
-    public boolean preLink( GL2 gl, int glProgramHandle )
+    public boolean preLink( GL gl, int glProgramHandle )
     {
-        gl.glBindAttribLocation( glProgramHandle, pixelCoordsAttributeIndex, "pixelCoords" );
-        gl.glBindAttribLocation( glProgramHandle, texCoordsAttributeIndex, "texCoords" );
-        gl.glBindAttribLocation( glProgramHandle, colorCoordsAttributeIndex, "pickColor" );
+        GL2 gl2 = gl.getGL2( );
+        
+        gl2.glBindAttribLocation( glProgramHandle, pixelCoordsAttributeIndex, "pixelCoords" );
+        gl2.glBindAttribLocation( glProgramHandle, texCoordsAttributeIndex, "texCoords" );
+        gl2.glBindAttribLocation( glProgramHandle, colorCoordsAttributeIndex, "pickColor" );
 
         return true;
     }

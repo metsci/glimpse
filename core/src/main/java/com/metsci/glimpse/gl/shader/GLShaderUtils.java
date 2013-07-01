@@ -31,7 +31,6 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 
@@ -57,7 +56,7 @@ public class GLShaderUtils
         int[] status = new int[1];
         gl.glGetProgramiv( glProgramHandle, GL2.GL_LINK_STATUS, status, 0 );
 
-        if( status[0] != GL.GL_TRUE )
+        if( status[0] != GL2.GL_TRUE )
         {
             logger.warning( "LINKING FAILED: " + name + " did not link properly." );
             logger.warning( getGLProgramInfoLog( gl, glProgramHandle ) );
@@ -74,7 +73,7 @@ public class GLShaderUtils
         int[] status = new int[1];
         gl.glGetShaderiv( glShaderHandle, GL2.GL_COMPILE_STATUS, status, 0 );
 
-        if( status[0] != GL.GL_TRUE )
+        if( status[0] != GL2.GL_TRUE )
         {
             logger.warning( "COMPILATION FAILED: " + name + " did not compile." );
             logger.warning( logGLShaderInfoLog( gl, glShaderHandle ) );

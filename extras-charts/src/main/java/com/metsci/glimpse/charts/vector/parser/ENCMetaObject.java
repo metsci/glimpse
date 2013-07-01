@@ -27,9 +27,9 @@
 package com.metsci.glimpse.charts.vector.parser;
 
 
-import com.metsci.glimpse.charts.vector.parser.attributes.GenericAttribute;
-
 import java.util.Map;
+
+import com.metsci.glimpse.charts.vector.parser.attributes.GenericAttribute;
 
 public class ENCMetaObject {
     private Map<String, GenericAttribute> attributeMap;

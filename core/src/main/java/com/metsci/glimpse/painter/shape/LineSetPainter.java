@@ -30,7 +30,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
@@ -217,7 +216,7 @@ public class LineSetPainter extends GlimpseDataPainter2D
             bufferInitialized = true;
         }
 
-        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
         if ( newData )
         {
@@ -225,7 +224,7 @@ public class LineSetPainter extends GlimpseDataPainter2D
             try
             {
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+                gl.glBufferData( GL2.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 
                 glHandleError( gl );
 
@@ -237,8 +236,8 @@ public class LineSetPainter extends GlimpseDataPainter2D
             }
         }
 
-        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         gl.glColor4fv( lineColor, 0 );
@@ -247,6 +246,6 @@ public class LineSetPainter extends GlimpseDataPainter2D
         offsetBuffer.rewind( );
         sizeBuffer.rewind( );
 
-        gl.glMultiDrawArrays( GL.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
+        gl.glMultiDrawArrays( GL2.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
     }
 }
