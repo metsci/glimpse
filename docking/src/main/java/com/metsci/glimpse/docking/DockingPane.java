@@ -1081,8 +1081,8 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             {
                 if ( !children.isEmpty( ) )
                 {
-                    int xDiv = ( cSplit.isRow ? startPixel    : 0            );
-                    int yDiv = ( cSplit.isRow ? 0             : startPixel   );
+                    int xDiv = ( cSplit.isRow ? startPixel    : 0            ) + bounds.x;
+                    int yDiv = ( cSplit.isRow ? 0             : startPixel   ) + bounds.y;
                     int wDiv = ( cSplit.isRow ? divPixels     : bounds.width );
                     int hDiv = ( cSplit.isRow ? bounds.height : divPixels    );
 
@@ -1096,9 +1096,9 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
                 int endPixel = iround( ( ( contentSoFar + cChild.extent ) / totalContent ) * totalContentPixels ) + divsSoFar*divPixels;
 
-                int xChild = ( cSplit.isRow ? startPixel          : 0 );
-                int yChild = ( cSplit.isRow ? 0                   : startPixel );
-                int wChild = ( cSplit.isRow ? endPixel-startPixel : bounds.width );
+                int xChild = ( cSplit.isRow ? startPixel          : 0                   ) + bounds.x;
+                int yChild = ( cSplit.isRow ? 0                   : startPixel          ) + bounds.y;
+                int wChild = ( cSplit.isRow ? endPixel-startPixel : bounds.width        );
                 int hChild = ( cSplit.isRow ? bounds.height       : endPixel-startPixel );
 
                 Node child = fromConfigNode( cChild, new Rectangle( xChild, yChild, wChild, hChild ), leavesById_OUT );
