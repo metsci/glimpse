@@ -280,13 +280,17 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
     protected TileKey chooseDefaultTile( ViewKey viewKey )
     {
         TileKey defaultTileKey = defaultTileKeys.get( viewKey );
-        boolean defaultTileExists = ( defaultTileKey != null && splitPane.getMultiSplitLayout( ).getNodeForName( defaultTileKey.leafId ) != null );
-        if ( defaultTileExists ) return defaultTileKey;
+        if ( tileExists( defaultTileKey ) ) return defaultTileKey;
 
         Leaf tileLeaf = firstTileLeaf( splitPane.getMultiSplitLayout( ).getModel( ) );
         if ( tileLeaf != null ) return new TileKey( tileLeaf.getName( ) );
 
         return initTile( setSolitaryLeaf( ) );
+    }
+
+    protected boolean tileExists( TileKey tileKey )
+    {
+        return ( tileKey != null && isTileLeaf( splitPane.getMultiSplitLayout( ).getNodeForName( tileKey.leafId ) ) );
     }
 
     protected Leaf firstTileLeaf( Node node )
