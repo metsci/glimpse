@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -123,69 +124,70 @@ public class CustomTile extends JComponent implements Tile
 
                 if ( leftmost )
                 {
-                    g.fillRoundRect( 0, 0, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                    g.fillRoundRect( lineThickness/2, lineThickness/2, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
                 }
                 else
                 {
-                    g.fillRoundRect( -lineThickness, 0, getWidth( ), getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                    g.fillRoundRect( -1 - lineThickness/2, lineThickness/2, getWidth( ), getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
                 }
             }
 
             // Edge lines
             g.setPaint( lineColor );
+            g.setStroke( new BasicStroke( lineThickness ) );
+
 
             // Top edge
             if ( leftmost )
             {
-                g.drawLine( cornerRadius, 0, getWidth( ) - 1, 0 );
+                g.drawLine( cornerRadius, lineThickness/2, getWidth( ) - 1, lineThickness/2 );
             }
             else
             {
-                g.drawLine( 0, 0, getWidth( ) - 1, 0 );
+                g.drawLine( 0, lineThickness/2, getWidth( ) - 1, lineThickness/2 );
             }
 
             // Bottom edge
             if ( !selected )
             {
-                g.drawLine( 0, getHeight( ) - 1, getWidth( ) - 1, getHeight( ) - 1 );
+                g.drawLine( 0, getHeight( ) - 1 - lineThickness/2, getWidth( ) - 1, getHeight( ) - 1 - lineThickness/2 );
             }
 
             // Left edge, and right edge in some cases
             if ( selected && leftmost )
             {
-                g.drawRoundRect( 0, 0, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( lineThickness/2, lineThickness/2, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
             }
             else if ( leftmost )
             {
-                g.drawRoundRect( 0, 0, getWidth( ) + cornerRadius, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( lineThickness/2, lineThickness/2, getWidth( ) + cornerRadius, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
             }
             else if ( selected )
             {
-                g.drawRoundRect( -lineThickness, 0, getWidth( ), getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( -1 - lineThickness/2, lineThickness/2, getWidth( ), getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
             }
 
             // Right edge in some cases
             if ( viewNum == selectedViewNum - 1 )
             {
-                g.drawRoundRect( getWidth( ) - lineThickness, 0, getWidth( ) + cornerRadius, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( getWidth( ) - 1 - lineThickness/2, 0, getWidth( ) + cornerRadius, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
             }
             else if ( !selected )
             {
-                g.drawLine( getWidth( ) - lineThickness, 0, getWidth( ) - lineThickness, getHeight( ) - 1 );
+                g.drawLine( getWidth( ) - 1 - lineThickness/2, 0, getWidth( ) - 1 - lineThickness/2, getHeight( ) - 1 );
             }
-
         }
     }
 
 
 
     protected static final int cornerRadius = 5;
-    protected static final int lineThickness = 1;
+    protected static final int lineThickness = 1; // Even values do NOT work well
     protected static final int cardPadding = 2;
     protected static final Color lineColor = Color.lightGray;
     protected static final Color highlightColor = Color.white;
-    protected static final Color selectedTextColor = Color.black;
-    protected static final Color unselectedTextColor = Color.gray;
+    protected static final Color selectedTextColor = Color.darkGray;
+    protected static final Color unselectedTextColor = Color.darkGray;
 
 
 
@@ -241,12 +243,14 @@ public class CustomTile extends JComponent implements Tile
 
         this.topBar = new JPanel( )
         {
-            protected void paintComponent( Graphics g )
+            protected void paintComponent( Graphics g0 )
             {
+                Graphics2D g = ( Graphics2D ) g0;
                 super.paintComponent( g );
                 g.setColor( lineColor );
-                g.drawRoundRect( 0, 0, getWidth( ) - 1, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
-                g.drawLine( tabBar.getWidth( ), getHeight( ) - 1, getWidth( ) - 1, getHeight( ) - 1 );
+                g.setStroke( new BasicStroke( lineThickness ) );
+                g.drawRoundRect( 0, lineThickness/2, getWidth( ) - 1 - lineThickness/2, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawLine( tabBar.getWidth( ), getHeight( ) - 1 - lineThickness/2, getWidth( ) - 1, getHeight( ) - 1 - lineThickness/2 );
             }
         };
         topBar.setOpaque( true );
