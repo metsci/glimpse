@@ -49,7 +49,7 @@ public class LinkedTaggedHeatMapExample
             @Override
             public GlimpseLayout getLayout( )
             {
-                return example.getLayout( );
+                return layout;
             }
 
         }, new GlimpseLayoutProvider( )

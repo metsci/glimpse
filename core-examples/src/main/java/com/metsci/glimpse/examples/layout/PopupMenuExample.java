@@ -43,11 +43,13 @@ import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
+ * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
+ * 
  * @author ulman
  */
-public class SimpleLayoutExampleWithPopup
+public class PopupMenuExample
 {
-    private static final Logger logger = Logger.getLogger( SimpleLayoutExampleWithPopup.class.getName( ) );
+    private static final Logger logger = Logger.getLogger( PopupMenuExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
     {

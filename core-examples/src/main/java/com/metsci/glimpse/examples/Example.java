@@ -113,10 +113,12 @@ public class Example
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
-        SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( true );
+        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
+        
+        SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( true, context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 
-        SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( true, leftPanel.getGLContext( ) );
+        SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( true, context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
         RepaintManager repaintManager = new SwingRepaintManager( );

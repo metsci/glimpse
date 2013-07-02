@@ -52,7 +52,8 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
 
 /**
  * Demonstrates using Glimpse offscreen rendering to distort an existing Glimpse plot.
- * This capability is used by {@link com.metsci.glimpse.examples.worldwind.BathymetryTileExample}
+ * This is a rather silly example, but this capability is used by
+ * {@link com.metsci.glimpse.examples.worldwind.BathymetryTileExample}
  * to reproject Glimpse rendering performed using a {@link TangentPlane} onto the
  * WorldWind globe, which expects a {@link PlateCarreeProjection}.
  * 
