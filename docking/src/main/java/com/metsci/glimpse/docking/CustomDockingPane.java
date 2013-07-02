@@ -26,12 +26,19 @@
  */
 package com.metsci.glimpse.docking;
 
+import static javax.swing.BorderFactory.*;
+
 public class CustomDockingPane extends DockingPane<CustomTile>
 {
+
+    protected static final int dividerSize = 5;
+
 
     public CustomDockingPane( )
     {
         super( CustomTile.class );
+        splitPane.setDividerSize( dividerSize );
+        splitPane.setBorder( createEmptyBorder( dividerSize, dividerSize, dividerSize, dividerSize ) );
     }
 
     @Override
