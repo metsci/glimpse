@@ -72,6 +72,10 @@ public class CustomTile extends JComponent implements Tile
 
         public CustomTab( View view )
         {
+            setLayout( new BorderLayout( ) );
+
+
+
             setOpaque( false );
             setBorder( null );
             setToolTipText( view.tooltip );
@@ -94,25 +98,53 @@ public class CustomTile extends JComponent implements Tile
         }
 
         @Override
+        public Dimension getPreferredSize( )
+        {
+            Dimension d = super.getPreferredSize( );
+
+            int viewNum = views.indexOf( view );
+            int leftmostViewNum = leftmostViewNum( );
+            boolean leftmost = ( viewNum == leftmostViewNum );
+            if ( leftmost ) d.width += lineThickness;
+
+            return d;
+        }
+
+        @Override
+        public Dimension getMinimumSize( )
+        {
+            Dimension d = super.getMinimumSize( );
+
+            int viewNum = views.indexOf( view );
+            int leftmostViewNum = leftmostViewNum( );
+            boolean leftmost = ( viewNum == leftmostViewNum );
+            if ( leftmost ) d.width += lineThickness;
+
+            return d;
+        }
+
+        public int leftmostViewNum( )
+        {
+            for ( int i = 0; i < views.size( ); i ++ )
+            {
+                if ( viewEntry( i ).tab.isVisible( ) )
+                {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        @Override
         protected void paintComponent( Graphics g0 )
         {
             Graphics2D g = ( Graphics2D ) g0;
 
             int viewNum = views.indexOf( view );
+            int leftmostViewNum = leftmostViewNum( );
             int selectedViewNum = views.indexOf( selectedView );
-
-            int leftmostViewNum = 0;
-            for ( int i = 0; i < views.size( ); i ++ )
-            {
-                if ( viewEntry( i ).tab.isVisible( ) )
-                {
-                    leftmostViewNum = i;
-                    break;
-                }
-            }
-
-            boolean selected = ( viewNum == selectedViewNum );
             boolean leftmost = ( viewNum == leftmostViewNum );
+            boolean selected = ( viewNum == selectedViewNum );
 
 
             // Fill selected
@@ -182,7 +214,7 @@ public class CustomTile extends JComponent implements Tile
 
 
     protected static final int cornerRadius = 5;
-    protected static final int lineThickness = 1; // Even values do NOT work well
+    protected static final int lineThickness = 5; // Even values do NOT work well
     protected static final int cardPadding = 2;
     protected static final Color lineColor = Color.lightGray;
     protected static final Color highlightColor = Color.white;
@@ -249,7 +281,7 @@ public class CustomTile extends JComponent implements Tile
                 super.paintComponent( g );
                 g.setColor( lineColor );
                 g.setStroke( new BasicStroke( lineThickness ) );
-                g.drawRoundRect( 0, lineThickness/2, getWidth( ) - 1 - lineThickness/2, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( lineThickness/2, lineThickness/2, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
                 g.drawLine( tabBar.getWidth( ), getHeight( ) - 1 - lineThickness/2, getWidth( ) - 1, getHeight( ) - 1 - lineThickness/2 );
             }
         };
