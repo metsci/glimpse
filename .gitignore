@@ -5,6 +5,7 @@ target/
 .settings/
 .classpath
 .project
+bin/
 
 # NetBeans
 nbproject/
