@@ -67,6 +67,15 @@ public class CustomTile extends JComponent implements Tile
 
     protected class CustomTab extends JPanel
     {
+        protected final int lineThickness = theme.lineThickness;
+        protected final int cornerRadius = theme.cornerRadius;
+        protected final int labelPadding = theme.labelPadding;
+
+        protected final Color lineColor = theme.lineColor;
+        protected final Color highlightColor = theme.highlightColor;
+        protected final Color selectedTextColor = theme.selectedTextColor;
+        protected final Color unselectedTextColor = theme.unselectedTextColor;
+
         protected final View view;
         protected boolean selected;
         protected final JLabel label;
@@ -190,26 +199,13 @@ public class CustomTile extends JComponent implements Tile
                     g.drawLine( wBox - 1 - lineThickness/2, 0, wBox - 1 - lineThickness/2, hBox - 1 );
                 }
             }
-
-
-//            g.setPaint( Color.blue );
-//            g.setStroke( new BasicStroke( 1, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[] { 4, 4 }, 0.0f ) );
-//            g.drawLine( 0, 0, 0, getHeight( ) );
         }
     }
 
 
 
-    protected static final int cornerRadius = 5;
-    protected static final int lineThickness = 1; // Even values do NOT work well
-    protected static final int cardPadding = 2;
-    protected static final int labelPadding = 4;
-    protected static final Color lineColor = Color.lightGray;
-    protected static final Color highlightColor = Color.white;
-    protected static final Color selectedTextColor = Color.darkGray;
-    protected static final Color unselectedTextColor = Color.darkGray;
 
-
+    protected final CustomDockingTheme theme;
 
     protected final JPanel topBar;
 
@@ -233,8 +229,14 @@ public class CustomTile extends JComponent implements Tile
     protected View selectedView;
 
 
-    public CustomTile( )
+    public CustomTile( CustomDockingTheme theme )
     {
+        this.theme = theme;
+        final int lineThickness = theme.lineThickness;
+        final int cornerRadius = theme.cornerRadius;
+        final int cardPadding = theme.cardPadding;
+        final Color lineColor = theme.lineColor;
+
         this.tabBar = newToolbar( false );
         tabBar.setBorder( null );
 
@@ -251,7 +253,8 @@ public class CustomTile extends JComponent implements Tile
 
         this.cardLayout = new CardLayout( );
         this.cardPanel = new JPanel( cardLayout );
-        cardPanel.setBorder( createCompoundBorder( createMatteBorder( 0, lineThickness, lineThickness, lineThickness, lineColor ), createEmptyBorder( cardPadding, cardPadding, cardPadding, cardPadding ) ) );
+        cardPanel.setBorder( createCompoundBorder( createMatteBorder( 0, lineThickness, lineThickness, lineThickness, lineColor ),
+                                                   createEmptyBorder( cardPadding, cardPadding, cardPadding, cardPadding ) ) );
 
         this.dockingMouseAdapters = newArrayList( );
 
@@ -278,7 +281,6 @@ public class CustomTile extends JComponent implements Tile
                         CustomTab tab = viewMap.get( view.viewKey ).tab;
 
                         // CAP_BUTT behaves differently when line-width is 1
-                        @SuppressWarnings( "unused" )
                         int wExtra = ( lineThickness > 1 ? lineThickness : 0 );
 
                         g.drawLine( tab.getX( ), getHeight( ) - 1 - lineThickness/2, tab.getX( ) + tab.getWidth( ) + wExtra, getHeight( ) - 1 - lineThickness/2 );
@@ -550,11 +552,11 @@ public class CustomTile extends JComponent implements Tile
     {
         Rectangle bounds = tabBounds( viewNum );
 
-        bounds.height += lineThickness;
+        bounds.height += theme.lineThickness;
 
         if ( viewNum != rightmostViewNum( ) )
         {
-            bounds.width += lineThickness;
+            bounds.width += theme.lineThickness;
         }
 
         return bounds;

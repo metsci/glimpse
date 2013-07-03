@@ -26,17 +26,40 @@
  */
 package com.metsci.glimpse.docking;
 
+import static java.awt.Color.*;
 import static javax.swing.BorderFactory.*;
 
 public class CustomDockingPane extends DockingPane<CustomTile>
 {
 
-    protected static final int dividerSize = 5;
+    public static final CustomDockingTheme defaultTheme = new CustomDockingTheme( 5,
+
+                                                                                  1, // Even lineThickness values do NOT work well
+                                                                                  5,
+                                                                                  2,
+                                                                                  4,
+
+                                                                                  lightGray,
+                                                                                  white,
+                                                                                  darkGray,
+                                                                                  darkGray );
+
+
+    protected final CustomDockingTheme theme;
 
 
     public CustomDockingPane( )
     {
+        this( defaultTheme );
+    }
+
+    public CustomDockingPane( CustomDockingTheme theme )
+    {
         super( CustomTile.class );
+
+        this.theme = theme;
+
+        int dividerSize = theme.dividerSize;
         splitPane.setDividerSize( dividerSize );
         splitPane.setBorder( createEmptyBorder( dividerSize, dividerSize, dividerSize, dividerSize ) );
     }
@@ -44,7 +67,7 @@ public class CustomDockingPane extends DockingPane<CustomTile>
     @Override
     protected CustomTile newTile( )
     {
-        return new CustomTile( );
+        return new CustomTile( theme );
     }
 
 }
