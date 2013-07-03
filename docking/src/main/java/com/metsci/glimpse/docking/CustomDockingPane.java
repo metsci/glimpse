@@ -26,31 +26,18 @@
  */
 package com.metsci.glimpse.docking;
 
-import static java.awt.Color.*;
+import static com.metsci.glimpse.docking.CustomDockingThemes.*;
 import static javax.swing.BorderFactory.*;
 
 public class CustomDockingPane extends DockingPane<CustomTile>
 {
-
-    public static final CustomDockingTheme defaultTheme = new CustomDockingTheme( 5,
-
-                                                                                  1, // Even lineThickness values do NOT work well
-                                                                                  5,
-                                                                                  2,
-                                                                                  4,
-
-                                                                                  lightGray,
-                                                                                  white,
-                                                                                  darkGray,
-                                                                                  darkGray );
-
 
     protected final CustomDockingTheme theme;
 
 
     public CustomDockingPane( )
     {
-        this( defaultTheme );
+        this( defaultDockingTheme );
     }
 
     public CustomDockingPane( CustomDockingTheme theme )
