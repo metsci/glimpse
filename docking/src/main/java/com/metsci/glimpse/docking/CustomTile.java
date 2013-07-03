@@ -39,6 +39,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -270,6 +271,10 @@ public class CustomTile extends JComponent implements Tile
             {
                 Graphics2D g = ( Graphics2D ) g0;
                 super.paintComponent( g );
+
+                // Certain L&Fs get messed up if we don't reset the stroke back how we found it
+                Stroke origStroke = g.getStroke( );
+
                 g.setColor( lineColor );
                 g.setStroke( new BasicStroke( lineThickness, CAP_BUTT, JOIN_MITER ) );
                 g.drawRoundRect( lineThickness/2, lineThickness/2, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
@@ -288,6 +293,8 @@ public class CustomTile extends JComponent implements Tile
                 }
 
                 g.drawLine( tabBar.getWidth( ) - lineThickness, getHeight( ) - 1 - lineThickness/2, getWidth( ) - 1, getHeight( ) - 1 - lineThickness/2 );
+
+                g.setStroke( origStroke );
             }
         };
         topBar.setOpaque( true );
