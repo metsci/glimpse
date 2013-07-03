@@ -278,8 +278,8 @@ public class CustomTile extends JComponent implements Tile
                         CustomTab tab = viewMap.get( view.viewKey ).tab;
 
                         // CAP_BUTT behaves differently when line-width is 1
-                        int wExtra = lineThickness;
-                        if ( wExtra == 1 ) wExtra = 0;
+                        @SuppressWarnings( "unused" )
+                        int wExtra = ( lineThickness > 1 ? lineThickness : 0 );
 
                         g.drawLine( tab.getX( ), getHeight( ) - 1 - lineThickness/2, tab.getX( ) + tab.getWidth( ) + wExtra, getHeight( ) - 1 - lineThickness/2 );
                     }
