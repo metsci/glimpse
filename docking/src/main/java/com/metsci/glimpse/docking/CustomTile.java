@@ -47,7 +47,6 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -247,8 +246,8 @@ public class CustomTile extends JComponent implements Tile
         overflowBar.add( overflowPopupButton );
 
         this.cornerBar = newToolbar( true );
-        cornerBar.add( new JButton( "Min" ) );
-        cornerBar.add( new JButton( "Max" ) );
+        //cornerBar.add( new JButton( "Min" ) );
+        //cornerBar.add( new JButton( "Max" ) );
 
         this.viewBarHolder = new JPanel( new GridLayout( 1, 1 ) );
 
