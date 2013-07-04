@@ -27,6 +27,7 @@
 package com.metsci.glimpse.docking;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -100,7 +101,51 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
 
         this.indicatorOverlay = new DockingIndicatorOverlay( black, 2, true );
-        this.splitPane = new JXMultiSplitPane( );
+        this.splitPane = new JXMultiSplitPane( new MultiSplitLayout( )
+        {
+            public void layoutContainer( Container parent )
+            {
+                // Set weights based on current sizes, so that the "layoutGrow" step
+                // in super.layoutContainer will divvy up extra space sensibly
+                //
+                // This is not perfect. If you shrink the pane down far enough, some
+                // tiles will hit their min sizes and stop shrinking. When you then
+                // re-expand the pane, the relative sizes of such tiles won't go back
+                // to what it was originally.
+                //
+                setWeights( getModel( ) );
+
+                super.layoutContainer( parent );
+            }
+
+            protected void setWeights( Node node )
+            {
+                if ( node instanceof Split )
+                {
+                    Split split = ( Split ) node;
+
+                    double totalExtent = 0;
+                    for ( Node child : split.getChildren( ) )
+                    {
+                        if ( child instanceof Split || child instanceof Leaf )
+                        {
+                            double childExtent = ( split.isRowLayout( ) ? child.getBounds( ).width : child.getBounds( ).height );
+                            totalExtent += childExtent;
+                        }
+                    }
+
+                    for ( Node child : split.getChildren( ) )
+                    {
+                        if ( child instanceof Split || child instanceof Leaf )
+                        {
+                            double childExtent = ( split.isRowLayout( ) ? child.getBounds( ).width : child.getBounds( ).height );
+                            child.setWeight( childExtent / totalExtent );
+                            setWeights( child );
+                        }
+                    }
+                }
+            }
+        } );
         splitPane.getMultiSplitLayout( ).setRemoveDividers( true );
         splitPane.getMultiSplitLayout( ).setFloatingDividers( false );
 
