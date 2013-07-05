@@ -1164,7 +1164,7 @@ public class DockingPane extends JRootPane
             splitPane.doLayout( );
         }
 
-        ArrangementNode arrangement = toArrangement( splitPane.getMultiSplitLayout( ).getModel( ) );
+        ArrangementNode arrangement = toArrangement( splitPane.getMultiSplitLayout( ).getModel( ), maximizedTileKey );
 
         if ( maximizedTileKey != null )
         {
@@ -1186,6 +1186,7 @@ public class DockingPane extends JRootPane
         Map<String,ArrangementLeaf> leavesById = newHashMap( );
         splitPane.setModel( fromArrangement( arrangement, innerBounds( splitPane ), leavesById ) );
 
+        TileKey maximizedTileKey = null;
         for ( Entry<String,ArrangementLeaf> en : leavesById.entrySet( ) )
         {
             String leafId = en.getKey( );
@@ -1200,6 +1201,16 @@ public class DockingPane extends JRootPane
 
             View selectedView = views.get( new ViewKey( arrLeaf.selectedViewId ) );
             if ( selectedView != null ) tile( tileKey ).selectView( selectedView );
+
+            if ( arrLeaf.isMaximized )
+            {
+                maximizedTileKey = tileKey;
+            }
+        }
+
+        if ( maximizedTileKey != null )
+        {
+            maximizeTile( maximizedTileKey );
         }
 
 
@@ -1207,7 +1218,7 @@ public class DockingPane extends JRootPane
         repaint( );
     }
 
-    protected ArrangementNode toArrangement( Node node )
+    protected ArrangementNode toArrangement( Node node, TileKey maximizedTileKey )
     {
         if ( node instanceof Split )
         {
@@ -1218,7 +1229,7 @@ public class DockingPane extends JRootPane
 
             for ( Node child : split.getChildren( ) )
             {
-                ArrangementNode arrChild = toArrangement( child );
+                ArrangementNode arrChild = toArrangement( child, maximizedTileKey );
                 if ( arrChild != null )
                 {
                     arrChild.extent = ( arrSplit.isRow ? child.getBounds( ).width : child.getBounds( ).height );
@@ -1231,9 +1242,12 @@ public class DockingPane extends JRootPane
         else if ( node instanceof Leaf )
         {
             Leaf leaf = ( Leaf ) node;
+            TileKey tileKey = new TileKey( leaf.getName( ) );
             ArrangementLeaf arrLeaf = new ArrangementLeaf( );
 
-            Tile tile = tile( new TileKey( leaf.getName( ) ) );
+            arrLeaf.isMaximized = areEqual( tileKey, maximizedTileKey );
+
+            Tile tile = tile( tileKey );
             for ( int viewNum = 0; viewNum < tile.numViews( ); viewNum++ )
             {
                 View view = tile.view( viewNum );
@@ -1351,6 +1365,8 @@ public class DockingPane extends JRootPane
 
             @XmlElement( name="selectedView" )
             public String selectedViewId = null;
+
+            public boolean isMaximized = false;
         }
 
         public static Marshaller newJaxbMarshaller( ) throws IOException, JAXBException
