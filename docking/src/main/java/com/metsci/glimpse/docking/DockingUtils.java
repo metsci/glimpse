@@ -28,6 +28,7 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -45,6 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -105,6 +107,15 @@ public class DockingUtils
             j += c.getY( );
         }
         return new Point( i, j );
+    }
+
+    public static Rectangle innerBounds( JComponent c )
+    {
+        Insets insets = c.getInsets( );
+        return new Rectangle( insets.left,
+                              insets.top,
+                              c.getWidth( ) - insets.left - insets.right,
+                              c.getHeight( ) - insets.top - insets.bottom );
     }
 
     public static int xAfter( Rectangle r )

@@ -1158,14 +1158,13 @@ public class DockingPane extends JRootPane
     {
         requireSwingThread( );
 
-        // XXX: Capture/restore aren't quite inverses ... maybe this method is not accounting properly for splitPane's border?
 
         Map<ViewKey,View> views = newHashMap( viewsByKey );
 
         for ( ViewKey viewKey : views.keySet( ) ) removeView( viewKey );
 
         Map<String,ArrangementLeaf> leavesById = newHashMap( );
-        splitPane.setModel( fromArrangement( arrangement, new Rectangle( 0, 0, splitPane.getWidth( ), splitPane.getHeight( ) ), leavesById ) );
+        splitPane.setModel( fromArrangement( arrangement, innerBounds( splitPane ), leavesById ) );
 
         for ( Entry<String,ArrangementLeaf> en : leavesById.entrySet( ) )
         {
