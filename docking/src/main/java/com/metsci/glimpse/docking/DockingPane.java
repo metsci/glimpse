@@ -1157,7 +1157,21 @@ public class DockingPane extends JRootPane
     {
         requireSwingThread( );
 
-        return toArrangement( splitPane.getMultiSplitLayout( ).getModel( ) );
+        TileKey maximizedTileKey = this.maximizedTileKey;
+        if ( maximizedTileKey != null )
+        {
+            unmaximizeTile( );
+            splitPane.doLayout( );
+        }
+
+        ArrangementNode arrangement = toArrangement( splitPane.getMultiSplitLayout( ).getModel( ) );
+
+        if ( maximizedTileKey != null )
+        {
+            maximizeTile( maximizedTileKey );
+        }
+
+        return arrangement;
     }
 
     public void restoreArrangement( ArrangementNode arrangement )
