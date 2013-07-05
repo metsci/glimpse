@@ -500,8 +500,6 @@ public class DockingPane extends JRootPane
 
     protected void removeEmptyNodes( )
     {
-        // XXX: Needs to prune tileMaximizeButtons as well
-
         MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
 
         Node model = layout.getModel( );
@@ -687,6 +685,8 @@ public class DockingPane extends JRootPane
 
     protected void removeLeafComponent( Leaf leaf )
     {
+        tileMaximizeButtons.remove( new TileKey( leaf.getName( ) ) );
+
         Component component = splitPane.getMultiSplitLayout( ).getComponentForNode( leaf );
         if ( component != null )
         {
