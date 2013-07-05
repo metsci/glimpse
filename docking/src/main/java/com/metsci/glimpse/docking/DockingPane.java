@@ -118,8 +118,24 @@ public class DockingPane extends JRootPane
         {
             public void layoutContainer( Container parent )
             {
+                // Ugh ... layoutGrow doesn't divvy up extra space intelligently to
+                // hidden tiles. But we need to set tile weights for hidden tiles, so
+                // that they look right when they become visible again. Hence this
+                // mess.
+                //
+                // It doesn't resize hidden tiles quite perfectly, but it doesn't do
+                // anything really dumb, either -- and it definitely works better than
+                // ignoring the issue.
+                //
+                TileKey maximizedTileKey = DockingPane.this.maximizedTileKey;
+                if ( maximizedTileKey != null )
+                {
+                    unmaximizeTile( );
+                    super.layoutContainer( parent );
+                }
+
                 // Set weights based on current sizes, so that the "layoutGrow" step
-                // in super.layoutContainer will divvy up extra space sensibly
+                // in super.layoutContainer will divvy up extra space sensibly.
                 //
                 // This is not perfect. If you shrink the pane down far enough, some
                 // tiles will hit their min sizes and stop shrinking. When you then
@@ -129,6 +145,12 @@ public class DockingPane extends JRootPane
                 setWeights( getModel( ) );
 
                 super.layoutContainer( parent );
+
+                if ( maximizedTileKey != null )
+                {
+                    maximizeTile( maximizedTileKey );
+                    super.layoutContainer( parent );
+                }
             }
 
             protected void setWeights( Node node )
