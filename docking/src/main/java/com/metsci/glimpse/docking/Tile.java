@@ -150,7 +150,7 @@ public class Tile extends JComponent
             {
                 Color bottomColor = new Color( highlightColor.getRed( ), highlightColor.getGreen( ), highlightColor.getBlue( ), 0 );
                 Color topColor = ( viewNum == selectedViewNum ? highlightColor : bottomColor );
-                g.setPaint( new GradientPaint( 0, lineThickness, topColor, 0, getHeight( ), bottomColor ) );
+                g.setPaint( new GradientPaint( 0, 0, topColor, 0, getHeight( ) - 1, bottomColor ) );
 
                 g.fillRoundRect( lineThickness/2, lineThickness/2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
             }
