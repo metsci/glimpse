@@ -71,36 +71,42 @@ import com.metsci.glimpse.docking.DockingUtils.IntAndIndex;
 import com.metsci.glimpse.docking.DockingUtils.Runnable1;
 import com.metsci.glimpse.docking.DockingUtils.Supplier;
 
+import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.awt.Color.*;
 import static java.awt.event.InputEvent.*;
 import static java.awt.event.MouseEvent.*;
 import static java.lang.Math.*;
+import static javax.swing.BorderFactory.*;
 import static javax.xml.bind.Marshaller.*;
 
-public abstract class DockingPane<T extends Component & Tile> extends JRootPane
+public class DockingPane extends JRootPane
 {
-
-    protected final Class<T> tileClass;
 
     protected final Map<ViewKey,View> viewsByKey;
     protected final Map<ViewKey,TileKey> tileKeys;
 
+    protected final DockingTheme theme;
     protected final DockingIndicatorOverlay indicatorOverlay;
     protected final JXMultiSplitPane splitPane;
 
     protected int nextLeafNumber;
 
 
-    public DockingPane( Class<T> tileClass )
+    public DockingPane( )
     {
-        this.tileClass = tileClass;
+        this( defaultDockingTheme );
+    }
 
+    public DockingPane( DockingTheme theme )
+    {
         this.viewsByKey = newHashMap( );
         this.tileKeys = newHashMap( );
 
+        this.theme = theme;
 
         this.indicatorOverlay = new DockingIndicatorOverlay( black, 2, true );
+
         this.splitPane = new JXMultiSplitPane( new MultiSplitLayout( )
         {
             public void layoutContainer( Container parent )
@@ -148,6 +154,9 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         } );
         splitPane.getMultiSplitLayout( ).setRemoveDividers( true );
         splitPane.getMultiSplitLayout( ).setFloatingDividers( false );
+        splitPane.setDividerSize( theme.dividerSize );
+        splitPane.setBorder( createEmptyBorder( theme.dividerSize, theme.dividerSize, theme.dividerSize, theme.dividerSize ) );
+
 
         setContentPane( splitPane );
         setGlassPane( indicatorOverlay );
@@ -305,11 +314,14 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         return ( "Leaf_" + leafNumber );
     }
 
-    protected abstract T newTile( );
+    protected Tile newTile( )
+    {
+        return new Tile( theme );
+    }
 
     protected TileKey initTile( String leafId )
     {
-        T tile = newTile( );
+        Tile tile = newTile( );
         tile.addDockingMouseAdapter( new DockingMouseAdapter( tile ) );
 
         splitPane.add( tile, leafId );
@@ -357,7 +369,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         return ( node instanceof Leaf && splitPane.getMultiSplitLayout( ).getComponentForNode( node ) instanceof Tile );
     }
 
-    protected T tile( TileKey tileKey )
+    protected Tile tile( TileKey tileKey )
     {
         MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
 
@@ -366,9 +378,9 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         Component component = layout.getComponentForNode( node );
         if ( component == null ) throw new RuntimeException( "No component for this tile-key: leaf-id = " + tileKey.leafId );
-        if ( !tileClass.isInstance( component ) ) throw new RuntimeException( "Component for this tile-key is not a Tile: leaf-id = " + tileKey.leafId );
+        if ( !( component instanceof Tile ) ) throw new RuntimeException( "Component for this tile-key is not a Tile: leaf-id = " + tileKey.leafId );
 
-        return tileClass.cast( component );
+        return ( Tile ) component;
     }
 
     protected void removeEmptyNodes( )
@@ -664,13 +676,13 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
     protected class DockingMouseAdapter extends MouseAdapter
     {
-        protected final T tile;
+        protected final Tile tile;
 
         protected boolean dragging = false;
         protected ViewKey draggedViewKey = null;
 
 
-        public DockingMouseAdapter( T tile )
+        public DockingMouseAdapter( Tile tile )
         {
             this.tile = tile;
             this.dragging = false;
@@ -737,10 +749,10 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             TileKey fromTileKey = tileKeys.get( draggedViewKey );
 
             TileKey toTileKey = null;
-            T toTile = null;
+            Tile toTile = null;
             for ( TileKey tileKey : tileKeys.values( ) )
             {
-                T tile = tile( tileKey );
+                Tile tile = tile( tileKey );
 
                 // Find coords relative to tile
                 int i = dragPoint.x - tile.getX( );
@@ -905,7 +917,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             @Override
             public Rectangle getIndicator( )
             {
-                T neighbor = tile( neighborKey );
+                Tile neighbor = tile( neighborKey );
                 int x = neighbor.getX( );
                 int y = neighbor.getY( );
                 int w = neighbor.getWidth( );
@@ -944,7 +956,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             @Override
             public Rectangle getIndicator( )
             {
-                T tile = tile( tileKey );
+                Tile tile = tile( tileKey );
                 Rectangle tabBounds = tile.viewTabBounds( viewNum );
                 if ( tabBounds == null )
                 {

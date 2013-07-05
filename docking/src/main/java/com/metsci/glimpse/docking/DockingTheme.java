@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Color;
 
-public class CustomDockingTheme
+public class DockingTheme
 {
 
     public final int dividerSize;
@@ -47,17 +47,17 @@ public class CustomDockingTheme
     public final Color unselectedTextColor;
 
 
-    public CustomDockingTheme( int dividerSize,
+    public DockingTheme( int dividerSize,
 
-                               int lineThickness, // Even lineThickness values do NOT work well
-                               int cornerRadius,
-                               int cardPadding,
-                               int labelPadding,
+                         int lineThickness, // Even lineThickness values do NOT work well
+                         int cornerRadius,
+                         int cardPadding,
+                         int labelPadding,
 
-                               Color lineColor,
-                               Color highlightColor,
-                               Color selectedTextColor,
-                               Color unselectedTextColor )
+                         Color lineColor,
+                         Color highlightColor,
+                         Color selectedTextColor,
+                         Color unselectedTextColor )
     {
         this.dividerSize = dividerSize;
 

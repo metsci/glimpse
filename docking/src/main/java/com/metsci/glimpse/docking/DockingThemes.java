@@ -31,42 +31,42 @@ import java.util.logging.Logger;
 
 import static java.awt.Color.*;
 
-public class CustomDockingThemes
+public class DockingThemes
 {
 
-    protected static final Logger logger = Logger.getLogger( CustomDockingThemes.class.getName( ) );
+    protected static final Logger logger = Logger.getLogger( DockingThemes.class.getName( ) );
 
 
-    public static final CustomDockingTheme defaultDockingTheme = new CustomDockingTheme( 5,
+    public static final DockingTheme defaultDockingTheme = new DockingTheme( 5,
 
-                                                                                         1, // Even lineThickness values do NOT work well
-                                                                                         5,
-                                                                                         2,
-                                                                                         4,
+                                                                             1, // Even lineThickness values do NOT work well
+                                                                             5,
+                                                                             2,
+                                                                             4,
 
-                                                                                         lightGray,
-                                                                                         white,
-                                                                                         darkGray,
-                                                                                         darkGray );
+                                                                             lightGray,
+                                                                             white,
+                                                                             darkGray,
+                                                                             darkGray );
 
 
-    public static CustomDockingTheme newDockingTheme( Color lineColor, Color textColor )
+    public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {
-        return new CustomDockingTheme( defaultDockingTheme.dividerSize,
+        return new DockingTheme( defaultDockingTheme.dividerSize,
 
-                                       defaultDockingTheme.lineThickness,
-                                       defaultDockingTheme.cornerRadius,
-                                       defaultDockingTheme.cardPadding,
-                                       defaultDockingTheme.labelPadding,
+                                 defaultDockingTheme.lineThickness,
+                                 defaultDockingTheme.cornerRadius,
+                                 defaultDockingTheme.cardPadding,
+                                 defaultDockingTheme.labelPadding,
 
-                                       lineColor,
-                                       defaultDockingTheme.highlightColor,
-                                       textColor,
-                                       textColor );
+                                 lineColor,
+                                 defaultDockingTheme.highlightColor,
+                                 textColor,
+                                 textColor );
     }
 
 
-    public static CustomDockingTheme tinyLafDockingTheme( )
+    public static DockingTheme tinyLafDockingTheme( )
     {
         try
         {
@@ -79,7 +79,7 @@ public class CustomDockingThemes
         }
     }
 
-    public static CustomDockingTheme tinyLafDockingTheme0( ) throws Exception
+    public static DockingTheme tinyLafDockingTheme0( ) throws Exception
     {
         return newDockingTheme( tinyLafColor( "tabPaneBorderColor" ), tinyLafColor( "tabFontColor" ) );
     }

@@ -44,8 +44,8 @@ import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.TinyLookAndFeel;
 
-import static com.metsci.glimpse.docking.CustomDockingThemes.*;
 import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
+import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.util.logging.Level.*;
 import static javax.swing.JFrame.*;
@@ -60,7 +60,7 @@ public class DockingExample
     {
         Theme.loadTheme( DockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        CustomDockingTheme dockingTheme = tinyLafDockingTheme( );
+        DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
         JPanel aPanel = new JPanel( ) {{ setBackground( Color.red ); }};
@@ -105,7 +105,7 @@ public class DockingExample
         hToolbar.add( new JButton( "H1" ) );
 
 
-        final DockingPane<?> dockingPane = new CustomDockingPane( dockingTheme );
+        final DockingPane dockingPane = new DockingPane( dockingTheme );
         dockingPane.addView( new View( "aView", "View A", null, null, aPanel, aToolbar ) );
         dockingPane.addView( new View( "bView", "View B", null, null, bPanel, bToolbar ) );
         dockingPane.addView( new View( "cView", "View C", null, null, cPanel, cToolbar ) );
