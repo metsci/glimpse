@@ -29,6 +29,7 @@ package com.metsci.glimpse.docking;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.awt.Color.*;
 
 public class DockingThemes
@@ -47,7 +48,10 @@ public class DockingThemes
                                                                              lightGray,
                                                                              white,
                                                                              darkGray,
-                                                                             darkGray );
+                                                                             darkGray,
+
+                                                                             requireIcon( "icons/maximize.gif" ),
+                                                                             requireIcon( "icons/restore.gif" ) );
 
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
@@ -62,7 +66,10 @@ public class DockingThemes
                                  lineColor,
                                  defaultDockingTheme.highlightColor,
                                  textColor,
-                                 textColor );
+                                 textColor,
+
+                                 defaultDockingTheme.maximizeIcon,
+                                 defaultDockingTheme.restoreIcon );
     }
 
 

@@ -28,6 +28,8 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Color;
 
+import javax.swing.ImageIcon;
+
 public class DockingTheme
 {
 
@@ -46,6 +48,9 @@ public class DockingTheme
     public final Color selectedTextColor;
     public final Color unselectedTextColor;
 
+    public final ImageIcon maximizeIcon;
+    public final ImageIcon restoreIcon;
+
 
     public DockingTheme( int dividerSize,
 
@@ -57,7 +62,10 @@ public class DockingTheme
                          Color lineColor,
                          Color highlightColor,
                          Color selectedTextColor,
-                         Color unselectedTextColor )
+                         Color unselectedTextColor,
+
+                         ImageIcon maximizeIcon,
+                         ImageIcon restoreIcon )
     {
         this.dividerSize = dividerSize;
 
@@ -70,6 +78,9 @@ public class DockingTheme
         this.highlightColor = highlightColor;
         this.selectedTextColor = selectedTextColor;
         this.unselectedTextColor = unselectedTextColor;
+
+        this.maximizeIcon = maximizeIcon;
+        this.restoreIcon = restoreIcon;
     }
 
 }

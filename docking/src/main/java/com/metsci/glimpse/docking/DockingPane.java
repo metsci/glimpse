@@ -30,6 +30,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -44,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.JButton;
 import javax.swing.JRootPane;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -85,10 +88,14 @@ public class DockingPane extends JRootPane
 
     protected final Map<ViewKey,View> viewsByKey;
     protected final Map<ViewKey,TileKey> tileKeys;
+    protected final Map<TileKey,JButton> tileMaximizeButtons;
 
     protected final DockingTheme theme;
     protected final DockingIndicatorOverlay indicatorOverlay;
     protected final JXMultiSplitPane splitPane;
+
+    protected TileKey maximizedTileKey;
+    protected ArrangementNode arrangementBeforeMaximize;
 
     protected int nextLeafNumber;
 
@@ -102,6 +109,7 @@ public class DockingPane extends JRootPane
     {
         this.viewsByKey = newHashMap( );
         this.tileKeys = newHashMap( );
+        this.tileMaximizeButtons = newHashMap( );
 
         this.theme = theme;
 
@@ -157,11 +165,12 @@ public class DockingPane extends JRootPane
         splitPane.setDividerSize( theme.dividerSize );
         splitPane.setBorder( createEmptyBorder( theme.dividerSize, theme.dividerSize, theme.dividerSize, theme.dividerSize ) );
 
-
         setContentPane( splitPane );
         setGlassPane( indicatorOverlay );
         indicatorOverlay.setVisible( true );
 
+        this.maximizedTileKey = null;
+        this.arrangementBeforeMaximize = null;
 
         this.nextLeafNumber = 0;
     }
@@ -179,6 +188,11 @@ public class DockingPane extends JRootPane
 
     public void addView( View view, TileKey tileKey, int viewPos )
     {
+        if ( maximizedTileKey != null && !areEqual( tileKey, maximizedTileKey ) )
+        {
+            unmaximizeTile( );
+        }
+
         ViewKey viewKey = view.viewKey;
         if ( viewsByKey.containsKey( viewKey ) ) throw new RuntimeException( "View-key has already been added: view-id = " + viewKey.viewId );
 
@@ -218,6 +232,11 @@ public class DockingPane extends JRootPane
     protected TileKey addNewTile( Node neighbor, Side sideOfNeighbor, double extentFraction )
     {
         if ( extentFraction < 0 || extentFraction > 1 ) throw new IllegalArgumentException( "Value for extentFraction is outside [0,1]: " + extentFraction );
+
+        if ( maximizedTileKey != null )
+        {
+            unmaximizeTile( );
+        }
 
         String newLeafId = nextLeafId( );
         Leaf newLeaf = new Leaf( newLeafId );
@@ -282,6 +301,51 @@ public class DockingPane extends JRootPane
         return initTile( newLeafId );
     }
 
+    public void maximizeTile( TileKey tileKey )
+    {
+        if ( maximizedTileKey != null )
+        {
+            unmaximizeTile( );
+        }
+
+        this.maximizedTileKey = tileKey;
+        this.arrangementBeforeMaximize = captureArrangement( );
+
+        // Probably safer to always have at least one leaf visible
+        MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
+        layout.displayNode( tileKey.leafId, true );
+        for ( TileKey tileKey0 : tileKeys.values( ) )
+        {
+            if ( !areEqual( tileKey0, tileKey ) )
+            {
+                layout.displayNode( tileKey0.leafId, false );
+            }
+        }
+
+        refreshMaximizeButtons( );
+    }
+
+    public void unmaximizeTile( )
+    {
+        if ( maximizedTileKey != null )
+        {
+            // XXX: This isn't enough -- views may have changed order as well
+
+            // In maximized tile, selected view should stay selected
+            View selectedView = tile( maximizedTileKey ).selectedView( );
+
+            // Must do this first, or restoreArrangement would call unmaximizeTile and trigger runaway recursion
+            this.maximizedTileKey = null;
+
+            restoreArrangement( arrangementBeforeMaximize );
+            this.arrangementBeforeMaximize = null;
+
+            tile( tileKeys.get( selectedView.viewKey ) ).selectView( selectedView );
+
+            refreshMaximizeButtons( );
+        }
+    }
+
     protected void splitBounds( Rectangle b, boolean isHorizSplit, double fraction1, Node node1, Divider nodeD, Node node2 )
     {
         if ( isHorizSplit )
@@ -314,19 +378,70 @@ public class DockingPane extends JRootPane
         return ( "Leaf_" + leafNumber );
     }
 
-    protected Tile newTile( )
+    protected void refreshMaximizeButtons( )
     {
-        return new Tile( theme );
+        for ( TileKey tileKey : tileKeys.values( ) )
+        {
+            refreshMaximizeButton( tileKey );
+        }
+    }
+
+    protected void refreshMaximizeButton( final TileKey tileKey )
+    {
+        final JButton button = tileMaximizeButtons.get( tileKey );
+
+        for ( ActionListener l : button.getActionListeners( ) )
+        {
+            button.removeActionListener( l );
+        }
+
+        if ( maximizedTileKey == null )
+        {
+            button.setIcon( theme.maximizeIcon );
+            button.addActionListener( new ActionListener( )
+            {
+                public void actionPerformed( ActionEvent ev )
+                {
+                    maximizeTile( tileKey );
+                    button.setIcon( theme.restoreIcon );
+                    button.getModel( ).setRollover( false );
+                }
+            } );
+        }
+        else
+        {
+            button.setIcon( theme.restoreIcon );
+            button.addActionListener( new ActionListener( )
+            {
+                public void actionPerformed( ActionEvent ev )
+                {
+                    unmaximizeTile( );
+                    button.setIcon( theme.maximizeIcon );
+                    button.getModel( ).setRollover( false );
+                }
+            } );
+        }
+    }
+
+    protected Tile newTile( final TileKey tileKey )
+    {
+        JButton maximizeButton = new JButton( theme.maximizeIcon );
+        tileMaximizeButtons.put( tileKey, maximizeButton );
+        refreshMaximizeButton( tileKey );
+
+        return new Tile( theme, maximizeButton );
     }
 
     protected TileKey initTile( String leafId )
     {
-        Tile tile = newTile( );
+        TileKey tileKey = new TileKey( leafId );
+
+        Tile tile = newTile( tileKey );
         tile.addDockingMouseAdapter( new DockingMouseAdapter( tile ) );
 
         splitPane.add( tile, leafId );
 
-        return new TileKey( leafId );
+        return tileKey;
     }
 
     protected TileKey chooseDefaultTile( ViewKey viewKey )
@@ -385,6 +500,8 @@ public class DockingPane extends JRootPane
 
     protected void removeEmptyNodes( )
     {
+        // XXX: Needs to prune tileMaximizeButtons as well
+
         MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
 
         Node model = layout.getModel( );
@@ -1041,6 +1158,7 @@ public class DockingPane extends JRootPane
     {
         requireSwingThread( );
 
+        // XXX: Capture/restore aren't quite inverses ... maybe this method is not accounting properly for splitPane's border?
 
         Map<ViewKey,View> views = newHashMap( viewsByKey );
 

@@ -229,7 +229,7 @@ public class Tile extends JComponent
     protected View selectedView;
 
 
-    public Tile( DockingTheme theme )
+    public Tile( DockingTheme theme, Component... cornerComponents )
     {
         this.theme = theme;
         final int lineThickness = theme.lineThickness;
@@ -246,8 +246,7 @@ public class Tile extends JComponent
         overflowBar.add( overflowPopupButton );
 
         this.cornerBar = newToolbar( true );
-        //cornerBar.add( new JButton( "Min" ) );
-        //cornerBar.add( new JButton( "Max" ) );
+        for ( Component c : cornerComponents ) cornerBar.add( c );
 
         this.viewBarHolder = new JPanel( new GridLayout( 1, 1 ) );
 
