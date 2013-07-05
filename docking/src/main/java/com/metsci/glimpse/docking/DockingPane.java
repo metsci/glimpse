@@ -95,7 +95,6 @@ public class DockingPane extends JRootPane
     protected final JXMultiSplitPane splitPane;
 
     protected TileKey maximizedTileKey;
-    protected ArrangementNode arrangementBeforeMaximize;
 
     protected int nextLeafNumber;
 
@@ -141,7 +140,7 @@ public class DockingPane extends JRootPane
                     double totalExtent = 0;
                     for ( Node child : split.getChildren( ) )
                     {
-                        if ( child instanceof Split || child instanceof Leaf )
+                        if ( child.isVisible( ) && ( child instanceof Split || child instanceof Leaf ) )
                         {
                             double childExtent = ( split.isRowLayout( ) ? child.getBounds( ).width : child.getBounds( ).height );
                             totalExtent += childExtent;
@@ -150,7 +149,7 @@ public class DockingPane extends JRootPane
 
                     for ( Node child : split.getChildren( ) )
                     {
-                        if ( child instanceof Split || child instanceof Leaf )
+                        if ( child.isVisible( ) && ( child instanceof Split || child instanceof Leaf ) )
                         {
                             double childExtent = ( split.isRowLayout( ) ? child.getBounds( ).width : child.getBounds( ).height );
                             child.setWeight( childExtent / totalExtent );
@@ -170,7 +169,6 @@ public class DockingPane extends JRootPane
         indicatorOverlay.setVisible( true );
 
         this.maximizedTileKey = null;
-        this.arrangementBeforeMaximize = null;
 
         this.nextLeafNumber = 0;
     }
@@ -188,11 +186,6 @@ public class DockingPane extends JRootPane
 
     public void addView( View view, TileKey tileKey, int viewPos )
     {
-        if ( maximizedTileKey != null && !areEqual( tileKey, maximizedTileKey ) )
-        {
-            unmaximizeTile( );
-        }
-
         ViewKey viewKey = view.viewKey;
         if ( viewsByKey.containsKey( viewKey ) ) throw new RuntimeException( "View-key has already been added: view-id = " + viewKey.viewId );
 
@@ -209,8 +202,14 @@ public class DockingPane extends JRootPane
 
         View view = viewsByKey.remove( viewKey );
         TileKey tileKey = tileKeys.remove( viewKey );
+        Tile tile = tile( tileKey );
 
-        tile( tileKey ).removeView( view );
+        tile.removeView( view );
+
+        if ( areEqual( tileKey, maximizedTileKey ) && tile.numViews( ) == 0 )
+        {
+            unmaximizeTile( );
+        }
 
         removeEmptyNodes( );
 
@@ -303,17 +302,25 @@ public class DockingPane extends JRootPane
 
     public void maximizeTile( TileKey tileKey )
     {
-        if ( maximizedTileKey != null )
+        if ( areEqual( tileKey, maximizedTileKey ) )
+        {
+            return;
+        }
+        else if ( !tileExists( tileKey ) )
+        {
+            unmaximizeTile( );
+            return;
+        }
+        else if ( maximizedTileKey != null )
         {
             unmaximizeTile( );
         }
 
-        this.maximizedTileKey = tileKey;
-        this.arrangementBeforeMaximize = captureArrangement( );
+        MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
 
         // Probably safer to always have at least one leaf visible
-        MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
         layout.displayNode( tileKey.leafId, true );
+
         for ( TileKey tileKey0 : tileKeys.values( ) )
         {
             if ( !areEqual( tileKey0, tileKey ) )
@@ -322,6 +329,8 @@ public class DockingPane extends JRootPane
             }
         }
 
+        this.maximizedTileKey = tileKey;
+
         refreshMaximizeButtons( );
     }
 
@@ -329,18 +338,13 @@ public class DockingPane extends JRootPane
     {
         if ( maximizedTileKey != null )
         {
-            // XXX: This isn't enough -- views may have changed order as well
+            MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
+            for ( TileKey tileKey : tileKeys.values( ) )
+            {
+                layout.displayNode( tileKey.leafId, true );
+            }
 
-            // In maximized tile, selected view should stay selected
-            View selectedView = tile( maximizedTileKey ).selectedView( );
-
-            // Must do this first, or restoreArrangement would call unmaximizeTile and trigger runaway recursion
             this.maximizedTileKey = null;
-
-            restoreArrangement( arrangementBeforeMaximize );
-            this.arrangementBeforeMaximize = null;
-
-            tile( tileKeys.get( selectedView.viewKey ) ).selectView( selectedView );
 
             refreshMaximizeButtons( );
         }
@@ -870,6 +874,7 @@ public class DockingPane extends JRootPane
             for ( TileKey tileKey : tileKeys.values( ) )
             {
                 Tile tile = tile( tileKey );
+                if ( !tile.isVisible( ) ) continue;
 
                 // Find coords relative to tile
                 int i = dragPoint.x - tile.getX( );
@@ -909,6 +914,7 @@ public class DockingPane extends JRootPane
 
             // Near edge of docking-pane
             //
+            if ( maximizedTileKey == null )
             {
                 // Coords relative to splitPane
                 int i = dragPoint.x;
@@ -939,7 +945,7 @@ public class DockingPane extends JRootPane
 
             // Near the edge of an existing tile
             //
-            if ( toTile != null )
+            if ( maximizedTileKey == null && toTile != null )
             {
                 // Find coords relative to tile
                 int i = dragPoint.x - toTile.getX( );
@@ -968,7 +974,7 @@ public class DockingPane extends JRootPane
 
             // In an existing tile, but not the one we started from, and not near the edge
             //
-            if ( toTileKey != null && !toTileKey.equals( fromTileKey ) )
+            if ( maximizedTileKey == null && toTileKey != null && !toTileKey.equals( fromTileKey ) )
             {
                 return new LastInExistingTile( toTileKey );
             }
