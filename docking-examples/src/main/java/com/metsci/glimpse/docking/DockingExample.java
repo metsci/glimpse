@@ -106,14 +106,14 @@ public class DockingExample
 
 
         final DockingPane dockingPane = new DockingPane( dockingTheme );
-        dockingPane.addView( new View( "aView", "View A", null, null, aPanel, aToolbar ) );
-        dockingPane.addView( new View( "bView", "View B", null, null, bPanel, bToolbar ) );
-        dockingPane.addView( new View( "cView", "View C", null, null, cPanel, cToolbar ) );
-        dockingPane.addView( new View( "dView", "View D", null, null, dPanel, dToolbar ) );
-        dockingPane.addView( new View( "eView", "View E", null, null, ePanel, eToolbar ) );
-        dockingPane.addView( new View( "fView", "View F", null, null, fPanel, fToolbar ) );
-        dockingPane.addView( new View( "gView", "View G", null, null, gPanel, gToolbar ) );
-        dockingPane.addView( new View( "hView", "View H", null, null, hPanel, hToolbar ) );
+        dockingPane.addView( new View( "aView", "View A", requireIcon( "icons/ViewA.png" ), null, aPanel, aToolbar ) );
+        dockingPane.addView( new View( "bView", "View B", requireIcon( "icons/ViewB.png" ), null, bPanel, bToolbar ) );
+        dockingPane.addView( new View( "cView", "View C", requireIcon( "icons/ViewC.png" ), null, cPanel, cToolbar ) );
+        dockingPane.addView( new View( "dView", "View D", requireIcon( "icons/ViewD.png" ), null, dPanel, dToolbar ) );
+        dockingPane.addView( new View( "eView", "View E", requireIcon( "icons/ViewE.png" ), null, ePanel, eToolbar ) );
+        dockingPane.addView( new View( "fView", "View F", requireIcon( "icons/ViewF.png" ), null, fPanel, fToolbar ) );
+        dockingPane.addView( new View( "gView", "View G", requireIcon( "icons/ViewG.png" ), null, gPanel, gToolbar ) );
+        dockingPane.addView( new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar ) );
 
 
 
