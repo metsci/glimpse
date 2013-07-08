@@ -1217,7 +1217,7 @@ public class DockingPane extends JRootPane
             TileKey tileKey = initTile( leafId );
             for ( String viewId : arrLeaf.viewIds )
             {
-                View view = views.get( new ViewKey( viewId ) );
+                View view = views.remove( new ViewKey( viewId ) );
                 if ( view != null ) addView( view, tileKey );
             }
 
@@ -1229,6 +1229,11 @@ public class DockingPane extends JRootPane
             {
                 maximizedTileKey = tileKey;
             }
+        }
+
+        for ( View view : views.values( ) )
+        {
+            addView( view );
         }
 
         if ( maximizedTileKey != null )
