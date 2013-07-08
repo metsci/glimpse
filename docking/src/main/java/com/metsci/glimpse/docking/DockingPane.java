@@ -472,7 +472,7 @@ public class DockingPane extends JRootPane
 
     protected TileKey chooseDefaultTile( ViewKey viewKey )
     {
-        Leaf tileLeaf = firstTileLeaf( splitPane.getMultiSplitLayout( ).getModel( ) );
+        Leaf tileLeaf = firstVisibleTileLeaf( splitPane.getMultiSplitLayout( ).getModel( ) );
         if ( tileLeaf != null ) return new TileKey( tileLeaf.getName( ) );
 
         return initTile( setSolitaryLeaf( ) );
@@ -483,7 +483,17 @@ public class DockingPane extends JRootPane
         return ( tileKey != null && isTileLeaf( splitPane.getMultiSplitLayout( ).getNodeForName( tileKey.leafId ) ) );
     }
 
+    protected Leaf firstVisibleTileLeaf( Node node )
+    {
+        return firstTileLeaf( node, true );
+    }
+
     protected Leaf firstTileLeaf( Node node )
+    {
+        return firstTileLeaf( node, false );
+    }
+
+    protected Leaf firstTileLeaf( Node node, boolean visibleOnly )
     {
         if ( isTileLeaf( node ) )
         {
@@ -495,7 +505,10 @@ public class DockingPane extends JRootPane
             for ( Node child : split.getChildren( ) )
             {
                 Leaf leaf = firstTileLeaf( child );
-                if ( leaf != null ) return leaf;
+                if ( leaf == null ) continue;
+
+                if ( !visibleOnly ) return leaf;
+                if ( visibleOnly && leaf.isVisible( ) ) return leaf;
             }
             return null;
         }
