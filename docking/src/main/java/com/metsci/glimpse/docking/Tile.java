@@ -92,7 +92,9 @@ public class Tile extends JComponent
             this.selected = false;
             this.label = new JLabel( view.title, view.icon, LEFT );
             label.setForeground( unselectedTextColor );
-            label.setBorder( createEmptyBorder( 0, lineThickness + labelPadding, 0, labelPadding ) );
+
+            // Add extra space on top and right, because text is right up against the edge
+            label.setBorder( createEmptyBorder( 2, lineThickness + labelPadding, 0, labelPadding + 2 ) );
 
             add( label, BorderLayout.CENTER );
         }
