@@ -336,6 +336,7 @@ public class DockingUtils
             toolbar = new JToolBar( );
         }
 
+        toolbar.setBorder( null );
         toolbar.setBorderPainted( false );
         toolbar.setFloatable( false );
         toolbar.setRollover( true );
