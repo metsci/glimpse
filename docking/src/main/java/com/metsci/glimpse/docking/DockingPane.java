@@ -1229,6 +1229,8 @@ public class DockingPane extends JRootPane
             String leafId = en.getKey( );
             ArrangementLeaf arrLeaf = en.getValue( );
 
+            View selectedView = views.get( new ViewKey( arrLeaf.selectedViewId ) );
+
             TileKey tileKey = initTile( leafId );
             for ( String viewId : arrLeaf.viewIds )
             {
@@ -1237,7 +1239,6 @@ public class DockingPane extends JRootPane
             }
 
             Tile tile = tile( tileKey );
-            View selectedView = views.get( new ViewKey( arrLeaf.selectedViewId ) );
             if ( tile.hasView( selectedView ) ) tile.selectView( selectedView );
 
             if ( arrLeaf.isMaximized )
