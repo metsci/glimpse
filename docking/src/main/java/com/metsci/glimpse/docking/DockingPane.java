@@ -76,10 +76,12 @@ import com.metsci.glimpse.docking.DockingUtils.Supplier;
 
 import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.ViewKey.*;
 import static java.awt.Color.*;
 import static java.awt.event.InputEvent.*;
 import static java.awt.event.MouseEvent.*;
 import static java.lang.Math.*;
+import static java.util.Collections.*;
 import static javax.swing.BorderFactory.*;
 import static javax.xml.bind.Marshaller.*;
 
@@ -1244,14 +1246,19 @@ public class DockingPane extends JRootPane
             }
         }
 
-        for ( View view : views.values( ) )
-        {
-            addView( view );
-        }
-
         if ( maximizedTileKey != null )
         {
+            // Maximize before adding unnamed views -- otherwise they might
+            // get placed in a hidden tile, which could be disconcerting
             maximizeTile( maximizedTileKey );
+        }
+
+        // Don't really care what order, as long as it's deterministic
+        List<ViewKey> viewKeys = newArrayList( views.keySet( ) );
+        sort( viewKeys, alphabeticalOrder );
+        for ( ViewKey viewKey : viewKeys )
+        {
+            addView( views.get( viewKey ) );
         }
 
 
