@@ -1221,8 +1221,9 @@ public class DockingPane extends JRootPane
                 if ( view != null ) addView( view, tileKey );
             }
 
+            Tile tile = tile( tileKey );
             View selectedView = views.get( new ViewKey( arrLeaf.selectedViewId ) );
-            if ( selectedView != null ) tile( tileKey ).selectView( selectedView );
+            if ( tile.hasView( selectedView ) ) tile.selectView( selectedView );
 
             if ( arrLeaf.isMaximized )
             {

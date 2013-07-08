@@ -509,6 +509,11 @@ public class Tile extends JComponent
         }
     }
 
+    public boolean hasView( View view )
+    {
+        return ( view != null && viewMap.containsKey( view.viewKey ) );
+    }
+
     public void selectView( View view )
     {
         if ( view == selectedView ) return;
