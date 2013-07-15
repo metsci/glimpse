@@ -56,6 +56,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.MiscUtils.*;
 import static java.awt.BasicStroke.*;
 import static java.lang.Math.*;
 import static javax.swing.BorderFactory.*;

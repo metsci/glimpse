@@ -28,25 +28,14 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
@@ -55,132 +44,10 @@ import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import org.jdesktop.swingx.MultiSplitLayout.ColSplit;
-import org.jdesktop.swingx.MultiSplitLayout.Node;
-import org.jdesktop.swingx.MultiSplitLayout.RowSplit;
-
 import static java.awt.ComponentOrientation.*;
 
 public class DockingUtils
 {
-
-    public static <E> void addAll( List<E> list, int index, E... elements )
-    {
-        list.addAll( index, Arrays.asList( elements ) );
-    }
-
-    public static class IntAndIndex
-    {
-        public final int value;
-        public final int index;
-
-        public IntAndIndex( int value, int index )
-        {
-            this.value = value;
-            this.index = index;
-        }
-    }
-
-    public static IntAndIndex minValueAndIndex( int... vs )
-    {
-        int iBest = -1;
-        int vBest = Integer.MAX_VALUE;
-        for ( int i = 0; i < vs.length; i++ )
-        {
-            int v = vs[ i ];
-            if ( v < vBest )
-            {
-                iBest = i;
-                vBest = v;
-            }
-        }
-        return new IntAndIndex( vBest, iBest );
-    }
-
-    public static Point pointRelativeToAncestor( MouseEvent ev, Component ancestor )
-    {
-        int i = ev.getX( );
-        int j = ev.getY( );
-        for ( Component c = ev.getComponent( ); c != ancestor; c = c.getParent( ) )
-        {
-            i += c.getX( );
-            j += c.getY( );
-        }
-        return new Point( i, j );
-    }
-
-    public static Rectangle innerBounds( JComponent c )
-    {
-        Insets insets = c.getInsets( );
-        return new Rectangle( insets.left,
-                              insets.top,
-                              c.getWidth( ) - insets.left - insets.right,
-                              c.getHeight( ) - insets.top - insets.bottom );
-    }
-
-    public static int xAfter( Rectangle r )
-    {
-        return r.x + r.width;
-    }
-
-    public static int yAfter( Rectangle r )
-    {
-        return r.y + r.height;
-    }
-
-    public static int xAfter( Node node )
-    {
-        return xAfter( node.getBounds( ) );
-    }
-
-    public static int yAfter( Node node )
-    {
-        return yAfter( node.getBounds( ) );
-    }
-
-    public static RowSplit newRowSplit( Rectangle bounds, Node... children )
-    {
-        RowSplit row = new RowSplit( children );
-        row.setBounds( bounds );
-        return row;
-    }
-
-    public static ColSplit newColSplit( Rectangle bounds, Node... children )
-    {
-        ColSplit col = new ColSplit( children );
-        col.setBounds( bounds );
-        return col;
-    }
-
-    public static int iround( double d )
-    {
-        return Math.round( ( float ) d );
-    }
-
-    public static <E> ArrayList<E> newArrayList( )
-    {
-        return new ArrayList<E>( );
-    }
-
-    public static <E> ArrayList<E> newArrayList( Collection<? extends E> c )
-    {
-        return new ArrayList<E>( c );
-    }
-
-    public static <K,V> HashMap<K,V> newHashMap( )
-    {
-        return new HashMap<K,V>( );
-    }
-
-    public static <K,V> HashMap<K,V> newHashMap( Map<? extends K,? extends V> m )
-    {
-        return new HashMap<K,V>( m );
-    }
-
-    public static boolean areEqual( Object a, Object b )
-    {
-        return ( a == b || ( a != null && a.equals( b ) ) );
-    }
 
     public static void requireSwingThread( )
     {

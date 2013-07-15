@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking;
 
 import java.util.Comparator;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.MiscUtils.*;
 
 public class ViewKey
 {

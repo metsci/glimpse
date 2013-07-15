@@ -70,12 +70,13 @@ import org.jdesktop.swingx.MultiSplitLayout.Split;
 import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementLeaf;
 import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementSplit;
-import com.metsci.glimpse.docking.DockingUtils.IntAndIndex;
 import com.metsci.glimpse.docking.DockingUtils.Runnable1;
 import com.metsci.glimpse.docking.DockingUtils.Supplier;
+import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 
 import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.MiscUtils.*;
 import static com.metsci.glimpse.docking.ViewKey.*;
 import static java.awt.Color.*;
 import static java.awt.event.InputEvent.*;
