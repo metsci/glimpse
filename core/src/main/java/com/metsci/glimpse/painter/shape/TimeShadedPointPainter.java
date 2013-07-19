@@ -134,10 +134,12 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         if ( timeAttributeBuffer != null )
         {
             startIndex = binarySearch0( timeAttributeBuffer, 0, timeAttributeBuffer.limit( ), startTime );
-            if ( startIndex < 0 ) startIndex = -( startIndex + 1 );
-            
+            if ( startIndex < 0 ) startIndex = - ( startIndex + 1 );
+            startIndex = firstIndex0( timeAttributeBuffer, startIndex, startTime );
+
             endIndex = binarySearch0( timeAttributeBuffer, 0, timeAttributeBuffer.limit( ), endTime );
-            if ( endIndex < 0 ) endIndex = -( endIndex + 1 );
+            if ( endIndex < 0 ) endIndex = - ( endIndex + 1 );
+            endIndex = lastIndex0( timeAttributeBuffer, endIndex, endTime );
         }
         else if ( positionBuffer != null )
         {
@@ -145,7 +147,27 @@ public class TimeShadedPointPainter extends ShadedPointPainter
             endIndex = positionBuffer.getNumVertices( );
         }
     }
-
+    
+    private static int lastIndex0( FloatBuffer b, int startIndex, float key )
+    {
+        for ( int i = startIndex ; i < b.limit( ) ; i++ )
+        {
+            if ( b.get( i ) != key ) return i-1;
+        }
+        
+        return b.limit( )-1;
+    }
+    
+    private static int firstIndex0( FloatBuffer b, int startIndex, float key )
+    {
+        for ( int i = startIndex ; i >= 0 ; i-- )
+        {
+            if ( b.get( i ) != key ) return i+1;
+        }
+        
+        return 0;
+    }
+    
     // java.util.Arrays.binarySearch0() modified to work with FloatBuffer
     private static int binarySearch0( FloatBuffer b, int fromIndex, int toIndex, float key )
     {
