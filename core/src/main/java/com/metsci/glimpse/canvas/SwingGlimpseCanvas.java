@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -39,9 +39,12 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
 import javax.media.opengl.awt.GLCanvas;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -67,7 +70,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     private static final long serialVersionUID = -5279064113986688397L;
 
     protected GLCanvas glCanvas;
-    protected FrameBufferGlimpseCanvas offscreenCanvas;
+    protected GLAutoDrawable tempDrawable;
 
     protected LayoutManager layoutManager;
 
@@ -75,7 +78,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
-
+    
     public SwingGlimpseCanvas( )
     {
         this( true );
@@ -315,21 +318,18 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     @Override
     public void removeNotify( )
     {
-        // transfer context to a holding drawable
-        if ( offscreenCanvas == null )
+        // transfer all contexts to a holding drawable
+        if ( tempDrawable == null )
         {
-            offscreenCanvas = new FrameBufferGlimpseCanvas( getWidth( ), getHeight( ), glCanvas.getContext( ) );
+        	// TODO: If this isn't correct then we might need to use the deprecated createGLPbuffer() method instead -- ttran17
+        	GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
+        	caps.setFBO(true);
+        	caps.setPBuffer(false);
+        	tempDrawable = GLDrawableFactory.getFactory(caps.getGLProfile()).createOffscreenAutoDrawable(null, caps, null, 10, 10, glCanvas.getContext());
         }
 
-        // add the layouts
-        offscreenCanvas.removeAllLayouts( );
-        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-        {
-            offscreenCanvas.addLayout( layout );
-        }
-
-        // paint so that all the buffers get added to the context
-        offscreenCanvas.paint( );
+        attachAllGLListeners( tempDrawable );
+        tempDrawable.display( );
 
         // remove the canvas (will destroy the context)
         boolean autoSwap = glCanvas.getAutoSwapBufferMode( );
@@ -337,7 +337,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         super.removeNotify( );
 
         // initialize the new canvas, share the temp context
-        this.glCanvas = new GLCanvas( null, null, offscreenCanvas.getGLContext( ), null );
+        this.glCanvas = new GLCanvas( tempDrawable.getChosenGLCapabilities( ), null, tempDrawable.getContext( ), null );
         this.glCanvas.setAutoSwapBufferMode( autoSwap );
         attachAllGLListeners( glCanvas );
         add( this.glCanvas, BorderLayout.CENTER );
@@ -394,12 +394,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 }
             }
 
-            @Override
-            public void dispose( GLAutoDrawable drawable )
-            {
-                // TODO Auto-generated method stub -- ttran17
-
-            }
+			@Override
+			public void dispose(GLAutoDrawable drawable) {
+				// TODO Auto-generated method stub -- ttran17
+				
+			}
         } );
     }
 
@@ -408,7 +407,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         return this.isDisposed;
     }
-
+    
     @Override
     public void dispose( RepaintManager manager )
     {
@@ -431,14 +430,14 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 {
                     glContext.release( );
                 }
-
+                
                 isDisposed = true;
             }
         };
-
+        
         if ( manager != null )
         {
-            manager.asyncExec( dispose );
+            manager.asyncExec( dispose );   
         }
         else
         {
