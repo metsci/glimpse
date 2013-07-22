@@ -134,12 +134,30 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         if ( timeAttributeBuffer != null )
         {
             startIndex = binarySearch0( timeAttributeBuffer, 0, timeAttributeBuffer.limit( ), startTime );
-            if ( startIndex < 0 ) startIndex = - ( startIndex + 1 );
-            startIndex = firstIndex0( timeAttributeBuffer, startIndex, startTime );
-
+            if ( startIndex < 0 ) {
+            	// index of the first element > startTime (inclusive lower index)
+            	startIndex = - ( startIndex + 1 ); 
+                if ( startIndex >= timeAttributeBuffer.limit( ) ) {
+                	startIndex = 0;
+                	endIndex = 0;
+                	return;
+                }
+            } else {
+            	startIndex = firstIndex0( timeAttributeBuffer, startIndex, startTime );
+            }
+            
             endIndex = binarySearch0( timeAttributeBuffer, 0, timeAttributeBuffer.limit( ), endTime );
-            if ( endIndex < 0 ) endIndex = - ( endIndex + 1 );
-            endIndex = lastIndex0( timeAttributeBuffer, endIndex, endTime );
+            if ( endIndex < 0 ) {
+            	// index of the first element > endTime (exclusive upper index)
+            	endIndex = - ( endIndex + 1 );
+            	if ( endIndex <= 0 ) {
+            		startIndex = 0;
+            		endIndex = 0;
+            		return;
+            	}
+            } else {
+                endIndex = lastIndex0( timeAttributeBuffer, endIndex, endTime ) + 1;            	
+            }
         }
         else if ( positionBuffer != null )
         {
