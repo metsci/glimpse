@@ -26,16 +26,12 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.awt.Color.*;
-import static java.awt.event.InputEvent.*;
-import static java.awt.event.MouseEvent.*;
-import static java.lang.Math.*;
-import static javax.xml.bind.Marshaller.*;
-
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -50,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.JButton;
 import javax.swing.JRootPane;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -70,44 +67,133 @@ import org.jdesktop.swingx.MultiSplitLayout.Node;
 import org.jdesktop.swingx.MultiSplitLayout.RowSplit;
 import org.jdesktop.swingx.MultiSplitLayout.Split;
 
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigLeaf;
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigNode;
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigSplit;
-import com.metsci.glimpse.docking.DockingUtils.IntAndIndex;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementLeaf;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementSplit;
 import com.metsci.glimpse.docking.DockingUtils.Runnable1;
 import com.metsci.glimpse.docking.DockingUtils.Supplier;
+import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 
-public abstract class DockingPane<T extends Component & Tile> extends JRootPane
+import static com.metsci.glimpse.docking.DockingThemes.*;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.MiscUtils.*;
+import static com.metsci.glimpse.docking.ViewKey.*;
+import static java.awt.Color.*;
+import static java.awt.event.InputEvent.*;
+import static java.awt.event.MouseEvent.*;
+import static java.lang.Math.*;
+import static java.util.Collections.*;
+import static javax.swing.BorderFactory.*;
+import static javax.xml.bind.Marshaller.*;
+
+public class DockingPane extends JRootPane
 {
-
-    protected final Class<T> tileClass;
 
     protected final Map<ViewKey,View> viewsByKey;
     protected final Map<ViewKey,TileKey> tileKeys;
+    protected final Map<TileKey,JButton> tileMaximizeButtons;
 
+    protected final DockingTheme theme;
     protected final DockingIndicatorOverlay indicatorOverlay;
     protected final JXMultiSplitPane splitPane;
+
+    protected TileKey maximizedTileKey;
 
     protected int nextLeafNumber;
 
 
-    public DockingPane( Class<T> tileClass )
+    public DockingPane( )
     {
-        this.tileClass = tileClass;
+        this( defaultDockingTheme );
+    }
 
+    public DockingPane( DockingTheme theme )
+    {
         this.viewsByKey = newHashMap( );
         this.tileKeys = newHashMap( );
+        this.tileMaximizeButtons = newHashMap( );
 
+        this.theme = theme;
 
         this.indicatorOverlay = new DockingIndicatorOverlay( black, 2, true );
-        this.splitPane = new JXMultiSplitPane( );
+
+        this.splitPane = new JXMultiSplitPane( new MultiSplitLayout( )
+        {
+            public void layoutContainer( Container parent )
+            {
+                // Ugh ... layoutGrow doesn't divvy up extra space intelligently to
+                // hidden tiles. But we need to set tile weights for hidden tiles, so
+                // that they look right when they become visible again. Hence this
+                // mess.
+                //
+                // It doesn't resize hidden tiles quite perfectly, but it doesn't do
+                // anything really dumb, either -- and it definitely works better than
+                // ignoring the issue.
+                //
+                TileKey maximizedTileKey = DockingPane.this.maximizedTileKey;
+                if ( maximizedTileKey != null )
+                {
+                    unmaximizeTile( );
+                    super.layoutContainer( parent );
+                }
+
+                // Set weights based on current sizes, so that the "layoutGrow" step
+                // in super.layoutContainer will divvy up extra space sensibly.
+                //
+                // This is not perfect. If you shrink the pane down far enough, some
+                // tiles will hit their min sizes and stop shrinking. When you then
+                // re-expand the pane, the relative sizes of such tiles won't go back
+                // to what it was originally.
+                //
+                setWeights( getModel( ) );
+
+                super.layoutContainer( parent );
+
+                if ( maximizedTileKey != null )
+                {
+                    maximizeTile( maximizedTileKey );
+                    super.layoutContainer( parent );
+                }
+            }
+
+            protected void setWeights( Node node )
+            {
+                if ( node instanceof Split )
+                {
+                    Split split = ( Split ) node;
+
+                    double totalExtent = 0;
+                    for ( Node child : split.getChildren( ) )
+                    {
+                        if ( child.isVisible( ) && ( child instanceof Split || child instanceof Leaf ) )
+                        {
+                            double childExtent = ( split.isRowLayout( ) ? child.getBounds( ).width : child.getBounds( ).height );
+                            totalExtent += childExtent;
+                        }
+                    }
+
+                    for ( Node child : split.getChildren( ) )
+                    {
+                        if ( child.isVisible( ) && ( child instanceof Split || child instanceof Leaf ) )
+                        {
+                            double childExtent = ( split.isRowLayout( ) ? child.getBounds( ).width : child.getBounds( ).height );
+                            child.setWeight( childExtent / totalExtent );
+                            setWeights( child );
+                        }
+                    }
+                }
+            }
+        } );
         splitPane.getMultiSplitLayout( ).setRemoveDividers( true );
         splitPane.getMultiSplitLayout( ).setFloatingDividers( false );
+        splitPane.setDividerSize( theme.dividerSize );
+        splitPane.setBorder( createEmptyBorder( theme.dividerSize, theme.dividerSize, theme.dividerSize, theme.dividerSize ) );
 
         setContentPane( splitPane );
         setGlassPane( indicatorOverlay );
         indicatorOverlay.setVisible( true );
 
+        this.maximizedTileKey = null;
 
         this.nextLeafNumber = 0;
     }
@@ -141,8 +227,14 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         View view = viewsByKey.remove( viewKey );
         TileKey tileKey = tileKeys.remove( viewKey );
+        Tile tile = tile( tileKey );
 
-        tile( tileKey ).removeView( view );
+        tile.removeView( view );
+
+        if ( areEqual( tileKey, maximizedTileKey ) && tile.numViews( ) == 0 )
+        {
+            unmaximizeTile( );
+        }
 
         removeEmptyNodes( );
 
@@ -164,6 +256,11 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
     protected TileKey addNewTile( Node neighbor, Side sideOfNeighbor, double extentFraction )
     {
         if ( extentFraction < 0 || extentFraction > 1 ) throw new IllegalArgumentException( "Value for extentFraction is outside [0,1]: " + extentFraction );
+
+        if ( maximizedTileKey != null )
+        {
+            unmaximizeTile( );
+        }
 
         String newLeafId = nextLeafId( );
         Leaf newLeaf = new Leaf( newLeafId );
@@ -228,6 +325,56 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         return initTile( newLeafId );
     }
 
+    public void maximizeTile( TileKey tileKey )
+    {
+        if ( areEqual( tileKey, maximizedTileKey ) )
+        {
+            return;
+        }
+        else if ( !tileExists( tileKey ) )
+        {
+            unmaximizeTile( );
+            return;
+        }
+        else if ( maximizedTileKey != null )
+        {
+            unmaximizeTile( );
+        }
+
+        MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
+
+        // Probably safer to always have at least one leaf visible
+        layout.displayNode( tileKey.leafId, true );
+
+        for ( TileKey tileKey0 : tileKeys.values( ) )
+        {
+            if ( !areEqual( tileKey0, tileKey ) )
+            {
+                layout.displayNode( tileKey0.leafId, false );
+            }
+        }
+
+        this.maximizedTileKey = tileKey;
+
+        refreshMaximizeButtons( );
+    }
+
+    public void unmaximizeTile( )
+    {
+        if ( maximizedTileKey != null )
+        {
+            MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
+            for ( TileKey tileKey : tileKeys.values( ) )
+            {
+                layout.displayNode( tileKey.leafId, true );
+            }
+
+            this.maximizedTileKey = null;
+
+            refreshMaximizeButtons( );
+        }
+    }
+
     protected void splitBounds( Rectangle b, boolean isHorizSplit, double fraction1, Node node1, Divider nodeD, Node node2 )
     {
         if ( isHorizSplit )
@@ -260,21 +407,75 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         return ( "Leaf_" + leafNumber );
     }
 
-    protected abstract T newTile( );
+    protected void refreshMaximizeButtons( )
+    {
+        for ( TileKey tileKey : tileKeys.values( ) )
+        {
+            refreshMaximizeButton( tileKey );
+        }
+    }
+
+    protected void refreshMaximizeButton( final TileKey tileKey )
+    {
+        final JButton button = tileMaximizeButtons.get( tileKey );
+
+        for ( ActionListener l : button.getActionListeners( ) )
+        {
+            button.removeActionListener( l );
+        }
+
+        if ( maximizedTileKey == null )
+        {
+            button.setIcon( theme.maximizeIcon );
+            button.addActionListener( new ActionListener( )
+            {
+                public void actionPerformed( ActionEvent ev )
+                {
+                    maximizeTile( tileKey );
+                    button.setIcon( theme.restoreIcon );
+                    button.getModel( ).setRollover( false );
+                }
+            } );
+        }
+        else
+        {
+            button.setIcon( theme.restoreIcon );
+            button.addActionListener( new ActionListener( )
+            {
+                public void actionPerformed( ActionEvent ev )
+                {
+                    unmaximizeTile( );
+                    button.setIcon( theme.maximizeIcon );
+                    button.getModel( ).setRollover( false );
+                }
+            } );
+        }
+    }
+
+    protected Tile newTile( final TileKey tileKey )
+    {
+        JButton maximizeButton = new JButton( theme.maximizeIcon );
+        tileMaximizeButtons.put( tileKey, maximizeButton );
+        refreshMaximizeButton( tileKey );
+
+        return new Tile( theme, maximizeButton );
+    }
 
     protected TileKey initTile( String leafId )
     {
-        T tile = newTile( );
+        TileKey tileKey = new TileKey( leafId );
+
+        Tile tile = newTile( tileKey );
         tile.addDockingMouseAdapter( new DockingMouseAdapter( tile ) );
 
         splitPane.add( tile, leafId );
 
-        return new TileKey( leafId );
+        return tileKey;
     }
 
     protected TileKey chooseDefaultTile( ViewKey viewKey )
     {
-        Leaf tileLeaf = firstTileLeaf( splitPane.getMultiSplitLayout( ).getModel( ) );
+        Leaf tileLeaf = firstVisibleTileLeaf( splitPane.getMultiSplitLayout( ).getModel( ) );
         if ( tileLeaf != null ) return new TileKey( tileLeaf.getName( ) );
 
         return initTile( setSolitaryLeaf( ) );
@@ -285,7 +486,17 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         return ( tileKey != null && isTileLeaf( splitPane.getMultiSplitLayout( ).getNodeForName( tileKey.leafId ) ) );
     }
 
+    protected Leaf firstVisibleTileLeaf( Node node )
+    {
+        return firstTileLeaf( node, true );
+    }
+
     protected Leaf firstTileLeaf( Node node )
+    {
+        return firstTileLeaf( node, false );
+    }
+
+    protected Leaf firstTileLeaf( Node node, boolean visibleOnly )
     {
         if ( isTileLeaf( node ) )
         {
@@ -297,7 +508,10 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             for ( Node child : split.getChildren( ) )
             {
                 Leaf leaf = firstTileLeaf( child );
-                if ( leaf != null ) return leaf;
+                if ( leaf == null ) continue;
+
+                if ( !visibleOnly ) return leaf;
+                if ( visibleOnly && leaf.isVisible( ) ) return leaf;
             }
             return null;
         }
@@ -312,7 +526,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         return ( node instanceof Leaf && splitPane.getMultiSplitLayout( ).getComponentForNode( node ) instanceof Tile );
     }
 
-    protected T tile( TileKey tileKey )
+    protected Tile tile( TileKey tileKey )
     {
         MultiSplitLayout layout = splitPane.getMultiSplitLayout( );
 
@@ -321,9 +535,9 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         Component component = layout.getComponentForNode( node );
         if ( component == null ) throw new RuntimeException( "No component for this tile-key: leaf-id = " + tileKey.leafId );
-        if ( !tileClass.isInstance( component ) ) throw new RuntimeException( "Component for this tile-key is not a Tile: leaf-id = " + tileKey.leafId );
+        if ( !( component instanceof Tile ) ) throw new RuntimeException( "Component for this tile-key is not a Tile: leaf-id = " + tileKey.leafId );
 
-        return tileClass.cast( component );
+        return ( Tile ) component;
     }
 
     protected void removeEmptyNodes( )
@@ -513,6 +727,8 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
     protected void removeLeafComponent( Leaf leaf )
     {
+        tileMaximizeButtons.remove( new TileKey( leaf.getName( ) ) );
+
         Component component = splitPane.getMultiSplitLayout( ).getComponentForNode( leaf );
         if ( component != null )
         {
@@ -619,13 +835,13 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
     protected class DockingMouseAdapter extends MouseAdapter
     {
-        protected final T tile;
+        protected final Tile tile;
 
         protected boolean dragging = false;
         protected ViewKey draggedViewKey = null;
 
 
-        public DockingMouseAdapter( T tile )
+        public DockingMouseAdapter( Tile tile )
         {
             this.tile = tile;
             this.dragging = false;
@@ -692,10 +908,11 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             TileKey fromTileKey = tileKeys.get( draggedViewKey );
 
             TileKey toTileKey = null;
-            T toTile = null;
+            Tile toTile = null;
             for ( TileKey tileKey : tileKeys.values( ) )
             {
-                T tile = tile( tileKey );
+                Tile tile = tile( tileKey );
+                if ( !tile.isVisible( ) ) continue;
 
                 // Find coords relative to tile
                 int i = dragPoint.x - tile.getX( );
@@ -735,6 +952,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
             // Near edge of docking-pane
             //
+            if ( maximizedTileKey == null )
             {
                 // Coords relative to splitPane
                 int i = dragPoint.x;
@@ -765,7 +983,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
             // Near the edge of an existing tile
             //
-            if ( toTile != null )
+            if ( maximizedTileKey == null && toTile != null )
             {
                 // Find coords relative to tile
                 int i = dragPoint.x - toTile.getX( );
@@ -794,7 +1012,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
             // In an existing tile, but not the one we started from, and not near the edge
             //
-            if ( toTileKey != null && !toTileKey.equals( fromTileKey ) )
+            if ( maximizedTileKey == null && toTileKey != null && !toTileKey.equals( fromTileKey ) )
             {
                 return new LastInExistingTile( toTileKey );
             }
@@ -860,7 +1078,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             @Override
             public Rectangle getIndicator( )
             {
-                T neighbor = tile( neighborKey );
+                Tile neighbor = tile( neighborKey );
                 int x = neighbor.getX( );
                 int y = neighbor.getY( );
                 int w = neighbor.getWidth( );
@@ -899,7 +1117,7 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             @Override
             public Rectangle getIndicator( )
             {
-                T tile = tile( tileKey );
+                Tile tile = tile( tileKey );
                 Rectangle tabBounds = tile.viewTabBounds( viewNum );
                 if ( tabBounds == null )
                 {
@@ -957,30 +1175,44 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
 
 
-    public final Supplier<ConfigNode> captureConfig = new Supplier<ConfigNode>( )
+    public final Supplier<ArrangementNode> captureArrangement = new Supplier<ArrangementNode>( )
     {
-        public ConfigNode get( )
+        public ArrangementNode get( )
         {
-            return captureConfig( );
+            return captureArrangement( );
         }
     };
 
-    public final Runnable1<ConfigNode> restoreConfig = new Runnable1<ConfigNode>( )
+    public final Runnable1<ArrangementNode> restoreArrangement = new Runnable1<ArrangementNode>( )
     {
-        public void run( ConfigNode config )
+        public void run( ArrangementNode arrangement )
         {
-            restoreConfig( config );
+            restoreArrangement( arrangement );
         }
     };
 
-    public ConfigNode captureConfig( )
+    public ArrangementNode captureArrangement( )
     {
         requireSwingThread( );
 
-        return toConfigNode( splitPane.getMultiSplitLayout( ).getModel( ) );
+        TileKey maximizedTileKey = this.maximizedTileKey;
+        if ( maximizedTileKey != null )
+        {
+            unmaximizeTile( );
+            splitPane.doLayout( );
+        }
+
+        ArrangementNode arrangement = toArrangement( splitPane.getMultiSplitLayout( ).getModel( ), maximizedTileKey );
+
+        if ( maximizedTileKey != null )
+        {
+            maximizeTile( maximizedTileKey );
+        }
+
+        return arrangement;
     }
 
-    public void restoreConfig( ConfigNode config )
+    public void restoreArrangement( ArrangementNode arrangement )
     {
         requireSwingThread( );
 
@@ -989,23 +1221,46 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
         for ( ViewKey viewKey : views.keySet( ) ) removeView( viewKey );
 
-        Map<String,ConfigLeaf> leavesById = newHashMap( );
-        splitPane.setModel( fromConfigNode( config, new Rectangle( 0, 0, splitPane.getWidth( ), splitPane.getHeight( ) ), leavesById ) );
+        Map<String,ArrangementLeaf> leavesById = newHashMap( );
+        splitPane.setModel( fromArrangement( arrangement, innerBounds( splitPane ), leavesById ) );
 
-        for ( Entry<String,ConfigLeaf> en : leavesById.entrySet( ) )
+        TileKey maximizedTileKey = null;
+        for ( Entry<String,ArrangementLeaf> en : leavesById.entrySet( ) )
         {
             String leafId = en.getKey( );
-            ConfigLeaf cLeaf = en.getValue( );
+            ArrangementLeaf arrLeaf = en.getValue( );
+
+            View selectedView = views.get( new ViewKey( arrLeaf.selectedViewId ) );
 
             TileKey tileKey = initTile( leafId );
-            for ( String viewId : cLeaf.viewIds )
+            for ( String viewId : arrLeaf.viewIds )
             {
-                View view = views.get( new ViewKey( viewId ) );
+                View view = views.remove( new ViewKey( viewId ) );
                 if ( view != null ) addView( view, tileKey );
             }
 
-            View selectedView = views.get( new ViewKey( cLeaf.selectedViewId ) );
-            if ( selectedView != null ) tile( tileKey ).selectView( selectedView );
+            Tile tile = tile( tileKey );
+            if ( tile.hasView( selectedView ) ) tile.selectView( selectedView );
+
+            if ( arrLeaf.isMaximized )
+            {
+                maximizedTileKey = tileKey;
+            }
+        }
+
+        if ( maximizedTileKey != null )
+        {
+            // Maximize before adding unnamed views -- otherwise they might
+            // get placed in a hidden tile, which could be disconcerting
+            maximizeTile( maximizedTileKey );
+        }
+
+        // Don't really care what order, as long as it's deterministic
+        List<ViewKey> viewKeys = newArrayList( views.keySet( ) );
+        sort( viewKeys, alphabeticalOrder );
+        for ( ViewKey viewKey : viewKeys )
+        {
+            addView( views.get( viewKey ) );
         }
 
 
@@ -1013,43 +1268,46 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         repaint( );
     }
 
-    protected ConfigNode toConfigNode( Node node )
+    protected ArrangementNode toArrangement( Node node, TileKey maximizedTileKey )
     {
         if ( node instanceof Split )
         {
             Split split = ( Split ) node;
-            ConfigSplit cSplit = new ConfigSplit( );
+            ArrangementSplit arrSplit = new ArrangementSplit( );
 
-            cSplit.isRow = split.isRowLayout( );
+            arrSplit.isRow = split.isRowLayout( );
 
             for ( Node child : split.getChildren( ) )
             {
-                ConfigNode cChild = toConfigNode( child );
-                if ( cChild != null )
+                ArrangementNode arrChild = toArrangement( child, maximizedTileKey );
+                if ( arrChild != null )
                 {
-                    cChild.extent = ( cSplit.isRow ? child.getBounds( ).width : child.getBounds( ).height );
-                    cSplit.childNodes.add( cChild );
+                    arrChild.extent = ( arrSplit.isRow ? child.getBounds( ).width : child.getBounds( ).height );
+                    arrSplit.childNodes.add( arrChild );
                 }
             }
 
-            return cSplit;
+            return arrSplit;
         }
         else if ( node instanceof Leaf )
         {
             Leaf leaf = ( Leaf ) node;
-            ConfigLeaf cLeaf = new ConfigLeaf( );
+            TileKey tileKey = new TileKey( leaf.getName( ) );
+            ArrangementLeaf arrLeaf = new ArrangementLeaf( );
 
-            Tile tile = tile( new TileKey( leaf.getName( ) ) );
+            arrLeaf.isMaximized = areEqual( tileKey, maximizedTileKey );
+
+            Tile tile = tile( tileKey );
             for ( int viewNum = 0; viewNum < tile.numViews( ); viewNum++ )
             {
                 View view = tile.view( viewNum );
-                cLeaf.viewIds.add( view.viewKey.viewId );
+                arrLeaf.viewIds.add( view.viewKey.viewId );
             }
 
             View selectedView = tile.selectedView( );
-            cLeaf.selectedViewId = ( selectedView == null ? null : selectedView.viewKey.viewId );
+            arrLeaf.selectedViewId = ( selectedView == null ? null : selectedView.viewKey.viewId );
 
-            return cLeaf;
+            return arrLeaf;
         }
         else
         {
@@ -1057,18 +1315,18 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         }
     }
 
-    protected Node fromConfigNode( ConfigNode cNode, Rectangle bounds, Map<String,ConfigLeaf> leavesById_OUT )
+    protected Node fromArrangement( ArrangementNode arrNode, Rectangle bounds, Map<String,ArrangementLeaf> leavesById_OUT )
     {
-        if ( cNode instanceof ConfigSplit )
+        if ( arrNode instanceof ArrangementSplit )
         {
-            ConfigSplit cSplit = ( ConfigSplit ) cNode;
+            ArrangementSplit arrSplit = ( ArrangementSplit ) arrNode;
 
             int divPixels = splitPane.getDividerSize( );
-            int totalDivs = max( 0, cSplit.childNodes.size( ) - 1 );
-            int totalContentPixels = ( cSplit.isRow ? bounds.width : bounds.height ) - totalDivs*divPixels;
+            int totalDivs = max( 0, arrSplit.childNodes.size( ) - 1 );
+            int totalContentPixels = ( arrSplit.isRow ? bounds.width : bounds.height ) - totalDivs*divPixels;
 
             double totalContent = 0;
-            for ( ConfigNode cChild : cSplit.childNodes )
+            for ( ArrangementNode cChild : arrSplit.childNodes )
             {
                 totalContent += cChild.extent;
             }
@@ -1077,14 +1335,14 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
             int startPixel = 0;
             double contentSoFar = 0;
             List<Node> children = newArrayList( );
-            for ( ConfigNode cChild : cSplit.childNodes )
+            for ( ArrangementNode arrChild : arrSplit.childNodes )
             {
                 if ( !children.isEmpty( ) )
                 {
-                    int xDiv = ( cSplit.isRow ? startPixel    : 0            );
-                    int yDiv = ( cSplit.isRow ? 0             : startPixel   );
-                    int wDiv = ( cSplit.isRow ? divPixels     : bounds.width );
-                    int hDiv = ( cSplit.isRow ? bounds.height : divPixels    );
+                    int xDiv = ( arrSplit.isRow ? startPixel    : 0            ) + bounds.x;
+                    int yDiv = ( arrSplit.isRow ? 0             : startPixel   ) + bounds.y;
+                    int wDiv = ( arrSplit.isRow ? divPixels     : bounds.width );
+                    int hDiv = ( arrSplit.isRow ? bounds.height : divPixels    );
 
                     Divider divider = new Divider( );
                     divider.setBounds( new Rectangle( xDiv, yDiv, wDiv, hDiv ) );
@@ -1094,31 +1352,31 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
                     divsSoFar++;
                 }
 
-                int endPixel = iround( ( ( contentSoFar + cChild.extent ) / totalContent ) * totalContentPixels ) + divsSoFar*divPixels;
+                int endPixel = iround( ( ( contentSoFar + arrChild.extent ) / totalContent ) * totalContentPixels ) + divsSoFar*divPixels;
 
-                int xChild = ( cSplit.isRow ? startPixel          : 0 );
-                int yChild = ( cSplit.isRow ? 0                   : startPixel );
-                int wChild = ( cSplit.isRow ? endPixel-startPixel : bounds.width );
-                int hChild = ( cSplit.isRow ? bounds.height       : endPixel-startPixel );
+                int xChild = ( arrSplit.isRow ? startPixel          : 0                   ) + bounds.x;
+                int yChild = ( arrSplit.isRow ? 0                   : startPixel          ) + bounds.y;
+                int wChild = ( arrSplit.isRow ? endPixel-startPixel : bounds.width        );
+                int hChild = ( arrSplit.isRow ? bounds.height       : endPixel-startPixel );
 
-                Node child = fromConfigNode( cChild, new Rectangle( xChild, yChild, wChild, hChild ), leavesById_OUT );
+                Node child = fromArrangement( arrChild, new Rectangle( xChild, yChild, wChild, hChild ), leavesById_OUT );
                 children.add( child );
 
                 startPixel = endPixel;
-                contentSoFar += cChild.extent;
+                contentSoFar += arrChild.extent;
             }
 
-            Split split = ( cSplit.isRow ? new RowSplit( ) : new ColSplit( ) );
+            Split split = ( arrSplit.isRow ? new RowSplit( ) : new ColSplit( ) );
             split.setChildren( children );
             split.setBounds( bounds );
             return split;
         }
-        else if ( cNode instanceof ConfigLeaf )
+        else if ( arrNode instanceof ArrangementLeaf )
         {
-            ConfigLeaf cLeaf = ( ConfigLeaf ) cNode;
+            ArrangementLeaf arrLeaf = ( ArrangementLeaf ) arrNode;
             String leafId = nextLeafId( );
 
-            leavesById_OUT.put( leafId, cLeaf );
+            leavesById_OUT.put( leafId, arrLeaf );
 
             Leaf leaf = new Leaf( leafId );
             leaf.setBounds( bounds );
@@ -1126,30 +1384,30 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
         }
         else
         {
-            throw new RuntimeException( "Unrecognized subclass of ConfigNode: " + cNode.getClass( ).getName( ) );
+            throw new RuntimeException( "Unrecognized subclass of ArrangementNode: " + arrNode.getClass( ).getName( ) );
         }
     }
 
-    public static class Config
+    public static class Arrangement
     {
         @XmlType( name="Node" )
-        public static class ConfigNode
+        public static class ArrangementNode
         {
             public double extent = 1;
         }
 
         @XmlType( name="Split" )
-        public static class ConfigSplit extends ConfigNode
+        public static class ArrangementSplit extends ArrangementNode
         {
             public boolean isRow = false;
 
             @XmlElementWrapper( name="children" )
             @XmlElement( name="child" )
-            public List<ConfigNode> childNodes = newArrayList( );
+            public List<ArrangementNode> childNodes = newArrayList( );
         }
 
         @XmlType( name="Leaf" )
-        public static class ConfigLeaf extends ConfigNode
+        public static class ArrangementLeaf extends ArrangementNode
         {
             @XmlElementWrapper( name="views" )
             @XmlElement( name="view" )
@@ -1157,75 +1415,77 @@ public abstract class DockingPane<T extends Component & Tile> extends JRootPane
 
             @XmlElement( name="selectedView" )
             public String selectedViewId = null;
+
+            public boolean isMaximized = false;
         }
 
         public static Marshaller newJaxbMarshaller( ) throws IOException, JAXBException
         {
-            Marshaller marshaller = JAXBContext.newInstance( ConfigNode.class, ConfigSplit.class, ConfigLeaf.class ).createMarshaller( );
+            Marshaller marshaller = JAXBContext.newInstance( ArrangementNode.class, ArrangementSplit.class, ArrangementLeaf.class ).createMarshaller( );
             marshaller.setProperty( JAXB_FORMATTED_OUTPUT, true );
             return marshaller;
         }
 
-        public static JAXBElement<ConfigNode> newJaxbRoot( ConfigNode model )
+        public static JAXBElement<ArrangementNode> newJaxbRoot( ArrangementNode model )
         {
-            return new JAXBElement<ConfigNode>( new QName( "model" ), ConfigNode.class, model );
+            return new JAXBElement<ArrangementNode>( new QName( "model" ), ArrangementNode.class, model );
         }
 
-        public static void writeDockingConfigXml( ConfigNode model, File file ) throws JAXBException, IOException
+        public static void writeDockingArrangementXml( ArrangementNode model, File file ) throws JAXBException, IOException
         {
             newJaxbMarshaller( ).marshal( newJaxbRoot( model ), file );
         }
 
-        public static void writeDockingConfigXml( ConfigNode model, Writer writer ) throws JAXBException, IOException
+        public static void writeDockingArrangementXml( ArrangementNode model, Writer writer ) throws JAXBException, IOException
         {
             newJaxbMarshaller( ).marshal( newJaxbRoot( model ), writer );
         }
 
-        public static void writeDockingConfigXml( ConfigNode model, OutputStream stream ) throws JAXBException, IOException
+        public static void writeDockingArrangementXml( ArrangementNode model, OutputStream stream ) throws JAXBException, IOException
         {
             newJaxbMarshaller( ).marshal( newJaxbRoot( model ), stream );
         }
 
         public static Unmarshaller newJaxbUnmarshaller( ) throws JAXBException, IOException
         {
-            Unmarshaller unmarshaller = JAXBContext.newInstance( ConfigNode.class, ConfigSplit.class, ConfigLeaf.class ).createUnmarshaller( );
+            Unmarshaller unmarshaller = JAXBContext.newInstance( ArrangementNode.class, ArrangementSplit.class, ArrangementLeaf.class ).createUnmarshaller( );
             return unmarshaller;
         }
 
-        protected static ConfigNode castToConfigNode( Object object )
+        protected static ArrangementNode castToArrangementNode( Object object )
         {
-            if ( object instanceof ConfigNode )
+            if ( object instanceof ArrangementNode )
             {
-                return ( ConfigNode ) object;
+                return ( ArrangementNode ) object;
             }
             else if ( object instanceof JAXBElement )
             {
-                return castToConfigNode( ( ( JAXBElement<?> ) object ).getValue( ) );
+                return castToArrangementNode( ( ( JAXBElement<?> ) object ).getValue( ) );
             }
             else
             {
-                throw new ClassCastException( "Object is neither a ConfigNode nor a JAXBElement: classname = " + object.getClass( ).getName( ) );
+                throw new ClassCastException( "Object is neither an ArrangementNode nor a JAXBElement: classname = " + object.getClass( ).getName( ) );
             }
         }
 
-        public static ConfigNode readDockingConfigXml( URL url ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( URL url ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( url ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( url ) );
         }
 
-        public static ConfigNode readDockingConfigXml( File file ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( File file ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( file ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( file ) );
         }
 
-        public static ConfigNode readDockingConfigXml( Reader reader ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( Reader reader ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( reader ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( reader ) );
         }
 
-        public static ConfigNode readDockingConfigXml( InputStream stream ) throws JAXBException, IOException
+        public static ArrangementNode readDockingArrangementXml( InputStream stream ) throws JAXBException, IOException
         {
-            return castToConfigNode( newJaxbUnmarshaller( ).unmarshal( stream ) );
+            return castToArrangementNode( newJaxbUnmarshaller( ).unmarshal( stream ) );
         }
     }
 

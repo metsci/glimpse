@@ -4,46 +4,50 @@
     <isRow>true</isRow>
     <children>
         <child xsi:type="Leaf">
-            <extent>331.0</extent>
+            <extent>330.0</extent>
             <views>
                 <view>aView</view>
             </views>
             <selectedView>aView</selectedView>
+            <isMaximized>false</isMaximized>
         </child>
         <child xsi:type="Split">
-            <extent>1249.0</extent>
+            <extent>1245.0</extent>
             <isRow>false</isRow>
             <children>
                 <child xsi:type="Split">
-                    <extent>695.0</extent>
+                    <extent>691.0</extent>
                     <isRow>true</isRow>
                     <children>
                         <child xsi:type="Leaf">
-                            <extent>907.0</extent>
+                            <extent>895.0</extent>
                             <views>
-								<view>bView</view>
-								<view>cView</view>
+                                <view>bView</view>
+                                <view>cView</view>
                             </views>
-                            <selectedView>bView</selectedView>
+                            <selectedView>cView</selectedView>
+                            <isMaximized>false</isMaximized>
                         </child>
                         <child xsi:type="Leaf">
-                            <extent>100.0</extent>
+                            <extent>345.0</extent>
                             <views>
-								<view>dView</view>
-								<view>eView</view>
-								<view>fView</view>
+                                <view>dView</view>
+                                <view>eView</view>
+                                <view>fView</view>
                             </views>
-                            <selectedView>dView</selectedView>
+                            <selectedView>eView</selectedView>
+                            <isMaximized>false</isMaximized>
                         </child>
                     </children>
                 </child>
                 <child xsi:type="Leaf">
-                    <extent>165.0</extent>
+                    <extent>164.0</extent>
                     <views>
                         <view>gView</view>
                         <view>hView</view>
                     </views>
                     <selectedView>gView</selectedView>
+                    <isMaximized>false</isMaximized>
                 </child>
             </children>
         </child>

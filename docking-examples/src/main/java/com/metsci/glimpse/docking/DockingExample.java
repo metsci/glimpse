@@ -26,14 +26,10 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingPane.Config.*;
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.util.logging.Level.*;
-import static javax.swing.BorderFactory.*;
-import static javax.swing.JFrame.*;
-
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.logging.Logger;
 
@@ -43,10 +39,16 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
-import com.metsci.glimpse.docking.DockingPane.Config.ConfigNode;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.TinyLookAndFeel;
+
+import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
+import static com.metsci.glimpse.docking.DockingThemes.*;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.util.logging.Level.*;
+import static javax.swing.JFrame.*;
 
 public class DockingExample
 {
@@ -58,16 +60,17 @@ public class DockingExample
     {
         Theme.loadTheme( DockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
+        DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        JPanel aPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.red ); }};
-        JPanel bPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.green ); }};
-        JPanel cPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.blue ); }};
-        JPanel dPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.cyan ); }};
-        JPanel ePanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.magenta ); }};
-        JPanel fPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.yellow ); }};
-        JPanel gPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.gray ); }};
-        JPanel hPanel = new JPanel( ) {{ setBorder( createLineBorder( getBackground( ), 25 ) ); setBackground( Color.white ); }};
+        JPanel aPanel = new JPanel( ) {{ setBackground( Color.red ); }};
+        JPanel bPanel = new JPanel( ) {{ setBackground( Color.green ); }};
+        JPanel cPanel = new JPanel( ) {{ setBackground( Color.blue ); }};
+        JPanel dPanel = new JPanel( ) {{ setBackground( Color.cyan ); }};
+        JPanel ePanel = new JPanel( ) {{ setBackground( Color.magenta ); }};
+        JPanel fPanel = new JPanel( ) {{ setBackground( Color.yellow ); }};
+        JPanel gPanel = new JPanel( ) {{ setBackground( Color.gray ); }};
+        JPanel hPanel = new JPanel( ) {{ setBackground( Color.white ); }};
 
 
         JToolBar aToolbar = newToolbar( true );
@@ -102,15 +105,15 @@ public class DockingExample
         hToolbar.add( new JButton( "H1" ) );
 
 
-        final DockingPane<?> dockingPane = new ExperimentalDockingPane( );
-        dockingPane.addView( new View( "aView", "View A", null, null, aPanel, aToolbar ) );
-        dockingPane.addView( new View( "bView", "View B", null, null, bPanel, bToolbar ) );
-        dockingPane.addView( new View( "cView", "View C", null, null, cPanel, cToolbar ) );
-        dockingPane.addView( new View( "dView", "View D", null, null, dPanel, dToolbar ) );
-        dockingPane.addView( new View( "eView", "View E", null, null, ePanel, eToolbar ) );
-        dockingPane.addView( new View( "fView", "View F", null, null, fPanel, fToolbar ) );
-        dockingPane.addView( new View( "gView", "View G", null, null, gPanel, gToolbar ) );
-        dockingPane.addView( new View( "hView", "View H", null, null, hPanel, hToolbar ) );
+        final DockingPane dockingPane = new DockingPane( dockingTheme );
+        dockingPane.addView( new View( "aView", "View A", requireIcon( "icons/ViewA.png" ), null, aPanel, aToolbar ) );
+        dockingPane.addView( new View( "bView", "View B", requireIcon( "icons/ViewB.png" ), null, bPanel, bToolbar ) );
+        dockingPane.addView( new View( "cView", "View C", requireIcon( "icons/ViewC.png" ), null, cPanel, cToolbar ) );
+        dockingPane.addView( new View( "dView", "View D", requireIcon( "icons/ViewD.png" ), null, dPanel, dToolbar ) );
+        dockingPane.addView( new View( "eView", "View E", requireIcon( "icons/ViewE.png" ), null, ePanel, eToolbar ) );
+        dockingPane.addView( new View( "fView", "View F", requireIcon( "icons/ViewF.png" ), null, fPanel, fToolbar ) );
+        dockingPane.addView( new View( "gView", "View G", requireIcon( "icons/ViewG.png" ), null, gPanel, gToolbar ) );
+        dockingPane.addView( new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar ) );
 
 
 
@@ -121,25 +124,25 @@ public class DockingExample
         frame.setPreferredSize( new Dimension( 1600, 900 ) );
         frame.pack( );
 
-        swingRun( dockingPane.restoreConfig, loadDockingArrangement( "docking-example" ) );
+        swingRun( dockingPane.restoreArrangement, loadDockingArrangement( "docking-example" ) );
 
-//        frame.addWindowListener( new WindowAdapter( )
-//        {
-//            public void windowClosing( WindowEvent ev )
-//            {
-//                saveDockingArrangement( "docking-example", dockingPane.captureConfig( ) );
-//            }
-//        } );
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            public void windowClosing( WindowEvent ev )
+            {
+                saveDockingArrangement( "docking-example", dockingPane.captureArrangement( ) );
+            }
+        } );
 
         frame.setVisible( true );
     }
 
-    public static void saveDockingArrangement( String appName, ConfigNode arrangement )
+    public static void saveDockingArrangement( String appName, ArrangementNode arrangement )
     {
         try
         {
             File arrangementFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeDockingConfigXml( arrangement, arrangementFile );
+            writeDockingArrangementXml( arrangement, arrangementFile );
         }
         catch ( Exception e )
         {
@@ -147,14 +150,14 @@ public class DockingExample
         }
     }
 
-    public static ConfigNode loadDockingArrangement( String appName )
+    public static ArrangementNode loadDockingArrangement( String appName )
     {
         try
         {
             File arrangementFile = new File( createAppDir( appName ), "arrangement.xml" );
             if ( arrangementFile.exists( ) )
             {
-                return readDockingConfigXml( arrangementFile );
+                return readDockingArrangementXml( arrangementFile );
             }
         }
         catch ( Exception e )
@@ -164,7 +167,7 @@ public class DockingExample
 
         try
         {
-            return readDockingConfigXml( DockingExample.class.getClassLoader( ).getResourceAsStream( "docking/arrangement-default.xml" ) );
+            return readDockingArrangementXml( DockingExample.class.getClassLoader( ).getResourceAsStream( "docking/arrangement-default.xml" ) );
         }
         catch ( Exception e )
         {

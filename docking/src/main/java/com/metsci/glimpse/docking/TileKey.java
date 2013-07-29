@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.MiscUtils.*;
 
 public class TileKey
 {

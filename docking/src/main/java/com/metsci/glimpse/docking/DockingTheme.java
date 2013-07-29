@@ -26,18 +26,61 @@
  */
 package com.metsci.glimpse.docking;
 
-public class CustomDockingPane extends DockingPane<CustomTile>
+import java.awt.Color;
+
+import javax.swing.ImageIcon;
+
+public class DockingTheme
 {
 
-    public CustomDockingPane( )
-    {
-        super( CustomTile.class );
-    }
+    public final int dividerSize;
 
-    @Override
-    protected CustomTile newTile( )
+    /**
+     * Even lineThickness values do NOT work well
+     */
+    public final int lineThickness;
+    public final int cornerRadius;
+    public final int cardPadding;
+    public final int labelPadding;
+
+    public final Color lineColor;
+    public final Color highlightColor;
+    public final Color selectedTextColor;
+    public final Color unselectedTextColor;
+
+    public final ImageIcon maximizeIcon;
+    public final ImageIcon restoreIcon;
+
+
+    public DockingTheme( int dividerSize,
+
+                         int lineThickness, // Even lineThickness values do NOT work well
+                         int cornerRadius,
+                         int cardPadding,
+                         int labelPadding,
+
+                         Color lineColor,
+                         Color highlightColor,
+                         Color selectedTextColor,
+                         Color unselectedTextColor,
+
+                         ImageIcon maximizeIcon,
+                         ImageIcon restoreIcon )
     {
-        return new CustomTile( );
+        this.dividerSize = dividerSize;
+
+        this.lineThickness = lineThickness;
+        this.cornerRadius = cornerRadius;
+        this.cardPadding = cardPadding;
+        this.labelPadding = labelPadding;
+
+        this.lineColor = lineColor;
+        this.highlightColor = highlightColor;
+        this.selectedTextColor = selectedTextColor;
+        this.unselectedTextColor = unselectedTextColor;
+
+        this.maximizeIcon = maximizeIcon;
+        this.restoreIcon = restoreIcon;
     }
 
 }

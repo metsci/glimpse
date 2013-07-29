@@ -26,10 +26,21 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
+import java.util.Comparator;
+
+import static com.metsci.glimpse.docking.MiscUtils.*;
 
 public class ViewKey
 {
+
+    public static final Comparator<ViewKey> alphabeticalOrder = new Comparator<ViewKey>( )
+    {
+        public int compare( ViewKey a, ViewKey b )
+        {
+            return a.viewId.compareTo( b.viewId );
+        }
+    };
+
 
     public final String viewId;
 
