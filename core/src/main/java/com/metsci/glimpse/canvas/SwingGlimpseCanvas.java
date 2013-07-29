@@ -39,11 +39,8 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
@@ -71,7 +68,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 
     protected GLCanvas glCanvas;
     protected FrameBufferGlimpseCanvas offscreenCanvas;
-    
+
     protected LayoutManager layoutManager;
 
     protected MouseWrapperSwing mouseHelper;
@@ -321,7 +318,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         // transfer context to a holding drawable
         if ( offscreenCanvas == null )
         {
-            offscreenCanvas = new FrameBufferGlimpseCanvas( getWidth( ), getHeight( ), glCanvas.getContext( ) );
+            offscreenCanvas = new FrameBufferGlimpseCanvas( 1, 1, glCanvas.getContext( ) );
         }
 
         // add the layouts
@@ -330,7 +327,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         {
             offscreenCanvas.addLayout( layout );
         }
-
+        
         // paint so that all the buffers get added to the context
         offscreenCanvas.paint( );
 
