@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.basic;
 
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -80,6 +82,37 @@ public class EmptyPlotExample implements GlimpseLayoutProvider
         plot.setAxisLabelX( "Axis X" );
         plot.setAxisLabelY( "Axis Y" );
         plot.setTitle( "Plot Title" );
+        
+        plot.addGlimpseMouseListener( new GlimpseMouseListener( )
+        {
+            
+            @Override
+            public void mouseReleased( GlimpseMouseEvent event )
+            {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void mousePressed( GlimpseMouseEvent event )
+            {
+                System.out.println( "Pressed " + event );
+            }
+            
+            @Override
+            public void mouseExited( GlimpseMouseEvent event )
+            {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void mouseEntered( GlimpseMouseEvent event )
+            {
+                // TODO Auto-generated method stub
+                
+            }
+        } );
 
         return plot;
     }
