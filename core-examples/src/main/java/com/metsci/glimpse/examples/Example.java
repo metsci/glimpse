@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.examples;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvasNew;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
@@ -48,12 +47,12 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
  */
 public class Example
 {
-    private SwingGlimpseCanvasNew canvas;
+    private SwingGlimpseCanvas canvas;
     private RepaintManager manager;
     private JFrame frame;
     private GlimpseLayout layout;
 
-    public Example( SwingGlimpseCanvasNew canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
+    public Example( SwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
     {
         super( );
         this.canvas = canvas;
@@ -62,7 +61,7 @@ public class Example
         this.layout = layout;
     }
 
-    public SwingGlimpseCanvasNew getCanvas( )
+    public SwingGlimpseCanvas getCanvas( )
     {
         return canvas;
     }
@@ -85,7 +84,7 @@ public class Example
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final SwingGlimpseCanvasNew canvas = new SwingGlimpseCanvasNew( GLProfile.GL2ES2, context );
+        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( GLProfile.GL2ES2, context );
 
         GlimpseLayout layout = layoutProvider.getLayout( );
         canvas.addLayout( layout );
@@ -116,11 +115,11 @@ public class Example
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        
-        SwingGlimpseCanvasNew leftPanel = new SwingGlimpseCanvasNew( GLProfile.GL2ES2, context );
+
+        SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( GLProfile.GL2ES2, context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 
-        SwingGlimpseCanvasNew rightPanel = new SwingGlimpseCanvasNew( GLProfile.GL2ES2, context );
+        SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( GLProfile.GL2ES2, context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
         RepaintManager repaintManager = new SwingRepaintManager( );

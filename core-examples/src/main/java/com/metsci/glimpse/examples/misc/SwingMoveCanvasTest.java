@@ -50,7 +50,7 @@ public class SwingMoveCanvasTest
     public static void main( String[] args ) throws Exception
     {
         // create a canvas and a plot
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, null );
+        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( );
         GlimpseLayout plot = new HeatMapExample( ).getLayout( );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );

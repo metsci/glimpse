@@ -238,7 +238,7 @@ public class DNCMapViewerExample
                 root = "dnc15-general";
             }
 
-            GlimpseCanvas panel = new SwingGlimpseCanvas( true );
+            GlimpseCanvas panel = new SwingGlimpseCanvas( );
             MercatorProjection projection = new MercatorProjection( );
 
             MapInfo<DNCObject> mapInfo = ResourceBasedMapInfo.createDNCMapInfo( root, dir );

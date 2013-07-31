@@ -64,7 +64,7 @@ public class ReprojectionExample
     public static void main( String[] args ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, context );
+        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( context );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
@@ -75,7 +75,7 @@ public class ReprojectionExample
         offscreenCanvas.addLayout( layout );
         manager.addGlimpseCanvas( offscreenCanvas );
 
-        final SwingGlimpseCanvas canvas2 = new SwingGlimpseCanvas( true, context );
+        final SwingGlimpseCanvas canvas2 = new SwingGlimpseCanvas( context );
         canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
         canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
         manager.addGlimpseCanvas( canvas2 );

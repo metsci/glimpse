@@ -136,7 +136,7 @@ public class BathymetryTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( true, wwc.getContext( ) );
+        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 

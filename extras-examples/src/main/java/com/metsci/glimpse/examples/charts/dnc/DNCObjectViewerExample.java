@@ -501,7 +501,7 @@ public class DNCObjectViewerExample extends JPanel
                 //roots.add("dnc15-coastal");
             }
 
-            SwingGlimpseCanvas panel = new SwingGlimpseCanvas( true );
+            SwingGlimpseCanvas panel = new SwingGlimpseCanvas( );
             SwingRepaintManager.newRepaintManager( panel );
 
             Iterator<String> rootIt = roots.iterator( );

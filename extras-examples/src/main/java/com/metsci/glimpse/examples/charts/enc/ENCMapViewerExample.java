@@ -248,7 +248,7 @@ public class ENCMapViewerExample
                 //root = "US1BS04M0";
             }
 
-            GlimpseCanvas panel = new SwingGlimpseCanvas( true );
+            GlimpseCanvas panel = new SwingGlimpseCanvas( );
             MercatorProjection projection = new MercatorProjection( );
 
             MapInfo<ENCObject> mapInfo = ResourceBasedMapInfo.createENCMapInfo( root, dir );

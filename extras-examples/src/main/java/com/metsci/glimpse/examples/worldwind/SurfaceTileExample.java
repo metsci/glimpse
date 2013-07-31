@@ -87,7 +87,7 @@ public class SurfaceTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( true, wwc.getContext( ) );
+        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( layout );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 

@@ -53,7 +53,7 @@ public class PopupMenuExample
 
     public static void main( String[] args ) throws Exception
     {
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true );
+        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( );
         GlimpseLayout plot = buildPlot( canvas );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );

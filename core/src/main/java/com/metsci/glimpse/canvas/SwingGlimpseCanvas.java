@@ -1,130 +1,151 @@
-/*
- * Copyright (c) 2012, Metron, Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of Metron, Inc. nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package com.metsci.glimpse.canvas;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelListener;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.awt.GLCanvas;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+import javax.media.opengl.GLProfile;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
+import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-/**
- * A JPanel onto which Glimpse rendering can take place. This class represents
- * the interface between Swing and OpenGL/Glimpse.
- *
- * @author ulman
- */
+// Jogamp / NEWT Links:
+//      https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/acore/TestSharedContextVBOES2NEWT.java
+//      http://forum.jogamp.org/Advantages-of-using-NEWT-vs-GLCanvas-td3703674.html
+//      http://jogamp.org/jogl/doc/NEWT-Overview.html
+//      http://jogamp.org/git/?p=jogl.git;a=blob;f=src/test/com/jogamp/opengl/test/junit/newt/parenting/TestParenting01cAWT.java;hb=HEAD
+//      http://jogamp.org/deployment/jogamp-next/javadoc/jogl/javadoc/com/jogamp/newt/event/awt/AWTAdapter.html
 public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 {
     private static final Logger logger = Logger.getLogger( SwingGlimpseCanvas.class.getName( ) );
 
-    private static final long serialVersionUID = -5279064113986688397L;
+    private static final long serialVersionUID = -160715062527667555L;
 
-    protected GLCanvas glCanvas;
-    protected FrameBufferGlimpseCanvas offscreenCanvas;
+    protected GLProfile glProfile;
+    protected GLCapabilities glCapabilities;
+    protected GLWindow glWindow;
+    protected NewtCanvasAWT glCanvas;
+    protected GLOffscreenAutoDrawable glDrawable;
 
-    protected LayoutManager layoutManager;
+    protected JComponent glassPane;
 
-    protected MouseWrapperSwing mouseHelper;
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
 
-    public SwingGlimpseCanvas( )
+    protected LayoutManager layoutManager;
+    protected MouseWrapperNewt mouseHelper;
+    
+    public SwingGlimpseCanvas( String profile, GLContext context )
     {
-        this( true );
-    }
+        this.glProfile = GLProfile.get( profile );
+        this.glCapabilities = new GLCapabilities( glProfile );
+        this.glDrawable = GLDrawableFactory.getFactory( glProfile ).createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1, context );
+        this.glWindow = GLWindow.create( glCapabilities );
+        this.glWindow.setSharedContext( glDrawable.getContext( ) );
+        this.glCanvas = new NewtCanvasAWT( glWindow );
 
-    public SwingGlimpseCanvas( GLContext _context )
-    {
-        this( true, _context );
-    }
-
-    public SwingGlimpseCanvas( boolean setNoEraseBackgroundProperty )
-    {
-        this( setNoEraseBackgroundProperty, null );
-    }
-
-    public SwingGlimpseCanvas( boolean setNoEraseBackgroundProperty, GLContext _context )
-    {
-        if ( setNoEraseBackgroundProperty )
-        {
-            System.setProperty( "sun.awt.noerasebackground", "true" );
-        }
-
-        if ( _context == null )
-        {
-            this.glCanvas = new GLCanvas( );
-        }
-        else
-        {
-            this.glCanvas = new GLCanvas( null, null, _context, null );
-        }
-
-        this.mouseHelper = new MouseWrapperSwing( this );
-        this.addMouseListener( this.mouseHelper );
-        this.addMouseMotionListener( this.mouseHelper );
-        this.addMouseWheelListener( this.mouseHelper );
+        this.glWindow.addGLEventListener( createGLEventListener( ) );
 
         this.layoutManager = new LayoutManager( );
 
         this.setLayout( new BorderLayout( ) );
         this.add( this.glCanvas, BorderLayout.CENTER );
 
+        this.mouseHelper = new MouseWrapperNewt( this );
+        this.glWindow.addMouseListener( this.mouseHelper );
+
         // workaround to enable the panel to shrink
+        // see: http://jogamp.org/jogl/doc/userguide/#heavylightweightissues
         this.setMinimumSize( new Dimension( 0, 0 ) );
 
         this.isDisposed = false;
-
-        this.addGLEventListener( this.glCanvas );
     }
 
+    public SwingGlimpseCanvas( GLContext context )
+    {
+        this( GLProfile.GL2GL3, context );
+    }
+    
+    public SwingGlimpseCanvas( )
+    {
+        this( GLProfile.GL2GL3, null );
+    }
+
+    private GLEventListener createGLEventListener( )
+    {
+        return new GLEventListener( )
+        {
+            @Override
+            public void init( GLAutoDrawable drawable )
+            {
+                try
+                {
+                    GL gl = drawable.getGL( );
+                    gl.setSwapInterval( 0 );
+                }
+                catch ( Exception e )
+                {
+                    // without this, repaint rate is tied to screen refresh rate on some systems
+                    // this doesn't work on some machines (Mac OSX in particular)
+                    // but it's not a big deal if it fails
+                    logWarning( logger, "Trouble in init.", e );
+                }
+            }
+
+            @Override
+            public void display( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.paintTo( getGlimpseContext( ) );
+                }
+            }
+
+            @Override
+            public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.layoutTo( getGlimpseContext( ) );
+                }
+            }
+
+            @Override
+            public void dispose( GLAutoDrawable drawable )
+            {
+                // TODO Auto-generated method stub -- ttran17
+
+            }
+        };
+    }
+    
+    public GLWindow getGLWindow( )
+    {
+        return glWindow;
+    }
+    
     @Override
     public GlimpseContext getGlimpseContext( )
     {
@@ -179,63 +200,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         // add GlimpseTargets which are not GlimpseLayouts to the list)
         return ( List ) this.layoutManager.getLayoutList( );
     }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void addMouseListener( MouseListener listener )
-    {
-        this.glCanvas.addMouseListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void addMouseMotionListener( MouseMotionListener listener )
-    {
-        this.glCanvas.addMouseMotionListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void addMouseWheelListener( MouseWheelListener listener )
-    {
-        this.glCanvas.addMouseWheelListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void removeMouseListener( MouseListener listener )
-    {
-        this.glCanvas.removeMouseListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void removeMouseMotionListener( MouseMotionListener listener )
-    {
-        this.glCanvas.removeMouseMotionListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void removeMouseWheelListener( MouseWheelListener listener )
-    {
-        this.glCanvas.removeMouseWheelListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void addKeyListener( KeyListener listener )
-    {
-        this.glCanvas.addKeyListener( listener );
-    }
-
-    @Override
-    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
-    public void removeKeyListener( KeyListener listener )
-    {
-        this.glCanvas.removeKeyListener( listener );
-    }
-
+    
     public Dimension getDimension( )
     {
         return this.glCanvas.getSize( );
@@ -256,13 +221,13 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     @Override
     public void paint( )
     {
-        this.glCanvas.display( );
+        this.glWindow.display( );
     }
 
     @Override
     public GLContext getGLContext( )
     {
-        return this.glCanvas.getContext( );
+        return this.glWindow.getContext( );
     }
 
     @Override
@@ -293,114 +258,6 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     public void setEventGenerator( boolean generate )
     {
         this.isEventGenerator = generate;
-    }
-
-    /**
-     * This implementation of removeNotify is to get around an inconvenience
-     * where this canvas is removed from one component hierarchy and added to
-     * another.  Technically, this will destroy the context.  But since Glimpse
-     * makes significant use of buffers and textures, this data needs to come
-     * along.  Therefore, we force shared contexts to preserve the information
-     * as we transition to another canvas.  This helps for docking frameworks
-     * and moving the canvas seamlessly.
-     * <p>
-     * We could override the removeNotify method of the enclosed GLCanvas, but
-     * then we'd have to take care of removing it from drawing into the screen.
-     * We could create a new GLCanvas directly shared with the old, instead of
-     * a pbuffer, but you have to draw into a new context at least once to share
-     * all the information, and you can't draw into a GLCanvas until it's
-     * physically displayed.
-     * </p>
-     */
-    @Override
-    public void removeNotify( )
-    {
-        // transfer context to a holding drawable
-        if ( offscreenCanvas == null )
-        {
-            offscreenCanvas = new FrameBufferGlimpseCanvas( 1, 1, glCanvas.getContext( ) );
-        }
-
-        // add the layouts
-        offscreenCanvas.removeAllLayouts( );
-        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-        {
-            offscreenCanvas.addLayout( layout );
-        }
-        
-        // paint so that all the buffers get added to the context
-        offscreenCanvas.paint( );
-
-        // remove the canvas (will destroy the context)
-        boolean autoSwap = glCanvas.getAutoSwapBufferMode( );
-        remove( this.glCanvas );
-        super.removeNotify( );
-
-        // initialize the new canvas, share the temp context
-        this.glCanvas = new GLCanvas( null, null, offscreenCanvas.getGLContext( ), null );
-        this.glCanvas.setAutoSwapBufferMode( autoSwap );
-        attachAllGLListeners( glCanvas );
-        add( this.glCanvas, BorderLayout.CENTER );
-    }
-
-    /**
-     * Attaches all the glimpse-related listeners to the new drawable.  This
-     * should also transfer over the AWT listeners, but it doesn't.
-     */
-    private void attachAllGLListeners( GLAutoDrawable drawable )
-    {
-        this.addMouseListener( this.mouseHelper );
-        this.addMouseMotionListener( this.mouseHelper );
-        this.addMouseWheelListener( this.mouseHelper );
-        this.addGLEventListener( drawable );
-    }
-
-    private void addGLEventListener( GLAutoDrawable drawable )
-    {
-        drawable.addGLEventListener( new GLEventListener( )
-        {
-            @Override
-            public void init( GLAutoDrawable drawable )
-            {
-                try
-                {
-                    GL gl = drawable.getGL( );
-                    gl.setSwapInterval( 0 );
-                }
-                catch ( Exception e )
-                {
-                    // without this, repaint rate is tied to screen refresh rate on some systems
-                    // this doesn't work on some machines (Mac OSX in particular)
-                    // but it's not a big deal if it fails
-                    logWarning( logger, "Trouble in init.", e );
-                }
-            }
-
-            @Override
-            public void display( GLAutoDrawable drawable )
-            {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.paintTo( getGlimpseContext( ) );
-                }
-            }
-
-            @Override
-            public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
-            {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.layoutTo( getGlimpseContext( ) );
-                }
-            }
-
-            @Override
-            public void dispose( GLAutoDrawable drawable )
-            {
-                // TODO Auto-generated method stub -- ttran17
-
-            }
-        } );
     }
 
     @Override

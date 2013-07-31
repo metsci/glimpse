@@ -61,7 +61,7 @@ public class ScreenCaptureExample
     public static void main( String[] args ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( true, context );
+        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( context );
 
         canvas.addLayout( new ScreenCaptureExample( ).getLayout( context ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );

@@ -503,7 +503,7 @@ public class ENCObjectViewerExample extends JPanel
                 //root = "US1BS04M";
             }
 
-            SwingGlimpseCanvas panel = new SwingGlimpseCanvas( true );
+            SwingGlimpseCanvas panel = new SwingGlimpseCanvas( );
             SwingRepaintManager.newRepaintManager( panel );
 
             GeoProjection projection = new MercatorProjection( );
