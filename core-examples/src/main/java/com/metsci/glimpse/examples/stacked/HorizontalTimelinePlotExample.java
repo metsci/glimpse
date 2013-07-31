@@ -100,12 +100,12 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         TimePlotInfo plot2 = plot.createTimePlot( "viscosity-plot-2-id" );
 
         // give the plots custom text labels indicating value being plotted and units
-        plot1.setLabelText( "Snail Speed (furlongs per fornight)" );
-        plot2.setLabelText( "Snail Slime Viscosity (pascal-seconds)" );
+//        plot1.setLabelText( "Snail Speed (furlongs per fornight)" );
+//        plot2.setLabelText( "Snail Slime Viscosity (pascal-seconds)" );
 
         // turn on timeline labels
-        plot.setLabelSize( 30 );
-        plot.showLabels( true );
+//        plot.setLabelSize( 30 );
+//        plot.showLabels( true );
 
         // display vertical labels
         plot1.getLabelPainter( ).setHorizontalLabels( false );
