@@ -28,14 +28,14 @@ package com.metsci.glimpse.examples.layout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.MouseEvent;
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.RepaintManager;
@@ -86,40 +86,18 @@ public class PopupMenuExample
 
         final JPopupMenu _popupMenu = createPopupMenu( );
 
-        canvas.addMouseListener( new MouseListener( )
+        canvas.getGLWindow( ).addMouseListener( new MouseAdapter( )
         {
-
             @Override
-            public void mouseClicked( MouseEvent arg0 )
+            public void mouseClicked( MouseEvent event )
             {
-                if ( arg0.getButton( ) == MouseEvent.BUTTON3 )
+                if ( event.getButton( ) == MouseEvent.BUTTON3 )
                 {
-                    _popupMenu.show( canvas, arg0.getX( ), arg0.getY( ) );
+                    _popupMenu.show( canvas, event.getX( ), event.getY( ) );
                 }
             }
-
-            @Override
-            public void mouseEntered( MouseEvent arg0 )
-            {
-            }
-
-            @Override
-            public void mouseExited( MouseEvent arg0 )
-            {
-            }
-
-            @Override
-            public void mousePressed( MouseEvent arg0 )
-            {
-            }
-
-            @Override
-            public void mouseReleased( MouseEvent arg0 )
-            {
-            }
-
         } );
-
+        
         return layout;
     }
 

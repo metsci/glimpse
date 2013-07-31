@@ -81,10 +81,11 @@ public class Example
         return layout;
     }
 
-    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
+
+    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profile ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( GLProfile.GL2ES2, context );
+        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( profile, context );
 
         GlimpseLayout layout = layoutProvider.getLayout( );
         canvas.addLayout( layout );
@@ -109,17 +110,22 @@ public class Example
             }
         } );
 
-        return new Example( canvas, manager, frame, layout );
+        return new Example( canvas, manager, frame, layout );   
+    }
+    
+    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
+    {
+        return showWithSwing( layoutProvider, GLProfile.GL2GL3 );
     }
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
 
-        SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( GLProfile.GL2ES2, context );
+        SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 
-        SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( GLProfile.GL2ES2, context );
+        SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
         RepaintManager repaintManager = new SwingRepaintManager( );
