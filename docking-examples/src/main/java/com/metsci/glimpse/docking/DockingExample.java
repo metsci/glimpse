@@ -35,7 +35,10 @@ import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
@@ -77,6 +80,11 @@ public class DockingExample
         aToolbar.add( new JButton( "A1" ) );
         aToolbar.add( new JButton( "A2" ) );
         aToolbar.add( new JButton( "A3" ) );
+
+        JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
+        JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
+        aOptionsPopup.add( new JMenuItem( "Option 1" ) );
+        aToolbar.add( aOptionsButton );
 
         JToolBar bToolbar = newToolbar( true );
         bToolbar.add( new JButton( "B1" ) );

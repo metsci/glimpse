@@ -50,6 +50,7 @@ public class DockingTheme
 
     public final ImageIcon maximizeIcon;
     public final ImageIcon restoreIcon;
+    public final ImageIcon optionsIcon;
 
 
     public DockingTheme( int dividerSize,
@@ -65,7 +66,8 @@ public class DockingTheme
                          Color unselectedTextColor,
 
                          ImageIcon maximizeIcon,
-                         ImageIcon restoreIcon )
+                         ImageIcon restoreIcon,
+                         ImageIcon optionsIcon )
     {
         this.dividerSize = dividerSize;
 
@@ -81,6 +83,7 @@ public class DockingTheme
 
         this.maximizeIcon = maximizeIcon;
         this.restoreIcon = restoreIcon;
+        this.optionsIcon = optionsIcon;
     }
 
 }
