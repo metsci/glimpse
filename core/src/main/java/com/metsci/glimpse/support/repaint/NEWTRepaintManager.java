@@ -24,7 +24,7 @@ public class NEWTRepaintManager extends RepaintManager
 
     public void asyncExec( final Runnable runnable )
     {
-        exec( runnable, false );
+        exec( runnable, true );
     }
 
     public void syncExec( Runnable runnable )

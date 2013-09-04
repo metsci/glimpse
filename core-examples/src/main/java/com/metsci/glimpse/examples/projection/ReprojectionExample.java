@@ -28,6 +28,9 @@ package com.metsci.glimpse.examples.projection;
 
 import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.media.opengl.GLContext;
 import javax.swing.JFrame;
 
@@ -88,16 +91,28 @@ public class ReprojectionExample
             @Override
             public void run( )
             {
-                canvas.dispose( manager );
-                canvas2.dispose( manager );
-                offscreenCanvas.dispose( manager );
+                offscreenCanvas.dispose( );
             }
         } );
     }
 
-    public static JFrame createFrame( String name, SwingGlimpseCanvas canvas )
+    public static JFrame createFrame( String name, final SwingGlimpseCanvas canvas )
     {
-        JFrame frame = new JFrame( name );
+        final JFrame frame = new JFrame( name );
+        
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // dispose of resources associated with the canvas
+                canvas.dispose( );
+                
+                // remove the canvas from the frame
+                frame.remove( canvas );
+            }
+        } );
+        
         frame.add( canvas );
 
         frame.pack( );

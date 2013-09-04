@@ -5,6 +5,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -26,8 +27,8 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
+import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 // Jogamp / NEWT Links:
@@ -57,6 +58,8 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     protected LayoutManager layoutManager;
     protected MouseWrapperNewt mouseHelper;
     
+    protected List<GLRunnable> disposeListeners;
+
     public SwingGlimpseCanvas( String profile, GLContext context )
     {
         this.glProfile = GLProfile.get( profile );
@@ -81,13 +84,15 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         this.setMinimumSize( new Dimension( 0, 0 ) );
 
         this.isDisposed = false;
+        
+        this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
 
     public SwingGlimpseCanvas( GLContext context )
     {
         this( GLProfile.GL2GL3, context );
     }
-    
+
     public SwingGlimpseCanvas( )
     {
         this( GLProfile.GL2GL3, null );
@@ -135,22 +140,31 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                // TODO Auto-generated method stub -- ttran17
-
+                logInfo( logger, "Disposing SwingGlimpseCanvas..." );
+                
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                for ( GLRunnable runnable : disposeListeners )
+                {
+                    runnable.run( drawable.getContext( ) );
+                }
             }
         };
     }
-    
+
     public GLAutoDrawable getGLDrawable( )
     {
         return glDrawable;
     }
-    
+
     public GLWindow getGLWindow( )
     {
         return glWindow;
     }
-    
+
     @Override
     public GlimpseContext getGlimpseContext( )
     {
@@ -205,7 +219,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         // add GlimpseTargets which are not GlimpseLayouts to the list)
         return ( List ) this.layoutManager.getLayoutList( );
     }
-    
+
     public Dimension getDimension( )
     {
         return this.glCanvas.getSize( );
@@ -272,39 +286,15 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( RepaintManager manager )
+    public void dispose( )
     {
-        Runnable dispose = new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                GLContext glContext = getGLContext( );
-                GlimpseContext context = new GlimpseContextImpl( glContext );
-                glContext.makeCurrent( );
-                try
-                {
-                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                    {
-                        layout.dispose( context );
-                    }
-                }
-                finally
-                {
-                    glContext.release( );
-                }
+        this.glWindow.destroy( );
+        this.isDisposed = true;
+    }
 
-                isDisposed = true;
-            }
-        };
-
-        if ( manager != null )
-        {
-            manager.asyncExec( dispose );
-        }
-        else
-        {
-            dispose.run( );
-        }
+    @Override
+    public void addDisposeListener( GLRunnable runnable )
+    {
+        this.disposeListeners.add( runnable );
     }
 }

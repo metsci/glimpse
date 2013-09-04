@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
 
+import javax.media.opengl.GLContext;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
@@ -37,7 +39,9 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.axis.tagged.shader.TaggedPointShader;
+import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
@@ -71,8 +75,34 @@ public class ScatterplotExample implements GlimpseLayoutProvider
 
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new ScatterplotExample( ) );
+        ScatterplotExample provider = new ScatterplotExample( );
+        Example example = Example.showWithSwing( provider );
+        provider.addDisposeListener( example.getCanvas( ) );
     }
+    
+    public void addDisposeListener( GlimpseCanvas canvas )
+    {
+        canvas.addDisposeListener( new GLRunnable( )
+        {
+            @Override
+            public Object run( GLContext context )
+            {
+                colorMapTexture.dispose( context );
+                sizeTexture.dispose( context );
+                sizeMapTexture.dispose( context );
+                xyValues.dispose( context.getGL( ) );
+                colorValues.dispose( context.getGL( ) );
+                
+                return null;
+            }
+        } );
+    }
+    
+    protected ColorTexture1D colorMapTexture;
+    protected ColorTexture1D sizeTexture;
+    protected FloatTexture1D sizeMapTexture;
+    protected GLFloatBuffer2D xyValues;
+    protected GLFloatBuffer colorValues;
 
     @Override
     public MultiAxisPlot2D getLayout( )
@@ -150,7 +180,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         as.setSize( 65 );
 
         // setup the color map for the painter and axis
-        ColorTexture1D colorMapTexture = new ColorTexture1D( 1024 );
+        colorMapTexture = new ColorTexture1D( 1024 );
 
         // use the predefined bathymetry color gradient (which is a dark
         // blue to light blue color gradient) but set the alpha value
@@ -170,7 +200,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         colorTagPainter.setColorScale( colorMapTexture );
 
         // setup the color map for the size painter (simple flat color)
-        ColorTexture1D sizeTexture = new ColorTexture1D( 1 );
+        sizeTexture = new ColorTexture1D( 1 );
         sizeTexture.mutate( new MutatorColor1D( )
         {
             @Override
@@ -188,7 +218,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
 
         // setup the size map for the painter (determines how size attribute
         // values get mapped to pixel sizes of points)
-        FloatTexture1D sizeMapTexture = new FloatTexture1D( 256 );
+        sizeMapTexture = new FloatTexture1D( 256 );
         final MutatorFloat1D sizeMutator = new MutatorFloat1D( )
         {
             @Override
@@ -245,7 +275,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         final Random r = new Random( );
 
         // setup the x y position data for the points
-        GLFloatBuffer2D xyValues = new GLFloatBuffer2D( NUM_POINTS );
+        xyValues = new GLFloatBuffer2D( NUM_POINTS );
         xyValues.mutate( new Mutator( )
         {
             @Override
@@ -264,7 +294,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         } );
 
         // setup the color value data for the points
-        GLFloatBuffer colorValues = new GLFloatBuffer( NUM_POINTS, 1 );
+        colorValues = new GLFloatBuffer( NUM_POINTS, 1 );
         colorValues.mutate( new Mutator( )
         {
             @Override

@@ -26,25 +26,25 @@
  */
 package com.metsci.glimpse.swt.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
-import javax.swing.SwingUtilities;
 import javax.media.opengl.awt.GLCanvas;
+import javax.swing.SwingUtilities;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.canvas.LayoutManager;
@@ -53,8 +53,8 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWTBridge;
 
@@ -73,6 +73,8 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
+
+    protected List<GLRunnable> disposeListeners;
 
     public SwtBridgeGlimpseCanvas( Composite parent )
     {
@@ -126,6 +128,8 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
         this.glFrame.add( this.glCanvas );
 
         this.addGLEventListener( this.glCanvas );
+
+        this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
 
     public GLCanvas getGLCanvas( )
@@ -279,7 +283,7 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                     {
                         glCanvas.requestFocus( );
                     }
-                });
+                } );
             }
         } );
     }
@@ -323,12 +327,19 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
                 }
             }
 
-			@Override
-			public void dispose(GLAutoDrawable drawable) {
-				// TODO Auto-generated method stub -- what to do? --ttran17
-			    //      Looks like in JOGL 2.0 you can dispose of the layouts
-				//      here but who knows ...
-			}
+            @Override
+            public void dispose( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                for ( GLRunnable runnable : disposeListeners )
+                {
+                    runnable.run( drawable.getContext( ) );
+                }
+            }
         } );
     }
 
@@ -339,53 +350,9 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( RepaintManager manager )
+    public void addDisposeListener( GLRunnable runnable )
     {
-        Runnable dispose = new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                GLContext glContext = getGLContext( );
-                GlimpseContext context = new GlimpseContextImpl( glContext );
-                glContext.makeCurrent( );
-                try
-                {
-                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                    {
-                        layout.dispose( context );
-                    }
-                }
-                finally
-                {
-                    glContext.release( );
-                }
-
-                isDisposed = true;
-            }
-        };
-
-        // don't dispose this component inside the Runnable
-        // (because dispose() should always be called from the SWT thread)
-        Display.getDefault( ).asyncExec( new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                if ( !SwtBridgeGlimpseCanvas.super.isDisposed( ) )
-                {
-                    dispose( );
-                }
-            }
-        } );
-
-        if ( manager != null )
-        {
-            manager.asyncExec( dispose );
-        }
-        else
-        {
-            dispose.run( );
-        }
+        this.disposeListeners.add( runnable );
+        this.isDisposed = true;
     }
 }

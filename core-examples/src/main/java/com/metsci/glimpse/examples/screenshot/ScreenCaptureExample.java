@@ -26,9 +26,11 @@
  */
 package com.metsci.glimpse.examples.screenshot;
 
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
 import javax.media.opengl.GLContext;
@@ -45,8 +47,6 @@ import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.repaint.RepaintManager;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.screenshot.ScreenshotUtil;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
@@ -66,24 +66,27 @@ public class ScreenCaptureExample
         canvas.addLayout( new ScreenCaptureExample( ).getLayout( context ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
+        final JFrame frame = new JFrame( "Glimpse Example" );
 
-        JFrame frame = new JFrame( "Glimpse Example" );
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // dispose of resources associated with the canvas
+                canvas.dispose( );
+
+                // remove the canvas from the frame
+                frame.remove( canvas );
+            }
+        } );
+
         frame.add( canvas );
 
         frame.pack( );
         frame.setSize( 800, 800 );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible( true );
-
-        Runtime.getRuntime( ).addShutdownHook( new Thread( )
-        {
-            @Override
-            public void run( )
-            {
-                canvas.dispose( manager );
-            }
-        } );
     }
 
     public ColorAxisPlot2D getLayout( GLContext context )

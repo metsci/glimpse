@@ -28,6 +28,9 @@ package com.metsci.glimpse.examples;
 
 import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
@@ -92,22 +95,30 @@ public class Example
 
         final RepaintManager manager = NEWTRepaintManager.newRepaintManager( canvas );
 
-        JFrame frame = new JFrame( "Glimpse Example" );
+        final JFrame frame = new JFrame( "Glimpse Example" );
+
+        // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
+        // This listener must be added before adding the SwingGlimpseCanvas to the frame because
+        // NEWTGLCanvas adds its own WindowListener and this WindowListener must receive the WindowEvent first.
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // dispose of resources associated with the canvas
+                canvas.dispose( );
+                
+                // remove the canvas from the frame
+                frame.remove( canvas );
+            }
+        } );
+
         frame.add( canvas );
 
         frame.pack( );
         frame.setSize( 800, 800 );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible( true );
-
-        Runtime.getRuntime( ).addShutdownHook( new Thread( )
-        {
-            @Override
-            public void run( )
-            {
-                canvas.dispose( manager );
-            }
-        } );
 
         return new Example( canvas, manager, frame, layout );
     }

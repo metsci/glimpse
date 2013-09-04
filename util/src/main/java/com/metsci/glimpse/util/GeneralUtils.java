@@ -364,6 +364,7 @@ public class GeneralUtils
         return Collections.list(Collections.<K>enumeration(values));
     }
 
+    @SuppressWarnings( "unchecked" )
     public static final <K> HashSet<K> asSet(K... values)
     {
         return new HashSet<K>(Arrays.asList(values));
@@ -412,6 +413,7 @@ public class GeneralUtils
     /**
      * Terse (especially as a static import) way to create a T[] literal.
      */
+    @SuppressWarnings( "unchecked" )
     public static <T> T[] array(T... values)
     {
         return values;
@@ -420,6 +422,7 @@ public class GeneralUtils
     /**
      * Terse (especially as a static import) way to create an EnumSet.
      */
+    @SuppressWarnings( "unchecked" )
     public static <T extends Enum<T>> EnumSet<T> enumSet(T... elements)
     {
         return EnumSet.<T>of(elements[0], elements);

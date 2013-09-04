@@ -28,6 +28,8 @@ package com.metsci.glimpse.examples.layout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -38,8 +40,6 @@ import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -58,24 +58,27 @@ public class PopupMenuExample
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
+        final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
+        
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // dispose of resources associated with the canvas
+                canvas.dispose( );
 
-        JFrame frame = new JFrame( "Glimpse Example (Swing)" );
+                // remove the canvas from the frame
+                frame.remove( canvas );
+            }
+        } );
+        
         frame.add( canvas );
 
         frame.pack( );
         frame.setSize( 800, 800 );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible( true );
-
-        Runtime.getRuntime( ).addShutdownHook( new Thread( )
-        {
-            @Override
-            public void run( )
-            {
-                canvas.dispose( manager );
-            }
-        } );
 
         return;
     }

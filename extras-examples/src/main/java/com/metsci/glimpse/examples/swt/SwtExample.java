@@ -78,7 +78,7 @@ public abstract class SwtExample
             @Override
             public void widgetDisposed( DisposeEvent event )
             {
-                canvas.dispose( manager );
+                canvas.dispose( );
             }
         } );
 

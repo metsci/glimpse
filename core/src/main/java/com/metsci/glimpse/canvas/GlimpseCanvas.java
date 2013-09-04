@@ -31,7 +31,7 @@ import javax.media.opengl.GLContext;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
-import com.metsci.glimpse.support.repaint.RepaintManager;
+import com.metsci.glimpse.gl.GLRunnable;
 
 /**
  * A heavy weight target for Glimpse rendering. Represents
@@ -65,9 +65,9 @@ public interface GlimpseCanvas extends GlimpseTarget
     public void paint( );
 
     /**
-     * Disposes of any native resources associated with the GlimpseCanvas.
+     * Disposes of any native resources of GlimpseLayouts and GlimpsePainters associated with the GlimpseCanvas.
      */
-    public void dispose( RepaintManager manager );
+    public void dispose( );
 
     /**
      *
@@ -75,4 +75,9 @@ public interface GlimpseCanvas extends GlimpseTarget
      *         this GlimpseCanvas is no longer valid for rendering.
      */
     public boolean isDisposed( );
+    
+    /**
+     * Called when the canvas is disposed. Can be used to clean up native resources used by this Canvas.
+     */
+    public void addDisposeListener( GLRunnable runnable );
 }
