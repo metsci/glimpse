@@ -51,7 +51,8 @@ public class DockingThemes
                                                                              darkGray,
 
                                                                              requireIcon( "icons/maximize.gif" ),
-                                                                             requireIcon( "icons/restore.gif" ) );
+                                                                             requireIcon( "icons/restore.gif" ),
+                                                                             requireIcon( "icons/options.gif" ) );
 
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
@@ -69,7 +70,8 @@ public class DockingThemes
                                  textColor,
 
                                  defaultDockingTheme.maximizeIcon,
-                                 defaultDockingTheme.restoreIcon );
+                                 defaultDockingTheme.restoreIcon,
+                                 defaultDockingTheme.optionsIcon );
     }
 
 
