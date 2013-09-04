@@ -141,6 +141,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         };
     }
     
+    public GLAutoDrawable getGLDrawable( )
+    {
+        return glDrawable;
+    }
+    
     public GLWindow getGLWindow( )
     {
         return glWindow;

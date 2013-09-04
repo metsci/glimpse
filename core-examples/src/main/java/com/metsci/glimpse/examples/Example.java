@@ -35,8 +35,8 @@ import javax.swing.JFrame;
 import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.repaint.RepaintManager;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -81,7 +81,6 @@ public class Example
         return layout;
     }
 
-
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profile ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
@@ -91,7 +90,7 @@ public class Example
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = NEWTRepaintManager.newRepaintManager( canvas );
 
         JFrame frame = new JFrame( "Glimpse Example" );
         frame.add( canvas );
@@ -110,9 +109,9 @@ public class Example
             }
         } );
 
-        return new Example( canvas, manager, frame, layout );   
+        return new Example( canvas, manager, frame, layout );
     }
-    
+
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
         return showWithSwing( layoutProvider, GLProfile.GL2GL3 );
@@ -128,7 +127,7 @@ public class Example
         SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
-        RepaintManager repaintManager = new SwingRepaintManager( );
+        RepaintManager repaintManager = new NEWTRepaintManager( leftPanel.getGLDrawable( ) );
         repaintManager.addGlimpseCanvas( leftPanel );
         repaintManager.addGlimpseCanvas( rightPanel );
         repaintManager.start( );
