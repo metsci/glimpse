@@ -65,9 +65,9 @@ public class CursorTextPainter extends GlimpsePainter2D
 
     public CursorTextPainter( Font font )
     {
-        this.textRenderer = new TextRenderer( font );        
+        this.textRenderer = new TextRenderer( font );
     }
-    
+
     public CursorTextPainter( )
     {
         this( FontUtils.getDefaultPlain( 12.0f ) );
@@ -97,14 +97,14 @@ public class CursorTextPainter extends GlimpsePainter2D
     {
         this.zTextGap = gap;
     }
-    
+
     /**
      * Gets the x position that will be annotated. Can be either the selection
      * center, the mouse or something else entirely.
      */
     protected float getPositionX( Axis2D axis )
     {
-        return ( float) axis.getAxisX( ).getSelectionCenter( );
+        return ( float ) axis.getAxisX( ).getSelectionCenter( );
     }
 
     /**
@@ -113,7 +113,7 @@ public class CursorTextPainter extends GlimpsePainter2D
      */
     protected float getPositionY( Axis2D axis )
     {
-        return ( float) axis.getAxisY( ).getSelectionCenter( );
+        return ( float ) axis.getAxisY( ).getSelectionCenter( );
     }
 
     /**
@@ -143,7 +143,7 @@ public class CursorTextPainter extends GlimpsePainter2D
         int centerPixelsX = axis.getAxisX( ).valueToScreenPixel( centerX );
         int centerPixelsY = axis.getAxisY( ).valueToScreenPixel( centerY );
 
-        int selectionSizePixelsX = ( int ) ( axis.getAxisX( ).getSelectionSize( ) / 2.0f * Math.abs(axis.getAxisX( ).getPixelsPerValue( )) );
+        int selectionSizePixelsX = ( int ) ( axis.getAxisX( ).getSelectionSize( ) / 2.0f * Math.abs( axis.getAxisX( ).getPixelsPerValue( ) ) );
 
         double x = ( centerPixelsX + horizontalBarSpacer + ( offsetBySelectionSize ? selectionSizePixelsX : 0 ) );
         double y = centerPixelsY + verticalBarSpacer + boundsY.getHeight( ) + ( boundsZ == null || zTextGap ? 0 : boundsZ.getHeight( ) );
@@ -178,7 +178,7 @@ public class CursorTextPainter extends GlimpsePainter2D
                     y = min( y, heightPixels - boundsX.getHeight( ) - boundsY.getHeight( ) - boundsZ.getHeight( ) );
                     y = max( y, 0 );
                 }
-    
+
                 // set the corners for Z text
                 corners[4] = ( float ) x;
                 corners[5] = ( float ) y;
@@ -221,8 +221,8 @@ public class CursorTextPainter extends GlimpsePainter2D
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
         if ( textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
