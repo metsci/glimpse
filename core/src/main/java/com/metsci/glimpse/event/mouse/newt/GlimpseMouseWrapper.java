@@ -44,31 +44,39 @@ public class GlimpseMouseWrapper
 
     public static GlimpseMouseEvent fromMouseEvent( MouseEvent event )
     {
-        return fromMouseEvent( event, (GlimpseTargetStack) event.getAttachment( ), event.getX( ), event.getY( ) );
+        return fromMouseEvent( event, ( GlimpseTargetStack ) event.getAttachment( ), event.getX( ), event.getY( ) );
     }
-    
+
     public static GlimpseMouseEvent fromMouseEvent( MouseEvent event, GlimpseTargetStack stack, int x, int y )
     {
-        int wheelIncrement = event.getWheelRotation( );
+        int wheelIncrement = ( int ) event.getRotation( )[1];
         int clickCount = event.getClickCount( );
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
 
         return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, wheelIncrement, clickCount );
     }
-    
+
     public static EnumSet<MouseButton> getMouseButtons( MouseEvent event )
     {
         EnumSet<MouseButton> buttons;
 
-        switch( event.getButton( ) )
+        switch ( event.getButton( ) )
         {
-            case MouseEvent.BUTTON1: buttons = EnumSet.of( MouseButton.Button1 ); break;
-            case MouseEvent.BUTTON2: buttons = EnumSet.of( MouseButton.Button2 ); break;
-            case MouseEvent.BUTTON3: buttons = EnumSet.of( MouseButton.Button3 ); break;
-            default: buttons = EnumSet.noneOf( MouseButton.class ); break;
+            case MouseEvent.BUTTON1:
+                buttons = EnumSet.of( MouseButton.Button1 );
+                break;
+            case MouseEvent.BUTTON2:
+                buttons = EnumSet.of( MouseButton.Button2 );
+                break;
+            case MouseEvent.BUTTON3:
+                buttons = EnumSet.of( MouseButton.Button3 );
+                break;
+            default:
+                buttons = EnumSet.noneOf( MouseButton.class );
+                break;
         }
-        
+
         return buttons;
     }
 
@@ -78,10 +86,10 @@ public class GlimpseMouseWrapper
 
         int mod = event.getModifiers( );
 
-        if ( ( mod & MouseEvent.ALT_MASK ) == MouseEvent.ALT_MASK )  modifiers.add( ModifierKey.Alt );
-        if ( ( mod & MouseEvent.CTRL_MASK ) == MouseEvent.CTRL_MASK )  modifiers.add( ModifierKey.Ctrl );
-        if ( ( mod & MouseEvent.META_MASK ) == MouseEvent.META_MASK )  modifiers.add( ModifierKey.Meta );
-        if ( ( mod & MouseEvent.SHIFT_MASK ) == MouseEvent.SHIFT_MASK )  modifiers.add( ModifierKey.Shift );
+        if ( ( mod & MouseEvent.ALT_MASK ) == MouseEvent.ALT_MASK ) modifiers.add( ModifierKey.Alt );
+        if ( ( mod & MouseEvent.CTRL_MASK ) == MouseEvent.CTRL_MASK ) modifiers.add( ModifierKey.Ctrl );
+        if ( ( mod & MouseEvent.META_MASK ) == MouseEvent.META_MASK ) modifiers.add( ModifierKey.Meta );
+        if ( ( mod & MouseEvent.SHIFT_MASK ) == MouseEvent.SHIFT_MASK ) modifiers.add( ModifierKey.Shift );
 
         return modifiers;
     }

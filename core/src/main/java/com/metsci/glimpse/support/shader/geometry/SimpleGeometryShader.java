@@ -108,11 +108,11 @@ public class SimpleGeometryShader extends SimpleShader
     {
         GL3 gl3 = gl.getGL3( );
 
-        gl3.glProgramParameteri( glProgramHandle, GL3.GL_GEOMETRY_INPUT_TYPE_ARB, inType );
+        gl3.glProgramParameteriARB( glProgramHandle, GL3.GL_GEOMETRY_INPUT_TYPE_ARB, inType );
         logGlError( gl3 );
-        gl3.glProgramParameteri( glProgramHandle, GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, outType );
+        gl3.glProgramParameteriARB( glProgramHandle, GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, outType );
         logGlError( gl3 );
-        gl3.glProgramParameteri( glProgramHandle, GL3.GL_GEOMETRY_VERTICES_OUT_ARB, maxVertices );
+        gl3.glProgramParameteriARB( glProgramHandle, GL3.GL_GEOMETRY_VERTICES_OUT_ARB, maxVertices );
         logGlError( gl3 );
 
         return true;

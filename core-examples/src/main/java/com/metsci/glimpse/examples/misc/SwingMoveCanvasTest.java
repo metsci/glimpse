@@ -32,10 +32,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -50,11 +50,11 @@ public class SwingMoveCanvasTest
     public static void main( String[] args ) throws Exception
     {
         // create a canvas and a plot
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( );
+        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( );
         GlimpseLayout plot = new HeatMapExample( ).getLayout( );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
-        SwingRepaintManager.newRepaintManager( canvas );
+        NEWTRepaintManager.newRepaintManager( canvas );
 
         // create two frames
         final JFrame frame = makeFrame( 0, 0, 800, 800 );

@@ -45,7 +45,7 @@ import javax.xml.bind.JAXBException;
 import org.xml.sax.SAXException;
 
 import com.metsci.glimpse.axis.UpdateMode;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.charts.vector.display.BasicSkin;
 import com.metsci.glimpse.charts.vector.display.BasicSkinHelper;
 import com.metsci.glimpse.charts.vector.display.ColorPalette;
@@ -79,7 +79,7 @@ public class ENCDisplayPanel<V extends GeoObject>
 {
     private static Logger logger = Logger.getLogger( ENCDisplayPanel.class.toString( ) );
 
-    private SwingGlimpseCanvas canvas;
+    private NewtGlimpseCanvas canvas;
     private GeoProjection projection;
     private GeoFilterableRecordList<V> encList;
     private BasicSkinHelper<V> skinHelper;
@@ -100,7 +100,7 @@ public class ENCDisplayPanel<V extends GeoObject>
 
     private boolean autoRezoom = false;
 
-    public ENCDisplayPanel( SwingGlimpseCanvas canvas,
+    public ENCDisplayPanel( NewtGlimpseCanvas canvas,
                             GeoProjection projection,
                             GeoFilterableRecordList<V> sourceENCList,
                             String skinResource,

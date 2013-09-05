@@ -53,7 +53,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.charts.vector.MercatorProjection;
 import com.metsci.glimpse.charts.vector.display.DNCBasicSkinHelper;
 import com.metsci.glimpse.charts.vector.display.examplesupport.AttributePanel;
@@ -70,7 +70,7 @@ import com.metsci.glimpse.charts.vector.iteration.GeoFilterableRecordList;
 import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.DNCObject;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -127,7 +127,7 @@ public class DNCObjectViewerExample extends JPanel
 
     private boolean iAmPublishing = false;
 
-    public DNCObjectViewerExample( SwingGlimpseCanvas canvas, GeoProjection GeoProjection, String encResource ) throws Exception
+    public DNCObjectViewerExample( NewtGlimpseCanvas canvas, GeoProjection GeoProjection, String encResource ) throws Exception
     {
         GeoFilterableRecordList<DNCObject> encSource = new GeoRecordListForStream<DNCObject>( new DNCObjectLoader( ), encResource );
         commonConstructor( canvas, GeoProjection, encSource );
@@ -135,14 +135,14 @@ public class DNCObjectViewerExample extends JPanel
         setMapName( encResource );
     }
 
-    public DNCObjectViewerExample( SwingGlimpseCanvas canvas, GeoProjection GeoProjection, GeoFilterableRecordList<DNCObject> sourceENCList ) throws Exception
+    public DNCObjectViewerExample( NewtGlimpseCanvas canvas, GeoProjection GeoProjection, GeoFilterableRecordList<DNCObject> sourceENCList ) throws Exception
     {
         commonConstructor( canvas, GeoProjection, sourceENCList );
 
         setMapName( null );
     }
 
-    private void commonConstructor( SwingGlimpseCanvas canvas, GeoProjection projection, final GeoFilterableRecordList<DNCObject> sourceENCList ) throws Exception
+    private void commonConstructor( NewtGlimpseCanvas canvas, GeoProjection projection, final GeoFilterableRecordList<DNCObject> sourceENCList ) throws Exception
     {
         selectedShapesPublisher = new UpdatePublisher<SelectedShapeChange<DNCObject>>( );
         this.sourceENCList = sourceENCList;
@@ -501,8 +501,8 @@ public class DNCObjectViewerExample extends JPanel
                 //roots.add("dnc15-coastal");
             }
 
-            SwingGlimpseCanvas panel = new SwingGlimpseCanvas( );
-            SwingRepaintManager.newRepaintManager( panel );
+            NewtGlimpseCanvas panel = new NewtGlimpseCanvas( );
+            NEWTRepaintManager.newRepaintManager( panel );
 
             Iterator<String> rootIt = roots.iterator( );
             String dncResource = dirPath + rootIt.next( ) + ".dnc";

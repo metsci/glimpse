@@ -44,13 +44,13 @@ import javax.swing.JPanel;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.examples.charts.bathy.BathymetryExample;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -136,14 +136,14 @@ public class BathymetryTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( wwc.getContext( ) );
+        NewtGlimpseCanvas glimpseCanvas = new NewtGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        SwingRepaintManager.newRepaintManager( glimpseCanvas );
+        NEWTRepaintManager.newRepaintManager( glimpseCanvas );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );

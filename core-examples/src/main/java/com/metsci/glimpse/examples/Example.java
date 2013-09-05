@@ -28,14 +28,12 @@ package com.metsci.glimpse.examples;
 
 import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
@@ -50,12 +48,12 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
  */
 public class Example
 {
-    private SwingGlimpseCanvas canvas;
+    private NewtGlimpseCanvas canvas;
     private RepaintManager manager;
     private JFrame frame;
     private GlimpseLayout layout;
 
-    public Example( SwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
+    public Example( NewtGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
     {
         super( );
         this.canvas = canvas;
@@ -64,7 +62,7 @@ public class Example
         this.layout = layout;
     }
 
-    public SwingGlimpseCanvas getCanvas( )
+    public NewtGlimpseCanvas getCanvas( )
     {
         return canvas;
     }
@@ -86,35 +84,35 @@ public class Example
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profile ) throws Exception
     {
-        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( profile, context );
+        // generate a GLContext by constructing a small offscreen pixel buffer
+        final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
+        final GLContext context = pBuffer.getContext( );
+        
+        // create a SwingGlimpseCanvas which shares the context
+        // other canvases could also be created which all share resources through this context
+        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( profile, context );
 
+        // create a top level GlimpseLayout which we can add painters and other layouts to
         GlimpseLayout layout = layoutProvider.getLayout( );
         canvas.addLayout( layout );
+        
+        // set a look and feel on the canvas (this will be applied to all attached layouts and painters)
+        // the look and feel affects default colors, fonts, etc...
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
+        // attach a repaint manager which repaints the canvas in a loop
         final RepaintManager manager = NEWTRepaintManager.newRepaintManager( canvas );
 
+        // create a Swing Frame to contain the GlimpseCanvas
         final JFrame frame = new JFrame( "Glimpse Example" );
 
-        // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
-        // This listener must be added before adding the SwingGlimpseCanvas to the frame because
-        // NEWTGLCanvas adds its own WindowListener and this WindowListener must receive the WindowEvent first.
-        frame.addWindowListener( new WindowAdapter( )
-        {
-            @Override
-            public void windowClosing( WindowEvent e )
-            {
-                // dispose of resources associated with the canvas
-                canvas.dispose( );
-                
-                // remove the canvas from the frame
-                frame.remove( canvas );
-            }
-        } );
+        // add a listener which will dispose of canvas resources when the JFrame is closed
+        canvas.addDisposeListener( frame, pBuffer );
 
+        // add the GlimpseCanvas to the frame
         frame.add( canvas );
 
+        // make the frame visible
         frame.pack( );
         frame.setSize( 800, 800 );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
@@ -130,12 +128,13 @@ public class Example
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
-        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
+        final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
+        final GLContext context = pBuffer.getContext( );
 
-        SwingGlimpseCanvas leftPanel = new SwingGlimpseCanvas( context );
+        NewtGlimpseCanvas leftPanel = new NewtGlimpseCanvas( context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 
-        SwingGlimpseCanvas rightPanel = new SwingGlimpseCanvas( context );
+        NewtGlimpseCanvas rightPanel = new NewtGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
         RepaintManager repaintManager = new NEWTRepaintManager( leftPanel.getGLDrawable( ) );
@@ -144,6 +143,7 @@ public class Example
         repaintManager.start( );
 
         JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
+        rightPanel.addDisposeListener( rightFrame, pBuffer );
         rightFrame.add( rightPanel );
 
         rightFrame.pack( );
@@ -153,6 +153,7 @@ public class Example
         rightFrame.setVisible( true );
 
         JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
+        leftPanel.addDisposeListener( leftFrame, pBuffer );
         leftFrame.add( leftPanel );
 
         leftFrame.pack( );

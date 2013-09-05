@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.projection;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -37,7 +37,7 @@ import javax.swing.JFrame;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
@@ -47,8 +47,8 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.projection.PolarProjection;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.repaint.RepaintManager;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -67,18 +67,18 @@ public class ReprojectionExample
     public static void main( String[] args ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( context );
+        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( context );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final RepaintManager manager = SwingRepaintManager.newRepaintManager( canvas );
+        final RepaintManager manager = NEWTRepaintManager.newRepaintManager( canvas );
 
         final FrameBufferGlimpseCanvas offscreenCanvas = new FrameBufferGlimpseCanvas( 800, 800, context );
         offscreenCanvas.addLayout( layout );
         manager.addGlimpseCanvas( offscreenCanvas );
 
-        final SwingGlimpseCanvas canvas2 = new SwingGlimpseCanvas( context );
+        final NewtGlimpseCanvas canvas2 = new NewtGlimpseCanvas( context );
         canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
         canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
         manager.addGlimpseCanvas( canvas2 );
@@ -96,10 +96,10 @@ public class ReprojectionExample
         } );
     }
 
-    public static JFrame createFrame( String name, final SwingGlimpseCanvas canvas )
+    public static JFrame createFrame( String name, final NewtGlimpseCanvas canvas )
     {
         final JFrame frame = new JFrame( name );
-        
+
         frame.addWindowListener( new WindowAdapter( )
         {
             @Override
@@ -107,12 +107,12 @@ public class ReprojectionExample
             {
                 // dispose of resources associated with the canvas
                 canvas.dispose( );
-                
+
                 // remove the canvas from the frame
                 frame.remove( canvas );
             }
         } );
-        
+
         frame.add( canvas );
 
         frame.pack( );

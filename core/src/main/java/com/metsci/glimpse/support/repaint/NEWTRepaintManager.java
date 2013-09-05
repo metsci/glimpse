@@ -3,11 +3,20 @@ package com.metsci.glimpse.support.repaint;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
 
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 
+/**
+ * A repaint manager for NEWT. Currently experimental: syncExec may not actually block
+ * like other RepaintManager implementations.
+ * 
+ * SwingRepaintManager or RepaintManager will also work. However NEWT decouples
+ * GL repainting from the EDT and SwingRepaintManager places the repaint loop on the EDT.
+ * 
+ * @author ulman
+ */
 public class NEWTRepaintManager extends RepaintManager
 {
-    public static NEWTRepaintManager newRepaintManager( SwingGlimpseCanvas canvas )
+    public static NEWTRepaintManager newRepaintManager( NewtGlimpseCanvas canvas )
     {
         NEWTRepaintManager manager = new NEWTRepaintManager( canvas.getGLDrawable( ) );
         manager.addGlimpseCanvas( canvas );
@@ -24,7 +33,7 @@ public class NEWTRepaintManager extends RepaintManager
 
     public void asyncExec( final Runnable runnable )
     {
-        exec( runnable, true );
+        exec( runnable, false );
     }
 
     public void syncExec( Runnable runnable )

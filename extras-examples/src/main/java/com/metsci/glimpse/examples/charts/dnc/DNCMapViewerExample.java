@@ -33,7 +33,7 @@ import javax.swing.JFrame;
 
 import com.metsci.glimpse.axis.UpdateMode;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
 import com.metsci.glimpse.charts.shoreline.LandShapePainter;
 import com.metsci.glimpse.charts.vector.MercatorProjection;
@@ -54,7 +54,7 @@ import com.metsci.glimpse.painter.info.MeasurementPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.shader.SampledColorScaleShaderInteger;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -213,7 +213,7 @@ public class DNCMapViewerExample
     private static void containInFrame( GlimpseCanvas canvas )
     {
         JFrame frame = new JFrame( "DNC Map Viewer Example" );
-        frame.add( ( SwingGlimpseCanvas ) canvas );
+        frame.add( ( NewtGlimpseCanvas ) canvas );
 
         frame.pack( );
         frame.setSize( 800, 800 );
@@ -238,13 +238,13 @@ public class DNCMapViewerExample
                 root = "dnc15-general";
             }
 
-            GlimpseCanvas panel = new SwingGlimpseCanvas( );
+            GlimpseCanvas panel = new NewtGlimpseCanvas( );
             MercatorProjection projection = new MercatorProjection( );
 
             MapInfo<DNCObject> mapInfo = ResourceBasedMapInfo.createDNCMapInfo( root, dir );
             new DNCMapViewerExample( panel, projection, mapInfo );
 
-            SwingRepaintManager.newRepaintManager( panel );
+            NEWTRepaintManager.newRepaintManager( panel );
             containInFrame( panel );
         }
         catch ( Throwable t )

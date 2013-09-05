@@ -49,7 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.charts.vector.MercatorProjection;
 import com.metsci.glimpse.charts.vector.display.ENCBasicSkinHelper;
 import com.metsci.glimpse.charts.vector.display.examplesupport.AttributePanel;
@@ -69,7 +69,7 @@ import com.metsci.glimpse.charts.vector.iteration.GeoIntAttributeFilter.Operator
 import com.metsci.glimpse.charts.vector.iteration.GeoRecordListForStream;
 import com.metsci.glimpse.charts.vector.parser.autogen.ENCAttributeType;
 import com.metsci.glimpse.charts.vector.parser.objects.ENCObject;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -113,7 +113,7 @@ public class ENCObjectViewerExample extends JPanel
 
     private boolean iAmPublishing = false;
 
-    public ENCObjectViewerExample( SwingGlimpseCanvas canvas, GeoProjection GeoProjection, String encResource ) throws Exception
+    public ENCObjectViewerExample( NewtGlimpseCanvas canvas, GeoProjection GeoProjection, String encResource ) throws Exception
     {
         GeoFilterableRecordList<ENCObject> encSource = new GeoRecordListForStream<ENCObject>( new ENCObjectLoader( ), encResource );
         commonConstructor( canvas, GeoProjection, encSource );
@@ -121,14 +121,14 @@ public class ENCObjectViewerExample extends JPanel
         setMapName( encResource );
     }
 
-    public ENCObjectViewerExample( SwingGlimpseCanvas canvas, GeoProjection GeoProjection, GeoFilterableRecordList<ENCObject> sourceENCList ) throws Exception
+    public ENCObjectViewerExample( NewtGlimpseCanvas canvas, GeoProjection GeoProjection, GeoFilterableRecordList<ENCObject> sourceENCList ) throws Exception
     {
         commonConstructor( canvas, GeoProjection, sourceENCList );
 
         setMapName( null );
     }
 
-    private void commonConstructor( SwingGlimpseCanvas canvas, GeoProjection projection, final GeoFilterableRecordList<ENCObject> sourceENCList ) throws Exception
+    private void commonConstructor( NewtGlimpseCanvas canvas, GeoProjection projection, final GeoFilterableRecordList<ENCObject> sourceENCList ) throws Exception
     {
         selectedShapesPublisher = new UpdatePublisher<SelectedShapeChange<ENCObject>>( );
         this.sourceENCList = sourceENCList;
@@ -503,8 +503,8 @@ public class ENCObjectViewerExample extends JPanel
                 //root = "US1BS04M";
             }
 
-            SwingGlimpseCanvas panel = new SwingGlimpseCanvas( );
-            SwingRepaintManager.newRepaintManager( panel );
+            NewtGlimpseCanvas panel = new NewtGlimpseCanvas( );
+            NEWTRepaintManager.newRepaintManager( panel );
 
             GeoProjection projection = new MercatorProjection( );
 

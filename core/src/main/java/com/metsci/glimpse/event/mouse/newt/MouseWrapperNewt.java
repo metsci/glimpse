@@ -1,9 +1,10 @@
 package com.metsci.glimpse.event.mouse.newt;
 
 import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.MouseEvent.PointerType;
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.opengl.GLWindow;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -13,7 +14,7 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
 {
     protected GLWindow glWindow;
 
-    public MouseWrapperNewt( SwingGlimpseCanvas canvas )
+    public MouseWrapperNewt( NewtGlimpseCanvas canvas )
     {
         super( canvas );
 
@@ -48,27 +49,54 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
 
         int parentHeight = glWindow.getHeight( );
 
-        int eventType = e.getEventType( );
+        short eventType = e.getEventType( );
         Object source = e.getSource( );
         long when = e.getWhen( );
         int modifiers = e.getModifiers( );
         int[] local_x = new int[] { e.getX( ) - bounds.getX( ) };
         int[] local_y = new int[] { e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) ) };
-        float[] pressure = new float[] { e.getPressure( ) };
-        int[] pointerIds = getPointerIds( e );
-        int clickCount = e.getClickCount( );
-        int button = e.getButton( );
-        int rotation = e.getWheelRotation( );
+        float[] pressure = getPressure( e );
+        float maxPressure = e.getMaxPressure( );
+        PointerType[] types = getPointerTypes( e );
+        short[] pointerIds = getPointerIds( e );
+        short clickCount = e.getClickCount( );
+        short button = e.getButton( );
+        float[] rotation = e.getRotation( );
+        float rotationScale = e.getRotationScale( );
 
-        MouseEvent event =  new MouseEvent( eventType, source, when, modifiers, local_x, local_y, pressure, pointerIds, clickCount, button, rotation );
+        MouseEvent event =  new MouseEvent( eventType, source, when, modifiers, local_x, local_y, pressure, maxPressure, types, pointerIds, clickCount, button, rotation, rotationScale );
         event.setAttachment( stack );
         
         return event;
     }
-
-    protected int[] getPointerIds( MouseEvent e )
+    
+    protected PointerType[] getPointerTypes( MouseEvent e )
     {
-        int[] ids = new int[e.getPointerCount( )];
+        PointerType[] types = new PointerType[e.getPointerCount( )];
+
+        for ( int i = 0; i < e.getPointerCount( ); i++ )
+        {
+            types[i] = e.getPointerType( i );
+        }
+
+        return types;
+    }
+    
+    protected float[] getPressure( MouseEvent e )
+    {
+        float[] ids = new float[e.getPointerCount( )];
+
+        for ( int i = 0; i < e.getPointerCount( ); i++ )
+        {
+            ids[i] = e.getPressure( i, false );
+        }
+
+        return ids;
+    }
+
+    protected short[] getPointerIds( MouseEvent e )
+    {
+        short[] ids = new short[e.getPointerCount( )];
 
         for ( int i = 0; i < e.getPointerCount( ); i++ )
         {

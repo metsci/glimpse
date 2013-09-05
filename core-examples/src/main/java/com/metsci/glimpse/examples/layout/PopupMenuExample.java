@@ -38,8 +38,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -53,13 +54,15 @@ public class PopupMenuExample
 
     public static void main( String[] args ) throws Exception
     {
-        final SwingGlimpseCanvas canvas = new SwingGlimpseCanvas( );
+        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( );
         GlimpseLayout plot = buildPlot( canvas );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
+        NEWTRepaintManager.newRepaintManager( canvas );
+
         final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
-        
+
         frame.addWindowListener( new WindowAdapter( )
         {
             @Override
@@ -72,7 +75,7 @@ public class PopupMenuExample
                 frame.remove( canvas );
             }
         } );
-        
+
         frame.add( canvas );
 
         frame.pack( );
@@ -83,7 +86,7 @@ public class PopupMenuExample
         return;
     }
 
-    protected static GlimpseLayout buildPlot( final SwingGlimpseCanvas canvas ) throws Exception
+    protected static GlimpseLayout buildPlot( final NewtGlimpseCanvas canvas ) throws Exception
     {
         GlimpseLayout layout = new SimpleLayoutExample( ).getLayout( );
 
@@ -100,7 +103,7 @@ public class PopupMenuExample
                 }
             }
         } );
-        
+
         return layout;
     }
 

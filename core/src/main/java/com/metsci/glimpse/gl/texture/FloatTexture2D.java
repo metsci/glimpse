@@ -134,7 +134,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F_ARB, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT,
+        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT,
                          data.rewind() );
     }
 

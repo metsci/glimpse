@@ -353,6 +353,5 @@ public class SwtBridgeGlimpseCanvas extends Composite implements GlimpseCanvas
     public void addDisposeListener( GLRunnable runnable )
     {
         this.disposeListeners.add( runnable );
-        this.isDisposed = true;
     }
 }

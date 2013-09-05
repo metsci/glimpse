@@ -43,7 +43,7 @@ public class GLPBufferUtils
 
     public static boolean canCreateGLPbuffer( )
     {
-        return GLDrawableFactory.getFactory(profile).canCreateGLPbuffer(null);
+        return GLDrawableFactory.getFactory(profile).canCreateGLPbuffer( null, null );
     }
 
     public static GLOffscreenAutoDrawable createPixelBuffer( int width, int height )
