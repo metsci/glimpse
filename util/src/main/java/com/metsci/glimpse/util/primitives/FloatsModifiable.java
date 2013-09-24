@@ -35,7 +35,8 @@ public interface FloatsModifiable extends Floats
 {
 
     void set(int i, float v);
-
+    void set(int i, float[] vs);
+    void set(int i, float[] vs, int from, int to);
 
 
     void insert(int i, float v);
@@ -79,7 +80,23 @@ public interface FloatsModifiable extends Floats
      * are present, there is no guarantee which one will be removed.
      */
     void remove(float v);
+    
+    /**
+     * Removes values starting at index from (inclusive) to index to (exclusive).
+     * All other values with indices greater than or equal to index to have
+     * their index in the array decreased by to-from and the size of the array is
+     * decreased by to-from.
+     */
+    void removeRange(int from, int to);
+    
+    /**
+     * Remove value at index. All other values with indices greater than index have
+     * their index in the array decreased by one and the size of the array is
+     * decreased by one.
+     */
+    void removeIndex(int index);
 
+    void clear( );
 
 
     void ensureCapacity(int minCapacity);

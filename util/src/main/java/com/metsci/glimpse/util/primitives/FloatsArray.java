@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.util.primitives;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.nio.FloatBuffer;
 
@@ -151,6 +150,21 @@ public class FloatsArray implements FloatsModifiable
     public void set(int i, float v)
     {
         a[i] = v;
+    }
+    
+    @Override
+    public void set(int i, float[] vs)
+    {
+        set( i, vs, 0, vs.length );
+    }
+    
+    @Override
+    public void set(int i, float[] vs, int from, int to)
+    {
+        int c = to - from;
+        ensureCapacity( i + c );
+        System.arraycopy( vs, from, a, i, c );
+        n = i + c;
     }
 
     @Override
@@ -418,6 +432,26 @@ public class FloatsArray implements FloatsModifiable
             }
         }
     }
+    
+    @Override
+    public void removeRange( int from, int to )
+    {
+        int length = n-to;
+        System.arraycopy( a, to, a, from, length );
+        n -= to-from;
+    }
+    
+    @Override
+    public void removeIndex( int index )
+    {
+        removeRange( index, index+1 );
+    }
+
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 
@@ -454,5 +488,4 @@ public class FloatsArray implements FloatsModifiable
         int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
         return new float[newCapacity];
     }
-
 }

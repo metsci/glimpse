@@ -262,7 +262,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         {
             for ( int i = 0; i < numTextures; i++ )
             {
-                gl.glBindTexture( getGLTextureDim( NUM_DIMENSIONS ), textureHandles[i] );
+                gl.glBindTexture( getTextureType( ), textureHandles[i] );
 
                 gl.glBindBuffer( GL.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
                 gl.glVertexPointer( floatsPerVertex, GL.GL_FLOAT, 0, 0 );
@@ -303,6 +303,11 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
     }
 
+    protected int getTextureType( )
+    {
+        return getGLTextureDim( NUM_DIMENSIONS );
+    }
+    
     protected void prepare_glState( GL gl )
     {
         gl.glEnable( GL.GL_TEXTURE_2D );

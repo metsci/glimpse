@@ -26,15 +26,13 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.nio.Buffer;
 import java.nio.ShortBuffer;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-
-import java.util.logging.Logger;
 
 /**
  * A texture class which stores 16 bit integer values (uncapped). Must be used
@@ -76,7 +74,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
     {
         for ( int i = 0; i < numTextures; i++ )
         {
-            gl.glBindTexture( getGLTextureDim( NUM_DIMENSIONS ), textureHandles[i] );
+            gl.glBindTexture( getTextureType( ), textureHandles[i] );
 
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );

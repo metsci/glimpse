@@ -171,12 +171,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         if ( indentSubplots )
         {
             int maxLevel = setIndentLevel0( );
-            setRowColumnConstraints( maxLevel, labelLayoutSize );
+            setRowColumnConstraints( maxLevel, getLabelSize( ) );
         }
         else
         {
             resetIndentLevel0( 0 );
-            setRowColumnConstraints( 0, labelLayoutSize );
+            setRowColumnConstraints( 0, getLabelSize( ) );
         }
     }
 

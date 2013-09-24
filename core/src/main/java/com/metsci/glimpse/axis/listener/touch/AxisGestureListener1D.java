@@ -38,7 +38,6 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 
 public class AxisGestureListener1D extends AxisGestureListener
 {
-
     protected GlimpseAxisLayout1D getAxisLayout( GlimpseTargetStack stack )
     {
         GlimpseTarget target = stack.getTarget( );
@@ -60,9 +59,9 @@ public class AxisGestureListener1D extends AxisGestureListener
         if ( layout == null ) return;
 
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        pan( targetAxis, layout.isHorizontal( ), event.getDxPixels( ), event.getDyPixels( ) );
+        pan( targetAxis, layout.isHorizontal( ), event.getDx( ), event.getDy( ) );
 
-        this.validateAxes( targetAxis );
+        validateAxes( targetAxis );
     }
 
     @Override
@@ -71,10 +70,11 @@ public class AxisGestureListener1D extends AxisGestureListener
         GlimpseAxisLayout1D layout = getAxisLayout( event.getTargetStack( ) );
         if ( layout == null ) return;
 
+        float scale = getScale( layout.isHorizontal( ), event.getScale( ), event.getAngle( ) );
         Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        zoom( targetAxis, layout.isHorizontal( ), event.getCenterPixelX( ), event.getCenterPixelY( ), event.getScale( ) );
+        zoom( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ), scale );
 
-        this.validateAxes( targetAxis );
+        validateAxes( targetAxis );
     }
 
     protected void validateAxes( Axis1D axis )
@@ -91,18 +91,22 @@ public class AxisGestureListener1D extends AxisGestureListener
     @Override
     public void tapDetected( GlimpseTapGestureEvent event )
     {
+        GlimpseAxisLayout1D layout = getAxisLayout( event.getTargetStack( ) );
+        if ( layout == null ) return;
 
+        Axis1D targetAxis = layout.getAxis( event.getTargetStack( ) );
+        select( targetAxis, layout.isHorizontal( ), event.getX( ), event.getY( ) );
+
+        validateAxes( targetAxis );
     }
 
     @Override
     public void longPressDetected( GlimpseLongPressGestureEvent event )
     {
-
     }
 
     @Override
     public void swipeDetected( GlimpseSwipeGestureEvent event )
     {
-
     }
 }

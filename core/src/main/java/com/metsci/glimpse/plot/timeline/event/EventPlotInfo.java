@@ -550,27 +550,27 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         return this.eventPainterManager.getTextureAtlas( );
     }
 
-    public void setBackgroundColor( float[] backgroundColor )
+    public void setDefaultEventBackgroundColor( float[] backgroundColor )
     {
         this.eventPainterManager.setBackgroundColor( backgroundColor );
     }
 
-    public float[] getBackgroundColor( )
+    public float[] getDefaultEventBackgroundColor( )
     {
         return this.eventPainterManager.getBackgroundColor( );
     }
     
-    public void setBorderColor( float[] borderColor )
+    public void setDefaultEventBorderColor( float[] borderColor )
     {
         this.eventPainterManager.setBorderColor( borderColor );
     }
 
-    public float[] getBorderColor( )
+    public float[] getDefaultEventBorderColor( )
     {
         return this.eventPainterManager.getBorderColor( );
     }
 
-    public void setTextColor( float[] textColor )
+    public void setDefaultEventTextColor( float[] textColor )
     {
         this.eventPainterManager.setTextColor( textColor );
     }
@@ -645,6 +645,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         {
             event.setEventPlotInfo( null );
         }
+    }
+    
+    public void removeAllEvents( )
+    {
+        this.eventManager.removeAllEvents( );
     }
 
     /**

@@ -39,7 +39,8 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
 
-public abstract class MouseWrapper<E>
+// I = input event
+public abstract class MouseWrapper<I>
 {
     protected GlimpseCanvas canvas;
     // set of hovered stacks which does not change during drags
@@ -56,7 +57,7 @@ public abstract class MouseWrapper<E>
         this.hoveredSet = new LinkedList<GlimpseTargetStack>( );
     }
 
-    public List<GlimpseTargetStack> getContainingTargets( E e )
+    public List<GlimpseTargetStack> getContainingTargets( I e )
     {
         // create a new context using the context associated with this mouse wrapper
         // GlimpseTargets will be popped on and off the context as we search through
@@ -73,7 +74,7 @@ public abstract class MouseWrapper<E>
 
     // perform a depth first search of the hierarchy of GlimpseLayouts in order
     // to find the top most component which contains the click
-    protected boolean getContainingTargets( E e, GlimpseContext context, List<GlimpseTargetStack> accumulator )
+    protected boolean getContainingTargets( I e, GlimpseContext context, List<GlimpseTargetStack> accumulator )
     {
         GlimpseTargetStack stack = context.getTargetStack( );
         GlimpseTarget layout = stack.getTarget( );
@@ -122,7 +123,7 @@ public abstract class MouseWrapper<E>
         }
     }
 
-    protected boolean handleInterior( E e, GlimpseContext context, GlimpseBounds bounds )
+    protected boolean handleInterior( I e, GlimpseContext context, GlimpseBounds bounds )
     {
         if ( bounds == null ) return false;
 
@@ -234,29 +235,17 @@ public abstract class MouseWrapper<E>
         return hoveredSet;
     }
 
-    protected GlimpseMouseEvent toLocalGlimpseEvent( E e, GlimpseTargetStack stack )
-    {
-        return toGlimpseEvent( toLocalCoords( e, stack ) );
-    }
-    
-    protected GlimpseMouseEvent toLocalGlimpseEvent( E e, GlimpseTargetStack stack, boolean handled )
-    {
-        GlimpseMouseEvent event = toLocalGlimpseEvent( e, stack );
-        event.setHandled( handled );
-        return event;
-    }
+    protected abstract boolean isButtonDown( I e );
 
-    protected abstract boolean isButtonDown( E e );
+    protected abstract boolean isInterior( I e, GlimpseBounds bounds );
 
-    protected abstract boolean isInterior( E e, GlimpseBounds bounds );
+    protected abstract boolean isValid( I e, GlimpseBounds bounds );
 
-    protected abstract boolean isValid( E e, GlimpseBounds bounds );
+    protected abstract GlimpseMouseEvent toGlimpseEvent( I e, GlimpseTargetStack stack );
 
-    protected abstract E toLocalCoords( E e, GlimpseTargetStack stack );
+    protected abstract GlimpseMouseEvent toGlimpseEventWheel( I e, GlimpseTargetStack stack );
 
-    protected abstract GlimpseMouseEvent toGlimpseEvent( E e );
-
-    public void notifyMouseEnteredExited( E event, List<GlimpseTargetStack> oldStacks, List<GlimpseTargetStack> newStacks )
+    public void notifyMouseEnteredExited( I event, List<GlimpseTargetStack> oldStacks, List<GlimpseTargetStack> newStacks )
     {
         for ( GlimpseTargetStack oldStack : oldStacks )
         {
@@ -275,14 +264,14 @@ public abstract class MouseWrapper<E>
         }
     }
 
-    public void notifyMouseEntered( E event, GlimpseTargetStack stack )
+    public void notifyMouseEntered( I event, GlimpseTargetStack stack )
     {
         Mouseable mouseTarget = getMouseTarget( stack );
-        GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+        GlimpseMouseEvent glimpseEvent = toGlimpseEvent( event, stack );
         if ( mouseTarget != null ) mouseTarget.mouseEntered( glimpseEvent );
     }
 
-    public void notifyMouseEntered( E event, List<GlimpseTargetStack> stacks )
+    public void notifyMouseEntered( I event, List<GlimpseTargetStack> stacks )
     {
         for ( GlimpseTargetStack stack : stacks )
         {
@@ -290,14 +279,14 @@ public abstract class MouseWrapper<E>
         }
     }
 
-    public void notifyMouseExited( E event, GlimpseTargetStack stack )
+    public void notifyMouseExited( I event, GlimpseTargetStack stack )
     {
         Mouseable mouseTarget = getMouseTarget( stack );
-        GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+        GlimpseMouseEvent glimpseEvent = toGlimpseEvent( event, stack );
         if ( mouseTarget != null ) mouseTarget.mouseExited( glimpseEvent );
     }
 
-    public void notifyMouseExited( E event, List<GlimpseTargetStack> stacks )
+    public void notifyMouseExited( I event, List<GlimpseTargetStack> stacks )
     {
         for ( GlimpseTargetStack stack : stacks )
         {

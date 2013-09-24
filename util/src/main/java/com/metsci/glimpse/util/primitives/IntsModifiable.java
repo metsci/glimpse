@@ -35,7 +35,9 @@ public interface IntsModifiable extends Ints
 {
 
     void set(int i, int v);
-
+    void set(int i, int[] vs);
+    void set(int i, int[] vs, int from, int to);
+    
 
 
     void insert(int i, int v);
@@ -79,6 +81,23 @@ public interface IntsModifiable extends Ints
      * are present, there is no guarantee which one will be removed.
      */
     void remove(int v);
+
+    /**
+     * Removes values starting at index from (inclusive) to index to (exclusive).
+     * All other values with indices greater than or equal to index to have
+     * their index in the array decreased by to-from and the size of the array is
+     * decreased by to-from.
+     */
+    void removeRange(int from, int to);
+    
+    /**
+     * Remove value at index. All other values with indices greater than index have
+     * their index in the array decreased by one and the size of the array is
+     * decreased by one.
+     */
+    void removeIndex(int index);
+    
+    void clear( );
 
 
 

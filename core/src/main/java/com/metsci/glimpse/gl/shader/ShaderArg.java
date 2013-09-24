@@ -125,6 +125,8 @@ public class ShaderArg
 
             switch( type )
             {
+                case SAMPLER_2D_ARRAY:
+                case SAMPLER_1D_ARRAY:
                 case SAMPLER_CUBE:
                 case SAMPLER_2D:
                 case ISAMPLER_2D:

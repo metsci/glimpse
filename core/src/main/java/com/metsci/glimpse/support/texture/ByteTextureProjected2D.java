@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.nio.Buffer;
@@ -73,7 +72,7 @@ public class ByteTextureProjected2D extends TextureProjected2D
     {
         for ( int i = 0; i < numTextures; i++ )
         {
-            gl.glBindTexture( getGLTextureDim( NUM_DIMENSIONS ), textureHandles[i] );
+            gl.glBindTexture( getTextureType( ), textureHandles[i] );
 
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );

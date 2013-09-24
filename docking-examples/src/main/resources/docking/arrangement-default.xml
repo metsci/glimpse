@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Split">
+    <extent>1.0</extent>
+    <isRow>true</isRow>
+    <children>
+        <child xsi:type="Leaf">
+            <extent>330.0</extent>
+            <views>
+                <view>aView</view>
+            </views>
+            <selectedView>aView</selectedView>
+            <isMaximized>false</isMaximized>
+        </child>
+        <child xsi:type="Split">
+            <extent>1245.0</extent>
+            <isRow>false</isRow>
+            <children>
+                <child xsi:type="Split">
+                    <extent>691.0</extent>
+                    <isRow>true</isRow>
+                    <children>
+                        <child xsi:type="Leaf">
+                            <extent>895.0</extent>
+                            <views>
+                                <view>bView</view>
+                                <view>cView</view>
+                            </views>
+                            <selectedView>cView</selectedView>
+                            <isMaximized>false</isMaximized>
+                        </child>
+                        <child xsi:type="Leaf">
+                            <extent>345.0</extent>
+                            <views>
+                                <view>dView</view>
+                                <view>eView</view>
+                                <view>fView</view>
+                            </views>
+                            <selectedView>eView</selectedView>
+                            <isMaximized>false</isMaximized>
+                        </child>
+                    </children>
+                </child>
+                <child xsi:type="Leaf">
+                    <extent>164.0</extent>
+                    <views>
+                        <view>gView</view>
+                        <view>hView</view>
+                    </views>
+                    <selectedView>gView</selectedView>
+                    <isMaximized>false</isMaximized>
+                </child>
+            </children>
+        </child>
+    </children>
+</model>

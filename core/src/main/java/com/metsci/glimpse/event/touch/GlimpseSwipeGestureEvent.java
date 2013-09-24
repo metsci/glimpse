@@ -35,38 +35,27 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
 public class GlimpseSwipeGestureEvent extends GlimpseGestureEvent
 {
-    protected String source;
-    protected GlimpseTargetStack stack;
-
-    protected int direction;
+    protected float angle;
     protected int ntouches;
 
-    public GlimpseSwipeGestureEvent( String source, GlimpseTargetStack stack, int direction, int ntouches )
+    public GlimpseSwipeGestureEvent( String source, GlimpseTargetStack stack, int x, int y, float angle, int ntouches )
     {
-        this.source = source;
-        this.stack = stack;
+        super( source, stack, x, y );
         this.ntouches = ntouches;
-        this.direction = direction;
+        this.angle = angle;
     }
 
-    public String getSource( )
+    /**
+     * The angle of the swipe, in MATH RADIANS.
+     */
+    public float getAngle( )
     {
-        return source;
-    }
-
-    public int getDirection( )
-    {
-        return direction;
+        return angle;
     }
 
     public int getNumTouches( )
     {
         return ntouches;
-    }
-
-    public GlimpseTargetStack getTargetStack( )
-    {
-        return this.stack;
     }
 
     public Axis1D getAxis1D( )
@@ -102,8 +91,14 @@ public class GlimpseSwipeGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpseSwipeGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpseSwipeGestureEvent( source, targetStack, x, y, angle, ntouches );
+    }
+
+    @Override
     public String toString( )
     {
-        return String.format( "direction: %d  ntouches: %d", direction, ntouches );
+        return String.format( "x,y = %d,%d direction: %d  ntouches: %d", x, y, angle, ntouches );
     }
 }

@@ -126,15 +126,14 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
         int count = 0;
         for ( Tag tag : tags )
         {
-            Object attr = tag.getAttribute( TEX_COORD_ATTR );
-            if ( attr != null && attr.getClass( ) == Float.class )
+            if ( tag.hasAttribute( TEX_COORD_ATTR ) )
             {
-                float textureCoord = ( Float ) attr;
+                float textureCoord = tag.getAttributeFloat( TEX_COORD_ATTR );
                 float vertexCoord = ( float ) taggedAxis.valueToScreenPixel( tag.getValue( ) );
-
+        
                 vertexCoords.put( vertexCoord ).put( y1 ).put( vertexCoord ).put( y2 );
                 textureCoords.put( textureCoord ).put( textureCoord );
-
+        
                 count += 2;
             }
         }

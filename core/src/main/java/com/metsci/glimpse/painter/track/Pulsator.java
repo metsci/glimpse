@@ -43,6 +43,9 @@ public class Pulsator
     protected float size;
     protected float direction;
     protected boolean paused;
+    protected boolean stopped;
+    
+    protected float defaultSize;
     
     protected IntsArray ids;
 
@@ -55,6 +58,7 @@ public class Pulsator
 
         this.delayMillis = delayMillis;
 
+        this.defaultSize = minSize;
         this.min = minSize;
         this.max = maxSize;
         this.step = stepSize;
@@ -62,6 +66,7 @@ public class Pulsator
         this.start = maxSize;
         this.direction = -1.0f;
         this.paused = false;
+        this.stopped = false;
 
         this.ids = new IntsArray( );
         
@@ -72,6 +77,20 @@ public class Pulsator
     public Pulsator( TrackPainter painter )
     {
         this( painter, 10, 10f, 0.1f, 15f );
+    }
+    
+    /**
+     * When an id is removed from the Pulsator, its point size is reset to the default size.
+     * @param size
+     */
+    public void setDefaultSize( float size )
+    {
+        this.defaultSize = size;
+    }
+    
+    public float getDefaultSize( )
+    {
+        return this.defaultSize;
     }
     
     public void resetSize( )
@@ -235,6 +254,22 @@ public class Pulsator
             this.lock.unlock( );
         }
     }
+    
+    public void removeAllIds( )
+    {
+        this.lock.lock( );
+        try
+        {
+            for ( int i = 0 ; i < ids.n( ) ; i++ )
+                this.painter.setPointSize( ids.v( i ), defaultSize );
+            
+            this.ids.clear( );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
 
     public void addId( int id )
     {
@@ -255,6 +290,21 @@ public class Pulsator
         try
         {
             this.ids.remove( id );
+            this.painter.setPointSize( id, defaultSize );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+    public void stop( )
+    {
+        this.lock.lock( );
+        try
+        {
+            setPaused( false );
+            this.stopped = true;
         }
         finally
         {
@@ -284,6 +334,9 @@ public class Pulsator
                             {
                             }
                         }
+                        
+                        if ( stopped )
+                            return;
                         
                         if ( size > max )
                         {

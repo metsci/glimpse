@@ -52,11 +52,11 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     protected static final int DEFAULT_DATA_COORD_UNIT = 2;
     protected static final int DEFAULT_TEX_COORD_UNIT = 3;
 
-    private FloatTexture1D vertexCoordTex;
-    private FloatTexture1D textureCoordTex;
+    protected FloatTexture1D vertexCoordTex;
+    protected FloatTexture1D textureCoordTex;
 
-    private TaggedColorScaleShader fragShader;
-    private TaggedAxis1D taggedAxis;
+    protected TaggedColorScaleShader fragShader;
+    protected TaggedAxis1D taggedAxis;
 
     public TaggedHeatMapPainter( TaggedAxis1D taggedAxis )
     {
@@ -187,9 +187,11 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
                 for ( int i = size - 1; i >= 0; i-- )
                 {
                     Tag tag = tags.get( i );
-                    Object attribute = tag.getAttribute( TEX_COORD_ATTR );
-
-                    if ( attribute != null ) data.put( ( Float ) attribute );
+                    
+                    if ( tag.hasAttribute( TEX_COORD_ATTR ) )
+                    {
+                        data.put( tag.getAttributeFloat( TEX_COORD_ATTR ) );
+                    }
                 }
             }
         } );

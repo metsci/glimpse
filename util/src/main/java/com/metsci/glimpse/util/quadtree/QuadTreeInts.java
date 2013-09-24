@@ -26,9 +26,6 @@
  */
 package com.metsci.glimpse.util.quadtree;
 
-import static java.lang.Float.floatToRawIntBits;
-import static java.lang.Float.intBitsToFloat;
-import static java.lang.Math.max;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
@@ -36,6 +33,9 @@ import com.metsci.glimpse.util.primitives.Ints;
 import com.metsci.glimpse.util.primitives.IntsArray;
 import com.metsci.glimpse.util.primitives.IntsModifiable;
 import com.metsci.glimpse.util.quadtree.QuadTreeInts.Bucket;
+
+import static java.lang.Float.*;
+import static java.lang.Math.*;
 
 /**
  * @author hogye
@@ -66,9 +66,9 @@ public abstract class QuadTreeInts extends QuadTree<Bucket>
         this.maxBucketSize = maxBucketSize;
     }
 
-    protected abstract float x(int v);
+    public abstract float x(int v);
 
-    protected abstract float y(int v);
+    public abstract float y(int v);
 
     public Ints search(float xMin, float xMax, float yMin, float yMax)
     {

@@ -447,17 +447,28 @@ public final class Vector3d implements Serializable
 
     /**
      * Returns the projection of this vector onto the vector v.
+     *
+     * @see #projectionOnto(Vector2d, boolean) for lenient handling of v
      */
-    public Vector3d projectionOnto(Vector3d v)
+    public Vector3d projectOnto(Vector3d v)
     {
-        if (isZero())
+        double scale = dotProduct(v) / v.normSquared();
+
+        return v.scaledBy(scale);
+    }
+
+    /**
+     * Returns the projection of this vector onto the vector v.  Lenient version treats zero vector for v as (1,0,0)
+     * in order to avoid returning vector containing NaN values.
+     */
+    public Vector3d projectionOnto(Vector3d v, boolean isLenient)
+    {
+        if (isLenient && v.isZero())
         {
-            return this;
+            v = new Vector3d(1, 0, 0);
         }
 
-        double scale = dotProduct(v) / norm();
-
-        return scaledBy(scale);
+        return projectOnto(v);
     }
 
     /**

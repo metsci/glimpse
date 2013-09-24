@@ -35,45 +35,30 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
 public class GlimpsePinchGestureEvent extends GlimpseGestureEvent
 {
-    protected String source;
-    protected GlimpseTargetStack stack;
-
-    protected float xCenterPixel;
-    protected float yCenterPixel;
     protected float scale;
+    protected float angle;
 
-    public GlimpsePinchGestureEvent( String source, GlimpseTargetStack stack, float xCenterPixel, float yCenterPixel, float scale )
+    public GlimpsePinchGestureEvent( String source, GlimpseTargetStack stack, int centerX, int centerY, float scale, float angle )
     {
-        this.source = source;
-        this.stack = stack;
-        this.xCenterPixel = xCenterPixel;
-        this.yCenterPixel = yCenterPixel;
+        super( source, stack, centerX, centerY );
         this.scale = scale;
+        this.angle = angle;
     }
 
-    public String getSource( )
-    {
-        return source;
-    }
-
+    /**
+     * The ratio of the current pinch distance to the start pinch distance.
+     */
     public float getScale( )
     {
         return scale;
     }
 
-    public float getCenterPixelX( )
+    /**
+     * The angle of the pinch in MATH RADIANS.
+     */
+    public float getAngle( )
     {
-        return xCenterPixel;
-    }
-
-    public float getCenterPixelY( )
-    {
-        return yCenterPixel;
-    }
-
-    public GlimpseTargetStack getTargetStack( )
-    {
-        return this.stack;
+        return angle;
     }
 
     public Axis1D getAxis1D( )
@@ -109,8 +94,14 @@ public class GlimpsePinchGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpsePinchGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpsePinchGestureEvent( source, targetStack, x, y, scale, angle );
+    }
+
+    @Override
     public String toString( )
     {
-        return String.format( "x: %f y: %f scale: %f ", xCenterPixel, yCenterPixel, scale );
+        return String.format( "x,y = %d,%d scale: %f angle: %f", x, y, scale, angle );
     }
 }

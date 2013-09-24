@@ -26,19 +26,16 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
-
-import java.util.logging.Logger;
 
 /**
  * A texture class which stores 4 channel RGBA colors. Each color channel
@@ -94,7 +91,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
     {
         for ( int i = 0; i < numTextures; i++ )
         {
-            gl.glBindTexture( getGLTextureDim( NUM_DIMENSIONS ), textureHandles[i] );
+            gl.glBindTexture( getTextureType( ), textureHandles[i] );
 
             prepare_setTexParameters( gl );
             Buffer positionBuffer = prepare_setPixelStore( gl, i );
@@ -121,7 +118,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
     {
         setData0( image, true, alpha );
     }
-    
+
     protected void setData0( final BufferedImage image, final boolean alphaOverride, final float alpha )
     {
         resize( image.getWidth( ), image.getHeight( ) );
@@ -138,9 +135,9 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
                     for ( int x = 0; x < dataSizeX; x++ )
                     {
                         int rgb = image.getRGB( x, image.getHeight( ) - y - 1 );
-                        
+
                         float a;
-                        
+
                         if ( alphaOverride )
                         {
                             a = alpha;
@@ -153,7 +150,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
                         {
                             a = r.getSample( x, image.getHeight( ) - y - 1, 0 ) / 255f;
                         }
-                        
+
                         data.put( ( ( rgb >> 16 ) & 0x000000FF ) / 255f );
                         data.put( ( ( rgb >> 8 ) & 0x000000FF ) / 255f );
                         data.put( ( ( rgb ) & 0x000000FF ) / 255f );
@@ -163,7 +160,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
             }
         } );
     }
-    
+
     public void setData( float[][][] data )
     {
         mutate( new SetDataMutator( data ) );

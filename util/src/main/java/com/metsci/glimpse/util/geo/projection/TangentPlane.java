@@ -26,19 +26,16 @@
  */
 package com.metsci.glimpse.util.geo.projection;
 
+import java.io.Serializable;
+
+import java.io.Serializable;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.geo.datum.DatumWgs84;
+import com.metsci.glimpse.util.geo.datum.DatumSphereWgs84;
 import com.metsci.glimpse.util.math.fast.PolynomialApprox;
 import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.util.vector.Vector3d;
-
-
-
-
-import java.io.Serializable;
-
 
 /**
  * Implementation of GeoProjection via a plane which is tangent to the Earth and maps x, y
@@ -49,8 +46,8 @@ import java.io.Serializable;
 public final class TangentPlane implements GeoProjection, Serializable
 {
     public static final long serialVersionUID = -6802219476339525122L;
-    private static final Vector2d defaultTangentPointOnPlane = new Vector2d(0.0, 0.0);
-    private static final double earthRadius = DatumWgs84.meanRadius;
+    private static final Vector2d defaultTangentPointOnPlane = new Vector2d( 0.0, 0.0 );
+    private static final double earthRadius = DatumSphereWgs84.Constants.avgGeodesicRadius;
 
     // reference LatLon at point of tangency as a LatLon instance and also represented as point on
     // unit sphere (Earth units: radius of earth = 1.0)
@@ -69,9 +66,9 @@ public final class TangentPlane implements GeoProjection, Serializable
      *
      * @param  latLon
      */
-    public TangentPlane(LatLonGeo latLon)
+    public TangentPlane( LatLonGeo latLon )
     {
-        this(latLon, defaultTangentPointOnPlane);
+        this( latLon, defaultTangentPointOnPlane );
     }
 
     /**
@@ -81,9 +78,9 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param  tangentPointOnPlaneX
      * @param  tangentPointOnPlaneY
      */
-    public TangentPlane(LatLonGeo latLon, double tangentPointOnPlaneX, double tangentPointOnPlaneY)
+    public TangentPlane( LatLonGeo latLon, double tangentPointOnPlaneX, double tangentPointOnPlaneY )
     {
-        this(latLon, new Vector2d(tangentPointOnPlaneX, tangentPointOnPlaneY));
+        this( latLon, new Vector2d( tangentPointOnPlaneX, tangentPointOnPlaneY ) );
     }
 
     /**
@@ -92,32 +89,32 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param  latLon
      * @param  tangentPointOnPlane
      */
-    private TangentPlane(LatLonGeo latLon, Vector2d tangentPointOnPlane)
+    private TangentPlane( LatLonGeo latLon, Vector2d tangentPointOnPlane )
     {
         _refLatLon = latLon;
-        _refPointOnUnitSphere = latLonToPointOnUnitSphere(latLon);
+        _refPointOnUnitSphere = latLonToPointOnUnitSphere( latLon );
         _tangentPointOnPlane = tangentPointOnPlane;
 
-        double x = _refPointOnUnitSphere.getX();
-        double y = _refPointOnUnitSphere.getY();
-        double z = _refPointOnUnitSphere.getZ();
-        _localEast = new Vector3d(-y, x, 0).normalizedLenient();
-        _localNorth = new Vector3d(-x * z, -y * z, (x * x) + (y * y)).normalizedLenient();
+        double x = _refPointOnUnitSphere.getX( );
+        double y = _refPointOnUnitSphere.getY( );
+        double z = _refPointOnUnitSphere.getZ( );
+        _localEast = new Vector3d( -y, x, 0 ).normalizedLenient( );
+        _localNorth = new Vector3d( -x * z, -y * z, ( x * x ) + ( y * y ) ).normalizedLenient( );
     }
 
     @Override
-    public LatLonGeo unproject(double planeX, double planeY)
+    public LatLonGeo unproject( double planeX, double planeY )
     {
-        Vector3d pointOnUnitSphere = planeXYToUnitSphere(planeX, planeY);
+        Vector3d pointOnUnitSphere = planeXYToUnitSphere( planeX, planeY );
 
-        return pointOnUnitSphereToLatLon(pointOnUnitSphere);
+        return pointOnUnitSphereToLatLon( pointOnUnitSphere );
     }
 
     @Override
-    public Vector2d project(LatLonGeo latLon)
+    public Vector2d project( LatLonGeo latLon )
     {
-        Vector3d pointOnUnitSphere = latLonToPointOnUnitSphere(latLon);
-        Vector2d ns = unitSphereToPlaneXY(pointOnUnitSphere);
+        Vector3d pointOnUnitSphere = latLonToPointOnUnitSphere( latLon );
+        Vector2d ns = unitSphereToPlaneXY( pointOnUnitSphere );
 
         return ns;
     }
@@ -125,13 +122,11 @@ public final class TangentPlane implements GeoProjection, Serializable
     /**
      * Converts from LatLon to a point on the unit sphere (ECEF-r).
      */
-    private static Vector3d latLonToPointOnUnitSphere(LatLonGeo latLon)
+    private static Vector3d latLonToPointOnUnitSphere( LatLonGeo latLon )
     {
-        double latRad = latLon.getLatRad();
-        double lonRad = latLon.getLonRad();
-        Vector3d pointOnUnitSphere = new Vector3d(Math.cos(latRad) * Math.cos(lonRad),
-                                                  Math.cos(latRad) * Math.sin(lonRad),
-                                                  Math.sin(latRad));
+        double latRad = latLon.getLatRad( );
+        double lonRad = latLon.getLonRad( );
+        Vector3d pointOnUnitSphere = new Vector3d( Math.cos( latRad ) * Math.cos( lonRad ), Math.cos( latRad ) * Math.sin( lonRad ), Math.sin( latRad ) );
 
         return pointOnUnitSphere;
     }
@@ -139,13 +134,12 @@ public final class TangentPlane implements GeoProjection, Serializable
     /**
      * Converts a point on the unit sphere (ECEF-r) to LatLon.
      */
-    private static LatLonGeo pointOnUnitSphereToLatLon(Vector3d pointOnUnitSphere)
+    private static LatLonGeo pointOnUnitSphereToLatLon( Vector3d pointOnUnitSphere )
     {
-        double lonRad = Math.atan2(pointOnUnitSphere.getY(), pointOnUnitSphere.getX());
-        double latRad = PolynomialApprox.asin(pointOnUnitSphere.getZ());
+        double lonRad = Math.atan2( pointOnUnitSphere.getY( ), pointOnUnitSphere.getX( ) );
+        double latRad = PolynomialApprox.asin( pointOnUnitSphere.getZ( ) );
 
-        LatLonGeo latLon = new LatLonGeo(Angle.radiansToDegrees(latRad),
-                                         Angle.radiansToDegrees(lonRad));
+        LatLonGeo latLon = new LatLonGeo( Angle.radiansToDegrees( latRad ), Angle.radiansToDegrees( lonRad ) );
 
         return latLon;
     }
@@ -157,12 +151,11 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param   planeY  y position on tangent plane
      * @return  point in Earth/sphere coordinates
      */
-    private Vector3d planeCoordsToEarthCoords(double planeX, double planeY)
+    private Vector3d planeCoordsToEarthCoords( double planeX, double planeY )
     {
-        Vector3d sphereCoords = Vector3d.linearCombination(earthRadius, _refPointOnUnitSphere,
-                                                           planeX, _localEast, planeY, _localNorth);
+        Vector3d sphereCoords = Vector3d.linearCombination( earthRadius, _refPointOnUnitSphere, planeX, _localEast, planeY, _localNorth );
 
-        sphereCoords = sphereCoords.scaledBy(1.0 / earthRadius);
+        sphereCoords = sphereCoords.scaledBy( 1.0 / earthRadius );
 
         return sphereCoords;
     }
@@ -175,19 +168,18 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param   planeY  y position on tangent plane
      * @return  point on unit sphere
      */
-    private Vector3d planeXYToUnitSphere(double planeX, double planeY)
+    private Vector3d planeXYToUnitSphere( double planeX, double planeY )
     {
-        double dx = planeX - _tangentPointOnPlane.getX();
-        double dy = planeY - _tangentPointOnPlane.getY();
-        Vector3d earthCoords = planeCoordsToEarthCoords(dx, dy);
+        double dx = planeX - _tangentPointOnPlane.getX( );
+        double dy = planeY - _tangentPointOnPlane.getY( );
+        Vector3d earthCoords = planeCoordsToEarthCoords( dx, dy );
 
         double a = dx / earthRadius;
         double b = dy / earthRadius;
 
-        double beta = 4.0 / (4.0 + (a * a) + (b * b));
+        double beta = 4.0 / ( 4.0 + ( a * a ) + ( b * b ) );
 
-        Vector3d pointOnUnitSphere = Vector3d.linearCombination(beta, earthCoords, beta - 1.0,
-                                                                _refPointOnUnitSphere);
+        Vector3d pointOnUnitSphere = Vector3d.linearCombination( beta, earthCoords, beta - 1.0, _refPointOnUnitSphere );
 
         return pointOnUnitSphere;
     }
@@ -199,15 +191,14 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param   pointOnUnitSphere
      * @return  position on tangent plane
      */
-    private Vector2d unitSphereToPlaneXY(Vector3d pointOnUnitSphere)
+    private Vector2d unitSphereToPlaneXY( Vector3d pointOnUnitSphere )
     {
-        assert Math.abs(pointOnUnitSphere.norm() - 1.0) < 1.0e-3;
+        assert Math.abs( pointOnUnitSphere.norm( ) - 1.0 ) < 1.0e-3;
 
-        double xdotp = pointOnUnitSphere.dotProduct(_refPointOnUnitSphere);
+        double xdotp = pointOnUnitSphere.dotProduct( _refPointOnUnitSphere );
         double div = 1 + xdotp;
-        Vector2d planeXY = new Vector2d(2 * pointOnUnitSphere.dotProduct(_localEast) / div,
-                                        2 * pointOnUnitSphere.dotProduct(_localNorth) / div);
-        planeXY = planeXY.scaledBy(earthRadius).plus(_tangentPointOnPlane);
+        Vector2d planeXY = new Vector2d( 2 * pointOnUnitSphere.dotProduct( _localEast ) / div, 2 * pointOnUnitSphere.dotProduct( _localNorth ) / div );
+        planeXY = planeXY.scaledBy( earthRadius ).plus( _tangentPointOnPlane );
 
         return planeXY;
     }
@@ -221,23 +212,22 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param   planeY  y position on old tangent plane
      * @return  velocity on unit sphere
      */
-    private Vector3d velXYToUnitSphere(double velX, double velY, double planeX, double planeY)
+    private Vector3d velXYToUnitSphere( double velX, double velY, double planeX, double planeY )
     {
         double a = planeX / earthRadius;
         double b = planeY / earthRadius;
         double da = velX / earthRadius;
         double db = velY / earthRadius;
-        double denom = 4.0 + (a * a) + (b * b);
+        double denom = 4.0 + ( a * a ) + ( b * b );
         double beta = 4.0 / denom;
-        double dBeta = ((da * a) + (db * b)) * -8.0 / (denom * denom);
+        double dBeta = ( ( da * a ) + ( db * b ) ) * -8.0 / ( denom * denom );
 
-        Vector3d velOnSphere = Vector3d.linearCombination(2.0, _refPointOnUnitSphere, a, _localEast,
-                                                          b, _localNorth);
-        velOnSphere = velOnSphere.scaledBy(dBeta);
+        Vector3d velOnSphere = Vector3d.linearCombination( 2.0, _refPointOnUnitSphere, a, _localEast, b, _localNorth );
+        velOnSphere = velOnSphere.scaledBy( dBeta );
 
-        Vector3d addTerm = Vector3d.linearCombination(da, _localEast, db, _localNorth);
-        addTerm = addTerm.scaledBy(beta);
-        velOnSphere = velOnSphere.plus(addTerm);
+        Vector3d addTerm = Vector3d.linearCombination( da, _localEast, db, _localNorth );
+        addTerm = addTerm.scaledBy( beta );
+        velOnSphere = velOnSphere.plus( addTerm );
 
         return velOnSphere;
     }
@@ -249,29 +239,27 @@ public final class TangentPlane implements GeoProjection, Serializable
      * @param   pointOnUnitSphere
      * @return  velocity on tangent plane
      */
-    private Vector2d velUnitSphereToVelXY(Vector3d velOnUnitSphere, Vector3d pointOnUnitSphere)
+    private Vector2d velUnitSphereToVelXY( Vector3d velOnUnitSphere, Vector3d pointOnUnitSphere )
     {
-        double onePlusXdotP = (1.0 + pointOnUnitSphere.dotProduct(_refPointOnUnitSphere));
-        Vector2d velXY = new Vector2d(velOnUnitSphere.dotProduct(_localEast),
-                                      velOnUnitSphere.dotProduct(_localNorth));
-        velXY = velXY.scaledBy(2.0 / onePlusXdotP);
+        double onePlusXdotP = ( 1.0 + pointOnUnitSphere.dotProduct( _refPointOnUnitSphere ) );
+        Vector2d velXY = new Vector2d( velOnUnitSphere.dotProduct( _localEast ), velOnUnitSphere.dotProduct( _localNorth ) );
+        velXY = velXY.scaledBy( 2.0 / onePlusXdotP );
 
-        Vector2d subTerm = new Vector2d(pointOnUnitSphere.dotProduct(_localEast),
-                                        pointOnUnitSphere.dotProduct(_localNorth));
+        Vector2d subTerm = new Vector2d( pointOnUnitSphere.dotProduct( _localEast ), pointOnUnitSphere.dotProduct( _localNorth ) );
 
-        double dxdotP = velOnUnitSphere.dotProduct(_refPointOnUnitSphere);
-        subTerm = subTerm.scaledBy(2.0 * dxdotP / (onePlusXdotP * onePlusXdotP));
-        velXY = velXY.minus(subTerm).scaledBy(earthRadius);
+        double dxdotP = velOnUnitSphere.dotProduct( _refPointOnUnitSphere );
+        subTerm = subTerm.scaledBy( 2.0 * dxdotP / ( onePlusXdotP * onePlusXdotP ) );
+        velXY = velXY.minus( subTerm ).scaledBy( earthRadius );
 
         return velXY;
     }
 
-    public LatLonGeo getRefLatLon()
+    public LatLonGeo getRefLatLon( )
     {
         return _refLatLon;
     }
 
-    public Vector3d getRefPointOnUnitSphere()
+    public Vector3d getRefPointOnUnitSphere( )
     {
         return _refPointOnUnitSphere;
     }
@@ -279,7 +267,7 @@ public final class TangentPlane implements GeoProjection, Serializable
     /**
      * The vector (in ECEF-r coordinates) corresponding to traveling East on the tangent plane.
      */
-    public Vector3d getLocalEast()
+    public Vector3d getLocalEast( )
     {
         return _localEast;
     }
@@ -287,7 +275,7 @@ public final class TangentPlane implements GeoProjection, Serializable
     /**
      * The vector (in ECEF-r coordinates) corresponding to traveling North on the tangent plane.
      */
-    public Vector3d getLocalNorth()
+    public Vector3d getLocalNorth( )
     {
         return _localNorth;
     }
@@ -295,92 +283,89 @@ public final class TangentPlane implements GeoProjection, Serializable
     /**
      * Tangent plane coordinates (x,y) of point on the plane tangent to reference LatLon.
      */
-    public Vector2d getTangentPointOnPlane()
+    public Vector2d getTangentPointOnPlane( )
     {
         return _tangentPointOnPlane;
     }
 
     @Override
-    public Vector2d reprojectFrom(double x, double y, GeoProjection fromProjection)
+    public Vector2d reprojectFrom( double x, double y, GeoProjection fromProjection )
     {
-        if (fromProjection instanceof TangentPlane)
+        if ( fromProjection instanceof TangentPlane )
         {
-            TangentPlane fromTangentPlane = (TangentPlane) fromProjection;
-            Vector3d pointOnUnitSphere = fromTangentPlane.planeXYToUnitSphere(x, y);
+            TangentPlane fromTangentPlane = ( TangentPlane ) fromProjection;
+            Vector3d pointOnUnitSphere = fromTangentPlane.planeXYToUnitSphere( x, y );
 
-            return unitSphereToPlaneXY(pointOnUnitSphere);
+            return unitSphereToPlaneXY( pointOnUnitSphere );
         }
         else
         {
-            LatLonGeo unproj = fromProjection.unproject(x, y);
+            LatLonGeo unproj = fromProjection.unproject( x, y );
 
-            return project(unproj);
+            return project( unproj );
         }
     }
 
     @Override
-    public KinematicVector2d reprojectPosVelFrom(double x, double y, double vx, double vy,
-                                                 GeoProjection fromProjection)
+    public KinematicVector2d reprojectPosVelFrom( double x, double y, double vx, double vy, GeoProjection fromProjection )
     {
-        if (fromProjection instanceof TangentPlane)
+        if ( fromProjection instanceof TangentPlane )
         {
-            TangentPlane fromTangentPlane = (TangentPlane) fromProjection;
+            TangentPlane fromTangentPlane = ( TangentPlane ) fromProjection;
 
             // Unproject from old plane to unit sphere
-            Vector3d pointOnUnitSphere = fromTangentPlane.planeXYToUnitSphere(x, y);
-            Vector3d velOnUnitSphere = fromTangentPlane.velXYToUnitSphere(vx, vy, x, y);
+            Vector3d pointOnUnitSphere = fromTangentPlane.planeXYToUnitSphere( x, y );
+            Vector3d velOnUnitSphere = fromTangentPlane.velXYToUnitSphere( vx, vy, x, y );
 
             // Project from unit sphere to new plane
-            Vector2d planeXY = unitSphereToPlaneXY(pointOnUnitSphere);
-            Vector2d velXY = velUnitSphereToVelXY(velOnUnitSphere, pointOnUnitSphere);
+            Vector2d planeXY = unitSphereToPlaneXY( pointOnUnitSphere );
+            Vector2d velXY = velUnitSphereToVelXY( velOnUnitSphere, pointOnUnitSphere );
 
-            return new KinematicVector2d(planeXY, velXY);
+            return new KinematicVector2d( planeXY, velXY );
         }
         else
         {
-            throw new RuntimeException(
-                " cannot handle arbitrary case with different type of projection");
+            throw new RuntimeException( " cannot handle arbitrary case with different type of projection" );
         }
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals( Object o )
     {
-        if (o == null)
+        if ( o == null )
         {
             return false;
         }
-        else if (!(o instanceof TangentPlane))
+        else if ( ! ( o instanceof TangentPlane ) )
         {
             return false;
         }
         else
         {
-            TangentPlane other = (TangentPlane) o;
+            TangentPlane other = ( TangentPlane ) o;
 
-            return _refPointOnUnitSphere.equals(other._refPointOnUnitSphere) &&
-                   _tangentPointOnPlane.equals(other._tangentPointOnPlane);
+            return _refPointOnUnitSphere.equals( other._refPointOnUnitSphere ) && _tangentPointOnPlane.equals( other._tangentPointOnPlane );
         }
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
-        return _refPointOnUnitSphere.hashCode() ^ _tangentPointOnPlane.hashCode();
+        return _refPointOnUnitSphere.hashCode( ) ^ _tangentPointOnPlane.hashCode( );
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
-        StringBuffer sb = new StringBuffer();
-        sb.append(String.format("TP[LatLon(%s)", getRefLatLon().format("%.4f")));
-        if (!_tangentPointOnPlane.equals(defaultTangentPointOnPlane))
+        StringBuffer sb = new StringBuffer( );
+        sb.append( String.format( "TP[LatLon(%s)", getRefLatLon( ).format( "%.4f" ) ) );
+        if ( !_tangentPointOnPlane.equals( defaultTangentPointOnPlane ) )
         {
-            sb.append(String.format(", %s", _tangentPointOnPlane.format("%.3f")));
+            sb.append( String.format( ", %s", _tangentPointOnPlane.format( "%.3f" ) ) );
         }
 
-        sb.append("]");
+        sb.append( "]" );
 
-        return sb.toString();
+        return sb.toString( );
     }
 }

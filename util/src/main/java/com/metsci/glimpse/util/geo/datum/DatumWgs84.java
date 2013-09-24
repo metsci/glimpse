@@ -34,13 +34,17 @@ import com.metsci.glimpse.util.units.Length;
  */
 public class DatumWgs84 extends Datum
 {
-    public static final double meanRadius = Length.fromMeters( 6371008.7714d ); // arithmetic mean
-    public static final double equatorialRadius = Length.fromMeters( 6378137.0d );
-    private static final double flattening = 1.0 / 298.257223563;
+    // IODH idiom avoids cycles in class initialization
+    public static final class Constants
+    {
+        public static final double meanRadius = Length.fromMeters( 6371008.7714d ); // arithmetic mean
+        public static final double equatorialRadius = Length.fromMeters( 6378137.0d );
+        public static final double flattening = 1.0 / 298.257223563;
+    }
 
     public DatumWgs84( )
     {
-        super( equatorialRadius, flattening );
+        super( Constants.equatorialRadius, Constants.flattening );
     }
 
     @Override

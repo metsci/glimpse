@@ -48,8 +48,11 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static final TimeStampFormat defaultFormat = TimeStampFormat.iso8601;
 
-
-    private static final TimeStampFactory<?> factory = TimeStampPosixMillisInt64.factory;
+    // IODH idiom avoids cycles in class initialization
+    private static class Instances
+    {
+        public static final TimeStampFactory<?> factory = TimeStampPosixMillisInt64.factory;
+    }
 
     /**
      * Converts a timestamp in posix seconds to a TimeStamp.
@@ -58,7 +61,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromPosixSeconds(double posixSeconds)
     {
-        return factory.fromPosixSeconds(posixSeconds);
+        return Instances.factory.fromPosixSeconds(posixSeconds);
     }
 
     /**
@@ -68,7 +71,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromPosixSeconds(BigDecimal posixSeconds)
     {
-        return factory.fromPosixSeconds(posixSeconds);
+        return Instances.factory.fromPosixSeconds(posixSeconds);
     }
 
     /**
@@ -78,7 +81,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromPosixMillis(long posixMillis)
     {
-        return factory.fromPosixMillis(posixMillis);
+        return Instances.factory.fromPosixMillis(posixMillis);
     }
 
     /**
@@ -88,7 +91,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromPosixMicros(long posixMicros)
     {
-        return factory.fromPosixMicros(posixMicros);
+        return Instances.factory.fromPosixMicros(posixMicros);
     }
 
     /**
@@ -98,7 +101,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromPosixNanos(long posixNanos)
     {
-        return factory.fromPosixNanos(posixNanos);
+        return Instances.factory.fromPosixNanos(posixNanos);
     }
 
     /**
@@ -108,7 +111,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromTimeStamp(TimeStamp timeStamp)
     {
-        return factory.fromTimeStamp(timeStamp);
+        return Instances.factory.fromTimeStamp(timeStamp);
     }
 
     /**
@@ -118,7 +121,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromDate(Date date)
     {
-        return factory.fromDate(date);
+        return Instances.factory.fromDate(date);
     }
 
     /**
@@ -128,7 +131,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromCalendar(Calendar calendar)
     {
-        return factory.fromCalendar(calendar);
+        return Instances.factory.fromCalendar(calendar);
     }
 
     /**
@@ -139,7 +142,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromString(String string, TimeStampFormat format) throws TimeStampParseException
     {
-        return factory.fromString(string, format);
+        return Instances.factory.fromString(string, format);
     }
 
     /**
@@ -150,7 +153,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp fromString(String string) throws TimeStampParseException
     {
-        return factory.fromString(string, defaultFormat);
+        return Instances.factory.fromString(string, defaultFormat);
     }
 
     /**
@@ -158,7 +161,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp posixEpoch()
     {
-        return factory.posixEpoch();
+        return Instances.factory.posixEpoch();
     }
 
     /**
@@ -167,7 +170,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      */
     public static TimeStamp currentTime()
     {
-        return factory.currentTime();
+        return Instances.factory.currentTime();
     }
 
 
