@@ -40,7 +40,7 @@ import com.metsci.glimpse.util.units.Angle;
  */
 public class LandVertex
 {
-    private static final double distancePerDegree_SU = Math.PI * DatumWgs84.meanRadius / 180.0;
+    private static final double distancePerDegree_SU = Math.PI * DatumWgs84.Constants.meanRadius / 180.0;
 
     public final double lat;
     public final double lon;

@@ -78,6 +78,8 @@ type returns [ShaderArgType result]
   | ISAMPLER2D   { $result = ShaderArgType.ISAMPLER_2D; }
   | USAMPLER2D   { $result = ShaderArgType.USAMPLER_2D; }
   | SAMPLERCUBE  { $result = ShaderArgType.SAMPLER_CUBE; }
+  | SAMPLER1DARRAY    { $result = ShaderArgType.SAMPLER_1D_ARRAY; }
+  | SAMPLER2DARRAY    { $result = ShaderArgType.SAMPLER_2D_ARRAY; }
   ;
 
 qualifier returns [ShaderArgQualifier result]
@@ -142,6 +144,8 @@ SAMPLER1D        : 'sampler1D';
 ISAMPLER1D       : 'isampler1D';
 USAMPLER1D       : 'usampler1D';
 SAMPLERCUBE      : 'samplerCube';
+SAMPLER1DARRAY        : 'sampler1DArray';
+SAMPLER2DARRAY        : 'sampler2DArray';
 STRUCT           : 'struct';
 TRUE             : 'true';
 UNIFORM          : 'uniform';

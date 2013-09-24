@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.metsci.ext.org.eclipse.swt</groupId>
             <artifactId>swt</artifactId>
-            <version>3.7.1</version>
+            <version>4.2.2</version>
             <type>pom</type>
         </dependency>
 

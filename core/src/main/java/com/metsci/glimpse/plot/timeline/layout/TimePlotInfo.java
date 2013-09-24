@@ -55,7 +55,7 @@ public interface TimePlotInfo extends PlotInfo
 
     public DataAxisMouseListener1D getDataAxisMouseListener( );
 
-    public void setBorderColor( float[] rgba );
+    public void setDefaultEventBorderColor( float[] rgba );
 
     public void setBorderWidth( float width );
 

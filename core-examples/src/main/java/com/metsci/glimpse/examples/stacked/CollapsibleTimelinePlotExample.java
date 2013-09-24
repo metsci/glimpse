@@ -121,7 +121,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events2.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
         events3.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
-
+        
         // create a collapsible/expandable group for all the event plots
         GroupInfo group = plot.createGroup( "events-group", events1, events2, events3 );
         group.setLabelText( "Event Group" );
@@ -135,10 +135,10 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events3.setOrder( 4 );
 
         // set default colors for the event plots
-        events1.setBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
-        events1.setBorderColor( GlimpseColor.getGreen( ) );
-        events3.setBackgroundColor( GlimpseColor.getCyan( 0.6f ) );
-        events3.setBorderColor( GlimpseColor.getCyan( ) );
+        events1.setDefaultEventBackgroundColor( GlimpseColor.getGreen( 0.6f ) );
+        events1.setDefaultEventBorderColor( GlimpseColor.getGreen( ) );
+        events3.setDefaultEventBackgroundColor( GlimpseColor.getCyan( 0.6f ) );
+        events3.setDefaultEventBorderColor( GlimpseColor.getCyan( ) );
 
         Epoch e = plot.getEpoch( );
         TimeStamp t0 = e.toTimeStamp( 0 );

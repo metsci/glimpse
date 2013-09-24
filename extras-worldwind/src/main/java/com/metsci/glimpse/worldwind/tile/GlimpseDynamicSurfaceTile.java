@@ -176,31 +176,57 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     {
         return new TextureSurfaceTile( textureHandle, corners );
     }
-
+    
     protected void updateGeometry( DrawContext dc )
     {
-        List<LatLon> screenCorners = getCorners( dc );
-
-        if ( !isValid( screenCorners ) )
+        // two heuristic methods of calculating the screen corners
+        // heuristic 1 is basically never actually used to updateGeometry(),
+        // but it is a good indicator of whether heuristic 2 will provide
+        // good results (if heuristic 1 is not valid, heuristic 2 is likely
+        // to provide bad results, so updateGeometryDefault() is used)
+        List<LatLon> screenCorners1 = getCornersHeuristic1( dc );
+        List<LatLon> screenCorners2 = getCornersHeuristic2( dc );
+        
+        if ( !isValid( screenCorners1 ) )
         {
-            corners = maxCorners;
-            bounds = maxBounds;
+            updateGeometryDefault( );
+        }
+        else if ( isValid( screenCorners2 ) )
+        {
+            updateGeometry( screenCorners2 );
         }
         else
         {
-            // two heuristic methods of calculating the screen corners
-            LatLonBounds screenBounds = bufferCorners( getCorners( getCorners0( dc ) ), 0.5 );
-            bounds = getIntersectedCorners( maxBounds, screenBounds );
-            corners = getCorners( bounds );
+            updateGeometryDefault( );
         }
-
+    }
+    
+    protected void updateGeometryDefault( )
+    {
+        corners = maxCorners;
+        bounds = maxBounds;
+        
+        updateTile( );
+    }
+    
+    protected void updateGeometry( List<LatLon> screenCorners )
+    {
+        LatLonBounds screenBounds = bufferCorners( getCorners( screenCorners ), 0.5 );
+        bounds = getIntersectedCorners( maxBounds, screenBounds );
+        corners = getCorners( bounds );
+        
+        updateTile( );
+    }
+    
+    protected void updateTile( )
+    {
         if ( tile != null )
         {
             setAxes( axes, bounds, projection );
             tile.setCorners( corners );
         }
     }
-
+    
     protected void setAxes( Axis2D axes, LatLonBounds bounds, GeoProjection projection )
     {
         Vector2d c1 = projection.project( LatLonGeo.fromDeg( bounds.minLat, bounds.minLon ) );
@@ -335,7 +361,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         return corners;
     }
 
-    public static List<LatLon> getCorners( DrawContext dc )
+    // a heuristic for calculating the corners of the visible region
+    public static List<LatLon> getCornersHeuristic1( DrawContext dc )
     {
         View view = dc.getView( );
         Rectangle viewport = view.getViewport( );
@@ -351,7 +378,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     // another possible heuristic for calculating the corners of the visible region
     // inspired by: gov.nasa.worldwind.layers.ScalebarLayer
-    public static List<LatLon> getCorners0( DrawContext dc )
+    public static List<LatLon> getCornersHeuristic2( DrawContext dc )
     {
         // Compute scale size in real world
         Position referencePosition = dc.getViewportCenterPosition( );
@@ -371,7 +398,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         // in order to not worry about how the viewport is rotated
         // (which direction is north) just take the largest dimension
         double viewportSizeMeters = Math.max( viewportHeightMeters, viewportWidthMeters );
-
+        
         LatLonGeo centerLatLon = LatLonGeo.fromDeg( referencePosition.latitude.getDegrees( ), referencePosition.longitude.getDegrees( ) );
         LatLonGeo swLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southwest );
         LatLonGeo seLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southeast );

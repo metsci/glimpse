@@ -268,9 +268,11 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     protected double tickInterval( Axis1D axis, double approxNumTicks )
     {
-        double min = converter.toAxisUnits( axis.getMin( ) );
-        double max = converter.toAxisUnits( axis.getMax( ) );
-
+    	
+        double calculatedMin = converter.toAxisUnits( axis.getMin( ) );
+        double calculatedMax = converter.toAxisUnits( axis.getMax( ) );
+        double min = Math.min(calculatedMin,calculatedMax);
+        double max = Math.max(calculatedMin,calculatedMax);
         double approxTickInterval = ( max - min ) / approxNumTicks;
         double prelimTickInterval = pow( 10, round( log10( approxTickInterval ) ) );
         double prelimNumTicks = ( max - min ) / prelimTickInterval;
@@ -280,7 +282,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
         if ( 5 * prelimNumTicks <= approxNumTicks ) return prelimTickInterval / 5;
         if ( 2 * prelimNumTicks <= approxNumTicks ) return prelimTickInterval / 2;
-
+        
         return prelimTickInterval;
     }
 
@@ -289,18 +291,31 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         double min = converter.toAxisUnits( axis.getMin( ) );
         double max = converter.toAxisUnits( axis.getMax( ) );
 
+        double cacheMin = min;
+        double cacheMax = max;
         if ( min >= max )
         {
-            return new double[0];
+        	cacheMin = max;
+        	cacheMax = min;
         }
-
-        int minTickNumber = ( int ) floor( min / tickInterval );
-        int tickCount = ( int ) ceil( ( max - min ) / tickInterval );
+        
+        int minTickNumber = ( int ) floor( cacheMin / tickInterval );
+        int tickCount = ( int ) ceil( ( cacheMax - cacheMin ) / tickInterval );
 
         double[] ticks = new double[tickCount + 1];
         for ( int i = 0; i < ticks.length; i++ )
             ticks[i] = ( i + minTickNumber ) * tickInterval;
-
+        
+        if(min >= max){
+        	int size = ticks.length;
+        	double temp = Double.NaN;
+        	for (int i = 0; i < size/2; i++)
+        	  {
+        	     temp = ticks[i];
+        	     ticks[i] = ticks[size-i-1];
+        	     ticks[size-i-1] = temp;
+        	  }
+        }
         return ticks;
     }
 

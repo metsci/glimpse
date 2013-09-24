@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-
 import java.nio.Buffer;
 
 import javax.media.opengl.GL;
@@ -57,7 +55,7 @@ public class LuminanceTextureProjected2D extends FloatTextureProjected2D
     {
         for ( int i = 0; i < numTextures; i++ )
         {
-            gl.glBindTexture( getGLTextureDim( NUM_DIMENSIONS ), textureHandles[i] );
+            gl.glBindTexture( getTextureType( ), textureHandles[i] );
 
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );

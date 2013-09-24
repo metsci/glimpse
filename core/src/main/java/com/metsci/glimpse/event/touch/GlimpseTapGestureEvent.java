@@ -35,38 +35,11 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
 public class GlimpseTapGestureEvent extends GlimpseGestureEvent
 {
-    protected String source;
-    protected GlimpseTargetStack stack;
-
-    protected float x;
-    protected float y;
-
-    public GlimpseTapGestureEvent( String source, GlimpseTargetStack stack, float x, float y )
+    public GlimpseTapGestureEvent( String source, GlimpseTargetStack stack, int x, int y )
     {
-        this.source = source;
-        this.stack = stack;
+        super( source, stack, x, y );
         this.x = x;
         this.y = y;
-    }
-
-    public String getSource( )
-    {
-        return source;
-    }
-
-    public float getX( )
-    {
-        return x;
-    }
-
-    public float getY( )
-    {
-        return y;
-    }
-
-    public GlimpseTargetStack getTargetStack( )
-    {
-        return this.stack;
     }
 
     public Axis1D getAxis1D( )
@@ -102,8 +75,14 @@ public class GlimpseTapGestureEvent extends GlimpseGestureEvent
     }
 
     @Override
+    public GlimpseTapGestureEvent withNewTarget( GlimpseTargetStack targetStack, int x, int y )
+    {
+        return new GlimpseTapGestureEvent( source, targetStack, x, y );
+    }
+
+    @Override
     public String toString( )
     {
-        return String.format( "x: %f y: %f", x, y );
+        return String.format( "x,y = %d,%d", x, y );
     }
 }

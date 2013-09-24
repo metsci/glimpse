@@ -44,34 +44,40 @@ public class GlimpseMouseWrapper
 
     }
 
-    public static GlimpseMouseEvent fromMouseEvent( MouseEvent event )
+    public static GlimpseMouseEvent fromMouseEvent( MouseEvent event, GlimpseTargetStack stack, int x, int y )
     {
-        int x = event.getX( );
-        int y = event.getY( );
         int clickCount = event.getClickCount( );
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
 
+        return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, 0, clickCount );
+    }
+    
+    public static GlimpseMouseEvent fromMouseEvent( MouseEvent event )
+    {
         GlimpseTargetStack stack = null;
 
         if ( event instanceof GlimpseSwingMouseEvent )
         {
             stack = ((GlimpseSwingMouseEvent)event).getTargetStack( );
         }
-
-        return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, 0, clickCount );
+        
+        return fromMouseEvent( event, stack, event.getX( ), event.getY( ) );
     }
 
-    public static GlimpseMouseEvent fromMouseWheelEvent( MouseWheelEvent event )
+    public static GlimpseMouseEvent fromMouseWheelEvent( MouseWheelEvent event, GlimpseTargetStack stack, int x, int y )
     {
-        int x = event.getX( );
-        int y = event.getY( );
         int wheelRotation = event.getWheelRotation( );
         int clickCount = event.getClickCount( );
 
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
 
+        return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, wheelRotation, clickCount );
+    }
+    
+    public static GlimpseMouseEvent fromMouseWheelEvent( MouseWheelEvent event )
+    {
         GlimpseTargetStack stack = null;
 
         if ( event instanceof GlimpseSwingMouseWheelEvent )
@@ -79,7 +85,7 @@ public class GlimpseMouseWrapper
             stack = ((GlimpseSwingMouseWheelEvent)event).getTargetStack( );
         }
 
-        return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, wheelRotation, clickCount );
+        return fromMouseWheelEvent( event, stack, event.getX( ), event.getY( ) );
     }
 
     public static EnumSet<MouseButton> getMouseButtons( MouseEvent event )

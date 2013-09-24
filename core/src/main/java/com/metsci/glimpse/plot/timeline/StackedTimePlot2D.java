@@ -237,13 +237,13 @@ public class StackedTimePlot2D extends StackedPlot2D
     @Override
     protected int getOverlayLayoutOffsetX( )
     {
-        return orient == VERTICAL ? labelLayoutSize : 0;
+        return orient == VERTICAL ? getLabelSize( ) : 0;
     }
 
     @Override
     protected int getOverlayLayoutOffsetY2( )
     {
-        return orient == VERTICAL ? 0 : labelLayoutSize;
+        return orient == VERTICAL ? 0 : getLabelSize( );
     }
 
     @Override
@@ -744,7 +744,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     public int getLabelSize( )
     {
-        return this.labelLayoutSize;
+        return showLabelLayout ? this.labelLayoutSize : 0;
     }
 
     public boolean isShowLabels( )
@@ -1018,11 +1018,11 @@ public class StackedTimePlot2D extends StackedPlot2D
                 // push the timeline plot over so that it lines up with the plot labels
                 if ( isTimeAxisHorizontal( ) )
                 {
-                    timeLayout.setLayoutData( String.format( "push, grow, gapleft %d!", labelLayoutSize ) );
+                    timeLayout.setLayoutData( String.format( "push, grow, gapleft %d!", getLabelSize( ) ) );
                 }
                 else
                 {
-                    timeLayout.setLayoutData( String.format( "push, grow, gaptop %d!", labelLayoutSize ) );
+                    timeLayout.setLayoutData( String.format( "push, grow, gaptop %d!", getLabelSize( ) ) );
                 }
             }
         };

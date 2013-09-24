@@ -150,6 +150,21 @@ public class BooleansArray implements BooleansModifiable
     {
         a[i] = v;
     }
+    
+    @Override
+    public void set(int i, boolean[] vs)
+    {
+        set( i, vs, 0, vs.length );
+    }
+    
+    @Override
+    public void set(int i, boolean[] vs, int from, int to)
+    {
+        int c = to - from;
+        ensureCapacity( i + c );
+        System.arraycopy( vs, from, a, i, c );
+        n = i + c;
+    }
 
     @Override
     public void insert(int i, boolean v)
@@ -377,7 +392,26 @@ public class BooleansArray implements BooleansModifiable
             }
         }
     }
+    
+    @Override
+    public void removeRange( int from, int to )
+    {
+        int length = n-to;
+        System.arraycopy( a, to, a, from, length );
+        n -= to-from;
+    }
+    
+    @Override
+    public void removeIndex( int index )
+    {
+        removeRange( index, index+1 );
+    }
 
+    @Override
+    public void clear( )
+    {
+        n = 0;
+    }
 
 
 

@@ -144,7 +144,7 @@ public class CursorTextPainter extends GlimpsePainter2D
         int centerPixelsX = axis.getAxisX( ).valueToScreenPixel( centerX );
         int centerPixelsY = axis.getAxisY( ).valueToScreenPixel( centerY );
 
-        int selectionSizePixelsX = ( int ) ( axis.getAxisX( ).getSelectionSize( ) / 2.0f * axis.getAxisX( ).getPixelsPerValue( ) );
+        int selectionSizePixelsX = ( int ) ( axis.getAxisX( ).getSelectionSize( ) / 2.0f * Math.abs(axis.getAxisX( ).getPixelsPerValue( )) );
 
         double x = ( centerPixelsX + horizontalBarSpacer + ( offsetBySelectionSize ? selectionSizePixelsX : 0 ) );
         double y = centerPixelsY + verticalBarSpacer + boundsY.getHeight( ) + ( boundsZ == null || zTextGap ? 0 : boundsZ.getHeight( ) );

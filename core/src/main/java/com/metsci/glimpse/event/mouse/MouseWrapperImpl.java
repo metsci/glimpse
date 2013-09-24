@@ -31,7 +31,7 @@ import java.util.List;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 
-public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
+public abstract class MouseWrapperImpl<I> extends MouseWrapper<I>
 {
 
     public MouseWrapperImpl( GlimpseCanvas canvas )
@@ -39,12 +39,12 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         super( canvas );
     }
 
-    public void mouseClicked0( E event )
+    public void mouseClicked0( I event )
     {
         // not handled by GlimpseMouseListener, use mousePressed/mouseReleased
     }
 
-    public void mouseEntered0( E event )
+    public void mouseEntered0( I event )
     {
         if ( event == null ) return;
 
@@ -61,7 +61,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         notifyMouseEnteredExited( event, oldHovered, newHovered );
     }
 
-    public void mouseExited0( E event )
+    public void mouseExited0( I event )
     {
         if ( event == null ) return;
 
@@ -78,7 +78,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         notifyMouseEnteredExited( event, oldHovered, newHovered );
     }
 
-    public boolean mousePressed0( E event )
+    public boolean mousePressed0( I event )
     {
         if ( event == null ) return false;
 
@@ -93,7 +93,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return false;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toGlimpseEvent( event, stack );
 
             mouseTarget.mousePressed( glimpseEvent );
 
@@ -103,7 +103,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         return false;
     }
 
-    public boolean mouseReleased0( E event )
+    public boolean mouseReleased0( I event )
     {
         if ( event == null ) return false;
 
@@ -117,7 +117,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseEvent = toGlimpseEvent( event, hoveredStack );
 
                 if ( mouseTarget != null ) mouseTarget.mouseReleased( glimpseEvent );
 
@@ -139,7 +139,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         return handled;
     }
 
-    public boolean mouseDragged0( E event )
+    public boolean mouseDragged0( I event )
     {
         if ( event == null ) return false;
 
@@ -161,7 +161,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
             for ( GlimpseTargetStack hoveredStack : hoveredList )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseHoveredEvent = toGlimpseEvent( event, hoveredStack );
 
                 if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
 
@@ -172,7 +172,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         return false;
     }
 
-    public boolean mouseMoved0( E event )
+    public boolean mouseMoved0( I event )
     {
         if ( event == null ) return false;
 
@@ -196,7 +196,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
             for ( GlimpseTargetStack hoveredStack : newHovered )
             {
                 Mouseable mouseHoveredTarget = getMouseTarget( hoveredStack );
-                GlimpseMouseEvent glimpseHoveredEvent = toLocalGlimpseEvent( event, hoveredStack );
+                GlimpseMouseEvent glimpseHoveredEvent = toGlimpseEvent( event, hoveredStack );
 
                 if ( mouseHoveredTarget != null ) mouseHoveredTarget.mouseMoved( glimpseHoveredEvent );
 
@@ -207,7 +207,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
         return false;
     }
 
-    public boolean mouseWheelMoved0( E event )
+    public boolean mouseWheelMoved0( I event )
     {
         if ( event == null ) return false;
 
@@ -218,7 +218,7 @@ public abstract class MouseWrapperImpl<E> extends MouseWrapper<E>
             Mouseable mouseTarget = getMouseTarget( stack );
             if ( mouseTarget == null ) return false;
 
-            GlimpseMouseEvent glimpseEvent = toLocalGlimpseEvent( event, stack );
+            GlimpseMouseEvent glimpseEvent = toGlimpseEventWheel( event, stack );
             mouseTarget.mouseWheelMoved( glimpseEvent );
 
             if ( glimpseEvent.isHandled( ) ) return true;

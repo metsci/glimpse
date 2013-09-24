@@ -55,8 +55,6 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     private boolean isDisposed = false;
 
-    private boolean visible = true;
-
     private boolean visualPadding = false;
     private static final boolean zeroMinSize = true;
 
@@ -489,7 +487,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     @Override
     public boolean isVisible( )
     {
-        return visible;
+        return layout.isVisible( );
     }
 
     @Override

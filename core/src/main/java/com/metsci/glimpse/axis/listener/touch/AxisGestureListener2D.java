@@ -45,7 +45,6 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
  */
 public class AxisGestureListener2D extends AxisGestureListener
 {
-
     protected GlimpseAxisLayout2D getAxisLayout( GlimpseTargetStack stack )
     {
         GlimpseTarget target = stack.getTarget( );
@@ -67,8 +66,8 @@ public class AxisGestureListener2D extends AxisGestureListener
         if ( layout == null ) return;
 
         Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        pan( targetAxis.getAxisX( ), true, event.getDxPixels( ), event.getDyPixels( ) );
-        pan( targetAxis.getAxisY( ), false, event.getDxPixels( ), event.getDyPixels( ) );
+        pan( targetAxis.getAxisX( ), true, event.getDx( ), event.getDy( ) );
+        pan( targetAxis.getAxisY( ), false, event.getDx( ), event.getDy( ) );
 
         applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }
@@ -79,9 +78,12 @@ public class AxisGestureListener2D extends AxisGestureListener
         GlimpseAxisLayout2D layout = getAxisLayout( event.getTargetStack( ) );
         if ( layout == null ) return;
 
+        float scaleX = getScale( true, event.getScale( ), event.getAngle( ) );
+        float scaleY = getScale( false, event.getScale( ), event.getAngle( ) );
+
         Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
-        zoom( targetAxis.getAxisX( ), true, event.getCenterPixelX( ), event.getCenterPixelY( ), event.getScale( ) );
-        zoom( targetAxis.getAxisY( ), false, event.getCenterPixelX( ), event.getCenterPixelY( ), event.getScale( ) );
+        zoom( targetAxis.getAxisX( ), true, event.getX( ), event.getX( ), scaleX );
+        zoom( targetAxis.getAxisY( ), false, event.getX( ), event.getX( ), scaleY );
 
         applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }
@@ -98,18 +100,23 @@ public class AxisGestureListener2D extends AxisGestureListener
     @Override
     public void tapDetected( GlimpseTapGestureEvent event )
     {
+        GlimpseAxisLayout2D layout = getAxisLayout( event.getTargetStack( ) );
+        if ( layout == null ) return;
 
+        Axis2D targetAxis = layout.getAxis( event.getTargetStack( ) );
+        select( targetAxis.getAxisX( ), true, event.getX( ), event.getY( ) );
+        select( targetAxis.getAxisY( ), false, event.getX( ), event.getY( ) );
+
+        applyAndUpdate( targetAxis.getAxisX( ), targetAxis.getAxisY( ) );
     }
 
     @Override
     public void longPressDetected( GlimpseLongPressGestureEvent event )
     {
-
     }
 
     @Override
     public void swipeDetected( GlimpseSwipeGestureEvent event )
     {
-
     }
 }

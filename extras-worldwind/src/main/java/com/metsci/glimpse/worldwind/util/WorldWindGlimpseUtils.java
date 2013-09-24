@@ -72,6 +72,7 @@ public class WorldWindGlimpseUtils
             {
                 Position pos = master.getView( ).getCurrentEyePosition( );
                 slave.getView( ).setEyePosition( pos );
+                slave.redraw( );
             }
         } );
     }

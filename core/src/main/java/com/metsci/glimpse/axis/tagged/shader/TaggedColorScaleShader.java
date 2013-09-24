@@ -45,6 +45,8 @@ import com.metsci.glimpse.util.io.StreamOpener;
 
 public class TaggedColorScaleShader extends Shader implements AxisListener1D
 {
+    public static final String DEFAULT_SHADER_SOURCE = "shaders/colormap/tagged_colorscale_shader.fs";
+    
     private ShaderArg dataTexUnit;
     private ShaderArg colorTexUnit;
 
@@ -60,9 +62,9 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
 
     private TaggedAxis1D taggedAxis;
 
-    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
+    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit, String source ) throws IOException
     {
-        super( "tagged_colorscale_shader", fragment, readSource( ) );
+        super( "tagged_colorscale_shader", fragment, readSource( source ) );
 
         this.taggedAxis = axis;
 
@@ -93,12 +95,17 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
         this.discardBelow = getArg( "discardBelow" );
         discardBelow.setValue( false );
 
-        this.taggedAxis.addAxisListener( this );
+        this.taggedAxis.addAxisListener( this ); 
+    }
+    
+    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
+    {
+        this( axis, dataTexUnit, colorTexUnit, vertexTexUnit, textureTexUnit, DEFAULT_SHADER_SOURCE );
     }
 
-    private final static ShaderSource readSource( ) throws IOException
+    private final static ShaderSource readSource( String source ) throws IOException
     {
-        return new ShaderSource( "shaders/colormap/tagged_colorscale_shader.fs", StreamOpener.fileThenResource );
+        return new ShaderSource( source, StreamOpener.fileThenResource );
     }
 
     @Override

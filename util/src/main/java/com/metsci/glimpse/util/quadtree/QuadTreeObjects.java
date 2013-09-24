@@ -44,9 +44,9 @@ public abstract class QuadTreeObjects<V> extends QuadTree<Collection<V>>
         this.maxBucketSize = maxBucketSize;
     }
 
-    protected abstract float x(V v);
+    public abstract float x(V v);
 
-    protected abstract float y(V v);
+    public abstract float y(V v);
 
     public Collection<V> search(float xMin, float xMax, float yMin, float yMax)
     {

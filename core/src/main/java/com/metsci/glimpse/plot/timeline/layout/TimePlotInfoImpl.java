@@ -173,7 +173,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
     }
 
     @Override
-    public void setBorderColor( float[] rgba )
+    public void setDefaultEventBorderColor( float[] rgba )
     {
         this.borderPainter.setColor( rgba );
     }

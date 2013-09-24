@@ -1,41 +1,53 @@
-target
-/.settings
-/.project
-/core/.project
-/core/.settings
-/core/target
-/core/.classpath
-/core-examples/.project
-/core-examples/.settings
-/core-examples/target
-/core-examples/.classpath
-/extras-charts/target
-/extras-charts/.classpath
-/extras-charts/.project
-/extras-charts/.settings
-/extras-dspl/.project
-/extras-dspl/.settings
-/extras-dspl/target
-/extras-dspl/.classpath
-/extras-examples/target
-/extras-examples/.classpath
-/extras-examples/.project
-/extras-examples/.settings
-/extras-worldwind/target
-/extras-worldwind/.classpath
-/extras-worldwind/.project
-/extras-worldwind/.settings
-/extras-spacenav/.project
-/extras-spacenav/.settings
-/extras-spacenav/target
-/extras-spacenav/.classpath
-/extras-swt/.project
-/extras-swt/.settings
-/extras-swt/target
-/extras-swt/.classpath
-/util/.project
-/util/.settings
-/util/target
-/util/.classpath
+# Maven
+target/
 
+# Eclipse
+.settings/
+.classpath
+.project
+bin/
+
+# NetBeans
+nbproject/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Mac
 .DS_Store
+
+# Windows
+Thumbs.db
+
+# Ant
+build/
+dist/
+
+# Matlab
+*.asv
+*.m~
+*.mex*
+slprj/
+
+# Vim
+.*.s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
+
+# SVN
+.svn
+
+# HotSpot
+hs_err*.log
+
+# Glimpse Specific
+ignore-strings
+results-filtered
+results-unfiltered
+search-strings
+search-git.sh
