@@ -5,12 +5,19 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>1.3.2</version>
+        <version>1.3.3</version>
     </parent>
 
     <artifactId>glimpse-full-assembly</artifactId>
     <version>${parent.version}</version>
     <packaging>pom</packaging>
+	
+	<repositories>
+		<repository>
+			<id>swt-repo</id>
+			<url>https://swt-repo.googlecode.com/svn/repo/</url>
+		</repository>
+	</repositories>
 
     <dependencies>
         <dependency>
