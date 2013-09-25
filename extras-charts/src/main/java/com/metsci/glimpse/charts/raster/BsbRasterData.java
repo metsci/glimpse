@@ -51,7 +51,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.metsci.glimpse.charts.vector.MercatorProjection;
+import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D.MutatorColor1D;
 import com.metsci.glimpse.support.projection.FlatProjection;
@@ -196,8 +196,6 @@ public final class BsbRasterData
         Vector<Pair<String, String>> allTokenData = extractTokenData( header, "REF" );
         for ( Pair<String, String> tokenData : allTokenData )
         {
-        	// No resource leak -- useDelimiter does not create a new instance. --ttran17
-            @SuppressWarnings("resource")
 			Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
 
             s.nextInt( );

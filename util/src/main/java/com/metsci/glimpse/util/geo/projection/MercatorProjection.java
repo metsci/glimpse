@@ -24,41 +24,66 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.charts.vector.display.examplesupport;
+package com.metsci.glimpse.util.geo.projection;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.geo.projection.KinematicVector2d;
+import com.metsci.glimpse.util.units.Angle;
+import com.metsci.glimpse.util.vector.Vector2d;
+
+import static java.lang.Math.*;
 
 /**
- * Simple class to manage and publish UpdateListener updates.
- * 
- * @author Cunningham
+ * Mercator cylindrical map projection.
+ *
+ * @author ulman
  */
-public class UpdatePublisher<V>
+public class MercatorProjection implements GeoProjection
 {
+    protected final double originLon;
 
-    private List<UpdateListener<V>> listenerList;
-
-    public UpdatePublisher( )
+    public MercatorProjection( double originLongitudeDeg )
     {
-        this.listenerList = new CopyOnWriteArrayList<UpdateListener<V>>( );
+        this.originLon = Angle.degreesToRadians( originLongitudeDeg );
     }
 
-    public void notifyUpdateOccurred( V v )
+    public MercatorProjection( )
     {
-        for ( UpdateListener<V> listener : listenerList )
-        {
-            listener.updateOccurred( v );
-        }
+        this( 0.0 );
     }
 
-    public void addUpdateListener( UpdateListener<V> listener )
+    @Override
+    public Vector2d project( LatLonGeo latLon )
     {
-        this.listenerList.add( listener );
+        double lon = latLon.getLonRad( );
+        double lat = latLon.getLatRad( );
+
+        double x = Angle.normalizeAnglePi( lon - originLon );
+        double y = log( ( sin( lat ) + 1 ) / cos( lat ) );
+
+        return new Vector2d( x, y );
     }
 
-    public void removeUpdateListener( UpdateListener<V> listener )
+    @Override
+    public LatLonGeo unproject( double x, double y )
     {
-        this.listenerList.remove( listener );
+        double lat = 2 * atan( exp( y ) ) - PI / 2;
+        double lon = x + originLon;
+
+        return LatLonGeo.fromRad( lat, lon );
+    }
+
+    @Override
+    public Vector2d reprojectFrom( double x, double y, GeoProjection fromProjection )
+    {
+        LatLonGeo unproj = fromProjection.unproject( x, y );
+        return project( unproj );
+    }
+
+    @Override
+    public KinematicVector2d reprojectPosVelFrom( double x, double y, double vx, double vy, GeoProjection fromProjection )
+    {
+        throw new UnsupportedOperationException( );
     }
 }

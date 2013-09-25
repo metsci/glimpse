@@ -32,7 +32,7 @@ import javax.media.opengl.GLProfile;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
-import com.metsci.glimpse.charts.vector.MercatorProjection;
+import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
