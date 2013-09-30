@@ -44,7 +44,7 @@ import javax.swing.JPanel;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.examples.charts.bathy.BathymetryExample;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
@@ -136,7 +136,7 @@ public class BathymetryTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        NewtGlimpseCanvas glimpseCanvas = new NewtGlimpseCanvas( wwc.getContext( ) );
+        NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 

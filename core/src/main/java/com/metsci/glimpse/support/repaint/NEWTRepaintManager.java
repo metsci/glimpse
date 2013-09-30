@@ -29,7 +29,7 @@ package com.metsci.glimpse.support.repaint;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
 
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 
 /**
  * A repaint manager for NEWT. Currently experimental: syncExec may not actually block
@@ -42,7 +42,7 @@ import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
  */
 public class NEWTRepaintManager extends RepaintManager
 {
-    public static NEWTRepaintManager newRepaintManager( NewtGlimpseCanvas canvas )
+    public static NEWTRepaintManager newRepaintManager( NewtSwingGlimpseCanvas canvas )
     {
         NEWTRepaintManager manager = new NEWTRepaintManager( canvas.getGLDrawable( ) );
         manager.addGlimpseCanvas( canvas );

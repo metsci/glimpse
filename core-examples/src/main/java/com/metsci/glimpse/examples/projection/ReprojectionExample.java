@@ -37,7 +37,7 @@ import javax.swing.JFrame;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas;
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
@@ -67,7 +67,7 @@ public class ReprojectionExample
     public static void main( String[] args ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( context );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
@@ -78,7 +78,7 @@ public class ReprojectionExample
         offscreenCanvas.addLayout( layout );
         manager.addGlimpseCanvas( offscreenCanvas );
 
-        final NewtGlimpseCanvas canvas2 = new NewtGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( context );
         canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
         canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
         manager.addGlimpseCanvas( canvas2 );
@@ -96,7 +96,7 @@ public class ReprojectionExample
         } );
     }
 
-    public static JFrame createFrame( String name, final NewtGlimpseCanvas canvas )
+    public static JFrame createFrame( String name, final NewtSwingGlimpseCanvas canvas )
     {
         final JFrame frame = new JFrame( name );
 

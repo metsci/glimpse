@@ -31,18 +31,17 @@ import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+import javax.media.opengl.GLProfile;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.RepaintManager;
-import com.metsci.glimpse.swt.canvas.SwtGlimpseCanvas;
+import com.metsci.glimpse.swt.canvas.NewtSwtGlimpseCanvas;
 import com.metsci.glimpse.swt.misc.SwtLookAndFeel;
 import com.metsci.glimpse.swt.repaint.SwtRepaintManager;
 
@@ -55,78 +54,29 @@ public abstract class SwtExample
 
     public static void showWithSwt( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
-        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
+        // generate a GLContext by constructing a small offscreen pixel buffer
+        final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
+        final GLContext context = pBuffer.getContext( );
 
         Display display = new Display( );
         Shell shell = new Shell( display );
         shell.setText( "Glimpse Example (SWT)" );
         shell.setLayout( new FillLayout( ) );
 
-        final GlimpseCanvas canvas = new SwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
+        final NewtSwtGlimpseCanvas canvas = new NewtSwtGlimpseCanvas( shell, GLProfile.GL2GL3, context, SWT.NO_BACKGROUND );
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
         final RepaintManager manager = SwtRepaintManager.newRepaintManager( canvas );
+
+        canvas.addDisposeListener( shell, pBuffer );
 
         shell.setSize( 800, 800 );
         shell.setLocation( 0, 0 );
         shell.open( );
         shell.moveAbove( null );
 
-        shell.addDisposeListener( new DisposeListener( )
-        {
-            @Override
-            public void widgetDisposed( DisposeEvent event )
-            {
-                canvas.dispose( );
-            }
-        } );
-
         while ( !shell.isDisposed( ) )
-            if ( !display.readAndDispatch( ) ) display.sleep( );
-
-        // shutdown the Glimpse repaint manager
-        manager.shutdown( );
-
-        return;
-    }
-
-    public static void showWithSwt( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
-    {
-        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-
-        Display display = new Display( );
-        Shell shellA = new Shell( display );
-        shellA.setText( "Glimpse Example (SWT)" );
-        shellA.setLayout( new FillLayout( ) );
-
-        SwtGlimpseCanvas canvasA = new SwtGlimpseCanvas( shellA, context, SWT.NO_BACKGROUND );
-        canvasA.addLayout( layoutProviderA.getLayout( ) );
-        canvasA.setLookAndFeel( new SwtLookAndFeel( ) );
-
-        SwtRepaintManager manager = SwtRepaintManager.newRepaintManager( canvasA );
-
-        shellA.setSize( 800, 800 );
-        shellA.setLocation( 0, 0 );
-        shellA.open( );
-        shellA.moveAbove( null );
-
-        Shell shellB = new Shell( display );
-        shellB.setText( "Glimpse Example (SWT)" );
-        shellB.setLayout( new FillLayout( ) );
-
-        SwtGlimpseCanvas canvasB = new SwtGlimpseCanvas( shellB, context, SWT.NO_BACKGROUND );
-        canvasB.addLayout( layoutProviderB.getLayout( ) );
-        canvasB.setLookAndFeel( new SwtLookAndFeel( ) );
-
-        manager.addGlimpseCanvas( canvasB );
-
-        shellB.setSize( 800, 800 );
-        shellB.setLocation( 0, 0 );
-        shellB.open( );
-        shellB.moveAbove( null );
-
-        while ( !shellA.isDisposed( ) && !shellB.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
 
         // shutdown the Glimpse repaint manager

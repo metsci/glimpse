@@ -40,7 +40,7 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
@@ -87,7 +87,7 @@ public class SurfaceTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        NewtGlimpseCanvas glimpseCanvas = new NewtGlimpseCanvas( wwc.getContext( ) );
+        NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( layout );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 

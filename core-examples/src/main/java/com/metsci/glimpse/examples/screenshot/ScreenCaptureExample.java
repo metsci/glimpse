@@ -39,7 +39,7 @@ import javax.swing.JFrame;
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
@@ -61,7 +61,7 @@ public class ScreenCaptureExample
     public static void main( String[] args ) throws Exception
     {
         GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( context );
 
         canvas.addLayout( new ScreenCaptureExample( ).getLayout( context ) );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );

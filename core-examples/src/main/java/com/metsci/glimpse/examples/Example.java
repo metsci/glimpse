@@ -33,7 +33,7 @@ import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
@@ -48,12 +48,12 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
  */
 public class Example
 {
-    private NewtGlimpseCanvas canvas;
+    private NewtSwingGlimpseCanvas canvas;
     private RepaintManager manager;
     private JFrame frame;
     private GlimpseLayout layout;
 
-    public Example( NewtGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
+    public Example( NewtSwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
     {
         super( );
         this.canvas = canvas;
@@ -62,7 +62,7 @@ public class Example
         this.layout = layout;
     }
 
-    public NewtGlimpseCanvas getCanvas( )
+    public NewtSwingGlimpseCanvas getCanvas( )
     {
         return canvas;
     }
@@ -90,7 +90,7 @@ public class Example
         
         // create a SwingGlimpseCanvas which shares the context
         // other canvases could also be created which all share resources through this context
-        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( profile, context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( profile, context );
 
         // create a top level GlimpseLayout which we can add painters and other layouts to
         GlimpseLayout layout = layoutProvider.getLayout( );
@@ -131,10 +131,10 @@ public class Example
         final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
         final GLContext context = pBuffer.getContext( );
 
-        NewtGlimpseCanvas leftPanel = new NewtGlimpseCanvas( context );
+        NewtSwingGlimpseCanvas leftPanel = new NewtSwingGlimpseCanvas( context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 
-        NewtGlimpseCanvas rightPanel = new NewtGlimpseCanvas( context );
+        NewtSwingGlimpseCanvas rightPanel = new NewtSwingGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
         RepaintManager repaintManager = new NEWTRepaintManager( leftPanel.getGLDrawable( ) );

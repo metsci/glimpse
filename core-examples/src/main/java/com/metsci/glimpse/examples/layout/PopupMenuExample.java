@@ -38,7 +38,7 @@ import javax.swing.JRadioButtonMenuItem;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
@@ -54,7 +54,7 @@ public class PopupMenuExample
 
     public static void main( String[] args ) throws Exception
     {
-        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( );
         GlimpseLayout plot = buildPlot( canvas );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
@@ -86,7 +86,7 @@ public class PopupMenuExample
         return;
     }
 
-    protected static GlimpseLayout buildPlot( final NewtGlimpseCanvas canvas ) throws Exception
+    protected static GlimpseLayout buildPlot( final NewtSwingGlimpseCanvas canvas ) throws Exception
     {
         GlimpseLayout layout = new SimpleLayoutExample( ).getLayout( );
 

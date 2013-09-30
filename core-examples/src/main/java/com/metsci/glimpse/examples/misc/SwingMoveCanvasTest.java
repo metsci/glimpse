@@ -32,7 +32,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
@@ -50,7 +50,7 @@ public class SwingMoveCanvasTest
     public static void main( String[] args ) throws Exception
     {
         // create a canvas and a plot
-        final NewtGlimpseCanvas canvas = new NewtGlimpseCanvas( );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( );
         GlimpseLayout plot = new HeatMapExample( ).getLayout( );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
