@@ -19,7 +19,6 @@ import javax.media.opengl.GLProfile;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -59,6 +58,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
 
     protected List<GLRunnable> disposeListeners;
 
+    protected Dimension dimension = new Dimension( 0, 0 );
+
     public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
     {
         super( parent, options );
@@ -72,9 +73,9 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
 
         FillLayout layout = new FillLayout( );
         this.setLayout( layout );
-        
+
         this.glCanvas = new NewtCanvasSWT( this, SWT.NONE, glWindow );
-        
+
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
         this.layoutManager = new LayoutManager( );
@@ -130,10 +131,6 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void display( GLAutoDrawable drawable )
             {
-                // ignore initial reshapes while canvas is not showing
-                // (the canvas can report incorrect/transient sizes during this time)
-                if ( !glCanvas.isVisible( ) ) return;
-
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.paintTo( getGlimpseContext( ) );
@@ -143,9 +140,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                // ignore initial reshapes while canvas is not showing
-                // (the canvas can report incorrect/transient sizes during this time)
-                if ( !glCanvas.isVisible( ) ) return;
+                dimension = new Dimension( width, height );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -240,30 +235,13 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
 
     public Dimension getDimension( )
     {
-        if ( !isDisposed( ) )
-        {
-            Rectangle rect = getClientArea( );
-            return new Dimension( rect.width, rect.height );
-        }
-        else
-        {
-            return null;
-        }
+        return dimension;
     }
 
     @Override
     public GlimpseBounds getTargetBounds( GlimpseTargetStack stack )
     {
-        Dimension dimension = getDimension( );
-
-        if ( dimension != null )
-        {
-            return new GlimpseBounds( getDimension( ) );
-        }
-        else
-        {
-            return null;
-        }
+        return new GlimpseBounds( getDimension( ) );
     }
 
     @Override
@@ -323,8 +301,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     @Override
     public void dispose( )
     {
-        this.glWindow.destroy( );
-        this.glContext.destroy( );
+        if ( this.glWindow != null ) this.glWindow.destroy( );
+        if ( this.glContext != null ) this.glContext.destroy( );
         this.isDisposed = true;
     }
 
