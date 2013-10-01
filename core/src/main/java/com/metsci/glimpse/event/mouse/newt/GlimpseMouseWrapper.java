@@ -49,7 +49,7 @@ public class GlimpseMouseWrapper
 
     public static GlimpseMouseEvent fromMouseEvent( MouseEvent event, GlimpseTargetStack stack, int x, int y )
     {
-        int wheelIncrement = ( int ) event.getRotation( )[1];
+        int wheelIncrement = ( int ) -event.getRotation( )[1];
         int clickCount = event.getClickCount( );
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
