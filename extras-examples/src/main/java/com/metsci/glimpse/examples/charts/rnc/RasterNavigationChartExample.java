@@ -28,9 +28,11 @@ package com.metsci.glimpse.examples.charts.rnc;
 
 import java.io.IOException;
 
+import javax.media.opengl.GLProfile;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
-import com.metsci.glimpse.charts.vector.MercatorProjection;
+import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -59,7 +61,7 @@ public class RasterNavigationChartExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new RasterNavigationChartExample( ) );
+        Example.showWithSwing( new RasterNavigationChartExample( ), GLProfile.GL2 );
     }
 
     protected int plotHeight = 200;

@@ -31,6 +31,7 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLException;
 
@@ -107,7 +108,7 @@ public class Pipeline
         return isLinked;
     }
 
-    public void beginUse( GL gl )
+    public void beginUse( GL2 gl )
     {
         if( isEmpty )
             return;
@@ -144,7 +145,7 @@ public class Pipeline
         }
     }
 
-    public void endUse( GL gl )
+    public void endUse( GL2 gl )
     {
         if( isEmpty )
             return;
@@ -165,7 +166,7 @@ public class Pipeline
     }
 
     // TODO: Clean up when compilation fails inside this method
-    private boolean compileAndLink( GL gl )
+    private boolean compileAndLink( GL2 gl )
     {
         if( isEmpty )
             return true;
@@ -220,7 +221,7 @@ public class Pipeline
 
     public void dispose( GLContext context )
     {
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         gl.glDeleteProgram( glProgramHandle );
 

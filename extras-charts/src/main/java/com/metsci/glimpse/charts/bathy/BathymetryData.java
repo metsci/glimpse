@@ -35,8 +35,8 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.projection.LatLonProjection;
+import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;

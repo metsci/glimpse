@@ -47,13 +47,21 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
     @Override
     public SimplePlot2D getLayout( )
     {
+        // create a simple pre-built Glimpse plot
         SimplePlot2D plot = new SimplePlot2D( );
 
+        // hide the cursor crosshairs
+        plot.getCrosshairPainter( ).setVisible( false );
+        
+        // set the x and y axis bounds
         plot.getAxis( ).set( -1, 2, -1, 2 );
 
+        // create a painter to display dynamically colored lines
         final DynamicLineSetPainter painter = new DynamicLineSetPainter( );
-        painter.setDotted( 2, (short) 0xAAAA );
         
+        // tell the painter to display dotted lines with the provided stipple pattern
+        painter.setDotted( 2, ( short ) 0xAAAA );
+
         plot.addPainter( painter );
 
         ( new Thread( )

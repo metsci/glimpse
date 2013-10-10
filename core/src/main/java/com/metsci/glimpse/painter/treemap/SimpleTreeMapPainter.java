@@ -33,12 +33,13 @@ import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * A simple implementation of {@code AbstractTreeMapPainter} that has default
@@ -171,14 +172,14 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     }
 
     @Override
-    protected void drawBorder( GL gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
+    protected void drawBorder( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
         float[] color = getBorderColor( nodeId, isSelected( axis, nodeBounds ) );
         gl.glColor4f( color[0], color[1], color[2], color[3] );
 
         gl.glLineWidth( 1 );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         gl.glVertex2d( nodeBounds.getMinX( ), nodeBounds.getMinY( ) );
         gl.glVertex2d( nodeBounds.getMinX( ), nodeBounds.getMaxY( ) );
         gl.glVertex2d( nodeBounds.getMaxX( ), nodeBounds.getMaxY( ) );
@@ -187,7 +188,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     }
 
     @Override
-    protected void drawLeafBackground( GL gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
+    protected void drawLeafBackground( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
     {
         float[] color = getLeafColor( leafId, false );
         gl.glColor4f( color[0], color[1], color[2], color[3] );
@@ -202,7 +203,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     }
 
     @Override
-    protected Rectangle2D drawTitle( GL gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D boundary, int nodeId )
+    protected Rectangle2D drawTitle( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D boundary, int nodeId )
     {
         String title = tree.getTitle( nodeId );
         if ( title == null )
@@ -238,7 +239,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         color = getTitleBorderColor( nodeId, selected );
         gl.glColor4f( color[0], color[1], color[2], color[3] );
         gl.glLineWidth( 0.5f );
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         gl.glVertex2d( boundary.getMinX( ), boundary.getMaxY( ) - borderHeight );
         gl.glVertex2d( boundary.getMinX( ), boundary.getMaxY( ) );
         gl.glVertex2d( boundary.getMaxX( ), boundary.getMaxY( ) );

@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GLContext;
 
-
 public class GLCapabilityLogger extends GLSimpleListenerAbstract
 {
     private final Logger logger;
@@ -48,7 +47,7 @@ public class GLCapabilityLogger extends GLSimpleListenerAbstract
 
     public GLCapabilityLogger( String name )
     {
-        this( Logger.getLogger( GLCapabilityLogger.class.getName() ), name );
+        this( Logger.getLogger( GLCapabilityLogger.class.getName( ) ), name );
     }
 
     public GLCapabilityLogger( Logger logger )
@@ -58,7 +57,7 @@ public class GLCapabilityLogger extends GLSimpleListenerAbstract
 
     public GLCapabilityLogger( )
     {
-        this( Logger.getLogger( GLCapabilityLogger.class.getName() ), "" );
+        this( Logger.getLogger( GLCapabilityLogger.class.getName( ) ), "" );
     }
 
     @Override
@@ -66,8 +65,7 @@ public class GLCapabilityLogger extends GLSimpleListenerAbstract
     {
         String prefix = "init()";
 
-        if( name != null && name.length() > 0 )
-            prefix += " on" + name;
+        if ( name != null && name.length( ) > 0 ) prefix += " on" + name;
 
         prefix = prefix + ": ";
 

@@ -48,28 +48,28 @@ public class AxisUtil
     /////////////////////////////////////////////////////////////////////////////////////////
     //      Methods for automatically creating GlimpseLayouts and associated Axes          //
     /////////////////////////////////////////////////////////////////////////////////////////
-    
+
     public static GlimpseAxisLayout2D createLayout2D( )
     {
         GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( );
         createAxis2D( layout );
         return layout;
     }
-    
+
     public static GlimpseAxisLayout1D createLayoutX( )
     {
         GlimpseAxisLayout1D layout = new GlimpseAxisLayoutX( );
         createHorizontalAxis( layout );
         return layout;
     }
-    
+
     public static GlimpseAxisLayout1D createLayoutY( )
     {
         GlimpseAxisLayout1D layout = new GlimpseAxisLayoutY( );
         createVerticalAxis( layout );
         return layout;
     }
-    
+
     /////////////////////////////////////////////////////////////////////////////////////////
     // Methods for automatically creating Glimpse Axes and attaching appropriate listeners //
     /////////////////////////////////////////////////////////////////////////////////////////

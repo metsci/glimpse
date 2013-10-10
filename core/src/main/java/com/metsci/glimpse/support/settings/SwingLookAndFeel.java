@@ -42,20 +42,20 @@ public class SwingLookAndFeel extends AbstractLookAndFeel
     {
         Color swingBg = UIManager.getColor( "Panel.background" );
         float[] bg = GlimpseColor.fromColorAwt( swingBg == null ? SystemColor.window : swingBg );
-        
+
         map.put( CROSSHAIR_COLOR, getBlack( ) );
         map.put( BORDER_COLOR, getBlack( ) );
-        
+
         map.put( PLOT_BACKGROUND_COLOR, addRgb( bg, -0.1f ) );
         map.put( FRAME_BACKGROUND_COLOR, bg );
-        
+
         map.put( AXIS_TEXT_COLOR, getBlack( ) );
         map.put( AXIS_TICK_COLOR, getBlack( ) );
         map.put( AXIS_TAG_COLOR, getBlack( 0.2f ) );
-        
+
         map.put( AXIS_FONT, getDefaultPlain( 11 ) );
         map.put( TITLE_FONT, getDefaultPlain( 14 ) );
-        
+
         map.put( TOOLTIP_BACKGROUND_COLOR, getBlack( 0.7f ) );
         map.put( TOOLTIP_TEXT_COLOR, getWhite( ) );
     }

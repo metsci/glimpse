@@ -40,11 +40,10 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
 
@@ -60,10 +59,7 @@ public class SurfaceTileExample
 
     public static void main( String[] args ) throws IOException
     {
-        Jogular.initJogl( );
-
         // create a Worldwind Frame
-
         JFrame worldwindFrame = new JFrame( "Worldwind" );
 
         JPanel panel = new JPanel( );
@@ -91,14 +87,14 @@ public class SurfaceTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( true, wwc.getContext( ) );
+        NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( layout );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        SwingRepaintManager.newRepaintManager( glimpseCanvas );
+        NEWTRepaintManager.newRepaintManager( glimpseCanvas );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );

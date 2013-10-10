@@ -26,16 +26,18 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.texture.Texture;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
@@ -46,10 +48,8 @@ import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
-import com.sun.opengl.util.texture.Texture;
 
 /**
  * An offscreen GlimpseCanvas which renders its
@@ -70,6 +70,10 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     protected int height;
 
     protected boolean isDisposed = false;
+    
+    protected GLContext sharedContext;
+    
+    protected List<GLRunnable> disposeListeners;
 
     public static interface GlimpseRunnable
     {
@@ -83,15 +87,17 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
 
     public FrameBufferGlimpseCanvas( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
     {
-        GLContext newContext = createPixelBuffer( 1, 1, context ).getContext( );
+        this.sharedContext = createPixelBuffer( 1, 1, context ).getContext( );
 
         this.width = width;
         this.height = height;
 
-        this.fbo = new GLSimpleFrameBufferObject( width, height, useDepth, useStencil, newContext );
+        this.fbo = new GLSimpleFrameBufferObject( width, height, useDepth, useStencil, sharedContext );
 
         this.layoutManager = new LayoutManager( );
 
+        this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
+        
         this.fbo.addListener( new GLSimpleListener( )
         {
             @Override
@@ -133,26 +139,35 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
             {
                 resize0( );
             }
+            
+            @Override
+            public void dispose( GLContext context )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                for ( GLRunnable runnable : disposeListeners )
+                {
+                    runnable.run( context );
+                }
+                
+                fbo.dispose( context );
+            }
+
+            @Override
+            public boolean isDisposed( )
+            {
+                return isDisposed;
+            }
 
             @Override
             public void displayChanged( GLContext context, boolean modeChanged, boolean deviceChanged )
             {
                 // do nothing
             }
-
-            @Override
-            public void dispose( GLContext context )
-            {
-                // do nothing
-            }
-
-            @Override
-            public boolean isDisposed( )
-            {
-                // return dummy value
-                return false;
-            }
-
+            
             @Override
             public GLListenerInfo getInfo( )
             {
@@ -332,41 +347,15 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void dispose( RepaintManager manager )
+    public void dispose( )
     {
-        Runnable dispose = new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                GLContext glContext = getGLContext( );
-                GlimpseContext context = new GlimpseContextImpl( glContext );
-                glContext.makeCurrent( );
-                try
-                {
-                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                    {
-                        layout.dispose( context );
-                    }
-
-                    fbo.dispose( glContext );
-                }
-                finally
-                {
-                    glContext.release( );
-                }
-
-                isDisposed = true;
-            }
-        };
-
-        if ( manager != null )
-        {
-            manager.asyncExec( dispose );
-        }
-        else
-        {
-            dispose.run( );
-        }
+        this.sharedContext.destroy( );
+        this.isDisposed = true;
+    }
+    
+    @Override
+    public void addDisposeListener( GLRunnable runnable )
+    {
+        this.disposeListeners.add( runnable );
     }
 }

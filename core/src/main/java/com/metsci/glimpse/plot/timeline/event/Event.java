@@ -26,20 +26,24 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
+
+import java.awt.geom.Rectangle2D;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.sun.opengl.util.j2d.TextRenderer;
-
-import javax.media.opengl.GL;
-import java.awt.geom.Rectangle2D;
-import java.util.*;
-
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 /**
  * Event represents an occurrence with a start and end time and is usually created
@@ -229,7 +233,7 @@ public class Event implements Iterable<Event>
     /**
      * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, int, int)
      */
-    public void paint( EventPainter defaultPainter, GL gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
+    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
     {
         EventPainter eventPainter = painter != null ? painter : defaultPainter;
 
@@ -238,7 +242,7 @@ public class Event implements Iterable<Event>
 
     public boolean hasChildren( )
     {
-        return getEventCount() > 1;
+        return getEventCount( ) > 1;
     }
 
     /**
@@ -257,27 +261,27 @@ public class Event implements Iterable<Event>
      */
     public Iterator<Event> iterator( )
     {
-        return new Iterator<Event>()
+        return new Iterator<Event>( )
         {
             boolean movedNext;
 
             @Override
-            public boolean hasNext()
+            public boolean hasNext( )
             {
                 return !movedNext;
             }
 
             @Override
-            public Event next()
+            public Event next( )
             {
                 movedNext = true;
                 return Event.this;
             }
 
             @Override
-            public void remove()
+            public void remove( )
             {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException( );
             }
         };
     }

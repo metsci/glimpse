@@ -30,9 +30,10 @@ import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.support.colormap.ColorGradient;
-import com.sun.opengl.util.BufferUtil;
 
 
 public class ColorTexture1D extends AbstractTexture
@@ -43,28 +44,28 @@ public class ColorTexture1D extends AbstractTexture
     public ColorTexture1D( int n )
     {
         super( n );
-        this.rgba = BufferUtil.newFloatBuffer( 4 * dim[0] );
+        this.rgba = Buffers.newDirectFloatBuffer( 4 * dim[0] );
     }
 
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
-        gl.glTexParameteri( GL.GL_TEXTURE_1D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
 
-        gl.glTexParameteri( GL.GL_TEXTURE_1D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP );
+        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
     }
 
     @Override
     protected void prepare_setPixelStore( GL gl )
     {
-        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
     }
 
     @Override
-    protected void prepare_setData( GL gl )
+    protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage1D( GL.GL_TEXTURE_1D, 0, GL.GL_RGBA, dim[0], 0, GL.GL_RGBA, GL.GL_FLOAT, rgba.rewind() );
+        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_RGBA, dim[0], 0, GL2.GL_RGBA, GL2.GL_FLOAT, rgba.rewind() );
     }
 
     public void setColorGradient( ColorGradient gradient )

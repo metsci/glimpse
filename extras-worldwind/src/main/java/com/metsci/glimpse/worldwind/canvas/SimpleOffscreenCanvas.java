@@ -38,9 +38,9 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -56,7 +56,7 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
 
     protected int width;
     protected int height;
-    
+
     protected boolean useDepth;
     protected boolean useStencil;
 
@@ -66,20 +66,20 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         this.width = width;
         this.height = height;
-        
+
         this.useDepth = useDepth;
         this.useStencil = useStencil;
-        
+
         this.layoutManager = new LayoutManager( );
     }
-    
+
     public SimpleOffscreenCanvas( int width, int height, boolean useDepth, boolean useStencil, GLContext context )
     {
         this( width, height, useDepth, useStencil );
-        
+
         this.initialize( context );
     }
-    
+
     public void initialize( GLContext context )
     {
         this.fbo = new GLSimpleFrameBufferObject( width, height, useDepth, useStencil, context );
@@ -225,49 +225,22 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         // do nothing
     }
-    
+
     @Override
     public boolean isDisposed( )
     {
         return this.isDisposed;
     }
-    
+
     @Override
-    public void dispose( RepaintManager manager )
+    public void dispose( )
     {
-        Runnable dispose = new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                GLContext glContext = getGLContext( );
-                GlimpseContext context = new GlimpseContextImpl( glContext );
-                glContext.makeCurrent( );
-                try
-                {
-                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                    {
-                        layout.dispose( context );
-                    }
-                    
-                    fbo.dispose( glContext );
-                }
-                finally
-                {
-                    glContext.release( );
-                }
-                
-                isDisposed = true;
-            }
-        };
-        
-        if ( manager != null )
-        {
-            manager.asyncExec( dispose );   
-        }
-        else
-        {
-            dispose.run( );
-        }
+        fbo.getGLContext( ).destroy( );
+    }
+
+    @Override
+    public void addDisposeListener( GLRunnable runnable )
+    {
+        // do nothing -- not a fully featured GlimpseCanvas
     }
 }

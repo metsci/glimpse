@@ -29,47 +29,50 @@ package com.metsci.glimpse.gl.util;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+import javax.media.opengl.GLProfile;
 
 
 public class GLPBufferUtils
 {
+	private static final GLProfile profile = GLProfile.get(GLProfile.GL2);
+	
     private GLPBufferUtils( )
     {
     }
 
     public static boolean canCreateGLPbuffer( )
     {
-        return GLDrawableFactory.getFactory().canCreateGLPbuffer();
+        return GLDrawableFactory.getFactory(profile).canCreateGLPbuffer( null, null );
     }
 
-    public static GLPbuffer createPixelBuffer( int width, int height )
+    public static GLOffscreenAutoDrawable createPixelBuffer( int width, int height )
     {
         return createPixelBuffer( width, height, null, null );
     }
 
-    public static GLPbuffer createPixelBuffer( int width, int height, GLContext context )
+    public static GLOffscreenAutoDrawable createPixelBuffer( int width, int height, GLContext context )
     {
         return createPixelBuffer( width, height, context, null );
     }
 
-    public static GLPbuffer createPixelBuffer( int width, int height, GLCapabilities cap )
+    public static GLOffscreenAutoDrawable createPixelBuffer( int width, int height, GLCapabilities cap )
     {
         return createPixelBuffer( width, height, null, cap );
     }
 
-    public static GLPbuffer createPixelBuffer( int width, int height, GLContext context, GLCapabilities cap )
+    public static GLOffscreenAutoDrawable createPixelBuffer( int width, int height, GLContext context, GLCapabilities cap )
     {
         if( !canCreateGLPbuffer() )
         {
             return null;
         }
 
-        GLDrawableFactory fac = GLDrawableFactory.getFactory();
+        GLDrawableFactory fac = ( cap == null ? GLDrawableFactory.getFactory(profile) : GLDrawableFactory.getFactory(cap.getGLProfile()) );
 
         if( cap == null )
         {
-            cap = new GLCapabilities();
+            cap = new GLCapabilities(profile);
             cap.setDoubleBuffered( false );
             cap.setDepthBits( 0 );
             cap.setAlphaBits( 0 );
@@ -77,12 +80,14 @@ public class GLPBufferUtils
             cap.setGreenBits( 8 );
             cap.setBlueBits( 8 );
         }
+        cap.setFBO(false);
+        cap.setPBuffer(true);
 
-        GLPbuffer buffer = fac.createGLPbuffer( cap, null, width, height, context );
+        GLOffscreenAutoDrawable buffer = fac.createOffscreenAutoDrawable(null, cap, null, width, height, context);
         return buffer;
     }
 
-    public static void destroyPixelBuffer( GLPbuffer buffer )
+    public static void destroyPixelBuffer( GLOffscreenAutoDrawable buffer )
     {
         if( buffer != null )
         {

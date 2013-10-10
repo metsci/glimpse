@@ -111,8 +111,8 @@ public class MapPlot2D extends Plot2D
 
         // reset the outer content painter to use the right axes
         this.axisLayoutXY.setAxis( outerContentAxis );
-        this.axisLayoutX.setAxis( outerContentAxis.getAxisX() );
-        this.axisLayoutY.setAxis( outerContentAxis.getAxisY() );
+        this.axisLayoutX.setAxis( outerContentAxis.getAxisX( ) );
+        this.axisLayoutY.setAxis( outerContentAxis.getAxisY( ) );
 
         this.tickTopX = createLabelHandlerTopX( );
         this.tickRightY = createLabelHandlerRightY( );
@@ -199,7 +199,7 @@ public class MapPlot2D extends Plot2D
          * TODO how do we reset this layout each time someone calls
          * borderPainter.setBorderSize(int)?
          */
-        mapContentLayout.setLayoutData( String.format("gap %1$d %1$d %1$d %1$d, push, grow", borderPainter.getBorderSize( ) ) );
+        mapContentLayout.setLayoutData( String.format( "gap %1$d %1$d %1$d %1$d, push, grow", borderPainter.getBorderSize( ) ) );
     }
 
     protected GridAxisLabelHandler createLabelHandlerTopX( )

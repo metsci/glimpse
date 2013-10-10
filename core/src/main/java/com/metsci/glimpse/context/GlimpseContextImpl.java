@@ -46,7 +46,7 @@ public class GlimpseContextImpl implements GlimpseContext
         this.targetStack = new GlimpseTargetStackImpl( );
         this.dpi = defaultDpiValue; //TODO fix this
     }
-    
+
     public GlimpseContextImpl( GlimpseCanvas canvas )
     {
         this.glContext = canvas.getGLContext( );

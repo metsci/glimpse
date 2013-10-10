@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.context.TargetStackUtil.*;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.factory.DefaultAxisFactory2D;
@@ -218,14 +218,14 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             Axis2D miniMapAxis = getMiniMapAxis0( context );
             Axis2D mainMapAxis = getMainMapAxis0( context );
 
-            GL gl = context.getGL( );
+            GL2 gl = context.getGL( ).getGL2();
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( miniMapAxis.getMinX( ), miniMapAxis.getMaxX( ), miniMapAxis.getMinY( ), miniMapAxis.getMaxY( ), -1, 1 );
 
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             double minX = mainMapAxis.getMinX( );
             double maxX = mainMapAxis.getMaxX( );
@@ -236,7 +236,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
 
             gl.glLineWidth( lineWidth );
             gl.glColor4fv( cursorColor, 0 );
-            gl.glBegin( GL.GL_LINE_LOOP );
+            gl.glBegin( GL2.GL_LINE_LOOP );
             try
             {
                 gl.glVertex2d( minX, minY );
@@ -250,7 +250,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             }
 
             gl.glColor4fv( shadeColor, 0 );
-            gl.glBegin( GL.GL_QUADS );
+            gl.glBegin( GL2.GL_QUADS );
             try
             {
                 gl.glVertex2d( minX, minY );

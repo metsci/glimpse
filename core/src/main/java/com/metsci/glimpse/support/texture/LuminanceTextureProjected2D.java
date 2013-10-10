@@ -28,7 +28,7 @@ package com.metsci.glimpse.support.texture;
 
 import java.nio.Buffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * A texture class which stores 16 bit fixed point greyscale values (capped from 0 to 1).
@@ -51,7 +51,7 @@ public class LuminanceTextureProjected2D extends FloatTextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL gl )
+    protected void prepare_setData( GL2 gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {
@@ -60,12 +60,12 @@ public class LuminanceTextureProjected2D extends FloatTextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_LUMINANCE16, texSizesX[i], texSizesY[i], 0, GL.GL_LUMINANCE, GL.GL_FLOAT, positionedBuffer );
+            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, positionedBuffer );
         }
 
-        gl.glPixelStorei( GL.GL_UNPACK_SKIP_PIXELS, 0 );
-        gl.glPixelStorei( GL.GL_UNPACK_SKIP_ROWS, 0 );
-        gl.glPixelStorei( GL.GL_UNPACK_ROW_LENGTH, 0 );
+        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
+        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, 0 );
+        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, 0 );
     }
 
 }

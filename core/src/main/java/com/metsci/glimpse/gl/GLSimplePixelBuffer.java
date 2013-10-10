@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl;
 
-import static com.sun.opengl.util.Screenshot.readToBufferedImage;
+import static com.jogamp.opengl.util.awt.Screenshot.readToBufferedImage;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -39,17 +39,15 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 
 import com.metsci.glimpse.gl.util.GLPBufferUtils;
 
-
 public class GLSimplePixelBuffer
 {
-    private GLPbuffer buffer;
+    private GLOffscreenAutoDrawable buffer;
 
-    private final static Logger logger = Logger.getLogger(GLSimplePixelBuffer.class.getName());
-
+    private final static Logger logger = Logger.getLogger( GLSimplePixelBuffer.class.getName( ) );
 
     public static class ListenerEntry
     {
@@ -58,7 +56,7 @@ public class GLSimplePixelBuffer
         private boolean needsReshape;
         private boolean warnOnException;
 
-        public ListenerEntry(GLSimpleListener listener)
+        public ListenerEntry( GLSimpleListener listener )
         {
             this.listener = listener;
             needsInit = true;
@@ -66,38 +64,38 @@ public class GLSimplePixelBuffer
             warnOnException = true;
         }
 
-        public void requireReshape()
+        public void requireReshape( )
         {
             needsReshape = true;
         }
 
-        public void draw(GLContext context, Rectangle bounds)
+        public void draw( GLContext context, Rectangle bounds )
         {
             try
             {
-                if (needsInit)
+                if ( needsInit )
                 {
-                    listener.init(context);
+                    listener.init( context );
                     needsInit = false;
                 }
 
-                if (needsReshape)
+                if ( needsReshape )
                 {
-                    GL gl = context.getGL();
-                    gl.glViewport(0, 0, bounds.width, bounds.height);
-                    listener.reshape(context, 0, 0, bounds.width, bounds.height);
+                    GL gl = context.getGL( );
+                    gl.glViewport( 0, 0, bounds.width, bounds.height );
+                    listener.reshape( context, 0, 0, bounds.width, bounds.height );
                     needsReshape = false;
                 }
 
-                listener.display(context);
+                listener.display( context );
 
                 warnOnException = true;
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
-                if (warnOnException)
+                if ( warnOnException )
                 {
-                    logger.log(Level.WARNING, "Listener failed to draw", e);
+                    logger.log( Level.WARNING, "Listener failed to draw", e );
                     warnOnException = false;
                 }
             }
@@ -110,7 +108,7 @@ public class GLSimplePixelBuffer
 
             if ( o instanceof ListenerEntry )
             {
-                ListenerEntry l = (ListenerEntry) o;
+                ListenerEntry l = ( ListenerEntry ) o;
                 return listener.equals( l.listener );
             }
 
@@ -118,14 +116,13 @@ public class GLSimplePixelBuffer
         }
     }
 
-
     private GLContext context;
     private List<ListenerEntry> listeners;
 
     public GLSimplePixelBuffer( int width, int height, GLContext _context )
     {
         createPixelBuffer( width, height, _context );
-        this.listeners = new CopyOnWriteArrayList<ListenerEntry>();
+        this.listeners = new CopyOnWriteArrayList<ListenerEntry>( );
     }
 
     protected void createPixelBuffer( int width, int height, GLContext _context )
@@ -144,65 +141,67 @@ public class GLSimplePixelBuffer
         listeners.remove( listener );
     }
 
-    public Dimension getDimension()
+    public Dimension getDimension( )
     {
-        return new Dimension( buffer.getHeight(), buffer.getWidth() );
+        return new Dimension( buffer.getHeight( ), buffer.getWidth( ) );
     }
 
     public void resize( int width, int height, boolean notifyListeners )
     {
-        int currHeight = buffer.getHeight();
-        int currWidth = buffer.getWidth();
+        int currHeight = buffer.getHeight( );
+        int currWidth = buffer.getWidth( );
 
-        if( currHeight != height || currWidth != width )
+        if ( currHeight != height || currWidth != width )
         {
-            GLPbuffer oldBuffer = buffer;
+            GLOffscreenAutoDrawable oldBuffer = buffer;
             createPixelBuffer( width, height, context );
-            oldBuffer.destroy();
+            oldBuffer.destroy( );
 
-            int newHeight = buffer.getHeight();
-            int newWidth = buffer.getWidth();
+            int newHeight = buffer.getHeight( );
+            int newWidth = buffer.getWidth( );
 
             // resize worked properly
-            if( newHeight == height && newWidth == width )
+            if ( newHeight == height && newWidth == width )
             {
-                if( notifyListeners )
+                if ( notifyListeners )
                 {
-                    for( ListenerEntry l : listeners )
+                    for ( ListenerEntry l : listeners )
                     {
-                        l.requireReshape();
+                        l.requireReshape( );
                     }
                 }
             }
         }
     }
 
-    public void draw()
+    public void draw( )
     {
-        glSyncExec( new GLRunnable() {
+        glSyncExec( new GLRunnable( )
+        {
             @Override
             public Object run( GLContext context, Rectangle bounds, List<ListenerEntry> entries )
             {
-                for( ListenerEntry l: entries )
+                for ( ListenerEntry l : entries )
                     l.draw( context, bounds );
 
-                context.getGL().glFlush();
+                context.getGL( ).glFlush( );
                 return null;
             }
-        });
+        } );
     }
 
-    public BufferedImage drawToBufferedImage()
+    public BufferedImage drawToBufferedImage( )
     {
-        return (BufferedImage) glSyncExec( new GLRunnable() {
+        return ( BufferedImage ) glSyncExec( new GLRunnable( )
+        {
             @Override
             public Object run( GLContext context, Rectangle bounds, List<ListenerEntry> entries )
             {
-                for (ListenerEntry l : listeners)
-                    l.draw(context, bounds);
+                for ( ListenerEntry l : listeners )
+                    l.draw( context, bounds );
 
-                context.getGL().glFlush();
-                return readToBufferedImage( buffer.getWidth(), buffer.getHeight() );
+                context.getGL( ).glFlush( );
+                return readToBufferedImage( buffer.getWidth( ), buffer.getHeight( ) );
             }
         } );
     }
@@ -210,16 +209,16 @@ public class GLSimplePixelBuffer
     // XXX: I have no idea if this is the right name for the method.
     public Object glSyncExec( GLRunnable runnable )
     {
-        context.makeCurrent();
-        Object result = runnable.run( context, getBounds(), new ArrayList<ListenerEntry>( listeners ) );
-        context.release();
+        context.makeCurrent( );
+        Object result = runnable.run( context, getBounds( ), new ArrayList<ListenerEntry>( listeners ) );
+        context.release( );
 
         return result;
     }
 
-    public Rectangle getBounds()
+    public Rectangle getBounds( )
     {
-        return new Rectangle( 0, 0, buffer.getWidth(), buffer.getHeight() );
+        return new Rectangle( 0, 0, buffer.getWidth( ), buffer.getHeight( ) );
     }
 
     public GLContext getGLContext( )
@@ -229,7 +228,8 @@ public class GLSimplePixelBuffer
 
     public void dispose( )
     {
-        glSyncExec( new GLRunnable() {
+        glSyncExec( new GLRunnable( )
+        {
             @Override
             public Object run( GLContext context, Rectangle bounds, List<ListenerEntry> entries )
             {
@@ -240,10 +240,10 @@ public class GLSimplePixelBuffer
 
                 return null;
             }
-        });
+        } );
 
-        listeners.clear();
-        context.destroy();
+        listeners.clear( );
+        context.destroy( );
     }
 
     public interface GLRunnable

@@ -45,7 +45,7 @@ public class TextureAtlasIconShaderFragment extends Shader
     protected ShaderArg textureUnitArg;
     protected ShaderArg isPickModeArg;
     protected boolean enablePicking;
-    
+
     public TextureAtlasIconShaderFragment( int textureUnit, boolean enablePicking )
     {
         super( "Texture Atlas Icon Fragment Shader", ShaderType.fragment, "shaders/atlas/texture_atlas_icon_shader.fs" );
@@ -58,10 +58,10 @@ public class TextureAtlasIconShaderFragment extends Shader
     {
         this.textureUnitArg = getArg( "tex" );
         this.textureUnitArg.setValue( textureUnit );
-        
+
         this.isPickModeArg = getArg( "isPickMode" );
         this.isPickModeArg.setValue( this.enablePicking );
-        
+
         return true;
     }
 
@@ -74,7 +74,7 @@ public class TextureAtlasIconShaderFragment extends Shader
     public void postDisplay( GL gl )
     {
     }
-    
+
     public void setPickMode( boolean pickMode )
     {
         this.enablePicking = pickMode;

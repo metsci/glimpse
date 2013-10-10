@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.base;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -37,15 +37,15 @@ import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 
 public abstract class GlimpseDataPainter1D extends GlimpsePainter1D
 {
-    public abstract void paintTo( GL gl, GlimpseBounds bounds, Axis1D axis );
+    public abstract void paintTo( GL2 gl, GlimpseBounds bounds, Axis1D axis );
 
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
         if ( axis == null || !bounds.isValid( ) ) return;
 
-        GL gl = context.getGL( );
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        GL2 gl = context.getGL( ).getGL2();
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
 
         int width = bounds.getWidth( );
@@ -61,12 +61,12 @@ public abstract class GlimpseDataPainter1D extends GlimpsePainter1D
             gl.glOrtho( 0, width, axis.getMin( ), axis.getMax( ), -1, 1 );
         }
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
-        gl.glEnable( GL.GL_POINT_SMOOTH );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
+        gl.glEnable( GL2.GL_POINT_SMOOTH );
 
-        paintTo( context.getGL( ), bounds, axis );
+        paintTo( context.getGL( ).getGL2(), bounds, axis );
     }
 
 }

@@ -43,89 +43,99 @@ package com.metsci.glimpse.support.colormap;
  *
  * @author borkholder
  */
-public class ColorGenerator {
-  /**
-   * The exponent for the number of color divisions at this step, e.g. 2^exp.
-   */
-  private int exp;
+public class ColorGenerator
+{
+    /**
+     * The exponent for the number of color divisions at this step, e.g. 2^exp.
+     */
+    private int exp;
 
-  /**
-   * The current index in the color division.
-   */
-  private int index;
+    /**
+     * The current index in the color division.
+     */
+    private int index;
 
-  private ColorGradient colors;
+    private ColorGradient colors;
 
-  /**
-   * Creates a new {@code ColorGenerator} using the jet color gradient.
-   */
-  public ColorGenerator() {
-    this(ColorGradients.jet);
-  }
-
-  /**
-   * Creates a new {@code ColorGenerator} using the given {@code ColorGradient}.
-   */
-  public ColorGenerator(ColorGradient colors) {
-    this.colors = colors;
-
-    exp = 0;
-    index = 0;
-  }
-
-  /**
-   * Gets the next color in the series. At some point, this will wrap and
-   * restart with the first color in the sequence.
-   */
-  public void next(float[] rgba) {
-    float value = -1;
-
-    if (index == 0) {
-      /*
-       * This happens on the first call (result is 0)
-       */
-      value = 0;
-      index = 1;
-    } else if (index == 1L << exp) {
-      /*
-       * This happens on the second call (result is 1)
-       */
-      value = 1;
-      exp++;
+    /**
+     * Creates a new {@code ColorGenerator} using the jet color gradient.
+     */
+    public ColorGenerator( )
+    {
+        this( ColorGradients.jet );
     }
 
-    /*
-     * If we assigned a value (0 or 1) then use it.
+    /**
+     * Creates a new {@code ColorGenerator} using the given {@code ColorGradient}.
      */
-    if (value >= 0) {
-      colors.toColor(value, rgba);
-      return;
+    public ColorGenerator( ColorGradient colors )
+    {
+        this.colors = colors;
+
+        exp = 0;
+        index = 0;
     }
 
-    /*
-     * If we need to go to the next level.
+    /**
+     * Gets the next color in the series. At some point, this will wrap and
+     * restart with the first color in the sequence.
      */
-    if (index > 1L << exp) {
-      index = 1;
-      exp++;
+    public void next( float[] rgba )
+    {
+        float value = -1;
+
+        if ( index == 0 )
+        {
+            /*
+             * This happens on the first call (result is 0)
+             */
+            value = 0;
+            index = 1;
+        }
+        else if ( index == 1L << exp )
+        {
+            /*
+             * This happens on the second call (result is 1)
+             */
+            value = 1;
+            exp++;
+        }
+
+        /*
+         * If we assigned a value (0 or 1) then use it.
+         */
+        if ( value >= 0 )
+        {
+            colors.toColor( value, rgba );
+            return;
+        }
+
+        /*
+         * If we need to go to the next level.
+         */
+        if ( index > 1L << exp )
+        {
+            index = 1;
+            exp++;
+        }
+
+        /*
+         * If we hit the maximum number of levels. Currently max is 63 which allows
+         * for about 1000 colors.
+         */
+        if ( exp > 63 )
+        {
+            index = 0;
+            exp = 0;
+        }
+
+        value = index / ( float ) ( 1L << exp );
+
+        /*
+         * Increment. All even indexes have been hit by the previous level.
+         */
+        index += 2;
+
+        colors.toColor( value, rgba );
     }
-
-    /*
-     * If we hit the maximum number of levels. Currently max is 63 which allows
-     * for about 1000 colors.
-     */
-    if (exp > 63) {
-      index = 0;
-      exp = 0;
-    }
-
-    value = index / (float) (1L << exp);
-
-    /*
-     * Increment. All even indexes have been hit by the previous level.
-     */
-    index += 2;
-
-    colors.toColor(value, rgba);
-  }
 }

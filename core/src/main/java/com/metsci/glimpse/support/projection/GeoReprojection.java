@@ -60,7 +60,7 @@ public class GeoReprojection implements Projection
     {
         this.from = from;
         this.to = to;
-        
+
         this.flat = flat;
 
         this.sizeDownsample = sizeDownsample;
@@ -92,13 +92,13 @@ public class GeoReprojection implements Projection
     @Override
     public int getSizeX( int textureSizeX )
     {
-        return (int) Math.max( 1, textureSizeX * sizeDownsample );
+        return ( int ) Math.max( 1, textureSizeX * sizeDownsample );
     }
 
     @Override
     public int getSizeY( int textureSizeY )
     {
-        return (int) Math.max( 1, textureSizeY * sizeDownsample );
+        return ( int ) Math.max( 1, textureSizeY * sizeDownsample );
     }
 
 }

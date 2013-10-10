@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 
@@ -53,5 +53,5 @@ public interface EventPainter
      * @param posMin the min y (or x, depending on orientation) in pixel coordinates of the Event
      * @param posMax the max y (or x, depending on orientation) in pixel coordinates of the Event
      */
-    public void paint( GL gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax );
+    public void paint( GL2 gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax );
 }

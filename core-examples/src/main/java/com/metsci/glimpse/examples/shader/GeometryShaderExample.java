@@ -31,7 +31,8 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.Random;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
@@ -72,7 +73,7 @@ public class GeometryShaderExample implements GlimpseLayoutProvider
         colors = new RGBA[] { WebColors.CornflowerBlue, WebColors.Salmon, WebColors.ForestGreen };
 
         //@formatter:off
-        shaders = new SimpleGeometryShader[] { SimpleGeometryShader.passGeometry( GL.GL_LINES, GL.GL_LINE_STRIP, 2 ),
+        shaders = new SimpleGeometryShader[] { SimpleGeometryShader.passGeometry( GL3.GL_LINES, GL3.GL_LINE_STRIP, 2 ),
                                                SimpleGeometryShader.linesToXs( ),
                                                SimpleGeometryShader.pointsToFixedSizeNGons( false, 4, 0.0375f ),
                                                SimpleGeometryShader.linesToVariableSizeNGons( true, 6 ),
@@ -108,8 +109,7 @@ public class GeometryShaderExample implements GlimpseLayoutProvider
     final Pipeline[] pipelines;
     final String[] pipelineNames;
     int pipelineIndex1, pipelineIndex2, pipelineIndex3;
-    private final SimpleTextPainter textLeft = new SimpleTextPainter( ), textRight = new SimpleTextPainter( ),
-            textCenter = new SimpleTextPainter( );
+    private final SimpleTextPainter textLeft = new SimpleTextPainter( ), textRight = new SimpleTextPainter( ), textCenter = new SimpleTextPainter( );
     RGBA[] colors;
 
     private static final float z = 0.0f, w = 1.0f;
@@ -133,7 +133,7 @@ public class GeometryShaderExample implements GlimpseLayoutProvider
             int nRandom = 1000;
 
             @Override
-            public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axes )
+            public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axes )
             {
                 {
                     RGBA color = colors[2];

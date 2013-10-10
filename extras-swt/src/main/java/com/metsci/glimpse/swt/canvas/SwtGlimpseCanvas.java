@@ -30,6 +30,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -51,9 +52,9 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.gl.GLListenerInfo;
+import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.GLSimpleListener;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.swt.event.mouse.MouseWrapperSWT;
 import com.metsci.glimpse.swt.misc.CursorUtil;
@@ -61,7 +62,7 @@ import com.metsci.glimpse.swt.misc.CursorUtil;
 public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
 {
     private static final Logger logger = Logger.getLogger( SwtGlimpseCanvas.class.getName( ) );
-    
+
     protected Composite parent;
 
     protected Cursor canvasCursor;
@@ -72,6 +73,8 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
+
+    protected List<GLRunnable> disposeListeners;
 
     public SwtGlimpseCanvas( Composite _parent )
     {
@@ -100,6 +103,8 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
         this.addFocusListener( this );
 
         this.setPlotAreaCursor( CursorUtil.crosshairs( _parent.getDisplay( ) ) );
+
+        this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
 
         this.addListener( new GLSimpleListener( )
         {
@@ -139,22 +144,29 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
             }
 
             @Override
-            public void displayChanged( GLContext context, boolean modeChanged, boolean deviceChanged )
-            {
-                // do nothing
-            }
-
-            @Override
             public void dispose( GLContext context )
             {
-                // do nothing
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+
+                for ( GLRunnable runnable : disposeListeners )
+                {
+                    runnable.run( context );
+                }
             }
 
             @Override
             public boolean isDisposed( )
             {
-                // return dummy value
-                return false;
+                return isDisposed;
+            }
+
+            @Override
+            public void displayChanged( GLContext context, boolean modeChanged, boolean deviceChanged )
+            {
+                // do nothing
             }
 
             @Override
@@ -204,7 +216,7 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     {
         this.layoutManager.removeLayout( layout );
     }
-    
+
     @Override
     public void removeAllLayouts( )
     {
@@ -336,56 +348,25 @@ public class SwtGlimpseCanvas extends GLSimpleSwtCanvas implements GlimpseCanvas
     {
         this.isEventGenerator = generate;
     }
-    
+
     @Override
     public boolean isDisposed( )
     {
         return isDisposed;
     }
-    
+
     @Override
     public void dispose( )
     {
         super.dispose( );
         canvasCursor.dispose( );
+
+        this.isDisposed = true;
     }
-    
+
     @Override
-    public void dispose( RepaintManager manager )
+    public void addDisposeListener( GLRunnable runnable )
     {
-        Runnable dispose = new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                GLContext glContext = getGLContext( );
-                GlimpseContext context = new GlimpseContextImpl( glContext );
-                glContext.makeCurrent( );
-                try
-                {
-                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                    {
-                        layout.dispose( context );
-                    }
-                }
-                finally
-                {
-                    glContext.release( );
-                }
-                
-                dispose( );
-                
-                isDisposed = true;
-            }
-        };
-        
-        if ( manager != null )
-        {
-            manager.asyncExec( dispose );   
-        }
-        else
-        {
-            dispose.run( );
-        }
+        this.disposeListeners.add( runnable );
     }
 }

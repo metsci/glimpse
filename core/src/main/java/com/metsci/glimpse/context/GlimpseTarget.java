@@ -86,9 +86,11 @@ public interface GlimpseTarget
      * @param layout
      */
     public void addLayout( GlimpseLayout layout );
+
     public void addLayout( GlimpseLayout layout, int zOrder );
+
     public void setZOrder( GlimpseLayout layout, int zOrder );
-    
+
     /**
      * Removes a previously added layout from this GlimpseTarget.
      * @param layout
@@ -112,6 +114,5 @@ public interface GlimpseTarget
      * Sets the LookAndFeel for this GlimpseTarget and all child GlimpseTargets.
      */
     public void setLookAndFeel( LookAndFeel laf );
-    
-    
+
 }

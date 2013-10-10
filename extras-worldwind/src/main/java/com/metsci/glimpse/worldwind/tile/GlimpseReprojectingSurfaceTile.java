@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -120,7 +121,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         reprojectCanvas.resize( width, height );
         updateProjection( width, height );
     }
-    
+
     @Override
     protected void setTextureScale( TextureSurfaceTile tile, float scaleX, float scaleY )
     {
@@ -180,18 +181,18 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
                 {
                     super.putVertexCoords( texIndex, ( float ) texFracX * scaleX, ( float ) texFracY * scaleY, temp );
                 }
-                
+
                 @Override
                 protected void putVertexTexCoords( int texIndex, double texFracX, double texFracY )
                 {
                     super.putVertexTexCoords( texIndex, ( float ) texFracX * scaleX, ( float ) texFracY * scaleY );
                 }
-                
+
                 @Override
                 protected void prepare_glState( GL gl )
                 {
-                    gl.glEnable( GL.GL_TEXTURE_2D );
-                    gl.glDisable( GL.GL_BLEND );
+                    gl.glEnable( GL2.GL_TEXTURE_2D );
+                    gl.glDisable( GL2.GL_BLEND );
                 }
             };
 
@@ -212,12 +213,12 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 
         GLSimpleFrameBufferObject fbo = reprojectCanvas.getFrameBuffer( );
         OGLStackHandler stack = new OGLStackHandler( );
-        GL gl = glContext.getGL( );
+        GL2 gl = glContext.getGL( ).getGL2( );
 
-        stack.pushAttrib( gl, GL.GL_ALL_ATTRIB_BITS );
-        stack.pushClientAttrib( gl, ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
+        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
         stack.pushTexture( gl );
-        gl.glLoadIdentity();
+        gl.glLoadIdentity( );
         stack.pushModelview( gl );
         stack.pushProjection( gl );
 

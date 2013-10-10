@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
@@ -104,17 +104,17 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
         {
             TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
-            GL gl = context.getGL( );
+            GL2 gl = context.getGL( ).getGL2();
 
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             paintTicks( gl, taggedAxis, width, height );
             paintAxisLabel( gl, taggedAxis, width, height );
@@ -124,7 +124,7 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
         }
     }
 
-    protected void paintTags( GL gl, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTags( GL2 gl, TaggedAxis1D taggedAxis, int width, int height )
     {
         for ( Tag tag : taggedAxis.getSortedTags( ) )
         {
@@ -132,7 +132,7 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
         }
     }
 
-    protected void paintTag( GL gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTag( GL2 gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
     {
         int y = taggedAxis.valueToScreenPixel( tag.getValue( ) );
         int xMin = getTagMinX( width );
@@ -140,7 +140,7 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
         int xMax = getTagMaxX( width );
 
         GlimpseColor.glColor( gl, tagColor );
-        gl.glBegin( GL.GL_TRIANGLES );
+        gl.glBegin( GL2.GL_TRIANGLES );
         try
         {
             gl.glVertex2f( xMin, y );
@@ -152,7 +152,7 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
             gl.glEnd( );
         }
 
-        gl.glBegin( GL.GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             gl.glVertex2f( xMax, y - tagHalfWidth );
@@ -167,8 +167,8 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
 
         GlimpseColor.glColor( gl, tagColor, 1f );
         gl.glLineWidth( tagPointerOutlineWidth );
-        gl.glEnable( GL.GL_LINE_SMOOTH );
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glEnable( GL2.GL_LINE_SMOOTH );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             gl.glVertex2f( xMin, y );

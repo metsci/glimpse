@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -36,7 +36,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
@@ -70,23 +70,23 @@ public class GlimpseStaticSurfaceTile extends AbstractLayer implements GlimpseSu
         this.width = width;
         this.height = height;
         this.corners = corners;
-        
+
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false );
         this.offscreenCanvas.addLayout( layout );
     }
-    
+
     @Override
     public GlimpseLayout getGlimpseLayout( )
     {
         return this.layout;
     }
-    
+
     @Override
     public GlimpseCanvas getGlimpseCanvas( )
     {
         return this.offscreenCanvas;
     }
-    
+
     @Override
     public GlimpseTargetStack getTargetStack( )
     {
@@ -116,12 +116,12 @@ public class GlimpseStaticSurfaceTile extends AbstractLayer implements GlimpseSu
             tile = newTextureSurfaceTile( textureHandle, corners );
         }
     }
-    
+
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
     {
         return new TextureSurfaceTile( textureHandle, corners );
     }
-    
+
     @Override
     protected void doRender( DrawContext dc )
     {
@@ -146,10 +146,10 @@ public class GlimpseStaticSurfaceTile extends AbstractLayer implements GlimpseSu
     {
         GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
         OGLStackHandler stack = new OGLStackHandler( );
-        GL gl = glContext.getGL( );
+        GL2 gl = glContext.getGL( ).getGL2( );
 
-        stack.pushAttrib( gl, GL.GL_ALL_ATTRIB_BITS );
-        stack.pushClientAttrib( gl, ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
+        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
         stack.pushTexture( gl );
         stack.pushModelview( gl );
         stack.pushProjection( gl );

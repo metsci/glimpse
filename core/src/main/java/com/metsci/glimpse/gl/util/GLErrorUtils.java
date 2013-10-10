@@ -27,12 +27,13 @@
 package com.metsci.glimpse.gl.util;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.sun.opengl.impl.error.Error.gluErrorString;
+import static jogamp.opengl.glu.error.Error.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 
 public class GLErrorUtils
@@ -44,7 +45,7 @@ public class GLErrorUtils
     public static boolean logGLError( Logger logger, Level level, GL gl, String prefix )
     {
         int error = gl.glGetError();
-        if( error != GL.GL_NO_ERROR )
+        if( error != GL2.GL_NO_ERROR )
         {
             StackTraceElement[] traceArray = Thread.currentThread( ).getStackTrace( );
             StringBuilder traceString = new StringBuilder( );

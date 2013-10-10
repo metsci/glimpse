@@ -33,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import net.miginfocom.layout.ComponentWrapper;
@@ -246,7 +247,7 @@ public class GLLayoutPainter extends GLSimpleListenerAbstract implements Compone
         GL gl = context.getGL( );
         try
         {
-            gl.glEnable( GL.GL_SCISSOR_TEST );
+            gl.glEnable( GL2.GL_SCISSOR_TEST );
 
             // TODO: scissor so as not to overrun the parent viewport
             // TODO: reconcile viewport with GLGlimpseListener viewport call
@@ -264,7 +265,7 @@ public class GLLayoutPainter extends GLSimpleListenerAbstract implements Compone
         }
         finally
         {
-            gl.glDisable( GL.GL_SCISSOR_TEST );
+            gl.glDisable( GL2.GL_SCISSOR_TEST );
         }
     }
 

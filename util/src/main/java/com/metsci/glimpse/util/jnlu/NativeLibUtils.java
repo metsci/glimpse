@@ -30,7 +30,6 @@ import static java.util.Collections.unmodifiableList;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -135,56 +134,6 @@ public class NativeLibUtils
         File toFile = new File(toDir, from.name);
         FileUtils.copy(from.url, toFile);
         return toFile;
-    }
-    
-    /**
-     * Relies on {@link NativeLibUtils#addLibDirToClassLoader_FRAGILE(File)}, which currently
-     * works on all platforms, but might not continue to forever. USE AT YOUR OWN RISK.
-     */
-    public static void addLibDir_FRAGILE(File newDir, boolean prepend) throws IOException
-    {
-        addLibDirToClassLoader_FRAGILE(newDir, prepend);
-        addLibDirToSystemProperty(newDir, prepend);
-    }
-    
-    /**
-     * Relies on private implementation details of the ClassLoader class. This currently
-     * works on all platforms, but might not continue to forever. USE AT YOUR OWN RISK.
-     */
-    public static void addLibDirToClassLoader_FRAGILE(File newDir, boolean prepend) throws IOException
-    {
-        try
-        {
-            Field field = ClassLoader.class.getDeclaredField("usr_paths");
-            field.setAccessible(true);
-            String[] originalArray = (String[]) field.get(null);
-            
-            Set<String> originalPaths = new HashSet<String>();
-            for (String p : originalArray) originalPaths.add((new File(p)).getCanonicalPath());
-            if (originalPaths.contains(newDir.getCanonicalPath())) return;
-            
-            int originalCount = originalArray.length;
-            String[] newArray = new String[originalCount + 1];
-            if (prepend)
-            {
-                newArray[0] = newDir.getPath();
-                System.arraycopy(originalArray, 0, newArray, 1, originalCount);
-            }
-            else
-            {
-                System.arraycopy(originalArray, 0, newArray, 0, originalCount);
-                newArray[originalCount] = newDir.getPath();
-            }
-            field.set(null, newArray);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new IOException("Failed to get permissions to set library path");
-        }
-        catch (NoSuchFieldException e)
-        {
-            throw new IOException("Failed to get field handle to set library path");
-        }
     }
     
     /**

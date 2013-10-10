@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.NumericXAxisPainter;
@@ -100,17 +100,17 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
         {
             TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
 
-            GL gl = context.getGL( );
+            GL2 gl = context.getGL( ).getGL2();
 
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             paintTicks( gl, taggedAxis, width, height );
             paintSelectionLine( gl, taggedAxis, width, height );
@@ -119,7 +119,7 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
         }
     }
 
-    protected void paintTags( GL gl, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTags( GL2 gl, TaggedAxis1D taggedAxis, int width, int height )
     {
         for ( Tag tag : taggedAxis.getSortedTags( ) )
         {
@@ -127,14 +127,14 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
         }
     }
 
-    protected void paintTag( GL gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTag( GL2 gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
     {
         int x = taggedAxis.valueToScreenPixel( tag.getValue( ) );
         int y1 = height - 1 - tickBufferSize - tagHeight;
         int y2 = y1 + tagHeight;
 
         GlimpseColor.glColor( gl, tagColor );
-        gl.glBegin( GL.GL_TRIANGLES );
+        gl.glBegin( GL2.GL_TRIANGLES );
         try
         {
             gl.glVertex2f( x, y2 );

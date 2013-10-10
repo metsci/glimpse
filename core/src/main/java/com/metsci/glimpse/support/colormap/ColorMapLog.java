@@ -37,16 +37,16 @@ package com.metsci.glimpse.support.colormap;
 public class ColorMapLog extends ColorMapLinear
 {
 
-    public ColorMapLog(float logMin, float logMax, ColorGradient gradient)
+    public ColorMapLog( float logMin, float logMax, ColorGradient gradient )
     {
-        super(logMin, logMax, gradient);
+        super( logMin, logMax, gradient );
     }
 
     @Override
-    public void toColor(float value, float[] rgba)
+    public void toColor( float value, float[] rgba )
     {
-        float logValue = (float) Math.log(value);
-        super.toColor(logValue, rgba);
+        float logValue = ( float ) Math.log( value );
+        super.toColor( logValue, rgba );
     }
 
 }

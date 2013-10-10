@@ -38,6 +38,6 @@ public interface ColorMap
      * and stores the color in the rgba array. The rgba array must
      * be a pre-allocated float array of length >= 4.
      */
-    void toColor(float value, float[] rgba);
+    void toColor( float value, float[] rgba );
 
 }

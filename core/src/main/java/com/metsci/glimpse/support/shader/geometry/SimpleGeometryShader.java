@@ -27,6 +27,7 @@
 package com.metsci.glimpse.support.shader.geometry;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.gl.shader.ShaderType;
 
@@ -51,7 +52,7 @@ public class SimpleGeometryShader extends SimpleShader
 
     public static SimpleGeometryShader pointsToFixedSizeNGons( final boolean solid, final int N, final float radius )
     {
-        return new SimpleGeometryShader( "ngons" + N, "shaders/geometry/n_gon.gs", GL.GL_POINTS, solid ? GL.GL_TRIANGLE_STRIP : GL.GL_LINE_STRIP, solid ? 3 * ( N - 1 ) : N + 1 )
+        return new SimpleGeometryShader( "ngons" + N, "shaders/geometry/n_gon.gs", GL3.GL_POINTS, solid ? GL3.GL_TRIANGLE_STRIP : GL3.GL_LINE_STRIP, solid ? 3 * ( N - 1 ) : N + 1 )
         {
             public void preDisplay( GL gl )
             {
@@ -64,7 +65,7 @@ public class SimpleGeometryShader extends SimpleShader
 
     public static SimpleGeometryShader pointsToPixelSizedNGons( final boolean solid, final int N, final int radiusPixels )
     {
-        return new SimpleGeometryShader( "ngons" + N, "shaders/geometry/pixel_n_gon.gs", GL.GL_POINTS, solid ? GL.GL_TRIANGLE_STRIP : GL.GL_LINE_STRIP, solid ? 3 * ( N - 1 ) : N + 1 )
+        return new SimpleGeometryShader( "ngons" + N, "shaders/geometry/pixel_n_gon.gs", GL3.GL_POINTS, solid ? GL3.GL_TRIANGLE_STRIP : GL3.GL_LINE_STRIP, solid ? 3 * ( N - 1 ) : N + 1 )
         {
             public void preDisplay( GL gl )
             {
@@ -87,7 +88,7 @@ public class SimpleGeometryShader extends SimpleShader
 
     public static SimpleGeometryShader linesToVariableSizeNGons( final boolean solid, final int N )
     {
-        return new SimpleGeometryShader( "variable_ngons" + N, "shaders/geometry/variable_n_gon.gs", GL.GL_LINES, solid ? GL.GL_TRIANGLE_STRIP : GL.GL_LINE_STRIP, solid ? 3 * ( N - 1 ) : N + 1 )
+        return new SimpleGeometryShader( "variable_ngons" + N, "shaders/geometry/variable_n_gon.gs", GL3.GL_LINES, solid ? GL3.GL_TRIANGLE_STRIP : GL3.GL_LINE_STRIP, solid ? 3 * ( N - 1 ) : N + 1 )
         {
             public void preDisplay( GL gl )
             {
@@ -99,18 +100,21 @@ public class SimpleGeometryShader extends SimpleShader
 
     public static SimpleGeometryShader linesToXs( )
     {
-        return new SimpleGeometryShader( "xs", "shaders/geometry/x.gs", GL.GL_LINES, GL.GL_LINE_STRIP, 5 );
+        return new SimpleGeometryShader( "xs", "shaders/geometry/x.gs", GL3.GL_LINES, GL3.GL_LINE_STRIP, 5 );
     }
 
     @Override
     public boolean preLink( GL gl, int glProgramHandle )
     {
-        gl.glProgramParameteriEXT( glProgramHandle, GL.GL_GEOMETRY_INPUT_TYPE_EXT, inType );
-        logGlError( gl );
-        gl.glProgramParameteriEXT( glProgramHandle, GL.GL_GEOMETRY_OUTPUT_TYPE_EXT, outType );
-        logGlError( gl );
-        gl.glProgramParameteriEXT( glProgramHandle, GL.GL_GEOMETRY_VERTICES_OUT_EXT, maxVertices );
-        logGlError( gl );
+        GL3 gl3 = gl.getGL3( );
+
+        gl3.glProgramParameteriARB( glProgramHandle, GL3.GL_GEOMETRY_INPUT_TYPE_ARB, inType );
+        logGlError( gl3 );
+        gl3.glProgramParameteriARB( glProgramHandle, GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, outType );
+        logGlError( gl3 );
+        gl3.glProgramParameteriARB( glProgramHandle, GL3.GL_GEOMETRY_VERTICES_OUT_ARB, maxVertices );
+        logGlError( gl3 );
+
         return true;
     }
 

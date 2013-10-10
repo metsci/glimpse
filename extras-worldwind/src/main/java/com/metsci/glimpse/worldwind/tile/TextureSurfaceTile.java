@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 /**
@@ -117,12 +118,12 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     @Override
     public void render( DrawContext dc )
     {
-        GL gl = dc.getGL( );
+        GL2 gl = dc.getGL( ).getGL2( );
 
-        gl.glPushAttrib( GL.GL_POLYGON_BIT );
-        gl.glPolygonMode( GL.GL_FRONT, GL.GL_FILL );
-        gl.glEnable( GL.GL_CULL_FACE );
-        gl.glCullFace( GL.GL_BACK );
+        gl.glPushAttrib( GL2.GL_POLYGON_BIT );
+        gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+        gl.glEnable( GL2.GL_CULL_FACE );
+        gl.glCullFace( GL2.GL_BACK );
 
         SurfaceTileRenderer r = renderer != null ? renderer : dc.getGeographicSurfaceTileRenderer( );
 
@@ -143,18 +144,18 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     {
         GL gl = dc.getGL( );
 
-        gl.glBindTexture( GL.GL_TEXTURE_2D, textureHandle );
+        gl.glBindTexture( GL2.GL_TEXTURE_2D, textureHandle );
 
         // these settings make fine line drawing against a transparent background appear much more natural
         // but can make other rendering look too jagged/crisp
 
-        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST );
-        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
-        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_BORDER );
-        //gl.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_BORDER );
+        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
+        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_BORDER );
+        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_BORDER );
         //
-        //gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
-        //gl.glEnable( GL.GL_BLEND );
+        //gl.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        //gl.glEnable( GL2.GL_BLEND );
         //
         //GlimpseColor.glColor( gl, GlimpseColor.getWhite( 0.5f ) );
 
@@ -164,11 +165,11 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     @Override
     public void applyInternalTransform( DrawContext dc, boolean textureIdentityActive )
     {
-        GL gl = GLContext.getCurrent( ).getGL( );
+        GL2 gl = GLContext.getCurrent( ).getGL( ).getGL2( );
 
         if ( !textureIdentityActive )
         {
-            gl.glMatrixMode( GL.GL_TEXTURE );
+            gl.glMatrixMode( GL2.GL_TEXTURE );
             gl.glLoadIdentity( );
         }
 

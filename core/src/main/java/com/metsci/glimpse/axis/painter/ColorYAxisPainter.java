@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -75,17 +75,17 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
         
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         paintColorScale( gl, axis, width, height );
 
@@ -94,7 +94,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         paintSelectionLine( gl, axis, width, height );
     }
 
-    protected void paintColorScale( GL gl, Axis1D axis, int width, int height )
+    protected void paintColorScale( GL2 gl, Axis1D axis, int width, int height )
     {
         if ( colorTexture != null )
         {
@@ -103,11 +103,11 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             int x1 = getColorBarMinX( width );
             int x2 = getColorBarMaxX( width );
 
-            gl.glTexEnvf( GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_REPLACE );
-            gl.glPolygonMode( GL.GL_FRONT, GL.GL_FILL );
-            gl.glEnable( GL.GL_TEXTURE_1D );
+            gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
+            gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+            gl.glEnable( GL2.GL_TEXTURE_1D );
 
-            gl.glBegin( GL.GL_QUADS );
+            gl.glBegin( GL2.GL_QUADS );
             try
             {
                 gl.glTexCoord1f( 0.0f );
@@ -127,7 +127,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
                 gl.glEnd( );
             }
 
-            gl.glDisable( GL.GL_TEXTURE_1D );
+            gl.glDisable( GL2.GL_TEXTURE_1D );
         }
 
         if ( outline )
@@ -136,14 +136,14 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         }
     }
 
-    protected void outlineColorQuad( GL gl, Axis1D axis, int width, int height )
+    protected void outlineColorQuad( GL2 gl, Axis1D axis, int width, int height )
     {
         float x1 = getColorBarMinX( width );
         float x2 = getColorBarMaxX( width );
 
         gl.glColor4fv( tickColor, 0 );
 
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             gl.glVertex2f( x2, 0 );

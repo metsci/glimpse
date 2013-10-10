@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -34,14 +34,18 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.awt.GLCanvas;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -50,8 +54,8 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
+import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -75,7 +79,9 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
-    
+
+    protected List<GLRunnable> disposeListeners;
+
     public SwingGlimpseCanvas( )
     {
         this( true );
@@ -123,6 +129,30 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         this.isDisposed = false;
 
         this.addGLEventListener( this.glCanvas );
+
+        this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
+    }
+    
+    public void addDisposeListener( final JFrame frame, final GLAutoDrawable sharedContextSource )
+    {
+        // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
+        // This listener must be added before adding the SwingGlimpseCanvas to the frame because
+        // NEWTGLCanvas adds its own WindowListener and this WindowListener must receive the WindowEvent first.
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // dispose of resources associated with the canvas
+                dispose( );
+                
+                // destroy the source of the shared glContext
+                sharedContextSource.destroy( );
+                
+                // remove the canvas from the frame
+                frame.remove( SwingGlimpseCanvas.this );
+            }
+        } );
     }
 
     @Override
@@ -395,9 +425,19 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             }
 
             @Override
-            public void displayChanged( GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged )
+            public void dispose( GLAutoDrawable drawable )
             {
-                // do nothing
+                logInfo( logger, "Disposing SwingGlimpseCanvas..." );
+
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+
+                for ( GLRunnable runnable : disposeListeners )
+                {
+                    runnable.run( drawable.getContext( ) );
+                }
             }
         } );
     }
@@ -407,41 +447,17 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         return this.isDisposed;
     }
-    
+
     @Override
-    public void dispose( RepaintManager manager )
+    public void dispose( )
     {
-        Runnable dispose = new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                GLContext glContext = getGLContext( );
-                GlimpseContext context = new GlimpseContextImpl( glContext );
-                glContext.makeCurrent( );
-                try
-                {
-                    for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                    {
-                        layout.dispose( context );
-                    }
-                }
-                finally
-                {
-                    glContext.release( );
-                }
-                
-                isDisposed = true;
-            }
-        };
-        
-        if ( manager != null )
-        {
-            manager.asyncExec( dispose );   
-        }
-        else
-        {
-            dispose.run( );
-        }
+        this.glCanvas.destroy( );
+        this.isDisposed = true;
+    }
+
+    @Override
+    public void addDisposeListener( GLRunnable runnable )
+    {
+        this.disposeListeners.add( runnable );
     }
 }

@@ -32,7 +32,6 @@ import static java.lang.Math.min;
 
 import java.awt.Color;
 
-
 public final class RGBA
 {
     public static final RGBA white = new RGBA( Color.white );
@@ -61,7 +60,6 @@ public final class RGBA
     public static final RGBA CYAN = new RGBA( Color.CYAN );
     public static final RGBA blue = new RGBA( Color.blue );
     public static final RGBA BLUE = new RGBA( Color.BLUE );
-
 
     public final float r;
     public final float g;
@@ -126,57 +124,57 @@ public final class RGBA
         saturation = min( 1, max( 0, saturation ) );
         brightness = min( 1, max( 0, brightness ) );
 
-        if( saturation == 0 )
+        if ( saturation == 0 )
         {
             return new RGBA( brightness, brightness, brightness, 1f );
         }
 
-        float h = (hue - (float)floor(hue)) * 6.0f;
-        float f = h - (float)floor(h);
-        float p = brightness * (1.0f - saturation);
-        float q = brightness * (1.0f - saturation * f);
-        float t = brightness * (1.0f - (saturation * (1.0f - f)));
+        float h = ( hue - ( float ) floor( hue ) ) * 6.0f;
+        float f = h - ( float ) floor( h );
+        float p = brightness * ( 1.0f - saturation );
+        float q = brightness * ( 1.0f - saturation * f );
+        float t = brightness * ( 1.0f - ( saturation * ( 1.0f - f ) ) );
 
         float r = 0f;
         float g = 0f;
         float b = 0f;
-        switch ((int) h)
+        switch ( ( int ) h )
         {
-        case 0:
-            r = brightness;
-            g = t;
-            b = p;
-            break;
+            case 0:
+                r = brightness;
+                g = t;
+                b = p;
+                break;
 
-        case 1:
-            r = q;
-            g = brightness;
-            b = p;
-            break;
+            case 1:
+                r = q;
+                g = brightness;
+                b = p;
+                break;
 
-        case 2:
-            r = p;
-            g = brightness;
-            b = t;
-            break;
+            case 2:
+                r = p;
+                g = brightness;
+                b = t;
+                break;
 
-        case 3:
-            r = p;
-            g = q;
-            b = brightness;
-            break;
+            case 3:
+                r = p;
+                g = q;
+                b = brightness;
+                break;
 
-        case 4:
-            r = t;
-            g = p;
-            b = brightness;
-            break;
+            case 4:
+                r = t;
+                g = p;
+                b = brightness;
+                break;
 
-        case 5:
-            r = brightness;
-            g = p;
-            b = q;
-            break;
+            case 5:
+                r = brightness;
+                g = p;
+                b = q;
+                break;
         }
 
         return new RGBA( r, g, b, alpha );
@@ -184,22 +182,22 @@ public final class RGBA
 
     public final int getIntRed( )
     {
-        return (int) ( r * 255f + 0.5f );
+        return ( int ) ( r * 255f + 0.5f );
     }
 
     public final int getIntGreen( )
     {
-        return (int) ( g * 255f + 0.5f );
+        return ( int ) ( g * 255f + 0.5f );
     }
 
     public final int getIntBlue( )
     {
-        return (int) ( b * 255f + 0.5f );
+        return ( int ) ( b * 255f + 0.5f );
     }
 
     public final int getIntAlpha( )
     {
-        return (int) ( a * 255f + 0.5f );
+        return ( int ) ( a * 255f + 0.5f );
     }
 
     public final RGBA withAlpha( float a )
@@ -229,14 +227,14 @@ public final class RGBA
 
     public final int[] toInt4( )
     {
-        return new int[] { getIntRed(), getIntGreen(), getIntBlue(), getIntAlpha() };
+        return new int[] { getIntRed( ), getIntGreen( ), getIntBlue( ), getIntAlpha( ) };
     }
 
     public final int[] toInt3( )
     {
-        return new int[] { getIntRed(), getIntGreen(), getIntBlue() };
+        return new int[] { getIntRed( ), getIntGreen( ), getIntBlue( ) };
     }
-    
+
     @Override
     public int hashCode( )
     {

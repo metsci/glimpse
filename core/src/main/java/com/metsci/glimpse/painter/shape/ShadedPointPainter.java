@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -329,7 +330,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         lock.lock( );
         try
@@ -349,7 +350,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
                 sizeTexture.prepare( gl, 1 );
                 sizeAttributeBuffer.bind( sizeAttributeIndex, gl );
 
-                gl.glEnable( GL.GL_VERTEX_PROGRAM_POINT_SIZE );
+                gl.glEnable( GL2.GL_VERTEX_PROGRAM_POINT_SIZE );
             }
 
             if ( constantColor )
@@ -365,9 +366,9 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             positionBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
             pipeline.beginUse( gl );
 
-            gl.glEnable( GL.GL_POINT_SMOOTH );
-            gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL.GL_BLEND );
+            gl.glEnable( GL2.GL_POINT_SMOOTH );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
 
             drawArrays( gl );
         }
@@ -389,7 +390,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
+        gl.glDrawArrays( GL2.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
     }
 
     @Override

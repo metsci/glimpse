@@ -28,8 +28,6 @@ package com.metsci.glimpse.util.geo.projection;
 
 import java.io.Serializable;
 
-import java.io.Serializable;
-
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.datum.DatumSphereWgs84;
 import com.metsci.glimpse.util.math.fast.PolynomialApprox;

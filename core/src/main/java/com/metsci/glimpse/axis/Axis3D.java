@@ -86,7 +86,6 @@ public class Axis3D extends Axis2D
         if ( z != null ) z.setLinkChildren( link );
     }
 
-
     public void set( double minX, double maxX, double minY, double maxY, double minZ, double maxZ )
     {
         x.setMin( minX );
@@ -96,7 +95,6 @@ public class Axis3D extends Axis2D
         z.setMin( minZ );
         z.setMax( maxZ );
     }
-
 
     @Override
     public String toString( )

@@ -35,6 +35,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLProfile;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
@@ -134,13 +135,15 @@ public class GLSimpleSwtCanvas extends GLCanvas
 
         setCurrent( );
 
+        GLProfile profile = GLProfile.get(GLProfile.GL2);
+        
         if ( _context == null )
         {
-            context = GLDrawableFactory.getFactory( ).createExternalGLContext( );
+            context = GLDrawableFactory.getFactory( profile ).createExternalGLContext( );
         }
         else
         {
-            GLDrawable drawable = GLDrawableFactory.getFactory( ).createExternalGLDrawable( );
+            GLDrawable drawable = GLDrawableFactory.getFactory( profile ).createExternalGLDrawable( );
             context = drawable.createContext( _context );
         }
 

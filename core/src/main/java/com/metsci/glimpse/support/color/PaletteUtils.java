@@ -39,9 +39,9 @@ public class PaletteUtils
 
         RGBA[] result = new RGBA[size];
 
-        for( int i = 0; i < size; i++ )
+        for ( int i = 0; i < size; i++ )
         {
-            float hue = (phase + i / (float) size) % 1;
+            float hue = ( phase + i / ( float ) size ) % 1;
             result[i] = RGBA.fromHsb( hue, saturation, brightness, alpha );
         }
 

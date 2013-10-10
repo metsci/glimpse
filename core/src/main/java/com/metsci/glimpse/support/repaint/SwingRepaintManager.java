@@ -43,7 +43,7 @@ public class SwingRepaintManager extends RepaintManager
         manager.start( );
         return manager;
     }
-    
+
     public void asyncExec( Runnable runnable )
     {
         SwingUtilities.invokeLater( runnable );
@@ -70,6 +70,7 @@ public class SwingRepaintManager extends RepaintManager
         return SwingUtilities.isEventDispatchThread( );
     }
 
+    @Override
     public Runnable newRepaintRunnable( )
     {
         return new RepaintRunnable( );

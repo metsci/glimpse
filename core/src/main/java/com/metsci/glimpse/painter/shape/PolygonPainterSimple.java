@@ -35,7 +35,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -70,7 +70,7 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
 
     public PolygonPainterSimple( )
     {
-        this.tessellator = new PolygonTessellator( glu );
+        this.tessellator = new PolygonTessellator( );
     }
 
     public void setShowOn( int[] ids )
@@ -158,7 +158,7 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
-    
+
     public void setShowAllTimeRange( )
     {
         lock.lock( );
@@ -243,12 +243,12 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         lock.lock( );
         try
         {
-            gl.glBegin( GL.GL_TRIANGLES );
+            gl.glBegin( GL2.GL_TRIANGLES );
             try
             {
                 for ( PolyStruct p : polyByTime )
@@ -302,8 +302,7 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         @Override
         public int compare( PolyStruct p1, PolyStruct p2 )
         {
-            if( p1 == p2 )
-                return 0;
+            if ( p1 == p2 ) return 0;
 
             if ( p1.time < p2.time )
             {

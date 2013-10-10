@@ -26,16 +26,12 @@
  */
 package com.metsci.glimpse.examples.worldwind;
 
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
-import static gov.nasa.worldwind.globes.Earth.*;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.*;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.globes.Earth;
-import gov.nasa.worldwind.globes.EllipsoidalGlobe;
 import gov.nasa.worldwind.layers.ViewControlsLayer;
 import gov.nasa.worldwind.layers.ViewControlsSelectListener;
-import gov.nasa.worldwind.terrain.ZeroElevationModel;
 import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.awt.BorderLayout;
@@ -48,31 +44,25 @@ import javax.swing.JPanel;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.canvas.SwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.examples.charts.bathy.BathymetryExample;
-import com.metsci.glimpse.gl.Jogular;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
-import com.metsci.glimpse.support.repaint.SwingRepaintManager;
+import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
-import com.metsci.glimpse.worldwind.tile.ElevatedSurfaceTileRenderer;
 import com.metsci.glimpse.worldwind.tile.GlimpseDynamicSurfaceTile;
 import com.metsci.glimpse.worldwind.tile.GlimpseReprojectingSurfaceTile;
-import com.metsci.glimpse.worldwind.tile.TextureSurfaceTile;
 
-@SuppressWarnings( "unused" )
 public class BathymetryTileExample
 {
     public static void main( String[] args ) throws IOException
     {
-        Jogular.initJogl( );
-
         // create a Worldwind Frame
         JFrame worldwindFrame = new JFrame( "Worldwind" );
 
@@ -82,10 +72,10 @@ public class BathymetryTileExample
 
         final WorldWindowGLCanvas wwc = new WorldWindowGLCanvas( );
         BasicModel model = new BasicModel( );
-        
+
         // uncomment this line to use a flat globe
         //model.setGlobe( new EllipsoidalGlobe( Earth.WGS84_EQUATORIAL_RADIUS, Earth.WGS84_POLAR_RADIUS, Earth.WGS84_ES, new ZeroElevationModel( ) ) );
-        
+
         wwc.setModel( model );
 
         panel.add( wwc, BorderLayout.CENTER );
@@ -134,23 +124,6 @@ public class BathymetryTileExample
 
         GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseReprojectingSurfaceTile( baseLayout, wwaxis, projection, projectionTo, 4500, 4500, 3000, 3000, corners );
 
-        // this block displays the SurfaceTile flat at 0 elevation
-        // the elevation exaggeration in the WorldWind GIU will probably need to be increased for the flat layer to become visible
-        /*        
-        GlimpseDynamicSurfaceTile glimpseLayer = new GlimpseReprojectingSurfaceTile( baseLayout, wwaxis, projection, projectionTo, 4500, 4500, 3000, 3000, corners )
-        {
-            @Override
-            protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
-            {
-                EllipsoidalGlobe globe = new EllipsoidalGlobe( Earth.WGS84_EQUATORIAL_RADIUS, Earth.WGS84_POLAR_RADIUS, Earth.WGS84_ES, new ZeroElevationModel( ) );
-                ElevatedSurfaceTileRenderer renderer = new ElevatedSurfaceTileRenderer( globe );
-                TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
-                tile.setSurfaceTileRenderer( renderer );
-                return tile;
-            }
-        };
-        */
-        
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
         // Create and install the view controls layer and register a controller for it with the World Window.
@@ -163,14 +136,14 @@ public class BathymetryTileExample
         worldwindFrame.setVisible( true );
 
         // create a Glimpse Frame
-        SwingGlimpseCanvas glimpseCanvas = new SwingGlimpseCanvas( true, wwc.getContext( ) );
+        NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );
         glimpseCanvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        SwingRepaintManager.newRepaintManager( glimpseCanvas );
+        NEWTRepaintManager.newRepaintManager( glimpseCanvas );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );

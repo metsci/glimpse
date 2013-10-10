@@ -35,14 +35,14 @@ public class ColorGradientUtils
 {
     public static ColorGradient buildCellColorGradient( final RGBA[] cellColors )
     {
-        return new ColorGradient()
+        return new ColorGradient( )
         {
             RGBA[] c = copyOf( cellColors, cellColors.length );
 
             @Override
-            public void toColor(float fraction, float[] rgba)
+            public void toColor( float fraction, float[] rgba )
             {
-                int index = min( c.length-1, (int) (c.length * fraction) );
+                int index = min( c.length - 1, ( int ) ( c.length * fraction ) );
 
                 rgba[0] = c[index].r;
                 rgba[1] = c[index].g;

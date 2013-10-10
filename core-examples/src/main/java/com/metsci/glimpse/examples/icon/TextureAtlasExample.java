@@ -31,7 +31,7 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
@@ -88,7 +88,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
         }
 
         @Override
-        public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+        public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
         {
             this.atlas.beginRendering( );
             try
@@ -104,7 +104,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
 
         }
     }
-    
+
     public static void loadTextureAtlas( TextureAtlas atlas ) throws IOException
     {
         atlas.loadImage( "image1", 30, 30, new ImageDrawer( )
@@ -168,7 +168,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
                 g.drawLine( 0, 0, width, height );
             }
         } );
-        
+
         atlas.loadImage( "image7", 100, 100, new ImageDrawer( )
         {
             @Override
@@ -198,25 +198,24 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
                 g.fillRect( width / 2, 0, width / 2, height / 2 );
             }
         } );
-        
+
         atlas.loadImage( "image9", 100, 100, 0, 0, new ImageDrawer( )
         {
             @Override
             public void drawImage( Graphics2D g, int width, int height )
             {
                 g.setColor( Color.black );
-                
-                for ( int x = 0 ; x < width ; x++ )
+
+                for ( int x = 0; x < width; x++ )
                 {
-                    for ( int y = 0 ; y < height ; y++ )
+                    for ( int y = 0; y < height; y++ )
                     {
-                        if ( ( x % 2 == 0 && y % 2 == 0 ) || ( x % 2 != 0 && y % 2 != 0 ) )
-                            g.fillRect( x,y,1,1 );
+                        if ( ( x % 2 == 0 && y % 2 == 0 ) || ( x % 2 != 0 && y % 2 != 0 ) ) g.fillRect( x, y, 1, 1 );
                     }
                 }
-                
+
                 g.setColor( Color.red );
-                g.drawRect( 0, 0, width-1, height-1 );
+                g.drawRect( 0, 0, width - 1, height - 1 );
             }
         } );
 

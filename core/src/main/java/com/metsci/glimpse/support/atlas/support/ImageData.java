@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.atlas.support;
 
-import com.sun.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 /**
  * An immutable wrapper around {@link ImageDataInternal} used to pass data about

@@ -67,7 +67,7 @@ public class GlimpseAxisLayoutX extends GlimpseAxisLayout1D
     {
         super( parent );
     }
-    
+
     public GlimpseAxisLayoutX( )
     {
         super( null, null, null );

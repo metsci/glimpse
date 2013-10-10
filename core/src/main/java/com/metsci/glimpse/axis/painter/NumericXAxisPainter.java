@@ -26,11 +26,11 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.round;
+import static java.lang.Math.*;
 
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -59,12 +59,12 @@ public class NumericXAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
@@ -73,7 +73,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         paintSelectionLine( gl, axis, width, height );
     }
 
-    protected void paintTicks( GL gl, Axis1D axis, int width, int height )
+    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
     {
         double[] xTicks = ticks.getTickPositions( axis );
         String[] xLabels = ticks.getTickLabels( axis, xTicks );
@@ -87,7 +87,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
         // Tick marks
         GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             for ( int i = 0; i < xTicks.length; i++ )
@@ -174,7 +174,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintAxisLabel( GL gl, Axis1D axis, int width, int height )
+    protected void paintAxisLabel( GL2 gl, Axis1D axis, int width, int height )
     {
         // Axis Label
         if ( showLabel )
@@ -197,7 +197,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintSelectionLine( GL gl, Axis1D axis, int width, int height )
+    protected void paintSelectionLine( GL2 gl, Axis1D axis, int width, int height )
     {
         // Selection line
         if ( showSelectionLine )
@@ -206,7 +206,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
             int x0 = axis.valueToScreenPixel( axis.getSelectionCenter( ) );
 
-            gl.glBegin( GL.GL_LINES );
+            gl.glBegin( GL2.GL_LINES );
             try
             {
                 gl.glVertex2f( x0, 0 );

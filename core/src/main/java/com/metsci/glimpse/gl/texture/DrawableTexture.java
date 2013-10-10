@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * A marker interface indicating that the {@link Texture} is able
@@ -36,5 +36,5 @@ import javax.media.opengl.GL;
  */
 public interface DrawableTexture extends Texture
 {
-    public abstract void draw( GL gl, int texUnit );
+    public abstract void draw( GL2 gl, int texUnit );
 }

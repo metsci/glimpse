@@ -26,14 +26,15 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -46,7 +47,6 @@ import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * A floating axis plot with axes, tick marks, and labels drawn along
@@ -214,7 +214,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         
         if ( this.textRenderer == null ) return;
         
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -352,7 +352,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
             textRenderer.endRendering( );
         }
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
         
@@ -361,7 +361,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         double labelBufferX = labelBuffer / axisX.getPixelsPerValue( );
         double labelBufferY = labelBuffer / axisY.getPixelsPerValue( );
         
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             if ( showHorizontal )

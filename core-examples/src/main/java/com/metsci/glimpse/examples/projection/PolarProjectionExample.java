@@ -107,7 +107,7 @@ public class PolarProjectionExample implements GlimpseLayoutProvider
         painter.setData( texture );
 
         // create a painter which displays the cursor position and data value under the cursor
-        CursorTextZPainter cursorPainter = new CursorTextZPainter(  );
+        CursorTextZPainter cursorPainter = new CursorTextZPainter( );
         plot.addPainter( cursorPainter );
 
         // tell the cursor painter what texture to report data values from

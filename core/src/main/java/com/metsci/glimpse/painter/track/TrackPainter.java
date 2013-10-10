@@ -44,8 +44,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -56,7 +58,6 @@ import com.metsci.glimpse.support.selection.SpatialSelectionAxisListener;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.metsci.glimpse.support.selection.TemporalSelectionListener;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Paints groups of line segments of points with associated timestamps.
@@ -994,7 +995,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
 
         int width = bounds.getWidth( );
@@ -1064,8 +1065,8 @@ public class TrackPainter extends GlimpseDataPainter2D
                             loaded.glBufferInitialized = true;
 
                             // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferData( GL.GL_ARRAY_BUFFER, loaded.glBufferMaxSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
+                            gl.glBufferData( GL2.GL_ARRAY_BUFFER, loaded.glBufferMaxSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
                         }
                         else
                         {
@@ -1080,8 +1081,8 @@ public class TrackPainter extends GlimpseDataPainter2D
                             track.loadIntoBuffer( dataBuffer, insertOffset, trackSize );
 
                             // update the device buffer with the new data
-                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, insertOffset * 2 * BYTES_PER_FLOAT, insertCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
+                            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, insertOffset * 2 * BYTES_PER_FLOAT, insertCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
                         }
                     }
 
@@ -1101,7 +1102,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         if ( loadedTracks.isEmpty( ) ) return;
 
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         boolean labelOn = false;
 
@@ -1112,8 +1113,8 @@ public class TrackPainter extends GlimpseDataPainter2D
             int glOffset = loaded.glSelectedOffset;
             int glSize = loaded.glSelectedSize;
 
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-            gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
+            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
 
             if ( loaded.linesOn )
             {
@@ -1122,15 +1123,15 @@ public class TrackPainter extends GlimpseDataPainter2D
 
                 if ( loaded.stippleOn )
                 {
-                    gl.glEnable( GL.GL_LINE_STIPPLE );
+                    gl.glEnable( GL2.GL_LINE_STIPPLE );
                     gl.glLineStipple( loaded.stippleFactor, loaded.stipplePattern );
                 }
 
-                gl.glDrawArrays( GL.GL_LINE_STRIP, glOffset, glSize );
+                gl.glDrawArrays( GL2.GL_LINE_STRIP, glOffset, glSize );
 
                 if ( loaded.stippleOn )
                 {
-                    gl.glDisable( GL.GL_LINE_STIPPLE );
+                    gl.glDisable( GL2.GL_LINE_STIPPLE );
                 }
             }
 
@@ -1138,14 +1139,14 @@ public class TrackPainter extends GlimpseDataPainter2D
             {
                 gl.glColor4fv( loaded.pointColor, 0 );
                 gl.glPointSize( loaded.pointSize );
-                gl.glDrawArrays( GL.GL_POINTS, glOffset, glSize );
+                gl.glDrawArrays( GL2.GL_POINTS, glOffset, glSize );
             }
 
             if ( loaded.headPointOn )
             {
                 gl.glColor4fv( loaded.headPointColor, 0 );
                 gl.glPointSize( loaded.headPointSize );
-                gl.glBegin( GL.GL_POINTS );
+                gl.glBegin( GL2.GL_POINTS );
                 try
                 {
                     gl.glVertex2d( loaded.headPosX, loaded.headPosY );
@@ -1181,10 +1182,10 @@ public class TrackPainter extends GlimpseDataPainter2D
                 fontRenderer.endRendering( );
             }
 
-            gl.glMatrixMode( GL.GL_PROJECTION );
+            gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( 0, width, 0, height, -1, 1 );
-            gl.glMatrixMode( GL.GL_MODELVIEW );
+            gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glLoadIdentity( );
 
             for ( LoadedTrack loaded : loadedTracks.values( ) )
@@ -1195,7 +1196,7 @@ public class TrackPainter extends GlimpseDataPainter2D
                     int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
 
                     gl.glColor3fv( loaded.labelLineColor, 0 );
-                    gl.glBegin( GL.GL_LINES );
+                    gl.glBegin( GL2.GL_LINES );
                     try
                     {
                         gl.glVertex2i( posX, posY );

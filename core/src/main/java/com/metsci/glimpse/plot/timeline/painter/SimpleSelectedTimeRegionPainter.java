@@ -29,8 +29,9 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.Font;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -41,7 +42,6 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
 {
@@ -91,11 +91,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
         this.currentTimeMarkerWidth = width;
     }
 
-    protected void paint( GL gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
+    protected void paint( GL2 gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
     {
         GlimpseColor.glColor( gl, selectionFillColor );
 
-        gl.glBegin( GL.GL_QUADS );
+        gl.glBegin( GL2.GL_QUADS );
         try
         {
             if ( orientation == Orientation.VERTICAL )
@@ -120,7 +120,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
 
         GlimpseColor.glColor( gl, selectionBorderColor );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
             if ( orientation == Orientation.VERTICAL)
@@ -148,7 +148,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             GlimpseColor.glColor( gl, currentTimeMarkerColor );
             gl.glLineWidth( currentTimeMarkerWidth );
     
-            gl.glBegin( GL.GL_LINES );
+            gl.glBegin( GL2.GL_LINES );
             try
             {
                 if ( orientation == Orientation.VERTICAL )
@@ -174,14 +174,14 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
     {
         if ( textRenderer == null ) return;
         
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
         int height = bounds.getHeight( );
         int width = bounds.getWidth( );
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
 
         if ( orientation == Orientation.VERTICAL )
@@ -193,8 +193,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             gl.glOrtho( -0.5, width - 1 + 0.5f, taggedAxis.getMin( ), taggedAxis.getMax( ), -1, 1 );
         }
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );

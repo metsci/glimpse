@@ -30,16 +30,16 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.colormap.ColorMap;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 import com.metsci.glimpse.util.quadtree.Xy;
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * Efficiently draws a static set of points. Can also efficiently
@@ -102,7 +102,7 @@ public class PointSetPainter extends GlimpseDataPainter2D
 
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < dataSize * 2 )
             {
-                this.dataBuffer = BufferUtil.newFloatBuffer( dataSize * 2 );
+                this.dataBuffer = Buffers.newDirectFloatBuffer( dataSize * 2 );
             }
 
             // copy data from the provided arrays into the host memory buffer
@@ -136,7 +136,7 @@ public class PointSetPainter extends GlimpseDataPainter2D
         {
             if ( colorBuffer == null || colorBuffer.rewind( ).capacity( ) < dataSize * 4 )
             {
-                this.colorBuffer = BufferUtil.newFloatBuffer( dataSize * 4 );
+                this.colorBuffer = Buffers.newDirectFloatBuffer( dataSize * 4 );
             }
 
             float[] color = new float[4];
@@ -234,7 +234,7 @@ public class PointSetPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( dataSize == 0 ) return;
 
@@ -254,20 +254,20 @@ public class PointSetPainter extends GlimpseDataPainter2D
             this.dataBufferLock.lock( );
             try
             {
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
+                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 
                 glHandleError( gl );
 
                 useColorDevice = useColorHost;
                 if ( useColorDevice )
                 {
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorHandle[0] );
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
 
                     // copy data from the host memory buffer to the device
-                    gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 4 * BYTES_PER_FLOAT, colorBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 4 * BYTES_PER_FLOAT, colorBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 
                     glHandleError( gl );
                 }
@@ -282,18 +282,18 @@ public class PointSetPainter extends GlimpseDataPainter2D
 
         if ( useColorDevice )
         {
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, colorHandle[0] );
-            gl.glColorPointer( 4, GL.GL_FLOAT, 0, 0 );
-            gl.glEnableClientState( GL.GL_COLOR_ARRAY );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
+            gl.glColorPointer( 4, GL2.GL_FLOAT, 0, 0 );
+            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
         }
 
-        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         gl.glColor4fv( pointColor, 0 );
         gl.glPointSize( pointSize );
 
-        gl.glDrawArrays( GL.GL_POINTS, 0, dataSize );
+        gl.glDrawArrays( GL2.GL_POINTS, 0, dataSize );
     }
 }

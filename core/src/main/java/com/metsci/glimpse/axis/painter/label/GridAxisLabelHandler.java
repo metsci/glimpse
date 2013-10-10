@@ -26,11 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter.label;
 
-import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
-import static java.lang.Math.log10;
-import static java.lang.Math.pow;
-import static java.lang.Math.round;
+import static java.lang.Math.*;
 
 import java.text.NumberFormat;
 

@@ -42,17 +42,17 @@ public class OceanLookAndFeel extends AbstractLookAndFeel
     {
         map.put( CROSSHAIR_COLOR, getBlack( ) );
         map.put( BORDER_COLOR, getWhite( ) );
-        
+
         map.put( PLOT_BACKGROUND_COLOR, addRgb( GlimpseColor.fromColorRgb( 25, 42, 62 ), -0.08f ) );
         map.put( FRAME_BACKGROUND_COLOR, GlimpseColor.fromColorRgb( 25, 42, 62 ) );
-        
+
         map.put( AXIS_TEXT_COLOR, getWhite( ) );
         map.put( AXIS_TICK_COLOR, getWhite( ) );
         map.put( AXIS_TAG_COLOR, getWhite( 0.2f ) );
-        
+
         map.put( AXIS_FONT, getDefaultPlain( 11 ) );
         map.put( TITLE_FONT, getDefaultPlain( 14 ) );
-        
+
         map.put( TOOLTIP_BACKGROUND_COLOR, getBlack( 0.7f ) );
         map.put( TOOLTIP_TEXT_COLOR, getWhite( ) );
     }

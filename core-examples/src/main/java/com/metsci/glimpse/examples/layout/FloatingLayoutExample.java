@@ -42,6 +42,7 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.repaint.RepaintManager;
 
 /**
  * Demonstrates nesting of one Glimpse plot inside another. The inner Glimpse
@@ -57,7 +58,9 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new FloatingLayoutExample( ) );
+        FloatingLayoutExample provider = new FloatingLayoutExample( );
+        Example example = Example.showWithSwing( provider );
+        provider.addListener( example.getManager( ) );
     }
 
     protected int plotHeight = 200;
@@ -66,15 +69,43 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
     protected double plotMinX = 0.0;
     protected double plotMinY = 0.0;
 
+    protected SimplePlot2D plot;
+    protected GlimpseLayout floatingLayout;
+
+    public void addListener( final RepaintManager manager )
+    {
+        // add an axis listener which adjusts the position of the floating layout painter as the axis changes
+        // (the layout painter is tied to a fixed axis value)
+        plot.addAxisListener( new AxisListener2D( )
+        {
+            @Override
+            public void axisUpdated( Axis2D axis )
+            {
+                manager.syncExec( new Runnable( )
+                {
+                    @Override
+                    public void run( )
+                    {
+                        int minX = plot.getAxisX( ).valueToScreenPixel( plotMinX );
+                        int minY = plot.getAxisY( ).valueToScreenPixel( plotMinY );
+
+                        floatingLayout.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
+                        plot.invalidateLayout( );
+                    }
+                } );
+            }
+        } );
+    }
+
     @Override
     public GlimpseLayout getLayout( )
     {
         // create the main plot
-        final SimplePlot2D plot = new SimplePlot2D( );
+        plot = new SimplePlot2D( );
 
         // create a GlimpseLayout to contain the floating plot
-        final GlimpseLayout floatingLayout = new GlimpseLayout( );
-        
+        floatingLayout = new GlimpseLayout( );
+
         // create a new plot for the floating layout area
         // it uses a vertical text orientation for its y axis painter to save space
         final SimplePlot2D floatingPlot = new SimplePlot2D( )
@@ -85,21 +116,6 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
                 return new NumericRotatedYAxisPainter( tickHandler );
             }
         };
-
-        // add an axis listener which adjusts the position of the floating layout painter as the axis changes
-        // (the layout painter is tied to a fixed axis value)
-        plot.addAxisListener( new AxisListener2D( )
-        {
-            @Override
-            public void axisUpdated( Axis2D axis )
-            {
-                int minX = plot.getAxisX( ).valueToScreenPixel( plotMinX );
-                int minY = plot.getAxisY( ).valueToScreenPixel( plotMinY );
-
-                floatingLayout.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
-                plot.invalidateLayout( );
-            }
-        } );
 
         // add a mouse listener which listens for middle mouse button (mouse wheel) clicks
         // and moves the floating plot in response

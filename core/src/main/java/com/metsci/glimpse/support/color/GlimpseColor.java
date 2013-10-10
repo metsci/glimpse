@@ -30,8 +30,9 @@ import java.awt.Color;
 import java.text.ParseException;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * A simple color utility class for converting various color wrapper classes/formats
@@ -105,8 +106,7 @@ public class GlimpseColor
     {
         color = color.trim( );
 
-        if ( color == null || ( color.length( ) != 7 && color.length( ) != 9 ) )
-            throw new ParseException( "Color string must be of the form: #RRGGBB or #RRGGBBAA", 0 );
+        if ( color == null || ( color.length( ) != 7 && color.length( ) != 9 ) ) throw new ParseException( "Color string must be of the form: #RRGGBB or #RRGGBBAA", 0 );
 
         int r = Integer.decode( "#" + color.substring( 1, 3 ) );
         int g = Integer.decode( "#" + color.substring( 3, 5 ) );
@@ -129,10 +129,10 @@ public class GlimpseColor
 
     public static String toColorHex( float[] color )
     {
-        long value = (int) ( color[0] * 255 );
-        value = value * 256 + (int) ( color[1] * 255 );
-        value = value * 256 + (int) ( color[2] * 255 );
-        value = value * 256 + (int) ( color[3] * 255 );
+        long value = ( int ) ( color[0] * 255 );
+        value = value * 256 + ( int ) ( color[1] * 255 );
+        value = value * 256 + ( int ) ( color[2] * 255 );
+        value = value * 256 + ( int ) ( color[3] * 255 );
         return String.format( "#%08x", value );
     }
 
@@ -155,13 +155,13 @@ public class GlimpseColor
     }
 
     // a convenience method wrapper for glColor4fv
-    public static void glColor( GL gl, float[] color )
+    public static void glColor( GL2 gl, float[] color )
     {
         gl.glColor4fv( color, 0 );
     }
 
     // a convenience method wrapper for glColor4fv (with alpha override)
-    public static void glColor( GL gl, float[] color, float alphaOverride )
+    public static void glColor( GL2 gl, float[] color, float alphaOverride )
     {
         gl.glColor4f( color[0], color[1], color[2], alphaOverride );
     }
@@ -183,24 +183,24 @@ public class GlimpseColor
 
     public static float[] addRgb( float[] color, float value )
     {
-    	return add( color, fromColorRgba( value, value, value, 0.0f ) );
+        return add( color, fromColorRgba( value, value, value, 0.0f ) );
     }
 
     public static float[] add( float[] color1, float[] color2 )
     {
-    	float[] newColor = new float[4];
+        float[] newColor = new float[4];
 
-    	for ( int i = 0 ; i < 4 ; i++ )
-    	{
-        	float color = color1[i] + color2[i];
+        for ( int i = 0; i < 4; i++ )
+        {
+            float color = color1[i] + color2[i];
 
-        	if ( color < 0.0f ) color = 0.0f;
-        	if ( color > 1.0f ) color = 1.0f;
+            if ( color < 0.0f ) color = 0.0f;
+            if ( color > 1.0f ) color = 1.0f;
 
-        	newColor[i] = color;
-    	}
+            newColor[i] = color;
+        }
 
-    	return newColor;
+        return newColor;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////

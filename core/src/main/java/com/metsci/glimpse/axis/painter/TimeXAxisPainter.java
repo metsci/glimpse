@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.util.units.time.TimeStamp.currentTime;
+import static com.metsci.glimpse.util.units.time.TimeStamp.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
@@ -81,17 +81,17 @@ public class TimeXAxisPainter extends TimeAxisPainter
         
         if ( textRenderer == null ) return;
         
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
         if ( width == 0 || height == 0 ) return;
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
         gl.glColor4fv( tickColor, 0 );
@@ -100,7 +100,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         double tickInterval = handler.tickInterval( tickTimes );
 
         // Tick marks
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         for ( TimeStamp t : tickTimes )
         {
             double x = axis.valueToScreenPixel( fromTimeStamp( t ) );
@@ -218,13 +218,13 @@ public class TimeXAxisPainter extends TimeAxisPainter
         return jTimeText;
     }
 
-    private void drawCurrentTimeTick( GL gl, Axis1D axis, int width, int height )
+    private void drawCurrentTimeTick( GL2 gl, Axis1D axis, int width, int height )
     {
         int iTick = axis.valueToScreenPixel( fromTimeStamp( getCurrentTime( ) ) );
 
         gl.glColor4fv( currentTimeTickColor, 0 );
         gl.glLineWidth( currentTimeLineThickness );
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         gl.glVertex2d( iTick, height );
         gl.glVertex2d( iTick, 0 );
         gl.glEnd( );

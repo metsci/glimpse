@@ -442,27 +442,27 @@ import java.util.TreeMap;
 
 public class WebColors
 {
-    private WebColors()
+    private WebColors( )
     {
     }
 
     public static RGBA get( String name )
     {
-        return getColors().get( name );
+        return getColors( ).get( name );
     }
 
-    private static Map< String, RGBA > getColors()
+    private static Map<String, RGBA> getColors( )
     {
         return MapInstance.colors;
     }
 
     private static class MapInstance
     {
-        final static Map< String, RGBA > colors = buildColors();
+        final static Map<String, RGBA> colors = buildColors( );
 
-        private static Map< String, RGBA > buildColors()
+        private static Map<String, RGBA> buildColors( )
         {
-            Map< String, RGBA > colors = new TreeMap< String, RGBA >();
+            Map<String, RGBA> colors = new TreeMap<String, RGBA>( );
 
             colors.put( "Snow", fromIntRGB( 255, 250, 250 ) );
             colors.put( "GhostWhite", fromIntRGB( 248, 248, 255 ) );
@@ -877,2025 +877,2025 @@ public class WebColors
     /**
      * <span style="background:#f0f8ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> AliceBlue <br>
      */
-    public static final RGBA AliceBlue = getColors().get("AliceBlue");
+    public static final RGBA AliceBlue = getColors( ).get( "AliceBlue" );
 
     /**
      * <span style="background:#faebd7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> AntiqueWhite <br>
      */
-    public static final RGBA AntiqueWhite = getColors().get("AntiqueWhite");
+    public static final RGBA AntiqueWhite = getColors( ).get( "AntiqueWhite" );
 
     /**
      * <span style="background:#ffefdb">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> AntiqueWhite1 <br>
      */
-    public static final RGBA AntiqueWhite1 = getColors().get("AntiqueWhite1");
+    public static final RGBA AntiqueWhite1 = getColors( ).get( "AntiqueWhite1" );
 
     /**
      * <span style="background:#eedfcc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> AntiqueWhite2 <br>
      */
-    public static final RGBA AntiqueWhite2 = getColors().get("AntiqueWhite2");
+    public static final RGBA AntiqueWhite2 = getColors( ).get( "AntiqueWhite2" );
 
     /**
      * <span style="background:#cdc0b0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> AntiqueWhite3 <br>
      */
-    public static final RGBA AntiqueWhite3 = getColors().get("AntiqueWhite3");
+    public static final RGBA AntiqueWhite3 = getColors( ).get( "AntiqueWhite3" );
 
     /**
      * <span style="background:#8b8378">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> AntiqueWhite4 <br>
      */
-    public static final RGBA AntiqueWhite4 = getColors().get("AntiqueWhite4");
+    public static final RGBA AntiqueWhite4 = getColors( ).get( "AntiqueWhite4" );
 
     /**
      * <span style="background:#7fffd4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Aquamarine <br>
      */
-    public static final RGBA Aquamarine = getColors().get("Aquamarine");
+    public static final RGBA Aquamarine = getColors( ).get( "Aquamarine" );
 
     /**
      * <span style="background:#76eec6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Aquamarine2 <br>
      */
-    public static final RGBA Aquamarine2 = getColors().get("Aquamarine2");
+    public static final RGBA Aquamarine2 = getColors( ).get( "Aquamarine2" );
 
     /**
      * <span style="background:#458b74">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Aquamarine4 <br>
      */
-    public static final RGBA Aquamarine4 = getColors().get("Aquamarine4");
+    public static final RGBA Aquamarine4 = getColors( ).get( "Aquamarine4" );
 
     /**
      * <span style="background:#f0ffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Azure <br>
      */
-    public static final RGBA Azure = getColors().get("Azure");
+    public static final RGBA Azure = getColors( ).get( "Azure" );
 
     /**
      * <span style="background:#e0eeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Azure2 <br>
      */
-    public static final RGBA Azure2 = getColors().get("Azure2");
+    public static final RGBA Azure2 = getColors( ).get( "Azure2" );
 
     /**
      * <span style="background:#c1cdcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Azure3 <br>
      */
-    public static final RGBA Azure3 = getColors().get("Azure3");
+    public static final RGBA Azure3 = getColors( ).get( "Azure3" );
 
     /**
      * <span style="background:#838b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Azure4 <br>
      */
-    public static final RGBA Azure4 = getColors().get("Azure4");
+    public static final RGBA Azure4 = getColors( ).get( "Azure4" );
 
     /**
      * <span style="background:#f5f5dc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Beige <br>
      */
-    public static final RGBA Beige = getColors().get("Beige");
+    public static final RGBA Beige = getColors( ).get( "Beige" );
 
     /**
      * <span style="background:#ffe4c4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Bisque <br>
      */
-    public static final RGBA Bisque = getColors().get("Bisque");
+    public static final RGBA Bisque = getColors( ).get( "Bisque" );
 
     /**
      * <span style="background:#eed5b7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Bisque2 <br>
      */
-    public static final RGBA Bisque2 = getColors().get("Bisque2");
+    public static final RGBA Bisque2 = getColors( ).get( "Bisque2" );
 
     /**
      * <span style="background:#cdb79e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Bisque3 <br>
      */
-    public static final RGBA Bisque3 = getColors().get("Bisque3");
+    public static final RGBA Bisque3 = getColors( ).get( "Bisque3" );
 
     /**
      * <span style="background:#8b7d6b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Bisque4 <br>
      */
-    public static final RGBA Bisque4 = getColors().get("Bisque4");
+    public static final RGBA Bisque4 = getColors( ).get( "Bisque4" );
 
     /**
      * <span style="background:#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Black <br>
      */
-    public static final RGBA Black = getColors().get("Black");
+    public static final RGBA Black = getColors( ).get( "Black" );
 
     /**
      * <span style="background:#ffebcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> BlanchedAlmond <br>
      */
-    public static final RGBA BlanchedAlmond = getColors().get("BlanchedAlmond");
+    public static final RGBA BlanchedAlmond = getColors( ).get( "BlanchedAlmond" );
 
     /**
      * <span style="background:#0000ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Blue <br>
      */
-    public static final RGBA Blue = getColors().get("Blue");
+    public static final RGBA Blue = getColors( ).get( "Blue" );
 
     /**
      * <span style="background:#0000ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Blue2 <br>
      */
-    public static final RGBA Blue2 = getColors().get("Blue2");
+    public static final RGBA Blue2 = getColors( ).get( "Blue2" );
 
     /**
      * <span style="background:#8a2be2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> BlueViolet <br>
      */
-    public static final RGBA BlueViolet = getColors().get("BlueViolet");
+    public static final RGBA BlueViolet = getColors( ).get( "BlueViolet" );
 
     /**
      * <span style="background:#a52a2a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Brown <br>
      */
-    public static final RGBA Brown = getColors().get("Brown");
+    public static final RGBA Brown = getColors( ).get( "Brown" );
 
     /**
      * <span style="background:#ff4040">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Brown1 <br>
      */
-    public static final RGBA Brown1 = getColors().get("Brown1");
+    public static final RGBA Brown1 = getColors( ).get( "Brown1" );
 
     /**
      * <span style="background:#ee3b3b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Brown2 <br>
      */
-    public static final RGBA Brown2 = getColors().get("Brown2");
+    public static final RGBA Brown2 = getColors( ).get( "Brown2" );
 
     /**
      * <span style="background:#cd3333">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Brown3 <br>
      */
-    public static final RGBA Brown3 = getColors().get("Brown3");
+    public static final RGBA Brown3 = getColors( ).get( "Brown3" );
 
     /**
      * <span style="background:#8b2323">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Brown4 <br>
      */
-    public static final RGBA Brown4 = getColors().get("Brown4");
+    public static final RGBA Brown4 = getColors( ).get( "Brown4" );
 
     /**
      * <span style="background:#deb887">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Burlywood <br>
      */
-    public static final RGBA Burlywood = getColors().get("Burlywood");
+    public static final RGBA Burlywood = getColors( ).get( "Burlywood" );
 
     /**
      * <span style="background:#ffd39b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Burlywood1 <br>
      */
-    public static final RGBA Burlywood1 = getColors().get("Burlywood1");
+    public static final RGBA Burlywood1 = getColors( ).get( "Burlywood1" );
 
     /**
      * <span style="background:#eec591">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Burlywood2 <br>
      */
-    public static final RGBA Burlywood2 = getColors().get("Burlywood2");
+    public static final RGBA Burlywood2 = getColors( ).get( "Burlywood2" );
 
     /**
      * <span style="background:#cdaa7d">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Burlywood3 <br>
      */
-    public static final RGBA Burlywood3 = getColors().get("Burlywood3");
+    public static final RGBA Burlywood3 = getColors( ).get( "Burlywood3" );
 
     /**
      * <span style="background:#8b7355">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Burlywood4 <br>
      */
-    public static final RGBA Burlywood4 = getColors().get("Burlywood4");
+    public static final RGBA Burlywood4 = getColors( ).get( "Burlywood4" );
 
     /**
      * <span style="background:#5f9ea0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> CadetBlue <br>
      */
-    public static final RGBA CadetBlue = getColors().get("CadetBlue");
+    public static final RGBA CadetBlue = getColors( ).get( "CadetBlue" );
 
     /**
      * <span style="background:#98f5ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> CadetBlue1 <br>
      */
-    public static final RGBA CadetBlue1 = getColors().get("CadetBlue1");
+    public static final RGBA CadetBlue1 = getColors( ).get( "CadetBlue1" );
 
     /**
      * <span style="background:#8ee5ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> CadetBlue2 <br>
      */
-    public static final RGBA CadetBlue2 = getColors().get("CadetBlue2");
+    public static final RGBA CadetBlue2 = getColors( ).get( "CadetBlue2" );
 
     /**
      * <span style="background:#7ac5cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> CadetBlue3 <br>
      */
-    public static final RGBA CadetBlue3 = getColors().get("CadetBlue3");
+    public static final RGBA CadetBlue3 = getColors( ).get( "CadetBlue3" );
 
     /**
      * <span style="background:#53868b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> CadetBlue4 <br>
      */
-    public static final RGBA CadetBlue4 = getColors().get("CadetBlue4");
+    public static final RGBA CadetBlue4 = getColors( ).get( "CadetBlue4" );
 
     /**
      * <span style="background:#7fff00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chartreuse <br>
      */
-    public static final RGBA Chartreuse = getColors().get("Chartreuse");
+    public static final RGBA Chartreuse = getColors( ).get( "Chartreuse" );
 
     /**
      * <span style="background:#76ee00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chartreuse2 <br>
      */
-    public static final RGBA Chartreuse2 = getColors().get("Chartreuse2");
+    public static final RGBA Chartreuse2 = getColors( ).get( "Chartreuse2" );
 
     /**
      * <span style="background:#66cd00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chartreuse3 <br>
      */
-    public static final RGBA Chartreuse3 = getColors().get("Chartreuse3");
+    public static final RGBA Chartreuse3 = getColors( ).get( "Chartreuse3" );
 
     /**
      * <span style="background:#458b00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chartreuse4 <br>
      */
-    public static final RGBA Chartreuse4 = getColors().get("Chartreuse4");
+    public static final RGBA Chartreuse4 = getColors( ).get( "Chartreuse4" );
 
     /**
      * <span style="background:#d2691e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chocolate <br>
      */
-    public static final RGBA Chocolate = getColors().get("Chocolate");
+    public static final RGBA Chocolate = getColors( ).get( "Chocolate" );
 
     /**
      * <span style="background:#ff7f24">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chocolate1 <br>
      */
-    public static final RGBA Chocolate1 = getColors().get("Chocolate1");
+    public static final RGBA Chocolate1 = getColors( ).get( "Chocolate1" );
 
     /**
      * <span style="background:#ee7621">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chocolate2 <br>
      */
-    public static final RGBA Chocolate2 = getColors().get("Chocolate2");
+    public static final RGBA Chocolate2 = getColors( ).get( "Chocolate2" );
 
     /**
      * <span style="background:#cd661d">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Chocolate3 <br>
      */
-    public static final RGBA Chocolate3 = getColors().get("Chocolate3");
+    public static final RGBA Chocolate3 = getColors( ).get( "Chocolate3" );
 
     /**
      * <span style="background:#ff7f50">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Coral <br>
      */
-    public static final RGBA Coral = getColors().get("Coral");
+    public static final RGBA Coral = getColors( ).get( "Coral" );
 
     /**
      * <span style="background:#ff7256">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Coral1 <br>
      */
-    public static final RGBA Coral1 = getColors().get("Coral1");
+    public static final RGBA Coral1 = getColors( ).get( "Coral1" );
 
     /**
      * <span style="background:#ee6a50">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Coral2 <br>
      */
-    public static final RGBA Coral2 = getColors().get("Coral2");
+    public static final RGBA Coral2 = getColors( ).get( "Coral2" );
 
     /**
      * <span style="background:#cd5b45">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Coral3 <br>
      */
-    public static final RGBA Coral3 = getColors().get("Coral3");
+    public static final RGBA Coral3 = getColors( ).get( "Coral3" );
 
     /**
      * <span style="background:#8b3e2f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Coral4 <br>
      */
-    public static final RGBA Coral4 = getColors().get("Coral4");
+    public static final RGBA Coral4 = getColors( ).get( "Coral4" );
 
     /**
      * <span style="background:#6495ed">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> CornflowerBlue <br>
      */
-    public static final RGBA CornflowerBlue = getColors().get("CornflowerBlue");
+    public static final RGBA CornflowerBlue = getColors( ).get( "CornflowerBlue" );
 
     /**
      * <span style="background:#fff8dc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cornsilk <br>
      */
-    public static final RGBA Cornsilk = getColors().get("Cornsilk");
+    public static final RGBA Cornsilk = getColors( ).get( "Cornsilk" );
 
     /**
      * <span style="background:#eee8cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cornsilk2 <br>
      */
-    public static final RGBA Cornsilk2 = getColors().get("Cornsilk2");
+    public static final RGBA Cornsilk2 = getColors( ).get( "Cornsilk2" );
 
     /**
      * <span style="background:#cdc8b1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cornsilk3 <br>
      */
-    public static final RGBA Cornsilk3 = getColors().get("Cornsilk3");
+    public static final RGBA Cornsilk3 = getColors( ).get( "Cornsilk3" );
 
     /**
      * <span style="background:#8b8878">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cornsilk4 <br>
      */
-    public static final RGBA Cornsilk4 = getColors().get("Cornsilk4");
+    public static final RGBA Cornsilk4 = getColors( ).get( "Cornsilk4" );
 
     /**
      * <span style="background:#00ffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cyan <br>
      */
-    public static final RGBA Cyan = getColors().get("Cyan");
+    public static final RGBA Cyan = getColors( ).get( "Cyan" );
 
     /**
      * <span style="background:#00eeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cyan2 <br>
      */
-    public static final RGBA Cyan2 = getColors().get("Cyan2");
+    public static final RGBA Cyan2 = getColors( ).get( "Cyan2" );
 
     /**
      * <span style="background:#00cdcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Cyan3 <br>
      */
-    public static final RGBA Cyan3 = getColors().get("Cyan3");
+    public static final RGBA Cyan3 = getColors( ).get( "Cyan3" );
 
     /**
      * <span style="background:#00008b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkBlue <br>
      */
-    public static final RGBA DarkBlue = getColors().get("DarkBlue");
+    public static final RGBA DarkBlue = getColors( ).get( "DarkBlue" );
 
     /**
      * <span style="background:#008b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkCyan <br>
      */
-    public static final RGBA DarkCyan = getColors().get("DarkCyan");
+    public static final RGBA DarkCyan = getColors( ).get( "DarkCyan" );
 
     /**
      * <span style="background:#b8860b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGoldenrod <br>
      */
-    public static final RGBA DarkGoldenrod = getColors().get("DarkGoldenrod");
+    public static final RGBA DarkGoldenrod = getColors( ).get( "DarkGoldenrod" );
 
     /**
      * <span style="background:#ffb90f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGoldenrod1 <br>
      */
-    public static final RGBA DarkGoldenrod1 = getColors().get("DarkGoldenrod1");
+    public static final RGBA DarkGoldenrod1 = getColors( ).get( "DarkGoldenrod1" );
 
     /**
      * <span style="background:#eead0e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGoldenrod2 <br>
      */
-    public static final RGBA DarkGoldenrod2 = getColors().get("DarkGoldenrod2");
+    public static final RGBA DarkGoldenrod2 = getColors( ).get( "DarkGoldenrod2" );
 
     /**
      * <span style="background:#cd950c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGoldenrod3 <br>
      */
-    public static final RGBA DarkGoldenrod3 = getColors().get("DarkGoldenrod3");
+    public static final RGBA DarkGoldenrod3 = getColors( ).get( "DarkGoldenrod3" );
 
     /**
      * <span style="background:#8b6508">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGoldenrod4 <br>
      */
-    public static final RGBA DarkGoldenrod4 = getColors().get("DarkGoldenrod4");
+    public static final RGBA DarkGoldenrod4 = getColors( ).get( "DarkGoldenrod4" );
 
     /**
      * <span style="background:#a9a9a9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGray <br>
      */
-    public static final RGBA DarkGray = getColors().get("DarkGray");
+    public static final RGBA DarkGray = getColors( ).get( "DarkGray" );
 
     /**
      * <span style="background:#006400">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkGreen <br>
      */
-    public static final RGBA DarkGreen = getColors().get("DarkGreen");
+    public static final RGBA DarkGreen = getColors( ).get( "DarkGreen" );
 
     /**
      * <span style="background:#bdb76b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkKhaki <br>
      */
-    public static final RGBA DarkKhaki = getColors().get("DarkKhaki");
+    public static final RGBA DarkKhaki = getColors( ).get( "DarkKhaki" );
 
     /**
      * <span style="background:#8b008b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkMagenta <br>
      */
-    public static final RGBA DarkMagenta = getColors().get("DarkMagenta");
+    public static final RGBA DarkMagenta = getColors( ).get( "DarkMagenta" );
 
     /**
      * <span style="background:#556b2f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOliveGreen <br>
      */
-    public static final RGBA DarkOliveGreen = getColors().get("DarkOliveGreen");
+    public static final RGBA DarkOliveGreen = getColors( ).get( "DarkOliveGreen" );
 
     /**
      * <span style="background:#caff70">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOliveGreen1 <br>
      */
-    public static final RGBA DarkOliveGreen1 = getColors().get("DarkOliveGreen1");
+    public static final RGBA DarkOliveGreen1 = getColors( ).get( "DarkOliveGreen1" );
 
     /**
      * <span style="background:#bcee68">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOliveGreen2 <br>
      */
-    public static final RGBA DarkOliveGreen2 = getColors().get("DarkOliveGreen2");
+    public static final RGBA DarkOliveGreen2 = getColors( ).get( "DarkOliveGreen2" );
 
     /**
      * <span style="background:#a2cd5a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOliveGreen3 <br>
      */
-    public static final RGBA DarkOliveGreen3 = getColors().get("DarkOliveGreen3");
+    public static final RGBA DarkOliveGreen3 = getColors( ).get( "DarkOliveGreen3" );
 
     /**
      * <span style="background:#6e8b3d">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOliveGreen4 <br>
      */
-    public static final RGBA DarkOliveGreen4 = getColors().get("DarkOliveGreen4");
+    public static final RGBA DarkOliveGreen4 = getColors( ).get( "DarkOliveGreen4" );
 
     /**
      * <span style="background:#ff8c00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrange <br>
      */
-    public static final RGBA DarkOrange = getColors().get("DarkOrange");
+    public static final RGBA DarkOrange = getColors( ).get( "DarkOrange" );
 
     /**
      * <span style="background:#ff7f00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrange1 <br>
      */
-    public static final RGBA DarkOrange1 = getColors().get("DarkOrange1");
+    public static final RGBA DarkOrange1 = getColors( ).get( "DarkOrange1" );
 
     /**
      * <span style="background:#ee7600">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrange2 <br>
      */
-    public static final RGBA DarkOrange2 = getColors().get("DarkOrange2");
+    public static final RGBA DarkOrange2 = getColors( ).get( "DarkOrange2" );
 
     /**
      * <span style="background:#cd6600">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrange3 <br>
      */
-    public static final RGBA DarkOrange3 = getColors().get("DarkOrange3");
+    public static final RGBA DarkOrange3 = getColors( ).get( "DarkOrange3" );
 
     /**
      * <span style="background:#8b4500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrange4 <br>
      */
-    public static final RGBA DarkOrange4 = getColors().get("DarkOrange4");
+    public static final RGBA DarkOrange4 = getColors( ).get( "DarkOrange4" );
 
     /**
      * <span style="background:#9932cc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrchid <br>
      */
-    public static final RGBA DarkOrchid = getColors().get("DarkOrchid");
+    public static final RGBA DarkOrchid = getColors( ).get( "DarkOrchid" );
 
     /**
      * <span style="background:#bf3eff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrchid1 <br>
      */
-    public static final RGBA DarkOrchid1 = getColors().get("DarkOrchid1");
+    public static final RGBA DarkOrchid1 = getColors( ).get( "DarkOrchid1" );
 
     /**
      * <span style="background:#b23aee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrchid2 <br>
      */
-    public static final RGBA DarkOrchid2 = getColors().get("DarkOrchid2");
+    public static final RGBA DarkOrchid2 = getColors( ).get( "DarkOrchid2" );
 
     /**
      * <span style="background:#9a32cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrchid3 <br>
      */
-    public static final RGBA DarkOrchid3 = getColors().get("DarkOrchid3");
+    public static final RGBA DarkOrchid3 = getColors( ).get( "DarkOrchid3" );
 
     /**
      * <span style="background:#68228b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkOrchid4 <br>
      */
-    public static final RGBA DarkOrchid4 = getColors().get("DarkOrchid4");
+    public static final RGBA DarkOrchid4 = getColors( ).get( "DarkOrchid4" );
 
     /**
      * <span style="background:#8b0000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkRed <br>
      */
-    public static final RGBA DarkRed = getColors().get("DarkRed");
+    public static final RGBA DarkRed = getColors( ).get( "DarkRed" );
 
     /**
      * <span style="background:#e9967a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSalmon <br>
      */
-    public static final RGBA DarkSalmon = getColors().get("DarkSalmon");
+    public static final RGBA DarkSalmon = getColors( ).get( "DarkSalmon" );
 
     /**
      * <span style="background:#8fbc8f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSeaGreen <br>
      */
-    public static final RGBA DarkSeaGreen = getColors().get("DarkSeaGreen");
+    public static final RGBA DarkSeaGreen = getColors( ).get( "DarkSeaGreen" );
 
     /**
      * <span style="background:#c1ffc1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSeaGreen1 <br>
      */
-    public static final RGBA DarkSeaGreen1 = getColors().get("DarkSeaGreen1");
+    public static final RGBA DarkSeaGreen1 = getColors( ).get( "DarkSeaGreen1" );
 
     /**
      * <span style="background:#b4eeb4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSeaGreen2 <br>
      */
-    public static final RGBA DarkSeaGreen2 = getColors().get("DarkSeaGreen2");
+    public static final RGBA DarkSeaGreen2 = getColors( ).get( "DarkSeaGreen2" );
 
     /**
      * <span style="background:#9bcd9b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSeaGreen3 <br>
      */
-    public static final RGBA DarkSeaGreen3 = getColors().get("DarkSeaGreen3");
+    public static final RGBA DarkSeaGreen3 = getColors( ).get( "DarkSeaGreen3" );
 
     /**
      * <span style="background:#698b69">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSeaGreen4 <br>
      */
-    public static final RGBA DarkSeaGreen4 = getColors().get("DarkSeaGreen4");
+    public static final RGBA DarkSeaGreen4 = getColors( ).get( "DarkSeaGreen4" );
 
     /**
      * <span style="background:#483d8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSlateBlue <br>
      */
-    public static final RGBA DarkSlateBlue = getColors().get("DarkSlateBlue");
+    public static final RGBA DarkSlateBlue = getColors( ).get( "DarkSlateBlue" );
 
     /**
      * <span style="background:#2f4f4f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSlateGray <br>
      */
-    public static final RGBA DarkSlateGray = getColors().get("DarkSlateGray");
+    public static final RGBA DarkSlateGray = getColors( ).get( "DarkSlateGray" );
 
     /**
      * <span style="background:#97ffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSlateGray1 <br>
      */
-    public static final RGBA DarkSlateGray1 = getColors().get("DarkSlateGray1");
+    public static final RGBA DarkSlateGray1 = getColors( ).get( "DarkSlateGray1" );
 
     /**
      * <span style="background:#8deeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSlateGray2 <br>
      */
-    public static final RGBA DarkSlateGray2 = getColors().get("DarkSlateGray2");
+    public static final RGBA DarkSlateGray2 = getColors( ).get( "DarkSlateGray2" );
 
     /**
      * <span style="background:#79cdcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSlateGray3 <br>
      */
-    public static final RGBA DarkSlateGray3 = getColors().get("DarkSlateGray3");
+    public static final RGBA DarkSlateGray3 = getColors( ).get( "DarkSlateGray3" );
 
     /**
      * <span style="background:#528b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkSlateGray4 <br>
      */
-    public static final RGBA DarkSlateGray4 = getColors().get("DarkSlateGray4");
+    public static final RGBA DarkSlateGray4 = getColors( ).get( "DarkSlateGray4" );
 
     /**
      * <span style="background:#00ced1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkTurquoise <br>
      */
-    public static final RGBA DarkTurquoise = getColors().get("DarkTurquoise");
+    public static final RGBA DarkTurquoise = getColors( ).get( "DarkTurquoise" );
 
     /**
      * <span style="background:#9400d3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DarkViolet <br>
      */
-    public static final RGBA DarkViolet = getColors().get("DarkViolet");
+    public static final RGBA DarkViolet = getColors( ).get( "DarkViolet" );
 
     /**
      * <span style="background:#ff1493">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepPink <br>
      */
-    public static final RGBA DeepPink = getColors().get("DeepPink");
+    public static final RGBA DeepPink = getColors( ).get( "DeepPink" );
 
     /**
      * <span style="background:#ee1289">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepPink2 <br>
      */
-    public static final RGBA DeepPink2 = getColors().get("DeepPink2");
+    public static final RGBA DeepPink2 = getColors( ).get( "DeepPink2" );
 
     /**
      * <span style="background:#cd1076">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepPink3 <br>
      */
-    public static final RGBA DeepPink3 = getColors().get("DeepPink3");
+    public static final RGBA DeepPink3 = getColors( ).get( "DeepPink3" );
 
     /**
      * <span style="background:#8b0a50">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepPink4 <br>
      */
-    public static final RGBA DeepPink4 = getColors().get("DeepPink4");
+    public static final RGBA DeepPink4 = getColors( ).get( "DeepPink4" );
 
     /**
      * <span style="background:#00bfff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepSkyBlue <br>
      */
-    public static final RGBA DeepSkyBlue = getColors().get("DeepSkyBlue");
+    public static final RGBA DeepSkyBlue = getColors( ).get( "DeepSkyBlue" );
 
     /**
      * <span style="background:#00b2ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepSkyBlue2 <br>
      */
-    public static final RGBA DeepSkyBlue2 = getColors().get("DeepSkyBlue2");
+    public static final RGBA DeepSkyBlue2 = getColors( ).get( "DeepSkyBlue2" );
 
     /**
      * <span style="background:#009acd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepSkyBlue3 <br>
      */
-    public static final RGBA DeepSkyBlue3 = getColors().get("DeepSkyBlue3");
+    public static final RGBA DeepSkyBlue3 = getColors( ).get( "DeepSkyBlue3" );
 
     /**
      * <span style="background:#00688b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DeepSkyBlue4 <br>
      */
-    public static final RGBA DeepSkyBlue4 = getColors().get("DeepSkyBlue4");
+    public static final RGBA DeepSkyBlue4 = getColors( ).get( "DeepSkyBlue4" );
 
     /**
      * <span style="background:#696969">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DimGray <br>
      */
-    public static final RGBA DimGray = getColors().get("DimGray");
+    public static final RGBA DimGray = getColors( ).get( "DimGray" );
 
     /**
      * <span style="background:#1e90ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DodgerBlue <br>
      */
-    public static final RGBA DodgerBlue = getColors().get("DodgerBlue");
+    public static final RGBA DodgerBlue = getColors( ).get( "DodgerBlue" );
 
     /**
      * <span style="background:#1c86ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DodgerBlue2 <br>
      */
-    public static final RGBA DodgerBlue2 = getColors().get("DodgerBlue2");
+    public static final RGBA DodgerBlue2 = getColors( ).get( "DodgerBlue2" );
 
     /**
      * <span style="background:#1874cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DodgerBlue3 <br>
      */
-    public static final RGBA DodgerBlue3 = getColors().get("DodgerBlue3");
+    public static final RGBA DodgerBlue3 = getColors( ).get( "DodgerBlue3" );
 
     /**
      * <span style="background:#104e8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> DodgerBlue4 <br>
      */
-    public static final RGBA DodgerBlue4 = getColors().get("DodgerBlue4");
+    public static final RGBA DodgerBlue4 = getColors( ).get( "DodgerBlue4" );
 
     /**
      * <span style="background:#b22222">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Firebrick <br>
      */
-    public static final RGBA Firebrick = getColors().get("Firebrick");
+    public static final RGBA Firebrick = getColors( ).get( "Firebrick" );
 
     /**
      * <span style="background:#ff3030">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Firebrick1 <br>
      */
-    public static final RGBA Firebrick1 = getColors().get("Firebrick1");
+    public static final RGBA Firebrick1 = getColors( ).get( "Firebrick1" );
 
     /**
      * <span style="background:#ee2c2c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Firebrick2 <br>
      */
-    public static final RGBA Firebrick2 = getColors().get("Firebrick2");
+    public static final RGBA Firebrick2 = getColors( ).get( "Firebrick2" );
 
     /**
      * <span style="background:#cd2626">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Firebrick3 <br>
      */
-    public static final RGBA Firebrick3 = getColors().get("Firebrick3");
+    public static final RGBA Firebrick3 = getColors( ).get( "Firebrick3" );
 
     /**
      * <span style="background:#8b1a1a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Firebrick4 <br>
      */
-    public static final RGBA Firebrick4 = getColors().get("Firebrick4");
+    public static final RGBA Firebrick4 = getColors( ).get( "Firebrick4" );
 
     /**
      * <span style="background:#fffaf0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> FloralWhite <br>
      */
-    public static final RGBA FloralWhite = getColors().get("FloralWhite");
+    public static final RGBA FloralWhite = getColors( ).get( "FloralWhite" );
 
     /**
      * <span style="background:#228b22">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> ForestGreen <br>
      */
-    public static final RGBA ForestGreen = getColors().get("ForestGreen");
+    public static final RGBA ForestGreen = getColors( ).get( "ForestGreen" );
 
     /**
      * <span style="background:#dcdcdc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Gainsboro <br>
      */
-    public static final RGBA Gainsboro = getColors().get("Gainsboro");
+    public static final RGBA Gainsboro = getColors( ).get( "Gainsboro" );
 
     /**
      * <span style="background:#f8f8ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> GhostWhite <br>
      */
-    public static final RGBA GhostWhite = getColors().get("GhostWhite");
+    public static final RGBA GhostWhite = getColors( ).get( "GhostWhite" );
 
     /**
      * <span style="background:#ffd700">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Gold <br>
      */
-    public static final RGBA Gold = getColors().get("Gold");
+    public static final RGBA Gold = getColors( ).get( "Gold" );
 
     /**
      * <span style="background:#eec900">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Gold2 <br>
      */
-    public static final RGBA Gold2 = getColors().get("Gold2");
+    public static final RGBA Gold2 = getColors( ).get( "Gold2" );
 
     /**
      * <span style="background:#cdad00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Gold3 <br>
      */
-    public static final RGBA Gold3 = getColors().get("Gold3");
+    public static final RGBA Gold3 = getColors( ).get( "Gold3" );
 
     /**
      * <span style="background:#8b7500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Gold4 <br>
      */
-    public static final RGBA Gold4 = getColors().get("Gold4");
+    public static final RGBA Gold4 = getColors( ).get( "Gold4" );
 
     /**
      * <span style="background:#daa520">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Goldenrod <br>
      */
-    public static final RGBA Goldenrod = getColors().get("Goldenrod");
+    public static final RGBA Goldenrod = getColors( ).get( "Goldenrod" );
 
     /**
      * <span style="background:#ffc125">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Goldenrod1 <br>
      */
-    public static final RGBA Goldenrod1 = getColors().get("Goldenrod1");
+    public static final RGBA Goldenrod1 = getColors( ).get( "Goldenrod1" );
 
     /**
      * <span style="background:#eeb422">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Goldenrod2 <br>
      */
-    public static final RGBA Goldenrod2 = getColors().get("Goldenrod2");
+    public static final RGBA Goldenrod2 = getColors( ).get( "Goldenrod2" );
 
     /**
      * <span style="background:#cd9b1d">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Goldenrod3 <br>
      */
-    public static final RGBA Goldenrod3 = getColors().get("Goldenrod3");
+    public static final RGBA Goldenrod3 = getColors( ).get( "Goldenrod3" );
 
     /**
      * <span style="background:#8b6914">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Goldenrod4 <br>
      */
-    public static final RGBA Goldenrod4 = getColors().get("Goldenrod4");
+    public static final RGBA Goldenrod4 = getColors( ).get( "Goldenrod4" );
 
     /**
      * <span style="background:#bebebe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Gray <br>
      */
-    public static final RGBA Gray = getColors().get("Gray");
+    public static final RGBA Gray = getColors( ).get( "Gray" );
 
     /**
      * <span style="background:#00ff00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Green <br>
      */
-    public static final RGBA Green = getColors().get("Green");
+    public static final RGBA Green = getColors( ).get( "Green" );
 
     /**
      * <span style="background:#00ee00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Green2 <br>
      */
-    public static final RGBA Green2 = getColors().get("Green2");
+    public static final RGBA Green2 = getColors( ).get( "Green2" );
 
     /**
      * <span style="background:#00cd00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Green3 <br>
      */
-    public static final RGBA Green3 = getColors().get("Green3");
+    public static final RGBA Green3 = getColors( ).get( "Green3" );
 
     /**
      * <span style="background:#008b00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Green4 <br>
      */
-    public static final RGBA Green4 = getColors().get("Green4");
+    public static final RGBA Green4 = getColors( ).get( "Green4" );
 
     /**
      * <span style="background:#adff2f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> GreenYellow <br>
      */
-    public static final RGBA GreenYellow = getColors().get("GreenYellow");
+    public static final RGBA GreenYellow = getColors( ).get( "GreenYellow" );
 
     /**
      * <span style="background:#f0fff0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Honeydew <br>
      */
-    public static final RGBA Honeydew = getColors().get("Honeydew");
+    public static final RGBA Honeydew = getColors( ).get( "Honeydew" );
 
     /**
      * <span style="background:#e0eee0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Honeydew2 <br>
      */
-    public static final RGBA Honeydew2 = getColors().get("Honeydew2");
+    public static final RGBA Honeydew2 = getColors( ).get( "Honeydew2" );
 
     /**
      * <span style="background:#c1cdc1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Honeydew3 <br>
      */
-    public static final RGBA Honeydew3 = getColors().get("Honeydew3");
+    public static final RGBA Honeydew3 = getColors( ).get( "Honeydew3" );
 
     /**
      * <span style="background:#838b83">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Honeydew4 <br>
      */
-    public static final RGBA Honeydew4 = getColors().get("Honeydew4");
+    public static final RGBA Honeydew4 = getColors( ).get( "Honeydew4" );
 
     /**
      * <span style="background:#ff69b4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> HotPink <br>
      */
-    public static final RGBA HotPink = getColors().get("HotPink");
+    public static final RGBA HotPink = getColors( ).get( "HotPink" );
 
     /**
      * <span style="background:#ff6eb4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> HotPink1 <br>
      */
-    public static final RGBA HotPink1 = getColors().get("HotPink1");
+    public static final RGBA HotPink1 = getColors( ).get( "HotPink1" );
 
     /**
      * <span style="background:#ee6aa7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> HotPink2 <br>
      */
-    public static final RGBA HotPink2 = getColors().get("HotPink2");
+    public static final RGBA HotPink2 = getColors( ).get( "HotPink2" );
 
     /**
      * <span style="background:#cd6090">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> HotPink3 <br>
      */
-    public static final RGBA HotPink3 = getColors().get("HotPink3");
+    public static final RGBA HotPink3 = getColors( ).get( "HotPink3" );
 
     /**
      * <span style="background:#8b3a62">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> HotPink4 <br>
      */
-    public static final RGBA HotPink4 = getColors().get("HotPink4");
+    public static final RGBA HotPink4 = getColors( ).get( "HotPink4" );
 
     /**
      * <span style="background:#cd5c5c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> IndianRed <br>
      */
-    public static final RGBA IndianRed = getColors().get("IndianRed");
+    public static final RGBA IndianRed = getColors( ).get( "IndianRed" );
 
     /**
      * <span style="background:#ff6a6a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> IndianRed1 <br>
      */
-    public static final RGBA IndianRed1 = getColors().get("IndianRed1");
+    public static final RGBA IndianRed1 = getColors( ).get( "IndianRed1" );
 
     /**
      * <span style="background:#ee6363">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> IndianRed2 <br>
      */
-    public static final RGBA IndianRed2 = getColors().get("IndianRed2");
+    public static final RGBA IndianRed2 = getColors( ).get( "IndianRed2" );
 
     /**
      * <span style="background:#cd5555">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> IndianRed3 <br>
      */
-    public static final RGBA IndianRed3 = getColors().get("IndianRed3");
+    public static final RGBA IndianRed3 = getColors( ).get( "IndianRed3" );
 
     /**
      * <span style="background:#8b3a3a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> IndianRed4 <br>
      */
-    public static final RGBA IndianRed4 = getColors().get("IndianRed4");
+    public static final RGBA IndianRed4 = getColors( ).get( "IndianRed4" );
 
     /**
      * <span style="background:#fffff0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Ivory <br>
      */
-    public static final RGBA Ivory = getColors().get("Ivory");
+    public static final RGBA Ivory = getColors( ).get( "Ivory" );
 
     /**
      * <span style="background:#eeeee0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Ivory2 <br>
      */
-    public static final RGBA Ivory2 = getColors().get("Ivory2");
+    public static final RGBA Ivory2 = getColors( ).get( "Ivory2" );
 
     /**
      * <span style="background:#cdcdc1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Ivory3 <br>
      */
-    public static final RGBA Ivory3 = getColors().get("Ivory3");
+    public static final RGBA Ivory3 = getColors( ).get( "Ivory3" );
 
     /**
      * <span style="background:#8b8b83">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Ivory4 <br>
      */
-    public static final RGBA Ivory4 = getColors().get("Ivory4");
+    public static final RGBA Ivory4 = getColors( ).get( "Ivory4" );
 
     /**
      * <span style="background:#f0e68c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Khaki <br>
      */
-    public static final RGBA Khaki = getColors().get("Khaki");
+    public static final RGBA Khaki = getColors( ).get( "Khaki" );
 
     /**
      * <span style="background:#fff68f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Khaki1 <br>
      */
-    public static final RGBA Khaki1 = getColors().get("Khaki1");
+    public static final RGBA Khaki1 = getColors( ).get( "Khaki1" );
 
     /**
      * <span style="background:#eee685">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Khaki2 <br>
      */
-    public static final RGBA Khaki2 = getColors().get("Khaki2");
+    public static final RGBA Khaki2 = getColors( ).get( "Khaki2" );
 
     /**
      * <span style="background:#cdc673">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Khaki3 <br>
      */
-    public static final RGBA Khaki3 = getColors().get("Khaki3");
+    public static final RGBA Khaki3 = getColors( ).get( "Khaki3" );
 
     /**
      * <span style="background:#8b864e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Khaki4 <br>
      */
-    public static final RGBA Khaki4 = getColors().get("Khaki4");
+    public static final RGBA Khaki4 = getColors( ).get( "Khaki4" );
 
     /**
      * <span style="background:#e6e6fa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Lavender <br>
      */
-    public static final RGBA Lavender = getColors().get("Lavender");
+    public static final RGBA Lavender = getColors( ).get( "Lavender" );
 
     /**
      * <span style="background:#fff0f5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LavenderBlush <br>
      */
-    public static final RGBA LavenderBlush = getColors().get("LavenderBlush");
+    public static final RGBA LavenderBlush = getColors( ).get( "LavenderBlush" );
 
     /**
      * <span style="background:#eee0e5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LavenderBlush2 <br>
      */
-    public static final RGBA LavenderBlush2 = getColors().get("LavenderBlush2");
+    public static final RGBA LavenderBlush2 = getColors( ).get( "LavenderBlush2" );
 
     /**
      * <span style="background:#cdc1c5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LavenderBlush3 <br>
      */
-    public static final RGBA LavenderBlush3 = getColors().get("LavenderBlush3");
+    public static final RGBA LavenderBlush3 = getColors( ).get( "LavenderBlush3" );
 
     /**
      * <span style="background:#8b8386">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LavenderBlush4 <br>
      */
-    public static final RGBA LavenderBlush4 = getColors().get("LavenderBlush4");
+    public static final RGBA LavenderBlush4 = getColors( ).get( "LavenderBlush4" );
 
     /**
      * <span style="background:#7cfc00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LawnGreen <br>
      */
-    public static final RGBA LawnGreen = getColors().get("LawnGreen");
+    public static final RGBA LawnGreen = getColors( ).get( "LawnGreen" );
 
     /**
      * <span style="background:#fffacd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LemonChiffon <br>
      */
-    public static final RGBA LemonChiffon = getColors().get("LemonChiffon");
+    public static final RGBA LemonChiffon = getColors( ).get( "LemonChiffon" );
 
     /**
      * <span style="background:#eee9bf">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LemonChiffon2 <br>
      */
-    public static final RGBA LemonChiffon2 = getColors().get("LemonChiffon2");
+    public static final RGBA LemonChiffon2 = getColors( ).get( "LemonChiffon2" );
 
     /**
      * <span style="background:#cdc9a5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LemonChiffon3 <br>
      */
-    public static final RGBA LemonChiffon3 = getColors().get("LemonChiffon3");
+    public static final RGBA LemonChiffon3 = getColors( ).get( "LemonChiffon3" );
 
     /**
      * <span style="background:#8b8970">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LemonChiffon4 <br>
      */
-    public static final RGBA LemonChiffon4 = getColors().get("LemonChiffon4");
+    public static final RGBA LemonChiffon4 = getColors( ).get( "LemonChiffon4" );
 
     /**
      * <span style="background:#add8e6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightBlue <br>
      */
-    public static final RGBA LightBlue = getColors().get("LightBlue");
+    public static final RGBA LightBlue = getColors( ).get( "LightBlue" );
 
     /**
      * <span style="background:#bfefff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightBlue1 <br>
      */
-    public static final RGBA LightBlue1 = getColors().get("LightBlue1");
+    public static final RGBA LightBlue1 = getColors( ).get( "LightBlue1" );
 
     /**
      * <span style="background:#b2dfee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightBlue2 <br>
      */
-    public static final RGBA LightBlue2 = getColors().get("LightBlue2");
+    public static final RGBA LightBlue2 = getColors( ).get( "LightBlue2" );
 
     /**
      * <span style="background:#9ac0cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightBlue3 <br>
      */
-    public static final RGBA LightBlue3 = getColors().get("LightBlue3");
+    public static final RGBA LightBlue3 = getColors( ).get( "LightBlue3" );
 
     /**
      * <span style="background:#68838b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightBlue4 <br>
      */
-    public static final RGBA LightBlue4 = getColors().get("LightBlue4");
+    public static final RGBA LightBlue4 = getColors( ).get( "LightBlue4" );
 
     /**
      * <span style="background:#f08080">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightCoral <br>
      */
-    public static final RGBA LightCoral = getColors().get("LightCoral");
+    public static final RGBA LightCoral = getColors( ).get( "LightCoral" );
 
     /**
      * <span style="background:#e0ffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightCyan <br>
      */
-    public static final RGBA LightCyan = getColors().get("LightCyan");
+    public static final RGBA LightCyan = getColors( ).get( "LightCyan" );
 
     /**
      * <span style="background:#d1eeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightCyan2 <br>
      */
-    public static final RGBA LightCyan2 = getColors().get("LightCyan2");
+    public static final RGBA LightCyan2 = getColors( ).get( "LightCyan2" );
 
     /**
      * <span style="background:#b4cdcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightCyan3 <br>
      */
-    public static final RGBA LightCyan3 = getColors().get("LightCyan3");
+    public static final RGBA LightCyan3 = getColors( ).get( "LightCyan3" );
 
     /**
      * <span style="background:#7a8b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightCyan4 <br>
      */
-    public static final RGBA LightCyan4 = getColors().get("LightCyan4");
+    public static final RGBA LightCyan4 = getColors( ).get( "LightCyan4" );
 
     /**
      * <span style="background:#eedd82">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGoldenrod <br>
      */
-    public static final RGBA LightGoldenrod = getColors().get("LightGoldenrod");
+    public static final RGBA LightGoldenrod = getColors( ).get( "LightGoldenrod" );
 
     /**
      * <span style="background:#ffec8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGoldenrod1 <br>
      */
-    public static final RGBA LightGoldenrod1 = getColors().get("LightGoldenrod1");
+    public static final RGBA LightGoldenrod1 = getColors( ).get( "LightGoldenrod1" );
 
     /**
      * <span style="background:#eedc82">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGoldenrod2 <br>
      */
-    public static final RGBA LightGoldenrod2 = getColors().get("LightGoldenrod2");
+    public static final RGBA LightGoldenrod2 = getColors( ).get( "LightGoldenrod2" );
 
     /**
      * <span style="background:#cdbe70">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGoldenrod3 <br>
      */
-    public static final RGBA LightGoldenrod3 = getColors().get("LightGoldenrod3");
+    public static final RGBA LightGoldenrod3 = getColors( ).get( "LightGoldenrod3" );
 
     /**
      * <span style="background:#8b814c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGoldenrod4 <br>
      */
-    public static final RGBA LightGoldenrod4 = getColors().get("LightGoldenrod4");
+    public static final RGBA LightGoldenrod4 = getColors( ).get( "LightGoldenrod4" );
 
     /**
      * <span style="background:#fafad2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGoldenrodYellow <br>
      */
-    public static final RGBA LightGoldenrodYellow = getColors().get("LightGoldenrodYellow");
+    public static final RGBA LightGoldenrodYellow = getColors( ).get( "LightGoldenrodYellow" );
 
     /**
      * <span style="background:#90ee90">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGreen <br>
      */
-    public static final RGBA LightGreen = getColors().get("LightGreen");
+    public static final RGBA LightGreen = getColors( ).get( "LightGreen" );
 
     /**
      * <span style="background:#d3d3d3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightGrey <br>
      */
-    public static final RGBA LightGrey = getColors().get("LightGrey");
+    public static final RGBA LightGrey = getColors( ).get( "LightGrey" );
 
     /**
      * <span style="background:#ffb6c1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightPink <br>
      */
-    public static final RGBA LightPink = getColors().get("LightPink");
+    public static final RGBA LightPink = getColors( ).get( "LightPink" );
 
     /**
      * <span style="background:#ffaeb9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightPink1 <br>
      */
-    public static final RGBA LightPink1 = getColors().get("LightPink1");
+    public static final RGBA LightPink1 = getColors( ).get( "LightPink1" );
 
     /**
      * <span style="background:#eea2ad">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightPink2 <br>
      */
-    public static final RGBA LightPink2 = getColors().get("LightPink2");
+    public static final RGBA LightPink2 = getColors( ).get( "LightPink2" );
 
     /**
      * <span style="background:#cd8c95">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightPink3 <br>
      */
-    public static final RGBA LightPink3 = getColors().get("LightPink3");
+    public static final RGBA LightPink3 = getColors( ).get( "LightPink3" );
 
     /**
      * <span style="background:#8b5f65">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightPink4 <br>
      */
-    public static final RGBA LightPink4 = getColors().get("LightPink4");
+    public static final RGBA LightPink4 = getColors( ).get( "LightPink4" );
 
     /**
      * <span style="background:#ffa07a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSalmon <br>
      */
-    public static final RGBA LightSalmon = getColors().get("LightSalmon");
+    public static final RGBA LightSalmon = getColors( ).get( "LightSalmon" );
 
     /**
      * <span style="background:#ee9572">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSalmon2 <br>
      */
-    public static final RGBA LightSalmon2 = getColors().get("LightSalmon2");
+    public static final RGBA LightSalmon2 = getColors( ).get( "LightSalmon2" );
 
     /**
      * <span style="background:#cd8162">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSalmon3 <br>
      */
-    public static final RGBA LightSalmon3 = getColors().get("LightSalmon3");
+    public static final RGBA LightSalmon3 = getColors( ).get( "LightSalmon3" );
 
     /**
      * <span style="background:#8b5742">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSalmon4 <br>
      */
-    public static final RGBA LightSalmon4 = getColors().get("LightSalmon4");
+    public static final RGBA LightSalmon4 = getColors( ).get( "LightSalmon4" );
 
     /**
      * <span style="background:#20b2aa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSeaGreen <br>
      */
-    public static final RGBA LightSeaGreen = getColors().get("LightSeaGreen");
+    public static final RGBA LightSeaGreen = getColors( ).get( "LightSeaGreen" );
 
     /**
      * <span style="background:#87cefa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSkyBlue <br>
      */
-    public static final RGBA LightSkyBlue = getColors().get("LightSkyBlue");
+    public static final RGBA LightSkyBlue = getColors( ).get( "LightSkyBlue" );
 
     /**
      * <span style="background:#b0e2ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSkyBlue1 <br>
      */
-    public static final RGBA LightSkyBlue1 = getColors().get("LightSkyBlue1");
+    public static final RGBA LightSkyBlue1 = getColors( ).get( "LightSkyBlue1" );
 
     /**
      * <span style="background:#a4d3ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSkyBlue2 <br>
      */
-    public static final RGBA LightSkyBlue2 = getColors().get("LightSkyBlue2");
+    public static final RGBA LightSkyBlue2 = getColors( ).get( "LightSkyBlue2" );
 
     /**
      * <span style="background:#8db6cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSkyBlue3 <br>
      */
-    public static final RGBA LightSkyBlue3 = getColors().get("LightSkyBlue3");
+    public static final RGBA LightSkyBlue3 = getColors( ).get( "LightSkyBlue3" );
 
     /**
      * <span style="background:#607b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSkyBlue4 <br>
      */
-    public static final RGBA LightSkyBlue4 = getColors().get("LightSkyBlue4");
+    public static final RGBA LightSkyBlue4 = getColors( ).get( "LightSkyBlue4" );
 
     /**
      * <span style="background:#8470ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSlateBlue <br>
      */
-    public static final RGBA LightSlateBlue = getColors().get("LightSlateBlue");
+    public static final RGBA LightSlateBlue = getColors( ).get( "LightSlateBlue" );
 
     /**
      * <span style="background:#778899">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSlateGray <br>
      */
-    public static final RGBA LightSlateGray = getColors().get("LightSlateGray");
+    public static final RGBA LightSlateGray = getColors( ).get( "LightSlateGray" );
 
     /**
      * <span style="background:#b0c4de">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSteelBlue <br>
      */
-    public static final RGBA LightSteelBlue = getColors().get("LightSteelBlue");
+    public static final RGBA LightSteelBlue = getColors( ).get( "LightSteelBlue" );
 
     /**
      * <span style="background:#cae1ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSteelBlue1 <br>
      */
-    public static final RGBA LightSteelBlue1 = getColors().get("LightSteelBlue1");
+    public static final RGBA LightSteelBlue1 = getColors( ).get( "LightSteelBlue1" );
 
     /**
      * <span style="background:#bcd2ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSteelBlue2 <br>
      */
-    public static final RGBA LightSteelBlue2 = getColors().get("LightSteelBlue2");
+    public static final RGBA LightSteelBlue2 = getColors( ).get( "LightSteelBlue2" );
 
     /**
      * <span style="background:#a2b5cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSteelBlue3 <br>
      */
-    public static final RGBA LightSteelBlue3 = getColors().get("LightSteelBlue3");
+    public static final RGBA LightSteelBlue3 = getColors( ).get( "LightSteelBlue3" );
 
     /**
      * <span style="background:#6e7b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightSteelBlue4 <br>
      */
-    public static final RGBA LightSteelBlue4 = getColors().get("LightSteelBlue4");
+    public static final RGBA LightSteelBlue4 = getColors( ).get( "LightSteelBlue4" );
 
     /**
      * <span style="background:#ffffe0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightYellow <br>
      */
-    public static final RGBA LightYellow = getColors().get("LightYellow");
+    public static final RGBA LightYellow = getColors( ).get( "LightYellow" );
 
     /**
      * <span style="background:#eeeed1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightYellow2 <br>
      */
-    public static final RGBA LightYellow2 = getColors().get("LightYellow2");
+    public static final RGBA LightYellow2 = getColors( ).get( "LightYellow2" );
 
     /**
      * <span style="background:#cdcdb4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightYellow3 <br>
      */
-    public static final RGBA LightYellow3 = getColors().get("LightYellow3");
+    public static final RGBA LightYellow3 = getColors( ).get( "LightYellow3" );
 
     /**
      * <span style="background:#8b8b7a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LightYellow4 <br>
      */
-    public static final RGBA LightYellow4 = getColors().get("LightYellow4");
+    public static final RGBA LightYellow4 = getColors( ).get( "LightYellow4" );
 
     /**
      * <span style="background:#32cd32">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> LimeGreen <br>
      */
-    public static final RGBA LimeGreen = getColors().get("LimeGreen");
+    public static final RGBA LimeGreen = getColors( ).get( "LimeGreen" );
 
     /**
      * <span style="background:#faf0e6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Linen <br>
      */
-    public static final RGBA Linen = getColors().get("Linen");
+    public static final RGBA Linen = getColors( ).get( "Linen" );
 
     /**
      * <span style="background:#ff00ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Magenta <br>
      */
-    public static final RGBA Magenta = getColors().get("Magenta");
+    public static final RGBA Magenta = getColors( ).get( "Magenta" );
 
     /**
      * <span style="background:#ee00ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Magenta2 <br>
      */
-    public static final RGBA Magenta2 = getColors().get("Magenta2");
+    public static final RGBA Magenta2 = getColors( ).get( "Magenta2" );
 
     /**
      * <span style="background:#cd00cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Magenta3 <br>
      */
-    public static final RGBA Magenta3 = getColors().get("Magenta3");
+    public static final RGBA Magenta3 = getColors( ).get( "Magenta3" );
 
     /**
      * <span style="background:#b03060">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Maroon <br>
      */
-    public static final RGBA Maroon = getColors().get("Maroon");
+    public static final RGBA Maroon = getColors( ).get( "Maroon" );
 
     /**
      * <span style="background:#ff34b3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Maroon1 <br>
      */
-    public static final RGBA Maroon1 = getColors().get("Maroon1");
+    public static final RGBA Maroon1 = getColors( ).get( "Maroon1" );
 
     /**
      * <span style="background:#ee30a7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Maroon2 <br>
      */
-    public static final RGBA Maroon2 = getColors().get("Maroon2");
+    public static final RGBA Maroon2 = getColors( ).get( "Maroon2" );
 
     /**
      * <span style="background:#cd2990">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Maroon3 <br>
      */
-    public static final RGBA Maroon3 = getColors().get("Maroon3");
+    public static final RGBA Maroon3 = getColors( ).get( "Maroon3" );
 
     /**
      * <span style="background:#8b1c62">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Maroon4 <br>
      */
-    public static final RGBA Maroon4 = getColors().get("Maroon4");
+    public static final RGBA Maroon4 = getColors( ).get( "Maroon4" );
 
     /**
      * <span style="background:#66cdaa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumAquamarine <br>
      */
-    public static final RGBA MediumAquamarine = getColors().get("MediumAquamarine");
+    public static final RGBA MediumAquamarine = getColors( ).get( "MediumAquamarine" );
 
     /**
      * <span style="background:#0000cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumBlue <br>
      */
-    public static final RGBA MediumBlue = getColors().get("MediumBlue");
+    public static final RGBA MediumBlue = getColors( ).get( "MediumBlue" );
 
     /**
      * <span style="background:#ba55d3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumOrchid <br>
      */
-    public static final RGBA MediumOrchid = getColors().get("MediumOrchid");
+    public static final RGBA MediumOrchid = getColors( ).get( "MediumOrchid" );
 
     /**
      * <span style="background:#e066ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumOrchid1 <br>
      */
-    public static final RGBA MediumOrchid1 = getColors().get("MediumOrchid1");
+    public static final RGBA MediumOrchid1 = getColors( ).get( "MediumOrchid1" );
 
     /**
      * <span style="background:#d15fee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumOrchid2 <br>
      */
-    public static final RGBA MediumOrchid2 = getColors().get("MediumOrchid2");
+    public static final RGBA MediumOrchid2 = getColors( ).get( "MediumOrchid2" );
 
     /**
      * <span style="background:#b452cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumOrchid3 <br>
      */
-    public static final RGBA MediumOrchid3 = getColors().get("MediumOrchid3");
+    public static final RGBA MediumOrchid3 = getColors( ).get( "MediumOrchid3" );
 
     /**
      * <span style="background:#7a378b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumOrchid4 <br>
      */
-    public static final RGBA MediumOrchid4 = getColors().get("MediumOrchid4");
+    public static final RGBA MediumOrchid4 = getColors( ).get( "MediumOrchid4" );
 
     /**
      * <span style="background:#9370db">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumPurple <br>
      */
-    public static final RGBA MediumPurple = getColors().get("MediumPurple");
+    public static final RGBA MediumPurple = getColors( ).get( "MediumPurple" );
 
     /**
      * <span style="background:#ab82ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumPurple1 <br>
      */
-    public static final RGBA MediumPurple1 = getColors().get("MediumPurple1");
+    public static final RGBA MediumPurple1 = getColors( ).get( "MediumPurple1" );
 
     /**
      * <span style="background:#9f79ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumPurple2 <br>
      */
-    public static final RGBA MediumPurple2 = getColors().get("MediumPurple2");
+    public static final RGBA MediumPurple2 = getColors( ).get( "MediumPurple2" );
 
     /**
      * <span style="background:#8968cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumPurple3 <br>
      */
-    public static final RGBA MediumPurple3 = getColors().get("MediumPurple3");
+    public static final RGBA MediumPurple3 = getColors( ).get( "MediumPurple3" );
 
     /**
      * <span style="background:#5d478b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumPurple4 <br>
      */
-    public static final RGBA MediumPurple4 = getColors().get("MediumPurple4");
+    public static final RGBA MediumPurple4 = getColors( ).get( "MediumPurple4" );
 
     /**
      * <span style="background:#3cb371">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumSeaGreen <br>
      */
-    public static final RGBA MediumSeaGreen = getColors().get("MediumSeaGreen");
+    public static final RGBA MediumSeaGreen = getColors( ).get( "MediumSeaGreen" );
 
     /**
      * <span style="background:#7b68ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumSlateBlue <br>
      */
-    public static final RGBA MediumSlateBlue = getColors().get("MediumSlateBlue");
+    public static final RGBA MediumSlateBlue = getColors( ).get( "MediumSlateBlue" );
 
     /**
      * <span style="background:#00fa9a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumSpring <br>
      */
-    public static final RGBA MediumSpring = getColors().get("MediumSpring");
+    public static final RGBA MediumSpring = getColors( ).get( "MediumSpring" );
 
     /**
      * <span style="background:#48d1cc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumTurquoise <br>
      */
-    public static final RGBA MediumTurquoise = getColors().get("MediumTurquoise");
+    public static final RGBA MediumTurquoise = getColors( ).get( "MediumTurquoise" );
 
     /**
      * <span style="background:#c71585">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MediumVioletRed <br>
      */
-    public static final RGBA MediumVioletRed = getColors().get("MediumVioletRed");
+    public static final RGBA MediumVioletRed = getColors( ).get( "MediumVioletRed" );
 
     /**
      * <span style="background:#191970">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MidnightBlue <br>
      */
-    public static final RGBA MidnightBlue = getColors().get("MidnightBlue");
+    public static final RGBA MidnightBlue = getColors( ).get( "MidnightBlue" );
 
     /**
      * <span style="background:#f5fffa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MintCream <br>
      */
-    public static final RGBA MintCream = getColors().get("MintCream");
+    public static final RGBA MintCream = getColors( ).get( "MintCream" );
 
     /**
      * <span style="background:#ffe4e1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MistyRose <br>
      */
-    public static final RGBA MistyRose = getColors().get("MistyRose");
+    public static final RGBA MistyRose = getColors( ).get( "MistyRose" );
 
     /**
      * <span style="background:#eed5d2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MistyRose2 <br>
      */
-    public static final RGBA MistyRose2 = getColors().get("MistyRose2");
+    public static final RGBA MistyRose2 = getColors( ).get( "MistyRose2" );
 
     /**
      * <span style="background:#cdb7b5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MistyRose3 <br>
      */
-    public static final RGBA MistyRose3 = getColors().get("MistyRose3");
+    public static final RGBA MistyRose3 = getColors( ).get( "MistyRose3" );
 
     /**
      * <span style="background:#8b7d7b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> MistyRose4 <br>
      */
-    public static final RGBA MistyRose4 = getColors().get("MistyRose4");
+    public static final RGBA MistyRose4 = getColors( ).get( "MistyRose4" );
 
     /**
      * <span style="background:#ffe4b5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Moccasin <br>
      */
-    public static final RGBA Moccasin = getColors().get("Moccasin");
+    public static final RGBA Moccasin = getColors( ).get( "Moccasin" );
 
     /**
      * <span style="background:#ffdead">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> NavajoWhite <br>
      */
-    public static final RGBA NavajoWhite = getColors().get("NavajoWhite");
+    public static final RGBA NavajoWhite = getColors( ).get( "NavajoWhite" );
 
     /**
      * <span style="background:#eecfa1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> NavajoWhite2 <br>
      */
-    public static final RGBA NavajoWhite2 = getColors().get("NavajoWhite2");
+    public static final RGBA NavajoWhite2 = getColors( ).get( "NavajoWhite2" );
 
     /**
      * <span style="background:#cdb38b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> NavajoWhite3 <br>
      */
-    public static final RGBA NavajoWhite3 = getColors().get("NavajoWhite3");
+    public static final RGBA NavajoWhite3 = getColors( ).get( "NavajoWhite3" );
 
     /**
      * <span style="background:#8b795e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> NavajoWhite4 <br>
      */
-    public static final RGBA NavajoWhite4 = getColors().get("NavajoWhite4");
+    public static final RGBA NavajoWhite4 = getColors( ).get( "NavajoWhite4" );
 
     /**
      * <span style="background:#000080">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Navy <br>
      */
-    public static final RGBA Navy = getColors().get("Navy");
+    public static final RGBA Navy = getColors( ).get( "Navy" );
 
     /**
      * <span style="background:#fdf5e6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OldLace <br>
      */
-    public static final RGBA OldLace = getColors().get("OldLace");
+    public static final RGBA OldLace = getColors( ).get( "OldLace" );
 
     /**
      * <span style="background:#6b8e23">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OliveDrab <br>
      */
-    public static final RGBA OliveDrab = getColors().get("OliveDrab");
+    public static final RGBA OliveDrab = getColors( ).get( "OliveDrab" );
 
     /**
      * <span style="background:#c0ff3e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OliveDrab1 <br>
      */
-    public static final RGBA OliveDrab1 = getColors().get("OliveDrab1");
+    public static final RGBA OliveDrab1 = getColors( ).get( "OliveDrab1" );
 
     /**
      * <span style="background:#b3ee3a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OliveDrab2 <br>
      */
-    public static final RGBA OliveDrab2 = getColors().get("OliveDrab2");
+    public static final RGBA OliveDrab2 = getColors( ).get( "OliveDrab2" );
 
     /**
      * <span style="background:#698b22">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OliveDrab4 <br>
      */
-    public static final RGBA OliveDrab4 = getColors().get("OliveDrab4");
+    public static final RGBA OliveDrab4 = getColors( ).get( "OliveDrab4" );
 
     /**
      * <span style="background:#ffa500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orange <br>
      */
-    public static final RGBA Orange = getColors().get("Orange");
+    public static final RGBA Orange = getColors( ).get( "Orange" );
 
     /**
      * <span style="background:#ee9a00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orange2 <br>
      */
-    public static final RGBA Orange2 = getColors().get("Orange2");
+    public static final RGBA Orange2 = getColors( ).get( "Orange2" );
 
     /**
      * <span style="background:#cd8500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orange3 <br>
      */
-    public static final RGBA Orange3 = getColors().get("Orange3");
+    public static final RGBA Orange3 = getColors( ).get( "Orange3" );
 
     /**
      * <span style="background:#8b5a00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orange4 <br>
      */
-    public static final RGBA Orange4 = getColors().get("Orange4");
+    public static final RGBA Orange4 = getColors( ).get( "Orange4" );
 
     /**
      * <span style="background:#ff4500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OrangeRed <br>
      */
-    public static final RGBA OrangeRed = getColors().get("OrangeRed");
+    public static final RGBA OrangeRed = getColors( ).get( "OrangeRed" );
 
     /**
      * <span style="background:#ee4000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OrangeRed2 <br>
      */
-    public static final RGBA OrangeRed2 = getColors().get("OrangeRed2");
+    public static final RGBA OrangeRed2 = getColors( ).get( "OrangeRed2" );
 
     /**
      * <span style="background:#cd3700">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OrangeRed3 <br>
      */
-    public static final RGBA OrangeRed3 = getColors().get("OrangeRed3");
+    public static final RGBA OrangeRed3 = getColors( ).get( "OrangeRed3" );
 
     /**
      * <span style="background:#8b2500">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> OrangeRed4 <br>
      */
-    public static final RGBA OrangeRed4 = getColors().get("OrangeRed4");
+    public static final RGBA OrangeRed4 = getColors( ).get( "OrangeRed4" );
 
     /**
      * <span style="background:#da70d6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orchid <br>
      */
-    public static final RGBA Orchid = getColors().get("Orchid");
+    public static final RGBA Orchid = getColors( ).get( "Orchid" );
 
     /**
      * <span style="background:#ff83fa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orchid1 <br>
      */
-    public static final RGBA Orchid1 = getColors().get("Orchid1");
+    public static final RGBA Orchid1 = getColors( ).get( "Orchid1" );
 
     /**
      * <span style="background:#ee7ae9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orchid2 <br>
      */
-    public static final RGBA Orchid2 = getColors().get("Orchid2");
+    public static final RGBA Orchid2 = getColors( ).get( "Orchid2" );
 
     /**
      * <span style="background:#cd69c9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orchid3 <br>
      */
-    public static final RGBA Orchid3 = getColors().get("Orchid3");
+    public static final RGBA Orchid3 = getColors( ).get( "Orchid3" );
 
     /**
      * <span style="background:#8b4789">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Orchid4 <br>
      */
-    public static final RGBA Orchid4 = getColors().get("Orchid4");
+    public static final RGBA Orchid4 = getColors( ).get( "Orchid4" );
 
     /**
      * <span style="background:#eee8aa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleGoldenrod <br>
      */
-    public static final RGBA PaleGoldenrod = getColors().get("PaleGoldenrod");
+    public static final RGBA PaleGoldenrod = getColors( ).get( "PaleGoldenrod" );
 
     /**
      * <span style="background:#98fb98">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleGreen <br>
      */
-    public static final RGBA PaleGreen = getColors().get("PaleGreen");
+    public static final RGBA PaleGreen = getColors( ).get( "PaleGreen" );
 
     /**
      * <span style="background:#9aff9a">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleGreen1 <br>
      */
-    public static final RGBA PaleGreen1 = getColors().get("PaleGreen1");
+    public static final RGBA PaleGreen1 = getColors( ).get( "PaleGreen1" );
 
     /**
      * <span style="background:#7ccd7c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleGreen3 <br>
      */
-    public static final RGBA PaleGreen3 = getColors().get("PaleGreen3");
+    public static final RGBA PaleGreen3 = getColors( ).get( "PaleGreen3" );
 
     /**
      * <span style="background:#548b54">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleGreen4 <br>
      */
-    public static final RGBA PaleGreen4 = getColors().get("PaleGreen4");
+    public static final RGBA PaleGreen4 = getColors( ).get( "PaleGreen4" );
 
     /**
      * <span style="background:#afeeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleTurquoise <br>
      */
-    public static final RGBA PaleTurquoise = getColors().get("PaleTurquoise");
+    public static final RGBA PaleTurquoise = getColors( ).get( "PaleTurquoise" );
 
     /**
      * <span style="background:#bbffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleTurquoise1 <br>
      */
-    public static final RGBA PaleTurquoise1 = getColors().get("PaleTurquoise1");
+    public static final RGBA PaleTurquoise1 = getColors( ).get( "PaleTurquoise1" );
 
     /**
      * <span style="background:#aeeeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleTurquoise2 <br>
      */
-    public static final RGBA PaleTurquoise2 = getColors().get("PaleTurquoise2");
+    public static final RGBA PaleTurquoise2 = getColors( ).get( "PaleTurquoise2" );
 
     /**
      * <span style="background:#96cdcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleTurquoise3 <br>
      */
-    public static final RGBA PaleTurquoise3 = getColors().get("PaleTurquoise3");
+    public static final RGBA PaleTurquoise3 = getColors( ).get( "PaleTurquoise3" );
 
     /**
      * <span style="background:#668b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleTurquoise4 <br>
      */
-    public static final RGBA PaleTurquoise4 = getColors().get("PaleTurquoise4");
+    public static final RGBA PaleTurquoise4 = getColors( ).get( "PaleTurquoise4" );
 
     /**
      * <span style="background:#db7093">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleVioletRed <br>
      */
-    public static final RGBA PaleVioletRed = getColors().get("PaleVioletRed");
+    public static final RGBA PaleVioletRed = getColors( ).get( "PaleVioletRed" );
 
     /**
      * <span style="background:#ff82ab">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleVioletRed1 <br>
      */
-    public static final RGBA PaleVioletRed1 = getColors().get("PaleVioletRed1");
+    public static final RGBA PaleVioletRed1 = getColors( ).get( "PaleVioletRed1" );
 
     /**
      * <span style="background:#ee799f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleVioletRed2 <br>
      */
-    public static final RGBA PaleVioletRed2 = getColors().get("PaleVioletRed2");
+    public static final RGBA PaleVioletRed2 = getColors( ).get( "PaleVioletRed2" );
 
     /**
      * <span style="background:#cd6889">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleVioletRed3 <br>
      */
-    public static final RGBA PaleVioletRed3 = getColors().get("PaleVioletRed3");
+    public static final RGBA PaleVioletRed3 = getColors( ).get( "PaleVioletRed3" );
 
     /**
      * <span style="background:#8b475d">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PaleVioletRed4 <br>
      */
-    public static final RGBA PaleVioletRed4 = getColors().get("PaleVioletRed4");
+    public static final RGBA PaleVioletRed4 = getColors( ).get( "PaleVioletRed4" );
 
     /**
      * <span style="background:#ffefd5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PapayaWhip <br>
      */
-    public static final RGBA PapayaWhip = getColors().get("PapayaWhip");
+    public static final RGBA PapayaWhip = getColors( ).get( "PapayaWhip" );
 
     /**
      * <span style="background:#ffdab9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PeachPuff <br>
      */
-    public static final RGBA PeachPuff = getColors().get("PeachPuff");
+    public static final RGBA PeachPuff = getColors( ).get( "PeachPuff" );
 
     /**
      * <span style="background:#eecbad">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PeachPuff2 <br>
      */
-    public static final RGBA PeachPuff2 = getColors().get("PeachPuff2");
+    public static final RGBA PeachPuff2 = getColors( ).get( "PeachPuff2" );
 
     /**
      * <span style="background:#cdaf95">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PeachPuff3 <br>
      */
-    public static final RGBA PeachPuff3 = getColors().get("PeachPuff3");
+    public static final RGBA PeachPuff3 = getColors( ).get( "PeachPuff3" );
 
     /**
      * <span style="background:#8b7765">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PeachPuff4 <br>
      */
-    public static final RGBA PeachPuff4 = getColors().get("PeachPuff4");
+    public static final RGBA PeachPuff4 = getColors( ).get( "PeachPuff4" );
 
     /**
      * <span style="background:#cd853f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Peru <br>
      */
-    public static final RGBA Peru = getColors().get("Peru");
+    public static final RGBA Peru = getColors( ).get( "Peru" );
 
     /**
      * <span style="background:#ffc0cb">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Pink <br>
      */
-    public static final RGBA Pink = getColors().get("Pink");
+    public static final RGBA Pink = getColors( ).get( "Pink" );
 
     /**
      * <span style="background:#ffb5c5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Pink1 <br>
      */
-    public static final RGBA Pink1 = getColors().get("Pink1");
+    public static final RGBA Pink1 = getColors( ).get( "Pink1" );
 
     /**
      * <span style="background:#eea9b8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Pink2 <br>
      */
-    public static final RGBA Pink2 = getColors().get("Pink2");
+    public static final RGBA Pink2 = getColors( ).get( "Pink2" );
 
     /**
      * <span style="background:#cd919e">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Pink3 <br>
      */
-    public static final RGBA Pink3 = getColors().get("Pink3");
+    public static final RGBA Pink3 = getColors( ).get( "Pink3" );
 
     /**
      * <span style="background:#8b636c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Pink4 <br>
      */
-    public static final RGBA Pink4 = getColors().get("Pink4");
+    public static final RGBA Pink4 = getColors( ).get( "Pink4" );
 
     /**
      * <span style="background:#dda0dd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Plum <br>
      */
-    public static final RGBA Plum = getColors().get("Plum");
+    public static final RGBA Plum = getColors( ).get( "Plum" );
 
     /**
      * <span style="background:#ffbbff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Plum1 <br>
      */
-    public static final RGBA Plum1 = getColors().get("Plum1");
+    public static final RGBA Plum1 = getColors( ).get( "Plum1" );
 
     /**
      * <span style="background:#eeaeee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Plum2 <br>
      */
-    public static final RGBA Plum2 = getColors().get("Plum2");
+    public static final RGBA Plum2 = getColors( ).get( "Plum2" );
 
     /**
      * <span style="background:#cd96cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Plum3 <br>
      */
-    public static final RGBA Plum3 = getColors().get("Plum3");
+    public static final RGBA Plum3 = getColors( ).get( "Plum3" );
 
     /**
      * <span style="background:#8b668b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Plum4 <br>
      */
-    public static final RGBA Plum4 = getColors().get("Plum4");
+    public static final RGBA Plum4 = getColors( ).get( "Plum4" );
 
     /**
      * <span style="background:#b0e0e6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> PowderBlue <br>
      */
-    public static final RGBA PowderBlue = getColors().get("PowderBlue");
+    public static final RGBA PowderBlue = getColors( ).get( "PowderBlue" );
 
     /**
      * <span style="background:#a020f0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Purple <br>
      */
-    public static final RGBA Purple = getColors().get("Purple");
+    public static final RGBA Purple = getColors( ).get( "Purple" );
 
     /**
      * <span style="background:#9b30ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Purple1 <br>
      */
-    public static final RGBA Purple1 = getColors().get("Purple1");
+    public static final RGBA Purple1 = getColors( ).get( "Purple1" );
 
     /**
      * <span style="background:#912cee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Purple2 <br>
      */
-    public static final RGBA Purple2 = getColors().get("Purple2");
+    public static final RGBA Purple2 = getColors( ).get( "Purple2" );
 
     /**
      * <span style="background:#7d26cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Purple3 <br>
      */
-    public static final RGBA Purple3 = getColors().get("Purple3");
+    public static final RGBA Purple3 = getColors( ).get( "Purple3" );
 
     /**
      * <span style="background:#551a8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Purple4 <br>
      */
-    public static final RGBA Purple4 = getColors().get("Purple4");
+    public static final RGBA Purple4 = getColors( ).get( "Purple4" );
 
     /**
      * <span style="background:#ff0000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Red <br>
      */
-    public static final RGBA Red = getColors().get("Red");
+    public static final RGBA Red = getColors( ).get( "Red" );
 
     /**
      * <span style="background:#ee0000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Red2 <br>
      */
-    public static final RGBA Red2 = getColors().get("Red2");
+    public static final RGBA Red2 = getColors( ).get( "Red2" );
 
     /**
      * <span style="background:#cd0000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Red3 <br>
      */
-    public static final RGBA Red3 = getColors().get("Red3");
+    public static final RGBA Red3 = getColors( ).get( "Red3" );
 
     /**
      * <span style="background:#bc8f8f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RosyBrown <br>
      */
-    public static final RGBA RosyBrown = getColors().get("RosyBrown");
+    public static final RGBA RosyBrown = getColors( ).get( "RosyBrown" );
 
     /**
      * <span style="background:#ffc1c1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RosyBrown1 <br>
      */
-    public static final RGBA RosyBrown1 = getColors().get("RosyBrown1");
+    public static final RGBA RosyBrown1 = getColors( ).get( "RosyBrown1" );
 
     /**
      * <span style="background:#eeb4b4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RosyBrown2 <br>
      */
-    public static final RGBA RosyBrown2 = getColors().get("RosyBrown2");
+    public static final RGBA RosyBrown2 = getColors( ).get( "RosyBrown2" );
 
     /**
      * <span style="background:#cd9b9b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RosyBrown3 <br>
      */
-    public static final RGBA RosyBrown3 = getColors().get("RosyBrown3");
+    public static final RGBA RosyBrown3 = getColors( ).get( "RosyBrown3" );
 
     /**
      * <span style="background:#8b6969">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RosyBrown4 <br>
      */
-    public static final RGBA RosyBrown4 = getColors().get("RosyBrown4");
+    public static final RGBA RosyBrown4 = getColors( ).get( "RosyBrown4" );
 
     /**
      * <span style="background:#4169e1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RoyalBlue <br>
      */
-    public static final RGBA RoyalBlue = getColors().get("RoyalBlue");
+    public static final RGBA RoyalBlue = getColors( ).get( "RoyalBlue" );
 
     /**
      * <span style="background:#4876ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RoyalBlue1 <br>
      */
-    public static final RGBA RoyalBlue1 = getColors().get("RoyalBlue1");
+    public static final RGBA RoyalBlue1 = getColors( ).get( "RoyalBlue1" );
 
     /**
      * <span style="background:#436eee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RoyalBlue2 <br>
      */
-    public static final RGBA RoyalBlue2 = getColors().get("RoyalBlue2");
+    public static final RGBA RoyalBlue2 = getColors( ).get( "RoyalBlue2" );
 
     /**
      * <span style="background:#3a5fcd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RoyalBlue3 <br>
      */
-    public static final RGBA RoyalBlue3 = getColors().get("RoyalBlue3");
+    public static final RGBA RoyalBlue3 = getColors( ).get( "RoyalBlue3" );
 
     /**
      * <span style="background:#27408b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> RoyalBlue4 <br>
      */
-    public static final RGBA RoyalBlue4 = getColors().get("RoyalBlue4");
+    public static final RGBA RoyalBlue4 = getColors( ).get( "RoyalBlue4" );
 
     /**
      * <span style="background:#8b4513">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SaddleBrown <br>
      */
-    public static final RGBA SaddleBrown = getColors().get("SaddleBrown");
+    public static final RGBA SaddleBrown = getColors( ).get( "SaddleBrown" );
 
     /**
      * <span style="background:#fa8072">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Salmon <br>
      */
-    public static final RGBA Salmon = getColors().get("Salmon");
+    public static final RGBA Salmon = getColors( ).get( "Salmon" );
 
     /**
      * <span style="background:#ff8c69">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Salmon1 <br>
      */
-    public static final RGBA Salmon1 = getColors().get("Salmon1");
+    public static final RGBA Salmon1 = getColors( ).get( "Salmon1" );
 
     /**
      * <span style="background:#ee8262">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Salmon2 <br>
      */
-    public static final RGBA Salmon2 = getColors().get("Salmon2");
+    public static final RGBA Salmon2 = getColors( ).get( "Salmon2" );
 
     /**
      * <span style="background:#cd7054">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Salmon3 <br>
      */
-    public static final RGBA Salmon3 = getColors().get("Salmon3");
+    public static final RGBA Salmon3 = getColors( ).get( "Salmon3" );
 
     /**
      * <span style="background:#8b4c39">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Salmon4 <br>
      */
-    public static final RGBA Salmon4 = getColors().get("Salmon4");
+    public static final RGBA Salmon4 = getColors( ).get( "Salmon4" );
 
     /**
      * <span style="background:#f4a460">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SandyBrown <br>
      */
-    public static final RGBA SandyBrown = getColors().get("SandyBrown");
+    public static final RGBA SandyBrown = getColors( ).get( "SandyBrown" );
 
     /**
      * <span style="background:#2e8b57">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SeaGreen <br>
      */
-    public static final RGBA SeaGreen = getColors().get("SeaGreen");
+    public static final RGBA SeaGreen = getColors( ).get( "SeaGreen" );
 
     /**
      * <span style="background:#54ff9f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SeaGreen1 <br>
      */
-    public static final RGBA SeaGreen1 = getColors().get("SeaGreen1");
+    public static final RGBA SeaGreen1 = getColors( ).get( "SeaGreen1" );
 
     /**
      * <span style="background:#4eee94">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SeaGreen2 <br>
      */
-    public static final RGBA SeaGreen2 = getColors().get("SeaGreen2");
+    public static final RGBA SeaGreen2 = getColors( ).get( "SeaGreen2" );
 
     /**
      * <span style="background:#43cd80">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SeaGreen3 <br>
      */
-    public static final RGBA SeaGreen3 = getColors().get("SeaGreen3");
+    public static final RGBA SeaGreen3 = getColors( ).get( "SeaGreen3" );
 
     /**
      * <span style="background:#fff5ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Seashell <br>
      */
-    public static final RGBA Seashell = getColors().get("Seashell");
+    public static final RGBA Seashell = getColors( ).get( "Seashell" );
 
     /**
      * <span style="background:#eee5de">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Seashell2 <br>
      */
-    public static final RGBA Seashell2 = getColors().get("Seashell2");
+    public static final RGBA Seashell2 = getColors( ).get( "Seashell2" );
 
     /**
      * <span style="background:#cdc5bf">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Seashell3 <br>
      */
-    public static final RGBA Seashell3 = getColors().get("Seashell3");
+    public static final RGBA Seashell3 = getColors( ).get( "Seashell3" );
 
     /**
      * <span style="background:#8b8682">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Seashell4 <br>
      */
-    public static final RGBA Seashell4 = getColors().get("Seashell4");
+    public static final RGBA Seashell4 = getColors( ).get( "Seashell4" );
 
     /**
      * <span style="background:#a0522d">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Sienna <br>
      */
-    public static final RGBA Sienna = getColors().get("Sienna");
+    public static final RGBA Sienna = getColors( ).get( "Sienna" );
 
     /**
      * <span style="background:#ff8247">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Sienna1 <br>
      */
-    public static final RGBA Sienna1 = getColors().get("Sienna1");
+    public static final RGBA Sienna1 = getColors( ).get( "Sienna1" );
 
     /**
      * <span style="background:#ee7942">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Sienna2 <br>
      */
-    public static final RGBA Sienna2 = getColors().get("Sienna2");
+    public static final RGBA Sienna2 = getColors( ).get( "Sienna2" );
 
     /**
      * <span style="background:#cd6839">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Sienna3 <br>
      */
-    public static final RGBA Sienna3 = getColors().get("Sienna3");
+    public static final RGBA Sienna3 = getColors( ).get( "Sienna3" );
 
     /**
      * <span style="background:#8b4726">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Sienna4 <br>
      */
-    public static final RGBA Sienna4 = getColors().get("Sienna4");
+    public static final RGBA Sienna4 = getColors( ).get( "Sienna4" );
 
     /**
      * <span style="background:#87ceeb">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SkyBlue <br>
      */
-    public static final RGBA SkyBlue = getColors().get("SkyBlue");
+    public static final RGBA SkyBlue = getColors( ).get( "SkyBlue" );
 
     /**
      * <span style="background:#87ceff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SkyBlue1 <br>
      */
-    public static final RGBA SkyBlue1 = getColors().get("SkyBlue1");
+    public static final RGBA SkyBlue1 = getColors( ).get( "SkyBlue1" );
 
     /**
      * <span style="background:#7ec0ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SkyBlue2 <br>
      */
-    public static final RGBA SkyBlue2 = getColors().get("SkyBlue2");
+    public static final RGBA SkyBlue2 = getColors( ).get( "SkyBlue2" );
 
     /**
      * <span style="background:#6ca6cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SkyBlue3 <br>
      */
-    public static final RGBA SkyBlue3 = getColors().get("SkyBlue3");
+    public static final RGBA SkyBlue3 = getColors( ).get( "SkyBlue3" );
 
     /**
      * <span style="background:#4a708b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SkyBlue4 <br>
      */
-    public static final RGBA SkyBlue4 = getColors().get("SkyBlue4");
+    public static final RGBA SkyBlue4 = getColors( ).get( "SkyBlue4" );
 
     /**
      * <span style="background:#6a5acd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateBlue <br>
      */
-    public static final RGBA SlateBlue = getColors().get("SlateBlue");
+    public static final RGBA SlateBlue = getColors( ).get( "SlateBlue" );
 
     /**
      * <span style="background:#836fff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateBlue1 <br>
      */
-    public static final RGBA SlateBlue1 = getColors().get("SlateBlue1");
+    public static final RGBA SlateBlue1 = getColors( ).get( "SlateBlue1" );
 
     /**
      * <span style="background:#7a67ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateBlue2 <br>
      */
-    public static final RGBA SlateBlue2 = getColors().get("SlateBlue2");
+    public static final RGBA SlateBlue2 = getColors( ).get( "SlateBlue2" );
 
     /**
      * <span style="background:#6959cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateBlue3 <br>
      */
-    public static final RGBA SlateBlue3 = getColors().get("SlateBlue3");
+    public static final RGBA SlateBlue3 = getColors( ).get( "SlateBlue3" );
 
     /**
      * <span style="background:#473c8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateBlue4 <br>
      */
-    public static final RGBA SlateBlue4 = getColors().get("SlateBlue4");
+    public static final RGBA SlateBlue4 = getColors( ).get( "SlateBlue4" );
 
     /**
      * <span style="background:#708090">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateGray <br>
      */
-    public static final RGBA SlateGray = getColors().get("SlateGray");
+    public static final RGBA SlateGray = getColors( ).get( "SlateGray" );
 
     /**
      * <span style="background:#c6e2ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateGray1 <br>
      */
-    public static final RGBA SlateGray1 = getColors().get("SlateGray1");
+    public static final RGBA SlateGray1 = getColors( ).get( "SlateGray1" );
 
     /**
      * <span style="background:#b9d3ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateGray2 <br>
      */
-    public static final RGBA SlateGray2 = getColors().get("SlateGray2");
+    public static final RGBA SlateGray2 = getColors( ).get( "SlateGray2" );
 
     /**
      * <span style="background:#9fb6cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateGray3 <br>
      */
-    public static final RGBA SlateGray3 = getColors().get("SlateGray3");
+    public static final RGBA SlateGray3 = getColors( ).get( "SlateGray3" );
 
     /**
      * <span style="background:#6c7b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SlateGray4 <br>
      */
-    public static final RGBA SlateGray4 = getColors().get("SlateGray4");
+    public static final RGBA SlateGray4 = getColors( ).get( "SlateGray4" );
 
     /**
      * <span style="background:#fffafa">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Snow <br>
      */
-    public static final RGBA Snow = getColors().get("Snow");
+    public static final RGBA Snow = getColors( ).get( "Snow" );
 
     /**
      * <span style="background:#eee9e9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Snow2 <br>
      */
-    public static final RGBA Snow2 = getColors().get("Snow2");
+    public static final RGBA Snow2 = getColors( ).get( "Snow2" );
 
     /**
      * <span style="background:#cdc9c9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Snow3 <br>
      */
-    public static final RGBA Snow3 = getColors().get("Snow3");
+    public static final RGBA Snow3 = getColors( ).get( "Snow3" );
 
     /**
      * <span style="background:#8b8989">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Snow4 <br>
      */
-    public static final RGBA Snow4 = getColors().get("Snow4");
+    public static final RGBA Snow4 = getColors( ).get( "Snow4" );
 
     /**
      * <span style="background:#00ff7f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SpringGreen <br>
      */
-    public static final RGBA SpringGreen = getColors().get("SpringGreen");
+    public static final RGBA SpringGreen = getColors( ).get( "SpringGreen" );
 
     /**
      * <span style="background:#00ee76">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SpringGreen2 <br>
      */
-    public static final RGBA SpringGreen2 = getColors().get("SpringGreen2");
+    public static final RGBA SpringGreen2 = getColors( ).get( "SpringGreen2" );
 
     /**
      * <span style="background:#00cd66">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SpringGreen3 <br>
      */
-    public static final RGBA SpringGreen3 = getColors().get("SpringGreen3");
+    public static final RGBA SpringGreen3 = getColors( ).get( "SpringGreen3" );
 
     /**
      * <span style="background:#008b45">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SpringGreen4 <br>
      */
-    public static final RGBA SpringGreen4 = getColors().get("SpringGreen4");
+    public static final RGBA SpringGreen4 = getColors( ).get( "SpringGreen4" );
 
     /**
      * <span style="background:#4682b4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SteelBlue <br>
      */
-    public static final RGBA SteelBlue = getColors().get("SteelBlue");
+    public static final RGBA SteelBlue = getColors( ).get( "SteelBlue" );
 
     /**
      * <span style="background:#63b8ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SteelBlue1 <br>
      */
-    public static final RGBA SteelBlue1 = getColors().get("SteelBlue1");
+    public static final RGBA SteelBlue1 = getColors( ).get( "SteelBlue1" );
 
     /**
      * <span style="background:#5cacee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SteelBlue2 <br>
      */
-    public static final RGBA SteelBlue2 = getColors().get("SteelBlue2");
+    public static final RGBA SteelBlue2 = getColors( ).get( "SteelBlue2" );
 
     /**
      * <span style="background:#4f94cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SteelBlue3 <br>
      */
-    public static final RGBA SteelBlue3 = getColors().get("SteelBlue3");
+    public static final RGBA SteelBlue3 = getColors( ).get( "SteelBlue3" );
 
     /**
      * <span style="background:#36648b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> SteelBlue4 <br>
      */
-    public static final RGBA SteelBlue4 = getColors().get("SteelBlue4");
+    public static final RGBA SteelBlue4 = getColors( ).get( "SteelBlue4" );
 
     /**
      * <span style="background:#d2b48c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tan <br>
      */
-    public static final RGBA Tan = getColors().get("Tan");
+    public static final RGBA Tan = getColors( ).get( "Tan" );
 
     /**
      * <span style="background:#ffa54f">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tan1 <br>
      */
-    public static final RGBA Tan1 = getColors().get("Tan1");
+    public static final RGBA Tan1 = getColors( ).get( "Tan1" );
 
     /**
      * <span style="background:#ee9a49">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tan2 <br>
      */
-    public static final RGBA Tan2 = getColors().get("Tan2");
+    public static final RGBA Tan2 = getColors( ).get( "Tan2" );
 
     /**
      * <span style="background:#8b5a2b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tan4 <br>
      */
-    public static final RGBA Tan4 = getColors().get("Tan4");
+    public static final RGBA Tan4 = getColors( ).get( "Tan4" );
 
     /**
      * <span style="background:#d8bfd8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Thistle <br>
      */
-    public static final RGBA Thistle = getColors().get("Thistle");
+    public static final RGBA Thistle = getColors( ).get( "Thistle" );
 
     /**
      * <span style="background:#ffe1ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Thistle1 <br>
      */
-    public static final RGBA Thistle1 = getColors().get("Thistle1");
+    public static final RGBA Thistle1 = getColors( ).get( "Thistle1" );
 
     /**
      * <span style="background:#eed2ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Thistle2 <br>
      */
-    public static final RGBA Thistle2 = getColors().get("Thistle2");
+    public static final RGBA Thistle2 = getColors( ).get( "Thistle2" );
 
     /**
      * <span style="background:#cdb5cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Thistle3 <br>
      */
-    public static final RGBA Thistle3 = getColors().get("Thistle3");
+    public static final RGBA Thistle3 = getColors( ).get( "Thistle3" );
 
     /**
      * <span style="background:#8b7b8b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Thistle4 <br>
      */
-    public static final RGBA Thistle4 = getColors().get("Thistle4");
+    public static final RGBA Thistle4 = getColors( ).get( "Thistle4" );
 
     /**
      * <span style="background:#ff6347">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tomato <br>
      */
-    public static final RGBA Tomato = getColors().get("Tomato");
+    public static final RGBA Tomato = getColors( ).get( "Tomato" );
 
     /**
      * <span style="background:#ee5c42">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tomato2 <br>
      */
-    public static final RGBA Tomato2 = getColors().get("Tomato2");
+    public static final RGBA Tomato2 = getColors( ).get( "Tomato2" );
 
     /**
      * <span style="background:#cd4f39">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tomato3 <br>
      */
-    public static final RGBA Tomato3 = getColors().get("Tomato3");
+    public static final RGBA Tomato3 = getColors( ).get( "Tomato3" );
 
     /**
      * <span style="background:#8b3626">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Tomato4 <br>
      */
-    public static final RGBA Tomato4 = getColors().get("Tomato4");
+    public static final RGBA Tomato4 = getColors( ).get( "Tomato4" );
 
     /**
      * <span style="background:#40e0d0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Turquoise <br>
      */
-    public static final RGBA Turquoise = getColors().get("Turquoise");
+    public static final RGBA Turquoise = getColors( ).get( "Turquoise" );
 
     /**
      * <span style="background:#00f5ff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Turquoise1 <br>
      */
-    public static final RGBA Turquoise1 = getColors().get("Turquoise1");
+    public static final RGBA Turquoise1 = getColors( ).get( "Turquoise1" );
 
     /**
      * <span style="background:#00e5ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Turquoise2 <br>
      */
-    public static final RGBA Turquoise2 = getColors().get("Turquoise2");
+    public static final RGBA Turquoise2 = getColors( ).get( "Turquoise2" );
 
     /**
      * <span style="background:#00c5cd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Turquoise3 <br>
      */
-    public static final RGBA Turquoise3 = getColors().get("Turquoise3");
+    public static final RGBA Turquoise3 = getColors( ).get( "Turquoise3" );
 
     /**
      * <span style="background:#00868b">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Turquoise4 <br>
      */
-    public static final RGBA Turquoise4 = getColors().get("Turquoise4");
+    public static final RGBA Turquoise4 = getColors( ).get( "Turquoise4" );
 
     /**
      * <span style="background:#ee82ee">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Violet <br>
      */
-    public static final RGBA Violet = getColors().get("Violet");
+    public static final RGBA Violet = getColors( ).get( "Violet" );
 
     /**
      * <span style="background:#d02090">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> VioletRed <br>
      */
-    public static final RGBA VioletRed = getColors().get("VioletRed");
+    public static final RGBA VioletRed = getColors( ).get( "VioletRed" );
 
     /**
      * <span style="background:#ff3e96">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> VioletRed1 <br>
      */
-    public static final RGBA VioletRed1 = getColors().get("VioletRed1");
+    public static final RGBA VioletRed1 = getColors( ).get( "VioletRed1" );
 
     /**
      * <span style="background:#ee3a8c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> VioletRed2 <br>
      */
-    public static final RGBA VioletRed2 = getColors().get("VioletRed2");
+    public static final RGBA VioletRed2 = getColors( ).get( "VioletRed2" );
 
     /**
      * <span style="background:#cd3278">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> VioletRed3 <br>
      */
-    public static final RGBA VioletRed3 = getColors().get("VioletRed3");
+    public static final RGBA VioletRed3 = getColors( ).get( "VioletRed3" );
 
     /**
      * <span style="background:#8b2252">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> VioletRed4 <br>
      */
-    public static final RGBA VioletRed4 = getColors().get("VioletRed4");
+    public static final RGBA VioletRed4 = getColors( ).get( "VioletRed4" );
 
     /**
      * <span style="background:#f5deb3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Wheat <br>
      */
-    public static final RGBA Wheat = getColors().get("Wheat");
+    public static final RGBA Wheat = getColors( ).get( "Wheat" );
 
     /**
      * <span style="background:#ffe7ba">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Wheat1 <br>
      */
-    public static final RGBA Wheat1 = getColors().get("Wheat1");
+    public static final RGBA Wheat1 = getColors( ).get( "Wheat1" );
 
     /**
      * <span style="background:#eed8ae">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Wheat2 <br>
      */
-    public static final RGBA Wheat2 = getColors().get("Wheat2");
+    public static final RGBA Wheat2 = getColors( ).get( "Wheat2" );
 
     /**
      * <span style="background:#cdba96">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Wheat3 <br>
      */
-    public static final RGBA Wheat3 = getColors().get("Wheat3");
+    public static final RGBA Wheat3 = getColors( ).get( "Wheat3" );
 
     /**
      * <span style="background:#8b7e66">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Wheat4 <br>
      */
-    public static final RGBA Wheat4 = getColors().get("Wheat4");
+    public static final RGBA Wheat4 = getColors( ).get( "Wheat4" );
 
     /**
      * <span style="background:#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> White <br>
      */
-    public static final RGBA White = getColors().get("White");
+    public static final RGBA White = getColors( ).get( "White" );
 
     /**
      * <span style="background:#f5f5f5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> WhiteSmoke <br>
      */
-    public static final RGBA WhiteSmoke = getColors().get("WhiteSmoke");
+    public static final RGBA WhiteSmoke = getColors( ).get( "WhiteSmoke" );
 
     /**
      * <span style="background:#ffff00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Yellow <br>
      */
-    public static final RGBA Yellow = getColors().get("Yellow");
+    public static final RGBA Yellow = getColors( ).get( "Yellow" );
 
     /**
      * <span style="background:#eeee00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Yellow2 <br>
      */
-    public static final RGBA Yellow2 = getColors().get("Yellow2");
+    public static final RGBA Yellow2 = getColors( ).get( "Yellow2" );
 
     /**
      * <span style="background:#cdcd00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Yellow3 <br>
      */
-    public static final RGBA Yellow3 = getColors().get("Yellow3");
+    public static final RGBA Yellow3 = getColors( ).get( "Yellow3" );
 
     /**
      * <span style="background:#8b8b00">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> Yellow4 <br>
      */
-    public static final RGBA Yellow4 = getColors().get("Yellow4");
+    public static final RGBA Yellow4 = getColors( ).get( "Yellow4" );
 
     /**
      * <span style="background:#9acd32">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> YellowGreen <br>
      */
-    public static final RGBA YellowGreen = getColors().get("YellowGreen");
+    public static final RGBA YellowGreen = getColors( ).get( "YellowGreen" );
 }

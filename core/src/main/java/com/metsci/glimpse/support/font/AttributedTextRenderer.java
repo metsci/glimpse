@@ -66,24 +66,28 @@ import java.util.List;
 import java.util.Map;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.impl.Debug;
-import com.sun.opengl.impl.packrect.BackingStoreManager;
-import com.sun.opengl.impl.packrect.Rect;
-import com.sun.opengl.impl.packrect.RectVisitor;
-import com.sun.opengl.impl.packrect.RectanglePacker;
-import com.sun.opengl.util.BufferUtil;
-import com.sun.opengl.util.FPSAnimator;
-import com.sun.opengl.util.j2d.TextureRenderer;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureCoords;
+import jogamp.opengl.Debug;
+
+import com.jogamp.common.nio.Buffers;
+
+import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.awt.TextureRenderer;
+import com.jogamp.opengl.util.packrect.BackingStoreManager;
+import com.jogamp.opengl.util.packrect.Rect;
+import com.jogamp.opengl.util.packrect.RectVisitor;
+import com.jogamp.opengl.util.packrect.RectanglePacker;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 /** Renders bitmapped Java 2D text into an OpenGL window with high
     performance, full Unicode support, and a simple API. Performs
@@ -700,17 +704,17 @@ public class AttributedTextRenderer
             getBackingStore( ).begin3DRendering( );
         }
 
-        GL gl = GLU.getCurrentGL( );
+        GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
         // Push client attrib bits used by the pipelined quad renderer
-        gl.glPushClientAttrib( ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+        gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
 
         if ( !haveMaxSize )
         {
             // Query OpenGL for the maximum texture size and set it in the
             // RectanglePacker to keep it from expanding too large
             int[] sz = new int[1];
-            gl.glGetIntegerv( GL.GL_MAX_TEXTURE_SIZE, sz, 0 );
+            gl.glGetIntegerv( GL2.GL_MAX_TEXTURE_SIZE, sz, 0 );
             packer.setMaxSize( sz[0], sz[0] );
             haveMaxSize = true;
         }
@@ -755,7 +759,7 @@ public class AttributedTextRenderer
 
         inBeginEndPair = false;
 
-        GL gl = GLU.getCurrentGL( );
+        GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
         // Pop client attrib bits used by the pipelined quad renderer
         gl.glPopClientAttrib( );
@@ -767,7 +771,7 @@ public class AttributedTextRenderer
         {
             try
             {
-                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
             }
             catch ( Exception e )
             {
@@ -1029,7 +1033,7 @@ public class AttributedTextRenderer
     {
         dbgFrame = new Frame( "TextRenderer Debug Output" );
 
-        GLCanvas dbgCanvas = new GLCanvas( new GLCapabilities( ), null, GLContext.getCurrent( ), null );
+        GLCanvas dbgCanvas = new GLCanvas( new GLCapabilities( GLProfile.get( GLProfile.GL2 ) ), null, GLContext.getCurrent( ), null );
         dbgCanvas.addGLEventListener( new DebugListener( dbgFrame ) );
         dbgFrame.add( dbgCanvas );
 
@@ -1362,7 +1366,7 @@ public class AttributedTextRenderer
             return false;
         }
 
-        public void additionFailed( Rect cause, int attemptNumber )
+        public boolean additionFailed( Rect cause, int attemptNumber )
         {
             // Heavy hammer -- might consider doing something different
             packer.clear( );
@@ -1373,6 +1377,7 @@ public class AttributedTextRenderer
             {
                 System.err.println( " *** Cleared all text because addition failed ***" );
             }
+            return true; // TODO: I have no idea what the default value should be. -- ttran17
         }
 
         public void beginMovement( Object oldBackingStore, Object newBackingStore )
@@ -1383,7 +1388,7 @@ public class AttributedTextRenderer
                 // Draw any outstanding glyphs
                 flush( );
 
-                GL gl = GLU.getCurrentGL( );
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
                 // Pop client attrib bits used by the pipelined quad renderer
                 gl.glPopClientAttrib( );
@@ -1395,7 +1400,7 @@ public class AttributedTextRenderer
                 {
                     try
                     {
-                        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, 0 );
+                        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
                     }
                     catch ( Exception e )
                     {
@@ -1456,8 +1461,8 @@ public class AttributedTextRenderer
                 }
 
                 // Push client attrib bits used by the pipelined quad renderer
-                GL gl = GLU.getCurrentGL( );
-                gl.glPushClientAttrib( ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
+                gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
 
                 if ( haveCachedColor )
                 {
@@ -1475,6 +1480,13 @@ public class AttributedTextRenderer
             {
                 needToResetColor = true;
             }
+        }
+
+        @Override
+        public boolean canCompact( )
+        {
+            // TODO Auto-generated method stub
+            return false;
         }
     }
 
@@ -1929,9 +1941,9 @@ public class AttributedTextRenderer
 
         Pipelined_QuadRenderer( )
         {
-            GL gl = GLU.getCurrentGL( );
-            mVertCoords = BufferUtil.newFloatBuffer( kTotalBufferSizeCoordsVerts );
-            mTexCoords = BufferUtil.newFloatBuffer( kTotalBufferSizeCoordsTex );
+            GL2 gl = GLU.getCurrentGL( ).getGL2( );
+            mVertCoords = Buffers.newDirectFloatBuffer( kTotalBufferSizeCoordsVerts );
+            mTexCoords = Buffers.newDirectFloatBuffer( kTotalBufferSizeCoordsTex );
 
             usingVBOs = is15Available( gl );
 
@@ -1945,11 +1957,11 @@ public class AttributedTextRenderer
                     mVBO_For_ResuableTileVertices = vbos[0];
                     mVBO_For_ResuableTileTexCoords = vbos[1];
 
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
-                    gl.glBufferData( GL.GL_ARRAY_BUFFER, kTotalBufferSizeBytesVerts, null, GL.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
+                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, kTotalBufferSizeBytesVerts, null, GL2.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
 
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
-                    gl.glBufferData( GL.GL_ARRAY_BUFFER, kTotalBufferSizeBytesTex, null, GL.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
+                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, kTotalBufferSizeBytesTex, null, GL2.GL_STREAM_DRAW ); // stream draw because this is a single quad use pipeline
                 }
                 catch ( Exception e )
                 {
@@ -1995,7 +2007,7 @@ public class AttributedTextRenderer
         {
             if ( mOutstandingGlyphsVerticesPipeline > 0 )
             {
-                GL gl = GLU.getCurrentGL( );
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
 
                 TextureRenderer renderer = getBackingStore( );
                 Texture texture = renderer.getTexture( ); // triggers texture uploads.  Maybe this should be more obvious?
@@ -2003,33 +2015,33 @@ public class AttributedTextRenderer
                 mVertCoords.rewind( );
                 mTexCoords.rewind( );
 
-                gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+                gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
                 if ( usingVBOs )
                 {
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
-                    gl.glBufferSubData( GL.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_VertexData, mVertCoords ); // upload only the new stuff
-                    gl.glVertexPointer( 3, GL.GL_FLOAT, 0, 0 );
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileVertices );
+                    gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_VertexData, mVertCoords ); // upload only the new stuff
+                    gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
                 }
                 else
                 {
-                    gl.glVertexPointer( 3, GL.GL_FLOAT, 0, mVertCoords );
+                    gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, mVertCoords );
                 }
 
-                gl.glEnableClientState( GL.GL_TEXTURE_COORD_ARRAY );
+                gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
 
                 if ( usingVBOs )
                 {
-                    gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
-                    gl.glBufferSubData( GL.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_TexData, mTexCoords ); // upload only the new stuff
-                    gl.glTexCoordPointer( 2, GL.GL_FLOAT, 0, 0 );
+                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, mVBO_For_ResuableTileTexCoords );
+                    gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, 0, mOutstandingGlyphsVerticesPipeline * kSizeInBytes_OneVertices_TexData, mTexCoords ); // upload only the new stuff
+                    gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, 0 );
                 }
                 else
                 {
-                    gl.glTexCoordPointer( 2, GL.GL_FLOAT, 0, mTexCoords );
+                    gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, mTexCoords );
                 }
 
-                gl.glDrawArrays( GL.GL_QUADS, 0, mOutstandingGlyphsVerticesPipeline );
+                gl.glDrawArrays( GL2.GL_QUADS, 0, mOutstandingGlyphsVerticesPipeline );
 
                 mVertCoords.rewind( );
                 mTexCoords.rewind( );
@@ -2044,8 +2056,8 @@ public class AttributedTextRenderer
                 TextureRenderer renderer = getBackingStore( );
                 Texture texture = renderer.getTexture( ); // triggers texture uploads.  Maybe this should be more obvious?
 
-                GL gl = GLU.getCurrentGL( );
-                gl.glBegin( GL.GL_QUADS );
+                GL2 gl = GLU.getCurrentGL( ).getGL2( );
+                gl.glBegin( GL2.GL_QUADS );
 
                 try
                 {
@@ -2096,7 +2108,7 @@ public class AttributedTextRenderer
         public void display( GLAutoDrawable drawable )
         {
             GL gl = drawable.getGL( );
-            gl.glClear( GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT );
+            gl.glClear( GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT );
 
             if ( packer == null )
             {
@@ -2133,6 +2145,13 @@ public class AttributedTextRenderer
 
         public void displayChanged( GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged )
         {
+        }
+
+        @Override
+        public void dispose( GLAutoDrawable drawable )
+        {
+            // TODO Auto-generated method stub -- ttran17
+
         }
     }
 

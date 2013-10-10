@@ -31,7 +31,10 @@ import java.awt.Font;
 public interface LookAndFeel
 {
     public Object getValue( String key );
+
     public float[] getColor( String key );
+
     public Font getFont( String key );
+
     public float getFloat( String key );
 }

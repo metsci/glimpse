@@ -10,19 +10,6 @@
     <artifactId>glimpse-core</artifactId>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.metsci.ext.net.java.dev.jogl</groupId>
-            <artifactId>jogl-native-all</artifactId>
-            <version>1.1.1a</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.ext.net.java.dev.gluegen</groupId>
-            <artifactId>gluegen-rt-native-all</artifactId>
-            <version>1.0b06</version>
-        </dependency>
-
         <dependency>
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout-core</artifactId>
@@ -41,6 +28,17 @@
             <version>${parent.version}</version>
         </dependency>
 
+        <dependency>
+        	<groupId>org.jogamp.jogl</groupId>
+        	<artifactId>jogl-all-main</artifactId>
+        	<version>2.0.2</version>
+        </dependency>
+        
+        <dependency>
+        	<groupId>org.jogamp.gluegen</groupId>
+        	<artifactId>gluegen-rt-main</artifactId>
+        	<version>2.0.2</version>
+        </dependency>
     </dependencies>
 
 </project>

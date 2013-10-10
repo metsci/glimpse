@@ -28,7 +28,7 @@ package com.metsci.glimpse.support.polygon;
 
 import java.util.Iterator;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 import javax.media.opengl.glu.GLUtessellatorCallback;
@@ -37,48 +37,46 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop;
 
 public class PolygonTessellator
 {
-    private final GLU glu;
     private final GLUtessellator tess;
     private final TessellatorCallback tessCallback;
 
-    public PolygonTessellator( GLU glu )
+    public PolygonTessellator( )
     {
-        this.glu = glu;
-        this.tess = glu.gluNewTess( );
+        this.tess = GLU.gluNewTess( );
 
-        glu.gluTessProperty( tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD );
+        GLU.gluTessProperty( tess, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD );
 
         tessCallback = new TessellatorCallback( );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_BEGIN, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_END, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_VERTEX, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_COMBINE, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_EDGE_FLAG, tessCallback );
-        glu.gluTessCallback( tess, GLU.GLU_TESS_ERROR, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_BEGIN, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_END, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_VERTEX, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_COMBINE, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_EDGE_FLAG, tessCallback );
+        GLU.gluTessCallback( tess, GLU.GLU_TESS_ERROR, tessCallback );
     }
 
     public final int tessellate( Polygon poly, VertexAccumulator accumulator ) throws TessellationException
     {
         tessCallback.reset( accumulator );
-        glu.gluTessBeginPolygon( tess, null );
+        GLU.gluTessBeginPolygon( tess, null );
 
         Iterator<Loop> loops = poly.getIterator( );
         while ( loops.hasNext( ) )
         {
-            glu.gluTessBeginContour( tess );
+            GLU.gluTessBeginContour( tess );
 
             Loop loop = loops.next( );
             for ( int i = 0, n = loop.size( ); i < n; i++ )
             {
                 double[] p = loop.get( i );
-                glu.gluTessVertex( tess, p, 0, p );
+                GLU.gluTessVertex( tess, p, 0, p );
                 tessCallback.checkErrorFlag( );
             }
 
-            glu.gluTessEndContour( tess );
+            GLU.gluTessEndContour( tess );
         }
 
-        glu.gluTessEndPolygon( tess );
+        GLU.gluTessEndPolygon( tess );
         tessCallback.checkErrorFlag( );
 
         return tessCallback.getNumTrianglesGenerated( );
@@ -86,7 +84,7 @@ public class PolygonTessellator
 
     public final void destroy( )
     {
-        glu.gluDeleteTess( tess );
+        GLU.gluDeleteTess( tess );
     }
 
     private static class TessellatorCallback implements GLUtessellatorCallback
@@ -118,11 +116,11 @@ public class PolygonTessellator
         @Override
         public void begin( int type )
         {
-            if ( type == GL.GL_TRIANGLE_FAN ) currentAdapter = new TriangleFanAdapter( );
+            if ( type == GL2.GL_TRIANGLE_FAN ) currentAdapter = new TriangleFanAdapter( );
 
-            if ( type == GL.GL_TRIANGLE_STRIP ) currentAdapter = new TriangleStripAdapter( );
+            if ( type == GL2.GL_TRIANGLE_STRIP ) currentAdapter = new TriangleStripAdapter( );
 
-            if ( type == GL.GL_TRIANGLES ) currentAdapter = new TriangleAdapter( );
+            if ( type == GL2.GL_TRIANGLES ) currentAdapter = new TriangleAdapter( );
 
             if ( currentAdapter == null ) errorFlag = true;
         }

@@ -30,15 +30,15 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.painter.shape.PointSetPainter.IdXy;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * Efficiently draws a static set of line segments. Can also efficiently
@@ -117,17 +117,17 @@ public class LineSetPainter extends GlimpseDataPainter2D
 
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < totalPointCount * 2 )
             {
-                this.dataBuffer = BufferUtil.newFloatBuffer( totalPointCount * 2 );
+                this.dataBuffer = Buffers.newDirectFloatBuffer( totalPointCount * 2 );
             }
 
             if ( sizeBuffer == null || sizeBuffer.rewind( ).capacity( ) < lineCount )
             {
-                this.sizeBuffer = BufferUtil.newIntBuffer( lineCount );
+                this.sizeBuffer = Buffers.newDirectIntBuffer( lineCount );
             }
 
             if ( offsetBuffer == null || offsetBuffer.rewind( ).capacity( ) < lineCount )
             {
-                this.offsetBuffer = BufferUtil.newIntBuffer( lineCount );
+                this.offsetBuffer = Buffers.newDirectIntBuffer( lineCount );
             }
 
             // copy data from the provided arrays into the host memory buffer
@@ -205,7 +205,7 @@ public class LineSetPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( lineCount == 0 ) return;
 
@@ -216,7 +216,7 @@ public class LineSetPainter extends GlimpseDataPainter2D
             bufferInitialized = true;
         }
 
-        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
         if ( newData )
         {
@@ -224,7 +224,7 @@ public class LineSetPainter extends GlimpseDataPainter2D
             try
             {
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+                gl.glBufferData( GL2.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 
                 glHandleError( gl );
 
@@ -236,9 +236,9 @@ public class LineSetPainter extends GlimpseDataPainter2D
             }
         }
 
-        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL.GL_VERTEX_ARRAY );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
+        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
 
         gl.glColor4fv( lineColor, 0 );
         gl.glLineWidth( lineWidth );
@@ -246,6 +246,6 @@ public class LineSetPainter extends GlimpseDataPainter2D
         offsetBuffer.rewind( );
         sizeBuffer.rewind( );
 
-        gl.glMultiDrawArrays( GL.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
+        gl.glMultiDrawArrays( GL2.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
     }
 }

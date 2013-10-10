@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -104,15 +104,15 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.height = height;
 
         updateMaxCorners( corners );
-        
+
         this.mask = new GlimpseLayout( );
         this.mask.setLayoutData( String.format( "pos 0 0 %d %d", width, height ) );
         this.mask.addLayout( layout );
-        
+
         this.background = new GlimpseLayout( );
         this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.background.addLayout( mask );
-        
+
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
         this.offscreenCanvas.addLayout( this.background );
     }
@@ -166,7 +166,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             tile = newTextureSurfaceTile( textureHandle, corners );
         }
     }
-    
+
     protected int getTextureHandle( )
     {
         return offscreenCanvas.getFrameBuffer( ).getTextureId( );
@@ -176,7 +176,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     {
         return new TextureSurfaceTile( textureHandle, corners );
     }
-    
+
     protected void updateGeometry( DrawContext dc )
     {
         // two heuristic methods of calculating the screen corners
@@ -186,7 +186,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         // to provide bad results, so updateGeometryDefault() is used)
         List<LatLon> screenCorners1 = getCornersHeuristic1( dc );
         List<LatLon> screenCorners2 = getCornersHeuristic2( dc );
-        
+
         if ( !isValid( screenCorners1 ) )
         {
             updateGeometryDefault( );
@@ -200,24 +200,24 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             updateGeometryDefault( );
         }
     }
-    
+
     protected void updateGeometryDefault( )
     {
         corners = maxCorners;
         bounds = maxBounds;
-        
+
         updateTile( );
     }
-    
+
     protected void updateGeometry( List<LatLon> screenCorners )
     {
         LatLonBounds screenBounds = bufferCorners( getCorners( screenCorners ), 0.5 );
         bounds = getIntersectedCorners( maxBounds, screenBounds );
         corners = getCorners( bounds );
-        
+
         updateTile( );
     }
-    
+
     protected void updateTile( )
     {
         if ( tile != null )
@@ -226,7 +226,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             tile.setCorners( corners );
         }
     }
-    
+
     protected void setAxes( Axis2D axes, LatLonBounds bounds, GeoProjection projection )
     {
         Vector2d c1 = projection.project( LatLonGeo.fromDeg( bounds.minLat, bounds.minLon ) );
@@ -398,7 +398,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         // in order to not worry about how the viewport is rotated
         // (which direction is north) just take the largest dimension
         double viewportSizeMeters = Math.max( viewportHeightMeters, viewportWidthMeters );
-        
+
         LatLonGeo centerLatLon = LatLonGeo.fromDeg( referencePosition.latitude.getDegrees( ), referencePosition.longitude.getDegrees( ) );
         LatLonGeo swLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southwest );
         LatLonGeo seLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southeast );
@@ -443,10 +443,10 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     {
         GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
         OGLStackHandler stack = new OGLStackHandler( );
-        GL gl = glContext.getGL( );
+        GL2 gl = glContext.getGL( ).getGL2( );
 
-        stack.pushAttrib( gl, GL.GL_ALL_ATTRIB_BITS );
-        stack.pushClientAttrib( gl, ( int ) GL.GL_ALL_CLIENT_ATTRIB_BITS );
+        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
+        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
         stack.pushTexture( gl );
         stack.pushModelview( gl );
         stack.pushProjection( gl );

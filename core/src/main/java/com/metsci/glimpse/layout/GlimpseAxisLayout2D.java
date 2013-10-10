@@ -104,8 +104,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
     {
         Axis2D contextAxis = getAxis( stack );
 
-        if ( contextAxis == null )
-            throw new AxisNotSetException( stack );
+        if ( contextAxis == null ) throw new AxisNotSetException( stack );
 
         contextAxis.setSizePixels( bounds );
     }
@@ -196,7 +195,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
         {
             if ( target instanceof GlimpseAxisLayout2D )
             {
-                GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+                GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
                 if ( layout.isAxisSet( ) )
                 {
                     return getCachedAxis0( layout.getAxis( ), factory, stack );
@@ -213,7 +212,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
         {
             if ( target instanceof GlimpseAxisLayout2D )
             {
-                GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+                GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
                 if ( layout.isAxisFactorySet( ) )
                 {
                     return layout.getAxisFactory( );

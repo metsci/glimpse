@@ -32,7 +32,7 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -347,7 +347,7 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( textRenderer == null || lines == null ) return;
 
-        GL gl = context.getGL( );
+        GL2 gl = context.getGL( ).getGL2();
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
@@ -366,14 +366,14 @@ public class TooltipPainter extends SimpleTextPainter
             if ( minY < 0 ) clampY = -minY;
         }
 
-        gl.glMatrixMode( GL.GL_PROJECTION );
+        gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5, -0.5, height - 1 + 0.5, -1, 1 );
-        gl.glMatrixMode( GL.GL_MODELVIEW );
+        gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
-        gl.glBlendFunc( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL.GL_BLEND );
+        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
 
         if ( this.paintBackground || this.paintBorder )
         {
@@ -382,7 +382,7 @@ public class TooltipPainter extends SimpleTextPainter
                 // Draw Text Background
                 gl.glColor4fv( backgroundColor, 0 );
 
-                gl.glBegin( GL.GL_QUADS );
+                gl.glBegin( GL2.GL_QUADS );
                 try
                 {
                     borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
@@ -397,9 +397,9 @@ public class TooltipPainter extends SimpleTextPainter
             {
                 // Draw Text Background
                 gl.glColor4fv( borderColor, 0 );
-                gl.glEnable( GL.GL_LINE_SMOOTH );
+                gl.glEnable( GL2.GL_LINE_SMOOTH );
 
-                gl.glBegin( GL.GL_LINE_LOOP );
+                gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
                     borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
@@ -411,7 +411,7 @@ public class TooltipPainter extends SimpleTextPainter
             }
         }
 
-        gl.glDisable( GL.GL_BLEND );
+        gl.glDisable( GL2.GL_BLEND );
 
         // draw text
         GlimpseColor.setColor( textRenderer, textColor );
@@ -478,7 +478,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-    protected void borderVertices( GL gl, int height, double offsetX, double offsetY )
+    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY )
     {
         double posX = x + linesBounds.minX + offsetX;
         double posY = height - y + linesBounds.minY + offsetY;

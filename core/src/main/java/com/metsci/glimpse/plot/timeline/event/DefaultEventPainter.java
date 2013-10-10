@@ -33,8 +33,9 @@ import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.UUID;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
@@ -42,7 +43,6 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * <p>Paints the default visualization for provided {@code Event} objects. Paints
@@ -100,7 +100,7 @@ public class DefaultEventPainter implements EventPainter
     }
 
     @Override
-    public void paint( GL gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
+    public void paint( GL2 gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
     {
         StackedTimePlot2D plot = info.getStackedTimePlot( );
         TaggedAxis1D axis = info.getCommonAxis( );
@@ -159,7 +159,7 @@ public class DefaultEventPainter implements EventPainter
                 if ( event.isShowBackground( ) )
                 {
                     GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-                    gl.glBegin( GL.GL_QUADS );
+                    gl.glBegin( GL2.GL_QUADS );
                     try
                     {
                         gl.glVertex2d( timeMin, posMin );
@@ -177,7 +177,7 @@ public class DefaultEventPainter implements EventPainter
                 {
                     GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
                     gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL.GL_LINE_LOOP );
+                    gl.glBegin( GL2.GL_LINE_LOOP );
                     try
                     {
                         gl.glVertex2d( timeMin, posMin );
@@ -196,7 +196,7 @@ public class DefaultEventPainter implements EventPainter
                 if ( event.isShowBackground( ) )
                 {
                     GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-                    gl.glBegin( GL.GL_POLYGON );
+                    gl.glBegin( GL2.GL_POLYGON );
                     try
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
@@ -216,7 +216,7 @@ public class DefaultEventPainter implements EventPainter
                 {
                     GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
                     gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL.GL_LINE_LOOP );
+                    gl.glBegin( GL2.GL_LINE_LOOP );
                     try
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
@@ -404,7 +404,7 @@ public class DefaultEventPainter implements EventPainter
             //TODO handle drawing text and icons in HORIZONTAL orientation
 
             GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-            gl.glBegin( GL.GL_QUADS );
+            gl.glBegin( GL2.GL_QUADS );
             try
             {
                 gl.glVertex2d( posMin, timeMin );
@@ -419,7 +419,7 @@ public class DefaultEventPainter implements EventPainter
 
             GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
             gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-            gl.glBegin( GL.GL_LINE_LOOP );
+            gl.glBegin( GL2.GL_LINE_LOOP );
             try
             {
                 gl.glVertex2d( posMin, timeMin );

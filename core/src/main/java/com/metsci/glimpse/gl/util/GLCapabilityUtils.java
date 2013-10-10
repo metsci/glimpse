@@ -33,6 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 
 
@@ -50,7 +52,7 @@ public class GLCapabilityUtils
     public static final String glRendererDocumentation = "The name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.";
     public static final String glVersionDocumentation = "A version or release number.";
     public static final String glShaderVersionDocumentation = "A version or release number for the shading language.";
-    public static final String glExtensionDocumentation = "A list of supported extensions to GL.";
+    public static final String glExtensionDocumentation = "A list of supported extensions to GL2.";
 
     public static void logGLBufferProperties( Logger logger, Level level, GLContext context, String prefix )
     {
@@ -59,17 +61,17 @@ public class GLCapabilityUtils
         if( prefix == null )
             prefix = "";
 
-        int rBits = queryGLInteger( GL.GL_RED_BITS, gl );
-        int gBits = queryGLInteger( GL.GL_GREEN_BITS, gl );
-        int bBits = queryGLInteger( GL.GL_BLUE_BITS, gl );
-        int aBits = queryGLInteger( GL.GL_ALPHA_BITS, gl );
-        int iBits = queryGLInteger( GL.GL_INDEX_BITS, gl );
-        int dBits = queryGLInteger( GL.GL_DEPTH_BITS, gl );
-        int sBits = queryGLInteger( GL.GL_STENCIL_BITS, gl );
-        int arBits = queryGLInteger( GL.GL_ACCUM_RED_BITS, gl );
-        int agBits = queryGLInteger( GL.GL_ACCUM_GREEN_BITS, gl );
-        int abBits = queryGLInteger( GL.GL_ACCUM_BLUE_BITS, gl );
-        int aaBits = queryGLInteger( GL.GL_ACCUM_ALPHA_BITS, gl );
+        int rBits = queryGLInteger( GL2.GL_RED_BITS, gl );
+        int gBits = queryGLInteger( GL2.GL_GREEN_BITS, gl );
+        int bBits = queryGLInteger( GL2.GL_BLUE_BITS, gl );
+        int aBits = queryGLInteger( GL2.GL_ALPHA_BITS, gl );
+        int iBits = queryGLInteger( GL2.GL_INDEX_BITS, gl );
+        int dBits = queryGLInteger( GL2.GL_DEPTH_BITS, gl );
+        int sBits = queryGLInteger( GL2.GL_STENCIL_BITS, gl );
+        int arBits = queryGLInteger( GL2.GL_ACCUM_RED_BITS, gl );
+        int agBits = queryGLInteger( GL2.GL_ACCUM_GREEN_BITS, gl );
+        int abBits = queryGLInteger( GL2.GL_ACCUM_BLUE_BITS, gl );
+        int aaBits = queryGLInteger( GL2.GL_ACCUM_ALPHA_BITS, gl );
         int totalBits = iBits + rBits + gBits + bBits + aBits + arBits + agBits + abBits + aaBits + dBits + sBits;
 
         log(logger, level, "%sbuffer-properties: %2d bits depth", prefix, dBits );
@@ -85,10 +87,10 @@ public class GLCapabilityUtils
         log(logger, level, "%sbuffer-properties: %2d bits accum alpha", prefix, aaBits );
         log(logger, level, "%sbuffer-properties: %d bits TOTAL", prefix, totalBits );
 
-        boolean isDoubleBuffered = queryGLBoolean( GL.GL_DOUBLEBUFFER, gl );
+        boolean isDoubleBuffered = queryGLBoolean( GL2.GL_DOUBLEBUFFER, gl );
         log(logger, level, "%sbuffer-properties: %s double buffered", prefix, isDoubleBuffered ? "is" : "is NOT" );
 
-        boolean isStereo = queryGLBoolean( GL.GL_STEREO, gl );
+        boolean isStereo = queryGLBoolean( GL2.GL_STEREO, gl );
         log(logger, level, "%sbuffer-properties: %s stereo", prefix, isStereo ? "is" : "is NOT" );
     }
 
@@ -188,7 +190,7 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxVertexAttributes( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_VERTEX_ATTRIBS, gl );
+        return queryGLInteger( GL2.GL_MAX_VERTEX_ATTRIBS, gl );
     }
 
     /**
@@ -197,7 +199,8 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxGeometryShaderOutput( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT, gl );
+    	// TODO: Figure out this GLProfile business -- ttran17
+        return queryGLInteger( GL3.GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, gl );
     }
 
     /**
@@ -208,7 +211,7 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxTextureEdgeLength( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_TEXTURE_SIZE, gl );
+        return queryGLInteger( GL2.GL_MAX_TEXTURE_SIZE, gl );
     }
 
     /**
@@ -217,17 +220,17 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxTextureBufferSize( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_TEXTURE_BUFFER_SIZE_EXT, gl );
+        return queryGLInteger( GL2.GL_MAX_TEXTURE_BUFFER_SIZE, gl );
     }
 
     public static int getGLMaxElementsIndices( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_ELEMENTS_INDICES, gl );
+        return queryGLInteger( GL2.GL_MAX_ELEMENTS_INDICES, gl );
     }
 
     public static int getGLMaxElementsVertices( GL gl )
     {
-        return queryGLInteger( GL.GL_MAX_ELEMENTS_VERTICES, gl );
+        return queryGLInteger( GL2.GL_MAX_ELEMENTS_VERTICES, gl );
     }
 
 
@@ -237,7 +240,7 @@ public class GLCapabilityUtils
      */
     public static String getGLVendorString( GL gl )
     {
-        return gl.glGetString( GL.GL_VENDOR );
+        return gl.glGetString( GL2.GL_VENDOR );
     }
 
     /**
@@ -247,7 +250,7 @@ public class GLCapabilityUtils
      */
     public static String getGLRendererString( GL gl )
     {
-        return gl.glGetString( GL.GL_RENDERER );
+        return gl.glGetString( GL2.GL_RENDERER );
     }
 
     /**
@@ -255,7 +258,7 @@ public class GLCapabilityUtils
      */
     public static String getGLVersionString( GL gl )
     {
-        return gl.glGetString( GL.GL_VERSION );
+        return gl.glGetString( GL2.GL_VERSION );
     }
 
     /**
@@ -263,14 +266,14 @@ public class GLCapabilityUtils
      */
     public static String getGLShaderVersionString( GL gl )
     {
-        return gl.glGetString( GL.GL_SHADING_LANGUAGE_VERSION );
+        return gl.glGetString( GL2.GL_SHADING_LANGUAGE_VERSION );
     }
 
     /**
-     * @return A space-delimited list of supported extensions to GL.
+     * @return A space-delimited list of supported extensions to GL2.
      */
     public static String getGLExtensions( GL gl )
     {
-        return gl.glGetString( GL.GL_EXTENSIONS );
+        return gl.glGetString( GL2.GL_EXTENSIONS );
     }
 }

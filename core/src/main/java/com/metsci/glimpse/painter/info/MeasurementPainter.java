@@ -26,20 +26,20 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.sun.opengl.util.j2d.TextRenderer;
 
 /**
  * Displays a protractor and ruler when the mouse cursor is locked
@@ -138,7 +138,7 @@ public class MeasurementPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( textRenderer == null ) return;
         
@@ -173,7 +173,7 @@ public class MeasurementPainter extends GlimpseDataPainter2D
         gl.glLineWidth( rulerWidth );
         gl.glColor4fv( rulerColor, 0 );
 
-        gl.glBegin( GL.GL_LINES );
+        gl.glBegin( GL2.GL_LINES );
         try
         {
             gl.glVertex2d( lockX, lockY );
@@ -187,7 +187,7 @@ public class MeasurementPainter extends GlimpseDataPainter2D
         //// draw protractor ////
         gl.glColor4fv( protractorColor, 0 );
 
-        gl.glBegin( GL.GL_TRIANGLE_FAN );
+        gl.glBegin( GL2.GL_TRIANGLE_FAN );
         try
         {
             gl.glVertex2d( lockX, lockY );

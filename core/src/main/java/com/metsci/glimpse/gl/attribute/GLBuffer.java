@@ -32,8 +32,9 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 public abstract class GLBuffer
 {
@@ -90,7 +91,7 @@ public abstract class GLBuffer
     
     public ByteBuffer createBuffer( int length, int elementSize )
     {
-        return BufferUtil.newByteBuffer( length * elementSize * getBytesPerElement( ) );
+        return Buffers.newDirectByteBuffer( length * elementSize * getBytesPerElement( ) );
     }
     
     public boolean isDirty( )
@@ -113,7 +114,7 @@ public abstract class GLBuffer
         return data.capacity( ) / elementSize / getBytesPerElement( );
     }
 
-    public void bind( GLVertexAttribute type, GL gl )
+    public void bind( GLVertexAttribute type, GL2 gl )
     {
         lock.lock( );
         try
@@ -128,7 +129,7 @@ public abstract class GLBuffer
         }
     }
 
-    public void bind( int genericIndex, GL gl )
+    public void bind( int genericIndex, GL2 gl )
     {
         lock.lock( );
         try
@@ -144,7 +145,7 @@ public abstract class GLBuffer
         }
     }
 
-    public void unbind( GL gl )
+    public void unbind( GL2 gl )
     {
         lock.lock( );
         try
@@ -177,11 +178,11 @@ public abstract class GLBuffer
                 makeDirty( );
             }
 
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, glHandle );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, glHandle );
 
             if ( isDirty( ) )
             {
-                gl.glBufferData( GL.GL_ARRAY_BUFFER, data.limit( ), data.rewind( ), GL.GL_STATIC_DRAW );
+                gl.glBufferData( GL2.GL_ARRAY_BUFFER, data.limit( ), data.rewind( ), GL2.GL_STATIC_DRAW );
                 dirty = false;
             }
 
