@@ -1,0 +1,10 @@
+---
+layout: default
+title: Glimpse 2.0.0 Release
+---
+
+<p><a href="http://jogamp.org/jogl/www/">JOGL 2</a> and <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Java 7</a> support has arrived! Support has also been added for <a href="http://jogamp.org/jogl/doc/NEWT-Overview.html">NEWT</a>, which provides high performance OpenGL Canvas implementations for Swing and SWT.</p>
+
+<p>Updating older Glimpse code to Glimpse 2.0.0 will require refactoring due to the move to JOGL 2.0. Further, although SwingGlimpseCanvas and SWTGlimpseCanvas still exist, moving to the new NEWT implementations (<a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/canvas/NewtSwingGlimpseCanvas.java">NewtSwingGlimpseCanvas</a> and <a href="https://github.com/metsci/glimpse/blob/master/extras-swt/src/main/java/com/metsci/glimpse/swt/canvas/NewtSwtGlimpseCanvas.java">NewtSwtGlimpseCanvas</a>) is highly recommended because of the bug fixes and performance improvements which they provide. See any of the updated Glimpse <a href="/glimpse/screenshots.html">examples</a> for details.</p>
+
+<p>Those not wishing to upgrade to JOGL 2.0, or requiring a more stable Glimpse release, should continue to use the <a href="http://glimpse.metsci.com/release/core">Glimpse 1.3.3</a>.</p>
