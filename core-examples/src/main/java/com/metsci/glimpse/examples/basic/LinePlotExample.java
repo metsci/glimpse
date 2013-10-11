@@ -113,6 +113,9 @@ public class LinePlotExample implements GlimpseLayoutProvider
         // add a painter to display the x and y position of the cursor
         CursorTextPainter cursorPainter = new CursorTextPainter( );
         plot.addPainter( cursorPainter );
+        
+        // don't offset the text by the size of the selection box, since we aren't showing it
+        cursorPainter.setOffsetBySelectionSize( false );
 
         LineLegendPainter legend = new LineLegendPainter( LegendPlacement.SE );
 
