@@ -43,9 +43,9 @@ import com.metsci.glimpse.plot.timeline.group.GroupUtilities;
 
 public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
-
     protected boolean indentSubplots = false;
-
+    protected int indentSize = -1;
+    
     public CollapsibleTimePlot2D( )
     {
         super( Orientation.VERTICAL );
@@ -72,6 +72,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         this.validate( );
     }
 
+    public void setIndentSize( int size )
+    {
+        this.indentSize = size;
+        this.validate( );
+    }
+    
     /**
      * Create a collapsible/expandable group of plots.
      */
@@ -168,15 +174,19 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     @Override
     protected void setRowColumnConstraints( )
     {
+        int tempIndentSize = indentSize;
+        
+        if ( indentSize < 0 ) tempIndentSize = getLabelSize( );
+        
         if ( indentSubplots )
         {
             int maxLevel = setIndentLevel0( );
-            setRowColumnConstraints( maxLevel, getLabelSize( ) );
+            setRowColumnConstraints( maxLevel, tempIndentSize );
         }
         else
         {
             resetIndentLevel0( 0 );
-            setRowColumnConstraints( 0, getLabelSize( ) );
+            setRowColumnConstraints( 0, tempIndentSize );
         }
     }
 

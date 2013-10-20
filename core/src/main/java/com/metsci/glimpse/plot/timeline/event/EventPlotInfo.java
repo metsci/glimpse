@@ -693,6 +693,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.eventManager.validate( );
     }
 
+    public GlimpseAxisLayout1D getEventLayout( )
+    {
+        return layout1D;
+    }
+    
     protected void notifyEventUpdated( Event event )
     {
         for ( EventPlotListener listener : eventListeners )
