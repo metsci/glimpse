@@ -196,6 +196,16 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.initializeOverlayPainters( );
     }
     
+    public void setTimeAxisLabelHandler( TimeAxisLabelHandler handler )
+    {
+        this.timeTickHandler = handler;
+    }
+    
+    public TimeAxisLabelHandler getTimeAxisLabelHandler( )
+    {
+        return this.timeTickHandler;
+    }
+    
     public TimelineInfo getDefaultTimeline( )
     {
         return this.defaultTimelineInfo;
@@ -321,6 +331,35 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
     }
 
+    /**
+     * Returns the timeline handle for the timeline identified via its unique string identifier.
+     * 
+     * @param id a timeline unique identifier
+     * @return the TimelineInfo handle
+     */
+    public TimelineInfo getTimeline( Object id )
+    {
+        this.lock.lock( );
+        try
+        {
+            PlotInfo plot = getPlot( id );
+
+            if ( plot instanceof TimelineInfo )
+            {
+                return ( TimelineInfo ) plot;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+    
     /**
      * Returns the time plot handle for the plot identified via its unique string identifier.
      * 
@@ -795,7 +834,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             
             this.stackedPlots.put( timelineInfo.getId( ), timelineInfo );
             if ( isAutoValidate( ) ) this.validate( );
-            
+
             return timelineInfo;
         }
         finally

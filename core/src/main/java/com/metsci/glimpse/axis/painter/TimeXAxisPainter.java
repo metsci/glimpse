@@ -159,7 +159,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         return currentTime( );
     }
 
-    private void printHoverLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, TimeStructFactory factory, double jTimeText, int width, int height )
+    protected void printHoverLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, TimeStructFactory factory, double jTimeText, int width, int height )
     {
         // text heights vary slightly, making the labels appear unevenly spaced in height
         // just use the height of a fixed sample character
@@ -186,7 +186,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         }
     }
 
-    private double printTickLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, int width, int height )
+    protected double printTickLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, int width, int height )
     {
         // text heights vary slightly, making the labels appear unevenly spaced in height
         // just use the height of a fixed sample character
@@ -213,28 +213,35 @@ public class TimeXAxisPainter extends TimeAxisPainter
         return jTimeText;
     }
 
-    private void drawCurrentTimeTick( GL2 gl, Axis1D axis, int width, int height )
+    protected void drawCurrentTimeTick( GL2 gl, Axis1D axis, int width, int height )
     {
-        int iTick = axis.valueToScreenPixel( fromTimeStamp( getCurrentTime( ) ) );
+        TimeStamp currentTime = getCurrentTime( );
+        double axisTime = fromTimeStamp( currentTime );
+        int pixelTime = axis.valueToScreenPixel( axisTime );
 
         gl.glColor4fv( currentTimeTickColor, 0 );
         gl.glLineWidth( currentTimeLineThickness );
         gl.glBegin( GL2.GL_LINES );
-        gl.glVertex2d( iTick, height );
-        gl.glVertex2d( iTick, 0 );
+        gl.glVertex2d( pixelTime, height );
+        gl.glVertex2d( pixelTime, 0 );
         gl.glEnd( );
 
-        String text = "NOW";
+        String text = getCurrentTimeTickText( currentTime );
 
         GlimpseColor.setColor( textRenderer, currentTimeTextColor );
         textRenderer.beginRendering( width, height );
         try
         {
-            textRenderer.draw( text, iTick + 3, 0 + 3 );
+            textRenderer.draw( text, pixelTime + 3, 0 + 3 );
         }
         finally
         {
             textRenderer.endRendering( );
         }
+    }
+    
+    protected String getCurrentTimeTickText( TimeStamp currentTime )
+    {
+        return "NOW";
     }
 }
