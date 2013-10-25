@@ -35,16 +35,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
@@ -55,6 +51,8 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.support.interval.IntervalSortedMultimap;
+import com.metsci.glimpse.support.interval.Keyed;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop;
@@ -72,92 +70,7 @@ import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
  */
 public class PolygonPainter extends GlimpsePainter2D
 {
-    // expand
     protected static final double DELETE_EXPAND_FACTOR = 1.2;
-
-    protected static final Comparator<IdPolygon> startTimeComparator = new Comparator<IdPolygon>( )
-    {
-        @Override
-        public int compare( IdPolygon p1, IdPolygon p2 )
-        {
-            if ( p1.startTime < p2.startTime )
-            {
-                return -1;
-            }
-            else if ( p1.startTime > p2.startTime )
-            {
-                return 1;
-            }
-            else
-            {
-                if ( p1.groupId < p2.groupId )
-                {
-                    return -1;
-                }
-                else if ( p1.groupId > p2.groupId )
-                {
-                    return 1;
-                }
-                else
-                {
-                    if ( p1.polygonId < p2.polygonId )
-                    {
-                        return -1;
-                    }
-                    else if ( p1.polygonId > p2.polygonId )
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-        }
-    };
-
-    protected static final Comparator<IdPolygon> endTimeComparator = new Comparator<IdPolygon>( )
-    {
-        @Override
-        public int compare( IdPolygon p1, IdPolygon p2 )
-        {
-            if ( p1.endTime < p2.endTime )
-            {
-                return -1;
-            }
-            else if ( p1.endTime > p2.endTime )
-            {
-                return 1;
-            }
-            else
-            {
-                if ( p1.groupId < p2.groupId )
-                {
-                    return -1;
-                }
-                else if ( p1.groupId > p2.groupId )
-                {
-                    return 1;
-                }
-                else
-                {
-                    if ( p1.polygonId < p2.polygonId )
-                    {
-                        return -1;
-                    }
-                    else if ( p1.polygonId > p2.polygonId )
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-        }
-    };
 
     //@formatter:off
     protected byte halftone[] = {
@@ -195,31 +108,31 @@ public class PolygonPainter extends GlimpsePainter2D
     protected FloatBuffer dataBuffer = null;
 
     // mapping from id to Group
-    protected Map<Integer, Group> groups;
+    protected Map<Object, Group> groups;
     // true indicates that new data must be loaded onto the GPU
     protected volatile boolean newData = false;
     // groups with new data which must be loaded onto the GPU
     protected Set<Group> updatedGroups;
     // mapping from id to LoadedGroup (GPU-side group information)
-    protected Map<Integer, LoadedGroup> loadedGroups;
+    protected Map<Object, LoadedGroup> loadedGroups;
 
     protected ReentrantLock updateLock;
 
-    protected IdPolygon globalSelectionStart;
-    protected IdPolygon globalSelectionEnd;
+    protected Long globalSelectionStart;
+    protected Long globalSelectionEnd;
 
     public PolygonPainter( )
     {
         this.tessellator = new PolygonTessellator( );
 
-        this.groups = new LinkedHashMap<Integer, Group>( );
+        this.groups = new LinkedHashMap<Object, Group>( );
         this.updatedGroups = new LinkedHashSet<Group>( );
-        this.loadedGroups = new LinkedHashMap<Integer, LoadedGroup>( );
+        this.loadedGroups = new LinkedHashMap<Object, LoadedGroup>( );
 
         this.updateLock = new ReentrantLock( );
     }
 
-    public void addPolygon( int groupId, int polygonId, float[] dataX, float[] dataY, float z )
+    public void addPolygon( Object groupId, Object polygonId, float[] dataX, float[] dataY, float z )
     {
         this.updateLock.lock( );
         try
@@ -232,7 +145,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void addPolygon( int groupId, int polygonId, Polygon geometry, float z )
+    public void addPolygon( Object groupId, Object polygonId, Polygon geometry, float z )
     {
         this.updateLock.lock( );
         try
@@ -246,7 +159,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void addPolygon( int groupId, int polygonId, Shape shape, float z )
+    public void addPolygon( Object groupId, Object polygonId, Shape shape, float z )
     {
         this.updateLock.lock( );
         try
@@ -260,7 +173,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void addPolygon( int groupId, int polygonId, long startTime, long endTime, float[] dataX, float[] dataY, float z )
+    public void addPolygon( Object groupId, Object polygonId, long startTime, long endTime, float[] dataX, float[] dataY, float z )
     {
         this.updateLock.lock( );
         try
@@ -273,7 +186,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void addPolygon( int groupId, int polygonId, long startTime, long endTime, Polygon geometry, float z )
+    public void addPolygon( Object groupId, Object polygonId, long startTime, long endTime, Polygon geometry, float z )
     {
         this.updateLock.lock( );
         try
@@ -286,7 +199,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void addPolygon( int groupId, int polygonId, long startTime, long endTime, Shape shape, float z )
+    public void addPolygon( Object groupId, Object polygonId, long startTime, long endTime, Shape shape, float z )
     {
         this.updateLock.lock( );
         try
@@ -299,7 +212,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void displayTimeRange( int groupId, double startTime, double endTime )
+    public void displayTimeRange( Object groupId, double startTime, double endTime )
     {
         displayTimeRange( groupId, ( long ) Math.ceil( startTime ), ( long ) Math.floor( endTime ) );
     }
@@ -311,15 +224,12 @@ public class PolygonPainter extends GlimpsePainter2D
 
     public void displayTimeRange( int groupId, long startTime, long endTime )
     {
-        IdPolygon startPoint = createSearchBoundStart( startTime );
-        IdPolygon endPoint = createSearchBoundEnd( endTime );
-
         this.updateLock.lock( );
         try
         {
             Group group = getOrCreateGroup( groupId );
 
-            group.setTimeRange( startPoint, endPoint );
+            group.setTimeRange( startTime, endTime );
 
             this.updatedGroups.add( group );
             this.newData = true;
@@ -332,8 +242,8 @@ public class PolygonPainter extends GlimpsePainter2D
 
     public void displayTimeRange( long startTime, long endTime )
     {
-        globalSelectionStart = createSearchBoundStart( startTime );
-        globalSelectionEnd = createSearchBoundEnd( endTime );
+        globalSelectionStart = startTime;
+        globalSelectionEnd = endTime;
 
         this.updateLock.lock( );
         try
@@ -352,19 +262,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    // create a dummy IdPolygon representing the end of a search time window
-    protected IdPolygon createSearchBoundEnd( long time )
-    {
-        return new IdPolygon( Integer.MAX_VALUE, Integer.MAX_VALUE, time, time, null, 0 );
-    }
-
-    // create a dummy IdPolygon representing the start of a search time window
-    protected IdPolygon createSearchBoundStart( long time )
-    {
-        return new IdPolygon( Integer.MIN_VALUE, Integer.MIN_VALUE, time, time, null, 0 );
-    }
-
-    public void setLineColor( int groupId, float[] rgba )
+    public void setLineColor( Object groupId, float[] rgba )
     {
         this.updateLock.lock( );
         try
@@ -382,7 +280,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setLineColor( int groupId, float r, float g, float b, float a )
+    public void setLineColor( Object groupId, float r, float g, float b, float a )
     {
         this.updateLock.lock( );
         try
@@ -400,7 +298,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setLineWidth( int groupId, float width )
+    public void setLineWidth( Object groupId, float width )
     {
         this.updateLock.lock( );
         try
@@ -418,7 +316,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setShowLines( int groupId, boolean show )
+    public void setShowLines( Object groupId, boolean show )
     {
         this.updateLock.lock( );
         try
@@ -436,7 +334,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setPolyDotted( int groupId, byte[] stipple )
+    public void setPolyDotted( Object groupId, byte[] stipple )
     {
         this.updateLock.lock( );
         try
@@ -455,7 +353,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setPolyDotted( int groupId, boolean dotted )
+    public void setPolyDotted( Object groupId, boolean dotted )
     {
         this.updateLock.lock( );
         try
@@ -473,7 +371,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setLineDotted( int groupId, boolean dotted )
+    public void setLineDotted( Object groupId, boolean dotted )
     {
         this.updateLock.lock( );
         try
@@ -491,7 +389,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setLineDotted( int groupId, int stippleFactor, short stipplePattern )
+    public void setLineDotted( Object groupId, int stippleFactor, short stipplePattern )
     {
         this.updateLock.lock( );
         try
@@ -510,7 +408,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setFill( int groupId, boolean show )
+    public void setFill( Object groupId, boolean show )
     {
         this.updateLock.lock( );
         try
@@ -528,7 +426,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setFillColor( int groupId, float[] rgba )
+    public void setFillColor( Object groupId, float[] rgba )
     {
         this.updateLock.lock( );
         try
@@ -546,7 +444,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void setFillColor( int groupId, float r, float g, float b, float a )
+    public void setFillColor( Object groupId, float r, float g, float b, float a )
     {
         this.updateLock.lock( );
         try
@@ -590,7 +488,7 @@ public class PolygonPainter extends GlimpsePainter2D
      * Deletes an individual Polygon group, removing its display settings and reclaiming memory.
      * @param groupId the id of the group to delete
      */
-    public void deleteGroup( int groupId )
+    public void deleteGroup( Object groupId )
     {
         this.updateLock.lock( );
         try
@@ -615,7 +513,7 @@ public class PolygonPainter extends GlimpsePainter2D
      * retaining its display settings.
      * @param groupId the id of the group to clear
      */
-    public void clearGroup( int groupId )
+    public void clearGroup( Object groupId )
     {
         this.updateLock.lock( );
         try
@@ -635,7 +533,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    public void deletePolygon( int groupId, int polygonId )
+    public void deletePolygon( Object groupId, Object polygonId )
     {
         this.updateLock.lock( );
         try
@@ -653,7 +551,7 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    protected void addPolygon( int groupId, IdPolygon polygon )
+    protected void addPolygon( Object groupId, IdPolygon polygon )
     {
         this.updateLock.lock( );
         try
@@ -672,7 +570,7 @@ public class PolygonPainter extends GlimpsePainter2D
     }
 
     // must be called while holding trackUpdateLock
-    protected Group getOrCreateGroup( int groupId )
+    protected Group getOrCreateGroup( Object groupId )
     {
         Group group = this.groups.get( groupId );
 
@@ -700,7 +598,7 @@ public class PolygonPainter extends GlimpsePainter2D
         dataBuffer.rewind( );
     }
 
-    protected LoadedGroup getOrCreateLoadedGroup( int id, Group group )
+    protected LoadedGroup getOrCreateLoadedGroup( Object id, Group group )
     {
         LoadedGroup loaded = loadedGroups.get( id );
         if ( loaded == null )
@@ -714,7 +612,7 @@ public class PolygonPainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         // something in a Group has changed so we must copy these
         // changes to the corresponding LoadedGroup (which is accessed
@@ -731,7 +629,7 @@ public class PolygonPainter extends GlimpsePainter2D
                 // loop through all Groups with updates
                 for ( Group group : updatedGroups )
                 {
-                    int id = group.groupId;
+                    Object id = group.groupId;
 
                     if ( group.groupDeleted || group.groupCleared )
                     {
@@ -1100,10 +998,10 @@ public class PolygonPainter extends GlimpsePainter2D
      *
      * @author ulman
      */
-    private class IdPolygon
+    private class IdPolygon implements Keyed<Long>
     {
-        int groupId;
-        int polygonId;
+        Object groupId;
+        Object polygonId;
 
         long startTime;
         long endTime;
@@ -1125,7 +1023,7 @@ public class PolygonPainter extends GlimpsePainter2D
         int[] fillOffsets;
         int[] fillSizes;
 
-        protected IdPolygon( int groupId, int polygonId, long startTime, long endTime, Polygon geometry, float depth )
+        protected IdPolygon( Object groupId, Object polygonId, long startTime, long endTime, Polygon geometry, float depth )
         {
             this.groupId = groupId;
             this.polygonId = polygonId;
@@ -1146,7 +1044,7 @@ public class PolygonPainter extends GlimpsePainter2D
             }
         }
 
-        protected IdPolygon( int groupId, int polygonId, Polygon geometry, float z )
+        protected IdPolygon( Object groupId, Object polygonId, Polygon geometry, float z )
         {
             this( groupId, polygonId, Long.MIN_VALUE, Long.MAX_VALUE, geometry, z );
         }
@@ -1176,12 +1074,14 @@ public class PolygonPainter extends GlimpsePainter2D
             fillPrimitiveCount = 1;
         }
 
-        public long getStartTime( )
+        @Override
+        public Long getStartTime( )
         {
             return startTime;
         }
 
-        public long getEndTime( )
+        @Override
+        public Long getEndTime( )
         {
             return endTime;
         }
@@ -1278,8 +1178,8 @@ public class PolygonPainter extends GlimpsePainter2D
             final int prime = 31;
             int result = 1;
             result = prime * result + getOuterType( ).hashCode( );
-            result = prime * result + groupId;
-            result = prime * result + polygonId;
+            result = prime * result + ( ( groupId == null ) ? 0 : groupId.hashCode( ) );
+            result = prime * result + ( ( polygonId == null ) ? 0 : polygonId.hashCode( ) );
             return result;
         }
 
@@ -1291,8 +1191,16 @@ public class PolygonPainter extends GlimpsePainter2D
             if ( getClass( ) != obj.getClass( ) ) return false;
             IdPolygon other = ( IdPolygon ) obj;
             if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
-            if ( groupId != other.groupId ) return false;
-            if ( polygonId != other.polygonId ) return false;
+            if ( groupId == null )
+            {
+                if ( other.groupId != null ) return false;
+            }
+            else if ( !groupId.equals( other.groupId ) ) return false;
+            if ( polygonId == null )
+            {
+                if ( other.polygonId != null ) return false;
+            }
+            else if ( !polygonId.equals( other.polygonId ) ) return false;
             return true;
         }
 
@@ -1568,10 +1476,10 @@ public class PolygonPainter extends GlimpsePainter2D
         float[] fillColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         boolean fillOn = false;
 
-        int groupId;
+        Object groupId;
 
         // mapping from polygonId to IdPolygon object
-        Map<Integer, IdPolygon> polygonMap;
+        Map<Object, IdPolygon> polygonMap;
         // polygons added since last display( ) call 
         Set<IdPolygon> newPolygons;
         // polygons selected since the last display( ) call
@@ -1579,13 +1487,11 @@ public class PolygonPainter extends GlimpsePainter2D
         Set<IdPolygon> newSelectedPolygons;
         // all selected polygons (based on selectionStart and selectionEnd)
         Set<IdPolygon> selectedPolygons;
-        // view of the IdPolygons in the polygons list sorted by startTime
-        NavigableSet<IdPolygon> startTimes;
-        // view of the IdPolygons in the polygons list sorted by endTime
-        NavigableSet<IdPolygon> endTimes;
 
-        IdPolygon selectionStart;
-        IdPolygon selectionEnd;
+        PolygonIntervalSortedMultimap map;
+
+        Long selectionStart;
+        Long selectionEnd;
 
         int selectedFillPrimitiveCount;
         int selectedLinePrimitiveCount;
@@ -1609,17 +1515,18 @@ public class PolygonPainter extends GlimpsePainter2D
         // if true, this group is waiting to be cleared
         boolean groupCleared = false;
 
-        public Group( int groupId )
+        public Group( Object groupId )
         {
             this.groupId = groupId;
             this.selectedPolygons = new LinkedHashSet<IdPolygon>( );
             this.newSelectedPolygons = new LinkedHashSet<IdPolygon>( );
             this.newPolygons = new LinkedHashSet<IdPolygon>( );
-            this.polygonMap = new HashMap<Integer, IdPolygon>( );
-            this.startTimes = new TreeSet<IdPolygon>( startTimeComparator );
-            this.endTimes = new TreeSet<IdPolygon>( endTimeComparator );
-            this.selectionStart = createSearchBoundStart( -Long.MAX_VALUE );
-            this.selectionEnd = createSearchBoundEnd( Long.MAX_VALUE );
+            this.polygonMap = new HashMap<Object, IdPolygon>( );
+
+            this.map = new PolygonIntervalSortedMultimap( );
+
+            this.selectionStart = -Long.MAX_VALUE;
+            this.selectionEnd = Long.MAX_VALUE;
         }
 
         public void deleteGroup( )
@@ -1636,8 +1543,7 @@ public class PolygonPainter extends GlimpsePainter2D
             this.selectedPolygons.clear( );
             this.newSelectedPolygons.clear( );
 
-            this.startTimes.clear( );
-            this.endTimes.clear( );
+            this.map.clear( );
 
             this.totalLineVertexCount = 0;
             this.lineInsertVertexCount = 0;
@@ -1654,15 +1560,14 @@ public class PolygonPainter extends GlimpsePainter2D
             this.groupCleared = true;
         }
 
-        public void deletePolygon( int polygonId )
+        public void deletePolygon( Object polygonId )
         {
             IdPolygon polygon = this.polygonMap.remove( polygonId );
 
             if ( polygon != null )
             {
                 this.newPolygons.remove( polygon );
-                this.startTimes.remove( polygon );
-                this.endTimes.remove( polygon );
+                this.map.remove( polygon );
 
                 // if the polygon was selected when it is deleted, mark the selection changed
                 this.polygonsSelected = this.selectedPolygons.remove( polygon );
@@ -1687,8 +1592,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
             this.newPolygons.add( polygon );
 
-            this.startTimes.add( polygon );
-            this.endTimes.add( polygon );
+            this.map.add( polygon );
 
             int lineVertexCount = polygon.lineVertexCount;
             this.totalLineVertexCount += lineVertexCount;
@@ -1698,7 +1602,7 @@ public class PolygonPainter extends GlimpsePainter2D
             this.totalFillVertexCount += fillVertexCount;
             this.fillInsertVertexCount += fillVertexCount;
 
-            if ( polygon.getStartTime( ) <= selectionEnd.endTime && polygon.getEndTime( ) >= selectionStart.startTime )
+            if ( polygon.getStartTime( ) <= selectionEnd && polygon.getEndTime( ) >= selectionStart )
             {
                 this.selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
                 this.selectedLinePrimitiveCount += polygon.linePrimitiveCount;
@@ -1709,10 +1613,10 @@ public class PolygonPainter extends GlimpsePainter2D
             this.polygonsInserted = true;
         }
 
-        public void setTimeRange( IdPolygon startPoint, IdPolygon endPoint )
+        public void setTimeRange( Long startTime, Long endTime )
         {
-            this.selectionStart = startPoint;
-            this.selectionEnd = endPoint;
+            this.selectionStart = startTime;
+            this.selectionEnd = endTime;
 
             checkTimeRange( );
         }
@@ -1721,13 +1625,8 @@ public class PolygonPainter extends GlimpsePainter2D
         {
             if ( this.selectionStart == null || this.selectionEnd == null ) return;
 
-            SortedSet<IdPolygon> startSet = this.startTimes.headSet( this.selectionEnd, true );
-            SortedSet<IdPolygon> endSet = this.endTimes.tailSet( this.selectionStart, true );
-
-            // selectedPolys contains the set intersection of startSet and endSet
             this.selectedPolygons.clear( );
-            this.selectedPolygons.addAll( startSet );
-            this.selectedPolygons.retainAll( endSet );
+            this.selectedPolygons.addAll( this.map.get( this.selectionStart, true, this.selectionEnd, true ) );
 
             this.selectedFillPrimitiveCount = 0;
             this.selectedLinePrimitiveCount = 0;
@@ -1813,6 +1712,21 @@ public class PolygonPainter extends GlimpsePainter2D
             this.polygonsSelected = false;
             this.groupCleared = false;
             this.groupDeleted = false;
+        }
+    }
+
+    public static class PolygonIntervalSortedMultimap extends IntervalSortedMultimap<Long, IdPolygon>
+    {
+        @Override
+        protected Long successor( Long t )
+        {
+            return t + 1;
+        }
+
+        @Override
+        protected Long predecessor( Long t )
+        {
+            return t - 1;
         }
     }
 }
