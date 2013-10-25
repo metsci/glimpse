@@ -53,26 +53,21 @@ import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
  * @see TimeAxisPainter
  */
 public class TimeXAxisPainter extends TimeAxisPainter
-{
+{	
+    public TimeXAxisPainter( TimeZone timeZone, Epoch epoch )
+    {
+        super( new TimeAxisLabelHandler( timeZone, epoch ) );
+    }
+	
     public TimeXAxisPainter( Epoch epoch )
     {
         super( new TimeAxisLabelHandler( epoch ) );
     }
 
-    //@formatter:off
-    public TimeXAxisPainter( TimeStampFormat minuteSecondFormat,
-                             TimeStampFormat hourMinuteFormat,
-                             TimeStampFormat hourDayMonthFormat,
-                             TimeStampFormat dayMonthYearFormat,
-                             TimeStampFormat dayFormat,
-                             TimeStampFormat dayMonthFormat,
-                             TimeStampFormat monthYearFormat,
-                             TimeStampFormat yearFormat,
-                             TimeZone timeZone, Epoch epoch )
+    public TimeXAxisPainter( TimeAxisLabelHandler handler )
     {
-        super( new TimeAxisLabelHandler( minuteSecondFormat, hourMinuteFormat, hourDayMonthFormat, dayMonthYearFormat, dayFormat, dayMonthFormat, monthYearFormat, yearFormat, timeZone, epoch ) );
+    	super( handler );
     }
-    //@formatter:on
     
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
@@ -121,7 +116,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
                 double jTimeText = printTickLabels( tickTimes, axis, handler.getSecondMinuteFormat( ), width, height );
 
                 // Date labels
-                printHoverLabels( tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
+                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
             }
             else if ( tickInterval <= Time.fromHours( 12 ) )
             {
@@ -129,7 +124,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
                 double jTimeText = printTickLabels( tickTimes, axis, handler.getHourMinuteFormat( ), width, height );
 
                 // Date labels
-                printHoverLabels( tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
+                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
             }
             else if ( tickInterval <= Time.fromDays( 10 ) )
             {
@@ -137,7 +132,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
                 double jTimeText = printTickLabels( tickTimes, axis, handler.getDayFormat( ), width, height );
 
                 // Year labels
-                printHoverLabels( tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
+                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
             }
             else if ( tickInterval <= Time.fromDays( 60 ) )
             {
@@ -145,7 +140,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
                 double jTimeText = printTickLabels( tickTimes, axis, handler.getMonthFormat( ), width, height );
 
                 // Year labels
-                printHoverLabels( tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
+                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
             }
             else
             {

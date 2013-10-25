@@ -42,34 +42,44 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 {
     protected static final TimeZone defaultTimeZone = TimeZone.getTimeZone( "UTC" );
 
-    protected static final TimeStampFormat defaultMinuteSecondFormat = new TimeStampFormatStandard( "%m:%S", defaultTimeZone );
-    protected static final TimeStampFormat defaultHourDayMonthFormat = new TimeStampFormatStandard( "%d %3N %H:00 ", defaultTimeZone );
+    protected static final String defaultMinuteSecondFormat = "%m:%S";
+    protected static final String defaultHourDayMonthFormat = "%d %3N %H:00 ";
 
-    protected static final TimeStampFormat defaultHourMinuteFormat = new TimeStampFormatStandard( "%H:%m", defaultTimeZone );
-    protected static final TimeStampFormat defaultDayMonthYearFormat = new TimeStampFormatStandard( "%d %3N %y", defaultTimeZone );
+    protected static final String defaultHourMinuteFormat = "%H:%m";
+    protected static final String defaultDayMonthYearFormat = "%d %3N %y";
 
-    protected static final TimeStampFormat defaultDayFormat = new TimeStampFormatStandard( "%d", defaultTimeZone );
-    protected static final TimeStampFormat defaultMonthYearFormat = new TimeStampFormatStandard( "%3N %y", defaultTimeZone );
+    protected static final String defaultDayFormat = "%d";
+    protected static final String defaultMonthYearFormat = "%3N %y";
 
-    protected static final TimeStampFormat defaultMonthFormat = new TimeStampFormatStandard( "%3N", defaultTimeZone );
-    protected static final TimeStampFormat defaultYearFormat = new TimeStampFormatStandard( "%y", defaultTimeZone );
+    protected static final String defaultMonthFormat = "%3N";
+    protected static final String defaultYearFormat = "%y";
 
     protected static final TimeStructFactory hourStructFactory = new HourStructFactory( );
     protected static final TimeStructFactory dayStructFactory = new DayStructFactory( );
     protected static final TimeStructFactory monthStructFactory = new MonthStructFactory( );
     protected static final TimeStructFactory yearStructFactory = new YearStructFactory( );
 
-    protected Epoch epoch;
-    protected final TimeZone timeZone;
-    protected final TimeStampFormat minuteSecondFormat;
-    protected final TimeStampFormat hourDayMonthFormat;
-    protected final TimeStampFormat hourMinuteFormat;
-    protected final TimeStampFormat dayMonthYearFormat;
-    protected final TimeStampFormat dayFormat;
-    protected final TimeStampFormat monthFormat;
-    protected final TimeStampFormat monthYearFormat;
-    protected final TimeStampFormat yearFormat;
+    protected TimeStampFormat minuteSecondFormat;
+    protected TimeStampFormat hourDayMonthFormat;
+    protected TimeStampFormat hourMinuteFormat;
+    protected TimeStampFormat dayMonthYearFormat;
+    protected TimeStampFormat dayFormat;
+    protected TimeStampFormat monthFormat;
+    protected TimeStampFormat monthYearFormat;
+    protected TimeStampFormat yearFormat;
     
+    protected final String minuteSecondString;
+    protected final String hourDayMonthString;
+    protected final String hourMinuteString;
+    protected final String dayMonthYearString;
+    protected final String dayString;
+    protected final String monthString;
+    protected final String monthYearString;
+    protected final String yearString;
+   
+    protected Epoch epoch;
+    protected TimeZone timeZone;
+   
     protected int pixelsBetweenTicks = 60;
     protected double yearOrderFactor = 6.0;
     
@@ -86,29 +96,32 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
     }
     
     //@formatter:off
-    public TimeAxisLabelHandler( TimeStampFormat minuteSecondFormat,
-                                 TimeStampFormat hourDayMonthFormat,
-                                 TimeStampFormat hourMinuteFormat,
-                                 TimeStampFormat dayMonthYearFormat,
-                                 TimeStampFormat dayFormat,
-                                 TimeStampFormat monthFormat,
-                                 TimeStampFormat monthYearFormat,
-                                 TimeStampFormat yearFormat,
-                                 TimeZone timeZone, Epoch epoch )
+    public TimeAxisLabelHandler(
+            String minuteSecondString,
+            String hourDayMonthString,
+            String hourMinuteString,
+            String dayMonthYearString,
+            String dayString,
+            String monthString,
+            String monthYearString,
+            String yearString,
+            TimeZone timeZone, Epoch epoch )
     {
         this.timeZone = timeZone;
 
-        this.minuteSecondFormat = minuteSecondFormat;
-        this.hourDayMonthFormat = hourDayMonthFormat;
+        this.minuteSecondString = minuteSecondString;
+        this.hourDayMonthString = hourDayMonthString;
 
-        this.hourMinuteFormat = hourMinuteFormat;
-        this.dayMonthYearFormat = dayMonthYearFormat;
+        this.hourMinuteString = hourMinuteString;
+        this.dayMonthYearString = dayMonthYearString;
 
-        this.dayFormat = dayFormat;
-        this.monthYearFormat = monthYearFormat;
-
-        this.monthFormat = monthFormat;
-        this.yearFormat = yearFormat;
+        this.dayString = dayString;
+        this.monthString = monthString;
+        
+        this.monthYearString = monthYearString;
+        this.yearString = yearString;
+        
+        this.updateFormatters( );
 
         this.epoch = epoch;
         
@@ -128,6 +141,29 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         };
     }
     //@formatter:on
+    
+    protected void updateFormatters( )
+    {
+        this.minuteSecondFormat = new TimeStampFormatStandard( minuteSecondString, timeZone );
+        this.hourDayMonthFormat = new TimeStampFormatStandard( hourDayMonthString, timeZone );
+        this.hourMinuteFormat = new TimeStampFormatStandard( hourMinuteString, timeZone );
+        this.dayMonthYearFormat = new TimeStampFormatStandard( dayMonthYearString, timeZone );
+        this.dayFormat = new TimeStampFormatStandard( dayString, timeZone );
+        this.monthFormat = new TimeStampFormatStandard( monthString, timeZone );
+        this.monthYearFormat = new TimeStampFormatStandard( monthYearString, timeZone );
+        this.yearFormat = new TimeStampFormatStandard( yearString, timeZone );
+    }
+    
+    public TimeZone getTimeZone( )
+    {
+        return timeZone;
+    }
+    
+    public void setTimeZone( TimeZone timeZone )
+    {
+        this.timeZone = timeZone;
+        this.updateFormatters( );
+    }
 
     public TimeStructFactory getHourStructFactory( )
     {

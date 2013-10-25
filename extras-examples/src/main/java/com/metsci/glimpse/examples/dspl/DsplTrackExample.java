@@ -260,7 +260,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
 
         // customize the coloring on the timeline
         timePlot.setBackgroundColor( GlimpseColor.fromColorRgb( 25, 42, 62 ) );
-        timePlot.setAxisColor( GlimpseColor.getWhite( ) );
+        timePlot.getDefaultTimeline( ).setAxisColor( GlimpseColor.getWhite( ) );
 
         // set the selected time range on the timeline
         timePlot.setTimeSelection( minTimestamp, maxTimestamp );
