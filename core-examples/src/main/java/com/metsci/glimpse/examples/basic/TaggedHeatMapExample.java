@@ -160,7 +160,8 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         CursorTextZPainter cursorPainter = new CursorTextZPainter( );
         plot.addPainter( cursorPainter );
 
-        cursorPainter.setOffsetBySelectionSize( false );
+        // offset the text by the size of the selection box
+        cursorPainter.setOffsetBySelectionSize( true );
 
         // tell the cursor painter what texture to report data values from
         cursorPainter.setTexture( texture );

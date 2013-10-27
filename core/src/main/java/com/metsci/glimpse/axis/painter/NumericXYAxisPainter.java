@@ -108,6 +108,26 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     {
         this( new GridAxisExponentLabelHandler( ), new GridAxisExponentLabelHandler( ) );
     }
+    
+    public void setLabelHandlerX( AxisLabelHandler ticksX )
+    {
+        this.ticksX = ticksX;
+    }
+    
+    public void setLabelHandlerY( AxisLabelHandler ticksY )
+    {
+        this.ticksY = ticksY;
+    }
+    
+    public AxisLabelHandler getLabelHandlerX( )
+    {
+        return this.ticksX;
+    }
+    
+    public AxisLabelHandler getLabelHandlerY( )
+    {
+        return this.ticksY;
+    }
 
     public void setFont( Font font )
     {

@@ -61,6 +61,7 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
+    protected boolean showDateLabels = true;
     protected boolean showCurrentTimeLabel = false;
     protected float[] currentTimeTextColor;
     protected float[] currentTimeTickColor;
@@ -85,6 +86,16 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
         this.setCurrentTimeTextColor( GlimpseColor.getGreen( 0.5f ) );
         this.setCurrentTimeTickColor( GlimpseColor.getGreen( 1.0f ) );
         this.currentTimeLineThickness = 3;
+    }
+    
+    public boolean isShowDateLabels( )
+    {
+        return this.showDateLabels;
+    }
+    
+    public void setShowDateLabels( boolean show )
+    {
+        this.showDateLabels = show;
     }
     
     public TimeAxisLabelHandler getLabelHandler( )

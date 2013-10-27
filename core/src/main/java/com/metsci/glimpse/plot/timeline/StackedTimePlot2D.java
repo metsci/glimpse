@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
-import java.awt.Font;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -40,11 +41,9 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.axis.painter.TimeAxisPainter;
-import com.metsci.glimpse.axis.painter.TimeXAxisPainter;
-import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -66,19 +65,18 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.painter.info.TooltipPainter;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
-import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.EventSelectionHandler;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl;
+import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 import com.metsci.glimpse.plot.timeline.listener.PlotMouseListener;
 import com.metsci.glimpse.plot.timeline.listener.TimeAxisMouseListener1D;
 import com.metsci.glimpse.plot.timeline.painter.SelectedTimeRegionPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -97,9 +95,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     public static final String MAX_TIME = "max_time";
     public static final String CURRENT_TIME = "current_time";
 
-    public static final String BACKGROUND = "Timeline Background";
-    public static final String TIMELINE = "Timeline";
-
     // tags representing the minimum and maximum bounds of the selected time window
     protected Tag minTag;
     protected Tag maxTag;
@@ -109,19 +104,16 @@ public class StackedTimePlot2D extends StackedPlot2D
     // epoch encapsulating the absolute time which maps to value 0 on the timeline
     protected Epoch epoch;
 
-    // time layout painters and listeners
-    protected PlotInfo timelineInfo;
-    protected GlimpseAxisLayout1D timeLayout;
-    protected DelegatePainter timeAxisDelegate;
-    protected TimeAxisPainter timeAxisPainter;
-    protected PlotInfo selectedLayout;
-
     // timeline painters and listeners
     protected AxisMouseListener1D timelineMouseListener;
-    protected SimpleTextPainter timeUnitsPainter;
-    protected BorderPainter timeAxisBorderPainter;
-    protected SelectedTimeRegionPainter selectedTimePainter;
     protected TooltipPainter tooltipPainter;
+
+    protected PlotInfo selectedLayout;
+    protected SelectedTimeRegionPainter selectedTimePainter;
+
+    // default tick/label handler
+    protected TimeAxisLabelHandler timeTickHandler;
+    protected TimelineInfo defaultTimelineInfo;
 
     // default settings for TimelineMouseListeners of new plots
     protected boolean allowPanX = true;
@@ -132,18 +124,18 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected boolean currentTimeLock;
 
     // the size of the label layout area in pixels
-    protected int labelLayoutSize;
+    protected int labelLayoutSize = 30;
     protected boolean showLabelLayout = false;
     protected boolean showTimeline = true;
 
     protected TextureAtlas defaultTextureAtlas;
-    
+
     // the default selection handler for all EventPlotInfo
     // if client code would like individual EventPlotInfo to maintain
     // their own set of selected events, individual SelectionHandlers
     // can be set for each EventPlotInfo
     protected EventSelectionHandler commonSelectionHandler;
-    
+
     protected List<PlotMouseListener> plotMouseListeners;
 
     public StackedTimePlot2D( )
@@ -174,12 +166,12 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         this( orientation, epoch, atlas, null );
     }
-    
+
     public StackedTimePlot2D( Orientation orientation, Epoch epoch, TaggedAxis1D commonAxis )
     {
         this( orientation, epoch, new TextureAtlas( ), commonAxis );
     }
-    
+
     /**
      * Creates a StackedTimePlot2D with specified orientation. The provided
      * epoch determines what absolute timestamp corresponds to value 0.0 on the
@@ -191,25 +183,44 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         this.epoch = epoch;
         this.defaultTextureAtlas = atlas;
-        
+
         this.commonSelectionHandler = new EventSelectionHandler( );
-        
+
         this.plotMouseListeners = new CopyOnWriteArrayList<PlotMouseListener>( );
 
-        this.initializeTimePlot( );
+        this.setBorderSize( 0 );
+        this.timeTickHandler = new TimeAxisLabelHandler( TimeZone.getTimeZone( "GMT-0:00" ), epoch );
+
+        this.initializeTimeAxis( );
+        this.defaultTimelineInfo = this.createTimeline( );
         this.initializeOverlayPainters( );
     }
     
+    public void setTimeAxisLabelHandler( TimeAxisLabelHandler handler )
+    {
+        this.timeTickHandler = handler;
+    }
+    
+    public TimeAxisLabelHandler getTimeAxisLabelHandler( )
+    {
+        return this.timeTickHandler;
+    }
+    
+    public TimelineInfo getDefaultTimeline( )
+    {
+        return this.defaultTimelineInfo;
+    }
+
     public void addPlotMouseListener( PlotMouseListener listener )
     {
         this.plotMouseListeners.add( listener );
     }
-    
+
     public void removePlotMouseListener( PlotMouseListener listener )
     {
         this.plotMouseListeners.remove( listener );
     }
-    
+
     /**
      * Returns the common EventSelectionHandler shared between all {@link EventPlotInfo}
      * sub-plots for this StackedTimePlot2D.
@@ -218,15 +229,19 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return this.commonSelectionHandler;
     }
-    
+
     public void setShowTimeline( boolean showTimeline )
     {
         this.showTimeline = showTimeline;
-        this.timelineInfo.getLayout( ).setVisible( showTimeline );
-        
+
+        for ( PlotInfo plot : getAllPlots( ) )
+        {
+            if ( plot instanceof TimelineInfo ) plot.getLayout( ).setVisible( showTimeline );
+        }
+
         if ( this.isAutoValidate( ) ) this.validate( );
     }
-    
+
     public boolean isShowTimeline( )
     {
         return this.showTimeline;
@@ -252,7 +267,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         for ( PlotInfo info : stackedPlots.values( ) )
         {
             // don't automatically change the timeline info plot spacing
-            if ( info.equals( timelineInfo ) ) continue;
+            if ( info instanceof TimelineInfo ) continue;
 
             info.setPlotSpacing( size );
         }
@@ -273,7 +288,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return this.overlayLayout;
     }
-    
+
     public GlimpseLayout getFullOverlayLayout( )
     {
         return this.fullOverlayLayout;
@@ -282,15 +297,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     public GlimpseAxisLayout1D getUnderlayLayout( )
     {
         return this.underlayLayout;
-    }
-
-    /**
-     * The layout on which the time axis markings are painted. Painters may be added
-     * to this layout to draw additional decorations onto the time axis.
-     */
-    public GlimpseAxisLayout1D getTimelineLayout( )
-    {
-        return this.timeLayout;
     }
 
     public TooltipPainter getTooltipPainter( )
@@ -325,6 +331,35 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
     }
 
+    /**
+     * Returns the timeline handle for the timeline identified via its unique string identifier.
+     * 
+     * @param id a timeline unique identifier
+     * @return the TimelineInfo handle
+     */
+    public TimelineInfo getTimeline( Object id )
+    {
+        this.lock.lock( );
+        try
+        {
+            PlotInfo plot = getPlot( id );
+
+            if ( plot instanceof TimelineInfo )
+            {
+                return ( TimelineInfo ) plot;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+    
     /**
      * Returns the time plot handle for the plot identified via its unique string identifier.
      * 
@@ -583,22 +618,6 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     }
 
-    public void setTimeAxisPainter( TimeAxisPainter painter )
-    {
-        this.lock.lock( );
-        try
-        {
-            this.timeAxisDelegate.removePainter( this.timeAxisPainter );
-            this.timeAxisPainter = painter;
-            this.timeAxisDelegate.addPainter( this.timeAxisPainter );
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-
-    }
-
     /**
      * Get the TaggedAxis1D Tag which defines the currently selected time.
      *
@@ -663,7 +682,16 @@ public class StackedTimePlot2D extends StackedPlot2D
     public void setEpoch( Epoch epoch )
     {
         this.epoch = epoch;
-        this.timeAxisPainter.setEpoch( epoch );
+
+        this.timeTickHandler.setEpoch( epoch );
+
+        for ( PlotInfo info : getAllPlots( ) )
+        {
+            if ( info instanceof TimelineInfo )
+            {
+                ( ( TimelineInfo ) info ).setEpoch( epoch );
+            }
+        }
     }
 
     public TimeStamp toTimeStamp( double value )
@@ -681,51 +709,9 @@ public class StackedTimePlot2D extends StackedPlot2D
         return ( TaggedAxis1D ) this.commonAxis;
     }
 
-    public TimeAxisPainter getTimeAxisPainter( )
-    {
-        return this.timeAxisPainter;
-    }
-
-    public SimpleTextPainter getTimeUnitsPainter( )
-    {
-        return this.timeUnitsPainter;
-    }
-
-    public BorderPainter getTimeAxisBorderPainter( )
-    {
-        return this.timeAxisBorderPainter;
-    }
-
     public SelectedTimeRegionPainter getSelectedTimePainter( )
     {
         return this.selectedTimePainter;
-    }
-
-    public PlotInfo getTimelinePlotInfo( )
-    {
-        return this.timelineInfo;
-    }
-
-    public void setAxisColor( float[] rgba )
-    {
-        this.timeAxisPainter.setTextColor( rgba );
-        this.timeAxisPainter.setTickColor( rgba );
-    }
-
-    public void setAxisFont( Font font )
-    {
-        this.timeAxisPainter.setFont( font );
-    }
-
-    public void setShowCurrentTime( boolean show )
-    {
-        this.timeAxisPainter.showCurrentTimeLabel( show );
-    }
-
-    public void setCurrentTimeColor( float[] rgba )
-    {
-        this.timeAxisPainter.setCurrentTimeTextColor( rgba );
-        this.timeAxisPainter.setCurrentTimeTickColor( rgba );
     }
 
     public void setLabelSize( int size )
@@ -815,10 +801,41 @@ public class StackedTimePlot2D extends StackedPlot2D
             TimePlotInfo timePlotInfo = createTimePlot0( plotInfo );
             stackedPlots.put( id, timePlotInfo );
             addTimePlotInfoListeners( timePlotInfo );
-            
+
             if ( isAutoValidate( ) ) validate( );
-            
+
             return timePlotInfo;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+    /**
+     * Creates a labeled timeline (with tick marks and date/time labels). This method may
+     * be called multiple times with different time zones if multiple timezone labels are
+     * desired.
+     */
+    public TimelineInfo createTimeline( )
+    {
+        return createTimeline( UUID.randomUUID( ), TimeZone.getTimeZone( "GMT-0:00" ) );
+    }
+    
+    public TimelineInfo createTimeline( Object id, TimeZone timeZone )
+    {
+        this.lock.lock( );
+        try
+        {
+            PlotInfo info = createPlot( id );
+            TimelineInfo timelineInfo = new TimelineInfo( this, info );
+        
+            timelineInfo.setTimeZone( timeZone );
+            
+            this.stackedPlots.put( timelineInfo.getId( ), timelineInfo );
+            if ( isAutoValidate( ) ) this.validate( );
+
+            return timelineInfo;
         }
         finally
         {
@@ -951,14 +968,25 @@ public class StackedTimePlot2D extends StackedPlot2D
         TimeStamp minTime = maxTime.subtract( diff );
         setTimeSelection( minTime, maxTime, maxTime );
     }
-    
+
     public TimeStamp getTime( GlimpseMouseEvent e )
     {
         Axis1D axis = e.getAxis1D( );
         double valueX = axis.screenPixelToValue( e.getX( ) );
         return getEpoch( ).toTimeStamp( valueX );
     }
-    
+
+    protected void initializeTimeAxis( )
+    {
+        TaggedAxis1D timeAxis = getTimeAxis( );
+
+        this.addTimeTags( getTimeAxis( ) );
+
+        this.minTag = timeAxis.getTag( MIN_TIME );
+        this.maxTag = timeAxis.getTag( MAX_TIME );
+        this.currentTag = timeAxis.getTag( CURRENT_TIME );
+    }
+
     protected void initializeOverlayPainters( )
     {
         this.selectedTimePainter = new SelectedTimeRegionPainter( this );
@@ -980,107 +1008,6 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.underlayLayout.addGlimpseMouseAllListener( this.timelineMouseListener );
     }
 
-    protected void initializeTimePlot( )
-    {
-        TaggedAxis1D timeAxis = getTimeAxis( );
-
-        this.addTimeTags( getTimeAxis( ) );
-
-        this.minTag = timeAxis.getTag( MIN_TIME );
-        this.maxTag = timeAxis.getTag( MAX_TIME );
-        this.currentTag = timeAxis.getTag( CURRENT_TIME );
-
-        PlotInfo info = createPlot( TIMELINE );
-        this.timelineInfo = new PlotInfoWrapper( info )
-        {
-            protected boolean doAnyOtherPlotsGrow( )
-            {
-                for ( PlotInfo plot : getAllPlots( ) )
-                {
-                    if ( this != plot && plot.isGrow( ) ) return true;
-                }
-                
-                return false;
-            }
-
-            @Override
-            public void updateLayout( int index )
-            {
-                // grow if no other plots are growing
-                setGrow( !doAnyOtherPlotsGrow( ) );
-                
-                super.updateLayout( index );
-                
-                if ( timeLayout == null ) return;
-                
-                // push the timeline plot over so that it lines up with the plot labels
-                if ( isTimeAxisHorizontal( ) )
-                {
-                    timeLayout.setLayoutData( String.format( "push, grow, gapleft %d!", getLabelSize( ) ) );
-                }
-                else
-                {
-                    timeLayout.setLayoutData( String.format( "push, grow, gaptop %d!", getLabelSize( ) ) );
-                }
-            }
-        };
-        this.stackedPlots.put( this.timelineInfo.getId( ), this.timelineInfo );
-
-        this.timelineInfo.setPlotSpacing( 0 );
-
-        if ( isTimeAxisHorizontal( ) )
-        {
-            this.timelineInfo.setSize( 45 );
-            this.timelineInfo.setOrder( Integer.MAX_VALUE );
-
-            this.timeLayout = new GlimpseAxisLayoutX( this.timelineInfo.getLayout( ) );
-            this.timeLayout.setEventConsumer( false );
-
-            this.labelLayoutSize = 30;
-        }
-        else
-        {
-            this.timelineInfo.setSize( 60 );
-            this.timelineInfo.setOrder( Integer.MIN_VALUE );
-
-            this.timeLayout = new GlimpseAxisLayoutY( this.timelineInfo.getLayout( ) );
-            this.timeLayout.setEventConsumer( false );
-
-            this.labelLayoutSize = 30;
-        }
-
-        this.timelineInfo.getLayout( ).setEventConsumer( false );
-
-        this.timeAxisPainter = createTimeAxisPainter( );
-        this.timeAxisPainter.setFont( getDefaultPlain( 12 ), false );
-        this.timeAxisPainter.showCurrentTimeLabel( false );
-        this.timeAxisPainter.setCurrentTimeTickColor( GlimpseColor.getGreen( ) );
-
-        this.setBorderSize( 0 );
-
-        this.timeAxisDelegate = new DelegatePainter( );
-        this.timeAxisDelegate.addPainter( this.timeAxisPainter );
-
-        this.timeLayout.addPainter( this.timeAxisDelegate );
-
-        this.timeUnitsPainter = new SimpleTextPainter( );
-        this.timeUnitsPainter.setHorizontalPosition( HorizontalPosition.Right );
-        this.timeUnitsPainter.setVerticalPosition( VerticalPosition.Bottom );
-        this.timeUnitsPainter.setColor( GlimpseColor.getBlack( ) );
-        this.timeUnitsPainter.setFont( getDefaultBold( 12 ) );
-        this.timeUnitsPainter.setText( "GMT" );
-        this.timeUnitsPainter.setBackgroundColor( GlimpseColor.getYellow( ) );
-        this.timeUnitsPainter.setPaintBackground( true );
-
-        this.timeAxisBorderPainter = new BorderPainter( );
-        this.timeAxisBorderPainter.setVisible( false );
-
-        this.timeLayout.addPainter( this.timeUnitsPainter );
-        this.timeLayout.addPainter( this.timeAxisBorderPainter );
-
-        this.validate( );
-    }
-
     protected DataAxisMouseListener1D createDataAxisListener( PlotInfo plotInfo )
     {
         return new DataAxisMouseListener1D( this, plotInfo );
@@ -1089,25 +1016,6 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected TimeAxisMouseListener1D createTimeAxisListener( )
     {
         return new TimeAxisMouseListener1D( this );
-    }
-
-    protected TimeAxisPainter createTimeAxisPainter( )
-    {
-        TimeAxisPainter painter;
-        if ( isTimeAxisHorizontal( ) )
-        {
-            painter = new TimeXAxisPainter( this.epoch );
-        }
-        else
-        {
-            painter = new TimeYAxisPainter( this.epoch );
-        }
-
-        painter.setFont( getDefaultPlain( 12 ), false );
-        painter.showCurrentTimeLabel( false );
-        painter.setCurrentTimeTickColor( GlimpseColor.getGreen( ) );
-
-        return painter;
     }
 
     protected void addTimeTags( TaggedAxis1D axis )
@@ -1157,7 +1065,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return new TaggedAxis1D( );
     }
-    
+
     protected EventPlotInfo createEventPlot( Object id, TextureAtlas atlas )
     {
         if ( !isTimeAxisHorizontal( ) )
@@ -1172,9 +1080,9 @@ public class StackedTimePlot2D extends StackedPlot2D
             EventPlotInfo eventPlotInfo = createEventPlot0( plotInfo, atlas );
             stackedPlots.put( id, eventPlotInfo );
             addTimePlotInfoListeners( eventPlotInfo );
-            
+
             if ( isAutoValidate( ) ) validate( );
-            
+
             return eventPlotInfo;
         }
         finally
@@ -1245,12 +1153,12 @@ public class StackedTimePlot2D extends StackedPlot2D
         if ( orient == HORIZONTAL )
         {
             xHandler = labelHandler;
-            yHandler = timeAxisPainter.getLabelHandler( );
+            yHandler = timeTickHandler;
         }
         else
         {
             yHandler = labelHandler;
-            xHandler = timeAxisPainter.getLabelHandler( );
+            xHandler = timeTickHandler;
         }
 
         // create a painter to display Y axis grid lines
@@ -1340,10 +1248,10 @@ public class StackedTimePlot2D extends StackedPlot2D
         }
 
         timePlotInfo.setLookAndFeel( laf );
-        
+
         return timePlotInfo;
     }
-    
+
     @Override
     public PlotInfo createPlot( Object id, Axis1D axis )
     {
@@ -1351,18 +1259,18 @@ public class StackedTimePlot2D extends StackedPlot2D
         addPlotInfoListeners( info );
         return info;
     }
-    
+
     protected void addPlotInfoListeners( PlotInfo info )
     {
         info.getLayout( ).addGlimpseMouseAllListener( createPlotMouseListener( info, PlotMouseListener.PlotLocation.Plot ) );
     }
-    
+
     protected void addTimePlotInfoListeners( TimePlotInfo info )
     {
         info.getLabelLayout( ).addGlimpseMouseAllListener( createPlotMouseListener( info, PlotMouseListener.PlotLocation.Label ) );
         info.getLayout( ).addGlimpseMouseAllListener( createPlotMouseListener( info, PlotMouseListener.PlotLocation.Plot ) );
     }
-    
+
     protected GlimpseMouseAllListener createPlotMouseListener( final PlotInfo info, final PlotMouseListener.PlotLocation location )
     {
         return new GlimpseMouseAllListener( )
@@ -1375,7 +1283,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                     listener.mouseWheelMoved( e, info, location );
                 }
             }
-            
+
             @Override
             public void mouseMoved( GlimpseMouseEvent e )
             {
@@ -1384,7 +1292,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                     listener.mouseMoved( e, info, location );
                 }
             }
-            
+
             @Override
             public void mouseReleased( GlimpseMouseEvent e )
             {
@@ -1393,7 +1301,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                     listener.mouseReleased( e, info, location );
                 }
             }
-            
+
             @Override
             public void mousePressed( GlimpseMouseEvent e )
             {
@@ -1402,7 +1310,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                     listener.mousePressed( e, info, location );
                 }
             }
-            
+
             @Override
             public void mouseExited( GlimpseMouseEvent e )
             {
@@ -1411,7 +1319,7 @@ public class StackedTimePlot2D extends StackedPlot2D
                     listener.mouseExited( e, info, location );
                 }
             }
-            
+
             @Override
             public void mouseEntered( GlimpseMouseEvent e )
             {

@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.examples.animated;
 
-import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
-import it.unimi.dsi.fastutil.ints.IntBidirectionalIterator;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -244,15 +244,15 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
     // a custom listener which is notified when the track points inside the plot's selection box change
     private static class TrackSelectionListener implements SpatialSelectionListener<Point>
     {
-        private IntAVLTreeSet selectedTrackIds;
-        private IntAVLTreeSet newSelectedTrackIds;
+        private Set<Object> selectedTrackIds;
+        private Set<Object> newSelectedTrackIds;
         private TrackPainter trackPainter;
         private TrackManager trackManager;
 
         public TrackSelectionListener( TrackManager trackManager, TrackPainter trackPainter )
         {
-            this.selectedTrackIds = new IntAVLTreeSet( );
-            this.newSelectedTrackIds = new IntAVLTreeSet( );
+            this.selectedTrackIds = new HashSet<>( );
+            this.newSelectedTrackIds = new HashSet<>( );
 
             this.trackManager = trackManager;
             this.trackPainter = trackPainter;
@@ -277,10 +277,10 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
             }
 
             // change various display characteristics of the selected tracks
-            IntBidirectionalIterator iter = newSelectedTrackIds.iterator( );
+            Iterator<Object> iter = newSelectedTrackIds.iterator( );
             while ( iter.hasNext( ) )
             {
-                int trackId = iter.nextInt( );
+                Object trackId = iter.next( );
 
                 trackPainter.setPointColor( trackId, 0.0f, 1.0f, 0.0f, 1.0f );
                 trackPainter.setLineColor( trackId, 0.0f, 1.0f, 0.0f, 1.0f );
@@ -293,7 +293,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
             iter = selectedTrackIds.iterator( );
             while ( iter.hasNext( ) )
             {
-                int trackId = iter.nextInt( );
+                Object trackId = iter.next( );
 
                 if ( newSelectedTrackIds.contains( trackId ) ) continue;
 
@@ -305,7 +305,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
             }
 
             // swap the sets storing previously selected and newly selected tracks
-            IntAVLTreeSet temp = selectedTrackIds;
+            Set<Object> temp = selectedTrackIds;
             selectedTrackIds = newSelectedTrackIds;
             newSelectedTrackIds = temp;
         }
@@ -315,7 +315,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
     private static class TrackManager extends Thread
     {
         private int time = 0;
-        private Map<Integer, Track> tracks;
+        private Map<Object, Track> tracks;
         private TrackPainter trackPainter;
         private int numberOfTracks;
 
@@ -323,7 +323,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
         {
             this.trackPainter = trackPainter;
             this.numberOfTracks = numberOfTracks;
-            this.tracks = Collections.synchronizedMap( new HashMap<Integer, Track>( numberOfTracks ) );
+            this.tracks = Collections.synchronizedMap( new HashMap<Object, Track>( numberOfTracks ) );
         }
 
         @Override
@@ -382,7 +382,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
             }
         }
 
-        public Track getTrack( int id )
+        public Track getTrack( Object id )
         {
             return tracks.get( id );
         }

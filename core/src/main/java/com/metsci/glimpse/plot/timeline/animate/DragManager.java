@@ -51,6 +51,7 @@ import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
 import com.metsci.glimpse.plot.timeline.listener.PlotMouseAdapter;
 import com.metsci.glimpse.plot.timeline.listener.PlotMouseListener.PlotLocation;
 import com.metsci.glimpse.support.repaint.RepaintManager;
@@ -600,7 +601,7 @@ public class DragManager
         boolean isInsideBottom = !top && checkPosition > bottomPos && checkPosition < middlePos;
         boolean isInside = isInsideTop || isInsideBottom;
         boolean isNotGrowing = growing != null && ( growing.size == size || !info.equals( growing.info ) );
-        boolean isNotTimeline = !info.equals( plot.getTimelinePlotInfo( ) );
+        boolean isNotTimeline = !(info instanceof TimelineInfo);
 
         if ( isInside && isNotGrowing && isNotTimeline )
         {

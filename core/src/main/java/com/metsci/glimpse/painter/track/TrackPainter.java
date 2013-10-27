@@ -34,6 +34,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,18 +80,20 @@ public class TrackPainter extends GlimpseDataPainter2D
     public static final int TRACK_LABEL_OFFSET_X = 8;
     public static final int TRACK_LABEL_OFFSET_Y = 8;
 
+    public static final Comparator<Point> comparator = Point.getTimeComparator( );
+
     protected int dataBufferSize = 0;
     protected FloatBuffer dataBuffer = null;
     protected ReentrantLock trackUpdateLock = null;
 
     // mapping from id to Track
-    protected Map<Integer, Track> tracks;
+    protected Map<Object, Track> tracks;
     // true indicates that new data must be loaded onto the GPU
     protected volatile boolean newData = false;
     // tracks with new data which must be loaded onto the GPU
     protected Set<Track> updatedTracks;
     // mapping from id to LoadedTrack (GPU-side track information)
-    protected Map<Integer, LoadedTrack> loadedTracks;
+    protected Map<Object, LoadedTrack> loadedTracks;
     // spatial index on Points
     protected QuadTreeXys<Point> spatialIndex;
 
@@ -116,9 +119,9 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         this.temporalSelectionListeners = new CopyOnWriteArrayList<TemporalSelectionListener<Point>>( );
 
-        this.tracks = new HashMap<Integer, Track>( );
-        this.updatedTracks = new HashSet<Track>( );
-        this.loadedTracks = new HashMap<Integer, LoadedTrack>( );
+        this.tracks = new HashMap<>( );
+        this.updatedTracks = new HashSet<>( );
+        this.loadedTracks = new HashMap<>( );
         this.trackUpdateLock = new ReentrantLock( );
 
         this.fontRenderer = new TextRenderer( textFont );
@@ -133,7 +136,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         this.temporalSelectionListeners.remove( listener );
     }
-    
+
     public void addSpatialSelectionListener( Axis2D axis, SpatialSelectionListener<Point> listener )
     {
         axis.addAxisListener( new SpatialSelectionAxisListener( this, listener ) );
@@ -162,7 +165,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public Point getTrackHead( int trackId )
+    public Point getTrackHead( Object trackId )
     {
         this.trackUpdateLock.lock( );
         try
@@ -206,7 +209,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void deleteTrack( int trackId )
+    public void deleteTrack( Object trackId )
     {
         this.trackUpdateLock.lock( );
         try
@@ -234,7 +237,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void clearTrack( int trackId )
+    public void clearTrack( Object trackId )
     {
         this.trackUpdateLock.lock( );
         try
@@ -262,12 +265,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void addPoint( int trackId, int pointId, double x, double y, long time )
+    public void addPoint( Object trackId, Object pointId, double x, double y, long time )
     {
         addPoint( trackId, new Point( trackId, pointId, x, y, time ) );
     }
 
-    public void addPoints( int trackId, List<Point> points )
+    public void addPoints( Object trackId, List<Point> points )
     {
         this.trackUpdateLock.lock( );
         try
@@ -285,12 +288,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setLineColor( int trackId, float[] color )
+    public void setLineColor( Object trackId, float[] color )
     {
         setLineColor( trackId, color[0], color[1], color[2], color[3] );
     }
 
-    public void setLineColor( int trackId, float r, float g, float b, float a )
+    public void setLineColor( Object trackId, float r, float g, float b, float a )
     {
         this.trackUpdateLock.lock( );
         try
@@ -308,7 +311,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setLineWidth( int trackId, float width )
+    public void setLineWidth( Object trackId, float width )
     {
         this.trackUpdateLock.lock( );
         try
@@ -326,12 +329,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setPointColor( int trackId, float[] color )
+    public void setPointColor( Object trackId, float[] color )
     {
         setPointColor( trackId, color[0], color[1], color[2], color[3] );
     }
 
-    public void setPointColor( int trackId, float r, float g, float b, float a )
+    public void setPointColor( Object trackId, float r, float g, float b, float a )
     {
         this.trackUpdateLock.lock( );
         try
@@ -349,7 +352,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setPointSize( int trackId, float size )
+    public void setPointSize( Object trackId, float size )
     {
         this.trackUpdateLock.lock( );
         try
@@ -367,7 +370,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setShowPoints( int trackId, boolean show )
+    public void setShowPoints( Object trackId, boolean show )
     {
         this.trackUpdateLock.lock( );
         try
@@ -385,12 +388,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setHeadPointColor( int trackId, float[] color )
+    public void setHeadPointColor( Object trackId, float[] color )
     {
         setHeadPointColor( trackId, color[0], color[1], color[2], color[3] );
     }
 
-    public void setHeadPointColor( int trackId, float r, float g, float b, float a )
+    public void setHeadPointColor( Object trackId, float r, float g, float b, float a )
     {
         this.trackUpdateLock.lock( );
         try
@@ -408,7 +411,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setHeadPointSize( int trackId, float size )
+    public void setHeadPointSize( Object trackId, float size )
     {
         this.trackUpdateLock.lock( );
         try
@@ -426,7 +429,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setShowHeadPoint( int trackId, boolean show )
+    public void setShowHeadPoint( Object trackId, boolean show )
     {
         this.trackUpdateLock.lock( );
         try
@@ -444,7 +447,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setShowLines( int trackId, boolean show )
+    public void setShowLines( Object trackId, boolean show )
     {
         this.trackUpdateLock.lock( );
         try
@@ -462,7 +465,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setDotted( int trackId, boolean dotted )
+    public void setDotted( Object trackId, boolean dotted )
     {
         this.trackUpdateLock.lock( );
         try
@@ -480,7 +483,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setDotted( int trackId, int stippleFactor, short stipplePattern )
+    public void setDotted( Object trackId, int stippleFactor, short stipplePattern )
     {
         this.trackUpdateLock.lock( );
         try
@@ -499,12 +502,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setLabelColor( int trackId, float[] color )
+    public void setLabelColor( Object trackId, float[] color )
     {
         setLabelColor( trackId, color[0], color[1], color[2], color[3] );
     }
 
-    public void setLabelColor( int trackId, float r, float g, float b, float a )
+    public void setLabelColor( Object trackId, float r, float g, float b, float a )
     {
         this.trackUpdateLock.lock( );
         try
@@ -522,12 +525,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setLabelLineColor( int trackId, float[] color )
+    public void setLabelLineColor( Object trackId, float[] color )
     {
         setLabelLineColor( trackId, color[0], color[1], color[2], color[3] );
     }
 
-    public void setLabelLineColor( int trackId, float r, float g, float b, float a )
+    public void setLabelLineColor( Object trackId, float r, float g, float b, float a )
     {
         this.trackUpdateLock.lock( );
         try
@@ -545,7 +548,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setShowLabelLine( int trackId, boolean show )
+    public void setShowLabelLine( Object trackId, boolean show )
     {
         this.trackUpdateLock.lock( );
         try
@@ -563,7 +566,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setLabel( int trackId, String label )
+    public void setLabel( Object trackId, String label )
     {
         this.trackUpdateLock.lock( );
         try
@@ -582,7 +585,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void setShowLabel( int trackId, boolean show )
+    public void setShowLabel( Object trackId, boolean show )
     {
         this.trackUpdateLock.lock( );
         try
@@ -600,7 +603,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    public void displayTimeRange( int trackId, double startTime, double endTime )
+    public void displayTimeRange( Object trackId, double startTime, double endTime )
     {
         displayTimeRange( trackId, ( long ) Math.ceil( startTime ), ( long ) Math.floor( endTime ) );
     }
@@ -609,13 +612,13 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         displayTimeRange( ( long ) Math.ceil( startTime ), ( long ) Math.floor( endTime ) );
     }
-    
-    public void displayTimeRange( int trackId, long startTime, long endTime )
+
+    public void displayTimeRange( Object trackId, long startTime, long endTime )
     {
         displayTimeRange( trackId, startTime, endTime, endTime );
     }
-    
-    public void displayTimeRange( int trackId, long startTime, long endTime, long selectedTime )
+
+    public void displayTimeRange( Object trackId, long startTime, long endTime, long selectedTime )
     {
         Point startPoint = getStartPoint( startTime );
         Point endPoint = getEndPoint( endTime );
@@ -641,7 +644,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         displayTimeRange( startTime, endTime, endTime );
     }
-    
+
     public void displayTimeRange( long startTime, long endTime, long selectedTime )
     {
         startTimeRange = getStartPoint( startTime );
@@ -668,7 +671,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     /**
      * Returns all Points within the given bounding box in axis coordinates (regardless
      * of time stamp).
-     * 
+     *
      * @param minX left edge of the bounding box
      * @param maxX right edge of the bounding box
      * @param minY bottom edge of the bounding box
@@ -694,7 +697,7 @@ public class TrackPainter extends GlimpseDataPainter2D
             return Collections.emptyList( );
         }
     }
-    
+
     /**
      * @see #getPixelRange(Axis2D, double, double, int, int)
      */
@@ -702,19 +705,19 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         return filter( getPixelRange( axis, centerX, centerY, pixelWidth, pixelHeight ) );
     }
-    
+
     /**
      * <p>Returns all the Points within the bounding box specified with a center in axis coordinates
      * and width/height specified in pixels.</p>
-     * 
+     *
      * <p>This is useful for querying for points near the cursor. When used in this way, the pixelWidth
      * and pixelHeight arguments control how close the user must get to a point before it is selected.
      * The Axis2D argument is usually obtained from a GlimpseMouseListener.</p>
-     * 
+     *
      * @param axis the axis to use to convert pixel values into axis coordinates.
      * @param centerX the x center of the query box in axis coordinates
      * @param centerY the y center of the query box in axis coordinates
-     * @param pixelWidth the width of the query box in pixels 
+     * @param pixelWidth the width of the query box in pixels
      * @param pixelHeight the height of the query box in pixels
      * @return all the Points within the specified bounding box
      */
@@ -722,15 +725,15 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         double width = pixelWidth / axis.getAxisX( ).getPixelsPerValue( );
         double height = pixelHeight / axis.getAxisY( ).getPixelsPerValue( );
-        
+
         return getGeoRange( centerX - width / 2, centerX + width / 2, centerY - height / 2, centerY + height / 2 );
     }
-    
+
     /**
      * Returns the closest point to the cursor position. Distance is measured in pixels, not
      * in axis units. However, the cursor position is specified in axis coordinates. If the closest
      * point is further away than maxPixelDistance then null is returned.
-     * 
+     *
      * @param axis the axis to use to convert pixel values into axis coordinates
      * @param centerX the x center of the query box in axis coordinates
      * @param centerY the y center of the query box in axis coordinates
@@ -741,13 +744,13 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
-        
+
         int centerPixelX = axisX.valueToScreenPixel( centerX );
         int centerPixelY = axisY.getSizePixels( ) - axisY.valueToScreenPixel( centerY );
-        
+
         return getNearestPoint( axis, centerPixelX, centerPixelY, maxPixelDistance );
     }
-    
+
     /**
      * Returns the closest Point to the mouse position specified in the given GlimpseMouseEvent.
      * If the closest point is farther away than maxPixelDistance pixels, then null is returned.
@@ -761,15 +764,15 @@ public class TrackPainter extends GlimpseDataPainter2D
         Axis2D axis = mouseEvent.getAxis2D( );
         int centerPixelX = mouseEvent.getX( );
         int centerPixelY = mouseEvent.getY( );
-    
+
         return getNearestPoint( axis, centerPixelX, centerPixelY, maxPixelDistance );
     }
-    
+
     /**
      * Returns the closest point to the cursor position. Distance is measured in pixels, not
      * in axis units. The cursor position is specified in pixel/screen coordinates.
      * If the closest point is further away than maxPixelDistance then null is returned.
-     * 
+     *
      * @param axis the axis to use to convert pixel values into axis coordinates
      * @param centerPixelX the x center of the query box in pixel coordinates
      * @param centerPixelY the y center of the query box in pixel coordinates
@@ -780,32 +783,32 @@ public class TrackPainter extends GlimpseDataPainter2D
     {
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
-        
+
         double centerX = axisX.screenPixelToValue( centerPixelX );
         double centerY = axisY.screenPixelToValue( axisY.getSizePixels( ) - centerPixelY );
-        
+
         Collection<Point> points = getTimePixelRange( axis, startTimeRange.time, endTimeRange.time, centerX, centerY, maxPixelDistance * 2, maxPixelDistance * 2 );
-        
+
         Point minPoint = null;
         double minDistance = 0;
-        
+
         for ( Point point : points )
         {
             double pixelX = axisX.valueToScreenPixel( point.x );
             double pixelY = axisY.getSizePixels( ) - axisY.valueToScreenPixel( point.y );
-            
+
             double diffX = pixelX - centerPixelX;
             double diffY = pixelY - centerPixelY;
-            
+
             double dist = Math.sqrt( diffX * diffX + diffY * diffY );
-            
+
             if ( minPoint == null || dist < minDistance )
             {
                 minPoint = point;
                 minDistance = dist;
             }
         }
-        
+
         return minPoint;
     }
 
@@ -906,7 +909,7 @@ public class TrackPainter extends GlimpseDataPainter2D
                 continue;
             }
 
-            if ( point.compareTo( track.selectionStart ) >= 0 && point.compareTo( track.selectionEnd ) < 0 )
+            if ( comparator.compare( point, track.selectionStart ) >= 0 && comparator.compare( point, track.selectionEnd ) < 0 )
             {
                 result.add( point );
             }
@@ -932,7 +935,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         return result;
     }
 
-    protected void addPoint( int trackId, Point point )
+    protected void addPoint( Object trackId, Point point )
     {
         this.trackUpdateLock.lock( );
         try
@@ -951,7 +954,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     }
 
     // must be called while holding trackUpdateLock
-    protected Track getOrCreateTrack( int trackId )
+    protected Track getOrCreateTrack( Object trackId )
     {
         Track track = this.tracks.get( trackId );
 
@@ -974,7 +977,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    protected void notifyTemporalSelectionListeners( Map<Integer, Point> newTrackHeads )
+    protected void notifyTemporalSelectionListeners( Map<Object, Point> newTrackHeads )
     {
         for ( TemporalSelectionListener<Point> listener : temporalSelectionListeners )
         {
@@ -982,7 +985,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
     }
 
-    protected LoadedTrack getOrCreateLoadedTrack( int id, Track track )
+    protected LoadedTrack getOrCreateLoadedTrack( Object id, Track track )
     {
         LoadedTrack loaded = loadedTracks.get( id );
         if ( loaded == null )
@@ -1009,7 +1012,7 @@ public class TrackPainter extends GlimpseDataPainter2D
                 // loop through all tracks with new posits
                 for ( Track track : updatedTracks )
                 {
-                    int id = track.trackId;
+                    Object id = track.trackId;
 
                     if ( track.isDeletePending( ) || track.isClearPending( ) )
                     {
@@ -1248,7 +1251,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     private static class LoadedTrack
     {
         // the unique identifier of the track
-        int trackId;
+        Object trackId;
 
         // track display attributes
         float[] lineColor = new float[4];
@@ -1347,20 +1350,27 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
 
         @Override
-        public boolean equals( Object o )
+        public int hashCode( )
         {
-            if ( o == null ) return false;
-            if ( o == this ) return true;
-            if ( o.getClass( ) != this.getClass( ) ) return false;
-            LoadedTrack p = ( LoadedTrack ) o;
-            return p.trackId == trackId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ( ( trackId == null ) ? 0 : trackId.hashCode( ) );
+            return result;
         }
 
         @Override
-        public int hashCode( )
+        public boolean equals( Object obj )
         {
-            final int prime = 227;
-            return prime + trackId;
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            LoadedTrack other = ( LoadedTrack ) obj;
+            if ( trackId == null )
+            {
+                if ( other.trackId != null ) return false;
+            }
+            else if ( !trackId.equals( other.trackId ) ) return false;
+            return true;
         }
 
         public void dispose( GL gl )
@@ -1379,7 +1389,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     private class Track
     {
         // the unique identifier of the track
-        int trackId;
+        Object trackId;
         // the points making up the track
         List<Point> points;
         // the lowest index of the last change made to the track
@@ -1428,7 +1438,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         float[] headPointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         boolean headPointOn = false;
 
-        public Track( int trackId )
+        public Track( Object trackId )
         {
             this.trackId = trackId;
             this.points = new ArrayList<Point>( TRACK_SIZE_ESTIMATE );
@@ -1447,9 +1457,9 @@ public class TrackPainter extends GlimpseDataPainter2D
         {
             if ( selectionStart == null || selectionEnd == null || selectionCurrent == null ) return;
 
-            int startIndex = firstIndexAfter( selectionStart );
-            int endIndex = firstIndexBefore( selectionEnd );
-            int selectedIndex = firstIndexBefore( selectionCurrent );
+            int startIndex = firstIndexBeforeTime( selectionStart ) + 1;
+            int endIndex = firstIndexAfterTime( selectionEnd ) - 1;
+            int selectedIndex = firstIndexAfterTime( selectionCurrent ) - 1;
 
             Point previousTrackHead = trackHead;
 
@@ -1469,7 +1479,7 @@ public class TrackPainter extends GlimpseDataPainter2D
 
                 if ( selectedIndex > endIndex ) selectedIndex = endIndex;
                 if ( selectedIndex < startIndex ) selectedIndex = startIndex;
-                
+
                 trackHead = points.get( selectedIndex );
                 headPosX = trackHead.getX( );
                 headPosY = trackHead.getY( );
@@ -1576,11 +1586,11 @@ public class TrackPainter extends GlimpseDataPainter2D
             if ( _points == null || _points.size( ) == 0 ) return;
 
             List<Point> sortedPoints = new ArrayList<Point>( _points );
-            Collections.sort( sortedPoints );
+            Collections.sort( sortedPoints, comparator);
             Point firstPoint = sortedPoints.get( 0 );
 
             // add the point to the temporal and spatial indexes
-            int index = firstIndexAfter( firstPoint );
+            int index = firstIndexAfterTime( firstPoint );
 
             if ( index == points.size( ) )
             {
@@ -1590,7 +1600,7 @@ public class TrackPainter extends GlimpseDataPainter2D
             {
                 for ( Point point : sortedPoints )
                 {
-                    index = firstIndexAfter( firstPoint );
+                    index = firstIndexAfterTime( firstPoint );
                     points.add( index, point );
                 }
             }
@@ -1612,7 +1622,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         public void add( Point point )
         {
             // add the point to the temporal and spatial indexes
-            int index = firstIndexAfter( point );
+            int index = firstIndexAfterTime( point );
             points.add( index, point );
             if ( spatialIndex != null ) spatialIndex.add( point );
 
@@ -1644,17 +1654,29 @@ public class TrackPainter extends GlimpseDataPainter2D
             checkTimeRange( );
         }
 
-        public int firstIndexAfter( Point point )
+        public int firstIndexAfterTime( Point point )
         {
-            int index = Collections.binarySearch( points, point );
+            int index = Collections.binarySearch( points, point, comparator );
             if ( index < 0 ) index = - ( index + 1 );
+
+            while ( index < points.size() && points.get( index ).time == point.time )
+            {
+                index++;
+            }
+
             return index;
         }
 
-        public int firstIndexBefore( Point point )
+        public int firstIndexBeforeTime( Point point )
         {
-            int index = Collections.binarySearch( points, point );
+            int index = Collections.binarySearch( points, point, comparator );
             if ( index < 0 ) index = - ( index + 1 ) - 1;
+
+            while ( 0 <= index && points.get( index ).time == point.time )
+            {
+                index--;
+            }
+
             return index;
         }
 
@@ -1709,20 +1731,34 @@ public class TrackPainter extends GlimpseDataPainter2D
         }
 
         @Override
-        public boolean equals( Object o )
+        public int hashCode( )
         {
-            if ( o == null ) return false;
-            if ( o == this ) return true;
-            if ( o.getClass( ) != this.getClass( ) ) return false;
-            Track p = ( Track ) o;
-            return p.trackId == trackId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType( ).hashCode( );
+            result = prime * result + ( ( trackId == null ) ? 0 : trackId.hashCode( ) );
+            return result;
         }
 
         @Override
-        public int hashCode( )
+        public boolean equals( Object obj )
         {
-            final int prime = 227;
-            return prime + trackId;
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            Track other = ( Track ) obj;
+            if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
+            if ( trackId == null )
+            {
+                if ( other.trackId != null ) return false;
+            }
+            else if ( !trackId.equals( other.trackId ) ) return false;
+            return true;
+        }
+
+        private TrackPainter getOuterType( )
+        {
+            return TrackPainter.this;
         }
     }
 }

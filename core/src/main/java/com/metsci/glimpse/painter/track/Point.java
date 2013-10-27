@@ -27,14 +27,14 @@
 package com.metsci.glimpse.painter.track;
 
 import java.nio.FloatBuffer;
+import java.util.Comparator;
 
-import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.quadtree.Xy;
 
-public class Point implements Comparable<Point>, Xy
+public class Point implements Xy
 {
-    protected int trackId;
-    protected int pointId;
+    protected Object trackId;
+    protected Object pointId;
     protected float x;
     protected float y;
     protected long time;
@@ -46,7 +46,7 @@ public class Point implements Comparable<Point>, Xy
         this.pointId = Integer.MIN_VALUE;
     }
 
-    public Point( int trackId, int pointId, double x, double y, long time )
+    public Point( Object trackId, Object pointId, double x, double y, long time )
     {
         this.trackId = trackId;
         this.pointId = pointId;
@@ -55,7 +55,7 @@ public class Point implements Comparable<Point>, Xy
         this.time = time;
     }
 
-    public Point( int trackId, int pointId, float x, float y, long time )
+    public Point( Object trackId, Object pointId, float x, float y, long time )
     {
         this.trackId = trackId;
         this.pointId = pointId;
@@ -79,12 +79,12 @@ public class Point implements Comparable<Point>, Xy
         return y;
     }
 
-    public int getPointId( )
+    public Object getPointId( )
     {
         return pointId;
     }
 
-    public int getTrackId( )
+    public Object getTrackId( )
     {
         return trackId;
     }
@@ -94,7 +94,7 @@ public class Point implements Comparable<Point>, Xy
         return time;
     }
 
-    public int getId( )
+    public Object getId( )
     {
         return pointId;
     }
@@ -112,43 +112,56 @@ public class Point implements Comparable<Point>, Xy
     }
 
     @Override
-    public boolean equals( Object o )
+    public int hashCode( )
     {
-        if ( o == null ) return false;
-        if ( o == this ) return true;
-        if ( o.getClass( ) != this.getClass( ) ) return false;
-        Point p = ( Point ) o;
-        return p.trackId == trackId && p.pointId == pointId && p.time == time;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ( ( pointId == null ) ? 0 : pointId.hashCode( ) );
+        result = prime * result + ( int ) ( time ^ ( time >>> 32 ) );
+        result = prime * result + ( ( trackId == null ) ? 0 : trackId.hashCode( ) );
+        return result;
     }
 
     @Override
-    public int compareTo( Point p )
+    public boolean equals( Object obj )
     {
-        if ( time < p.time )
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( getClass( ) != obj.getClass( ) ) return false;
+        Point other = ( Point ) obj;
+        if ( pointId == null )
         {
-            return -1;
+            if ( other.pointId != null ) return false;
         }
-        else if ( time > p.time )
+        else if ( !pointId.equals( other.pointId ) ) return false;
+        if ( time != other.time ) return false;
+        if ( trackId == null )
         {
-            return 1;
+            if ( other.trackId != null ) return false;
         }
-        else
+        else if ( !trackId.equals( other.trackId ) ) return false;
+        return true;
+    }
+
+    @Override
+    public String toString( )
+    {
+        return "[ " + pointId + ", " + trackId + ", " + time + " ]";
+    }
+
+    public static Comparator<Point> getTimeComparator( )
+    {
+
+        return new Comparator<Point>( )
         {
-            if ( trackId < p.trackId )
+            @Override
+            public int compare( Point o1, Point o2 )
             {
-                return -1;
-            }
-            else if ( trackId > p.trackId )
-            {
-                return 1;
-            }
-            else
-            {
-                if ( pointId < p.pointId )
+                if ( o1.time < o2.time )
                 {
                     return -1;
                 }
-                else if ( pointId > p.pointId )
+                else if ( o1.time > o2.time )
                 {
                     return 1;
                 }
@@ -157,23 +170,6 @@ public class Point implements Comparable<Point>, Xy
                     return 0;
                 }
             }
-        }
-    }
-
-    @Override
-    public int hashCode( )
-    {
-        final int prime = 227;
-        int result = 1;
-        result = prime * result + trackId;
-        result = prime * result + pointId;
-        result = prime * result + GeneralUtils.hashCode( time );
-        return result;
-    }
-
-    @Override
-    public String toString( )
-    {
-        return "[ " + pointId + ", " + trackId + ", " + time + " ]";
+        };
     }
 }
