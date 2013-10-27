@@ -67,6 +67,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
+                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                             <includeScope>compile</includeScope>
                             <classifier>sources</classifier>
                             <outputDirectory>${project.build.directory}/sources</outputDirectory>
