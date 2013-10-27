@@ -5,4 +5,4 @@ title: Glimpse 2.0.1 Release
 
 <p>Glimpse 2.0.1 provides minor bug fixes for issues caused by the move to JOGL 2.0 and by the refactoring performed as part of the Glimpse 2.0 release. It also provides a number of <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/plot/timeline/StackedTimePlot2D.java">StackedTimePlot2D</a> API improvements.</p>
 
-<p>Note, Glimpse 2 is still quite new, and some of the API and feature changes from Glimpse 1 are still being worked out. As a result, upgrading to 2.0.1 from 2.0.0 may require some minor refactoring. Please post in the <a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">Glimpse</a> Forum for help.
+<p>Note, Glimpse 2 is still quite new, and some of the API and feature changes from Glimpse 1 are still being worked out. As a result, upgrading to 2.0.1 from 2.0.0 may require some minor refactoring. Please post in the <a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">Glimpse Forum</a> for help.
