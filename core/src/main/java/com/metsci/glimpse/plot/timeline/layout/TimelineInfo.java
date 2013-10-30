@@ -223,9 +223,6 @@ public class TimelineInfo extends PlotInfoWrapper
     @Override
     public void updateLayout( int index )
     {
-        // grow if no other plots are growing
-        setGrow( !doAnyOtherPlotsGrow( ) );
-
         super.updateLayout( index );
 
         if ( timeLayout == null ) return;
@@ -233,11 +230,11 @@ public class TimelineInfo extends PlotInfoWrapper
         // push the timeline plot over so that it lines up with the plot labels
         if ( plot.isTimeAxisHorizontal( ) )
         {
-            timeLayout.setLayoutData( String.format( "push, grow, gapleft %d!", plot.getLabelSize( ) ) );
+            timeLayout.setLayoutData( String.format( "push x, grow x, gapleft %d!", plot.getLabelSize( ) ) );
         }
         else
         {
-            timeLayout.setLayoutData( String.format( "push, grow, gaptop %d!", plot.getLabelSize( ) ) );
+            timeLayout.setLayoutData( String.format( "push y, grow y, gaptop %d!", plot.getLabelSize( ) ) );
         }
     }
 }
