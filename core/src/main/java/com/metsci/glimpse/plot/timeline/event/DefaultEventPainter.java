@@ -140,9 +140,9 @@ public class DefaultEventPainter implements EventPainter
         arrowBaseMin = Math.min( timeMax, arrowBaseMin );
 
         double timeSpan = arrowBaseMax - arrowBaseMin;
-        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
+        double remainingSpace = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
-        int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
+        int pixel = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
 
         // start positions of the next event in this row
         double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : axis.getMax( );
@@ -239,17 +239,17 @@ public class DefaultEventPainter implements EventPainter
                 final int numRows = maxIconRows;
                 int iconSizePixels = size / numRows;
 
-                int columnsByAvailableSpace = ( int ) Math.floor( remainingSpaceX / ( double ) iconSizePixels );
+                int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePixels );
                 int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
                 int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
 
                 double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
                 int totalIconWidthPixels = iconSizePixels * numColumns;
 
-                event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
+                event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel );
                 if ( event.isIconVisible )
                 {
-                    double valueX = axis.screenPixelToValue( pixelX );
+                    double valueX = axis.screenPixelToValue( pixel );
                     event.iconStartTime = epoch.toTimeStamp( valueX );
                     event.iconEndTime = event.iconStartTime.add( totalIconWidthPixels / axis.getPixelsPerValue( ) );
 
@@ -297,8 +297,8 @@ public class DefaultEventPainter implements EventPainter
                         atlas.endRendering( );
                     }
 
-                    remainingSpaceX -= totalIconWidthPixels + buffer;
-                    pixelX += totalIconWidthPixels + buffer;
+                    remainingSpace -= totalIconWidthPixels + buffer;
+                    pixel += totalIconWidthPixels + buffer;
                 }
             }
             else
@@ -306,11 +306,11 @@ public class DefaultEventPainter implements EventPainter
                 //XXX there is currently no way for custom subclasses of EventPainter to properly
                 //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
                 //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
-                event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+                event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpace, pixel, nextStartPixel );
 
                 if ( event.isIconVisible )
                 {
-                    double valueX = axis.screenPixelToValue( pixelX );
+                    double valueX = axis.screenPixelToValue( pixel );
                     event.iconStartTime = epoch.toTimeStamp( valueX );
                     event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
 
@@ -328,8 +328,8 @@ public class DefaultEventPainter implements EventPainter
                         atlas.endRendering( );
                     }
 
-                    remainingSpaceX -= size + buffer;
-                    pixelX += size + buffer;
+                    remainingSpace -= size + buffer;
+                    pixel += size + buffer;
                 }
             }
 
@@ -338,10 +338,10 @@ public class DefaultEventPainter implements EventPainter
                 TextRenderer textRenderer = info.getTextRenderer( );
                 Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
 
-                boolean isTextOverfull = event.isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextIntersecting = event.isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
+                boolean isTextOverfull = event.isTextOverfull( size, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
+                boolean isTextIntersecting = event.isTextIntersecting( size, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
                 boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == HideAll );
-                double availableSpace = event.getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
+                double availableSpace = event.getTextAvailableSpace( size, buffer, remainingSpace, pixel, nextStartPixel );
 
                 event.isTextVisible = !isTextOverlappingAndHidden;
 
@@ -356,7 +356,7 @@ public class DefaultEventPainter implements EventPainter
                         displayBounds = textRenderer.getBounds( displayText );
                     }
 
-                    double valueX = axis.screenPixelToValue( pixelX );
+                    double valueX = axis.screenPixelToValue( pixel );
                     event.textStartTime = epoch.toTimeStamp( valueX );
                     event.textEndTime = event.textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
 
@@ -383,10 +383,10 @@ public class DefaultEventPainter implements EventPainter
                         // use the labelBounds for the height (if the text shortening removed a character which
                         // hangs below the line, we don't want the text position to move)
                         int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
-                        textRenderer.draw( displayText, pixelX, pixelY );
+                        textRenderer.draw( displayText, pixel, pixelY );
 
-                        remainingSpaceX -= displayBounds.getWidth( ) + buffer;
-                        pixelX += displayBounds.getWidth( ) + buffer;
+                        remainingSpace -= displayBounds.getWidth( ) + buffer;
+                        pixel += displayBounds.getWidth( ) + buffer;
                     }
                     finally
                     {
@@ -401,35 +401,112 @@ public class DefaultEventPainter implements EventPainter
         }
         else
         {
-            //TODO handle drawing text and icons in HORIZONTAL orientation
+            if ( !offEdgeMin && !offEdgeMax )
+            {
+                if ( event.isShowBackground( ) )
+                {
+                    GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
+                    gl.glBegin( GL2.GL_QUADS );
+                    try
+                    {
+                        gl.glVertex2d( posMin, timeMin );
+                        gl.glVertex2d( posMax, timeMin );
+                        gl.glVertex2d( posMax, timeMax );
+                        gl.glVertex2d( posMin, timeMax );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+    
+                if ( event.isShowBorder( ) )
+                {
+                    GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
+                    gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
+                    gl.glBegin( GL2.GL_LINE_LOOP );
+                    try
+                    {
+                        gl.glVertex2d( posMin, timeMin );
+                        gl.glVertex2d( posMax, timeMin );
+                        gl.glVertex2d( posMax, timeMax );
+                        gl.glVertex2d( posMin, timeMax );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
+            }
+            else
+            {
+                if ( event.isShowBackground( ) )
+                {
+                    GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
+                    gl.glBegin( GL2.GL_POLYGON );
+                    try
+                    {
+                        gl.glVertex2d( posMax, arrowBaseMin );
+                        gl.glVertex2d( posMax, arrowBaseMax );
+                        gl.glVertex2d( sizeCenter, timeMax );
+                        gl.glVertex2d( posMin, arrowBaseMax );
+                        gl.glVertex2d( posMin, arrowBaseMin );
+                        gl.glVertex2d( sizeCenter, timeMin );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
 
-            GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-            gl.glBegin( GL2.GL_QUADS );
-            try
-            {
-                gl.glVertex2d( posMin, timeMin );
-                gl.glVertex2d( posMax, timeMin );
-                gl.glVertex2d( posMax, timeMax );
-                gl.glVertex2d( posMin, timeMax );
+                if ( event.isShowBorder( ) )
+                {
+                    GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
+                    gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
+                    gl.glBegin( GL2.GL_LINE_LOOP );
+                    try
+                    {
+                        gl.glVertex2d( posMax, arrowBaseMin );
+                        gl.glVertex2d( posMax, arrowBaseMax );
+                        gl.glVertex2d( sizeCenter, timeMax );
+                        gl.glVertex2d( posMin, arrowBaseMax );
+                        gl.glVertex2d( posMin, arrowBaseMin );
+                        gl.glVertex2d( sizeCenter, timeMin );
+                    }
+                    finally
+                    {
+                        gl.glEnd( );
+                    }
+                }
             }
-            finally
-            {
-                gl.glEnd( );
-            }
+            
+            //XXX there is currently no way for custom subclasses of EventPainter to properly
+            //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
+            //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
+            event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpace, pixel, nextStartPixel );
 
-            GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
-            gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-            gl.glBegin( GL2.GL_LINE_LOOP );
-            try
+            if ( event.isIconVisible )
             {
-                gl.glVertex2d( posMin, timeMin );
-                gl.glVertex2d( posMax, timeMin );
-                gl.glVertex2d( posMax, timeMax );
-                gl.glVertex2d( posMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
+                double value = axis.screenPixelToValue( pixel );
+                event.iconStartTime = epoch.toTimeStamp( value );
+                event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
+
+                TextureAtlas atlas = info.getTextureAtlas( );
+                atlas.beginRendering( );
+                try
+                {
+                    ImageData iconData = atlas.getImageData( event.getIconId( ) );
+                    double iconScale = size / ( double ) iconData.getHeight( );
+
+                    atlas.drawImageAxisY( gl, event.getIconId( ), axis, posMin, value, iconScale, iconScale, 0, iconData.getHeight( ) );
+                }
+                finally
+                {
+                    atlas.endRendering( );
+                }
+
+                remainingSpace -= size + buffer;
+                pixel += size + buffer;
             }
         }
     }
