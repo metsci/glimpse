@@ -415,8 +415,8 @@ public class DefaultEventPainter implements EventPainter
                     displayBounds = textRenderer.getBounds( displayText );
                 }
 
-                double valueX = axis.screenPixelToValue( pixel );
-                event.textStartTime = epoch.toTimeStamp( valueX );
+                double value = axis.screenPixelToValue( pixel );
+                event.textStartTime = epoch.toTimeStamp( value );
                 event.textEndTime = event.textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
 
                 // use this event's text color if it has been set
@@ -436,20 +436,50 @@ public class DefaultEventPainter implements EventPainter
                     GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
                 }
 
-                textRenderer.beginRendering( width, height );
-                try
+                if ( horiz )
                 {
-                    // use the labelBounds for the height (if the text shortening removed a character which
-                    // hangs below the line, we don't want the text position to move)
-                    int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
-                    textRenderer.draw( displayText, pixel, pixelY );
-
-                    remainingSpace -= displayBounds.getWidth( ) + buffer;
-                    pixel += displayBounds.getWidth( ) + buffer;
+                    textRenderer.beginRendering( width, height );
+                    try
+                    {
+                        // use the labelBounds for the height (if the text shortening removed a character which
+                        // hangs below the line, we don't want the text position to move)
+                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
+                        textRenderer.draw( displayText, pixel, pixelY );
+    
+                        remainingSpace -= displayBounds.getWidth( ) + buffer;
+                        pixel += displayBounds.getWidth( ) + buffer;
+                    }
+                    finally
+                    {
+                        textRenderer.endRendering( );
+                    }
                 }
-                finally
+                else
                 {
-                    textRenderer.endRendering( );
+                    textRenderer.beginRendering( width, height );
+                    try
+                    {
+                        double shiftX = size / 2.0 + posMin;
+                        int pixelX = ( int ) shiftX;
+                     
+                        double shiftY = pixel;
+                        int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
+
+                        gl.glMatrixMode( GL2.GL_PROJECTION );
+                        
+                        gl.glTranslated( shiftX, shiftY, 0 );
+                        gl.glRotated( 90, 0, 0, 1.0f );
+                        gl.glTranslated( -shiftX, -shiftY, 0 );
+                        
+                        textRenderer.draw( displayText, pixelX, pixelY );
+    
+                        remainingSpace -= displayBounds.getWidth( ) + buffer;
+                        pixel += displayBounds.getWidth( ) + buffer;
+                    }
+                    finally
+                    {
+                        textRenderer.endRendering( );
+                    }
                 }
             }
         }
