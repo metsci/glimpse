@@ -585,26 +585,23 @@ public class EventManager
         lock.lock( );
         try
         {
-            if ( isHorizontal )
+            Row row = getNearestRow( e );
+
+            if ( row != null )
             {
-                Row row = getNearestRow( e );
+                Axis1D axis = e.getAxis1D( );
+                double value = isHorizontal ? e.getAxisCoordinatesX( ) : e.getAxisCoordinatesY( );
+                double buffer = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
 
-                if ( row != null )
-                {
-                    Axis1D axis = e.getAxis1D( );
-                    double valueX = axis.screenPixelToValue( e.getX( ) );
-                    double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
+                Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
 
-                    Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
+                TimeStamp time = epoch.toTimeStamp( value );
+                TimeStamp timeStart = epoch.toTimeStamp( value - buffer );
+                TimeStamp timeEnd = epoch.toTimeStamp( value + buffer );
 
-                    TimeStamp time = epoch.toTimeStamp( valueX );
-                    TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
-                    TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
-
-                    Set<Event> events = row.getNearestVisibleEvents( timeStart, timeEnd );
-                    Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
-                    return eventSelections;
-                }
+                Set<Event> events = row.getNearestVisibleEvents( timeStart, timeEnd );
+                Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
+                return eventSelections;
             }
 
             return Collections.emptySet( );
@@ -626,9 +623,8 @@ public class EventManager
         try
         {
             Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
-            Axis1D axis = e.getAxis1D( );
-            double valueX = axis.screenPixelToValue( e.getX( ) );
-            TimeStamp time = epoch.toTimeStamp( valueX );
+            double value = isHorizontal ? e.getAxisCoordinatesX( ) : e.getAxisCoordinatesY( );
+            TimeStamp time = epoch.toTimeStamp( value );
 
             double bestDist = Double.MAX_VALUE;
             EventSelection bestEvent = null;
@@ -676,17 +672,14 @@ public class EventManager
     // must be called while holding lock
     protected Row getNearestRow( GlimpseMouseEvent e )
     {
-        if ( isHorizontal )
+        int value = isHorizontal ? e.getY( ) : e.getTargetStack( ).getBounds( ).getWidth( ) - e.getX( );
+
+        int rowIndex = ( int ) Math.floor( value / ( double ) ( info.getRowSize( ) + info.getEventPadding( ) ) );
+        rowIndex = info.getRowCount( ) - 1 - rowIndex;
+
+        if ( rowIndex >= 0 && rowIndex < rows.size( ) )
         {
-            int valueY = e.getY( );
-
-            int rowIndex = ( int ) Math.floor( valueY / ( double ) ( info.getRowSize( ) + info.getEventPadding( ) ) );
-            rowIndex = info.getRowCount( ) - 1 - rowIndex;
-
-            if ( rowIndex >= 0 && rowIndex < rows.size( ) )
-            {
-                return rows.get( rowIndex );
-            }
+            return rows.get( rowIndex );
         }
 
         return null;
@@ -900,9 +893,6 @@ public class EventManager
     // make a new row (which will have no overlaps. If we're constrained
     // regarding the number of rows we can create, we may have to accept
     // some overlaps.
-    //
-    // "least" overlap is defined by the total amount of overlap time
-    // TODO: this doesn't work well with zero duration events...
     private Row getRowWithLeastOverlaps( Event event )
     {
         int size = rows.size( );
