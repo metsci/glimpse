@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.examples;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
-
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
@@ -82,20 +82,23 @@ public class Example
         return layout;
     }
 
-    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profile ) throws Exception
+    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profileString ) throws Exception
     {
-        // generate a GLContext by constructing a small offscreen pixel buffer
-        final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
-        final GLContext context = pBuffer.getContext( );
+        // generate a GLContext by constructing a small offscreen framebuffer
+        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
+        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
+        GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+        GLContext context = glDrawable.getContext( );
         
         // create a SwingGlimpseCanvas which shares the context
         // other canvases could also be created which all share resources through this context
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( profile, context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( profileString, context );
 
         // create a top level GlimpseLayout which we can add painters and other layouts to
         GlimpseLayout layout = layoutProvider.getLayout( );
         canvas.addLayout( layout );
-        
+
         // set a look and feel on the canvas (this will be applied to all attached layouts and painters)
         // the look and feel affects default colors, fonts, etc...
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
@@ -107,7 +110,7 @@ public class Example
         final JFrame frame = new JFrame( "Glimpse Example" );
 
         // add a listener which will dispose of canvas resources when the JFrame is closed
-        canvas.addDisposeListener( frame, pBuffer );
+        canvas.addDisposeListener( frame );
 
         // add the GlimpseCanvas to the frame
         frame.add( canvas );
@@ -128,8 +131,12 @@ public class Example
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
-        final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
-        final GLContext context = pBuffer.getContext( );
+        // generate a GLContext by constructing a small offscreen framebuffer
+        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
+        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
+        GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+        GLContext context = glDrawable.getContext( );
 
         NewtSwingGlimpseCanvas leftPanel = new NewtSwingGlimpseCanvas( context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
@@ -143,7 +150,7 @@ public class Example
         repaintManager.start( );
 
         JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
-        rightPanel.addDisposeListener( rightFrame, pBuffer );
+        rightPanel.addDisposeListener( rightFrame );
         rightFrame.add( rightPanel );
 
         rightFrame.pack( );
@@ -153,7 +160,7 @@ public class Example
         rightFrame.setVisible( true );
 
         JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
-        leftPanel.addDisposeListener( leftFrame, pBuffer );
+        leftPanel.addDisposeListener( leftFrame );
         leftFrame.add( leftPanel );
 
         leftFrame.pack( );
