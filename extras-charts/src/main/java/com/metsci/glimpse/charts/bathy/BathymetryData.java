@@ -40,6 +40,7 @@ import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
@@ -186,6 +187,8 @@ public class BathymetryData
 
             data[x][y] = row.depth;
         }
+        
+        startLon = Angle.normalizeAngle180( startLon );
     }
 
     public FloatTextureProjected2D getTexture( )
