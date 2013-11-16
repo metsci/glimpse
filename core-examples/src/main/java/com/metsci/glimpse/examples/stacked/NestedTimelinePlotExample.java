@@ -29,7 +29,6 @@ package com.metsci.glimpse.examples.stacked;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 
@@ -37,9 +36,7 @@ public class NestedTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example example = Example.showWithSwing( new NestedTimelinePlotExample( ) );
-
-        new DragManager( ( CollapsibleTimePlot2D ) example.getLayout( ), example.getManager( ) );
+        Example.showWithSwing( new NestedTimelinePlotExample( ) );
     }
 
     @Override
@@ -89,6 +86,10 @@ public class NestedTimelinePlotExample extends HorizontalTimelinePlotExample
         group3.setLabelText( "Group 3" );
 
         plot.setIndentSubplots( true );
+
+        GroupInfo g = plot.createGroup( );
+
+        group5.addChildPlot( g );
 
         return plot;
     }

@@ -971,9 +971,14 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     public TimeStamp getTime( GlimpseMouseEvent e )
     {
-        Axis1D axis = e.getAxis1D( );
-        double valueX = axis.screenPixelToValue( e.getX( ) );
-        return getEpoch( ).toTimeStamp( valueX );
+        if ( isTimeAxisHorizontal( ) )
+        {
+            return getEpoch( ).toTimeStamp( e.getAxisCoordinatesX( ) );
+        }
+        else
+        {
+            return getEpoch( ).toTimeStamp( e.getAxisCoordinatesY( ) );
+        }
     }
 
     protected void initializeTimeAxis( )
@@ -1068,11 +1073,6 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     protected EventPlotInfo createEventPlot( Object id, TextureAtlas atlas )
     {
-        if ( !isTimeAxisHorizontal( ) )
-        {
-            throw new UnsupportedOperationException( "Event Plots are currently not supported by HORIZTONAL StackedTimePlot2D" );
-        }
-
         this.lock.lock( );
         try
         {
@@ -1100,8 +1100,17 @@ public class StackedTimePlot2D extends StackedPlot2D
         // don't show grid lines
         timePlot.getGridPainter( ).setVisible( false );
         // center the labels because the plots are so small anyway
-        timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
-
+        if ( isTimeAxisHorizontal( ) )
+        {
+            timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
+            timePlot.getLabelPainter( ).setHorizontalPosition( HorizontalPosition.Left );
+        }
+        else
+        {
+            timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
+            timePlot.getLabelPainter( ).setHorizontalPosition( HorizontalPosition.Center );
+        }
+        
         // the TimeAxisMouseListener1D for all plots is attached to the underlay layout
         // thus we need to let events fall through if they are not handled
         timePlot.getLayout( ).setEventConsumer( false );

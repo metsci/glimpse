@@ -236,44 +236,41 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         @Override
         public void mousePressed( GlimpseMouseEvent e )
         {
-            if ( isHorizontal )
+            TimeStamp time = getTime( e );
+            Set<EventSelection> tempEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
+
+            for ( EventPlotListener listener : eventListeners )
             {
-                TimeStamp time = getTime( e );
-                Set<EventSelection> tempEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
+                listener.eventsClicked( e, tempEvents, time );
+            }
 
-                for ( EventPlotListener listener : eventListeners )
+            EventSelection eventSelection = eventManager.getNearestEvent( tempEvents, e );
+            if ( eventSelection != null )
+            {
+                Event event = eventSelection.getEvent( );
+
+                if ( event.isSelectable( ) )
                 {
-                    listener.eventsClicked( e, tempEvents, time );
-                }
-
-                EventSelection eventSelection = eventManager.getNearestEvent( tempEvents, e );
-                if ( eventSelection != null )
-                {
-                    Event event = eventSelection.getEvent( );
-
-                    if ( event.isSelectable( ) )
+                    if ( e.isKeyDown( ModifierKey.Ctrl ) )
                     {
-                        if ( e.isKeyDown( ModifierKey.Ctrl ) )
+                        if ( selectionHandler.isEventSelected( event ) )
                         {
-                            if ( selectionHandler.isEventSelected( event ) )
-                            {
-                                selectionHandler.removeSelectedEvent( event );
-                            }
-                            else
-                            {
-                                selectionHandler.addSelectedEvent( event );
-                            }
+                            selectionHandler.removeSelectedEvent( event );
                         }
                         else
                         {
-                            selectionHandler.setSelectedEvents( Collections.singleton( event ) );
+                            selectionHandler.addSelectedEvent( event );
                         }
                     }
+                    else
+                    {
+                        selectionHandler.setSelectedEvents( Collections.singleton( event ) );
+                    }
                 }
-                else if ( selectionHandler.isClearSelectionOnClick( ) )
-                {
-                    selectionHandler.clearSelectedEvents( );
-                }
+            }
+            else if ( selectionHandler.isClearSelectionOnClick( ) )
+            {
+                selectionHandler.clearSelectedEvents( );
             }
         }
 
@@ -290,30 +287,27 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         @Override
         public void mouseMoved( GlimpseMouseEvent e )
         {
-            if ( isHorizontal )
+            TimeStamp time = getTime( e );
+            Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
+
+            SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
+            for ( EventPlotListener listener : eventListeners )
             {
-                TimeStamp time = getTime( e );
-                Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
-
-                SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
-                for ( EventPlotListener listener : eventListeners )
-                {
-                    listener.eventsExited( e, eventsExited, time );
-                }
-
-                SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
-                for ( EventPlotListener listener : eventListeners )
-                {
-                    listener.eventsEntered( e, eventsEntered, time );
-                }
-
-                for ( EventPlotListener listener : eventListeners )
-                {
-                    listener.eventsHovered( e, newHoveredEvents, time );
-                }
-
-                hoveredEvents = Sets.newHashSet( newHoveredEvents );
+                listener.eventsExited( e, eventsExited, time );
             }
+
+            SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
+            for ( EventPlotListener listener : eventListeners )
+            {
+                listener.eventsEntered( e, eventsEntered, time );
+            }
+
+            for ( EventPlotListener listener : eventListeners )
+            {
+                listener.eventsHovered( e, newHoveredEvents, time );
+            }
+
+            hoveredEvents = Sets.newHashSet( newHoveredEvents );
         }
     }
 

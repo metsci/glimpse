@@ -355,8 +355,10 @@ public class TooltipPainter extends SimpleTextPainter
         {
             updateLayout( );
         }
+        
+        final List<TextBoundingBox> tempLines = lines;
 
-        if ( textRenderer == null || lines == null ) return;
+        if ( textRenderer == null || tempLines == null ) return;
 
         GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
@@ -429,9 +431,9 @@ public class TooltipPainter extends SimpleTextPainter
         textRenderer.beginRendering( width, height );
         try
         {
-            for ( int i = 0; i < lines.size( ); i++ )
+            for ( int i = 0; i < tempLines.size( ); i++ )
             {
-                TextBoundingBox line = lines.get( i );
+                TextBoundingBox line = tempLines.get( i );
 
                 float iconSize = getIconSpacing( i );
 
@@ -446,7 +448,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         // draw icon
-        if ( !lines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
+        if ( !tempLines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
         {
             atlas.beginRendering( );
             try
@@ -455,7 +457,7 @@ public class TooltipPainter extends SimpleTextPainter
                 {
                     Object iconId = iconIds.get( i );
                     ImageData iconData = icons.get( i );
-                    TextBoundingBox line = lines.get( i );
+                    TextBoundingBox line = tempLines.get( i );
 
                     if ( iconId != null && iconData != null && line != null )
                     {
