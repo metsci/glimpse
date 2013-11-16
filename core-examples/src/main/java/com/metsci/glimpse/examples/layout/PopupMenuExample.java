@@ -28,8 +28,6 @@ package com.metsci.glimpse.examples.layout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -63,18 +61,7 @@ public class PopupMenuExample
 
         final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
 
-        frame.addWindowListener( new WindowAdapter( )
-        {
-            @Override
-            public void windowClosing( WindowEvent e )
-            {
-                // dispose of resources associated with the canvas
-                canvas.dispose( );
-
-                // remove the canvas from the frame
-                frame.remove( canvas );
-            }
-        } );
+        canvas.addDisposeListener( frame );
 
         frame.add( canvas );
 

@@ -43,6 +43,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.interval.Keyed;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -57,7 +58,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * 
  * @author ulman
  */
-public class Event implements Iterable<Event>
+public class Event implements Iterable<Event>, Keyed<TimeStamp>
 {
     protected EventPlotInfo info;
 
@@ -580,24 +581,6 @@ public class Event implements Iterable<Event>
     }
 
     /**
-     * @deprecated use {@link #getLabel()}
-     * @return
-     */
-    public String getName( )
-    {
-        return label;
-    }
-
-    /**
-     * @deprecated use {@link #setLabel(String)}
-     * @return
-     */
-    public void setName( String name )
-    {
-        this.label = name;
-    }
-
-    /**
      * @see #setIconId(Object)
      * @return the identifier for the icon displayed inside the Event box on the timeline.
      */
@@ -796,6 +779,7 @@ public class Event implements Iterable<Event>
     /**
      * @return the start / earliest / left-edge TimeStamp for this Event.
      */
+    @Override
     public TimeStamp getStartTime( )
     {
         return startTime;
@@ -818,6 +802,7 @@ public class Event implements Iterable<Event>
     /**
      * @return the end / latest / right-edge TimeStamp for this Event.
      */
+    @Override
     public TimeStamp getEndTime( )
     {
         return endTime;

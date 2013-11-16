@@ -83,12 +83,12 @@ public class EventManager
         int index;
 
         // all Events in the Row
-        IntervalSortedMultimap events;
+        EventIntervalSortedMultimap events;
 
         // all visible Events in the Row (some Events may be aggregated)
         // will not be filled in if aggregation is not turned on (in that
         // case it is unneeded because the events map can be queried instead)
-        IntervalSortedMultimap visibleAggregateEvents;
+        EventIntervalSortedMultimap visibleAggregateEvents;
 
         // all visible Events (including aggregated events, if turned on)
         // sorted by starting timestamp
@@ -97,19 +97,19 @@ public class EventManager
         public Row( int index )
         {
             this.index = index;
-            this.visibleAggregateEvents = new IntervalSortedMultimap( );
-            this.events = new IntervalSortedMultimap( );
+            this.visibleAggregateEvents = new EventIntervalSortedMultimap( );
+            this.events = new EventIntervalSortedMultimap( );
         }
 
         public void addEvent( Event event )
         {
-            this.events.addEvent( event );
+            this.events.add( event );
             rowMap.put( event.getId( ), this );
         }
 
         public void removeEvent( Event event )
         {
-            this.events.removeEvent( event );
+            this.events.remove( event );
             rowMap.remove( event.getId( ) );
         }
 
@@ -142,7 +142,7 @@ public class EventManager
             SetMultimap<TimeStamp, Event> visibleMultimap = this.events.getMap( expandedMin, true, expandedMax, true );
             SortedMap<TimeStamp, Collection<Event>> visibleMap = ( SortedMap<TimeStamp, Collection<Event>> ) visibleMultimap.asMap( );
 
-            IntervalSortedMultimap map = new IntervalSortedMultimap( );
+            EventIntervalSortedMultimap map = new EventIntervalSortedMultimap( );
 
             Set<Event> children = new HashSet<Event>( );
             TimeStamp childrenMin = null;
@@ -180,7 +180,7 @@ public class EventManager
                     // otherwise just add it to the result map
                     else
                     {
-                        if ( isVisible( event, min, max ) ) map.addEvent( event );
+                        if ( isVisible( event, min, max ) ) map.add( event );
                     }
                 }
             }
@@ -192,20 +192,20 @@ public class EventManager
             this.visibleEvents = map.getStartMap( );
         }
 
-        protected void addAggregateEvent( IntervalSortedMultimap map, Set<Event> children, TimeStamp childrenMin, TimeStamp childrenMax, TimeStamp min, TimeStamp max )
+        protected void addAggregateEvent( EventIntervalSortedMultimap map, Set<Event> children, TimeStamp childrenMin, TimeStamp childrenMax, TimeStamp min, TimeStamp max )
         {
             // if there is only one or zero events in the current group, just add a regular event
             if ( children.size( ) <= 1 )
             {
                 for ( Event child : children )
-                    if ( isVisible( child, min, max ) ) map.addEvent( child );
+                    if ( isVisible( child, min, max ) ) map.add( child );
             }
             // otherwise create an aggregate group and add it to the result map
             else
             {
                 AggregateEvent aggregate = new AggregateEvent( children, childrenMin, childrenMax );
 
-                if ( isVisible( aggregate, min, max ) ) map.addEvent( aggregate );
+                if ( isVisible( aggregate, min, max ) ) map.add( aggregate );
             }
         }
 
@@ -585,26 +585,23 @@ public class EventManager
         lock.lock( );
         try
         {
-            if ( isHorizontal )
+            Row row = getNearestRow( e );
+
+            if ( row != null )
             {
-                Row row = getNearestRow( e );
+                Axis1D axis = e.getAxis1D( );
+                double value = isHorizontal ? e.getAxisCoordinatesX( ) : e.getAxisCoordinatesY( );
+                double buffer = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
 
-                if ( row != null )
-                {
-                    Axis1D axis = e.getAxis1D( );
-                    double valueX = axis.screenPixelToValue( e.getX( ) );
-                    double bufferX = PICK_BUFFER_PIXELS / axis.getPixelsPerValue( );
+                Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
 
-                    Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
+                TimeStamp time = epoch.toTimeStamp( value );
+                TimeStamp timeStart = epoch.toTimeStamp( value - buffer );
+                TimeStamp timeEnd = epoch.toTimeStamp( value + buffer );
 
-                    TimeStamp time = epoch.toTimeStamp( valueX );
-                    TimeStamp timeStart = epoch.toTimeStamp( valueX - bufferX );
-                    TimeStamp timeEnd = epoch.toTimeStamp( valueX + bufferX );
-
-                    Set<Event> events = row.getNearestVisibleEvents( timeStart, timeEnd );
-                    Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
-                    return eventSelections;
-                }
+                Set<Event> events = row.getNearestVisibleEvents( timeStart, timeEnd );
+                Set<EventSelection> eventSelections = createEventSelection( axis, events, time );
+                return eventSelections;
             }
 
             return Collections.emptySet( );
@@ -626,9 +623,8 @@ public class EventManager
         try
         {
             Epoch epoch = info.getStackedTimePlot( ).getEpoch( );
-            Axis1D axis = e.getAxis1D( );
-            double valueX = axis.screenPixelToValue( e.getX( ) );
-            TimeStamp time = epoch.toTimeStamp( valueX );
+            double value = isHorizontal ? e.getAxisCoordinatesX( ) : e.getAxisCoordinatesY( );
+            TimeStamp time = epoch.toTimeStamp( value );
 
             double bestDist = Double.MAX_VALUE;
             EventSelection bestEvent = null;
@@ -676,17 +672,14 @@ public class EventManager
     // must be called while holding lock
     protected Row getNearestRow( GlimpseMouseEvent e )
     {
-        if ( isHorizontal )
+        int value = isHorizontal ? e.getY( ) : e.getTargetStack( ).getBounds( ).getWidth( ) - e.getX( );
+
+        int rowIndex = ( int ) Math.floor( value / ( double ) ( info.getRowSize( ) + info.getEventPadding( ) ) );
+        rowIndex = info.getRowCount( ) - 1 - rowIndex;
+
+        if ( rowIndex >= 0 && rowIndex < rows.size( ) )
         {
-            int valueY = e.getY( );
-
-            int rowIndex = ( int ) Math.floor( valueY / ( double ) ( info.getRowSize( ) + info.getEventPadding( ) ) );
-            rowIndex = info.getRowCount( ) - 1 - rowIndex;
-
-            if ( rowIndex >= 0 && rowIndex < rows.size( ) )
-            {
-                return rows.get( rowIndex );
-            }
+            return rows.get( rowIndex );
         }
 
         return null;
@@ -900,9 +893,6 @@ public class EventManager
     // make a new row (which will have no overlaps. If we're constrained
     // regarding the number of rows we can create, we may have to accept
     // some overlaps.
-    //
-    // "least" overlap is defined by the total amount of overlap time
-    // TODO: this doesn't work well with zero duration events...
     private Row getRowWithLeastOverlaps( Event event )
     {
         int size = rows.size( );

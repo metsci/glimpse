@@ -34,5 +34,5 @@ public interface TemporalSelectionListener<T>
      * @param newTrackHeads A map from track id to the head point of the track.
      *                      The head point may be null if the track is not visible.
      */
-    public void selectionChanged( Map<Integer, T> newTrackHeads );
+    public void selectionChanged( Map<Object, T> newTrackHeads );
 }

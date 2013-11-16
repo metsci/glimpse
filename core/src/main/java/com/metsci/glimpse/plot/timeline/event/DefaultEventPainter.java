@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
-
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -40,6 +38,7 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -140,9 +139,9 @@ public class DefaultEventPainter implements EventPainter
         arrowBaseMin = Math.min( timeMax, arrowBaseMin );
 
         double timeSpan = arrowBaseMax - arrowBaseMin;
-        double remainingSpaceX = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
+        double remainingSpace = axis.getPixelsPerValue( ) * timeSpan - buffer * 2;
 
-        int pixelX = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
+        int pixel = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, axis.valueToScreenPixel( timeMin ) );
 
         // start positions of the next event in this row
         double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : axis.getMax( );
@@ -152,52 +151,74 @@ public class DefaultEventPainter implements EventPainter
         boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
         boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( event ) : false;
 
-        if ( plot.isTimeAxisHorizontal( ) )
+        boolean horiz = plot.isTimeAxisHorizontal( );
+        
+        if ( !offEdgeMin && !offEdgeMax )
         {
-            if ( !offEdgeMin && !offEdgeMax )
+            if ( event.isShowBackground( ) )
             {
-                if ( event.isShowBackground( ) )
+                GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
+                gl.glBegin( GL2.GL_QUADS );
+                try
                 {
-                    GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-                    gl.glBegin( GL2.GL_QUADS );
-                    try
+                    if ( horiz )
                     {
                         gl.glVertex2d( timeMin, posMin );
                         gl.glVertex2d( timeMin, posMax );
                         gl.glVertex2d( timeMax, posMax );
                         gl.glVertex2d( timeMax, posMin );
                     }
-                    finally
+                    else
                     {
-                        gl.glEnd( );
+                        gl.glVertex2d( posMin, timeMin );
+                        gl.glVertex2d( posMax, timeMin );
+                        gl.glVertex2d( posMax, timeMax );
+                        gl.glVertex2d( posMin, timeMax );
                     }
                 }
-
-                if ( event.isShowBorder( ) )
+                finally
                 {
-                    GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
-                    gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL2.GL_LINE_LOOP );
-                    try
-                    {
-                        gl.glVertex2d( timeMin, posMin );
-                        gl.glVertex2d( timeMin, posMax );
-                        gl.glVertex2d( timeMax, posMax );
-                        gl.glVertex2d( timeMax, posMin );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
-                    }
+                    gl.glEnd( );
                 }
             }
-            else
+
+            if ( event.isShowBorder( ) )
             {
-                if ( event.isShowBackground( ) )
+                GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
+                gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
+                gl.glBegin( GL2.GL_LINE_LOOP );
+                try
                 {
-                    GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-                    gl.glBegin( GL2.GL_POLYGON );
-                    try
+                    if ( horiz )
+                    {
+                        gl.glVertex2d( timeMin, posMin );
+                        gl.glVertex2d( timeMin, posMax );
+                        gl.glVertex2d( timeMax, posMax );
+                        gl.glVertex2d( timeMax, posMin );
+                    }
+                    else
+                    {
+                        gl.glVertex2d( posMin, timeMin );
+                        gl.glVertex2d( posMax, timeMin );
+                        gl.glVertex2d( posMax, timeMax );
+                        gl.glVertex2d( posMin, timeMax );
+                    }
+                }
+                finally
+                {
+                    gl.glEnd( );
+                }
+            }
+        }
+        else
+        {
+            if ( event.isShowBackground( ) )
+            {
+                GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
+                gl.glBegin( GL2.GL_POLYGON );
+                try
+                {
+                    if ( horiz )
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
                         gl.glVertex2d( arrowBaseMax, posMax );
@@ -206,18 +227,30 @@ public class DefaultEventPainter implements EventPainter
                         gl.glVertex2d( arrowBaseMin, posMin );
                         gl.glVertex2d( timeMin, sizeCenter );
                     }
-                    finally
+                    else
                     {
-                        gl.glEnd( );
+                        gl.glVertex2d( posMax, arrowBaseMin );
+                        gl.glVertex2d( posMax, arrowBaseMax );
+                        gl.glVertex2d( sizeCenter, timeMax );
+                        gl.glVertex2d( posMin, arrowBaseMax );
+                        gl.glVertex2d( posMin, arrowBaseMin );
+                        gl.glVertex2d( sizeCenter, timeMin );
                     }
                 }
-
-                if ( event.isShowBorder( ) )
+                finally
                 {
-                    GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
-                    gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-                    gl.glBegin( GL2.GL_LINE_LOOP );
-                    try
+                    gl.glEnd( );
+                }
+            }
+
+            if ( event.isShowBorder( ) )
+            {
+                GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
+                gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
+                gl.glBegin( GL2.GL_LINE_LOOP );
+                try
+                {
+                    if ( horiz )
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
                         gl.glVertex2d( arrowBaseMax, posMax );
@@ -226,167 +259,222 @@ public class DefaultEventPainter implements EventPainter
                         gl.glVertex2d( arrowBaseMin, posMin );
                         gl.glVertex2d( timeMin, sizeCenter );
                     }
-                    finally
+                    else
                     {
-                        gl.glEnd( );
+                        gl.glVertex2d( posMax, arrowBaseMin );
+                        gl.glVertex2d( posMax, arrowBaseMax );
+                        gl.glVertex2d( sizeCenter, timeMax );
+                        gl.glVertex2d( posMin, arrowBaseMax );
+                        gl.glVertex2d( posMin, arrowBaseMin );
+                        gl.glVertex2d( sizeCenter, timeMin );
                     }
                 }
-            }
-
-            if ( event.hasChildren( ) )
-            {
-                final int numChildren = event.getEventCount( );
-                final int numRows = maxIconRows;
-                int iconSizePixels = size / numRows;
-
-                int columnsByAvailableSpace = ( int ) Math.floor( remainingSpaceX / ( double ) iconSizePixels );
-                int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
-                int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
-
-                double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
-                int totalIconWidthPixels = iconSizePixels * numColumns;
-
-                event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpaceX, pixelX, nextStartPixel );
-                if ( event.isIconVisible )
+                finally
                 {
-                    double valueX = axis.screenPixelToValue( pixelX );
-                    event.iconStartTime = epoch.toTimeStamp( valueX );
-                    event.iconEndTime = event.iconStartTime.add( totalIconWidthPixels / axis.getPixelsPerValue( ) );
+                    gl.glEnd( );
+                }
+            }
+        }
 
-                    TextureAtlas atlas = info.getTextureAtlas( );
-                    atlas.beginRendering( );
-                    try
+        if ( event.hasChildren( ) )
+        {
+            final int numChildren = event.getEventCount( );
+            final int numRows = maxIconRows;
+            int iconSizePixels = size / numRows;
+
+            int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePixels );
+            int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
+            int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
+
+            double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
+            int totalIconWidthPixels = iconSizePixels * numColumns;
+
+            event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel );
+            if ( event.isIconVisible )
+            {
+                double value = axis.screenPixelToValue( pixel );
+                event.iconStartTime = epoch.toTimeStamp( value );
+                event.iconEndTime = event.iconStartTime.add( totalIconWidthPixels / axis.getPixelsPerValue( ) );
+
+                TextureAtlas atlas = info.getTextureAtlas( );
+                atlas.beginRendering( );
+                try
+                {
+                    Iterator<Event> iter = event.iterator( );
+
+                    outer: for ( int c = 0; c < numColumns; c++ )
                     {
-                        Iterator<Event> iter = event.iterator( );
-
-                        outer: for ( int c = 0; c < numColumns; c++ )
+                        for ( int r = numRows - 1; r >= 0; r-- )
                         {
-                            for ( int r = numRows - 1; r >= 0; r-- )
+                            if ( iter.hasNext( ) )
                             {
-                                if ( iter.hasNext( ) )
+                                Event child = iter.next( );
+                                Object icon = child.getIconId( );
+                                if ( icon == null )
                                 {
-                                    Event child = iter.next( );
-                                    Object icon = child.getIconId( );
-                                    if ( icon == null )
-                                    {
-                                        GlimpseColor.glColor( gl, child.getBackgroundColor( info, isSelected ), 0.5f );
-                                        icon = defaultIconId;
-                                    }
-                                    else
-                                    {
-                                        GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
-                                    }
-
-                                    ImageData iconData = atlas.getImageData( icon );
-                                    double iconScale = iconSizePixels / ( double ) iconData.getHeight( );
-
-                                    double x = valueX + c * iconSizeValue;
-                                    double y = posMin + r * iconSizePixels;
-
-                                    atlas.drawImageAxisX( gl, icon, axis, x, y, iconScale, iconScale, 0, iconData.getHeight( ) );
+                                    GlimpseColor.glColor( gl, child.getBackgroundColor( info, isSelected ), 0.5f );
+                                    icon = defaultIconId;
                                 }
                                 else
                                 {
-                                    break outer;
+                                    GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
                                 }
+
+                                ImageData iconData = atlas.getImageData( icon );
+                                int iconSize = horiz ? iconData.getHeight( ) : iconData.getWidth( );
+                                double iconScale = iconSizePixels / ( double ) iconSize;
+
+                                double x = value + c * iconSizeValue;
+                                double y = posMin + r * iconSizePixels;
+
+                                if ( horiz )
+                                {
+                                    atlas.drawImageAxisX( gl, icon, axis, x, y, iconScale, iconScale, 0, iconSize );
+                                }
+                                else
+                                {
+                                    atlas.drawImageAxisY( gl, icon, axis, y, x, iconScale, iconScale, 0, iconSize );
+                                }
+                            }
+                            else
+                            {
+                                break outer;
                             }
                         }
                     }
-                    finally
-                    {
-                        atlas.endRendering( );
-                    }
-
-                    remainingSpaceX -= totalIconWidthPixels + buffer;
-                    pixelX += totalIconWidthPixels + buffer;
                 }
-            }
-            else
-            {
-                //XXX there is currently no way for custom subclasses of EventPainter to properly
-                //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
-                //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
-                event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-
-                if ( event.isIconVisible )
+                finally
                 {
-                    double valueX = axis.screenPixelToValue( pixelX );
-                    event.iconStartTime = epoch.toTimeStamp( valueX );
-                    event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
-
-                    TextureAtlas atlas = info.getTextureAtlas( );
-                    atlas.beginRendering( );
-                    try
-                    {
-                        ImageData iconData = atlas.getImageData( event.getIconId( ) );
-                        double iconScale = size / ( double ) iconData.getHeight( );
-
-                        atlas.drawImageAxisX( gl, event.getIconId( ), axis, valueX, posMin, iconScale, iconScale, 0, iconData.getHeight( ) );
-                    }
-                    finally
-                    {
-                        atlas.endRendering( );
-                    }
-
-                    remainingSpaceX -= size + buffer;
-                    pixelX += size + buffer;
+                    atlas.endRendering( );
                 }
+
+                remainingSpace -= totalIconWidthPixels + buffer;
+                pixel += totalIconWidthPixels + buffer;
             }
+        }
+        else
+        {
+            //XXX there is currently no way for custom subclasses of EventPainter to properly
+            //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
+            //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
+            event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpace, pixel, nextStartPixel );
 
-            if ( event.isShowLabel( ) && event.getLabel( ) != null )
+            if ( event.isIconVisible )
             {
-                TextRenderer textRenderer = info.getTextRenderer( );
-                Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
-
-                boolean isTextOverfull = event.isTextOverfull( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextIntersecting = event.isTextIntersecting( size, buffer, remainingSpaceX, pixelX, nextStartPixel, labelBounds );
-                boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == HideAll );
-                double availableSpace = event.getTextAvailableSpace( size, buffer, remainingSpaceX, pixelX, nextStartPixel );
-
-                event.isTextVisible = !isTextOverlappingAndHidden;
-
-                if ( event.isTextVisible )
+                double value = axis.screenPixelToValue( pixel );
+                event.iconStartTime = epoch.toTimeStamp( value );
+                event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
+                
+                TextureAtlas atlas = info.getTextureAtlas( );
+                atlas.beginRendering( );
+                try
                 {
-                    Rectangle2D displayBounds = labelBounds;
-                    String displayText = event.getLabel( );
+                    ImageData iconData = atlas.getImageData( event.getIconId( ) );
+                    int iconSize = horiz ? iconData.getHeight( ) : iconData.getWidth( );
+                    double iconScale = size / ( double ) iconSize;
 
-                    if ( labelBounds.getWidth( ) > availableSpace && event.getTextRenderingMode( ) != ShowAll )
-                    {
-                        displayText = event.calculateDisplayText( textRenderer, displayText, availableSpace );
-                        displayBounds = textRenderer.getBounds( displayText );
+                    if ( horiz )
+                    {   
+                        atlas.drawImageAxisX( gl, event.getIconId( ), axis, value, posMin, iconScale, iconScale, 0, iconSize );
                     }
-
-                    double valueX = axis.screenPixelToValue( pixelX );
-                    event.textStartTime = epoch.toTimeStamp( valueX );
-                    event.textEndTime = event.textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
-
-                    // use this event's text color if it has been set
-                    if ( event.getLabelColor( ) != null )
-                    {
-                        GlimpseColor.setColor( textRenderer, event.getLabelColor( ) );
-                    }
-                    // otherwise, use the default no background color if the background is not showing
-                    // and if a color has not been explicitly set for the EventPainter
-                    else if ( !info.isTextColorSet( ) && !event.isShowBackground( ) )
-                    {
-                        GlimpseColor.setColor( textRenderer, info.getTextColorNoBackground( ) );
-                    }
-                    // otherwise use the EventPainter's default text color
                     else
                     {
-                        GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
+                        atlas.drawImageAxisY( gl, event.getIconId( ), axis, posMin, value, iconScale, iconScale, 0, iconSize );
                     }
+                }
+                finally
+                {
+                    atlas.endRendering( );
+                }
 
+                remainingSpace -= size + buffer;
+                pixel += size + buffer;
+            }
+        }
+
+        if ( event.isShowLabel( ) && event.getLabel( ) != null )
+        {
+            TextRenderer textRenderer = info.getTextRenderer( );
+            Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
+
+            boolean isTextOverfull = event.isTextOverfull( size, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
+            boolean isTextIntersecting = event.isTextIntersecting( size, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
+            boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == TextRenderingMode.HideAll );
+            double availableSpace = event.getTextAvailableSpace( size, buffer, remainingSpace, pixel, nextStartPixel );
+
+            event.isTextVisible = !isTextOverlappingAndHidden;
+
+            if ( event.isTextVisible )
+            {
+                Rectangle2D displayBounds = labelBounds;
+                String displayText = event.getLabel( );
+
+                if ( labelBounds.getWidth( ) > availableSpace && event.getTextRenderingMode( ) != TextRenderingMode.ShowAll )
+                {
+                    displayText = event.calculateDisplayText( textRenderer, displayText, availableSpace );
+                    displayBounds = textRenderer.getBounds( displayText );
+                }
+
+                double value = axis.screenPixelToValue( pixel );
+                event.textStartTime = epoch.toTimeStamp( value );
+                event.textEndTime = event.textStartTime.add( displayBounds.getWidth( ) / axis.getPixelsPerValue( ) );
+
+                // use this event's text color if it has been set
+                if ( event.getLabelColor( ) != null )
+                {
+                    GlimpseColor.setColor( textRenderer, event.getLabelColor( ) );
+                }
+                // otherwise, use the default no background color if the background is not showing
+                // and if a color has not been explicitly set for the EventPainter
+                else if ( !info.isTextColorSet( ) && !event.isShowBackground( ) )
+                {
+                    GlimpseColor.setColor( textRenderer, info.getTextColorNoBackground( ) );
+                }
+                // otherwise use the EventPainter's default text color
+                else
+                {
+                    GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
+                }
+
+                if ( horiz )
+                {
                     textRenderer.beginRendering( width, height );
                     try
                     {
                         // use the labelBounds for the height (if the text shortening removed a character which
                         // hangs below the line, we don't want the text position to move)
                         int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
-                        textRenderer.draw( displayText, pixelX, pixelY );
+                        textRenderer.draw( displayText, pixel, pixelY );
+    
+                        remainingSpace -= displayBounds.getWidth( ) + buffer;
+                        pixel += displayBounds.getWidth( ) + buffer;
+                    }
+                    finally
+                    {
+                        textRenderer.endRendering( );
+                    }
+                }
+                else
+                {
+                    textRenderer.beginRendering( width, height );
+                    try
+                    {
+                        double shiftX = size / 2.0 + posMin;
+                        int pixelX = ( int ) shiftX;
+                     
+                        double shiftY = pixel;
+                        int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
 
-                        remainingSpaceX -= displayBounds.getWidth( ) + buffer;
-                        pixelX += displayBounds.getWidth( ) + buffer;
+                        gl.glMatrixMode( GL2.GL_PROJECTION );
+                        
+                        gl.glTranslated( shiftX, shiftY, 0 );
+                        gl.glRotated( 90, 0, 0, 1.0f );
+                        gl.glTranslated( -shiftX, -shiftY, 0 );
+                        
+                        textRenderer.draw( displayText, pixelX, pixelY );
+    
+                        remainingSpace -= displayBounds.getWidth( ) + buffer;
+                        pixel += displayBounds.getWidth( ) + buffer;
                     }
                     finally
                     {
@@ -394,43 +482,10 @@ public class DefaultEventPainter implements EventPainter
                     }
                 }
             }
-            else
-            {
-                event.isTextVisible = false;
-            }
         }
         else
         {
-            //TODO handle drawing text and icons in HORIZONTAL orientation
-
-            GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
-            gl.glBegin( GL2.GL_QUADS );
-            try
-            {
-                gl.glVertex2d( posMin, timeMin );
-                gl.glVertex2d( posMax, timeMin );
-                gl.glVertex2d( posMax, timeMax );
-                gl.glVertex2d( posMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-
-            GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
-            gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
-            gl.glBegin( GL2.GL_LINE_LOOP );
-            try
-            {
-                gl.glVertex2d( posMin, timeMin );
-                gl.glVertex2d( posMax, timeMin );
-                gl.glVertex2d( posMax, timeMax );
-                gl.glVertex2d( posMin, timeMax );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
+            event.isTextVisible = false;
         }
     }
 }

@@ -100,10 +100,8 @@ public class TooltipPainter extends SimpleTextPainter
     public TooltipPainter setIcon( Object iconId )
     {
         this.iconIds = Collections.singletonList( iconId );
-        ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
-        this.icons = Collections.singletonList( icon );
         this.iconColors = null;
-        this.noIcons = icon == null;
+        this.icons = null; // signal that the icons should be recalculated
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
@@ -115,17 +113,9 @@ public class TooltipPainter extends SimpleTextPainter
     public TooltipPainter setIcons( List<Object> iconIds )
     {
         this.iconIds = Lists.newArrayList( iconIds );
-        this.icons = Lists.newArrayListWithCapacity( iconIds.size( ) );
-        this.noIcons = true;
-        for ( int i = 0; i < iconIds.size( ); i++ )
-        {
-            Object iconId = this.iconIds.get( i );
-            ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
-            if ( icon != null ) noIcons = false;
-            this.icons.add( icon );
-        }
         this.iconColors = null;
-        this.lines = null;
+        this.icons = null; // signal that the icons should be recalculated
+        this.lines = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -327,9 +317,30 @@ public class TooltipPainter extends SimpleTextPainter
         linesBounds = new Bounds( overallMinX, overallMaxX, overallMinY, overallMaxY );
     }
 
+    protected void loadIcons( )
+    {
+        int size = iconIds == null ? 0 : iconIds.size( );
+        
+        this.icons = Lists.newArrayListWithCapacity( size );
+
+        this.noIcons = true;
+        for ( int i = 0; i < size; i++ )
+        {
+            Object iconId = this.iconIds.get( i );
+            ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
+            if ( icon != null ) noIcons = false;
+            this.icons.add( icon );
+        }
+    }
+
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
+        if ( icons == null )
+        {
+            loadIcons( );
+        }
+
         if ( newFont != null )
         {
             updateTextRenderer( );
@@ -344,10 +355,12 @@ public class TooltipPainter extends SimpleTextPainter
         {
             updateLayout( );
         }
+        
+        final List<TextBoundingBox> tempLines = lines;
 
-        if ( textRenderer == null || lines == null ) return;
+        if ( textRenderer == null || tempLines == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
@@ -418,9 +431,9 @@ public class TooltipPainter extends SimpleTextPainter
         textRenderer.beginRendering( width, height );
         try
         {
-            for ( int i = 0; i < lines.size( ); i++ )
+            for ( int i = 0; i < tempLines.size( ); i++ )
             {
-                TextBoundingBox line = lines.get( i );
+                TextBoundingBox line = tempLines.get( i );
 
                 float iconSize = getIconSpacing( i );
 
@@ -435,7 +448,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         // draw icon
-        if ( !lines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
+        if ( !tempLines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
         {
             atlas.beginRendering( );
             try
@@ -444,7 +457,7 @@ public class TooltipPainter extends SimpleTextPainter
                 {
                     Object iconId = iconIds.get( i );
                     ImageData iconData = icons.get( i );
-                    TextBoundingBox line = lines.get( i );
+                    TextBoundingBox line = tempLines.get( i );
 
                     if ( iconId != null && iconData != null && line != null )
                     {

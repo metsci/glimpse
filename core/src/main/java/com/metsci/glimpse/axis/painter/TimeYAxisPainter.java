@@ -52,28 +52,22 @@ import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
  */
 public class TimeYAxisPainter extends TimeAxisPainter
 {
-
     protected static final double dateTextRightPadding = 4;
 
+    public TimeYAxisPainter( TimeZone timeZone, Epoch epoch )
+    {
+        super( new TimeAxisLabelHandler( timeZone, epoch ) );
+    }
+    
     public TimeYAxisPainter( Epoch epoch )
     {
         super( new TimeAxisLabelHandler( epoch ) );
     }
 
-    //@formatter:off
-    public TimeYAxisPainter( TimeStampFormat minuteSecondFormat,
-                             TimeStampFormat hourMinuteFormat,
-                             TimeStampFormat hourDayMonthFormat,
-                             TimeStampFormat dayMonthYearFormat,
-                             TimeStampFormat dayFormat,
-                             TimeStampFormat dayMonthFormat,
-                             TimeStampFormat monthYearFormat,
-                             TimeStampFormat yearFormat,
-                             TimeZone timeZone, Epoch epoch )
+    public TimeYAxisPainter( TimeAxisLabelHandler handler )
     {
-        super( new TimeAxisLabelHandler( minuteSecondFormat, hourMinuteFormat, hourDayMonthFormat, dayMonthYearFormat, dayFormat, dayMonthFormat, monthYearFormat, yearFormat, timeZone, epoch ) );
+        super( handler );
     }
-    //@formatter:on
 
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
