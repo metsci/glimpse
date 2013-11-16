@@ -1,0 +1,8 @@
+---
+layout: default
+title: Glimpse 2.0.2 Release
+---
+
+<p>Glimpse 2.0.2 provides minor bug fixes and enhances the Glimpse Timeline capability to support events on vertical timelines.</p>
+
+<p>Note: Glimpse 2 is still quite new and some of the API and feature changes from Glimpse 1 are still being worked out. As a result, upgrading to 2.0.2 from 2.0.0 may require some minor refactoring. Please post in the <a href="https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse">Glimpse Forum</a> for help.
