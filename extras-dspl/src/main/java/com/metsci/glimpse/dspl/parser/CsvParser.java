@@ -161,6 +161,8 @@ public class CsvParser implements TableParser
 
         while ( ( line = in.readLine( ) ) != null )
         {
+            if ( line.isEmpty( ) ) continue;
+            
             String[] tokens = splitLine( line );
 
             if ( tokens.length == size )
