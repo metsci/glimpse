@@ -71,7 +71,7 @@
                             <includeScope>compile</includeScope>
                             <classifier>sources</classifier>
                             <outputDirectory>${project.build.directory}/sources</outputDirectory>
-                            <excludeArtifactIds>gluegen-rt-native-all,jogl,jogl-native-all,serializer,antlr,swt,jsr305,png-encoder,jts,worldwind-vpf-symbols</excludeArtifactIds>
+			    <includeGroupIds>com.metsci.glimpse</includeGroupIds>
                         </configuration>
                     </execution>
                 </executions>
@@ -87,7 +87,7 @@
                         </goals>
                         <configuration>
                             <show>public</show>
-                            <subpackages>com.metsci.glimpse</subpackages>
+                            <maxmemory>2056m</maxmemory>
                             <sourcepath>${project.build.directory}/sources</sourcepath>
                             <doctitle>Glimpse Data Visualization Library</doctitle>
                         </configuration>

@@ -113,8 +113,8 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         int orderTick = getOrderTick( tickInterval );
         updateFormatter( orderAxis, orderTick );
 
-        String[] tickLabels = new String[ tickPositions.length ];
-        for ( int i = 0 ; i < tickPositions.length ; i++ )
+        String[] tickLabels = new String[tickPositions.length];
+        for ( int i = 0; i < tickPositions.length; i++ )
         {
             tickLabels[i] = tickString( tickPositions[i], orderAxis );
         }
@@ -125,8 +125,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
     @Override
     public double[] getMinorTickPositions( double[] tickPositions )
     {
-        if ( tickPositions.length < 2 )
-            return new double[0];
+        if ( tickPositions.length < 2 ) return new double[0];
 
         // assume all the ticks are evenly spaced
         double start = tickPositions[0];
@@ -134,25 +133,24 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         double step = ( end - start ) / ( minorTickCount + 1 );
 
         int minorIndex = 0;
-        double[] minorTickPositions = new double[ (tickPositions.length+1) * minorTickCount ];
+        double[] minorTickPositions = new double[ ( tickPositions.length + 1 ) * minorTickCount];
 
-        for ( int i = 0 ; i < tickPositions.length ; i++ )
+        for ( int i = 0; i < tickPositions.length; i++ )
         {
             start = tickPositions[i];
 
-            for ( int j = 1 ; j < minorTickCount + 1 ; j++ )
+            for ( int j = 1; j < minorTickCount + 1; j++ )
             {
                 minorTickPositions[minorIndex++] = start - step * j;
             }
         }
 
-        start = tickPositions[tickPositions.length-1];
+        start = tickPositions[tickPositions.length - 1];
 
-        for ( int j = 1 ; j < minorTickCount + 1 ; j++ )
+        for ( int j = 1; j < minorTickCount + 1; j++ )
         {
             minorTickPositions[minorIndex++] = start + step * j;
         }
-
 
         return minorTickPositions;
     }
@@ -180,7 +178,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     public void setAxisUnits( String units, boolean abbreviated )
     {
-        if( abbreviated )
+        if ( abbreviated )
         {
             this.setAxisUnits( "m" + units, units, "k" + units );
         }
@@ -201,17 +199,17 @@ public class GridAxisLabelHandler implements AxisLabelHandler
     {
         String pad = axisLabel.length( ) > 0 ? " " : "";
 
-        if( axisUnits.length( ) == 0 )
+        if ( axisUnits.length( ) == 0 )
         {
-            if( orderX == 0 )
+            if ( orderX == 0 )
             {
                 return axisLabel;
             }
-            else if( orderX == 3 )
+            else if ( orderX == 3 )
             {
                 return axisLabel + pad + "(x 1,000)";
             }
-            else if( orderX == -3 )
+            else if ( orderX == -3 )
             {
                 return axisLabel + pad + "(x 0.001)";
             }
@@ -221,22 +219,22 @@ public class GridAxisLabelHandler implements AxisLabelHandler
             }
         }
 
-        if( orderX == 0 )
+        if ( orderX == 0 )
         {
             return axisLabel + pad + "(" + axisUnits + ")";
         }
-        else if( orderX == 3 )
+        else if ( orderX == 3 )
         {
             return axisLabel + pad + "(" + axisKiloUnits + ")";
         }
-        else if( orderX == -3 )
+        else if ( orderX == -3 )
         {
             return axisLabel + pad + "(" + axisMilliUnits + ")";
         }
-        else if( orderX > 3 )
+        else if ( orderX > 3 )
         {
             int labelPower = 1;
-            while( orderX > 3 )
+            while ( orderX > 3 )
             {
                 labelPower *= 10;
                 orderX--;
@@ -264,11 +262,11 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     protected double tickInterval( Axis1D axis, double approxNumTicks )
     {
-    	
+
         double calculatedMin = converter.toAxisUnits( axis.getMin( ) );
         double calculatedMax = converter.toAxisUnits( axis.getMax( ) );
-        double min = Math.min(calculatedMin,calculatedMax);
-        double max = Math.max(calculatedMin,calculatedMax);
+        double min = Math.min( calculatedMin, calculatedMax );
+        double max = Math.max( calculatedMin, calculatedMax );
         double approxTickInterval = ( max - min ) / approxNumTicks;
         double prelimTickInterval = pow( 10, round( log10( approxTickInterval ) ) );
         double prelimNumTicks = ( max - min ) / prelimTickInterval;
@@ -278,7 +276,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
         if ( 5 * prelimNumTicks <= approxNumTicks ) return prelimTickInterval / 5;
         if ( 2 * prelimNumTicks <= approxNumTicks ) return prelimTickInterval / 2;
-        
+
         return prelimTickInterval;
     }
 
@@ -291,27 +289,29 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         double cacheMax = max;
         if ( min >= max )
         {
-        	cacheMin = max;
-        	cacheMax = min;
+            cacheMin = max;
+            cacheMax = min;
         }
-        
+
         int minTickNumber = ( int ) floor( cacheMin / tickInterval );
         int tickCount = ( int ) ceil( ( cacheMax - cacheMin ) / tickInterval );
 
         double[] ticks = new double[tickCount + 1];
         for ( int i = 0; i < ticks.length; i++ )
             ticks[i] = ( i + minTickNumber ) * tickInterval;
-        
-        if(min >= max){
-        	int size = ticks.length;
-        	double temp = Double.NaN;
-        	for (int i = 0; i < size/2; i++)
-        	  {
-        	     temp = ticks[i];
-        	     ticks[i] = ticks[size-i-1];
-        	     ticks[size-i-1] = temp;
-        	  }
+
+        // handle case where axis min/max are reversed
+        if ( min >= max )
+        {
+            int size = ticks.length;
+            for ( int i = 0; i < size / 2; i++ )
+            {
+                double temp = ticks[i];
+                ticks[i] = ticks[size - i - 1];
+                ticks[size - i - 1] = temp;
+            }
         }
+        
         return ticks;
     }
 
@@ -331,14 +331,14 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
         int orderX = getOrderTick( Math.abs( max - min ) );
 
-        if( orderX > 0 )
+        if ( orderX > 0 )
         {
-            return 3 * (( orderX - 1 ) / 3);
+            return 3 * ( ( orderX - 1 ) / 3 );
         }
 
-        if( orderX < 0 )
+        if ( orderX < 0 )
         {
-            return 3 * (orderX/3 - 1);
+            return 3 * ( orderX / 3 - 1 );
         }
 
         return 0;

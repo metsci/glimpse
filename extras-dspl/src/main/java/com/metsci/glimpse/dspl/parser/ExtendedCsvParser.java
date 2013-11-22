@@ -103,6 +103,8 @@ public class ExtendedCsvParser extends CsvParser implements MultipleFileTablePar
 
         while ( ( line = in.readLine( ) ) != null )
         {
+            if ( line.isEmpty( ) ) continue;
+            
             String[] tokens = splitLine( line, splitLimit );
 
             for ( int i = 0; i < size; i++ )
