@@ -89,6 +89,9 @@ public class Example
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
         GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+
+        // trigger GLContext creation
+        glDrawable.display( );
         GLContext context = glDrawable.getContext( );
         
         // create a SwingGlimpseCanvas which shares the context
@@ -136,6 +139,9 @@ public class Example
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
         GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+
+        // trigger GLContext creation
+        glDrawable.display( );
         GLContext context = glDrawable.getContext( );
 
         NewtSwingGlimpseCanvas leftPanel = new NewtSwingGlimpseCanvas( context );
