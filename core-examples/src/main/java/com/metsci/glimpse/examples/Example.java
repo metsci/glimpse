@@ -85,7 +85,7 @@ public class Example
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profileString ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
-        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLProfile glProfile = GLProfile.get( profileString );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
         GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
