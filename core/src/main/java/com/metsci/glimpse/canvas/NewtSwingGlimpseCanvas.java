@@ -41,7 +41,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -74,7 +73,6 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     protected GLCapabilities glCapabilities;
     protected GLWindow glWindow;
     protected NewtCanvasAWT glCanvas;
-    protected GLOffscreenAutoDrawable glDrawable;
 
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
@@ -219,7 +217,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     @Override
     public GLAutoDrawable getGLDrawable( )
     {
-        return glDrawable;
+        return glWindow;
     }
 
     @Override
