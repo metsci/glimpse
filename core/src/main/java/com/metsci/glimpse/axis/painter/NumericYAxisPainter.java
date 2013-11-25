@@ -64,7 +64,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
+        gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
 
         paintTicks( gl, axis, width, height );
         paintAxisLabel( gl, axis, width, height );
@@ -79,8 +79,8 @@ public class NumericYAxisPainter extends NumericAxisPainter
         AxisUnitConverter converter = ticks.getAxisUnitConverter( );
 
         // Tick marks
-        int iTick0 = getTickRightX( width, tickSize );
-        int iTick1 = getTickLeftX( width, tickSize );
+        double iTick0 = getTickRightX( width, tickSize );
+        double iTick1 = getTickLeftX( width, tickSize );
         int min = -1;
         int max = yTicks.length;
 
@@ -91,26 +91,23 @@ public class NumericYAxisPainter extends NumericAxisPainter
         {
             for ( int i = 0; i < yTicks.length; i++ )
             {
-                int jTick = axis.valueToScreenPixel( converter.fromAxisUnits( yTicks[i] ) );
-
-                // keep the last tick on the screen
-                if ( jTick == height ) jTick -= 1;
+                double jTick = converter.fromAxisUnits( yTicks[i] );
 
                 // don't draw ticks off the screen
-                if ( jTick > height && !showLabelsForOffscreenTicks )
+                if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
                 {
                     max = i;
                     break;
                 }
-                else if ( jTick < 0 && !showLabelsForOffscreenTicks )
+                else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
                 {
                     min = i;
                     continue;
                 }
                 else
                 {
-                    gl.glVertex2f( iTick0, jTick );
-                    gl.glVertex2f( iTick1, jTick );
+                    gl.glVertex2d( iTick0, jTick );
+                    gl.glVertex2d( iTick1, jTick );
                 }
             }
 
@@ -122,10 +119,10 @@ public class NumericYAxisPainter extends NumericAxisPainter
 
                 for ( int i = 0; i < xMinor.length; i++ )
                 {
-                    int jTick = axis.valueToScreenPixel( converter.fromAxisUnits( xMinor[i] ) );
+                    double jTick = converter.fromAxisUnits( xMinor[i] );
 
-                    gl.glVertex2f( iTick0, jTick );
-                    gl.glVertex2f( iTick1, jTick );
+                    gl.glVertex2d( iTick0, jTick );
+                    gl.glVertex2d( iTick1, jTick );
                 }
             }
         }
@@ -205,13 +202,13 @@ public class NumericYAxisPainter extends NumericAxisPainter
         {
             gl.glLineWidth( markerWidth );
 
-            int y0 = axis.valueToScreenPixel( converter.fromAxisUnits( axis.getSelectionCenter( ) ) );
+            double y0 = converter.fromAxisUnits( axis.getSelectionCenter( ) );
 
             gl.glBegin( GL2.GL_LINES );
             try
             {
-                gl.glVertex2f( 0, y0 );
-                gl.glVertex2f( width, y0 );
+                gl.glVertex2d( 0, y0 );
+                gl.glVertex2d( width, y0 );
             }
             finally
             {

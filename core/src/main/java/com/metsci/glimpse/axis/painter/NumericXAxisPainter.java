@@ -66,8 +66,8 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-
+        gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
+        
         paintTicks( gl, axis, width, height );
         paintAxisLabel( gl, axis, width, height );
         paintSelectionLine( gl, axis, width, height );
@@ -82,8 +82,8 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
         int min = -1;
         int max = xTicks.length;
-        int jTick0 = getTickTopY( height, tickSize );
-        int jTick1 = getTickBottomY( height, tickSize );
+        double jTick0 = getTickTopY( height, tickSize );
+        double jTick1 = getTickBottomY( height, tickSize );
 
         // Tick marks
         GlimpseColor.glColor( gl, tickColor );
@@ -92,25 +92,22 @@ public class NumericXAxisPainter extends NumericAxisPainter
         {
             for ( int i = 0; i < xTicks.length; i++ )
             {
-                int iTick = axis.valueToScreenPixel( converter.fromAxisUnits( xTicks[i] ) );
-
-                // keep the last tick on the screen
-                if ( iTick == width ) iTick -= 1;
+                double iTick = converter.fromAxisUnits( xTicks[i] );
 
                 // don't draw ticks off the screen
-                if ( iTick < 0 && !showLabelsForOffscreenTicks )
+                if ( iTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
                 {
                     min = i;
                     continue;
                 }
-                else if ( iTick > width && !showLabelsForOffscreenTicks )
+                else if ( iTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
                 {
                     max = i;
                     break;
                 }
 
-                gl.glVertex2f( iTick, jTick0 );
-                gl.glVertex2f( iTick, jTick1 );
+                gl.glVertex2d( iTick, jTick0 );
+                gl.glVertex2d( iTick, jTick1 );
             }
 
             if ( showMinorTicks )
@@ -121,10 +118,10 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
                 for ( int i = 0; i < xMinor.length; i++ )
                 {
-                    int iTick = axis.valueToScreenPixel( converter.fromAxisUnits( xMinor[i] ) );
+                    double iTick = converter.fromAxisUnits( xMinor[i] );
 
-                    gl.glVertex2f( iTick, jTick0 );
-                    gl.glVertex2f( iTick, jTick1 );
+                    gl.glVertex2d( iTick, jTick0 );
+                    gl.glVertex2d( iTick, jTick1 );
                 }
             }
         }
@@ -204,13 +201,13 @@ public class NumericXAxisPainter extends NumericAxisPainter
         {
             gl.glLineWidth( markerWidth );
 
-            int x0 = axis.valueToScreenPixel( axis.getSelectionCenter( ) );
+            double x0 = axis.getSelectionCenter( );
 
             gl.glBegin( GL2.GL_LINES );
             try
             {
-                gl.glVertex2f( x0, 0 );
-                gl.glVertex2f( x0, height );
+                gl.glVertex2d( x0, 0 );
+                gl.glVertex2d( x0, height );
             }
             finally
             {

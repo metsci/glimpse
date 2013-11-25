@@ -85,7 +85,8 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
+        gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
+        
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
@@ -98,7 +99,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         gl.glBegin( GL2.GL_LINES );
         for ( TimeStamp t : tickTimes )
         {
-            double x = axis.valueToScreenPixel( fromTimeStamp( t ) );
+            double x = fromTimeStamp( t );
             gl.glVertex2d( x, height );
             gl.glVertex2d( x, height - tickLineLength );
         }
@@ -222,8 +223,8 @@ public class TimeXAxisPainter extends TimeAxisPainter
         gl.glColor4fv( currentTimeTickColor, 0 );
         gl.glLineWidth( currentTimeLineThickness );
         gl.glBegin( GL2.GL_LINES );
-        gl.glVertex2d( pixelTime, height );
-        gl.glVertex2d( pixelTime, 0 );
+        gl.glVertex2d( axisTime, height );
+        gl.glVertex2d( axisTime, 0 );
         gl.glEnd( );
 
         String text = getCurrentTimeTickText( currentTime );
