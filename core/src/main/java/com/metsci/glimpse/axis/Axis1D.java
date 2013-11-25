@@ -1152,17 +1152,7 @@ public class Axis1D
     // of axes are visible when they should be
     protected static double tweakUp( double val )
     {
-        if ( Double.isInfinite( val ) || Double.isNaN( val ) ) return val;
-
-        double eps = 1d;
-
-        do
-        {
-            eps /= 2d;
-        }
-        while ( ( val + ( eps / 2.0 ) ) != val );
-
-        return val + eps * 2 * 10;
+        return val + Math.ulp( val );
     }
 
     @Override
