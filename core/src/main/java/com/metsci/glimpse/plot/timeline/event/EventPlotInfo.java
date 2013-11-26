@@ -103,6 +103,9 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected EventSelectionHandler selectionHandler;
     
     protected Object defaultIconId;
+    
+    protected int defaultIconSize = 0;
+    protected boolean useDefaultIconSize = false;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -382,6 +385,26 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         public void eventUpdated( Event event )
         {
         }
+    }
+    
+    public void setDefaultIconSize( int size )
+    {
+        this.defaultIconSize = size;
+    }
+    
+    public int getDefaultIconSize( )
+    {
+        return this.defaultIconSize;
+    }
+    
+    public boolean isUseDefaultIconSize( )
+    {
+        return this.useDefaultIconSize;
+    }
+    
+    public void setUseDefaultIconSize( boolean useDefaultIconSize )
+    {
+        this.useDefaultIconSize = useDefaultIconSize;
     }
     
     public void setAggregateNearbyEvents( boolean aggregate )

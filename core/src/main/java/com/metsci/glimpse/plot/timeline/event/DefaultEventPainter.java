@@ -109,9 +109,11 @@ public class DefaultEventPainter implements EventPainter
 
         int buffer = info.getEventPadding( );
 
-        int size = posMax - posMin;
-        double sizeCenter = posMin + size / 2.0;
-        int arrowSize = Math.min( size, ARROW_SIZE );
+        // the size of the event in pixels perpendicular to the time axis
+        int sizePerpPixels = posMax - posMin;
+        // the location of the event center perpendicular to the time axis
+        double sizePerpCenter = posMin + sizePerpPixels / 2.0;
+        int arrowSize = Math.min( sizePerpPixels, ARROW_SIZE );
 
         Epoch epoch = plot.getEpoch( );
         double timeMin = epoch.fromTimeStamp( event.getStartTime( ) );
@@ -222,19 +224,19 @@ public class DefaultEventPainter implements EventPainter
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
                         gl.glVertex2d( arrowBaseMax, posMax );
-                        gl.glVertex2d( timeMax, sizeCenter );
+                        gl.glVertex2d( timeMax, sizePerpCenter );
                         gl.glVertex2d( arrowBaseMax, posMin );
                         gl.glVertex2d( arrowBaseMin, posMin );
-                        gl.glVertex2d( timeMin, sizeCenter );
+                        gl.glVertex2d( timeMin, sizePerpCenter );
                     }
                     else
                     {
                         gl.glVertex2d( posMax, arrowBaseMin );
                         gl.glVertex2d( posMax, arrowBaseMax );
-                        gl.glVertex2d( sizeCenter, timeMax );
+                        gl.glVertex2d( sizePerpCenter, timeMax );
                         gl.glVertex2d( posMin, arrowBaseMax );
                         gl.glVertex2d( posMin, arrowBaseMin );
-                        gl.glVertex2d( sizeCenter, timeMin );
+                        gl.glVertex2d( sizePerpCenter, timeMin );
                     }
                 }
                 finally
@@ -254,19 +256,19 @@ public class DefaultEventPainter implements EventPainter
                     {
                         gl.glVertex2d( arrowBaseMin, posMax );
                         gl.glVertex2d( arrowBaseMax, posMax );
-                        gl.glVertex2d( timeMax, sizeCenter );
+                        gl.glVertex2d( timeMax, sizePerpCenter );
                         gl.glVertex2d( arrowBaseMax, posMin );
                         gl.glVertex2d( arrowBaseMin, posMin );
-                        gl.glVertex2d( timeMin, sizeCenter );
+                        gl.glVertex2d( timeMin, sizePerpCenter );
                     }
                     else
                     {
                         gl.glVertex2d( posMax, arrowBaseMin );
                         gl.glVertex2d( posMax, arrowBaseMax );
-                        gl.glVertex2d( sizeCenter, timeMax );
+                        gl.glVertex2d( sizePerpCenter, timeMax );
                         gl.glVertex2d( posMin, arrowBaseMax );
                         gl.glVertex2d( posMin, arrowBaseMin );
-                        gl.glVertex2d( sizeCenter, timeMin );
+                        gl.glVertex2d( sizePerpCenter, timeMin );
                     }
                 }
                 finally
@@ -275,19 +277,23 @@ public class DefaultEventPainter implements EventPainter
                 }
             }
         }
+        
+        int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
 
         if ( event.hasChildren( ) )
         {
             final int numChildren = event.getEventCount( );
             final int numRows = maxIconRows;
-            int iconSizePixels = size / numRows;
+            
+            // the requested size of the icon in the direction perpendicular to the time axis
+            int iconSizePerpPixels = totalIconSizePerpPixels / numRows;
 
-            int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePixels );
+            int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePerpPixels );
             int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
             int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
 
-            double iconSizeValue = iconSizePixels / axis.getPixelsPerValue( );
-            int totalIconWidthPixels = iconSizePixels * numColumns;
+            double iconSizePerpValue = iconSizePerpPixels / axis.getPixelsPerValue( );
+            int totalIconWidthPixels = iconSizePerpPixels * numColumns;
 
             event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel );
             if ( event.isIconVisible )
@@ -299,7 +305,7 @@ public class DefaultEventPainter implements EventPainter
                 TextureAtlas atlas = info.getTextureAtlas( );
                 atlas.beginRendering( );
                 try
-                {
+                {                    
                     Iterator<Event> iter = event.iterator( );
 
                     outer: for ( int c = 0; c < numColumns; c++ )
@@ -319,21 +325,25 @@ public class DefaultEventPainter implements EventPainter
                                 {
                                     GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
                                 }
-
+                                
                                 ImageData iconData = atlas.getImageData( icon );
-                                int iconSize = horiz ? iconData.getHeight( ) : iconData.getWidth( );
-                                double iconScale = iconSizePixels / ( double ) iconSize;
+                                
+                                // the size of the icon in the direction perpendicular to the time axis
+                                int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
+                                
+                                double iconScale =  iconSizePerpPixels / ( double ) iconSizePerp;
 
-                                double x = value + c * iconSizeValue;
-                                double y = posMin + r * iconSizePixels;
+                                double x = value + c * iconSizePerpValue;
+                                double startY = sizePerpCenter - totalIconSizePerpPixels / 2.0;
+                                double y = startY + r * iconSizePerpPixels;
 
                                 if ( horiz )
                                 {
-                                    atlas.drawImageAxisX( gl, icon, axis, x, y, iconScale, iconScale, 0, iconSize );
+                                    atlas.drawImageAxisX( gl, icon, axis, x, y, iconScale, iconScale, 0, iconSizePerp );
                                 }
                                 else
                                 {
-                                    atlas.drawImageAxisY( gl, icon, axis, y, x, iconScale, iconScale, 0, iconSize );
+                                    atlas.drawImageAxisY( gl, icon, axis, y, x, iconScale, iconScale, 0, iconSizePerp );
                                 }
                             }
                             else
@@ -357,38 +367,56 @@ public class DefaultEventPainter implements EventPainter
             //XXX there is currently no way for custom subclasses of EventPainter to properly
             //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
             //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
-            event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( size, buffer, remainingSpace, pixel, nextStartPixel );
+            event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( totalIconSizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel );
 
             if ( event.isIconVisible )
             {
-                double value = axis.screenPixelToValue( pixel );
-                event.iconStartTime = epoch.toTimeStamp( value );
-                event.iconEndTime = event.iconStartTime.add( size / axis.getPixelsPerValue( ) );
-                
-                TextureAtlas atlas = info.getTextureAtlas( );
+                TextureAtlas atlas = info.getTextureAtlas( );                
                 atlas.beginRendering( );
                 try
                 {
                     ImageData iconData = atlas.getImageData( event.getIconId( ) );
-                    int iconSize = horiz ? iconData.getHeight( ) : iconData.getWidth( );
-                    double iconScale = size / ( double ) iconSize;
-
+                    
+                    // the size of the icon in the direction perpendicular to the time axis
+                    int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
+                    
+                    // the size of the icon in the direction parallel to the time axis
+                    int iconSizeTime = horiz ? iconData.getWidth( ) : iconData.getHeight( );
+                    
+                    // the requested size of the icon in the direction perpendicular to the time axis
+                    int iconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
+                    
+                    double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
+                    
+                    // the axis value corresponding to the left side of the icon
+                    double posTime = axis.screenPixelToValue( pixel );
+                    event.iconStartTime = epoch.toTimeStamp( posTime );
+                    // the size of the icon (parallel to the time axis) in axis units
+                    double iconSizeTimeAxis = iconSizeTime / axis.getPixelsPerValue( );
+                    event.iconEndTime = event.iconStartTime.add( iconSizeTimeAxis );
+                    
+                    // the scaled size of the icon parallel to the time axis in pixels
+                    int iconSizeTimeScaledPixels = (int) ( iconSizeTime * iconScale );
+                    
+                    // the position of the bottom of the icon in pixels perpendicular to the time axis
+                    double posPerp = sizePerpCenter - iconSizePerpPixels / 2.0;
+                    
                     if ( horiz )
-                    {   
-                        atlas.drawImageAxisX( gl, event.getIconId( ), axis, value, posMin, iconScale, iconScale, 0, iconSize );
+                    {
+                        atlas.drawImageAxisX( gl, event.getIconId( ), axis, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp );
                     }
                     else
                     {
-                        atlas.drawImageAxisY( gl, event.getIconId( ), axis, posMin, value, iconScale, iconScale, 0, iconSize );
+                        atlas.drawImageAxisY( gl, event.getIconId( ), axis, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp );
                     }
+                    
+                    remainingSpace -= iconSizeTimeScaledPixels + buffer;
+                    pixel += iconSizeTimeScaledPixels + buffer;
                 }
                 finally
                 {
                     atlas.endRendering( );
                 }
-
-                remainingSpace -= size + buffer;
-                pixel += size + buffer;
             }
         }
 
@@ -397,10 +425,10 @@ public class DefaultEventPainter implements EventPainter
             TextRenderer textRenderer = info.getTextRenderer( );
             Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
 
-            boolean isTextOverfull = event.isTextOverfull( size, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
-            boolean isTextIntersecting = event.isTextIntersecting( size, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
+            boolean isTextOverfull = event.isTextOverfull( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
+            boolean isTextIntersecting = event.isTextIntersecting( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
             boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == TextRenderingMode.HideAll );
-            double availableSpace = event.getTextAvailableSpace( size, buffer, remainingSpace, pixel, nextStartPixel );
+            double availableSpace = event.getTextAvailableSpace( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel );
 
             event.isTextVisible = !isTextOverlappingAndHidden;
 
@@ -443,7 +471,7 @@ public class DefaultEventPainter implements EventPainter
                     {
                         // use the labelBounds for the height (if the text shortening removed a character which
                         // hangs below the line, we don't want the text position to move)
-                        int pixelY = ( int ) ( size / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
+                        int pixelY = ( int ) ( sizePerpPixels / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
                         textRenderer.draw( displayText, pixel, pixelY );
     
                         remainingSpace -= displayBounds.getWidth( ) + buffer;
@@ -459,7 +487,7 @@ public class DefaultEventPainter implements EventPainter
                     textRenderer.beginRendering( width, height );
                     try
                     {
-                        double shiftX = size / 2.0 + posMin;
+                        double shiftX = sizePerpPixels / 2.0 + posMin;
                         int pixelX = ( int ) shiftX;
                      
                         double shiftY = pixel;
@@ -487,5 +515,24 @@ public class DefaultEventPainter implements EventPainter
         {
             event.isTextVisible = false;
         }
+    }
+    
+    protected int getIconSizePerpPixels( Event event, EventPlotInfo info, int sizePerpPixels )
+    {
+        int iconSizePerpPixels;
+        if ( !event.isUseDefaultIconSize( )  )
+        {
+            iconSizePerpPixels = event.getIconSize( );
+        }
+        else if ( !info.isUseDefaultIconSize( ) )
+        {
+            iconSizePerpPixels = info.getDefaultIconSize( );
+        }
+        else
+        {
+            iconSizePerpPixels = sizePerpPixels;
+        }
+        
+        return iconSizePerpPixels;
     }
 }
