@@ -100,6 +100,9 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
     protected boolean isResizeable = true;
     protected double maxTimeSpan = Double.MAX_VALUE;
     protected double minTimeSpan = 0;
+    
+    protected int iconSize = 0;
+    protected boolean useDefaultSize = true;
 
     protected List<EventConstraint> constraints;
 
@@ -240,7 +243,50 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
 
         if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
     }
+    
+    /**
+     * Sets the height of the Event's icon (for horizontal timeline layouts) or the width (for vertical timeline layouts).
+     * 
+     * @param iconSize the icon size in pixels
+     */
+    public void setIconSize( int iconSize )
+    {
+        this.iconSize = iconSize;
+        this.setUseDefaultIconSize( false );
+    }
+    
+    /**
+     * @see #setIconSize(int)
+     * @return the icon size in pixels
+     */
+    public int getIconSize( )
+    {
+        return this.iconSize;
+    }
+    
+    /**
+     * If a specific icon size has not been set, the default icon size is used. The default size is the minimum of the
+     * actual size of the icon and the height of the event row.
+     */
+    public void setUseDefaultIconSize( boolean useDefaultSize )
+    {
+        this.useDefaultSize = useDefaultSize;
+    }
+    
+    /**
+     * @see #setUseDefaultIconSize(boolean)
+     */
+    public boolean isUseDefaultIconSize( )
+    {
+        return this.useDefaultSize;
+    }
 
+    /**
+     * Events can be aggregated when many Events are close together in time and the timeline view is zoomed out very far. This
+     * method will return true for aggregate events.
+     * 
+     * @return true if the event is an aggregate event, false otherwise
+     */
     public boolean hasChildren( )
     {
         return getEventCount( ) > 1;
@@ -287,11 +333,22 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         };
     }
 
+    /**
+     * Sets a custom painter for this event. In addition to modifying the look of a single Event,
+     * {@code EventPlotInfo#setEventPainter(EventPainter)} can be used to modify the default
+     * EventPainter used for all events in the EventPlotInfo. However, the EventPainter set
+     * here takes precedence.
+     * 
+     * @param painter the EventPainter to use to render this event on the timeline
+     */
     public void setEventPainter( EventPainter painter )
     {
         this.painter = painter;
     }
 
+    /**
+     * @see #setEventPainter(EventPainter)
+     */
     public EventPainter getEventPainter( )
     {
         return this.painter;
@@ -316,118 +373,22 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
      * @see #addConstraint(EventConstraint)
      * @param constraint the EventConstraint to remove
      */
-    public void removeConstrain( EventConstraint constraint )
+    public void removeConstraint( EventConstraint constraint )
     {
         this.constraints.remove( constraint );
     }
 
-    protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
-    {
-        float[] defaultColor = info.getDefaultEventBackgroundColor( );
-        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
-
-        if ( isSelected )
-        {
-            if ( selectedColor != null )
-                return selectedColor;
-            else if ( backgroundColor != null )
-                return backgroundColor;
-            else
-                return defaultColor;
-        }
-        else
-        {
-            if ( backgroundColor != null )
-                return backgroundColor;
-            else
-                return defaultColor;
-        }
-    }
-
-    protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )
-    {
-        float[] defaultColor = info.getDefaultEventBorderColor( );
-        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
-
-        if ( isSelected )
-        {
-            if ( selectedColor != null )
-                return selectedColor;
-            else if ( borderColor != null )
-                return borderColor;
-            else
-                return defaultColor;
-        }
-        else
-        {
-            if ( borderColor != null )
-                return borderColor;
-            else
-                return defaultColor;
-        }
-    }
-
-    protected float getBorderThickness( EventPlotInfo info, boolean isSelected )
-    {
-        if ( isSelected )
-        {
-            return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
-        }
-        else
-        {
-            return borderThickness;
-        }
-    }
-
-    protected String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
-    {
-        for ( int endIndex = fullText.length( ); endIndex >= 0; endIndex-- )
-        {
-            String subText = fullText.substring( 0, endIndex ) + "...";
-            Rectangle2D bounds = textRenderer.getBounds( subText );
-            if ( bounds.getWidth( ) < availableSpace ) return subText;
-        }
-
-        return "";
-    }
-
-    protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
-    {
-        double insideBoxSpace = remainingSpaceX - buffer;
-        double outsideBoxSpace = nextStartPixel - pixelX - buffer;
-
-        switch ( overlapRenderingMode )
-        {
-            case Overfull:
-                return insideBoxSpace;
-            case Intersecting:
-                return outsideBoxSpace;
-            case None:
-            default:
-                return Double.MAX_VALUE;
-        }
-    }
-
-    protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
-    {
-        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapRenderingMode == Overfull;
-    }
-
-    protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
-    {
-        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapRenderingMode == Intersecting;
-    }
-
-    protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
-    {
-        return ( size + buffer > remainingSpaceX && overlapRenderingMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapRenderingMode == Intersecting );
-    }
-
+    /**
+     * Sets the tooltip text to be displayed when the user mouses over this Event.
+     */
     public void setToolTipText( String text )
     {
         this.toolTipText = text;
     }
 
+    /**
+     * @see #getToolTipText()
+     */
     public String getToolTipText( )
     {
         return this.toolTipText;
@@ -445,6 +406,9 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         this.isSelectable = isSelectable;
     }
 
+    /**
+     * @see #isSelectable()
+     */
     public boolean isSelectable( )
     {
         return this.isSelectable;
@@ -702,6 +666,11 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         }
     }
 
+    /**
+     * {@code EventPlotInfo} plots on a {@code StackedTimePlot2D} can place events into multiple
+     * rows to prevent them from overlapping with one another if they overlap in time. This
+     * method allows querying for the row that this Event has been assigned.
+     */
     public int getRow( )
     {
         if ( this.info != null )
@@ -714,11 +683,21 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         }
     }
 
+    /**
+     * Events may either be assigned a fixed row to be displayed on, or may float automatically between
+     * rows to ensure that no Events overlap in time.
+     * 
+     * @see #getRow()
+     */
     public boolean isFixedRow( )
     {
         return this.fixedRow;
     }
 
+    /**
+     * @see #getRow()
+     * @see #isFixedRow()
+     */
     protected int getFixedRow( )
     {
         return this.fixedRowIndex;
@@ -822,6 +801,9 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         this.endTime = endTime;
     }
 
+    /**
+     * @return the start and end times of the Event packaged in a TimeSpan
+     */
     public TimeSpan getTimeSpan( )
     {
         return new TimeSpan( startTime, endTime );
@@ -1146,5 +1128,107 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
                 return o1.getEndTime( ).compareTo( o2.getEndTime( ) );
             }
         };
+    }
+    
+    protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
+    {
+        float[] defaultColor = info.getDefaultEventBackgroundColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
+
+        if ( isSelected )
+        {
+            if ( selectedColor != null )
+                return selectedColor;
+            else if ( backgroundColor != null )
+                return backgroundColor;
+            else
+                return defaultColor;
+        }
+        else
+        {
+            if ( backgroundColor != null )
+                return backgroundColor;
+            else
+                return defaultColor;
+        }
+    }
+
+    protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )
+    {
+        float[] defaultColor = info.getDefaultEventBorderColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
+
+        if ( isSelected )
+        {
+            if ( selectedColor != null )
+                return selectedColor;
+            else if ( borderColor != null )
+                return borderColor;
+            else
+                return defaultColor;
+        }
+        else
+        {
+            if ( borderColor != null )
+                return borderColor;
+            else
+                return defaultColor;
+        }
+    }
+
+    protected float getBorderThickness( EventPlotInfo info, boolean isSelected )
+    {
+        if ( isSelected )
+        {
+            return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
+        }
+        else
+        {
+            return borderThickness;
+        }
+    }
+
+    protected String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
+    {
+        for ( int endIndex = fullText.length( ); endIndex >= 0; endIndex-- )
+        {
+            String subText = fullText.substring( 0, endIndex ) + "...";
+            Rectangle2D bounds = textRenderer.getBounds( subText );
+            if ( bounds.getWidth( ) < availableSpace ) return subText;
+        }
+
+        return "";
+    }
+
+    protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    {
+        double insideBoxSpace = remainingSpaceX - buffer;
+        double outsideBoxSpace = nextStartPixel - pixelX - buffer;
+
+        switch ( overlapRenderingMode )
+        {
+            case Overfull:
+                return insideBoxSpace;
+            case Intersecting:
+                return outsideBoxSpace;
+            case None:
+            default:
+                return Double.MAX_VALUE;
+        }
+    }
+
+    protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    {
+        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapRenderingMode == Overfull;
+    }
+
+    protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
+    {
+        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapRenderingMode == Intersecting;
+    }
+
+    protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
+    {
+        return ( size + buffer > remainingSpaceX && overlapRenderingMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapRenderingMode == Intersecting );
     }
 }

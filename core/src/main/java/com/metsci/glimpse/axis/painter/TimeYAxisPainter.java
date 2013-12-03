@@ -85,7 +85,8 @@ public class TimeYAxisPainter extends TimeAxisPainter
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
+        gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
+
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
@@ -98,7 +99,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
         gl.glBegin( GL2.GL_LINES );
         for ( TimeStamp t : tickTimes )
         {
-            double y = axis.valueToScreenPixel( fromTimeStamp( t ) );
+            double y = fromTimeStamp( t );
             gl.glVertex2d( width, y );
             gl.glVertex2d( width - tickLineLength, y );
         }
