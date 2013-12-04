@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.examples;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
@@ -88,12 +91,12 @@ public class Example
         GLProfile glProfile = GLProfile.get( profileString );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
-        GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
 
         // trigger GLContext creation
         glDrawable.display( );
         GLContext context = glDrawable.getContext( );
-        
+
         // create a SwingGlimpseCanvas which shares the context
         // other canvases could also be created which all share resources through this context
         final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( profileString, context );
@@ -112,8 +115,23 @@ public class Example
         // create a Swing Frame to contain the GlimpseCanvas
         final JFrame frame = new JFrame( "Glimpse Example" );
 
-        // add a listener which will dispose of canvas resources when the JFrame is closed
-        canvas.addDisposeListener( frame );
+        // This listener is added before adding the SwingGlimpseCanvas to the frame because
+        // NEWTGLCanvas adds its own WindowListener and this WindowListener should reveive the WindowEvent first
+        // (although I'm now not sure how much this matters)
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                glDrawable.destroy( );
+
+                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
+                // However, it also seems to make SIGSEGV error occur more frequently
+                // frame.remove( canvas );
+
+                canvas.dispose( );
+            }
+        } );
 
         // add the GlimpseCanvas to the frame
         frame.add( canvas );
@@ -138,16 +156,16 @@ public class Example
         GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
-        GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
 
         // trigger GLContext creation
         glDrawable.display( );
         GLContext context = glDrawable.getContext( );
 
-        NewtSwingGlimpseCanvas leftPanel = new NewtSwingGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas leftPanel = new NewtSwingGlimpseCanvas( context );
         leftPanel.addLayout( layoutProviderA.getLayout( ) );
 
-        NewtSwingGlimpseCanvas rightPanel = new NewtSwingGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas rightPanel = new NewtSwingGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
         RepaintManager repaintManager = new NEWTRepaintManager( leftPanel.getGLDrawable( ) );
@@ -155,8 +173,24 @@ public class Example
         repaintManager.addGlimpseCanvas( rightPanel );
         repaintManager.start( );
 
+        WindowAdapter disposeListener = new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                glDrawable.destroy( );
+
+                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
+                // However, it also seems to make SIGSEGV error occur more frequently
+                // frame.remove( canvas );
+
+                leftPanel.dispose( );
+                rightPanel.dispose( );
+            }
+        };
+
         JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
-        rightPanel.addDisposeListener( rightFrame );
+        rightFrame.addWindowListener( disposeListener );
         rightFrame.add( rightPanel );
 
         rightFrame.pack( );
@@ -166,7 +200,7 @@ public class Example
         rightFrame.setVisible( true );
 
         JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
-        leftPanel.addDisposeListener( leftFrame );
+        leftFrame.addWindowListener( disposeListener );
         leftFrame.add( leftPanel );
 
         leftFrame.pack( );

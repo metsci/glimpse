@@ -30,8 +30,6 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
@@ -42,7 +40,6 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
@@ -125,25 +122,6 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         this( GLProfile.GL2GL3, null );
     }
 
-    public void addDisposeListener( final JFrame frame )
-    {
-        // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
-        // This listener must be added before adding the SwingGlimpseCanvas to the frame because
-        // NEWTGLCanvas adds its own WindowListener and this WindowListener must receive the WindowEvent first.
-        frame.addWindowListener( new WindowAdapter( )
-        {
-            @Override
-            public void windowClosing( WindowEvent e )
-            {
-                // remove the canvas from the frame
-                frame.remove( NewtSwingGlimpseCanvas.this );
-
-                // dispose of resources associated with the canvas
-                dispose( );
-            }
-        } );
-    }
-
     private GLEventListener createGLEventListener( )
     {
         return new GLEventListener( )
@@ -194,7 +172,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                logInfo( logger, "Disposing SwingGlimpseCanvas..." );
+                logInfo( logger, "Disposing NewtSwingGlimpseCanvas..." );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -351,7 +329,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         if ( !this.isDisposed )
         {
-            if ( this.glCanvas != null ) this.glCanvas.destroy( );
+            if ( this.glWindow != null ) this.glWindow.destroy( );
             this.isDisposed = true;
         }
     }

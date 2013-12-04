@@ -178,7 +178,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                logInfo( logger, "Disposing SwingGlimpseCanvas..." );
+                logInfo( logger, "Disposing NewtSwtGlimpseCanvas..." );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
