@@ -524,7 +524,7 @@ public class DefaultEventPainter implements EventPainter
         {
             iconSizePerpPixels = event.getIconSize( );
         }
-        else if ( !info.isUseDefaultIconSize( ) )
+        else if ( info.isUseDefaultIconSize( ) )
         {
             iconSizePerpPixels = info.getDefaultIconSize( );
         }
