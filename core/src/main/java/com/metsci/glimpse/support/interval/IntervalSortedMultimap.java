@@ -107,6 +107,7 @@ public abstract class IntervalSortedMultimap<K extends Comparable<K>, V extends 
     
     protected void add0( V event )
     {
+        values.put( event, event );
         startMultimap.put( event.getStartTime( ), event );
         endMultimap.put( event.getEndTime( ), event );
     }
@@ -130,6 +131,7 @@ public abstract class IntervalSortedMultimap<K extends Comparable<K>, V extends 
     
     protected void remove0( V event )
     {
+        values.remove( event );
         startMultimap.remove( event.getStartTime( ), event );
         endMultimap.remove( event.getEndTime( ), event );
     }
