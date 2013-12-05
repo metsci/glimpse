@@ -316,7 +316,7 @@ public class DefaultEventPainter implements EventPainter
                             {
                                 Event child = iter.next( );
                                 Object icon = child.getIconId( );
-                                if ( icon == null )
+                                if ( icon == null || !atlas.isImageLoaded( icon ) )
                                 {
                                     GlimpseColor.glColor( gl, child.getBackgroundColor( info, isSelected ), 0.5f );
                                     icon = defaultIconId;
@@ -375,7 +375,13 @@ public class DefaultEventPainter implements EventPainter
                 atlas.beginRendering( );
                 try
                 {
-                    ImageData iconData = atlas.getImageData( event.getIconId( ) );
+                    Object icon = event.getIconId( );
+                    if ( icon == null || !atlas.isImageLoaded( icon ) )
+                    {
+                        icon = defaultIconId;
+                    }
+                    
+                    ImageData iconData = atlas.getImageData( icon );
                     
                     // the size of the icon in the direction perpendicular to the time axis
                     int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
@@ -403,11 +409,11 @@ public class DefaultEventPainter implements EventPainter
                     
                     if ( horiz )
                     {
-                        atlas.drawImageAxisX( gl, event.getIconId( ), axis, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp );
+                        atlas.drawImageAxisX( gl, icon, axis, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp );
                     }
                     else
                     {
-                        atlas.drawImageAxisY( gl, event.getIconId( ), axis, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp );
+                        atlas.drawImageAxisY( gl, icon, axis, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp );
                     }
                     
                     remainingSpace -= iconSizeTimeScaledPixels + buffer;
