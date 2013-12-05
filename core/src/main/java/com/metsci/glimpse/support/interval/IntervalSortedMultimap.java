@@ -30,11 +30,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -45,16 +47,12 @@ import com.google.common.collect.Sets;
  * values which overlap with a particular time window, or all values which
  * are completely contained within a time window.</p>
  * 
- * <p>Although this collection is sorted based on the Event start and end
- * TimeStamps, it uses {@link #equals(Object)} to satisfy the {@link Set} contract.
- * If two values are equal they must also have the same {@link Keyed#getStartTime()}
- * and {@link Keyed#getEndTime()}. However, two values which are not equal may have
- * the same start and end.</p> 
- * 
  * @author ulman
  */
 public abstract class IntervalSortedMultimap<K extends Comparable<K>, V extends Keyed<K>>
 {
+    Map<V,V> values;
+    
     SetMultimap<K, V> startMultimap;
     SetMultimap<K, V> endMultimap;
 
@@ -63,6 +61,8 @@ public abstract class IntervalSortedMultimap<K extends Comparable<K>, V extends 
 
     public IntervalSortedMultimap( )
     {
+        values = Maps.newHashMap( );
+        
         startMultimap = buildMap( );
         endMultimap = buildMap( );
 
@@ -86,17 +86,49 @@ public abstract class IntervalSortedMultimap<K extends Comparable<K>, V extends 
 
     public void clear( )
     {
+        values.clear( );
         startMultimap.clear( );
         endMultimap.clear( );
     }
     
     public void add( V event )
     {
+        // event might be an equal() event but with a different
+        // start/end time than the event stored in the map
+        // we need to remove the existing event and add our new one
+        V existingEvent = values.get( event );
+        if ( existingEvent != null )
+        {
+            remove0( existingEvent );
+        }
+        
+        add0( event );
+    }
+    
+    protected void add0( V event )
+    {
         startMultimap.put( event.getStartTime( ), event );
         endMultimap.put( event.getEndTime( ), event );
     }
 
     public void remove( V event )
+    {
+        // event might be an equal() event but with a different
+        // start/end time than the event stored in the map
+        // to properly remove the event stored in the map we
+        // need to use its start/end time
+        V existingEvent = values.get( event );
+        if ( existingEvent != null )
+        {
+            remove0( existingEvent );
+        }
+        else
+        {
+            remove0( event );   
+        }
+    }
+    
+    protected void remove0( V event )
     {
         startMultimap.remove( event.getStartTime( ), event );
         endMultimap.remove( event.getEndTime( ), event );
