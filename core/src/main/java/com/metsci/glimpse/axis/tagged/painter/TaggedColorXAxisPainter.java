@@ -112,18 +112,26 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glEnable( GL2.GL_BLEND );
+            
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
 
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
             paintColorScale( gl, taggedAxis, width, height );
 
+            gl.glMatrixMode( GL2.GL_PROJECTION );
+            gl.glLoadIdentity( );
+            gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
+            
             paintTicks( gl, taggedAxis, width, height );
             paintSelectionLine( gl, taggedAxis, width, height );
 
+            gl.glMatrixMode( GL2.GL_PROJECTION );
+            gl.glLoadIdentity( );
+            gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
+            
             paintTags( gl, taggedAxis, width, height );
         }
     }
