@@ -30,6 +30,8 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.support.colormap.ColorGradients;
 
 /**
  * Demonstrates Glimpse's axis linking capability by creating
@@ -42,14 +44,22 @@ public class LinkedTaggedHeatMapExample
     public static void main( String[] args ) throws Exception
     {
         final TaggedHeatMapExample example = new TaggedHeatMapExample( );
-        final GlimpseLayout layout = example.getLayout( );
-
+        
+        final ColorAxisPlot2D layout1 = example.getLayout( ColorGradients.greenBone );
+        final ColorAxisPlot2D layout2 = example.getLayout( ColorGradients.jet );
+        
+        // link x and y axes of the two plots
+        layout1.getAxis( ).setParent( layout2.getAxis( ) );
+        
+        // link z (color) axes of the two plots
+        layout1.getAxisZ( ).setParent( layout2.getAxisZ( ) );
+        
         Example.showWithSwing( new GlimpseLayoutProvider( )
         {
             @Override
             public GlimpseLayout getLayout( )
             {
-                return layout;
+                return layout1;
             }
 
         }, new GlimpseLayoutProvider( )
@@ -57,7 +67,7 @@ public class LinkedTaggedHeatMapExample
             @Override
             public GlimpseLayout getLayout( )
             {
-                return layout;
+                return layout2;
             }
         } );
     }

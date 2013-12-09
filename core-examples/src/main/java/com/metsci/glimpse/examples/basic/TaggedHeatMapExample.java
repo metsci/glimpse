@@ -39,6 +39,7 @@ import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.plot.TaggedColorAxisPlot2D;
+import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.projection.Projection;
@@ -59,8 +60,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
     TaggedHeatMapPainter heatmap;
 
-    @Override
-    public ColorAxisPlot2D getLayout( )
+    public ColorAxisPlot2D getLayout( ColorGradient colorGradient )
     {
         // create a heat map plot with three custom modifications:
         // 1) Use a TaggedAxis1D for the z axis, allowing the addition of custom, draggable tag points
@@ -135,7 +135,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
         // setup the color map for the painter
         ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.purpleBone );
+        colors.setColorGradient( colorGradient );
 
         // create a painter to display the heatmap data
         // this heatmap painter knows about axis tags
@@ -167,6 +167,12 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         cursorPainter.setTexture( texture );
 
         return plot;
+    }
+    
+    @Override
+    public ColorAxisPlot2D getLayout( )
+    {
+        return getLayout( ColorGradients.purpleBone );
     }
 
     public GlimpsePainter getPainter( )

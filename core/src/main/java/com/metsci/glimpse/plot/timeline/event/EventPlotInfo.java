@@ -390,6 +390,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public void setDefaultIconSize( int size )
     {
         this.defaultIconSize = size;
+        this.setUseDefaultIconSize( true );
     }
     
     public int getDefaultIconSize( )
