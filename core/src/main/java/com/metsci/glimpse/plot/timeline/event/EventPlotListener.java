@@ -73,11 +73,16 @@ public interface EventPlotListener
     public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
     /**
-     * Indicates that the provided Event was updated by the user. If enabled, the user can click
+     * <p>Indicates that the provided Event was updated by the user. If enabled, the user can click
      * and drag to change the start and/or end time of Events. When the user does this, eventUpdated
-     * is called.
+     * is called.</p>
      * 
-     * @param event
+     * <p>If the update was caused by user mouse actions, the GlimpseMouseEvent argument will contain
+     * the mouse event which moved the event. If the event was modified programatically, then the 
+     * GlimpseMouseEvent will be null.</p>
+     * 
+     * @param event The updated Event
+     * @param e The GlimpseMouseEvent which caused the Event update, or null if the Event was updated programatically
      */
-    public void eventUpdated( Event event );
+    public void eventUpdated( GlimpseMouseEvent e, Event event );
 }

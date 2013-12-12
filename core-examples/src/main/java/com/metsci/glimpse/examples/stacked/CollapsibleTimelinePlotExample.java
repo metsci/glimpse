@@ -238,7 +238,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             }
 
             @Override
-            public void eventUpdated( Event event )
+            public void eventUpdated( GlimpseMouseEvent e, Event event )
             {
                 logInfo( logger, "Event Updated: %s", event );
             }
