@@ -59,7 +59,7 @@ public class EventPlotAdapter implements EventPlotListener
     }
 
     @Override
-    public void eventUpdated( Event event )
+    public void eventUpdated( GlimpseMouseEvent e, Event event )
     {
     }
 }

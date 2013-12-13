@@ -40,6 +40,7 @@ import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -646,6 +647,11 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
      */
     public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
+    	setTimes0( null, startTime, endTime, force );
+    }
+    
+    protected void setTimes0( GlimpseMouseEvent mouseEvent, TimeStamp startTime, TimeStamp endTime, boolean force )
+    {
         if ( !force )
         {
             TimeSpan newTimes = applyConstraints( new TimeSpan( startTime, endTime ) );
@@ -662,7 +668,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         {
             // if we're attached to a plot, delegate the update of our
             // start/end time to it, so that it can update its data structures
-            this.info.updateEvent( this, startTime, endTime );
+            this.info.updateEvent0( mouseEvent, this, startTime, endTime );
         }
     }
 
@@ -725,7 +731,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
 
         if ( this.info != null )
         {
-            this.info.updateEventRow( this, rowIndex );
+            this.info.updateEventRow( null, this, rowIndex );
         }
     }
 

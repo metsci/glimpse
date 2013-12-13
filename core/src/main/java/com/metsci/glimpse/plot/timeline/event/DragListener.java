@@ -154,7 +154,7 @@ public class DragListener implements EventPlotListener, GlimpseMouseAllListener
     @Override public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
     @Override public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
     @Override public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-    @Override public void eventUpdated( Event event ) { }
+    @Override public void eventUpdated( GlimpseMouseEvent e, Event event ) { }
     @Override public void mouseEntered( GlimpseMouseEvent event ) { }
     @Override public void mouseExited( GlimpseMouseEvent event ) { }
     @Override public void mousePressed( GlimpseMouseEvent event ) { }
