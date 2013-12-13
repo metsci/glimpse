@@ -90,7 +90,7 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
         float[] rotation = e.getRotation( );
         float rotationScale = e.getRotationScale( );
 
-        MouseEvent event = new MouseEvent( eventType, source, when, modifiers, types, pointerIds, local_x, local_y, pressure, maxPressure, clickCount, button, rotation, rotationScale );
+        MouseEvent event = new MouseEvent( eventType, source, when, modifiers, types, pointerIds, local_x, local_y, pressure, maxPressure, button, clickCount, rotation, rotationScale );
         event.setAttachment( stack );
 
         return event;
