@@ -36,11 +36,10 @@ import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -52,15 +51,13 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 public class Example
 {
     private NewtSwingGlimpseCanvas canvas;
-    private RepaintManager manager;
     private JFrame frame;
     private GlimpseLayout layout;
 
-    public Example( NewtSwingGlimpseCanvas canvas, RepaintManager manager, JFrame frame, GlimpseLayout layout )
+    public Example( NewtSwingGlimpseCanvas canvas, JFrame frame, GlimpseLayout layout )
     {
         super( );
         this.canvas = canvas;
-        this.manager = manager;
         this.frame = frame;
         this.layout = layout;
     }
@@ -68,11 +65,6 @@ public class Example
     public NewtSwingGlimpseCanvas getCanvas( )
     {
         return canvas;
-    }
-
-    public RepaintManager getManager( )
-    {
-        return manager;
     }
 
     public JFrame getFrame( )
@@ -110,7 +102,7 @@ public class Example
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         // attach a repaint manager which repaints the canvas in a loop
-        final RepaintManager manager = NEWTRepaintManager.newRepaintManager( canvas );
+        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
 
         // create a Swing Frame to contain the GlimpseCanvas
         final JFrame frame = new JFrame( "Glimpse Example" );
@@ -142,7 +134,7 @@ public class Example
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible( true );
 
-        return new Example( canvas, manager, frame, layout );
+        return new Example( canvas, frame, layout );
     }
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
@@ -168,10 +160,10 @@ public class Example
         final NewtSwingGlimpseCanvas rightPanel = new NewtSwingGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
-        RepaintManager repaintManager = new NEWTRepaintManager( leftPanel.getGLDrawable( ) );
-        repaintManager.addGlimpseCanvas( leftPanel );
-        repaintManager.addGlimpseCanvas( rightPanel );
-        repaintManager.start( );
+        FPSAnimator animator = new FPSAnimator( 120 );
+        animator.add( leftPanel.getGLDrawable( ) );
+        animator.add( rightPanel.getGLDrawable( ) );
+        animator.start( );
 
         WindowAdapter disposeListener = new WindowAdapter( )
         {

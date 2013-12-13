@@ -35,6 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 
 import com.jogamp.opengl.util.texture.Texture;
@@ -357,5 +358,13 @@ public class FrameBufferGlimpseCanvas implements GlimpseCanvas
     public void addDisposeListener( GLRunnable runnable )
     {
         this.disposeListeners.add( runnable );
+    }
+
+    @Override
+    public GLAutoDrawable getGLDrawable( )
+    {
+        //TODO this needs to be fixed -- the simplest solution is probably to use
+        //     jogamp.opengl.GLOffscreenAutoDrawableImpl.FBOImpl instead of GLSimpleFrameBufferObject
+        return null;
     }
 }

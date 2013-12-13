@@ -73,7 +73,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // use the ocean look and feel
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
 
-        new DragManager( ( CollapsibleTimePlot2D ) example.getLayout( ), example.getManager( ) );
+        new DragManager( ( CollapsibleTimePlot2D ) example.getLayout( ) );
     }
 
     @Override

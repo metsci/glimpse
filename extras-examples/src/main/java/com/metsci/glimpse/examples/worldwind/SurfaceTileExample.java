@@ -40,10 +40,10 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
 
@@ -94,7 +94,8 @@ public class SurfaceTileExample
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        NEWTRepaintManager.newRepaintManager( glimpseCanvas );
+        // attach a repaint manager which repaints the canvas in a loop
+        new FPSAnimator( glimpseCanvas.getGLDrawable( ), 120 ).start( );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );

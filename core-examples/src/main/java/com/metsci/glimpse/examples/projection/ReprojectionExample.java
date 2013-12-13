@@ -26,14 +26,17 @@
  */
 package com.metsci.glimpse.examples.projection;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas;
@@ -47,8 +50,6 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.projection.PolarProjection;
-import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -66,22 +67,33 @@ public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
+        // generate a GLContext by constructing a small offscreen framebuffer
+        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
+        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
+        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+
+        // trigger GLContext creation
+        glDrawable.display( );
+        GLContext context = glDrawable.getContext( );
+
         final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( context );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final RepaintManager manager = NEWTRepaintManager.newRepaintManager( canvas );
-
         final FrameBufferGlimpseCanvas offscreenCanvas = new FrameBufferGlimpseCanvas( 800, 800, context );
         offscreenCanvas.addLayout( layout );
-        manager.addGlimpseCanvas( offscreenCanvas );
 
         final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( context );
         canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
         canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
-        manager.addGlimpseCanvas( canvas2 );
+
+        // attach a repaint manager which repaints the canvas in a loop
+        FPSAnimator animator = new FPSAnimator( 120 );
+        animator.add( offscreenCanvas.getGLDrawable( ) );
+        animator.add( canvas2.getGLDrawable( ) );
+        animator.start( );
 
         createFrame( "Original", canvas );
         createFrame( "Reprojected", canvas2 );

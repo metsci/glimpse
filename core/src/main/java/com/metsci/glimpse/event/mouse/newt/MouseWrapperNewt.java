@@ -90,12 +90,12 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
         float[] rotation = e.getRotation( );
         float rotationScale = e.getRotationScale( );
 
-        MouseEvent event =  new MouseEvent( eventType, source, when, modifiers, types, pointerIds, local_x, local_y, pressure, maxPressure, clickCount, button, rotation, rotationScale );
+        MouseEvent event = new MouseEvent( eventType, source, when, modifiers, types, pointerIds, local_x, local_y, pressure, maxPressure, clickCount, button, rotation, rotationScale );
         event.setAttachment( stack );
-        
+
         return event;
     }
-    
+
     protected PointerType[] getPointerTypes( MouseEvent e )
     {
         PointerType[] types = new PointerType[e.getPointerCount( )];
@@ -107,7 +107,7 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
 
         return types;
     }
-    
+
     protected float[] getPressure( MouseEvent e )
     {
         float[] ids = new float[e.getPointerCount( )];

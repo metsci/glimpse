@@ -38,9 +38,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -59,7 +59,8 @@ public class PopupMenuExample
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        NEWTRepaintManager.newRepaintManager( canvas );
+        // attach a repaint manager which repaints the canvas in a loop
+        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
 
         final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
 
@@ -71,7 +72,7 @@ public class PopupMenuExample
                 canvas.dispose( );
             }
         } );
-        
+
         frame.add( canvas );
 
         frame.pack( );

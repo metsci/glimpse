@@ -40,7 +40,6 @@ import com.metsci.glimpse.axis.painter.NumericXAxisPainter;
 import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
@@ -59,7 +58,6 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 
 /**
@@ -230,11 +228,6 @@ public class Plot2D extends GlimpseAxisLayout2D
         attachAxisMouseListener( axisLayoutY, mouseListenerY );
         attachAxisMouseListener( axisLayoutZ, mouseListenerZ );
         attachAxisMouseListener( axisLayoutXY, mouseListenerXY );
-    }
-
-    protected RepaintManager createRepaintManager( GlimpseCanvas canvas )
-    {
-        return new RepaintManager( canvas );
     }
 
     protected void removeAxisMouseListener( Mouseable mouseable, AxisMouseListener listener )

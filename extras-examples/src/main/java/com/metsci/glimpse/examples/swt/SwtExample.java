@@ -26,24 +26,25 @@
  */
 package com.metsci.glimpse.examples.swt;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
-
 import java.util.logging.Logger;
 
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 import com.metsci.glimpse.swt.canvas.NewtSwtGlimpseCanvas;
 import com.metsci.glimpse.swt.misc.SwtLookAndFeel;
-import com.metsci.glimpse.swt.repaint.SwtRepaintManager;
 
 /**
  * @author ulman
@@ -54,9 +55,15 @@ public abstract class SwtExample
 
     public static void showWithSwt( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
-        // generate a GLContext by constructing a small offscreen pixel buffer
-        final GLOffscreenAutoDrawable pBuffer = createPixelBuffer( 1, 1 );
-        final GLContext context = pBuffer.getContext( );
+        // generate a GLContext by constructing a small offscreen framebuffer
+        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
+        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
+        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+
+        // trigger GLContext creation
+        glDrawable.display( );
+        GLContext context = glDrawable.getContext( );
 
         Display display = new Display( );
         Shell shell = new Shell( display );
@@ -67,9 +74,18 @@ public abstract class SwtExample
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
-        final RepaintManager manager = SwtRepaintManager.newRepaintManager( canvas );
+        // attach a repaint manager which repaints the canvas in a loop
+        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
 
-        canvas.addDisposeListener( shell, pBuffer );
+        shell.addDisposeListener( new DisposeListener( )
+        {
+            @Override
+            public void widgetDisposed( DisposeEvent e )
+            {
+                glDrawable.destroy( );
+                canvas.dispose( );
+            }
+        } );
 
         shell.setSize( 800, 800 );
         shell.setLocation( 0, 0 );
@@ -78,9 +94,6 @@ public abstract class SwtExample
 
         while ( !shell.isDisposed( ) )
             if ( !display.readAndDispatch( ) ) display.sleep( );
-
-        // shutdown the Glimpse repaint manager
-        manager.shutdown( );
 
         return;
     }

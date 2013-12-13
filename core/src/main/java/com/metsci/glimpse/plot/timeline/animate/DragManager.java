@@ -26,7 +26,15 @@
  */
 package com.metsci.glimpse.plot.timeline.animate;
 
-import static com.metsci.glimpse.plot.timeline.animate.DragUtils.*;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.findParent;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getBottom;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getCoordinate;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getDragInfoList;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getIndex;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSize;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSortedDescendants;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSpacerSize;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getTop;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +44,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
@@ -54,7 +64,6 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
 import com.metsci.glimpse.plot.timeline.listener.PlotMouseAdapter;
 import com.metsci.glimpse.plot.timeline.listener.PlotMouseListener.PlotLocation;
-import com.metsci.glimpse.support.repaint.RepaintManager;
 
 /**
  * <p>Attaches to an existing {@link StackedTimePlot2D} to allow animated rearrangement
@@ -70,7 +79,6 @@ public class DragManager
 
     // constructor arguments
     protected StackedTimePlot2D plot;
-    protected RepaintManager manager;
     protected Orientation orient;
 
     // Invariant: the total size of shrinking + growing PlotInfo should
@@ -89,6 +97,8 @@ public class DragManager
     // sorted list of the PlotInfos currently being dragged by the user
     protected List<DragInfo> dragging;
     protected volatile boolean dragHappening = false;
+    protected ReentrantLock lock = new ReentrantLock( );
+    protected Condition dragCondition = lock.newCondition( );
 
     // PlotInfos which had extra spacing added above or below them to make
     // room for the dragged plot. The dragged plot has since moved away from
@@ -108,14 +118,13 @@ public class DragManager
 
     protected boolean allowNestedGroups = false;
 
-    public static DragManager attach( StackedTimePlot2D plot, RepaintManager manager )
+    public static DragManager attach( StackedTimePlot2D plot )
     {
-        return new DragManager( plot, manager );
+        return new DragManager( plot );
     }
 
-    public DragManager( final StackedTimePlot2D plot, final RepaintManager manager )
+    public DragManager( final StackedTimePlot2D plot )
     {
-        this.manager = manager;
         this.plot = plot;
         this.orient = plot.getOrientation( );
 
@@ -123,6 +132,35 @@ public class DragManager
         this.backgroundPainter = new BackgroundPainter( ).setColor( plot.getBackgroundColor( ) );
         this.backgroundLayout.addPainter( this.backgroundPainter );
 
+        // create a thread that updates the gaps between PlotInfos (in order
+        // to animate them sliding around in response to the user)
+        this.executor = Executors.newScheduledThreadPool( 2 );
+        this.executor.scheduleWithFixedDelay( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                lock.lock( );
+                try
+                {
+                    while ( !dragHappening )
+                    {
+                        dragCondition.await( );
+                    }
+                    
+                    updateGrowingShrinking( );
+                    plot.validate( );
+                }
+                catch ( InterruptedException e )
+                {
+                }
+                finally
+                {
+                    lock.unlock( );
+                }
+            }
+        }, TICK_TIME_MILLIS, TICK_TIME_MILLIS, TimeUnit.MILLISECONDS );
+        
         // create a listener which is notified when MouseEvents happen inside
         // any of the StackedPlot2D's PlotInfo
         this.plot.addPlotMouseListener( new PlotMouseAdapter( )
@@ -130,14 +168,22 @@ public class DragManager
             @Override
             public void mouseReleased( final GlimpseMouseEvent event, PlotInfo info, PlotLocation location )
             {
-                manager.asyncExec( new Runnable( )
+                executor.execute( new Runnable( )
                 {
                     @Override
                     public void run( )
                     {
-                        if ( dragHappening )
+                        lock.lock( );
+                        try
                         {
-                            endDrag( event );
+                            if ( dragHappening )
+                            {
+                                endDrag( event );
+                            }
+                        }
+                        finally
+                        {
+                            lock.unlock( );
                         }
                     }
                 } );
@@ -145,19 +191,27 @@ public class DragManager
 
             @Override
             public void mouseMoved( final GlimpseMouseEvent event, final PlotInfo info, final PlotLocation location )
-            {
-                manager.asyncExec( new Runnable( )
+            {                
+                executor.execute( new Runnable( )
                 {
                     @Override
                     public void run( )
                     {
-                        boolean isButton1 = event.isButtonDown( MouseButton.Button1 );
-                        boolean isGroup = info instanceof GroupInfo;
-                        boolean isLabel = location == PlotLocation.Label;
-
-                        if ( !dragHappening && isButton1 && ( isGroup || isLabel ) )
+                        lock.lock( );
+                        try
                         {
-                            startDrag( event, info, location );
+                            boolean isButton1 = event.isButtonDown( MouseButton.Button1 );
+                            boolean isGroup = info instanceof GroupInfo;
+                            boolean isLabel = location == PlotLocation.Label;
+    
+                            if ( !dragHappening && isButton1 && ( isGroup || isLabel ) )
+                            {
+                                startDrag( event, info, location );
+                            }
+                        }
+                        finally
+                        {
+                            lock.unlock( );
                         }
                     }
                 } );
@@ -170,14 +224,22 @@ public class DragManager
             @Override
             public void mouseReleased( final GlimpseMouseEvent event )
             {
-                manager.asyncExec( new Runnable( )
+                executor.execute( new Runnable( )
                 {
                     @Override
                     public void run( )
                     {
-                        if ( dragHappening )
+                        lock.lock( );
+                        try
                         {
-                            endDrag( event );
+                            if ( dragHappening )
+                            {
+                                endDrag( event );
+                            }
+                        }
+                        finally
+                        {
+                            lock.unlock( );
                         }
                     }
                 } );
@@ -191,26 +253,34 @@ public class DragManager
                     // update dragPosition
                     if ( dragHappening )
                     {
-                        manager.asyncExec( new Runnable( )
+                        executor.execute( new Runnable( )
                         {
                             @Override
                             public void run( )
                             {
-                                // check dragHappening again, it may have changed since
-                                // we checked outside of asyncExec
-                                if ( dragHappening )
+                                lock.lock( );
+                                try
                                 {
-
-                                    // record the position of the click relative to the StackedPlot2D
-                                    prevDragPosition = dragPosition;
-                                    dragPosition = getDragPosition( event );
-
-                                    // check if the growing PlotInfo should be changed
-                                    chooseNewGrowing( event );
-
-                                    // update layout data for dragged plots and animate
-                                    updateLayoutData( );
-                                    plot.validate( );
+                                    // check dragHappening again, it may have changed since
+                                    // we checked outside of asyncExec
+                                    if ( dragHappening )
+                                    {
+        
+                                        // record the position of the click relative to the StackedPlot2D
+                                        prevDragPosition = dragPosition;
+                                        dragPosition = getDragPosition( event );
+        
+                                        // check if the growing PlotInfo should be changed
+                                        chooseNewGrowing( event );
+        
+                                        // update layout data for dragged plots and animate
+                                        updateLayoutData( );
+                                        plot.validate( );
+                                    }
+                                }
+                                finally
+                                {
+                                    lock.unlock( );
                                 }
                             }
                         } );
@@ -232,46 +302,6 @@ public class DragManager
     public boolean isAllowNestedGroups( )
     {
         return this.allowNestedGroups;
-    }
-
-    protected void stopUpdateThread( )
-    {
-        if ( this.executor != null )
-        {
-            this.executor.shutdown( );
-            this.executor = null;
-        }
-    }
-
-    protected void startUpdateThread( )
-    {
-        if ( this.executor != null )
-        {
-            this.executor.shutdown( );
-        }
-
-        // create a thread that updates the gaps between PlotInfos (in order
-        // to animate them sliding around in response to the user)
-        this.executor = Executors.newScheduledThreadPool( 1 );
-        this.executor.scheduleWithFixedDelay( new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                manager.syncExec( new Runnable( )
-                {
-                    @Override
-                    public void run( )
-                    {
-                        if ( dragHappening )
-                        {
-                            updateGrowingShrinking( );
-                            plot.validate( );
-                        }
-                    }
-                } );
-            }
-        }, TICK_TIME_MILLIS, TICK_TIME_MILLIS, TimeUnit.MILLISECONDS );
     }
 
     //XXX I don't think this will work under all circumstances
@@ -341,6 +371,7 @@ public class DragManager
         }
     }
 
+    // must be called while holding lock
     protected void endDrag( GlimpseMouseEvent event )
     {
         applyDrag( event );
@@ -371,9 +402,6 @@ public class DragManager
         // reset flags
         dragHappening = false;
         dragging = null;
-
-        // stop the update thread (which animates the gap spacing changes)
-        stopUpdateThread( );
 
         plot.validate( );
     }
@@ -439,6 +467,7 @@ public class DragManager
         }
     }
 
+    // must be called while holding lock
     protected void startDrag( GlimpseMouseEvent event, PlotInfo info, PlotLocation location )
     {
         dragHappening = true;
@@ -476,7 +505,8 @@ public class DragManager
         // the end result should be that nothing changes position the moment the drag starts
         initializeGrowingShrinking( dragging.get( 0 ) );
 
-        startUpdateThread( );
+        dragCondition.signalAll( );
+        
         updateLayoutData( );
         updateGrowingShrinking( );
 
@@ -502,7 +532,7 @@ public class DragManager
         {
             this.backgroundLayout.setLayoutData( String.format( "pos %d container.y+%3$d %d container.y2-%3$d", pos - backgroundSize, pos, plot.getBorderSize( ) ) );
         }
-        
+
         this.backgroundPainter.setColor( plot.getBackgroundColor( ) );
 
         // set the position of each PlotInfo being dragged (absolute position
@@ -601,7 +631,7 @@ public class DragManager
         boolean isInsideBottom = !top && checkPosition > bottomPos && checkPosition < middlePos;
         boolean isInside = isInsideTop || isInsideBottom;
         boolean isNotGrowing = growing != null && ( growing.size == size || !info.equals( growing.info ) );
-        boolean isNotTimeline = !(info instanceof TimelineInfo);
+        boolean isNotTimeline = ! ( info instanceof TimelineInfo );
 
         if ( isInside && isNotGrowing && isNotTimeline )
         {
