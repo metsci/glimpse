@@ -97,7 +97,7 @@ public class TooltipPainter extends SimpleTextPainter
      * Sets the icon to be displayed on the first line of the tool tip.
      * @param id the id of the icon in TooltipPainter's TextureAtlas
      */
-    public TooltipPainter setIcon( Object iconId )
+    public synchronized TooltipPainter setIcon( Object iconId )
     {
         this.iconIds = Collections.singletonList( iconId );
         this.iconColors = null;
@@ -110,7 +110,7 @@ public class TooltipPainter extends SimpleTextPainter
      * Sets the TooltipPainter to display multiple icons, one per line,
      * down the left hand side of the tooltip window.
      */
-    public TooltipPainter setIcons( List<Object> iconIds )
+    public synchronized TooltipPainter setIcons( List<Object> iconIds )
     {
         this.iconIds = Lists.newArrayList( iconIds );
         this.iconColors = null;
@@ -124,14 +124,14 @@ public class TooltipPainter extends SimpleTextPainter
      * 
      * @see #setIcons(List)
      */
-    public TooltipPainter setIcons( List<Object> iconIds, List<float[]> colors )
+    public synchronized TooltipPainter setIcons( List<Object> iconIds, List<float[]> colors )
     {
         setIcons( iconIds );
         this.iconColors = Lists.newArrayList( colors );
         return this;
     }
 
-    public TooltipPainter setWrapTextAroundIcon( boolean wrap )
+    public synchronized TooltipPainter setWrapTextAroundIcon( boolean wrap )
     {
         this.wrapTextAroundIcon = wrap;
         this.lines = null; // signal that layout should be recalculated
@@ -142,7 +142,7 @@ public class TooltipPainter extends SimpleTextPainter
      * Sets the location of the upper left corner of the tooltip box
      * in screen/pixel coordinates.
      */
-    public TooltipPainter setLocation( int x, int y )
+    public synchronized TooltipPainter setLocation( int x, int y )
     {
         this.x = x;
         this.y = y;
@@ -150,7 +150,7 @@ public class TooltipPainter extends SimpleTextPainter
         return this;
     }
 
-    public TooltipPainter setOffset( int x, int y )
+    public synchronized TooltipPainter setOffset( int x, int y )
     {
         this.offsetX = x;
         this.offsetY = y;
@@ -158,24 +158,19 @@ public class TooltipPainter extends SimpleTextPainter
         return this;
     }
 
-    public TooltipPainter setLocation( GlimpseMouseEvent e )
+    public synchronized TooltipPainter setLocation( GlimpseMouseEvent e )
     {
         return setLocation( e.getScreenPixelsX( ), e.getScreenPixelsY( ) );
     }
 
-    public TooltipPainter setBorderSize( int size )
+    public synchronized TooltipPainter setBorderSize( int size )
     {
         this.borderSize = size;
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
 
-    public int getBorderSize( )
-    {
-        return this.borderSize;
-    }
-
-    public TooltipPainter setFixedWidth( int fixedWidth )
+    public synchronized TooltipPainter setFixedWidth( int fixedWidth )
     {
         this.fixedWidth = fixedWidth;
         this.isFixedWidth = true;
@@ -183,60 +178,28 @@ public class TooltipPainter extends SimpleTextPainter
         return this;
     }
 
-    public TooltipPainter setUnlimitedWidth( )
+    public synchronized TooltipPainter setUnlimitedWidth( )
     {
         this.isFixedWidth = false;
         this.lines = null; // signal that layout should be recalculated
         return this;
     }
 
-    public void setClampToScreenEdges( boolean clamp )
-    {
-        this.clampToScreenEdges = clamp;
-    }
-
-    public int getFixedWidth( )
-    {
-        return this.fixedWidth;
-    }
-
-    public boolean isFixedWidth( )
-    {
-        return this.isFixedWidth;
-    }
-
-    public TooltipPainter setBreakOnEol( boolean breakOnEol )
+    public synchronized TooltipPainter setBreakOnEol( boolean breakOnEol )
     {
         this.breakOnEol = breakOnEol;
         this.textLayout = null; // signal that textLayout should be recreated
         return this;
     }
 
-    /**
-     * Whether to force a break on the end of line characters (\r \f \n).
-     */
-    public boolean getBreakOnEol( )
-    {
-        return breakOnEol;
-    }
-
-    public TooltipPainter setLineSpacing( float lineSpacing )
+    public synchronized TooltipPainter setLineSpacing( float lineSpacing )
     {
         this.lineSpacing = lineSpacing;
         this.textLayout = null; // signal that textLayout should be recreated
         return this;
     }
 
-    /**
-     * The spacing between the bottom (descent) of one line of text to the top
-     * (ascent) of the next line.
-     */
-    public float getLineSpacing( )
-    {
-        return lineSpacing;
-    }
-
-    public TooltipPainter setBreakIterator( BreakIterator breakIterator )
+    public synchronized TooltipPainter setBreakIterator( BreakIterator breakIterator )
     {
         this.breakIterator = breakIterator;
         this.textLayout = null; // signal that textLayout should be recreated
@@ -244,11 +207,48 @@ public class TooltipPainter extends SimpleTextPainter
     }
 
     @Override
-    public TooltipPainter setText( String text )
+    public synchronized TooltipPainter setText( String text )
     {
         this.text = text;
         this.lines = null; // signal that layout should be recalculated
         return this;
+    }
+
+    public synchronized int getBorderSize( )
+    {
+        return this.borderSize;
+    }
+
+    public synchronized void setClampToScreenEdges( boolean clamp )
+    {
+        this.clampToScreenEdges = clamp;
+    }
+
+    public synchronized int getFixedWidth( )
+    {
+        return this.fixedWidth;
+    }
+
+    public synchronized boolean isFixedWidth( )
+    {
+        return this.isFixedWidth;
+    }
+
+    /**
+     * Whether to force a break on the end of line characters (\r \f \n).
+     */
+    public synchronized boolean getBreakOnEol( )
+    {
+        return breakOnEol;
+    }
+
+    /**
+     * The spacing between the bottom (descent) of one line of text to the top
+     * (ascent) of the next line.
+     */
+    public synchronized float getLineSpacing( )
+    {
+        return lineSpacing;
     }
 
     protected void updateTextLayout( )
@@ -320,7 +320,7 @@ public class TooltipPainter extends SimpleTextPainter
     protected void loadIcons( )
     {
         int size = iconIds == null ? 0 : iconIds.size( );
-        
+
         this.icons = Lists.newArrayListWithCapacity( size );
 
         this.noIcons = true;
@@ -334,7 +334,7 @@ public class TooltipPainter extends SimpleTextPainter
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
         if ( icons == null )
         {
@@ -355,10 +355,8 @@ public class TooltipPainter extends SimpleTextPainter
         {
             updateLayout( );
         }
-        
-        final List<TextBoundingBox> tempLines = lines;
 
-        if ( textRenderer == null || tempLines == null ) return;
+        if ( textRenderer == null || lines == null ) return;
 
         GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
@@ -431,9 +429,9 @@ public class TooltipPainter extends SimpleTextPainter
         textRenderer.beginRendering( width, height );
         try
         {
-            for ( int i = 0; i < tempLines.size( ); i++ )
+            for ( int i = 0; i < lines.size( ); i++ )
             {
-                TextBoundingBox line = tempLines.get( i );
+                TextBoundingBox line = lines.get( i );
 
                 float iconSize = getIconSpacing( i );
 
@@ -448,7 +446,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         // draw icon
-        if ( !tempLines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
+        if ( !lines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
         {
             atlas.beginRendering( );
             try
@@ -457,7 +455,7 @@ public class TooltipPainter extends SimpleTextPainter
                 {
                     Object iconId = iconIds.get( i );
                     ImageData iconData = icons.get( i );
-                    TextBoundingBox line = tempLines.get( i );
+                    TextBoundingBox line = lines.get( i );
 
                     if ( iconId != null && iconData != null && line != null )
                     {
