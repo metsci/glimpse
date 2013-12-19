@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.screenshot;
 
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.createPixelBuffer;
+import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
 import java.io.File;
 import java.io.IOException;
