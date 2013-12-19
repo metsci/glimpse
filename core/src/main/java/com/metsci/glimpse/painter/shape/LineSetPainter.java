@@ -115,8 +115,6 @@ public class LineSetPainter extends GlimpseDataPainter2D
                 totalPointCount += pointCount;
             }
 
-            System.out.println( totalPointCount );
-            
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < totalPointCount * 2 )
             {
                 this.dataBuffer = Buffers.newDirectFloatBuffer( totalPointCount * 2 );
