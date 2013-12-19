@@ -115,6 +115,8 @@ public class LineSetPainter extends GlimpseDataPainter2D
                 totalPointCount += pointCount;
             }
 
+            System.out.println( totalPointCount );
+            
             if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < totalPointCount * 2 )
             {
                 this.dataBuffer = Buffers.newDirectFloatBuffer( totalPointCount * 2 );
@@ -218,10 +220,10 @@ public class LineSetPainter extends GlimpseDataPainter2D
 
         gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
-        if ( newData )
+        dataBufferLock.lock( );
+        try
         {
-            this.dataBufferLock.lock( );
-            try
+            if ( newData )
             {
                 // copy data from the host memory buffer to the device
                 gl.glBufferData( GL2.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
@@ -230,22 +232,22 @@ public class LineSetPainter extends GlimpseDataPainter2D
 
                 newData = false;
             }
-            finally
-            {
-                this.dataBufferLock.unlock( );
-            }
+    
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
+            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+    
+            gl.glColor4fv( lineColor, 0 );
+            gl.glLineWidth( lineWidth );
+    
+            offsetBuffer.rewind( );
+            sizeBuffer.rewind( );
+    
+            gl.glMultiDrawArrays( GL2.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
         }
-
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        gl.glColor4fv( lineColor, 0 );
-        gl.glLineWidth( lineWidth );
-
-        offsetBuffer.rewind( );
-        sizeBuffer.rewind( );
-
-        gl.glMultiDrawArrays( GL2.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
+        finally
+        {
+            dataBufferLock.unlock( );
+        }
     }
 }
