@@ -126,6 +126,17 @@ public class GLUtils
         return animator;
     }
 
+    public static Runnable newPaintJob( final GlimpseCanvas canvas )
+    {
+        return new Runnable( )
+        {
+            public void run( )
+            {
+                canvas.paint( );
+            }
+        };
+    }
+
     public static void setLookAndFeel( LookAndFeel laf, GlimpseTarget... targets )
     {
         for ( GlimpseTarget target : targets )
