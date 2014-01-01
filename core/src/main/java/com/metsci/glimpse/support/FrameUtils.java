@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.support;
 
+import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
+import static java.awt.GraphicsDevice.TYPE_RASTER_SCREEN;
 import static java.lang.Math.round;
 
 import java.awt.Container;
@@ -39,6 +41,7 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.List;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JFrame;
@@ -169,6 +172,30 @@ public class FrameUtils
             GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment( ).getDefaultScreenDevice( );
             device.setFullScreenWindow( frame );
         }
+    }
+
+    public static List<GraphicsDevice> screens( )
+    {
+        List<GraphicsDevice> screens = newArrayList( );
+        for ( GraphicsDevice device : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
+        {
+            if ( device.getType( ) == TYPE_RASTER_SCREEN )
+            {
+                screens.add( device );
+            }
+        }
+        return screens;
+    }
+
+    /**
+     * Make the frame fullscreen on the screen indicated by screenIndex, and make it visible.
+     *
+     * NOTE: This functionality is subject to the whims of the platform's window manager.
+     */
+    public static void showFrameFullscreen( Frame frame, GraphicsDevice screen )
+    {
+        frame.setUndecorated( true );
+        screen.setFullScreenWindow( frame );
     }
 
 }
