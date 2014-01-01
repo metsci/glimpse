@@ -35,6 +35,8 @@ import javax.media.opengl.GLProfile;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 
 public class GLUtils
@@ -122,5 +124,13 @@ public class GLUtils
         }
         animator.start( );
         return animator;
+    }
+
+    public static void setLookAndFeel( LookAndFeel laf, GlimpseTarget... targets )
+    {
+        for ( GlimpseTarget target : targets )
+        {
+            target.setLookAndFeel( laf );
+        }
     }
 }
