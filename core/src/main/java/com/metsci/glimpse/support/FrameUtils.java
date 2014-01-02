@@ -98,46 +98,80 @@ public class FrameUtils
     }
 
     /**
-     * Size the frame, center it on the screen (usually the screen of the primary monitor,
-     * but may vary based on the platform's window manager), and make it visible.
+     * Size the frame, center it, and make it visible.
      *
      * The frame is sized to take up 85% of available horizontal and vertical space.
      *
-     * @see #showFrameCentered(Frame, double)
+     * @see #centerFrame(Frame)
      */
     public static void showFrameCentered( Frame frame )
     {
-        showFrameCentered( frame, 0.85 );
+        centerFrame( frame );
+        frame.setVisible( true );
     }
 
     /**
-     * Size the frame, center it on the screen (usually the screen of the primary monitor,
-     * but may vary based on the platform's window manager), and make it visible.
+     * Size the frame, center it, and make it visible.
      *
-     * The frame is sized to take up the given fraction of available horizontal and vertical
-     * space. Available space should not include system bars and such -- but is ultimately up
-     * to the platform's window manager.
+     * @see #centerFrame(Frame, double)
      */
     public static void showFrameCentered( Frame frame, double screenExtentFraction )
+    {
+        centerFrame( frame, screenExtentFraction );
+        frame.setVisible( true );
+    }
+
+    /**
+     * Size the frame, center it, and make it visible.
+     *
+     * @see #centerFrame(Frame, int, int)
+     */
+    public static void showFrameCentered( Frame frame, int width, int height )
+    {
+        centerFrame( frame, width, height );
+        frame.setVisible( true );
+    }
+
+    /**
+     * Size the frame, and center it on the screen (usually the screen of the primary monitor,
+     * but may vary based on the platform's window manager). Does not make the frame visible.
+     *
+     * The frame is sized to take up 85% of available horizontal and vertical space.
+     *
+     * @see #centerFrame(Frame, double)
+     */
+    public static void centerFrame( Frame frame )
+    {
+        centerFrame( frame, 0.85 );
+    }
+
+    /**
+     * Size the frame, and center it on the screen (usually the screen of the primary monitor,
+     * but may vary based on the platform's window manager). Does not make the frame visible.
+     *
+     * The frame is sized to take up the given fraction of available horizontal and vertical
+     * space. In most cases, available space will not include system bars and such, but it is
+     * ultimately up to the platform's window manager.
+     */
+    public static void centerFrame( Frame frame, double screenExtentFraction )
     {
         Rectangle maxWindowBounds = GraphicsEnvironment.getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
         float frac = ( float ) screenExtentFraction;
         int width = round( frac * maxWindowBounds.width );
         int height = round( frac * maxWindowBounds.height );
-        showFrameCentered( frame, width, height );
+        centerFrame( frame, width, height );
     }
 
     /**
-     * Size the frame, center it on the screen (usually the screen of the primary monitor,
-     * but may vary based on the platform's window manager), and make it visible.
+     * Size the frame, and center it on the screen (usually the screen of the primary monitor,
+     * but may vary based on the platform's window manager). Does not make the frame visible.
      */
-    public static void showFrameCentered( Frame frame, int width, int height )
+    public static void centerFrame( Frame frame, int width, int height )
     {
         frame.setPreferredSize( new Dimension( width, height ) );
         frame.pack( );
         frame.setSize( width, height );
         frame.setLocationRelativeTo( null );
-        frame.setVisible( true );
     }
 
     /**
