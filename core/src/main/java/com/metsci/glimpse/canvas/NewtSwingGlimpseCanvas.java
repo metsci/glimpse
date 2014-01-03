@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
+import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.BorderLayout;
@@ -114,7 +115,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     public NewtSwingGlimpseCanvas( GLContext context )
     {
-        this( GLProfile.GL2GL3, context );
+        this( profileNameOf( context, GLProfile.GL2GL3 ), context );
     }
 
     public NewtSwingGlimpseCanvas( )

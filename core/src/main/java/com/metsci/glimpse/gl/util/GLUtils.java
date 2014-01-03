@@ -29,6 +29,7 @@ package com.metsci.glimpse.gl.util;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
@@ -113,6 +114,19 @@ public class GLUtils
         offscreenDrawable.display( );
 
         return offscreenDrawable;
+    }
+
+    public static String profileNameOf( GLContext context )
+    {
+        return context.getGLDrawable( ).getGLProfile( ).getName( );
+    }
+
+    /**
+     * Returns the profile-name of the given context, or the given fallback if context is null.
+     */
+    public static String profileNameOf( GLContext context, String fallback )
+    {
+        return ( context == null ? fallback : profileNameOf( context ) );
     }
 
     public static FPSAnimator startFpsAnimator( int fps, GlimpseCanvas... canvases )
