@@ -1,0 +1,8 @@
+---
+layout: default
+title: Glimpse 2.1.0 Release
+---
+
+<p>Glimpse 2.1.0 updates Glimpse to depend on <a href="https://jogamp.org/wiki/index.php/Release_2.1.3">Jogl 2.1.3</a>.</p>
+
+<p>Changes include fixes to threading issues caused by NEWT's threading model, timeline enhancements, and continued work on bugs introduced by the move to Jogl 2.</p>
