@@ -26,10 +26,20 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
+import java.util.Set;
+
 import com.metsci.glimpse.support.interval.IntervalSortedMultimap;
+import com.metsci.glimpse.support.interval.Keyed;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.metsci.glimpse.util.units.time.TimeStampPosixMillisInt64;
 
+/**
+ * <p>Although this collection is sorted based on the Event start and end
+ * TimeStamps, it uses {@link #equals(Object)} to satisfy the {@link Set} contract.
+ * If two values are equal they must also have the same {@link Keyed#getStartTime()}
+ * and {@link Keyed#getEndTime()}. However, two values which are not equal may have
+ * the same start and end.</p> 
+*/
 public class EventIntervalSortedMultimap extends IntervalSortedMultimap<TimeStamp, Event>
 {
 

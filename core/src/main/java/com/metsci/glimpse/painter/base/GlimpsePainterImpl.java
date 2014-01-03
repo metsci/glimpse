@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.painter.base;
 
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,13 +45,21 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
     public static final int BYTES_PER_FLOAT = 4;
 
-    protected boolean disposed = false;
-    protected boolean displayOn = true;
-    protected boolean doErrorHandling = true;
+    protected volatile boolean disposed = false;
+    protected final ReentrantLock disposeLock;
+    
+    protected volatile boolean displayOn = true;
+    protected volatile boolean doErrorHandling = true;
+    
     protected final String errorPrefix = "GL ERROR: " + getClass( ).getName( );
-
+    
     protected abstract void paintTo( GlimpseContext context, GlimpseBounds bounds );
 
+    public GlimpsePainterImpl( )
+    {
+        this.disposeLock = new ReentrantLock( );
+    }
+    
     public void setErrorHandling( boolean doErrorHandling )
     {
         this.doErrorHandling = doErrorHandling;
@@ -120,10 +129,22 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     @Override
     public void dispose( GlimpseContext context )
     {
+        // Double-checked locking works fine with a volatile var (as of Java 5)
         if ( !this.disposed )
         {
-            this.disposed = true;
-            dispose( context.getGLContext( ) );
+            this.disposeLock.lock( );
+            try
+            {
+                if ( !this.disposed )
+                {
+                    this.disposed = true;
+                    dispose( context.getGLContext( ) );
+                }
+            }
+            finally
+            {
+                this.disposeLock.unlock( );
+            }
         }
     }
 

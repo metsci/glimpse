@@ -64,8 +64,8 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
         AxisUnitConverter converter = ticks.getAxisUnitConverter( );
 
         // Tick marks
-        int iTick0 = getTickRightX( width, tickSize );
-        int iTick1 = getTickLeftX( width, tickSize );
+        double iTick0 = getTickRightX( width, tickSize );
+        double iTick1 = getTickLeftX( width, tickSize );
         int min = -1;
         int max = yTicks.length;
 
@@ -76,15 +76,15 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
         {
             for ( int i = 0; i < yTicks.length; i++ )
             {
-                int jTick = axis.valueToScreenPixel( converter.fromAxisUnits( yTicks[i] ) );
+                double jTick = converter.fromAxisUnits( yTicks[i] );
 
                 // don't draw ticks off the screen
-                if ( jTick > height - 1 && !showLabelsForOffscreenTicks )
+                if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
                 {
                     max = i;
                     break;
                 }
-                else if ( jTick < 0 && !showLabelsForOffscreenTicks )
+                else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
                 {
                     min = i;
                     continue;
@@ -93,8 +93,8 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
                 {
                     if ( jTick == height ) jTick = height - 1;
 
-                    gl.glVertex2f( iTick0, jTick );
-                    gl.glVertex2f( iTick1, jTick );
+                    gl.glVertex2d( iTick0, jTick );
+                    gl.glVertex2d( iTick1, jTick );
                 }
             }
 
@@ -106,10 +106,10 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
 
                 for ( int i = 0; i < xMinor.length; i++ )
                 {
-                    int jTick = axis.valueToScreenPixel( converter.fromAxisUnits( xMinor[i] ) );
+                    double jTick = converter.fromAxisUnits( xMinor[i] );
 
-                    gl.glVertex2f( iTick0, jTick );
-                    gl.glVertex2f( iTick1, jTick );
+                    gl.glVertex2d( iTick0, jTick );
+                    gl.glVertex2d( iTick1, jTick );
                 }
             }
         }

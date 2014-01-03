@@ -24,11 +24,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.canvas;
+package com.metsci.glimpse.util.concurrent;
 
-import com.jogamp.newt.opengl.GLWindow;
+import java.util.concurrent.locks.ReentrantLock;
 
-public interface NewtGlimpseCanvas extends GlimpseCanvas
+public class ConcurrencyUtils
 {
-    public GLWindow getGLWindow( );
+
+    public static void requireLock( ReentrantLock lock )
+    {
+        if ( !lock.isHeldByCurrentThread( ) )
+        {
+            throw new RuntimeException( "Lock is not held by current thread: thread-name = " + Thread.currentThread( ).getName( ) );
+        }
+    }
+
 }

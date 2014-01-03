@@ -28,6 +28,8 @@ package com.metsci.glimpse.examples.layout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
@@ -36,9 +38,9 @@ import javax.swing.JRadioButtonMenuItem;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -57,11 +59,19 @@ public class PopupMenuExample
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        NEWTRepaintManager.newRepaintManager( canvas );
+        // attach a repaint manager which repaints the canvas in a loop
+        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
 
         final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
 
-        canvas.addDisposeListener( frame );
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                canvas.dispose( );
+            }
+        } );
 
         frame.add( canvas );
 

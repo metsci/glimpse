@@ -27,15 +27,19 @@
 package com.metsci.glimpse.examples.screenshot;
 
 import static com.metsci.glimpse.context.TargetStackUtil.*;
-import static com.metsci.glimpse.gl.util.GLPBufferUtils.*;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
@@ -45,6 +49,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.screenshot.ScreenshotUtil;
@@ -60,29 +65,56 @@ public class ScreenCaptureExample
 {
     public static void main( String[] args ) throws Exception
     {
-        GLContext context = createPixelBuffer( 1, 1 ).getContext( );
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( context );
+        // generate a GLContext by constructing a small offscreen framebuffer
+        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
+        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
+        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
 
-        canvas.addLayout( new ScreenCaptureExample( ).getLayout( context ) );
+        // trigger GLContext creation
+        glDrawable.display( );
+        GLContext context = glDrawable.getContext( );
+
+        // create a SwingGlimpseCanvas which shares the context
+        // other canvases could also be created which all share resources through this context
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( GLProfile.GL2GL3, context );
+
+        // create a top level GlimpseLayout which we can add painters and other layouts to
+        GlimpseLayout layout = new ScreenCaptureExample( ).getLayout( context );
+        canvas.addLayout( layout );
+
+        // set a look and feel on the canvas (this will be applied to all attached layouts and painters)
+        // the look and feel affects default colors, fonts, etc...
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
+        // attach a repaint manager which repaints the canvas in a loop
+        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
+
+        // create a Swing Frame to contain the GlimpseCanvas
         final JFrame frame = new JFrame( "Glimpse Example" );
 
+        // This listener is added before adding the SwingGlimpseCanvas to the frame because
+        // NEWTGLCanvas adds its own WindowListener and this WindowListener should reveive the WindowEvent first
+        // (although I'm now not sure how much this matters)
         frame.addWindowListener( new WindowAdapter( )
         {
             @Override
             public void windowClosing( WindowEvent e )
             {
-                // dispose of resources associated with the canvas
-                canvas.dispose( );
+                glDrawable.destroy( );
 
-                // remove the canvas from the frame
-                frame.remove( canvas );
+                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
+                // However, it also seems to make SIGSEGV error occur more frequently
+                // frame.remove( canvas );
+
+                canvas.dispose( );
             }
         } );
 
+        // add the GlimpseCanvas to the frame
         frame.add( canvas );
 
+        // make the frame visible
         frame.pack( );
         frame.setSize( 800, 800 );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );

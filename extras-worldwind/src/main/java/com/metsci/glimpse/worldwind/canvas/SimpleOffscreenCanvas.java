@@ -29,6 +29,7 @@ package com.metsci.glimpse.worldwind.canvas;
 import java.awt.Dimension;
 import java.util.List;
 
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
@@ -242,5 +243,12 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     public void addDisposeListener( GLRunnable runnable )
     {
         // do nothing -- not a fully featured GlimpseCanvas
+    }
+
+    @Override
+    public GLAutoDrawable getGLDrawable( )
+    {
+        // not a fully featured GlimpseCanvas
+        return null;
     }
 }

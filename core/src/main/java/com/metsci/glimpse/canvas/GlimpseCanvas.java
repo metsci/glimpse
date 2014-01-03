@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -45,6 +46,8 @@ import com.metsci.glimpse.gl.GLRunnable;
  */
 public interface GlimpseCanvas extends GlimpseTarget
 {
+    public GLAutoDrawable getGLDrawable( );
+    
     public GLContext getGLContext( );
 
     public GlimpseContext getGlimpseContext( );

@@ -28,6 +28,16 @@ package com.metsci.glimpse.gl.util;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLOffscreenAutoDrawable;
+import javax.media.opengl.GLProfile;
+
+import com.jogamp.opengl.util.FPSAnimator;
+import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 
 public class GLUtils
@@ -87,5 +97,65 @@ public class GLUtils
             throw new IllegalArgumentException( "Only 31 texture units supported." );
 
         return GL2.GL_TEXTURE0 + texUnit;
+    }
+
+    public static GLOffscreenAutoDrawable newOffscreenDrawable( String profileName )
+    {
+        return newOffscreenDrawable( GLProfile.get( profileName ) );
+    }
+
+    public static GLOffscreenAutoDrawable newOffscreenDrawable( GLProfile profile )
+    {
+        GLDrawableFactory drawableFactory = GLDrawableFactory.getFactory( profile );
+        GLCapabilities caps = new GLCapabilities( profile );
+        GLOffscreenAutoDrawable offscreenDrawable = drawableFactory.createOffscreenAutoDrawable( null, caps, null, 1, 1 );
+
+        // Trigger context creation
+        offscreenDrawable.display( );
+
+        return offscreenDrawable;
+    }
+
+    public static String profileNameOf( GLContext context )
+    {
+        return context.getGLDrawable( ).getGLProfile( ).getName( );
+    }
+
+    /**
+     * Returns the profile-name of the given context, or the given fallback if context is null.
+     */
+    public static String profileNameOf( GLContext context, String fallback )
+    {
+        return ( context == null ? fallback : profileNameOf( context ) );
+    }
+
+    public static FPSAnimator startFpsAnimator( int fps, GlimpseCanvas... canvases )
+    {
+        FPSAnimator animator = new FPSAnimator( fps );
+        for ( GlimpseCanvas canvas : canvases )
+        {
+            animator.add( canvas.getGLDrawable( ) );
+        }
+        animator.start( );
+        return animator;
+    }
+
+    public static Runnable newPaintJob( final GlimpseCanvas canvas )
+    {
+        return new Runnable( )
+        {
+            public void run( )
+            {
+                canvas.paint( );
+            }
+        };
+    }
+
+    public static void setLookAndFeel( LookAndFeel laf, GlimpseTarget... targets )
+    {
+        for ( GlimpseTarget target : targets )
+        {
+            target.setLookAndFeel( laf );
+        }
     }
 }

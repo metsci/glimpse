@@ -103,6 +103,9 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected EventSelectionHandler selectionHandler;
     
     protected Object defaultIconId;
+    
+    protected int defaultIconSize = 0;
+    protected boolean useDefaultIconSize = false;
 
     public EventPlotInfo( TimePlotInfo delegate )
     {
@@ -379,9 +382,30 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         }
 
         @Override
-        public void eventUpdated( Event event )
+        public void eventUpdated( GlimpseMouseEvent e, Event event )
         {
         }
+    }
+    
+    public void setDefaultIconSize( int size )
+    {
+        this.defaultIconSize = size;
+        this.setUseDefaultIconSize( true );
+    }
+    
+    public int getDefaultIconSize( )
+    {
+        return this.defaultIconSize;
+    }
+    
+    public boolean isUseDefaultIconSize( )
+    {
+        return this.useDefaultIconSize;
+    }
+    
+    public void setUseDefaultIconSize( boolean useDefaultIconSize )
+    {
+        this.useDefaultIconSize = useDefaultIconSize;
     }
     
     public void setAggregateNearbyEvents( boolean aggregate )
@@ -668,18 +692,23 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         return this.textRenderingMode;
     }
 
-    public void updateEventRow( Event event, int rowIndex )
+    public void updateEventRow( GlimpseMouseEvent mouseEvent, Event event, int rowIndex )
     {
         this.eventManager.setRow( event.getId( ), rowIndex );
 
-        this.notifyEventUpdated( event );
+        this.notifyEventUpdated( mouseEvent, event );
     }
 
     public void updateEvent( Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
+        this.updateEvent0( null, oldEvent, newStartTime, newEndTime );
+    }
+    
+    protected void updateEvent0( GlimpseMouseEvent mouseEvent, Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
+    {
         this.eventManager.moveEvent( oldEvent, newStartTime, newEndTime );
 
-        this.notifyEventUpdated( oldEvent );
+        this.notifyEventUpdated( mouseEvent, oldEvent );
     }
     
     public void validate( )
@@ -692,11 +721,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         return layout1D;
     }
     
-    protected void notifyEventUpdated( Event event )
+    protected void notifyEventUpdated( GlimpseMouseEvent mouseEvent, Event event )
     {
         for ( EventPlotListener listener : eventListeners )
         {
-            listener.eventUpdated( event );
+            listener.eventUpdated( mouseEvent, event );
         }
     }
 }

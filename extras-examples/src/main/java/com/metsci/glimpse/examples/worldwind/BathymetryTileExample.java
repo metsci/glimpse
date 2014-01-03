@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.worldwind;
 
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.*;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.LatLon;
@@ -42,6 +42,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -50,7 +51,6 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
-import com.metsci.glimpse.support.repaint.NEWTRepaintManager;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -143,7 +143,8 @@ public class BathymetryTileExample
         JFrame glimpseFrame = new JFrame( "Glimpse" );
         glimpseFrame.add( glimpseCanvas );
 
-        NEWTRepaintManager.newRepaintManager( glimpseCanvas );
+        // attach a repaint manager which repaints the canvas in a loop
+        new FPSAnimator( glimpseCanvas.getGLDrawable( ), 120 ).start( );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );

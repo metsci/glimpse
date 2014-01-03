@@ -67,7 +67,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
 
         // allow the user to rearrange plots by dragging on their labels
-        DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ), example.getManager( ) );
+        DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ) );
     }
 
     @Override

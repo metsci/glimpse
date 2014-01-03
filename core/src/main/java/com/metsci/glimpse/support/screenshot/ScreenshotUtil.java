@@ -34,11 +34,11 @@ import java.io.IOException;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLException;
 
+import com.jogamp.opengl.util.awt.Screenshot;
 import com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.jogamp.opengl.util.awt.Screenshot;
 
 public class ScreenshotUtil
 {
