@@ -45,8 +45,8 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
     public static final int BYTES_PER_FLOAT = 4;
 
-    protected boolean disposed = false;
-    protected ReentrantLock disposeLock;
+    protected volatile boolean disposed = false;
+    protected final ReentrantLock disposeLock;
     
     protected volatile boolean displayOn = true;
     protected volatile boolean doErrorHandling = true;
@@ -129,18 +129,22 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     @Override
     public void dispose( GlimpseContext context )
     {
-        this.disposeLock.lock( );
-        try
+        // Double-checked locking works fine with a volatile var (as of Java 5)
+        if ( !this.disposed )
         {
-            if ( !this.disposed )
+            this.disposeLock.lock( );
+            try
             {
-                this.disposed = true;
-                dispose( context.getGLContext( ) );
+                if ( !this.disposed )
+                {
+                    this.disposed = true;
+                    dispose( context.getGLContext( ) );
+                }
             }
-        }
-        finally
-        {
-            this.disposeLock.unlock( );
+            finally
+            {
+                this.disposeLock.unlock( );
+            }
         }
     }
 
@@ -152,15 +156,7 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     @Override
     public boolean isDisposed( )
     {
-        this.disposeLock.lock( );
-        try
-        {
-            return this.disposed;
-        }
-        finally
-        {
-            this.disposeLock.unlock( );
-        }
+        return this.disposed;
     }
 
     protected boolean glHandleError( GL gl )
