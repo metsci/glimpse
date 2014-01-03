@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.painter.base;
 
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,12 +46,20 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     public static final int BYTES_PER_FLOAT = 4;
 
     protected boolean disposed = false;
-    protected boolean displayOn = true;
-    protected boolean doErrorHandling = true;
+    protected ReentrantLock disposeLock;
+    
+    protected volatile boolean displayOn = true;
+    protected volatile boolean doErrorHandling = true;
+    
     protected final String errorPrefix = "GL ERROR: " + getClass( ).getName( );
-
+    
     protected abstract void paintTo( GlimpseContext context, GlimpseBounds bounds );
 
+    public GlimpsePainterImpl( )
+    {
+        this.disposeLock = new ReentrantLock( );
+    }
+    
     public void setErrorHandling( boolean doErrorHandling )
     {
         this.doErrorHandling = doErrorHandling;
@@ -120,10 +129,18 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     @Override
     public void dispose( GlimpseContext context )
     {
-        if ( !this.disposed )
+        this.disposeLock.lock( );
+        try
         {
-            this.disposed = true;
-            dispose( context.getGLContext( ) );
+            if ( !this.disposed )
+            {
+                this.disposed = true;
+                dispose( context.getGLContext( ) );
+            }
+        }
+        finally
+        {
+            this.disposeLock.unlock( );
         }
     }
 
@@ -135,7 +152,15 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     @Override
     public boolean isDisposed( )
     {
-        return this.disposed;
+        this.disposeLock.lock( );
+        try
+        {
+            return this.disposed;
+        }
+        finally
+        {
+            this.disposeLock.unlock( );
+        }
     }
 
     protected boolean glHandleError( GL gl )
