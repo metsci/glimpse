@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>2.1.0</version>
+        <version>CURRENT-SNAPSHOT</version>
     </parent>
 
     <artifactId>glimpse-extras-examples</artifactId>
@@ -46,7 +46,7 @@
             <artifactId>glimpse-extras-charts</artifactId>
             <version>${parent.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-worldwind</artifactId>
