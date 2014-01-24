@@ -395,8 +395,9 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
             // Put ticks on nice round numbers in _local_ time
             double zoneOffset_SU = Time.fromMilliseconds( timeZone.getOffset( t0.toPosixMillis( ) ) );
-            TimeStamp epoch = TimeStamp.posixEpoch( );
-            TimeStamp firstTick = epoch.add( tickInterval_SU * Math.floor( ( t0.durationAfter( epoch ) + zoneOffset_SU ) / tickInterval_SU ) - zoneOffset_SU );
+            
+            double ticksSinceEpoch = Math.floor( ( t0.toPosixSeconds( ) + zoneOffset_SU ) / tickInterval_SU );
+            TimeStamp firstTick = TimeStamp.fromPosixSeconds( tickInterval_SU * ticksSinceEpoch - zoneOffset_SU );
             int numTicks = (int) Math.ceil( 1 + ( t1.durationAfter( firstTick ) / tickInterval_SU ) );
 
             List<TimeStamp> times = new ArrayList<TimeStamp>( numTicks );
@@ -412,7 +413,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
     public static int tickInterval_Days( double approxTickInterval_SU )
     {
-        double approxTickInterval_Days = Time.secondsToDays( approxTickInterval_SU );
+        double approxTickInterval_Days = Time.toDays( approxTickInterval_SU );
 
         for ( int r : rungs_days_SU )
             if ( approxTickInterval_Days <= r ) return r;
@@ -607,14 +608,18 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         double maxDayViewDuration = Double.NEGATIVE_INFINITY;
         Calendar calendar = Calendar.getInstance( timeZone );
 
+        TimeStamp previousStart = null;
+        
         for ( TimeStamp t : tickTimes )
         {
             TimeStruct day = factory.newTimeStruct( );
-            days.add( day );
 
             day.setCalendar( t, calendar );
             day.start = TimeStamp.fromPosixMillis( calendar.getTimeInMillis( ) );
 
+            if ( previousStart != null && previousStart.equals( day.start ) ) continue;
+            previousStart = day.start;
+            
             day.incrementCalendar( calendar );
             day.end = TimeStamp.fromPosixMillis( calendar.getTimeInMillis( ) );
 
@@ -622,6 +627,8 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
             day.viewEnd = min( day.end, max( day.start, viewEnd ) );
 
             maxDayViewDuration = Math.max( maxDayViewDuration, day.viewEnd.durationAfter( day.viewStart ) );
+        
+            days.add( day );
         }
 
         for ( TimeStruct day : days )

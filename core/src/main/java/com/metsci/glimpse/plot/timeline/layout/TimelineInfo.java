@@ -77,6 +77,7 @@ public class TimelineInfo extends PlotInfoWrapper
     public void setTimeZone( TimeZone timeZone )
     {
         this.timeAxisPainter.getLabelHandler( ).setTimeZone( timeZone );
+        this.timeZonePainter.setText( timeZone.getID( ) );
     }
     
     public TimeZone getTimeZone( )
