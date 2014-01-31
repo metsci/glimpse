@@ -1,6 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
     <version>CURRENT-SNAPSHOT</version>
@@ -68,6 +74,21 @@
 
     <build>
         <plugins>
+            <!-- sign deployed maven artifacts -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -223,31 +244,5 @@
             </extension>
         </extensions>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>metron-maven-server</id>
-            <url>${release-deployment-url}</url>
-        </repository>
-        <snapshotRepository>
-            <id>metron-maven-server</id>
-            <url>${snapshot-deployment-url}</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>glimpse-releases</id>
-            <url>http://glimpse.metsci.com/maven2/metsci-releases</url>
-        </repository>
-        <repository>
-            <id>glimpse-snapshots</id>
-            <url>http://glimpse.metsci.com/maven2/metsci-snapshots</url>
-        </repository>
-        <repository>
-            <id>glimpse-thirdparty</id>
-            <url>http://glimpse.metsci.com/maven2/thirdparty</url>
-        </repository>
-    </repositories>
 
 </project>
