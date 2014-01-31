@@ -74,6 +74,24 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <show>public</show>
+                            <maxmemory>2056m</maxmemory>
+                            <doctitle>Glimpse Data Visualization Library</doctitle>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- sign deployed maven artifacts -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -209,6 +227,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <!-- explicitly define maven-deploy-plugin after other to 
+                    force exec order -->
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
         <pluginManagement>
