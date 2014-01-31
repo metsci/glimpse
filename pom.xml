@@ -110,6 +110,25 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <show>public</show>
+                            <maxmemory>2056m</maxmemory>
+                            <aggregate>true</aggregate>
+                            <doctitle>Glimpse Data Visualization Library</doctitle>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- add the current commit SHA to the build jar -->
             <plugin>
                 <groupId>com.github.koraktor</groupId>
