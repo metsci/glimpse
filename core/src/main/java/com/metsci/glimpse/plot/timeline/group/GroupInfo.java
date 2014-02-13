@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
-import java.util.Collection;
-
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
+
+import java.util.Collection;
 
 public interface GroupInfo extends PlotInfo
 {
@@ -46,6 +46,10 @@ public interface GroupInfo extends PlotInfo
     public void setExpanded( boolean expanded );
 
     public boolean isExpanded( );
+
+    public void setCollapsible ( boolean collapsible );
+
+    public boolean isCollapsible( );
 
     public void setShowArrow( boolean show );
 
