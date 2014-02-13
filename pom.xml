@@ -1,9 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1</version>
     <packaging>pom</packaging>
 
     <name>Glimpse</name>
@@ -68,6 +74,39 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <show>public</show>
+                            <maxmemory>2056m</maxmemory>
+                            <doctitle>Glimpse Data Visualization Library</doctitle>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- sign deployed maven artifacts -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -85,6 +124,25 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <show>public</show>
+                            <maxmemory>2056m</maxmemory>
+                            <aggregate>true</aggregate>
+                            <doctitle>Glimpse Data Visualization Library</doctitle>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -169,6 +227,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <!-- explicitly define maven-deploy-plugin after other to 
+                    force exec order -->
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
         <pluginManagement>
@@ -208,6 +282,26 @@
                                         <execute/>
                                     </action>
                                 </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-javadoc-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.9.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>jar</goal>
+                                            <goal>javadoc</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
@@ -224,29 +318,4 @@
         </extensions>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>metron-maven-server</id>
-            <url>${release-deployment-url}</url>
-        </repository>
-        <snapshotRepository>
-            <id>metron-maven-server</id>
-            <url>${snapshot-deployment-url}</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>glimpse-releases</id>
-            <url>http://glimpse.metsci.com/maven2/metsci-releases</url>
-        </repository>
-        <repository>
-            <id>glimpse-snapshots</id>
-            <url>http://glimpse.metsci.com/maven2/metsci-snapshots</url>
-        </repository>
-        <repository>
-            <id>glimpse-thirdparty</id>
-            <url>http://glimpse.metsci.com/maven2/thirdparty</url>
-        </repository>
-    </repositories>
 </project>

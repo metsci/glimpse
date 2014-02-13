@@ -39,6 +39,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
  * Displays text annotations at specified locations on a plot.
@@ -148,24 +149,65 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
         //@formatter:on
 
+        /**
+         * @deprecated
+         * @see #getStartTimeStamp()
+         */
+        @Deprecated
         public long getStartTime( )
         {
             return startTime;
         }
 
+        /**
+         * @deprecated
+         * @see #setStartTime(TimeStamp)
+         */
+        @Deprecated
         public void setStartTime( long startTime )
         {
             this.startTime = startTime;
         }
 
+
+        /**
+         * @deprecated
+         * @see #getEndTimeStamp()
+         */
+        @Deprecated
         public long getEndTime( )
         {
             return endTime;
         }
 
+        /**
+         * @deprecated
+         * @see #setEndTime(TimeStamp)
+         */
+        @Deprecated
         public void setEndTime( long endTime )
         {
             this.endTime = endTime;
+        }
+        
+        public TimeStamp getStartTimeStamp( )
+        {
+            return TimeStamp.fromPosixMillis( startTime );
+        }
+
+        public void setStartTime( TimeStamp startTime )
+        {
+            this.startTime = startTime.toPosixMillis( );
+        }
+
+        public TimeStamp getEndTimeStamp( )
+        {
+            return TimeStamp.fromPosixMillis( startTime );
+        }
+
+        public void setEndTime( TimeStamp endTime )
+        {
+            this.endTime = endTime.toPosixMillis( );
         }
 
         public float getX( )
@@ -362,6 +404,16 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
     }
 
+    public void displayTime( TimeStamp time )
+    {
+        displayTime( time.toPosixMillis( ) );
+    }
+    
+    /**
+     * @see #displayTime( TimeStamp )
+     * @deprecated
+     */
+    @Deprecated
     public void displayTime( long time )
     {
         this.lock.lock( );
@@ -376,6 +428,16 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
     }
 
+    public void displayTimeRange( TimeStamp minTime, TimeStamp maxTime )
+    {
+        displayTimeRange( minTime.toPosixMillis( ), maxTime.toPosixMillis( ) );
+    }
+    
+    /**
+     * @see #displayTimeRange( TimeStamp, TimeStamp )
+     * @deprecated
+     */
+    @Deprecated
     public void displayTimeRange( long minTime, long maxTime )
     {
         this.lock.lock( );
