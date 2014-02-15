@@ -48,6 +48,8 @@ import com.google.common.collect.Sets;
  * are completely contained within a time window.</p>
  * 
  * @author ulman
+ * @deprecated IntervalSortedMultimap lookup runtime scales poorly with many items. Use {@link IntervalQuadTree} instead.
+ * @see com.metsci.glimpse.support.interval.IntervalQuadTree
  */
 public abstract class IntervalSortedMultimap<K extends Comparable<K>, V extends Keyed<K>>
 {

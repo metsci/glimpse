@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.support.interval;
 
+/**
+ * 
+ * @author ulman
+ * @deprecated use {@link IntervalQuadTree} instead of {@link IntervalSortedMultimap}
+ */
 public interface Keyed<K>
 {
     public K getStartTime( );
