@@ -219,6 +219,21 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         }
     }
 
+    //NOTE: currently doesn't capture any of the space allocated in gl vertex arrays
+    public void removeAll( )
+    {
+        lock.lock( );
+        try
+        {
+            this.idMap.clear( );
+            this.indexMap.clear( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
     public void removeLine( Object id )
     {
         throw new UnsupportedOperationException( "removeLine() is not yet supported" );
