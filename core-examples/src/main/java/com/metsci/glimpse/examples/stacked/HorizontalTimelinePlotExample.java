@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.stacked;
 
+import java.util.TimeZone;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -75,6 +77,9 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
     {
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
+        
+        // set the time zone for the timeline to local time
+        plot.getDefaultTimeline( ).setTimeZone( TimeZone.getDefault( ) );
 
         // calculate some TimeStamps representing the selected time range and initial extents of the timeline
         Epoch epoch = plot.getEpoch( );

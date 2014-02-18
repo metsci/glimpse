@@ -35,6 +35,7 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -126,7 +127,16 @@ public class Example
         } );
 
         // add the GlimpseCanvas to the frame
-        frame.add( canvas );
+        // this must be done on the Swing EDT to avoid JOGL crashes
+        // when removing the canvas from the frame
+        SwingUtilities.invokeAndWait( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                frame.add( canvas );
+            }
+        } );
 
         // make the frame visible
         frame.pack( );

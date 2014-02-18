@@ -26,6 +26,12 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
+import static com.metsci.glimpse.docking.DockingThemes.*;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.util.logging.Level.*;
+import static javax.swing.JFrame.*;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
@@ -40,18 +46,13 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.TinyLookAndFeel;
-
-import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
-import static com.metsci.glimpse.docking.DockingThemes.*;
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.util.logging.Level.*;
-import static javax.swing.JFrame.*;
 
 public class DockingExample
 {
@@ -123,12 +124,18 @@ public class DockingExample
         dockingPane.addView( new View( "gView", "View G", requireIcon( "icons/ViewG.png" ), null, gPanel, gToolbar ) );
         dockingPane.addView( new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar ) );
 
-
-
-
-        JFrame frame = new JFrame( "Docking Example" );
+        final JFrame frame = new JFrame( "Docking Example" );
         frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-        frame.setContentPane( dockingPane );
+        
+        SwingUtilities.invokeAndWait( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                frame.setContentPane( dockingPane );
+            }
+        });
+        
         frame.setPreferredSize( new Dimension( 1600, 900 ) );
         frame.pack( );
 

@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import com.jogamp.opengl.util.FPSAnimator;
@@ -62,9 +63,18 @@ public class SwingMoveCanvasTest
         final JFrame frame = makeFrame( 0, 0, 800, 800 );
         final JFrame frame2 = makeFrame( 800, 0, 800, 800 );
 
-        // add the canvas to one of the frames
-        frame.add( canvas );
-
+        // add the GlimpseCanvas to one of the frames
+        // this must be done on the Swing EDT to avoid JOGL crashes
+        // when removing the canvas from the frame
+        SwingUtilities.invokeAndWait( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                frame.add( canvas );
+            }
+        });
+        
         // periodically switch the canvas between the frames
         // Swing actions must be called on the EventDispatch thread
         new Timer( 1000, new ActionListener( )
@@ -78,6 +88,7 @@ public class SwingMoveCanvasTest
                 {
                     frame.remove( canvas );
                     frame2.add( canvas );
+
                 }
                 else
                 {

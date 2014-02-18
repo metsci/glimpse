@@ -37,6 +37,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -282,6 +283,25 @@ public class GeneralUtils
     public static final <K> HashSet<K> newHashSet(Collection<? extends K> c)
     {
         return new HashSet<K>(c);
+    }
+
+    /**
+     * Creates a new {@link LinkedHashSet} by examining the expected return type.
+     */
+    public static final <K> LinkedHashSet<K> newLinkedHashSet( )
+    {
+        return new LinkedHashSet<K>();
+    }
+
+    /**
+     * Creates a new {@link LinkedHashSet} containing the elements of the specified
+     * collection.
+     *
+     * @see {@link LinkedHashSet#LinkedHashSet(Collection)}
+     */
+    public static final <K> LinkedHashSet<K> newLinkedHashSet(Collection<? extends K> c)
+    {
+        return new LinkedHashSet<K>(c);
     }
 
     /**

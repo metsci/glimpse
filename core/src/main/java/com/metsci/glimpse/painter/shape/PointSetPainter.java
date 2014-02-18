@@ -234,66 +234,68 @@ public class PointSetPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo(GL2 gl, GlimpseBounds bounds, Axis2D axis)
     {
-        if ( dataSize == 0 ) return;
+      if (dataSize == 0)
+        return;
 
-        if ( !bufferInitialized )
+      if (!bufferInitialized)
+      {
+        bufferHandle = new int[1];
+        gl.glGenBuffers(1, bufferHandle, 0);
+
+        colorHandle = new int[1];
+        gl.glGenBuffers(1, colorHandle, 0);
+
+        bufferInitialized = true;
+      }
+
+
+      this.dataBufferLock.lock();
+        try
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
+        if (newData)
+        {
+          gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, bufferHandle[0]);
 
-            colorHandle = new int[1];
-            gl.glGenBuffers( 1, colorHandle, 0 );
+          // copy data from the host memory buffer to the device
+          gl.glBufferData(GL2.GL_ARRAY_BUFFER, dataSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind(), GL2.GL_DYNAMIC_DRAW);
 
-            bufferInitialized = true;
+          glHandleError(gl);
+
+          useColorDevice = useColorHost;
+          if (useColorDevice)
+          {
+            gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, colorHandle[0]);
+
+            // copy data from the host memory buffer to the device
+            gl.glBufferData(GL2.GL_ARRAY_BUFFER, dataSize * 4 * BYTES_PER_FLOAT, colorBuffer.rewind(), GL2.GL_DYNAMIC_DRAW);
+
+            glHandleError(gl);
+          }
         }
 
-        if ( newData )
+        newData = false;
+
+          if (useColorDevice)
+          {
+            gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, colorHandle[0]);
+          gl.glColorPointer(4, GL2.GL_FLOAT, 0, 0);
+          gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
+          }
+
+        gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, bufferHandle[0]);
+        gl.glVertexPointer(2, GL2.GL_FLOAT, 0, 0);
+        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+
+        gl.glColor4fv(pointColor, 0);
+        gl.glPointSize(pointSize);
+
+        gl.glDrawArrays(GL2.GL_POINTS, 0, dataSize);
+      } finally
         {
-            this.dataBufferLock.lock( );
-            try
-            {
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-
-                // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-
-                glHandleError( gl );
-
-                useColorDevice = useColorHost;
-                if ( useColorDevice )
-                {
-                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
-
-                    // copy data from the host memory buffer to the device
-                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 4 * BYTES_PER_FLOAT, colorBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-
-                    glHandleError( gl );
-                }
-
-                newData = false;
-            }
-            finally
-            {
-                this.dataBufferLock.unlock( );
-            }
+        this.dataBufferLock.unlock();
         }
-
-        if ( useColorDevice )
-        {
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
-            gl.glColorPointer( 4, GL2.GL_FLOAT, 0, 0 );
-            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-        }
-
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        gl.glColor4fv( pointColor, 0 );
-        gl.glPointSize( pointSize );
-
-        gl.glDrawArrays( GL2.GL_POINTS, 0, dataSize );
     }
-}
+  }
+

@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.painter.track;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.metsci.glimpse.util.primitives.IntsArray;
 
 public class Pulsator
 {
@@ -44,10 +44,10 @@ public class Pulsator
     protected float direction;
     protected boolean paused;
     protected boolean stopped;
-    
+
     protected float defaultSize;
-    
-    protected IntsArray ids;
+
+    protected Collection<Object> ids;
 
     protected ReentrantLock lock;
     protected Condition pauseCondition;
@@ -68,8 +68,8 @@ public class Pulsator
         this.paused = false;
         this.stopped = false;
 
-        this.ids = new IntsArray( );
-        
+        this.ids = new LinkedList<Object>( );
+
         this.lock = new ReentrantLock( );
         this.pauseCondition = this.lock.newCondition( );
     }
@@ -78,7 +78,7 @@ public class Pulsator
     {
         this( painter, 10, 10f, 0.1f, 15f );
     }
-    
+
     /**
      * When an id is removed from the Pulsator, its point size is reset to the default size.
      * @param size
@@ -87,12 +87,12 @@ public class Pulsator
     {
         this.defaultSize = size;
     }
-    
+
     public float getDefaultSize( )
     {
         return this.defaultSize;
     }
-    
+
     public void resetSize( )
     {
         this.lock.lock( );
@@ -106,14 +106,14 @@ public class Pulsator
             this.lock.unlock( );
         }
     }
-    
+
     public void setPaused( boolean paused )
     {
         this.lock.lock( );
         try
         {
             this.paused = paused;
-            
+
             if ( !this.paused )
             {
                 this.pauseCondition.signalAll( );
@@ -254,15 +254,17 @@ public class Pulsator
             this.lock.unlock( );
         }
     }
-    
+
     public void removeAllIds( )
     {
         this.lock.lock( );
         try
         {
-            for ( int i = 0 ; i < ids.n( ) ; i++ )
-                this.painter.setPointSize( ids.v( i ), defaultSize );
-            
+            for ( Object id : ids )
+            {
+                this.painter.setPointSize( id, defaultSize );
+            }
+
             this.ids.clear( );
         }
         finally
@@ -271,12 +273,12 @@ public class Pulsator
         }
     }
 
-    public void addId( int id )
+    public void addId( Object id )
     {
         this.lock.lock( );
         try
         {
-            this.ids.append( id );
+            this.ids.add( id );
         }
         finally
         {
@@ -284,7 +286,7 @@ public class Pulsator
         }
     }
 
-    public void removeId( int id )
+    public void removeId( Object id )
     {
         this.lock.lock( );
         try
@@ -297,7 +299,7 @@ public class Pulsator
             this.lock.unlock( );
         }
     }
-    
+
     public void stop( )
     {
         this.lock.lock( );
@@ -334,10 +336,9 @@ public class Pulsator
                             {
                             }
                         }
-                        
-                        if ( stopped )
-                            return;
-                        
+
+                        if ( stopped ) return;
+
                         if ( size > max )
                         {
                             direction = -1.0f;
@@ -348,19 +349,19 @@ public class Pulsator
                             direction = 1.0f;
                             size = min;
                         }
-    
+
                         size += step * direction;
-    
-                        for ( int i = 0; i < ids.n; i++ )
+
+                        for ( Object id : ids )
                         {
-                            painter.setPointSize( ids.a[i], size );
+                            painter.setPointSize( id, size );
                         }
                     }
                     finally
                     {
                         lock.unlock( );
                     }
-    
+
                     try
                     {
                         Thread.sleep( delayMillis );

@@ -26,11 +26,6 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -38,6 +33,11 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 {
@@ -49,6 +49,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     protected String label;
 
     protected boolean expanded;
+    protected boolean collapsible;
 
     public GroupInfoImpl( CollapsibleTimePlot2D _plot, PlotInfo group, Collection<? extends PlotInfo> subplots )
     {
@@ -59,6 +60,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         this.info.getLayout( ).addPainter( this.labelPainter );
         this.info.setSize( 22 );
         this.expanded = true;
+        this.collapsible = true;
 
         this.children = new LinkedHashSet<PlotInfo>( );
         this.children.addAll( subplots );
@@ -91,7 +93,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
             @Override
             public void mouseReleased( GlimpseMouseEvent event )
             {
-                if ( click )
+                if ( click && collapsible )
                 {
                     int x = event.getScreenPixelsX( );
     
@@ -170,6 +172,18 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         this.labelPainter.setExpanded( expanded );
         this.setVisible0( this, expanded );
         this.plot.validateLayout( );
+    }
+
+    @Override
+    public void setCollapsible( boolean collapsible )
+    {
+        this.collapsible = collapsible;
+    }
+
+    @Override
+    public boolean isCollapsible( )
+    {
+        return this.collapsible;
     }
 
     protected void setVisible0( GroupInfo parent, boolean visible )

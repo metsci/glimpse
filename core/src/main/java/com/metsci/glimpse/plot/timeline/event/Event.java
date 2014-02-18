@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -44,7 +45,6 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.interval.Keyed;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -59,7 +59,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * 
  * @author ulman
  */
-public class Event implements Iterable<Event>, Keyed<TimeStamp>
+public class Event implements Iterable<Event>
 {
     protected EventPlotInfo info;
 
@@ -101,7 +101,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
     protected boolean isResizeable = true;
     protected double maxTimeSpan = Double.MAX_VALUE;
     protected double minTimeSpan = 0;
-    
+
     protected int iconSize = 0;
     protected boolean useDefaultSize = true;
 
@@ -244,7 +244,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
 
         if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
     }
-    
+
     /**
      * Sets the height of the Event's icon (for horizontal timeline layouts) or the width (for vertical timeline layouts).
      * 
@@ -255,7 +255,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
         this.iconSize = iconSize;
         this.setUseDefaultIconSize( false );
     }
-    
+
     /**
      * @see #setIconSize(int)
      * @return the icon size in pixels
@@ -264,7 +264,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
     {
         return this.iconSize;
     }
-    
+
     /**
      * If a specific icon size has not been set, the default icon size is used. The default size is the minimum of the
      * actual size of the icon and the height of the event row.
@@ -273,7 +273,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
     {
         this.useDefaultSize = useDefaultSize;
     }
-    
+
     /**
      * @see #setUseDefaultIconSize(boolean)
      */
@@ -647,9 +647,9 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
      */
     public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
-    	setTimes0( null, startTime, endTime, force );
+        setTimes0( null, startTime, endTime, force );
     }
-    
+
     protected void setTimes0( GlimpseMouseEvent mouseEvent, TimeStamp startTime, TimeStamp endTime, boolean force )
     {
         if ( !force )
@@ -764,7 +764,6 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
     /**
      * @return the start / earliest / left-edge TimeStamp for this Event.
      */
-    @Override
     public TimeStamp getStartTime( )
     {
         return startTime;
@@ -787,7 +786,6 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
     /**
      * @return the end / latest / right-edge TimeStamp for this Event.
      */
-    @Override
     public TimeStamp getEndTime( )
     {
         return endTime;
@@ -1135,7 +1133,7 @@ public class Event implements Iterable<Event>, Keyed<TimeStamp>
             }
         };
     }
-    
+
     protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
     {
         float[] defaultColor = info.getDefaultEventBackgroundColor( );

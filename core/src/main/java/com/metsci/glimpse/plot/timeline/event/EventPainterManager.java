@@ -27,7 +27,6 @@
 package com.metsci.glimpse.plot.timeline.event;
 
 import java.awt.Font;
-import java.util.Collection;
 import java.util.List;
 
 import javax.media.opengl.GL2;
@@ -213,17 +212,14 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 Row row = rows.get( i );
 
                 Event prev = null;
-                for ( Collection<Event> eventsAtTime : row.visibleEvents.values( ) )
+                for ( Event next : row.visibleEvents )
                 {
-                    for ( Event next : eventsAtTime )
+                    if ( prev != null )
                     {
-                        if ( prev != null )
-                        {
-                            prev.paint( defaultPainter, gl, next, plot, bounds, posMin, posMax );
-                        }
-
-                        prev = next;
+                        prev.paint( defaultPainter, gl, next, plot, bounds, posMin, posMax );
                     }
+
+                    prev = next;
                 }
 
                 // paint last event
