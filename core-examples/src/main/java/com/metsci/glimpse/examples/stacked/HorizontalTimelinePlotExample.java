@@ -78,7 +78,8 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
         
-        plot.getDefaultTimeline( ).setTimeZone( TimeZone.getTimeZone( "EST" ) );
+        // set the time zone for the timeline to local time
+        plot.getDefaultTimeline( ).setTimeZone( TimeZone.getDefault( ) );
 
         // calculate some TimeStamps representing the selected time range and initial extents of the timeline
         Epoch epoch = plot.getEpoch( );
