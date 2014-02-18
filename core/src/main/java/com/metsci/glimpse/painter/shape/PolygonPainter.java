@@ -51,8 +51,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
-import com.metsci.glimpse.support.interval.IntervalSortedMultimap;
-import com.metsci.glimpse.support.interval.Keyed;
+import com.metsci.glimpse.support.interval.IntervalQuadTree;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop;
@@ -998,7 +997,7 @@ public class PolygonPainter extends GlimpsePainter2D
      *
      * @author ulman
      */
-    private class IdPolygon implements Keyed<Long>
+    private class IdPolygon
     {
         Object groupId;
         Object polygonId;
@@ -1072,18 +1071,6 @@ public class PolygonPainter extends GlimpsePainter2D
             fillVertices = tessellate( );
             fillVertexCount = fillVertices.length / 2;
             fillPrimitiveCount = 1;
-        }
-
-        @Override
-        public Long getStartTime( )
-        {
-            return startTime;
-        }
-
-        @Override
-        public Long getEndTime( )
-        {
-            return endTime;
         }
 
         /**
@@ -1488,7 +1475,7 @@ public class PolygonPainter extends GlimpsePainter2D
         // all selected polygons (based on selectionStart and selectionEnd)
         Set<IdPolygon> selectedPolygons;
 
-        PolygonIntervalSortedMultimap map;
+        IntervalQuadTree<IdPolygon> map;
 
         Long selectionStart;
         Long selectionEnd;
@@ -1523,7 +1510,22 @@ public class PolygonPainter extends GlimpsePainter2D
             this.newPolygons = new LinkedHashSet<IdPolygon>( );
             this.polygonMap = new HashMap<Object, IdPolygon>( );
 
-            this.map = new PolygonIntervalSortedMultimap( );
+            this.map = new IntervalQuadTree<IdPolygon>( 100 )
+            {
+
+                @Override
+                public long getStartTimeMillis( IdPolygon v )
+                {
+                    return v.startTime;
+                }
+
+                @Override
+                public long getEndTimeMillis( IdPolygon v )
+                {
+                    return v.endTime;
+                }
+
+            };
 
             this.selectionStart = -Long.MAX_VALUE;
             this.selectionEnd = Long.MAX_VALUE;
@@ -1602,7 +1604,7 @@ public class PolygonPainter extends GlimpsePainter2D
             this.totalFillVertexCount += fillVertexCount;
             this.fillInsertVertexCount += fillVertexCount;
 
-            if ( polygon.getStartTime( ) <= selectionEnd && polygon.getEndTime( ) >= selectionStart )
+            if ( polygon.startTime <= selectionEnd && polygon.endTime >= selectionStart )
             {
                 this.selectedFillPrimitiveCount += polygon.fillPrimitiveCount;
                 this.selectedLinePrimitiveCount += polygon.linePrimitiveCount;
@@ -1712,21 +1714,6 @@ public class PolygonPainter extends GlimpsePainter2D
             this.polygonsSelected = false;
             this.groupCleared = false;
             this.groupDeleted = false;
-        }
-    }
-
-    public static class PolygonIntervalSortedMultimap extends IntervalSortedMultimap<Long, IdPolygon>
-    {
-        @Override
-        protected Long successor( Long t )
-        {
-            return t + 1;
-        }
-
-        @Override
-        protected Long predecessor( Long t )
-        {
-            return t - 1;
         }
     }
 }

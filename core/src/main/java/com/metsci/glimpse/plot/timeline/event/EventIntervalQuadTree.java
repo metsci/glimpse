@@ -28,10 +28,7 @@ package com.metsci.glimpse.plot.timeline.event;
 
 import java.util.Set;
 
-import com.metsci.glimpse.support.interval.IntervalSortedMultimap;
-import com.metsci.glimpse.support.interval.Keyed;
-import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.metsci.glimpse.util.units.time.TimeStampPosixMillisInt64;
+import com.metsci.glimpse.support.interval.IntervalQuadTree;
 
 /**
  * <p>Although this collection is sorted based on the Event start and end
@@ -40,37 +37,27 @@ import com.metsci.glimpse.util.units.time.TimeStampPosixMillisInt64;
  * and {@link Keyed#getEndTime()}. However, two values which are not equal may have
  * the same start and end.</p> 
 */
-public class EventIntervalSortedMultimap extends IntervalSortedMultimap<TimeStamp, Event>
+public class EventIntervalQuadTree extends IntervalQuadTree<Event>
 {
-
-    @Override
-    public TimeStamp successor( TimeStamp t )
+    public EventIntervalQuadTree( )
     {
-        return TimeStampPosixMillisInt64.factory.fromPosixMillis( t.toPosixMillis( ) + 1 );
+        this( 100 );
+    }
+    
+    public EventIntervalQuadTree( int maxBucketSize )
+    {
+        super( maxBucketSize );
     }
 
     @Override
-    public TimeStamp predecessor( TimeStamp t )
+    public long getStartTimeMillis( com.metsci.glimpse.plot.timeline.event.Event v )
     {
-        return TimeStampPosixMillisInt64.factory.fromPosixMillis( t.toPosixMillis( ) - 1 );
+        return v.getStartTime( ).toPosixMillis( );
     }
 
-    public static void main( String[] args )
+    @Override
+    public long getEndTimeMillis( com.metsci.glimpse.plot.timeline.event.Event v )
     {
-        Event a = new Event( "a", "a", TimeStamp.fromPosixMillis( 0 ), TimeStamp.fromPosixMillis( 1 ) );
-        Event b = new Event( "b", "b", TimeStamp.fromPosixMillis( 2 ), TimeStamp.fromPosixMillis( 4 ) );
-        Event c = new Event( "c", "c", TimeStamp.fromPosixMillis( 0 ), TimeStamp.fromPosixMillis( 2 ) );
-        Event d = new Event( "d", "d", TimeStamp.fromPosixMillis( 1 ), TimeStamp.fromPosixMillis( 1 ) );
-        Event e = new Event( "e", "e", TimeStamp.fromPosixMillis( 1 ), TimeStamp.fromPosixMillis( 1 ) );
-
-        EventIntervalSortedMultimap map = new EventIntervalSortedMultimap( );
-        map.add( a );
-        map.add( b );
-        map.add( c );
-        map.add( d );
-        map.add( a );
-        map.add( e );
-
-        System.out.println( map.getInterior( TimeStamp.fromPosixMillis( 1 ), TimeStamp.fromPosixMillis( 4 ) ) );
+        return v.getEndTime( ).toPosixMillis( );
     }
 }
