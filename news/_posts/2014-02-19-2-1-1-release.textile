@@ -1,0 +1,8 @@
+---
+layout: default
+title: Glimpse 2.1.1 Release
+---
+
+<p>Glimpse is now available in the <a href="http://search.maven.org/#browse%7C1117099642">Maven Central Repository</a>!</p>
+
+<p>Currently only the core, core-examples, docking, docking-examples, and util modules are available through Maven Central because some of the <i>extras</i> modules contain dependencies which are still only available through the <a href="http://maven.metsci.com/">Metron Maven Repository</a>.</p>
