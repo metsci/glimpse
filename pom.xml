@@ -79,7 +79,20 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>deploy</id>
                         <phase>deploy</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <show>public</show>
+                            <maxmemory>2056m</maxmemory>
+                            <doctitle>Glimpse Data Visualization Library</doctitle>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install</id>
+                        <phase>install</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -124,25 +137,6 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>javadoc</goal>
-                        </goals>
-                        <configuration>
-                            <show>public</show>
-                            <maxmemory>2056m</maxmemory>
-                            <aggregate>true</aggregate>
-                            <doctitle>Glimpse Data Visualization Library</doctitle>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -238,6 +232,21 @@
                         <phase>deploy</phase>
                         <goals>
                             <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- explicitly define maven-install-plugin after other to 
+                    force exec order -->
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install</goal>
                         </goals>
                     </execution>
                 </executions>
