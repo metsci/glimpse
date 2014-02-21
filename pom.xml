@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -176,15 +177,16 @@
                     <includes>
                         <include>src/main/java/**</include>
                     </includes>
-		    <mapping>
-                        <!-- using JAVADOC_STYLE can sometimes cause the license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
+                    <mapping>
+                        <!-- using JAVADOC_STYLE can sometimes cause the 
+                            license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <excludes>
                         <exclude>target/**</exclude>
-                        <!-- don't put license header on package descriptions. If no other
-                             javadoc is provided, the first line of the license header
-                             ends up in the javadoc.-->
+                        <!-- don't put license header on package descriptions. 
+                            If no other javadoc is provided, the first line of the license header ends 
+                            up in the javadoc. -->
                         <exclude>**/package-info.java</exclude>
                         <!-- these classes have their own license headers -->
                         <exclude>**/charts/bathy/Conrec.java</exclude>
@@ -263,7 +265,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute/>
+                                        <execute />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -276,7 +278,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute/>
+                                        <execute />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -314,5 +316,85 @@
             </extension>
         </extensions>
     </build>
+
+    <repositories>
+        <repository>
+            <id>glimpse-releases</id>
+            <url>http://glimpse.metsci.com/maven2/metsci-releases</url>
+        </repository>
+        <repository>
+            <id>glimpse-snapshots</id>
+            <url>http://glimpse.metsci.com/maven2/metsci-snapshots</url>
+        </repository>
+        <repository>
+            <id>glimpse-thirdparty</id>
+            <url>http://glimpse.metsci.com/maven2/thirdparty</url>
+        </repository>
+    </repositories>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+
+            <!-- for now only release certain modules
+                 (many extras modules have dependencies which are not in Maven Central -->
+            <modules>
+
+                <module>util</module>
+
+                <module>core</module>
+                <module>core-examples</module>
+
+                <module>docking</module>
+                <module>docking-examples</module>
+
+            </modules>
+
+        </profile>
+        <profile>
+            <id>internal</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <repository>
+                    <id>metron-maven-server</id>
+                    <url>${release-deployment-url}</url>
+                </repository>
+                <snapshotRepository>
+                    <id>metron-maven-server</id>
+                    <url>${snapshot-deployment-url}</url>
+                </snapshotRepository>
+            </distributionManagement>
+            <build>
+                <plugins>
+                    <!-- don't sign for internal releases -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>glimpse.metsci.com</id>
+            <distributionManagement>
+                <repository>
+                    <id>metron-maven-server</id>
+                    <url>${glimpse-release-deployment-url}</url>
+                </repository>
+                <snapshotRepository>
+                    <id>metron-maven-server</id>
+                    <url>${glimpse-snapshot-deployment-url}</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 
 </project>
