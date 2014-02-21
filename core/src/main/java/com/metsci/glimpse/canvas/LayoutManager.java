@@ -27,15 +27,13 @@
 package com.metsci.glimpse.canvas;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.layout.GlimpseLayout;
 
 /**
@@ -58,27 +56,29 @@ public class LayoutManager
         this.comparator = new LayoutOrderComparator( );
         this.layoutList = new ArrayList<LayoutOrder>( );
         this.layoutMap = new LinkedHashMap<GlimpseLayout, LayoutOrder>( );
-        this.unmodifiableLayoutList = new LayoutList( this.layoutList );
+        this.unmodifiableLayoutList = Collections.emptyList( );
     }
 
-    public void removeLayout( GlimpseLayout layout )
+    public synchronized void removeLayout( GlimpseLayout layout )
     {
         LayoutOrder layoutOrder = this.layoutMap.remove( layout );
         this.layoutList.remove( layoutOrder );
+        this.updateLayoutList( );
     }
 
-    public void removeAllLayouts( )
+    public synchronized void removeAllLayouts( )
     {
         this.layoutMap.clear( );
         this.layoutList.clear( );
+        this.updateLayoutList( );
     }
 
-    public void addLayout( GlimpseLayout layout )
+    public synchronized void addLayout( GlimpseLayout layout )
     {
         this.addLayout( layout, 0 );
     }
 
-    public void addLayout( GlimpseLayout layout, int zOrder )
+    public synchronized void addLayout( GlimpseLayout layout, int zOrder )
     {
         LayoutOrder layoutOrder = new LayoutOrder( layout, zOrder );
         this.layoutMap.put( layout, layoutOrder );
@@ -86,7 +86,7 @@ public class LayoutManager
         this.updateLayoutList( );
     }
 
-    public void setZOrder( GlimpseLayout layout, int zOrder )
+    public synchronized void setZOrder( GlimpseLayout layout, int zOrder )
     {
         LayoutOrder layoutOrder = this.layoutMap.get( layout );
         if ( layoutOrder != null )
@@ -96,7 +96,7 @@ public class LayoutManager
         }
     }
 
-    public List<GlimpseLayout> getLayoutList( )
+    public synchronized List<GlimpseLayout> getLayoutList( )
     {
         return this.unmodifiableLayoutList;
     }
@@ -104,188 +104,14 @@ public class LayoutManager
     protected void updateLayoutList( )
     {
         Collections.sort( this.layoutList, this.comparator );
-    }
 
-    /**
-     * An unmodifiable list wrapper for the internal List<LayoutOrder> which
-     * exposes it as a List<GlimpseTarget>.
-     * 
-     * @author ulman
-     */
-    /*
-     * This could be solved much more cleanly using Guava as follows:
-     * 
-     * Collections.unmodifiableList( Lists.transform( layoutList, new Function<LayoutOrder, GlimpseTarget>( )
-     * {
-     *   @Override
-     *   public GlimpseTarget apply( LayoutOrder arg0 )
-     *   {
-     *     return arg0.getLayout( );
-     *   }
-     * } ) );
-     *
-     */
-    public static class LayoutList implements List<GlimpseLayout>
-    {
-        protected List<LayoutOrder> backingList;
-
-        public LayoutList( List<LayoutOrder> backingList )
+        ArrayList<GlimpseLayout> temp = Lists.newArrayListWithCapacity( this.layoutList.size( ) );
+        for ( LayoutOrder order : this.layoutList )
         {
-            this.backingList = backingList;
+            temp.add( order.getLayout( ) );
         }
 
-        //@formatter:off
-        @Override public boolean add( GlimpseLayout e ) {  throw new UnsupportedOperationException(); }
-        @Override public void add( int index, GlimpseLayout element ) {  throw new UnsupportedOperationException(); }
-        @Override public boolean addAll( Collection<? extends GlimpseLayout> c ) {  throw new UnsupportedOperationException(); }
-        @Override public boolean addAll( int index, Collection<? extends GlimpseLayout> c ) {  throw new UnsupportedOperationException(); }
-        @Override public void clear( ) {  throw new UnsupportedOperationException(); }
-        @Override public boolean remove( Object o ) {  throw new UnsupportedOperationException(); }
-        @Override public GlimpseLayout remove( int index ) {  throw new UnsupportedOperationException(); }
-        @Override public boolean removeAll( Collection<?> c ) {  throw new UnsupportedOperationException(); }
-        @Override public boolean retainAll( Collection<?> c ) {  throw new UnsupportedOperationException(); }
-        @Override public GlimpseLayout set( int index, GlimpseLayout element ) {  throw new UnsupportedOperationException(); }
-        
-        @Override
-        public ListIterator<GlimpseLayout> listIterator( final int index )
-        {
-            return new ListIterator<GlimpseLayout>()
-            {
-                ListIterator<LayoutOrder> i = backingList.listIterator(index);
-    
-                public boolean hasNext()         {return i.hasNext();}
-                public GlimpseLayout next()      {return i.next().getLayout( );}
-                public boolean hasPrevious()     {return i.hasPrevious();}
-                public GlimpseLayout previous()  {return i.previous().getLayout( );}
-                public int nextIndex()           {return i.nextIndex();}
-                public int previousIndex()       {return i.previousIndex();}
-    
-                public void remove() { throw new UnsupportedOperationException(); }
-                public void set(GlimpseLayout e) { throw new UnsupportedOperationException(); }
-                public void add(GlimpseLayout e) { throw new UnsupportedOperationException(); }
-            };
-        }
-        //@formatter:on
-
-        @Override
-        public GlimpseLayout get( int index )
-        {
-            LayoutOrder layoutOrder = backingList.get( index );
-            return layoutOrder.getLayout( );
-        }
-
-        @Override
-        public boolean isEmpty( )
-        {
-            return backingList.isEmpty( );
-        }
-
-        @Override
-        public Iterator<GlimpseLayout> iterator( )
-        {
-            return listIterator( 0 );
-        }
-
-        @Override
-        public ListIterator<GlimpseLayout> listIterator( )
-        {
-            return listIterator( 0 );
-        }
-
-        @Override
-        public int size( )
-        {
-            return backingList.size( );
-        }
-
-        @Override
-        public boolean contains( Object o )
-        {
-            for ( LayoutOrder order : backingList )
-            {
-                if ( order.getLayout( ).equals( o ) ) return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean containsAll( Collection<?> c )
-        {
-            for ( Object o : c )
-            {
-                if ( !contains( o ) ) return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public List<GlimpseLayout> subList( int fromIndex, int toIndex )
-        {
-            return new LayoutList( backingList.subList( fromIndex, toIndex ) );
-        }
-
-        @Override
-        public int indexOf( Object o )
-        {
-            for ( int i = 0; i < backingList.size( ); i++ )
-            {
-                LayoutOrder order = backingList.get( i );
-
-                if ( order.getLayout( ).equals( o ) ) return i;
-            }
-
-            return -1;
-        }
-
-        @Override
-        public int lastIndexOf( Object o )
-        {
-            for ( int i = backingList.size( ) - 1; i >= 0; i-- )
-            {
-                LayoutOrder order = backingList.get( i );
-
-                if ( order.getLayout( ).equals( o ) ) return i;
-            }
-
-            return -1;
-        }
-
-        @Override
-        public Object[] toArray( )
-        {
-            Object[] a = new Object[backingList.size( )];
-
-            for ( int i = 0; i < backingList.size( ); i++ )
-            {
-                LayoutOrder order = backingList.get( i );
-                a[i] = order.getLayout( );
-            }
-
-            return a;
-        }
-
-        @SuppressWarnings( "unchecked" )
-        @Override
-        public <T> T[] toArray( T[] a )
-        {
-            Object[] o = a;
-
-            if ( a.length < backingList.size( ) )
-            {
-                o = new Object[backingList.size( )];
-            }
-
-            for ( int i = 0; i < backingList.size( ); i++ )
-            {
-                LayoutOrder order = backingList.get( i );
-                o[i] = order.getLayout( );
-            }
-
-            return ( T[] ) o;
-        }
-
+        this.unmodifiableLayoutList = Collections.unmodifiableList( temp );
     }
 
     public static class LayoutOrder
