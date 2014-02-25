@@ -41,7 +41,7 @@ import com.metsci.glimpse.event.mouse.Mouseable;
  */
 public abstract class AxisMouseListener implements GlimpseMouseAllListener
 {
-    public final double zoomConstant = 0.12f;
+    public final double zoomConstant = 1.12f;
 
     protected boolean allowSelectionLock = true;
     protected boolean allowSelectionZoom = true;
@@ -181,21 +181,14 @@ public abstract class AxisMouseListener implements GlimpseMouseAllListener
         axis.setMax( newMaxValue );
     }
 
-    public void zoom( Axis1D axis, boolean horizontal, int zoomIncrements, int posX, int posY )
+    public void zoom( Axis1D axis, boolean horizontal, double zoomIncrements, int posX, int posY )
     {
         if ( !allowZoom ) return;
 
         int mousePosPixels = getDim( horizontal, posX, axis.getSizePixels( ) - posY );
         double mousePosValue = axis.screenPixelToValue( mousePosPixels );
 
-        // calculate new pixelsPerValue and minValue
-        double zoomPercentDbl = 1.0f;
-        for ( int i = 0; i < Math.abs( zoomIncrements ); i++ )
-        {
-            zoomPercentDbl *= 1.0 + zoomConstant;
-        }
-        zoomPercentDbl = zoomIncrements > 0 ? zoomPercentDbl : 1.0 / zoomPercentDbl;
-
+        double zoomPercentDbl = Math.pow( zoomConstant, zoomIncrements );
         double oldPixelsPerValue = axis.getPixelsPerValue( );
         double newPixelsPerValue = oldPixelsPerValue * zoomPercentDbl;
         double newMinValue = mousePosValue - mousePosPixels / newPixelsPerValue;
@@ -205,16 +198,11 @@ public abstract class AxisMouseListener implements GlimpseMouseAllListener
         axis.setMax( newMaxValue );
     }
 
-    public void zoomSelection( Axis1D axis, boolean horizontal, int zoomIncrements, int posX, int posY )
+    public void zoomSelection( Axis1D axis, boolean horizontal, double zoomIncrements, int posX, int posY )
     {
         if ( !allowSelectionZoom ) return;
 
-        double zoomPercentDbl = 1.0f;
-        for ( int i = 0; i < Math.abs( zoomIncrements ); i++ )
-        {
-            zoomPercentDbl *= 1.0 + zoomConstant;
-        }
-        zoomPercentDbl = zoomIncrements > 0 ? zoomPercentDbl : 1.0 / zoomPercentDbl;
+        double zoomPercentDbl = Math.pow( zoomConstant, zoomIncrements );
         double newSelectionSize = axis.getSelectionSize( ) * zoomPercentDbl;
 
         axis.setSelectionSize( newSelectionSize );

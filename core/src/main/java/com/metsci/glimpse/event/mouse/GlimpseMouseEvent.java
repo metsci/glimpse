@@ -50,7 +50,7 @@ public class GlimpseMouseEvent
     protected GlimpseTargetStack stack;
     protected EnumSet<ModifierKey> modifiers;
     protected EnumSet<MouseButton> buttons;
-    protected int wheelIncrement;
+    protected double wheelIncrement;
     protected int clickCount;
     protected int x;
     protected int y;
@@ -81,12 +81,12 @@ public class GlimpseMouseEvent
         this( stack, EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), x, y, event.wheelIncrement, event.clickCount, event.handled );
     }
     
-    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, int wheelIncrement, int clickCount )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, double wheelIncrement, int clickCount )
     {
         this( stack, modifiers, buttons, x, y, wheelIncrement, clickCount, false );
     }
     
-    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, int wheelIncrement, int clickCount, boolean handled )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, double wheelIncrement, int clickCount, boolean handled )
     {
         super( );
         this.stack = stack;
@@ -203,7 +203,7 @@ public class GlimpseMouseEvent
         return getY( );
     }
 
-    public int getWheelIncrement( )
+    public double getWheelIncrement( )
     {
         return this.wheelIncrement;
     }

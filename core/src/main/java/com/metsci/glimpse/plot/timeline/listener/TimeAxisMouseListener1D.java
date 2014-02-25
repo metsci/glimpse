@@ -218,9 +218,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
 
         if ( taggedAxis == null ) return;
 
-        int zoomIncrements = e.getWheelIncrement( );
-
-        double newSelectionSize = calculateNewSelectionSize( taggedAxis, zoomIncrements );
+        double newSelectionSize = calculateNewSelectionSize( taggedAxis, e.getWheelIncrement( ) );
 
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
@@ -250,7 +248,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         }
     }
 
-    protected double calculateNewSelectionSize( TaggedAxis1D taggedAxis, int zoomIncrements )
+    protected double calculateNewSelectionSize( TaggedAxis1D taggedAxis, double zoomIncrements )
     {
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );
@@ -259,12 +257,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
         double maxValue = maxTag.getValue( );
         double selectionSize = maxValue - minValue;
 
-        double zoomPercentDbl = 1.0f;
-        for ( int i = 0; i < Math.abs( zoomIncrements ); i++ )
-        {
-            zoomPercentDbl *= 1.0 + zoomConstant;
-        }
-        zoomPercentDbl = zoomIncrements > 0 ? 1.0 / zoomPercentDbl : zoomPercentDbl;
+        double zoomPercentDbl = Math.pow( zoomConstant, zoomIncrements );
         double newSelectionSize = selectionSize * zoomPercentDbl;
 
         return newSelectionSize;
