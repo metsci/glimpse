@@ -187,6 +187,11 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             }
         };
     }
+    
+    public GLProfile getGLProfile( )
+    {
+        return glProfile;
+    }
 
     public NewtCanvasAWT getCanvas( )
     {

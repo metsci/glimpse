@@ -39,6 +39,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  * listener to be used as a GlimpsePainter.
  *
  * @author ulman
+ * @deprecated
  */
 public class GLSimpleListenerPainter implements GlimpsePainter
 {

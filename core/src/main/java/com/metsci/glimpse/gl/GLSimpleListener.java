@@ -28,9 +28,13 @@ package com.metsci.glimpse.gl;
 
 import javax.media.opengl.GLContext;
 
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
+
 /**
  * A substitute for GLEventListener that is easy to use from SWT as well as
  * Swing/AWT.
+ * 
+ * @deprecated use {@link FBOGlimpseCanvas} instead
  */
 public interface GLSimpleListener
 {

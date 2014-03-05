@@ -39,6 +39,7 @@ import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
@@ -81,13 +82,8 @@ public class Example
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profileString ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
-        GLProfile glProfile = GLProfile.get( profileString );
-        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
-        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
-        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+        final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( profileString );
 
-        // trigger GLContext creation
-        glDrawable.display( );
         GLContext context = glDrawable.getContext( );
 
         // create a SwingGlimpseCanvas which shares the context

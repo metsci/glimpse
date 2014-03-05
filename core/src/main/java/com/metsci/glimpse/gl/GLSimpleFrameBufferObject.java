@@ -42,9 +42,14 @@ import javax.media.opengl.GLContext;
 
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 
+/**
+ * @deprecated use {@link FBOGlimpseCanvas} instead
+ */
+@Deprecated
 public class GLSimpleFrameBufferObject
 {
     private static final Logger logger = Logger.getLogger( GLSimpleFrameBufferObject.class.getName( ) );

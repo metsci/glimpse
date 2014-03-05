@@ -34,6 +34,10 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GLContext;
 
+/**
+ * @see {@link GLCapabilityEventListener}
+ */
+@Deprecated
 public class GLCapabilityLogger extends GLSimpleListenerAbstract
 {
     private final Logger logger;

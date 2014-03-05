@@ -41,8 +41,13 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.gl.util.GLPBufferUtils;
 
+/**
+ * @deprecated use {@link FBOGlimpseCanvas} instead
+ */
+@Deprecated
 public class GLSimplePixelBuffer
 {
     private GLOffscreenAutoDrawable buffer;
