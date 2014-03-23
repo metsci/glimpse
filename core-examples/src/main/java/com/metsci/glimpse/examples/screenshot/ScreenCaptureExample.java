@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.screenshot;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -37,7 +37,7 @@ import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -73,7 +73,7 @@ public class ScreenCaptureExample implements GlimpseLayoutProvider
 
     public static void setupScreenCapture( Example example )
     {
-        NewtSwingGlimpseCanvas canvas = example.getCanvas( );
+        GlimpseCanvas canvas = example.getCanvas( );
 
         ColorAxisPlot2D plot = ( ColorAxisPlot2D ) example.getLayout( );
         plot.setTitleFont( FontUtils.getDefaultBold( 18 ) );

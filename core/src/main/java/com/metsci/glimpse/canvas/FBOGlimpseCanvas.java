@@ -143,6 +143,12 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     }
 
     @Override
+    public GLProfile getGLProfile( )
+    {
+        return this.glProfile;
+    }
+    
+    @Override
     public GLOffscreenAutoDrawable.FBO getGLDrawable( )
     {
         return drawable;
