@@ -40,7 +40,6 @@ import javax.swing.SwingUtilities;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
-import com.metsci.glimpse.canvas.SwingLightweightGlimpseCanvas;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -83,14 +82,19 @@ public class Example
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, String profileString ) throws Exception
     {
+        return showWithSwing( layoutProvider, GLProfile.get( profileString ) );
+    }
+    
+    public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, GLProfile profile ) throws Exception
+    {
         // generate a GLContext by constructing a small offscreen framebuffer
-        final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( profileString );
+        final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( profile );
 
         GLContext context = glDrawable.getContext( );
 
         // create a SwingGlimpseCanvas which shares the context
         // other canvases could also be created which all share resources through this context
-        final SwingLightweightGlimpseCanvas canvas = new SwingLightweightGlimpseCanvas( profileString, context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( profile, context );
 
         // create a top level GlimpseLayout which we can add painters and other layouts to
         GlimpseLayout layout = layoutProvider.getLayout( );
@@ -147,13 +151,13 @@ public class Example
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
-        return showWithSwing( layoutProvider, GLProfile.GL2GL3 );
+        return showWithSwing( layoutProvider, GLProfile.getMaxFixedFunc( true ) );
     }
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
-        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLProfile glProfile = GLProfile.getMaxFixedFunc( true );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
         final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );

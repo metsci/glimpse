@@ -81,9 +81,14 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     protected List<GLRunnable> disposeListeners;
 
-    public NewtSwingGlimpseCanvas( String profile, GLContext context )
+    public NewtSwingGlimpseCanvas( String glProfile, GLContext context )
     {
-        this.glProfile = GLProfile.get( profile );
+        this( GLProfile.get( glProfile ), context );
+    }
+    
+    public NewtSwingGlimpseCanvas( GLProfile glProfile, GLContext context )
+    {
+        this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
         this.glWindow = GLWindow.create( glCapabilities );
