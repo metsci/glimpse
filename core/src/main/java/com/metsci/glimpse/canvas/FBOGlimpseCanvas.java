@@ -34,12 +34,33 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     protected GLOffscreenAutoDrawable.FBO drawable;
     protected boolean isDisposed;
 
+    public FBOGlimpseCanvas( GLProfile glProfile, int width, int height )
+    {
+        init( glProfile, null, width, height );
+    }
+    
+    public FBOGlimpseCanvas( GLContext glContext, int width, int height )
+    {
+        init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height );
+    }
+    
+    /**
+     * @deprecated Use {@link #FBOGlimpseCanvas(GLContext,int,int)} instead. The context implicitly provides a GLProfile.
+     */
     public FBOGlimpseCanvas( String glProfileName, GLContext glContext, int width, int height )
     {
         this( GLProfile.get( glProfileName ), glContext, width, height );
     }
     
+    /**
+     * @deprecated Use {@link #FBOGlimpseCanvas(GLContext,int,int)} instead. The context implicitly provides a GLProfile.
+     */
     public FBOGlimpseCanvas( GLProfile glProfile, GLContext glContext, int width, int height )
+    {
+        init( glProfile, glContext, width, height );
+    }
+    
+    private void init( GLProfile glProfile, GLContext glContext, int width, int height )
     {
         this.glProfile = glProfile;
         this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( this.glProfile, glContext );

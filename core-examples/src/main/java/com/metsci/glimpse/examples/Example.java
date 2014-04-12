@@ -94,7 +94,7 @@ public class Example
 
         // create a SwingGlimpseCanvas which shares the context
         // other canvases could also be created which all share resources through this context
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( profile, context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( context );
 
         // create a top level GlimpseLayout which we can add painters and other layouts to
         GlimpseLayout layout = layoutProvider.getLayout( );
@@ -151,13 +151,13 @@ public class Example
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
-        return showWithSwing( layoutProvider, GLProfile.getMaxFixedFunc( true ) );
+        return showWithSwing( layoutProvider, GLUtils.getDefaultGLProfile( ) );
     }
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
-        GLProfile glProfile = GLProfile.getMaxFixedFunc( true );
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
         final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );

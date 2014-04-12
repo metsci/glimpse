@@ -80,7 +80,7 @@ public class ScreenCaptureExample implements GlimpseLayoutProvider
         plot.setTitle( "Click Center Mouse Button To Take Screenshot" );
 
         // create an offscreen GlimpseCanvas
-        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( canvas.getGLProfile( ), canvas.getGLContext( ), 1000, 1000 );
+        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( canvas.getGLContext( ), 1000, 1000 );
 
         // add the GlimpseLayout from the onscreen canvas to the offscreen canvas as well
         // (GlimpseLayouts can have multiple parents)

@@ -126,6 +126,11 @@ public class GLUtils
 
         return offscreenDrawable;
     }
+    
+    public static GLProfile getDefaultGLProfile( )
+    {
+        return GLProfile.getMaxFixedFunc( true );
+    }
 
     public static String profileNameOf( GLContext context )
     {

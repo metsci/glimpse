@@ -66,19 +66,19 @@ public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        String glProfile = GLProfile.GL2GL3;
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );;
         GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
         GLContext glContext = glDrawable.getContext( );
 
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( glProfile, glContext );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( glContext );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( glProfile, glContext, 800, 800 );
+        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( glContext, 800, 800 );
         offscreenCanvas.addLayout( layout );
 
-        final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( glProfile, glContext );
+        final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( glContext );
         canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
         canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
 

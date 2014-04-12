@@ -18,12 +18,14 @@ public class OffscreenRenderingExample
 {
     public static void main( String[] args ) throws IOException
     {
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );
+        
         // generate a GLContext by constructing a small offscreen framebuffer
-        final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( GLProfile.GL2GL3 );
+        final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
 
         // create an offscreen GlimpseCanvas which shares an OpenGL context with the above drawable
         // (its size is 1000 by 1000 pixels)
-        final FBOGlimpseCanvas canvas = new FBOGlimpseCanvas( GLProfile.GL2GL3, glDrawable.getContext( ), 1000, 1000 );
+        final FBOGlimpseCanvas canvas = new FBOGlimpseCanvas( glDrawable.getContext( ), 1000, 1000 );
         
         // set the Glimpse look and feed of the canvas just like we would for an onscreen canvas
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );

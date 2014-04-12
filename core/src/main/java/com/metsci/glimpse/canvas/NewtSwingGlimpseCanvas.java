@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -52,6 +52,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.gl.GLRunnable;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -81,12 +82,38 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     protected List<GLRunnable> disposeListeners;
 
+    /**
+     * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
     public NewtSwingGlimpseCanvas( String glProfile, GLContext context )
     {
         this( GLProfile.get( glProfile ), context );
     }
-    
+
+    /**
+     * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
     public NewtSwingGlimpseCanvas( GLProfile glProfile, GLContext context )
+    {
+        init( glProfile, context );
+    }
+
+    public NewtSwingGlimpseCanvas( String profile )
+    {
+        init( GLProfile.get( profile ), null );
+    }
+
+    public NewtSwingGlimpseCanvas( GLContext context )
+    {
+        init( context.getGLDrawable( ).getGLProfile( ), context );
+    }
+
+    public NewtSwingGlimpseCanvas( )
+    {
+        init( GLUtils.getDefaultGLProfile( ), null );
+    }
+    
+    private void init( GLProfile glProfile, GLContext context )
     {
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
@@ -111,21 +138,6 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         this.isDisposed = false;
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
-    }
-
-    public NewtSwingGlimpseCanvas( String profile )
-    {
-        this( profile, null );
-    }
-
-    public NewtSwingGlimpseCanvas( GLContext context )
-    {
-        this( profileNameOf( context, GLProfile.GL2GL3 ), context );
-    }
-
-    public NewtSwingGlimpseCanvas( )
-    {
-        this( GLProfile.GL2GL3, null );
     }
 
     private GLEventListener createGLEventListener( )
@@ -192,7 +204,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             }
         };
     }
-    
+
     @Override
     public GLProfile getGLProfile( )
     {
@@ -273,7 +285,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     public Dimension getDimension( )
     {
-        return this.glCanvas.getSize( );
+        return new Dimension( this.glWindow.getWidth( ), this.glWindow.getHeight( ) );
     }
 
     @Override

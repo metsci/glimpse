@@ -29,6 +29,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 import com.metsci.glimpse.gl.GLRunnable;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -62,27 +63,59 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 
     public SwingGlimpseCanvas( )
     {
-        this( null );
+        init( true, GLUtils.getDefaultGLProfile( ), null );
     }
 
     public SwingGlimpseCanvas( GLContext context )
     {
-        this( GLProfile.GL2GL3, context );
+        init( true, context.getGLDrawable( ).getGLProfile( ), context );
+    }
+    
+    public SwingGlimpseCanvas( GLProfile glProfile )
+    {
+        init( true, glProfile, null );
+    }
+    
+    /**
+     * @deprecated Use {@link #SwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingGlimpseCanvas( GLProfile glProfile, GLContext context )
+    {
+        init( true, glProfile, context );
     }
 
+    /**
+     * @deprecated Use {@link #SwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
     public SwingGlimpseCanvas( String profile, GLContext context )
     {
-        this( true, profile, context );
+        init( true, GLProfile.get( profile ), context );
+    }
+    
+    /**
+     * @deprecated Use {@link #SwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingGlimpseCanvas( boolean setNoEraseBackgroundProperty, String profile, GLContext context )
+    {
+        init( setNoEraseBackgroundProperty, GLProfile.get( profile ), context );
     }
 
-    public SwingGlimpseCanvas( boolean setNoEraseBackgroundProperty, String profile, GLContext context )
+    /**
+     * @deprecated Use {@link #SwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingGlimpseCanvas( boolean setNoEraseBackgroundProperty, GLProfile glProfile, GLContext context )
+    {
+        init( setNoEraseBackgroundProperty, glProfile, context );
+    }
+    
+    private void init( boolean setNoEraseBackgroundProperty, GLProfile glProfile, GLContext context )
     {
         if ( setNoEraseBackgroundProperty )
         {
             System.setProperty( "sun.awt.noerasebackground", "true" );
         }
 
-        this.glProfile = GLProfile.get( profile );
+        this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
         this.glCanvas = new GLCanvas( glCapabilities, null, null );
@@ -333,7 +366,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     @Override
     public String toString( )
     {
-        return NewtSwingGlimpseCanvas.class.getSimpleName( );
+        return SwingGlimpseCanvas.class.getSimpleName( );
     }
 
     @Override

@@ -83,10 +83,37 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
 
     protected Dimension dimension = new Dimension( 0, 0 );
 
+    public NewtSwtGlimpseCanvas( Composite parent, GLProfile profile, int options )
+    {
+        super( parent, options );
+        init( parent, profile, null, options );
+    }
+    
+    public NewtSwtGlimpseCanvas( Composite parent, GLContext context, int options )
+    {
+        super( parent, options );
+        init( parent, context.getGLDrawable( ).getGLProfile( ), context, options );
+    }
+    
+    /**
+     * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
+     */
     public NewtSwtGlimpseCanvas( Composite parent, GLProfile glProfile, GLContext context, int options )
     {
         super( parent, options );
-
+        init( parent, glProfile, context, options );
+    }
+    
+    /**
+     * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
+     */
+    public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
+    {
+        this( parent, GLProfile.get( profile ), context, options );
+    }
+    
+    public void init( Composite parent, GLProfile glProfile, GLContext context, int options )
+    {
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
@@ -109,11 +136,6 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         this.isDisposed = false;
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
-    }
-    
-    public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
-    {
-        this( parent, GLProfile.get( profile ), context, options );
     }
 
     public void addDisposeListener( final Shell shell, final GLAutoDrawable sharedContextSource )
@@ -343,8 +365,6 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         if ( !this.isDisposed )
         {
-            System.out.println( "DISPOSE" );
-            
             if ( this.glCanvas != null ) this.glCanvas.dispose( );
             this.isDisposed = true;
         }
