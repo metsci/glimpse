@@ -317,39 +317,9 @@
         </extensions>
     </build>
 
-    <repositories>
-        <repository>
-            <id>glimpse-releases</id>
-            <url>http://glimpse.metsci.com/maven2/metsci-releases</url>
-        </repository>
-        <repository>
-            <id>glimpse-snapshots</id>
-            <url>http://glimpse.metsci.com/maven2/metsci-snapshots</url>
-        </repository>
-        <repository>
-            <id>glimpse-thirdparty</id>
-            <url>http://glimpse.metsci.com/maven2/thirdparty</url>
-        </repository>
-    </repositories>
-
     <profiles>
         <profile>
             <id>release</id>
-
-            <!-- for now only release certain modules
-                 (many extras modules have dependencies which are not in Maven Central -->
-            <modules>
-
-                <module>util</module>
-
-                <module>core</module>
-                <module>core-examples</module>
-
-                <module>docking</module>
-                <module>docking-examples</module>
-
-            </modules>
-
         </profile>
         <profile>
             <id>internal</id>

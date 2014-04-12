@@ -83,11 +83,11 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
 
     protected Dimension dimension = new Dimension( 0, 0 );
 
-    public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
+    public NewtSwtGlimpseCanvas( Composite parent, GLProfile glProfile, GLContext context, int options )
     {
         super( parent, options );
 
-        this.glProfile = GLProfile.get( profile );
+        this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
         this.glWindow = GLWindow.create( glCapabilities );
@@ -109,6 +109,11 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         this.isDisposed = false;
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
+    }
+    
+    public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
+    {
+        this( parent, GLProfile.get( profile ), context, options );
     }
 
     public void addDisposeListener( final Shell shell, final GLAutoDrawable sharedContextSource )
