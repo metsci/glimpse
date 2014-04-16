@@ -353,7 +353,6 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     @Override
     public void paint( )
     {
-        System.out.println( "PAINT" );
         this.repaint( );
     }
 
