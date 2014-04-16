@@ -1,0 +1,8 @@
+---
+layout: default
+title: Glimpse 2.1.2 Release
+---
+
+<p>JOGL 2.1.5 fixes a <a href="https://jogamp.org/wiki/index.php/SW_Tracking_Report_Objectives_for_the_release_2.1.5">number of issues</a> with NEWT canvases in Mac OS X. Glimpse 2.1.2 updates Glimpse to include these JOGL fixes. The GLProfile which Glimpse requests by default has also been changed to be more compatible with OS X (which does not provide a GL3 profile which is backwards compatible with GL2).</p>
+
+<p>Glimpse 2.1.2 also fixes a number of build issues introduced when modifying the project to deploy to <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.metsci.glimpse%22">Maven Central</a>. The Glimpse Maven build should work correctly now and require only artifacts from <a href="http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.metsci.glimpse%22">Maven Central</a> (referencing the <a href="http://glimpse.metsci.com/maven2">Glimpse Maven repository</a> in your pom is no longer necessary).</p>

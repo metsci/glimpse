@@ -9,7 +9,7 @@ title: Maven
     &lt;dependency&gt;
         &lt;groupId&gt;com.metsci.glimpse&lt;/groupId&gt;
         &lt;artifactId&gt;glimpse-core&lt;/artifactId&gt;
-        &lt;version&gt;2.1.1&lt;/version&gt;
+        &lt;version&gt;2.1.2&lt;/version&gt;
     &lt;/dependency&gt;
 &lt;/dependencies&gt;</pre>
 
@@ -20,23 +20,4 @@ title: Maven
 <pre>        &lt;artifactId&gt;glimpse-extras-swt&lt;/artifactId&gt;</pre>
 <pre>        &lt;artifactId&gt;glimpse-extras-examples&lt;/artifactId&gt;</pre>
 
-<p>All the <i>non-extras</i> modules are available directly from <a href="http://search.maven.org/#browse%7C1117099642">Maven Central</a>. In most cases, this is all you will need. However, some of the <i>extras</i> modules contain dependencies which are still only available through the <a href="http://maven.metsci.com/">Metron Maven Repository</a>. Also, older releases are currently only available through the <a href="http://maven.metsci.com/">Metron Maven Repository</a>.
-
-<p>In order to download <i>extras</i> artifacts or older versions, you must add <a href="http://glimpse.metsci.com/maven2/">Metron's Maven repository</a> to your project's <strong>pom.xml</strong> or your <strong>settings.xml</strong>:</p>
-
-  <pre>&lt;repositories&gt;
-    &lt;repository&gt;
-        &lt;id&gt;glimpse-releases&lt;/id&gt;
-        &lt;url&gt;http://glimpse.metsci.com/maven2/metsci-releases&lt;/url&gt;
-    &lt;/repository&gt;
-    &lt;repository&gt;
-        &lt;id&gt;glimpse-snapshots&lt;/id&gt;
-        &lt;url&gt;http://glimpse.metsci.com/maven2/metsci-snapshots&lt;/url&gt;
-    &lt;/repository&gt;
-    &lt;repository&gt;
-        &lt;id&gt;glimpse-thirdparty&lt;/id&gt;
-        &lt;url&gt;http://glimpse.metsci.com/maven2/thirdparty&lt;/url&gt;
-    &lt;/repository&gt;
-&lt;/repositories&gt;</pre>
-
-<p>For more information, see the Maven documentation on <a href="http://maven.apache.org/guides/mini/guide-multiple-repositories.html">Setting up Multiple Repositories</a>.</p>
+<p>All the <i>non-extras</i> modules are available directly from <a href="http://search.maven.org/#browse%7C1117099642">Maven Central</a>.
