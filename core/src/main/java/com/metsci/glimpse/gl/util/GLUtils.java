@@ -106,14 +106,30 @@ public class GLUtils
 
     public static GLOffscreenAutoDrawable newOffscreenDrawable( GLProfile profile )
     {
+        return newOffscreenDrawable( profile, null );
+    }
+    
+    public static GLOffscreenAutoDrawable newOffscreenDrawable( String profileName, GLContext sharedContext )
+    {
+        return newOffscreenDrawable( GLProfile.get( profileName ), sharedContext );
+    }
+    
+    public static GLOffscreenAutoDrawable newOffscreenDrawable( GLProfile profile, GLContext sharedContext )
+    {
         GLDrawableFactory drawableFactory = GLDrawableFactory.getFactory( profile );
         GLCapabilities caps = new GLCapabilities( profile );
         GLOffscreenAutoDrawable offscreenDrawable = drawableFactory.createOffscreenAutoDrawable( null, caps, null, 1, 1 );
-
+        if ( sharedContext != null ) offscreenDrawable.setSharedContext( sharedContext );
+        
         // Trigger context creation
         offscreenDrawable.display( );
 
         return offscreenDrawable;
+    }
+    
+    public static GLProfile getDefaultGLProfile( )
+    {
+        return GLProfile.getMaxFixedFunc( true );
     }
 
     public static String profileNameOf( GLContext context )

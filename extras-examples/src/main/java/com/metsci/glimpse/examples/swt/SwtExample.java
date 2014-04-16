@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.jogamp.opengl.util.FPSAnimator;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.swt.canvas.NewtSwtGlimpseCanvas;
 import com.metsci.glimpse.swt.misc.SwtLookAndFeel;
@@ -56,7 +57,7 @@ public abstract class SwtExample
     public static void showWithSwt( GlimpseLayoutProvider layoutProvider ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
-        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
         GLCapabilities glCapabilities = new GLCapabilities( glProfile );
         final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
@@ -70,7 +71,7 @@ public abstract class SwtExample
         shell.setText( "Glimpse Example (SWT)" );
         shell.setLayout( new FillLayout( ) );
 
-        final NewtSwtGlimpseCanvas canvas = new NewtSwtGlimpseCanvas( shell, GLProfile.GL2GL3, context, SWT.NO_BACKGROUND );
+        final NewtSwtGlimpseCanvas canvas = new NewtSwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
         canvas.addLayout( layoutProvider.getLayout( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 

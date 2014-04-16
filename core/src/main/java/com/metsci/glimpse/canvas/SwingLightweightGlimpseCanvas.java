@@ -31,6 +31,10 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
@@ -41,102 +45,129 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLJPanel;
 import javax.swing.JPanel;
 
-import com.jogamp.newt.awt.NewtCanvasAWT;
-import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
+import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-// Jogamp / NEWT Links:
-//      https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/acore/TestSharedContextVBOES2NEWT.java
-//      http://forum.jogamp.org/Advantages-of-using-NEWT-vs-GLCanvas-td3703674.html
-//      http://jogamp.org/jogl/doc/NEWT-Overview.html
-//      http://jogamp.org/git/?p=jogl.git;a=blob;f=src/test/com/jogamp/opengl/test/junit/newt/parenting/TestParenting01cAWT.java;hb=HEAD
-//      http://jogamp.org/deployment/jogamp-next/javadoc/jogl/javadoc/com/jogamp/newt/event/awt/AWTAdapter.html
-public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
+/**
+ * A Swing GlimpseCanvas implementation which draws to a {@link javax.media.opengl.awt.GLCanvas}. This
+ * Canvas implementation is not as well supported as the newer JOGL {@link com.jogamp.newt.awt.NewtCanvasAWT}.
+ * For this reason, {@link NewtSwingGlimpseCanvas} should generally be prefered over this class.
+ * 
+ * @author ulman
+ * @deprecated see {@link NewtSwingGlimpseCanvas}
+ */
+@Deprecated
+public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanvas
 {
-    private static final Logger logger = Logger.getLogger( NewtSwingGlimpseCanvas.class.getName( ) );
+    private static final Logger logger = Logger.getLogger( SwingLightweightGlimpseCanvas.class.getName( ) );
 
-    private static final long serialVersionUID = -160715062527667555L;
+    private static final long serialVersionUID = 1L;
 
     protected GLProfile glProfile;
     protected GLCapabilities glCapabilities;
-    protected GLWindow glWindow;
-    protected NewtCanvasAWT glCanvas;
+    protected GLJPanel glCanvas;
+    protected GLAutoDrawable glDrawable;
+
+    protected LayoutManager layoutManager;
+    protected MouseWrapperSwing mouseHelper;
+
+    protected List<GLRunnable> disposeListeners;
 
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
     protected boolean isDisposed = false;
 
-    protected LayoutManager layoutManager;
-    protected MouseWrapperNewt mouseHelper;
-
-    protected List<GLRunnable> disposeListeners;
-
-    /**
-     * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
-     */
-    public NewtSwingGlimpseCanvas( String glProfile, GLContext context )
+    public SwingLightweightGlimpseCanvas( )
     {
-        this( GLProfile.get( glProfile ), context );
+        init( true, GLUtils.getDefaultGLProfile( ), null );
     }
 
-    /**
-     * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
-     */
-    public NewtSwingGlimpseCanvas( GLProfile glProfile, GLContext context )
+    public SwingLightweightGlimpseCanvas( GLContext context )
     {
-        init( glProfile, context );
-    }
-
-    public NewtSwingGlimpseCanvas( String profile )
-    {
-        init( GLProfile.get( profile ), null );
-    }
-
-    public NewtSwingGlimpseCanvas( GLContext context )
-    {
-        init( context.getGLDrawable( ).getGLProfile( ), context );
-    }
-
-    public NewtSwingGlimpseCanvas( )
-    {
-        init( GLUtils.getDefaultGLProfile( ), null );
+        init( true, context.getGLDrawable( ).getGLProfile( ), context );
     }
     
-    private void init( GLProfile glProfile, GLContext context )
+    public SwingLightweightGlimpseCanvas( GLProfile glProfile )
     {
+        init( true, glProfile, null );
+    }
+    
+    /**
+     * @deprecated Use {@link #SwingLightweightGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingLightweightGlimpseCanvas( GLProfile glProfile, GLContext context )
+    {
+        init( true, glProfile, context );
+    }
+
+    /**
+     * @deprecated Use {@link #SwingLightweightGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingLightweightGlimpseCanvas( String profile, GLContext context )
+    {
+        init( true, GLProfile.get( profile ), context );
+    }
+    
+    /**
+     * @deprecated Use {@link #SwingLightweightGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingLightweightGlimpseCanvas( boolean setNoEraseBackgroundProperty, String profile, GLContext context )
+    {
+        init( setNoEraseBackgroundProperty, GLProfile.get( profile ), context );
+    }
+
+    /**
+     * @deprecated Use {@link #SwingLightweightGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
+     */
+    public SwingLightweightGlimpseCanvas( boolean setNoEraseBackgroundProperty, GLProfile glProfile, GLContext context )
+    {
+        init( setNoEraseBackgroundProperty, glProfile, context );
+    }
+    
+    private void init( boolean setNoEraseBackgroundProperty, GLProfile glProfile, GLContext context )
+    {
+        if ( setNoEraseBackgroundProperty )
+        {
+            System.setProperty( "sun.awt.noerasebackground", "true" );
+        }
+
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
-        this.glWindow = GLWindow.create( glCapabilities );
-        if ( context != null ) this.glWindow.setSharedContext( context );
-        this.glWindow.addGLEventListener( createGLEventListener( ) );
+        this.glCanvas = new GLJPanel( glCapabilities, null );
 
-        this.mouseHelper = new MouseWrapperNewt( this );
-        this.glWindow.addMouseListener( this.mouseHelper );
+        if ( context != null ) {
+            this.glCanvas.setSharedContext( context );
+        }
+        
+        this.mouseHelper = new MouseWrapperSwing( this );
+        this.addMouseListener( this.mouseHelper );
+        this.addMouseMotionListener( this.mouseHelper );
+        this.addMouseWheelListener( this.mouseHelper );
 
-        this.glCanvas = new NewtCanvasAWT( glWindow );
         this.setLayout( new BorderLayout( ) );
         this.add( this.glCanvas, BorderLayout.CENTER );
 
         this.layoutManager = new LayoutManager( );
 
         // workaround to enable the panel to shrink
-        // see: http://jogamp.org/jogl/doc/userguide/#heavylightweightissues
         this.setMinimumSize( new Dimension( 0, 0 ) );
 
         this.isDisposed = false;
 
+        this.glCanvas.addGLEventListener( createGLEventListener( ) );
+        
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
 
@@ -190,7 +221,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                logInfo( logger, "Disposing NewtSwingGlimpseCanvas..." );
+                logInfo( logger, "Disposing SwingGlimpseCanvas..." );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -206,26 +237,71 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     }
 
     @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void addMouseListener( MouseListener listener )
+    {
+        this.glCanvas.addMouseListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void addMouseMotionListener( MouseMotionListener listener )
+    {
+        this.glCanvas.addMouseMotionListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void addMouseWheelListener( MouseWheelListener listener )
+    {
+        this.glCanvas.addMouseWheelListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void removeMouseListener( MouseListener listener )
+    {
+        this.glCanvas.removeMouseListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void removeMouseMotionListener( MouseMotionListener listener )
+    {
+        this.glCanvas.removeMouseMotionListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void removeMouseWheelListener( MouseWheelListener listener )
+    {
+        this.glCanvas.removeMouseWheelListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void addKeyListener( KeyListener listener )
+    {
+        this.glCanvas.addKeyListener( listener );
+    }
+
+    @Override
+    // the glCanvas covers the entire underlying JPanel, so event listeners should be attached to the glCanvas, not this
+    public void removeKeyListener( KeyListener listener )
+    {
+        this.glCanvas.removeKeyListener( listener );
+    }
+    
+    @Override
     public GLProfile getGLProfile( )
     {
         return this.glProfile;
     }
 
-    public NewtCanvasAWT getCanvas( )
-    {
-        return glCanvas;
-    }
-
     @Override
     public GLAutoDrawable getGLDrawable( )
     {
-        return glWindow;
-    }
-
-    @Override
-    public GLWindow getGLWindow( )
-    {
-        return glWindow;
+        return this.glCanvas;
     }
 
     @Override
@@ -285,7 +361,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     public Dimension getDimension( )
     {
-        return new Dimension( this.glWindow.getWidth( ), this.glWindow.getHeight( ) );
+        return this.glCanvas.getSize( );
     }
 
     @Override
@@ -303,19 +379,19 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     @Override
     public void paint( )
     {
-        this.glWindow.display( );
+        this.repaint( );
     }
 
     @Override
     public GLContext getGLContext( )
     {
-        return this.glWindow.getContext( );
+        return this.glCanvas.getContext( );
     }
 
     @Override
     public String toString( )
     {
-        return NewtSwingGlimpseCanvas.class.getSimpleName( );
+        return SwingLightweightGlimpseCanvas.class.getSimpleName( );
     }
 
     @Override
@@ -353,7 +429,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         if ( !this.isDisposed )
         {
-            if ( this.glWindow != null ) this.glWindow.destroy( );
+            if ( this.glCanvas != null ) this.glCanvas.destroy( );
             this.isDisposed = true;
         }
     }

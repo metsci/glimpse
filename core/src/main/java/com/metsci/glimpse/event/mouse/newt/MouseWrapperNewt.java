@@ -79,8 +79,8 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
         Object source = e.getSource( );
         long when = e.getWhen( );
         int modifiers = e.getModifiers( );
-        int[] local_x = new int[] { e.getX( ) - bounds.getX( ) };
-        int[] local_y = new int[] { e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) ) };
+        int[] local_x = getX( e, bounds );
+        int[] local_y = getY( e, bounds, parentHeight );
         float[] pressure = getPressure( e );
         float maxPressure = e.getMaxPressure( );
         PointerType[] types = getPointerTypes( e );
@@ -94,6 +94,28 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
         event.setAttachment( stack );
 
         return event;
+    }
+    
+    protected int[] getX( MouseEvent e, GlimpseBounds bounds )
+    {
+        int[] allX = e.getAllX( );
+        int[] newX = new int[allX.length];
+        for ( int i = 0 ; i < allX.length ; i++ )
+        {
+            newX[i] = allX[i] - bounds.getX( );
+        }
+        return newX;
+    }
+    
+    protected int[] getY( MouseEvent e, GlimpseBounds bounds, int parentHeight )
+    {
+        int[] allY = e.getAllY( );
+        int[] newY = new int[allY.length];
+        for ( int i = 0 ; i < allY.length ; i++ )
+        {
+            newY[i] = e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) ); 
+        }
+        return newY;
     }
 
     protected PointerType[] getPointerTypes( MouseEvent e )

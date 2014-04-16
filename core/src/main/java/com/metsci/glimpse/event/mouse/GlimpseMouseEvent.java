@@ -50,23 +50,23 @@ public class GlimpseMouseEvent
     protected GlimpseTargetStack stack;
     protected EnumSet<ModifierKey> modifiers;
     protected EnumSet<MouseButton> buttons;
-    protected int wheelIncrement;
+    protected double wheelIncrement;
     protected int clickCount;
-    protected int x;
-    protected int y;
+    protected int[] x;
+    protected int[] y;
     protected boolean handled;
 
-    public GlimpseMouseEvent( GlimpseTargetStack stack, int x, int y )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, int[] x, int[] y )
     {
         this( stack, x, y, 0 );
     }
 
-    public GlimpseMouseEvent( GlimpseTargetStack stack, int x, int y , int wheelIncrement )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, int[] x, int[] y , int wheelIncrement )
     {
         this( stack, EnumSet.noneOf( ModifierKey.class ), EnumSet.noneOf( MouseButton.class ), x, y, wheelIncrement, 0, false );
     }
 
-    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int[] x, int[] y )
     {
         this( stack, modifiers, buttons, x, y, 0, 0, false );
     }
@@ -76,17 +76,27 @@ public class GlimpseMouseEvent
         this( TargetStackUtil.newTargetStack( event.stack ), EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), event.x, event.y, event.wheelIncrement, event.clickCount, event.handled );
     }
     
-    public GlimpseMouseEvent( GlimpseMouseEvent event, GlimpseTargetStack stack, int x, int y )
+    public GlimpseMouseEvent( GlimpseMouseEvent event, GlimpseTargetStack stack, int[] x, int[] y )
     {
         this( stack, EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), x, y, event.wheelIncrement, event.clickCount, event.handled );
     }
     
-    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, int wheelIncrement, int clickCount )
+    public GlimpseMouseEvent( GlimpseMouseEvent event, GlimpseTargetStack stack, int x, int y )
+    {
+        this( stack, new int[] { x }, new int[] { y }, 0 );
+    }
+    
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int[] x, int[] y, double wheelIncrement, int clickCount )
     {
         this( stack, modifiers, buttons, x, y, wheelIncrement, clickCount, false );
     }
     
-    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, int wheelIncrement, int clickCount, boolean handled )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, double wheelIncrement, int clickCount )
+    {
+        this( stack, modifiers, buttons, new int[] { x }, new int[] { y }, wheelIncrement, clickCount, false );
+    }
+    
+    public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int[] x, int[] y, double wheelIncrement, int clickCount, boolean handled )
     {
         super( );
         this.stack = stack;
@@ -136,6 +146,11 @@ public class GlimpseMouseEvent
 
     public int getX( )
     {
+        return x[0];
+    }
+    
+    public int[] getAllX( )
+    {
         return x;
     }
     
@@ -160,7 +175,7 @@ public class GlimpseMouseEvent
 
         if ( axis != null )
         {
-            return axis.screenPixelToValue( x ); 
+            return axis.screenPixelToValue( getX( ) ); 
         }
         else
         {
@@ -169,6 +184,11 @@ public class GlimpseMouseEvent
     }
 
     public int getY( )
+    {
+        return y[0];
+    }
+    
+    public int[] getAllY( )
     {
         return y;
     }
@@ -190,7 +210,7 @@ public class GlimpseMouseEvent
         if ( axis != null )
         {
             int height = axis.getSizePixels( );
-            return axis.screenPixelToValue( height - y ); 
+            return axis.screenPixelToValue( height - getY( ) ); 
         }
         else
         {
@@ -203,7 +223,7 @@ public class GlimpseMouseEvent
         return getY( );
     }
 
-    public int getWheelIncrement( )
+    public double getWheelIncrement( )
     {
         return this.wheelIncrement;
     }

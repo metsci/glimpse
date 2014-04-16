@@ -248,13 +248,13 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             }
 
             EventSelection eventSelection = eventManager.getNearestEvent( tempEvents, e );
-            if ( eventSelection != null )
+            if ( eventSelection != null && selectionHandler.isAllowMouseEventSelection( ) )
             {
                 Event event = eventSelection.getEvent( );
 
                 if ( event.isSelectable( ) )
                 {
-                    if ( e.isKeyDown( ModifierKey.Ctrl ) )
+                    if ( e.isKeyDown( ModifierKey.Ctrl ) && selectionHandler.isAllowMultipleEventSelection( ) )
                     {
                         if ( selectionHandler.isEventSelected( event ) )
                         {
@@ -267,7 +267,15 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                     }
                     else
                     {
-                        selectionHandler.setSelectedEvents( Collections.singleton( event ) );
+                        // special case: clicking a single selected event deselects it
+                        if ( isDeselectSingleEvent( event ) )
+                        {
+                            selectionHandler.setSelectedEvents( Collections.<Event>emptySet( ) );
+                        }
+                        else
+                        {
+                            selectionHandler.setSelectedEvents( Collections.singleton( event ) );
+                        }
                     }
                 }
             }
@@ -311,6 +319,19 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             }
 
             hoveredEvents = Sets.newHashSet( newHoveredEvents );
+        }
+    }
+    
+    protected boolean isDeselectSingleEvent( Event event )
+    {
+        if ( selectionHandler.getSelectedEvents( ).size( ) == 1 )
+        {
+            Event currentSelection = selectionHandler.getSelectedEvents( ).iterator( ).next( );
+            return currentSelection.equals( event );
+        }
+        else
+        {
+            return false;
         }
     }
 

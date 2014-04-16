@@ -440,8 +440,6 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             // ensure that we have been laid out properly
             GlimpseBounds bounds = layoutTo( context );
 
-            if ( !isVisible ) return;
-
             // push our bounds onto the layout stack
             context.getTargetStack( ).push( this, bounds );
 

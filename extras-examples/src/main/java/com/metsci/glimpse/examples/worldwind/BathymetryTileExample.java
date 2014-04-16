@@ -134,7 +134,7 @@ public class BathymetryTileExample
         worldwindFrame.setSize( 800, 800 );
         worldwindFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         worldwindFrame.setVisible( true );
-
+        
         // create a Glimpse Frame
         NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );

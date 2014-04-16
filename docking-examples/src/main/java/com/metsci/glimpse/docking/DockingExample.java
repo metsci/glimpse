@@ -49,10 +49,10 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
+import net.sf.tinylaf.Theme;
+import net.sf.tinylaf.TinyLookAndFeel;
 
-import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.TinyLookAndFeel;
+import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 
 public class DockingExample
 {

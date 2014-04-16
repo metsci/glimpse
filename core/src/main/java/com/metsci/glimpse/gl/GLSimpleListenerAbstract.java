@@ -30,6 +30,12 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
+
+/**
+ * @deprecated use {@link FBOGlimpseCanvas} instead
+ */
+@Deprecated
 public abstract class GLSimpleListenerAbstract implements GLSimpleListener
 {
     protected boolean isDisposed = false;
