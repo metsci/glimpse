@@ -147,8 +147,6 @@ public class ReprojectionExample
 
                 if ( !initialized && offscreenCanvas.getGLDrawable( ).isInitialized( ) )
                 {
-                    System.out.println( "initialized " + offscreenCanvas.getGLDrawable( ).getHandle( ) + " "  + offscreenCanvas.getTextureUnit( ) );
-                    
                     TextureProjected2D texture = offscreenCanvas.getProjectedTexture( );
                     texture.setProjection( new PolarProjection( 0, 10, 0, 360 ) );
                     addDrawableTexture( texture );
