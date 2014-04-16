@@ -161,6 +161,12 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         {
             try
             {
+                // don't paint non-GlimpseLayout painters when isVisible is false
+                // this implementation is somewhat ugly, but stems from the fact that GlimpseLayout implements GlimpsePainter
+                // (which it probably shouldn't) and even if isVisible is false, GlimpseLayout still needs to layout its
+                // children or odd behavior may result if the GlimpseLayout is resized while not visible
+                if ( !(m.painter instanceof GlimpseLayout) && !layout.isVisible ) continue;
+                
                 gl.glEnable( GL2.GL_SCISSOR_TEST );
 
                 gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );

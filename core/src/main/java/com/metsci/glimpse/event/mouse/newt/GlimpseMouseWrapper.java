@@ -49,7 +49,7 @@ public class GlimpseMouseWrapper
 
     public static GlimpseMouseEvent fromMouseEvent( MouseEvent event, GlimpseTargetStack stack, int x, int y )
     {
-        int wheelIncrement = getWheelIncrement( event );
+        double wheelIncrement = getWheelIncrement( event );
         int clickCount = event.getClickCount( );
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
@@ -80,7 +80,7 @@ public class GlimpseMouseWrapper
         return buttons;
     }
 
-    public static int getWheelIncrement( MouseEvent event )
+    public static double getWheelIncrement( MouseEvent event )
     {
         // wheel increment is usually reported in index 1
         // however, when shift is down it is reported in index 0
@@ -89,7 +89,7 @@ public class GlimpseMouseWrapper
 
         for ( float increment : event.getRotation( ) )
         {
-            if ( increment != 0.0 ) return ( int ) -increment;
+            if ( increment != 0.0 ) return -increment;
         }
 
         return 0;

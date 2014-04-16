@@ -29,9 +29,7 @@ package com.metsci.glimpse.examples.projection;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
@@ -39,11 +37,12 @@ import javax.swing.JFrame;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas;
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -67,25 +66,19 @@ public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        // generate a GLContext by constructing a small offscreen framebuffer
-        GLProfile glProfile = GLProfile.get( GLProfile.GL2GL3 );
-        GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
-        GLCapabilities glCapabilities = new GLCapabilities( glProfile );
-        final GLOffscreenAutoDrawable glDrawable = factory.createOffscreenAutoDrawable( null, glCapabilities, null, 1, 1 );
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );;
+        GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
+        GLContext glContext = glDrawable.getContext( );
 
-        // trigger GLContext creation
-        glDrawable.display( );
-        GLContext context = glDrawable.getContext( );
-
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( glContext );
         ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        final FrameBufferGlimpseCanvas offscreenCanvas = new FrameBufferGlimpseCanvas( 800, 800, context );
+        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( glContext, 800, 800 );
         offscreenCanvas.addLayout( layout );
 
-        final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( context );
+        final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( glContext );
         canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
         canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
 
@@ -93,6 +86,7 @@ public class ReprojectionExample
         FPSAnimator animator = new FPSAnimator( 120 );
         animator.add( offscreenCanvas.getGLDrawable( ) );
         animator.add( canvas2.getGLDrawable( ) );
+        animator.add( canvas.getGLDrawable( ) );
         animator.start( );
 
         createFrame( "Original", canvas );
@@ -135,7 +129,7 @@ public class ReprojectionExample
         return frame;
     }
 
-    public GlimpseLayout getLayout( final FrameBufferGlimpseCanvas offscreenCanvas ) throws Exception
+    public GlimpseLayout getLayout( final FBOGlimpseCanvas offscreenCanvas ) throws Exception
     {
         Axis2D axis = new Axis2D( );
         axis.set( -10, 10, -10, 10 );
@@ -151,9 +145,9 @@ public class ReprojectionExample
             {
                 super.paintTo( context, bounds, axis );
 
-                if ( !initialized && offscreenCanvas.getFrameBuffer( ).isInitialized( ) )
+                if ( !initialized && offscreenCanvas.getGLDrawable( ).isInitialized( ) )
                 {
-                    TextureProjected2D texture = offscreenCanvas.getGlimpseTexture( );
+                    TextureProjected2D texture = offscreenCanvas.getProjectedTexture( );
                     texture.setProjection( new PolarProjection( 0, 10, 0, 360 ) );
                     addDrawableTexture( texture );
                     initialized = true;

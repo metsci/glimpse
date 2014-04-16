@@ -184,16 +184,38 @@ public class HistogramPainter extends GlimpseDataPainter2D
         setData( counts, size, (float) binSize );
     }
 
+
     /**
      * Sets the histogram data without automatically binning.
+     * 
+     * @param counts map from left edge of bin to number of values in bin
+     * @param binSize the width of each bin
      */
-    public void setData( Float2IntMap counts, int totalSize, float binSize )
+    public void setData( Float2IntMap counts, float binSize )
     {
-        this.binSize = binSize;
-
+        int sum = 0;
+        for ( Float2IntMap.Entry entry : counts.float2IntEntrySet() )
+        {
+            sum += entry.getIntValue( );
+        }
+        setData( counts, sum, binSize );
+    }
+    
+    /**
+     * Sets the histogram data without automatically binning.
+     * 
+     * @param counts map from left edge of bin to number of values in bin
+     * @param totalSize the sum of the count values from the counts map
+     * @param binSize the width of each bin
+     */
+    public void setData( Float2IntMap counts, int totalCount, float binSize )
+    {
         dataBufferLock.lock( );
         try
         {
+            this.binSize = binSize;
+
+            
             minY = 0;
             maxY = 0;
 
@@ -207,7 +229,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
                 dataBuffer = Buffers.newDirectFloatBuffer( dataSize * FLOATS_PER_BAR );
             }
 
-            final float denom = (asDensity) ? (binSize * totalSize) : totalSize;
+            final float denom = (asDensity) ? (binSize * totalCount) : totalCount;
             
             for ( Float2IntMap.Entry entry : counts.float2IntEntrySet() )
             {
@@ -233,7 +255,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
         finally
         {
             dataBufferLock.unlock( );
-        }
+        }   
     }
 
     public void setData( double[] data, float binSize, float binStart )

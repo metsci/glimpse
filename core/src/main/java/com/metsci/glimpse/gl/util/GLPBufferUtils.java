@@ -33,6 +33,10 @@ import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 
 
+/**
+ * @deprecated use {@link GLUtils} instead
+ */
+@Deprecated
 public class GLPBufferUtils
 {
 	private static final GLProfile profile = GLProfile.get(GLProfile.GL2);

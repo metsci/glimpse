@@ -51,6 +51,7 @@ public class EventSelectionHandler
     protected boolean highlightSelectedEvents = false;
     protected boolean clearSelectionOnClick = false;
     protected boolean allowMouseEventSelection = true;
+    protected boolean allowMultipleEventSelection = true;
     
     public EventSelectionHandler( )
     {
@@ -67,6 +68,20 @@ public class EventSelectionHandler
     public void removeEventSelectionListener( EventSelectionListener listener )
     {
         this.eventListeners.remove( listener );
+    }
+    
+    /**
+     * If true, multiple events may be selected by holding down the ctrl key while
+     * clicking them. Does not restrict programmatic selection in any way.
+     */
+    public void setAllowMultipleEventSelection( boolean allowMultiple )
+    {
+        this.allowMultipleEventSelection = allowMultiple;
+    }
+    
+    public boolean isAllowMultipleEventSelection( )
+    {
+        return this.allowMultipleEventSelection;
     }
     
     /**
@@ -122,6 +137,8 @@ public class EventSelectionHandler
 
     public void setSelectedEvents( Set<Event> events )
     {
+        if ( events.equals( selectedEvents ) ) return;
+        
         // set of deselected events
         Set<Event> deselectedEvents = Sets.difference( selectedEvents, events ).immutableCopy( );
         // set of newly selected events

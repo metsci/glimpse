@@ -32,8 +32,14 @@ import java.util.logging.Level;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
+
 import java.util.logging.Logger;
 
+/**
+ * @deprecated use {@link FBOGlimpseCanvas} instead
+ */
+@Deprecated
 public class GLSimpleFboListenerEntry
 {
     private static final Logger logger = Logger.getLogger( GLSimpleFboListenerEntry.class.getName( ) );

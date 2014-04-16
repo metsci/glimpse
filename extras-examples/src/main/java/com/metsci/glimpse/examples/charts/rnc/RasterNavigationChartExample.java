@@ -28,20 +28,19 @@ package com.metsci.glimpse.examples.charts.rnc;
 
 import java.io.IOException;
 
-import javax.media.opengl.GLProfile;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
-import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.shader.SampledColorScaleShaderInteger;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
+import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
@@ -61,7 +60,7 @@ public class RasterNavigationChartExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new RasterNavigationChartExample( ), GLProfile.GL2 );
+        Example.showWithSwing( new RasterNavigationChartExample( ), GLUtils.getDefaultGLProfile( ) );
     }
 
     protected int plotHeight = 200;

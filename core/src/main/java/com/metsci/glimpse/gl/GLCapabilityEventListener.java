@@ -27,51 +27,51 @@
 package com.metsci.glimpse.gl;
 
 import static com.metsci.glimpse.gl.util.GLCapabilityUtils.*;
-import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.*;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLEventListener;
 
-/**
- * @see {@link GLCapabilityEventListener}
- */
-@Deprecated
-public class GLCapabilityLogger extends GLSimpleListenerAbstract
+public class GLCapabilityEventListener implements GLEventListener
 {
     private final Logger logger;
     private final String name;
 
-    public GLCapabilityLogger( Logger logger, String name )
+    public GLCapabilityEventListener( Logger logger, String name )
     {
         this.logger = logger;
         this.name = name;
     }
 
-    public GLCapabilityLogger( String name )
+    public GLCapabilityEventListener( String name )
     {
-        this( Logger.getLogger( GLCapabilityLogger.class.getName( ) ), name );
+        this( Logger.getLogger( GLCapabilityEventListener.class.getName( ) ), name );
     }
 
-    public GLCapabilityLogger( Logger logger )
+    public GLCapabilityEventListener( Logger logger )
     {
         this( logger, "" );
     }
 
-    public GLCapabilityLogger( )
+    public GLCapabilityEventListener( )
     {
-        this( Logger.getLogger( GLCapabilityLogger.class.getName( ) ), "" );
+        this( Logger.getLogger( GLCapabilityEventListener.class.getName( ) ), "" );
     }
 
     @Override
-    public void init( GLContext context )
+    public void init( GLAutoDrawable drawable )
     {
         String prefix = "init()";
 
         if ( name != null && name.length( ) > 0 ) prefix += " on" + name;
 
         prefix = prefix + ": ";
+
+        GLContext context = drawable.getContext( );
 
         logGLVersionInfo( logger, INFO, context, true );
         logGLMaximumValues( logger, INFO, context );
@@ -81,23 +81,21 @@ public class GLCapabilityLogger extends GLSimpleListenerAbstract
     }
 
     @Override
-    public void display( GLContext context )
+    public void dispose( GLAutoDrawable drawable )
     {
+        // do nothing
     }
 
     @Override
-    public void reshape( GLContext context, int x, int y, int width, int height )
+    public void display( GLAutoDrawable drawable )
     {
+        // do nothing
     }
 
     @Override
-    public void displayChanged( GLContext context, boolean modeChanged, boolean deviceChanged )
+    public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
     {
+        // do nothing
     }
 
-    @Override
-    public void dispose( GLContext context )
-    {
-        // nothing to dispose
-    }
 }

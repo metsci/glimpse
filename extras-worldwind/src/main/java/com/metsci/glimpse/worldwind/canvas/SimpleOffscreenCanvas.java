@@ -31,6 +31,7 @@ import java.util.List;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLProfile;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.canvas.LayoutManager;
@@ -247,6 +248,13 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
 
     @Override
     public GLAutoDrawable getGLDrawable( )
+    {
+        // not a fully featured GlimpseCanvas
+        return null;
+    }
+
+    @Override
+    public GLProfile getGLProfile( )
     {
         // not a fully featured GlimpseCanvas
         return null;

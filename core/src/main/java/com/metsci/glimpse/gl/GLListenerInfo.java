@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.gl;
 
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
+
+/**
+ * @deprecated use {@link FBOGlimpseCanvas} instead
+ */
 public class GLListenerInfo
 {
 
