@@ -43,6 +43,8 @@ title: Guide
 
 <p>A NewtSwingGlimpseCanvas can be constructed and added to a Swing application like any other Swing Component. Other NewtSwingGlimpseCanvas constructor arguments allow sharing of OpenGL Contexts between GlimpseCanvases, but the simple zero argument constructor suffices here. Adding the GlimpseCanvas to a FPSAnimator automatically redraws the GlimpseCanvas periodically. Finally, the canvas can be added to the Swing frame like any other Swing component.</p>
 
+<p><a href="https://github.com/metsci/glimpse/blob/master/core-examples/src/main/java/com/metsci/glimpse/examples/Example.java">Example.java</a> provides a more complete example of setting of a simple Swing Glimpse application.</p>
+
 <p>When this snippet is run, a window with a 100 pixel by 100 pixel black square will appear on the screen. In order to get something more interesting showing up, we need to add GlimpseLayouts and GlimpsePainters to the canvas.</p>
 
 <h3>Glimpse Layout and Glimpse Painter</h3>
@@ -85,3 +87,6 @@ public class SimplePainter extends GlimpseDataPainter2D
 
 <img src="/glimpse/images/guide/Simple_Painter.png" border="1" width="600px"/>
 
+<h3>Glimpse Plots</h3>
+
+Although you can start with a GlimpseCanvas and construct visualizations by arranging GlimpseLayouts and adding GlimpsePainters and GlimpseMouseListeners, it is often easier to start with one of the pre-built plots in the <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/package-summary.html">com.metsci.glimpse.plot</a></code> package.
