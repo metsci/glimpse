@@ -27,7 +27,7 @@ title: Guide
 
 <p>All Glimpse applications start with a <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/canvas/GlimpseCanvas.html">Glimpse Canvas</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/canvas/GlimpseCanvas.java">(source)</a> which wraps a JOGL <a href="https://jogamp.org/deployment/jogamp-next/javadoc/jogl/javadoc/javax/media/opengl/GLDrawable.html">GLDrawable</a>. A GlimpseCanvas, and the GLDrawable it wraps, are abstractions for generic OpenGL rendering targets. For Swing applications, the concrete GlimpseCanvas implementation <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/canvas/NewtSwingGlimpseCanvas.html">NewtSwingGlimpseCanvas</a>, is a JPanel and can be directly incorporated into an existing Swing application. <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/swt/canvas/NewtSwtGlimpseCanvas.html">SWTGlimpseCanvas</a> provides the analogous capability for SWT applications. Other GlimpseCanvas implementations exist for drawing to off-screen buffers.</p>
 
-<p>The following code snippit is all that is necessary to bring up a Swing JFrame containing a GlimpseCanvas:</p>
+<p>The following code snippit is all that is necessary to create a Swing JFrame containing a GlimpseCanvas:</p>
 
 {% highlight java %}
     public static void main( String[] args )
@@ -41,15 +41,15 @@ title: Guide
     }
 {% endhighlight %}
 
-<p>A NewtSwingGlimpseCanvas can be constructed and added to a Swing application like any other Swing Component. Other NewtSwingGlimpseCanvas constructor arguments allow sharing of OpenGL Contexts between GlimpseCanvases, but the simple zero argument constructor suffices here. Adding the GlimpseCanvas to a FPSAnimator automatically redraws the GlimpseCanvas periodically. Finally, the canvas can be added to the Swing frame like any other Swing component.</p>
-
-<p><a href="https://github.com/metsci/glimpse/blob/master/core-examples/src/main/java/com/metsci/glimpse/examples/Example.java">Example.java</a> provides a more complete example of setting of a simple Swing Glimpse application.</p>
+<p>A NewtSwingGlimpseCanvas can be constructed and added to a Swing application like any other Swing Component. Other NewtSwingGlimpseCanvas constructor arguments allow sharing of OpenGL Contexts between GlimpseCanvases, but the simple zero argument constructor suffices here. Adding the GlimpseCanvas to a FPSAnimator automatically redraws the GlimpseCanvas periodically</p>
 
 <p>When this snippet is run, a window with a 100 pixel by 100 pixel black square will appear on the screen. In order to get something more interesting showing up, we need to add GlimpseLayouts and GlimpsePainters to the canvas.</p>
 
-<h3>Layouts and Painters</h3>
+<p><a href="https://github.com/metsci/glimpse/blob/master/core-examples/src/main/java/com/metsci/glimpse/examples/Example.java">Example.java</a> provides a more complete example of setting of a simple Swing Glimpse application.</p>
 
-<p>Glimpse provides tools to break up a single GlimpseCanvas into many (possibly nested) logical plotting areas which can each be painted on and receive mouse events. Each plotting area is defined by a <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">GlimpseLayout</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/layout/GlimpseLayout.java">(source)</a> and arranged using <a href="http://www.miglayout.com/">Mig Layout</a>. The next image outlines the GlimpseLayouts from HeatMapExample. Although everything is rendered in a single OpenGL canvas, Glimpse allows mouse listeners to be attached to any GlimpseLayout and allows rendering to a specific GlimpseLayout.</p>
+<h3>Layouts</h3>
+
+<p>Glimpse provides tools to break up a single GlimpseCanvas into many (possibly nested) logical plotting areas which can each be painted on and receive mouse events. Each plotting area is defined by a <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">GlimpseLayout</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/layout/GlimpseLayout.java">(source)</a> and arranged using <a href="http://www.miglayout.com/">Mig Layout</a> constraints just like you might use to layout Swing Components. The screenshot below outlines the GlimpseLayouts from HeatMapExample. Although everything is rendered in a single OpenGL canvas, Glimpse allows mouse listeners to be attached to any GlimpseLayout and allows rendering to a specific GlimpseLayout.</p>
 
 <img src="/glimpse/images/guide/Heatmap_red_layout_bounds.png" border="1" width="600px"/>
 
@@ -57,9 +57,11 @@ title: Guide
 
 <img src="/glimpse/images/guide/Multi_Heatmap_red_layout.png" border="1" width="600px"/>
 
+<h3>Painters</h3>
+
 <p>Once the plotting areas have been defined via GlimpseLayouts, OpenGL rendering inside GlimpseLayouts is performed by GlimpsePainters. Multiple GlimpsePainters can be added to a GlimpseLayout and act like layers. Glimpse provides lots of pre-built painters in the <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/painter/package-summary.html">com.metsci.glimpse.painter</a></code> package. However, most applications also want to perform custom rendering. The <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/painter/base/package-summary.html">com.metsci.glimpse.painter.base</a></code> package contains the <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/painter/base/GlimpsePainter.html">GlimpsePainter</a> interface, as well as a number of abstract helper implementations. In most cases, <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/painter/base/GlimpseDataPainter2D.html">GlimpseDataPainter2D</a> is a good place to start. It handles setting up the OpenGL viewport and scissor regions and projection matrix so that <code>glVertex( )</code> calls will draw to the correct screen location based on the GlimpseLayout being painted into and the bounds of the data axes.
 
-<p>The following example demonstrates a very simple GlimpsePainter which draws a blue diagonal line from <code>(5.0,5.0)</code> to <code>(10.0,10.0)</code> in data coordinates. A <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/painter/base/GlimpsePainter.html">NumericXYAxisPainter</a> (another GlimpsePainter) has also been added to the same GlimpseLayout to draw axis tick marks and labels.
+<p>The following example demonstrates a very simple GlimpsePainter which draws a blue diagonal line from <code>(5.0,5.0)</code> to <code>(10.0,10.0)</code> in data coordinates. In the screenshot, a <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/painter/base/GlimpsePainter.html">NumericXYAxisPainter</a> (another GlimpsePainter) has also been added to the same GlimpseLayout to draw axis tick marks and labels.
 
 {% highlight java %}
 public class SimplePainter extends GlimpseDataPainter2D
@@ -89,11 +91,11 @@ public class SimplePainter extends GlimpseDataPainter2D
 
 <h3>Mouse Listeners</h3>
 
-In addition to defining where inside a GlimpseCanvas each GlimpsePainter paints to, GlimpseLayouts can also have mouse listeners attached to them. Events will only be reported within the bounds of the GlimpseLayout and coordinates will be reported relative to the lower left corner of the GlimpseLayout.
+In addition to defining where inside a GlimpseCanvas each GlimpsePainter paints to, GlimpseLayouts can also have mouse listeners attached to them. Mouse Events will only be reported within the bounds of the GlimpseLayout and coordinates will be reported relative to the lower left corner of the GlimpseLayout.
 
-Glimpse mouse listeners work very similarly to Swing or SWT mouse listeners. A class implementing one of the Glimpse mouse listener interfaces can be registered with any GlimpseLayout. <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseListener.html">GlimpseMouseListener</a> can be used to register for mouse clicks, <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseMotionListener.html">GlimpseMouseMotionListener</a> for mouse movement, and <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseWheelListener.html">GlimpseMouseWheelListener</a> for mouse wheel events.
+Glimpse mouse listeners work very similarly to Swing or SWT mouse listeners: a class implementing one of the Glimpse mouse listener interfaces can be registered with any GlimpseLayout (just like adding a Swing MouseListener to a <code>java.awt.Component</code>). <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseListener.html">GlimpseMouseListener</a> can be used to register for mouse clicks, <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseMotionListener.html">GlimpseMouseMotionListener</a> for mouse movement, and <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseWheelListener.html">GlimpseMouseWheelListener</a> for mouse wheel events.
 
-The following shows a basic example which will print the x and y coordinates of any mouse click inside the GlimpseLayout.
+The following snippet prints the x and y coordinates of any mouse click inside the GlimpseLayout.
 
 {% highlight java %}
 GlimpseLayout layout = new GlimpseLayout( );
@@ -128,7 +130,7 @@ layout.addGlimpseMouseListener( new GlimpseMouseAdapter( ) {
     @Override
     public void mousePressed( GlimpseMouseEvent event )
     {
-        System.out.printf( "(%d, %d)%n", event.getAxisCoordinatesX( ), event.getAxisCoordinatesY( ) ); 
+        System.out.printf( "(%f, %f)%n", event.getAxisCoordinatesX( ), event.getAxisCoordinatesY( ) ); 
     }
 } );
 {% endhighlight %}
@@ -138,3 +140,15 @@ The SimplePainter class which we wrote above extended <a href="https://github.co
 <h3>Plots</h3>
 
 Although you can start with a GlimpseCanvas and construct visualizations by arranging GlimpseLayouts and adding GlimpsePainters and GlimpseMouseListeners, it is often easier to start with one of the pre-built plots in the <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/package-summary.html">com.metsci.glimpse.plot</a></code> package.
+
+<a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/SimplePlot2D.html">SimplePlot2D</a> provides a basic plotting area with x, y, and z axes, a title, and grid lines.
+
+<img src="/glimpse/images/10_11_2012/EmptyPlotExample.png" border="1" width="600px"/>
+
+SimplePlot2D also provides a number of methods for modifying the appearace of the plot, the size of the area allocated to the axes, the title of the plot, etc...
+
+If more axes are needed, <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/MultiAxisPlot2D.html">MultiAxisPlot2D</a> allows any number of axes on the top, bottom, left, or right of the plot. See <a href="https://github.com/metsci/glimpse/blob/master/core-examples/src/main/java/com/metsci/glimpse/examples/axis/MultiAxisPlotExample.java">MultiAxisPlotExample</a> for a usage example.
+
+Glimpse also provides a number of specialized plots for dealing with temporal information. <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/timeline/CollapsibleTimePlot2D.html">CollapsibleTimePlot2D</a> provides a timeline and the ability to easily visualize events (with start and end times and customizable labels, icons, and colors), timeseries, and other temporal data.
+
+<img src="/glimpse/images/10_11_2012/EventTimeline.png" border="1" width="600px"/>
