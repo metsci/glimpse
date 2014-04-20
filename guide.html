@@ -133,6 +133,8 @@ layout.addGlimpseMouseListener( new GlimpseMouseAdapter( ) {
 } );
 {% endhighlight %}
 
+The SimplePainter class which we wrote above extended <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/painter/base/GlimpseDataPainter2D.java">GlimpseDataPainter2D</a>. When added to a GlimpseAxisLayout2D, this GlimpsePainter subclass automatically sets up the OpenGL projection matrix to draw vertices at the correct position in axis coordinates. GlimpseDataPainter2D also provides the Axis2D as an argument to the <code>paintTo()</code> method.
+
 <h3>Plots</h3>
 
 Although you can start with a GlimpseCanvas and construct visualizations by arranging GlimpseLayouts and adding GlimpsePainters and GlimpseMouseListeners, it is often easier to start with one of the pre-built plots in the <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/package-summary.html">com.metsci.glimpse.plot</a></code> package.
