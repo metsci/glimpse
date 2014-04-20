@@ -91,6 +91,48 @@ public class SimplePainter extends GlimpseDataPainter2D
 
 In addition to defining where inside a GlimpseCanvas each GlimpsePainter paints to, GlimpseLayouts can also have mouse listeners attached to them. Events will only be reported within the bounds of the GlimpseLayout and coordinates will be reported relative to the lower left corner of the GlimpseLayout.
 
+Glimpse mouse listeners work very similarly to Swing or SWT mouse listeners. A class implementing one of the Glimpse mouse listener interfaces can be registered with any GlimpseLayout. <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseListener.html">GlimpseMouseListener</a> can be used to register for mouse clicks, <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseMotionListener.html">GlimpseMouseMotionListener</a> for mouse movement, and <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/event/mouse/GlimpseMouseWheelListener.html">GlimpseMouseWheelListener</a> for mouse wheel events.
+
+The following shows a basic example which will print the x and y coordinates of any mouse click inside the GlimpseLayout.
+
+{% highlight java %}
+GlimpseLayout layout = new GlimpseLayout( );
+layout.addGlimpseMouseListener( new GlimpseMouseAdapter( ) {
+    @Override
+    public void mousePressed( GlimpseMouseEvent event )
+    {
+        System.out.printf( "(%d, %d)%n", event.getX( ), event.getY( ) ); 
+    }
+} );
+{% endhighlight %}
+
+<h3>Axes</h3>
+
+<a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/axis/Axis1D.html">Axis1D</a> and <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/axis/Axis2D.html">Axis2D</a> are used in conjunction with GlimpseLayouts and GlimpsePainters to determine where data is drawn.
+
+<a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/layout/GlimpseAxisLayout2D.html">GlimpseAxisLayout2D</a> is a GlimpseLayout subclass which has an associated <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/axis/Axis2D.html">Axis2D</a>. Glimpse mouse listeners can use this axis to report the click position in axis coordinates instead of pixel coordinates, as in the following example:
+
+{% highlight java %}
+// create a new axis and set its min and max x and y values
+Axis2D axis = new Axis2D( );
+axis.set( 0, 20, -3, 3 );
+
+// create a GlimpseAxisLayout2D which uses the axis to position
+// data drawn by painters attached to the axis
+GlimpseLayout layout = new GlimpseAxisLayout2D( axis );
+
+// attach a mouse listener as before, but instead of printing
+// the position of the mouse click in pixels, print the position
+// of the mouse click in axis coordinates
+layout.addGlimpseMouseListener( new GlimpseMouseAdapter( ) {
+    @Override
+    public void mousePressed( GlimpseMouseEvent event )
+    {
+        System.out.printf( "(%d, %d)%n", event.getAxisCoordinatesX( ), event.getAxisCoordinatesY( ) ); 
+    }
+} );
+{% endhighlight %}
+
 <h3>Plots</h3>
 
 Although you can start with a GlimpseCanvas and construct visualizations by arranging GlimpseLayouts and adding GlimpsePainters and GlimpseMouseListeners, it is often easier to start with one of the pre-built plots in the <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/package-summary.html">com.metsci.glimpse.plot</a></code> package.
