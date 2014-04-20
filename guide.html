@@ -47,7 +47,7 @@ title: Guide
 
 <p>When this snippet is run, a window with a 100 pixel by 100 pixel black square will appear on the screen. In order to get something more interesting showing up, we need to add GlimpseLayouts and GlimpsePainters to the canvas.</p>
 
-<h3>Glimpse Layout and Glimpse Painter</h3>
+<h3>Layouts and Painters</h3>
 
 <p>Glimpse provides tools to break up a single GlimpseCanvas into many (possibly nested) logical plotting areas which can each be painted on and receive mouse events. Each plotting area is defined by a <a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/layout/GlimpseLayout.html">GlimpseLayout</a> <a href="https://github.com/metsci/glimpse/blob/master/core/src/main/java/com/metsci/glimpse/layout/GlimpseLayout.java">(source)</a> and arranged using <a href="http://www.miglayout.com/">Mig Layout</a>. The next image outlines the GlimpseLayouts from HeatMapExample. Although everything is rendered in a single OpenGL canvas, Glimpse allows mouse listeners to be attached to any GlimpseLayout and allows rendering to a specific GlimpseLayout.</p>
 
@@ -87,6 +87,10 @@ public class SimplePainter extends GlimpseDataPainter2D
 
 <img src="/glimpse/images/guide/Simple_Painter.png" border="1" width="600px"/>
 
-<h3>Glimpse Plots</h3>
+<h3>Mouse Listeners</h3>
+
+In addition to defining where inside a GlimpseCanvas each GlimpsePainter paints to, GlimpseLayouts can also have mouse listeners attached to them. Events will only be reported within the bounds of the GlimpseLayout and coordinates will be reported relative to the lower left corner of the GlimpseLayout.
+
+<h3>Plots</h3>
 
 Although you can start with a GlimpseCanvas and construct visualizations by arranging GlimpseLayouts and adding GlimpsePainters and GlimpseMouseListeners, it is often easier to start with one of the pre-built plots in the <code><a href="http://glimpse.metsci.com/apidocs/2.1.2/index.html?com/metsci/glimpse/plot/package-summary.html">com.metsci.glimpse.plot</a></code> package.
