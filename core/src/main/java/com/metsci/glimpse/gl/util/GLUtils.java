@@ -99,6 +99,11 @@ public class GLUtils
         return GL2.GL_TEXTURE0 + texUnit;
     }
 
+    public static GLOffscreenAutoDrawable newOffscreenDrawable( )
+    {
+        return newOffscreenDrawable( getDefaultGLProfile( ) );
+    }
+    
     public static GLOffscreenAutoDrawable newOffscreenDrawable( String profileName )
     {
         return newOffscreenDrawable( GLProfile.get( profileName ) );

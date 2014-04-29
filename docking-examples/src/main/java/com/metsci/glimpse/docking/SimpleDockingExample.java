@@ -54,15 +54,14 @@ import net.sf.tinylaf.TinyLookAndFeel;
 
 import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
 
-public class DockingExample
+public class SimpleDockingExample
 {
+    protected static final Logger logger = Logger.getLogger( SimpleDockingExample.class.getName( ) );
 
-    protected static final Logger logger = Logger.getLogger( DockingExample.class.getName( ) );
-
-
+    @SuppressWarnings( "serial" )
     public static void main( String[] args ) throws Exception
     {
-        Theme.loadTheme( DockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+        Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
@@ -139,13 +138,13 @@ public class DockingExample
         frame.setPreferredSize( new Dimension( 1600, 900 ) );
         frame.pack( );
 
-        swingRun( dockingPane.restoreArrangement, loadDockingArrangement( "docking-example" ) );
+        swingRun( dockingPane.restoreArrangement, loadDockingArrangement( "simple-docking-example" ) );
 
         frame.addWindowListener( new WindowAdapter( )
         {
             public void windowClosing( WindowEvent ev )
             {
-                saveDockingArrangement( "docking-example", dockingPane.captureArrangement( ) );
+                saveDockingArrangement( "simple-docking-example", dockingPane.captureArrangement( ) );
             }
         } );
 
@@ -182,7 +181,7 @@ public class DockingExample
 
         try
         {
-            return readDockingArrangementXml( DockingExample.class.getClassLoader( ).getResourceAsStream( "docking/arrangement-default.xml" ) );
+            return readDockingArrangementXml( SimpleDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/simple-arrangement-default.xml" ) );
         }
         catch ( Exception e )
         {
