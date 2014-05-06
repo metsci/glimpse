@@ -28,16 +28,17 @@ package com.metsci.glimpse.support.interval;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import com.metsci.glimpse.util.quadtree.longvalued.LongQuadTreeObjects;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public abstract class IntervalQuadTree<V>
 {
     // set is necessary to enforce set semantics, which LongQuadTreeObjects does not do
-    protected Set<V> set;
+    protected Map<V, V> set;
     protected LongQuadTreeObjects<V> tree;
     protected int maxBucketSize;
 
@@ -50,7 +51,7 @@ public abstract class IntervalQuadTree<V>
     {
         this.maxBucketSize = maxBucketSize;
         this.tree = buildTree( maxBucketSize );
-        this.set = new HashSet<>( );
+        this.set = Maps.newHashMap( );
     }
 
     protected LongQuadTreeObjects<V> buildTree( int maxBucketSize )
@@ -78,7 +79,7 @@ public abstract class IntervalQuadTree<V>
 
     public Set<V> getAll( )
     {
-        return Collections.unmodifiableSet( this.set );
+        return Collections.unmodifiableSet( this.set.keySet( ) );
     }
 
     public void clear( )
@@ -89,17 +90,22 @@ public abstract class IntervalQuadTree<V>
 
     public void add( V value )
     {
-        if ( this.set.add( value ) )
+        V oldValue = this.set.get( value );
+        if ( oldValue != null )
         {
-            this.tree.add( value );
+            this.tree.remove( oldValue );
         }
+
+        this.tree.add( value );
     }
 
     public void remove( V value )
     {
-        if ( this.set.remove( value ) )
+        V oldValue = this.set.remove( value );
+
+        if ( oldValue != null )
         {
-            this.tree.remove( value );
+            this.tree.remove( oldValue );
         }
     }
 
