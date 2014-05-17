@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Glimpse 2.1.1 Release
+url: http://glimpse.metsci.com/release/core/glimpse_core_v2.1.1.zip
 ---
 
 <p>Glimpse is now available in the <a href="http://search.maven.org/#browse%7C1117099642">Maven Central Repository</a>!</p>
