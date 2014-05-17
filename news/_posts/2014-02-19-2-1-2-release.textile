@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Glimpse 2.1.2 Release
+url: http://glimpse.metsci.com/release/core/glimpse_core_v2.1.2.zip
 ---
 
 <p>Glimpse 2.1.2 updates Glimpse to JOGL 2.1.5. This update fixes resize issues with NewtSwingGlimpseCanvas in Mac OS X. The GLProfile which Glimpse requests by default has also been changed to be more compatible with OS X (which does not provide a GL3 profile which is backwards compatible with GL2).</p>
