@@ -114,12 +114,12 @@ public class GLUtils
         return newOffscreenDrawable( profile, null );
     }
     
-    public static GLOffscreenAutoDrawable newOffscreenDrawable( String profileName, GLContext sharedContext )
+    public static GLOffscreenAutoDrawable newOffscreenDrawable( GLContext sharedContext )
     {
-        return newOffscreenDrawable( GLProfile.get( profileName ), sharedContext );
+        return newOffscreenDrawable( sharedContext.getGLDrawable( ).getGLProfile( ), sharedContext );
     }
     
-    public static GLOffscreenAutoDrawable newOffscreenDrawable( GLProfile profile, GLContext sharedContext )
+    private static GLOffscreenAutoDrawable newOffscreenDrawable( GLProfile profile, GLContext sharedContext )
     {
         GLDrawableFactory drawableFactory = GLDrawableFactory.getFactory( profile );
         GLCapabilities caps = new GLCapabilities( profile );

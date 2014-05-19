@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.examples.shader;
 
-import static java.lang.Math.*;
+import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
 
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.gl.GLCapabilityLogger;
+import com.metsci.glimpse.gl.GLCapabilityEventListener;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
@@ -43,7 +43,6 @@ import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.adapter.GLSimpleListenerPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.ShadedPointPainter;
@@ -60,7 +59,10 @@ public class PointShaderExample implements GlimpseLayoutProvider
 
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new PointShaderExample( ) );
+        Example example = Example.showWithSwing( new PointShaderExample( ) );
+        // add a GLEventListener to the GlimpseCanvas which will print some information
+        // about GLCapabilities upon initialization
+        example.getCanvas( ).getGLDrawable( ).addGLEventListener( new GLCapabilityEventListener( ) );
     }
 
     @Override
@@ -95,11 +97,6 @@ public class PointShaderExample implements GlimpseLayoutProvider
         plot.setMaxZ( 10 );
 
         plot.lockAspectRatioXY( 1 );
-
-        // add a logger that tells us about OpenGL versions and buffer capabilities
-        // because this is a GLSimpleListener, we must use the GLSimpleListenerPainter
-        // adapter to satisfy the GlimpsePainter interface
-        plot.addPainter( new GLSimpleListenerPainter( new GLCapabilityLogger( ) ) );
 
         // add a painter that will use our new shader for color-mapping
         ShadedPointPainter dp;

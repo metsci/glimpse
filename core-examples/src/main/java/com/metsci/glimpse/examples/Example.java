@@ -122,13 +122,10 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
-                glDrawable.destroy( );
-
-                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
-                // However, it also seems to make SIGSEGV error occur more frequently
-                // frame.remove( canvas );
-
-                canvas.dispose( );
+                // destroy heavyweight canvas and GLContext
+                canvas.destroy( );
+                // dispose of GlimpseLayouts and GlimpsePainters attached to GlimpseCanvas
+                canvas.disposeAttached( );
             }
         } );
 
@@ -189,14 +186,10 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
-                glDrawable.destroy( );
-
-                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
-                // However, it also seems to make SIGSEGV error occur more frequently
-                // frame.remove( canvas );
-
-                leftPanel.dispose( );
-                rightPanel.dispose( );
+                leftPanel.destroy( );
+                rightPanel.destroy( );
+                leftPanel.disposeAttached( );
+                rightPanel.disposeAttached( );
             }
         };
         

@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.swt.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
@@ -40,6 +39,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -59,7 +59,6 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -74,7 +73,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
 
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
-    protected boolean isDisposed = false;
+    protected boolean isDestroyed = false;
 
     protected LayoutManager layoutManager;
     protected MouseWrapperNewt mouseHelper;
@@ -133,7 +132,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         this.mouseHelper = new MouseWrapperNewt( this );
         this.glWindow.addMouseListener( this.mouseHelper );
 
-        this.isDisposed = false;
+        this.isDestroyed = false;
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
@@ -150,7 +149,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             public void widgetDisposed( DisposeEvent e )
             {
                 // dispose of resources associated with the canvas
-                dispose( );
+                disposeAttached( );
 
                 // destroy the source of the shared glContext
                 sharedContextSource.destroy( );
@@ -202,16 +201,9 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                logInfo( logger, "Disposing NewtSwtGlimpseCanvas..." );
-
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-
                 for ( GLRunnable runnable : disposeListeners )
                 {
-                    runnable.run( drawable.getContext( ) );
+                    runnable.run( drawable );
                 }
             }
         };
@@ -355,18 +347,19 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     }
 
     @Override
-    public boolean isDisposed( )
+    public boolean isDestroyed( )
     {
-        return this.isDisposed;
+        return this.isDestroyed;
     }
 
     @Override
-    public void dispose( )
+    public void destroy( )
     {
-        if ( !this.isDisposed )
+        if ( !this.isDestroyed )
         {
-            if ( this.glCanvas != null ) this.glCanvas.dispose( );
-            this.isDisposed = true;
+            if ( this.glWindow != null ) this.glWindow.destroy( ); // dispose NEWT Window
+            this.dispose( ); // dispose SWT Container
+            this.isDestroyed = true;
         }
     }
 
@@ -374,5 +367,23 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     public void addDisposeListener( GLRunnable runnable )
     {
         this.disposeListeners.add( runnable );
+    }
+    
+    @Override
+    public void disposeAttached( )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+
+                return false;
+            }
+        } );
     }
 }

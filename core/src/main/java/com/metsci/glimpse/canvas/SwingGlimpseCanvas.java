@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.BorderLayout;
@@ -45,6 +44,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
@@ -54,7 +54,6 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -85,7 +84,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
 
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
-    protected boolean isDisposed = false;
+    protected boolean isDestroyed = false;
 
     public SwingGlimpseCanvas( )
     {
@@ -96,12 +95,12 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         init( true, context.getGLDrawable( ).getGLProfile( ), context );
     }
-    
+
     public SwingGlimpseCanvas( GLProfile glProfile )
     {
         init( true, glProfile, null );
     }
-    
+
     /**
      * @deprecated Use {@link #SwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
@@ -117,7 +116,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         init( true, GLProfile.get( profile ), context );
     }
-    
+
     /**
      * @deprecated Use {@link #SwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
@@ -133,7 +132,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         init( setNoEraseBackgroundProperty, glProfile, context );
     }
-    
+
     private void init( boolean setNoEraseBackgroundProperty, GLProfile glProfile, GLContext context )
     {
         if ( setNoEraseBackgroundProperty )
@@ -164,7 +163,7 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
         // workaround to enable the panel to shrink
         this.setMinimumSize( new Dimension( 0, 0 ) );
 
-        this.isDisposed = false;
+        this.isDestroyed = false;
 
         this.glCanvas.addGLEventListener( createGLEventListener( ) );
 
@@ -221,16 +220,9 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                logInfo( logger, "Disposing SwingGlimpseCanvas..." );
-
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-
                 for ( GLRunnable runnable : disposeListeners )
                 {
-                    runnable.run( drawable.getContext( ) );
+                    runnable.run( drawable );
                 }
             }
         };
@@ -419,18 +411,18 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     }
 
     @Override
-    public boolean isDisposed( )
+    public boolean isDestroyed( )
     {
-        return this.isDisposed;
+        return this.isDestroyed;
     }
 
     @Override
-    public void dispose( )
+    public void destroy( )
     {
-        if ( !this.isDisposed )
+        if ( !this.isDestroyed )
         {
             if ( this.glCanvas != null ) this.glCanvas.destroy( );
-            this.isDisposed = true;
+            this.isDestroyed = true;
         }
     }
 
@@ -438,5 +430,23 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     public void addDisposeListener( GLRunnable runnable )
     {
         this.disposeListeners.add( runnable );
+    }
+
+    @Override
+    public void disposeAttached( )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+
+                return false;
+            }
+        } );
     }
 }

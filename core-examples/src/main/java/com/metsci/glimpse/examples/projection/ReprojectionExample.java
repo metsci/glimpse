@@ -97,7 +97,7 @@ public class ReprojectionExample
             @Override
             public void run( )
             {
-                offscreenCanvas.dispose( );
+                offscreenCanvas.disposeAttached( );
             }
         } );
     }
@@ -112,7 +112,7 @@ public class ReprojectionExample
             public void windowClosing( WindowEvent e )
             {
                 // dispose of resources associated with the canvas
-                canvas.dispose( );
+                canvas.disposeAttached( );
 
                 // remove the canvas from the frame
                 frame.remove( canvas );

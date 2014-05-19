@@ -70,7 +70,7 @@ public class FrameUtils
         {
             public void windowClosing( WindowEvent ev )
             {
-                canvas.dispose( );
+                canvas.disposeAttached( );
             }
         };
         window.addWindowListener( listener );

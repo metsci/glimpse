@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.BorderLayout;
@@ -41,6 +40,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 import javax.swing.JPanel;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
@@ -51,7 +51,6 @@ import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -75,7 +74,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     protected boolean isEventConsumer = true;
     protected boolean isEventGenerator = true;
-    protected boolean isDisposed = false;
+    protected boolean isDestroyed = false;
 
     protected LayoutManager layoutManager;
     protected MouseWrapperNewt mouseHelper;
@@ -112,7 +111,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         init( GLUtils.getDefaultGLProfile( ), null );
     }
-    
+
     private void init( GLProfile glProfile, GLContext context )
     {
         this.glProfile = glProfile;
@@ -135,7 +134,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         // see: http://jogamp.org/jogl/doc/userguide/#heavylightweightissues
         this.setMinimumSize( new Dimension( 0, 0 ) );
 
-        this.isDisposed = false;
+        this.isDestroyed = false;
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
@@ -190,16 +189,9 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                logInfo( logger, "Disposing NewtSwingGlimpseCanvas..." );
-
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-
                 for ( GLRunnable runnable : disposeListeners )
                 {
-                    runnable.run( drawable.getContext( ) );
+                    runnable.run( drawable );
                 }
             }
         };
@@ -343,19 +335,37 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     }
 
     @Override
-    public boolean isDisposed( )
+    public void destroy( )
     {
-        return this.isDisposed;
+        if ( !this.isDestroyed )
+        {
+            if ( this.glWindow != null ) this.glWindow.destroy( );
+            this.isDestroyed = true;
+        }
     }
 
     @Override
-    public void dispose( )
+    public boolean isDestroyed( )
     {
-        if ( !this.isDisposed )
+        return this.isDestroyed;
+    }
+
+    @Override
+    public void disposeAttached( )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
         {
-            if ( this.glWindow != null ) this.glWindow.destroy( );
-            this.isDisposed = true;
-        }
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                return false;
+            }
+        } );
     }
 
     @Override

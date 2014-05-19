@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
