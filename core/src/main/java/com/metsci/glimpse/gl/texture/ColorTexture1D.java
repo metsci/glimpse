@@ -27,7 +27,6 @@
 package com.metsci.glimpse.gl.texture;
 
 import java.nio.FloatBuffer;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -38,7 +37,6 @@ import com.metsci.glimpse.support.colormap.ColorGradient;
 
 public class ColorTexture1D extends AbstractTexture
 {
-    protected final ReentrantLock lock = new ReentrantLock();
     protected FloatBuffer rgba;
 
     public ColorTexture1D( int n )
