@@ -373,4 +373,12 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
+    
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
 }

@@ -136,4 +136,11 @@ public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
             target.setLookAndFeel( laf );
         }
     }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
 }

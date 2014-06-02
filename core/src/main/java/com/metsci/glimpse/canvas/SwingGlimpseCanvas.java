@@ -449,4 +449,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
             }
         } );
     }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
 }

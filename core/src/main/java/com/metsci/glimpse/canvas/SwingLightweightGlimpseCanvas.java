@@ -449,4 +449,12 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         this.disposeListeners.add( runnable );
     }
+    
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
 }

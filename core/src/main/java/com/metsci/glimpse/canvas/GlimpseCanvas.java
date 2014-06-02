@@ -88,6 +88,16 @@ public interface GlimpseCanvas extends GlimpseTarget
     public void disposeAttached( );
 
     /**
+     * A convenience method which is equivalent to:
+     * 
+     * <code>
+     * disposeAttached( );
+     * destroy( );
+     * </code>
+     */
+    public void dispose( );
+    
+    /**
      * @return whether or not {@code #dispose()} has been successfully called. Once true, this GlimpseCanvas is no longer valid for rendering.
      */
     public boolean isDestroyed( );

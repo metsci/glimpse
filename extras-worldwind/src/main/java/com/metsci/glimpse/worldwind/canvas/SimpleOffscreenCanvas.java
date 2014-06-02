@@ -259,6 +259,13 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         // not a fully featured GlimpseCanvas
     }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
 
     @Override
     public boolean isDestroyed( )

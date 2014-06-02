@@ -358,7 +358,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         if ( !this.isDestroyed )
         {
             if ( this.glWindow != null ) this.glWindow.destroy( ); // dispose NEWT Window
-            this.dispose( ); // dispose SWT Container
+            super.dispose( ); // dispose SWT Container
             this.isDestroyed = true;
         }
     }
@@ -385,5 +385,12 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 return false;
             }
         } );
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
     }
 }
