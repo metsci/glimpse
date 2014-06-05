@@ -30,7 +30,6 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -38,7 +37,10 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLRunnable;
 
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -67,7 +69,7 @@ public class GLSimpleFrameBufferObject
     private int[] renderBufferId;
     private int[] frameBufferId;
 
-    private List<GLSimpleFboListenerEntry> listeners;
+    private List<GLEventListener> listeners;
 
     private ReentrantLock lock;
 
@@ -84,7 +86,7 @@ public class GLSimpleFrameBufferObject
         this.useDepth = useDepth;
         this.useStencil = useStencil;
 
-        this.listeners = new CopyOnWriteArrayList<GLSimpleFboListenerEntry>( );
+        this.listeners = new CopyOnWriteArrayList<GLEventListener>( );
         this.lock = new ReentrantLock( );
     }
 
@@ -95,14 +97,13 @@ public class GLSimpleFrameBufferObject
         this.height = height;
     }
 
-    // XXX: I have no idea if this is the right name for the method.
-    public Object glSyncExec( final GLRunnable runnable )
+    public void glSyncExec( final GLRunnable runnable )
     {
         context.makeCurrent( );
-        Object result = ( new GLRunnable( )
+        ( new GLRunnable( )
         {
             @Override
-            public Object run( GLContext context )
+            public boolean run( GLAutoDrawable drawable )
             {
                 lock.lock( );
                 try
@@ -110,7 +111,7 @@ public class GLSimpleFrameBufferObject
                     bind( context );
                     try
                     {
-                        return runnable.run( context );
+                        return runnable.run( drawable );
                     }
                     finally
                     {
@@ -123,28 +124,8 @@ public class GLSimpleFrameBufferObject
                     lock.unlock( );
                 }
             }
-        } ).run( context );
+        } ).run( ( GLAutoDrawable ) context.getGLDrawable( ) );
         context.release( );
-
-        return result;
-    }
-
-    public void draw( )
-    {
-        final Rectangle bounds = getBounds( );
-        final List<GLSimpleFboListenerEntry> entries = new ArrayList<GLSimpleFboListenerEntry>( listeners );
-
-        glSyncExec( new GLRunnable( )
-        {
-            @Override
-            public Object run( GLContext context )
-            {
-                for ( GLSimpleFboListenerEntry l : entries )
-                    l.draw( context, bounds );
-
-                return null;
-            }
-        } );
     }
 
     public void bind( GLContext context )
@@ -263,11 +244,6 @@ public class GLSimpleFrameBufferObject
         gl.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
     }
 
-    public void addListener( GLSimpleListener listener )
-    {
-        listeners.add( new GLSimpleFboListenerEntry( listener ) );
-    }
-
     public Dimension getDimension( )
     {
         return new Dimension( width, height );
@@ -307,9 +283,9 @@ public class GLSimpleFrameBufferObject
     {
         GL gl = context.getGL( );
 
-        for ( GLSimpleFboListenerEntry entry : listeners )
+        for ( GLEventListener entry : listeners )
         {
-            entry.dispose( context );
+            entry.dispose( (GLAutoDrawable) context.getGLDrawable( ) );
         }
 
         if ( textureId != null ) gl.glDeleteTextures( 1, textureId, 0 );

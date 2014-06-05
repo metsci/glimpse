@@ -84,7 +84,7 @@ public class Example
     {
         return showWithSwing( layoutProvider, GLProfile.get( profileString ) );
     }
-    
+
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, GLProfile profile ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
@@ -104,47 +104,51 @@ public class Example
         // the look and feel affects default colors, fonts, etc...
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
-        // attach a repaint manager which repaints the canvas in a loop
-        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
+        // attach an animator which repaints the canvas in a loop
+        // usually only one FPSAnimator is necessary (multiple GlimpseCanvas
+        // can be repainted from the same FPSAnimator)
+        FPSAnimator animator = new FPSAnimator( 120 );
+        animator.add( canvas.getGLDrawable( ) );
+        animator.start( );
 
         // create a Swing Frame to contain the GlimpseCanvas
         final JFrame frame = new JFrame( "Glimpse Example" );
 
         // This listener is added before adding the SwingGlimpseCanvas to the frame because
-        // NEWTGLCanvas adds its own WindowListener and this WindowListener should reveive the WindowEvent first
+        // NEWTGLCanvas adds its own WindowListener and this WindowListener should receive the WindowEvent first
         // (although I'm now not sure how much this matters)
         frame.addWindowListener( new WindowAdapter( )
         {
             @Override
             public void windowClosing( WindowEvent e )
             {
-                glDrawable.destroy( );
-
-                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
-                // However, it also seems to make SIGSEGV error occur more frequently
-                // frame.remove( canvas );
-
-                canvas.dispose( );
+                // dispose of GlimpseLayouts and GlimpsePainters attached to GlimpseCanvas
+                canvas.disposeAttached( );
+                // destroy heavyweight canvas and GLContext
+                canvas.destroy( );
             }
         } );
+
+        // make the frame visible
+        frame.setSize( 800, 800 );
+        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setVisible( true );
 
         // add the GlimpseCanvas to the frame
         // this must be done on the Swing EDT to avoid JOGL crashes
         // when removing the canvas from the frame
+        // it should also be done after the frame has been made visible or
+        // the GlimpseCanvas GLEventListener.reshape( ) may be called
+        // with spurious sizes (possible NEWT bug)
         SwingUtilities.invokeAndWait( new Runnable( )
         {
             @Override
             public void run( )
             {
                 frame.add( canvas );
+                frame.validate( );
             }
         } );
-
-        // make the frame visible
-        frame.pack( );
-        frame.setSize( 800, 800 );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.setVisible( true );
 
         return new Example( canvas, frame, layout );
     }
@@ -182,38 +186,41 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
-                glDrawable.destroy( );
-
-                // Removing the canvas from the frame may prevent X11 errors (see http://tinyurl.com/m4rnuvf)
-                // However, it also seems to make SIGSEGV error occur more frequently
-                // frame.remove( canvas );
-
-                leftPanel.dispose( );
-                rightPanel.dispose( );
+                leftPanel.disposeAttached( );
+                rightPanel.disposeAttached( );
+                leftPanel.destroy( );
+                rightPanel.destroy( );
             }
         };
-
-        JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
+        
+        final JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
         rightFrame.addWindowListener( disposeListener );
-        rightFrame.add( rightPanel );
+        
+        final JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
+        leftFrame.addWindowListener( disposeListener );
 
-        rightFrame.pack( );
         rightFrame.setSize( 800, 800 );
         rightFrame.setLocation( 800, 0 );
         rightFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         rightFrame.setVisible( true );
 
-        JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
-        leftFrame.addWindowListener( disposeListener );
-        leftFrame.add( leftPanel );
-
-        leftFrame.pack( );
         leftFrame.setSize( 800, 800 );
         leftFrame.setLocation( 0, 0 );
         leftFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         leftFrame.setVisible( true );
+        
+        SwingUtilities.invokeAndWait( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                rightFrame.add( rightPanel );
+                leftFrame.add( leftPanel );
+                rightFrame.validate( );
+                leftFrame.validate( );
+            }
+        } );
 
         return;
-
     }
 }

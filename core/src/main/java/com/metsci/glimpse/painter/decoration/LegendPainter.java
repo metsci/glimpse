@@ -60,8 +60,6 @@ public abstract class LegendPainter extends GlimpsePainter2D
         N, NE, E, SE, S, SW, W, NW;
     }
 
-    //TODO add locks?
-
     private float[] textColor = GlimpseColor.getBlack( );
 
     //The width of the color item next to the legend.
@@ -166,7 +164,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         addItem( label, new float[] { r, g, b, a } );
     }
 
-    public void addItem( String label, float[] rgba )
+    public synchronized void addItem( String label, float[] rgba )
     {
         if ( !colors.containsKey( label ) )
         {
@@ -175,19 +173,19 @@ public abstract class LegendPainter extends GlimpsePainter2D
         colors.put( label, rgba );
     }
 
-    public void removeItem( String label )
+    public synchronized void removeItem( String label )
     {
         list.remove( label );
         colors.remove( label );
     }
 
-    public void clear( )
+    public synchronized void clear( )
     {
         list.clear( );
         colors.clear( );
     }
 
-    public void setColor( String label, float r, float g, float b, float a )
+    public synchronized void setColor( String label, float r, float g, float b, float a )
     {
         float[] rgba = colors.get( label );
         rgba[0] = r;
@@ -240,7 +238,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         this.itemWidth = width;
     }
 
-    private void displayLegend( GL2 gl, int width, int height )
+    private synchronized void displayLegend( GL2 gl, int width, int height )
     {
         //Figure out dimensions and position
         int lw = 0;
@@ -482,7 +480,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
         if ( newFont != null )
         {

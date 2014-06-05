@@ -39,6 +39,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLFBODrawable;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 
 import com.jogamp.opengl.FBObject.TextureAttachment;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
@@ -46,7 +47,6 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
@@ -58,7 +58,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
 
     protected GLProfile glProfile;
     protected GLOffscreenAutoDrawable.FBO drawable;
-    protected boolean isDisposed;
+    protected boolean isDestroyed;
 
     public FBOGlimpseCanvas( GLProfile glProfile, int width, int height )
     {
@@ -89,7 +89,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     private void init( GLProfile glProfile, GLContext glContext, int width, int height )
     {
         this.glProfile = glProfile;
-        this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( this.glProfile, glContext );
+        this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( glContext );
         this.drawable.addGLEventListener( createGLEventListener( ) );
         this.drawable.setSize( width, height );
         this.drawable.setRealized( true );
@@ -134,7 +134,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
         return TextureIO.newTexture( drawable.getTextureUnit( ) );
     }
 
-    private GLEventListener createGLEventListener( )
+    protected GLEventListener createGLEventListener( )
     {
         return new GLEventListener( )
         {
@@ -176,14 +176,9 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
             @Override
             public void dispose( GLAutoDrawable drawable )
             {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-
                 for ( GLRunnable runnable : disposeListeners )
                 {
-                    runnable.run( drawable.getContext( ) );
+                    runnable.run( drawable );
                 }
             }
         };
@@ -224,20 +219,38 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         return getTargetBounds( );
     }
-
+    
     @Override
-    public void dispose( )
+    public void destroy( )
     {
-        if ( !isDisposed )
+        if ( !isDestroyed )
         {
             this.drawable.destroy( );
-            this.isDisposed = true;
+            this.isDestroyed = true;
         }
     }
 
     @Override
-    public boolean isDisposed( )
+    public void disposeAttached( )
     {
-        return this.isDisposed;
+        this.drawable.invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                return false;
+            }
+        } );
+    }
+
+    @Override
+    public boolean isDestroyed( )
+    {
+        return this.isDestroyed;
     }
 }

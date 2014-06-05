@@ -218,7 +218,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
 
         if ( taggedAxis == null ) return;
 
-        double newSelectionSize = calculateNewSelectionSize( taggedAxis, e.getWheelIncrement( ) );
+        double newSelectionSize = calculateNewSelectionSize( taggedAxis, -e.getWheelIncrement( ) );
 
         Tag minTag = taggedAxis.getTag( StackedTimePlot2D.MIN_TIME );
         Tag maxTag = taggedAxis.getTag( StackedTimePlot2D.MAX_TIME );

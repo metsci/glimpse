@@ -583,7 +583,7 @@ public class TextureAtlas
     /**
      * Disposes of the OpenGL resources associated with this TextureAtlas.
      * 
-     * @see com.sun.opengl.util.j2d.TextRenderer#dispose( )
+     * @see com.sun.opengl.util.j2d.TextRenderer#disposeAttached( )
      */
     public void dispose( ) throws GLException
     {
