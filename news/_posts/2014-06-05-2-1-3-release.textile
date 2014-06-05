@@ -1,0 +1,8 @@
+---
+layout: default
+title: Glimpse 2.1.3 Release
+---
+
+<p>Glimpse 2.1.3 provides bug fixes for synchronization issues with some GlimpsePainters and dispose issues with GlimpseCanvas.</p>
+
+<p>The NASA Worldwind dependency of the extras-worldwind module is updated to Worldwind 2.0.0.</p>
