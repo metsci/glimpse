@@ -194,8 +194,7 @@ public class TrackPainter extends GlimpseDataPainter2D
         {
             for ( Track track : tracks.values( ) )
             {
-                track.deletePending = true;
-                track.points.clear( );
+                track.delete( );
             }
 
             if ( this.spatialIndex != null ) this.spatialIndex = new QuadTreeXys<Point>( QUAD_TREE_BIN_MAX );

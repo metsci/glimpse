@@ -69,7 +69,7 @@ public class PopupMenuExample
             @Override
             public void windowClosing( WindowEvent e )
             {
-                canvas.dispose( );
+                canvas.disposeAttached( );
             }
         } );
 

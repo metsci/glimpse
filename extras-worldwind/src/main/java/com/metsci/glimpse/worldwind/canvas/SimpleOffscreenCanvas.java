@@ -32,7 +32,9 @@ import java.util.List;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.canvas.LayoutManager;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -40,7 +42,6 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -49,6 +50,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  * Simplified version of {@link com.metsci.glimpse.canvas.FrameBufferGlimpseCanvas}
  *
  * @author ulman
+ * @deprecated see {@link FBOGlimpseCanvas}
  */
 public class SimpleOffscreenCanvas implements GlimpseCanvas
 {
@@ -195,7 +197,7 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     @Override
     public void paint( )
     {
-        fbo.draw( );
+     // not a fully featured GlimpseCanvas
     }
 
     @Override
@@ -229,24 +231,6 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     }
 
     @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
-    }
-
-    @Override
-    public void dispose( )
-    {
-        fbo.getGLContext( ).destroy( );
-    }
-
-    @Override
-    public void addDisposeListener( GLRunnable runnable )
-    {
-        // do nothing -- not a fully featured GlimpseCanvas
-    }
-
-    @Override
     public GLAutoDrawable getGLDrawable( )
     {
         // not a fully featured GlimpseCanvas
@@ -258,5 +242,40 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         // not a fully featured GlimpseCanvas
         return null;
+    }
+
+    @Override
+    public void destroy( )
+    {
+        if ( !this.isDisposed )
+        {
+            fbo.getGLContext( ).destroy( );
+            this.isDisposed = true;
+        }
+    }
+
+    @Override
+    public void disposeAttached( )
+    {
+        // not a fully featured GlimpseCanvas
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+
+    @Override
+    public boolean isDestroyed( )
+    {
+        return this.isDisposed;
+    }
+
+    @Override
+    public void addDisposeListener( GLRunnable runnable )
+    {
+        // not a fully featured GlimpseCanvas
     }
 }

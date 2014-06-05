@@ -26,11 +26,11 @@
  */
 package com.metsci.glimpse.examples.basic;
 
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
-
-import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -39,9 +39,7 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.axis.tagged.shader.TaggedPointShader;
-import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
@@ -59,8 +57,6 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-
 /**
  * A scatter plot with adjustable point size and color. Usage of GLSL
  * shaders allows the color and size of millions of data points to be
@@ -76,28 +72,9 @@ public class ScatterplotExample implements GlimpseLayoutProvider
     public static void main( String[] args ) throws Exception
     {
         ScatterplotExample provider = new ScatterplotExample( );
-        Example example = Example.showWithSwing( provider );
-        provider.addDisposeListener( example.getCanvas( ) );
+        Example.showWithSwing( provider );
     }
-    
-    public void addDisposeListener( GlimpseCanvas canvas )
-    {
-        canvas.addDisposeListener( new GLRunnable( )
-        {
-            @Override
-            public Object run( GLContext context )
-            {
-                colorMapTexture.dispose( context );
-                sizeTexture.dispose( context );
-                sizeMapTexture.dispose( context );
-                xyValues.dispose( context.getGL( ) );
-                colorValues.dispose( context.getGL( ) );
-                
-                return null;
-            }
-        } );
-    }
-    
+
     protected ColorTexture1D colorMapTexture;
     protected ColorTexture1D sizeTexture;
     protected FloatTexture1D sizeMapTexture;

@@ -28,16 +28,17 @@ package com.metsci.glimpse.support.interval;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
 import com.metsci.glimpse.util.quadtree.longvalued.LongQuadTreeObjects;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public abstract class IntervalQuadTree<V>
 {
     // set is necessary to enforce set semantics, which LongQuadTreeObjects does not do
-    protected Set<V> set;
+    protected Map<V, V> map;
     protected LongQuadTreeObjects<V> tree;
     protected int maxBucketSize;
 
@@ -50,7 +51,7 @@ public abstract class IntervalQuadTree<V>
     {
         this.maxBucketSize = maxBucketSize;
         this.tree = buildTree( maxBucketSize );
-        this.set = new HashSet<>( );
+        this.map = Maps.newHashMap( );
     }
 
     protected LongQuadTreeObjects<V> buildTree( int maxBucketSize )
@@ -78,28 +79,34 @@ public abstract class IntervalQuadTree<V>
 
     public Set<V> getAll( )
     {
-        return Collections.unmodifiableSet( this.set );
+        return Collections.unmodifiableSet( this.map.keySet( ) );
     }
 
     public void clear( )
     {
         this.tree = buildTree( maxBucketSize );
-        this.set.clear( );
+        this.map.clear( );
     }
 
     public void add( V value )
     {
-        if ( this.set.add( value ) )
+        V oldValue = this.map.get( value );
+        if ( oldValue != null )
         {
-            this.tree.add( value );
+            this.tree.remove( oldValue );
         }
+
+        this.tree.add( value );
+        this.map.put( value, value );
     }
 
     public void remove( V value )
     {
-        if ( this.set.remove( value ) )
+        V oldValue = this.map.remove( value );
+
+        if ( oldValue != null )
         {
-            this.tree.remove( value );
+            this.tree.remove( oldValue );
         }
     }
 
@@ -196,6 +203,6 @@ public abstract class IntervalQuadTree<V>
 
     public int size( )
     {
-        return this.set.size( );
+        return this.map.size( );
     }
 }

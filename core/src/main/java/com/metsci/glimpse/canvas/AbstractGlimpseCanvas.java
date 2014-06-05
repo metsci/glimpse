@@ -29,10 +29,11 @@ package com.metsci.glimpse.canvas;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.media.opengl.GLRunnable;
+
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
-import com.metsci.glimpse.gl.GLRunnable;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -134,5 +135,12 @@ public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
         {
             target.setLookAndFeel( laf );
         }
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
     }
 }

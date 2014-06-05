@@ -28,12 +28,13 @@ package com.metsci.glimpse.canvas;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.GLRunnable;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
-import com.metsci.glimpse.gl.GLRunnable;
 
 /**
  * A heavy weight target for Glimpse rendering. Represents
@@ -71,19 +72,41 @@ public interface GlimpseCanvas extends GlimpseTarget
     public void paint( );
 
     /**
-     * Disposes of any native resources of GlimpseLayouts and GlimpsePainters associated with the GlimpseCanvas.
+     * Destroys the native surface which this canvas draws to. Does not dispose of GL resources associated
+     * with GlimpsePainters and GlimpseLayouts attached to the GlimpseCanvas (as these may be attached to other
+     * GlimpseCanvases as well). Disposing of Glimpse resources can be done via {@code #disposeAttached()}.
+     * 
+     * @see #disposeAttached()
      */
-    public void dispose( );
-
-    /**
-     *
-     * @return whether or not dispose() has been successfully called. Once true,
-     *         this GlimpseCanvas is no longer valid for rendering.
-     */
-    public boolean isDisposed( );
+    public void destroy( );
     
     /**
-     * Called when the canvas is disposed. Can be used to clean up native resources used by this Canvas.
+     * Disposes native resources of GlimpseLayouts and GlimpsePainters associated with the GlimpseCanvas.
+     * 
+     * @see #destroy()
+     */
+    public void disposeAttached( );
+
+    /**
+     * A convenience method which is equivalent to:
+     * 
+     * <code>
+     * disposeAttached( );
+     * destroy( );
+     * </code>
+     */
+    public void dispose( );
+    
+    /**
+     * @return whether or not {@code #dispose()} has been successfully called. Once true, this GlimpseCanvas is no longer valid for rendering.
+     */
+    public boolean isDestroyed( );
+    
+    /**
+     * Called when {@link GLEventListener#dispose(GLAutoDrawable)} event is fired by the {@link GLAutoDrawable} associated with the
+     * GlimpseCanvas. This can happen for reasons other than the window containing the GlimpseCanvas being closed (for example, moving
+     * the window between physical monitors or moving the container between docks in a docking framework). Thus, GlimpsePainters and
+     * GlimpseLayouts attached to this GlimpseCanvas should generally not be disposed when this callback occurs.
      */
     public void addDisposeListener( GLRunnable runnable );
 }

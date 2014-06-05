@@ -83,8 +83,8 @@ public abstract class SwtExample
             @Override
             public void widgetDisposed( DisposeEvent e )
             {
-                glDrawable.destroy( );
-                canvas.dispose( );
+                canvas.destroy( );
+                canvas.disposeAttached( );
             }
         } );
 
