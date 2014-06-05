@@ -122,10 +122,10 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
-                // destroy heavyweight canvas and GLContext
-                canvas.destroy( );
                 // dispose of GlimpseLayouts and GlimpsePainters attached to GlimpseCanvas
                 canvas.disposeAttached( );
+                // destroy heavyweight canvas and GLContext
+                canvas.destroy( );
             }
         } );
 
@@ -186,10 +186,10 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
-                leftPanel.destroy( );
-                rightPanel.destroy( );
                 leftPanel.disposeAttached( );
                 rightPanel.disposeAttached( );
+                leftPanel.destroy( );
+                rightPanel.destroy( );
             }
         };
         
