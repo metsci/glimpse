@@ -98,6 +98,11 @@ public interface GlimpseTarget
     public void removeLayout( GlimpseLayout layout );
 
     /**
+     * Clears the canvas, removing all attached GlimpseLayouts.
+     */
+    public void removeAllLayouts( );
+    
+    /**
      * @return the list of children added through addLayout( GlimpseLayout ).
      */
     public List<GlimpseTarget> getTargetChildren( );

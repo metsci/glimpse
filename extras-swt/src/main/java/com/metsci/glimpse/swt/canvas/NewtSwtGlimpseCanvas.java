@@ -60,6 +60,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
@@ -370,6 +371,13 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     }
     
     @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+    
+    @Override
     public void disposeAttached( )
     {
         this.getGLDrawable( ).invoke( false, new GLRunnable( )
@@ -381,16 +389,27 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-
-                return false;
+                
+                // after layouts are disposed they should not be painted
+                // so remove them from the canvas
+                removeAllLayouts( );
+                
+                return true;
             }
         } );
     }
     
     @Override
-    public void dispose( )
+    public void disposePainter( final GlimpsePainter painter )
     {
-        disposeAttached( );
-        destroy( );
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }

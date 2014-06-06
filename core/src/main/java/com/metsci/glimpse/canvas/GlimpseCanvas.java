@@ -35,6 +35,7 @@ import javax.media.opengl.GLRunnable;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 
 /**
  * A heavy weight target for Glimpse rendering. Represents
@@ -57,11 +58,6 @@ public interface GlimpseCanvas extends GlimpseTarget
     public GlimpseContext getGlimpseContext( );
 
     public GlimpseBounds getTargetBounds( );
-
-    /**
-     * Clears the canvas, removing all attached GlimpseLayouts.
-     */
-    public void removeAllLayouts( );
 
     /**
      * Lays out any {@link com.metsci.glimpse.layout.GlimpseLayout} instances
@@ -96,6 +92,17 @@ public interface GlimpseCanvas extends GlimpseTarget
      * </code>
      */
     public void dispose( );
+    
+    /**
+     * <p>Calls {@code GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
+     * this GlimpseCanvas is active.</p>
+     * 
+     * <p>The GlimpsePainter should not be currently attached to a GlimpseLayout attached to any GlimpseCanvas
+     * (as it will no longer be valid for drawing). However, it should have been attached, at some point, to a
+     * GlimpseLayout attached to this GlimpseCanvas (so that it allocated OpenGL resources on the GLContext
+     * associated with this GlimpseCanvas).</p>
+     */
+    public void disposePainter( GlimpsePainter painter );
     
     /**
      * @return whether or not {@code #dispose()} has been successfully called. Once true, this GlimpseCanvas is no longer valid for rendering.

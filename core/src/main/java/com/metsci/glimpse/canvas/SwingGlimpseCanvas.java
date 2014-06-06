@@ -56,6 +56,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -431,7 +432,14 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+    
     @Override
     public void disposeAttached( )
     {
@@ -444,16 +452,27 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-
-                return false;
+                
+                // after layouts are disposed they should not be painted
+                // so remove them from the canvas
+                removeAllLayouts( );
+                
+                return true;
             }
         } );
     }
     
     @Override
-    public void dispose( )
+    public void disposePainter( final GlimpsePainter painter )
     {
-        disposeAttached( );
-        destroy( );
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }
