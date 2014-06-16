@@ -249,8 +249,13 @@ public class DockingPane extends JRootPane
 
     public TileKey addNewTile( TileKey neighborKey, Side sideOfNeighbor )
     {
+        return addNewTile( neighborKey, sideOfNeighbor, 0.5 );
+    }
+    
+    public TileKey addNewTile( TileKey neighborKey, Side sideOfNeighbor, double extentFraction )
+    {
         Node neighbor = splitPane.getMultiSplitLayout( ).getNodeForName( neighborKey.leafId );
-        return addNewTile( neighbor, sideOfNeighbor, 0.5 );
+        return addNewTile( neighbor, sideOfNeighbor, extentFraction );
     }
 
     protected TileKey addNewTile( Node neighbor, Side sideOfNeighbor, double extentFraction )
