@@ -240,6 +240,11 @@ public class DockingPane extends JRootPane
 
         return view;
     }
+    
+    public TileKey addNewTile( )
+    {
+        return initTile( setSolitaryLeaf( ) );
+    }
 
     public TileKey addNewTile( Side edgeOfPane )
     {
