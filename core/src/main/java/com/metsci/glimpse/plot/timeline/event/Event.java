@@ -752,7 +752,7 @@ public class Event implements Iterable<Event>
      */
     public void setTimes( TimeStamp startTime, TimeStamp endTime )
     {
-        setTimes( startTime, endTime, false );
+        setTimes( startTime, endTime, true );
     }
 
     protected void setTimes0( TimeStamp startTime, TimeStamp endTime )
@@ -775,7 +775,7 @@ public class Event implements Iterable<Event>
      */
     public void setStartTime( TimeStamp startTime )
     {
-        setTimes( startTime, this.endTime );
+        setTimes( startTime, this.endTime, true );
     }
 
     protected void setStartTime0( TimeStamp startTime )
@@ -797,7 +797,7 @@ public class Event implements Iterable<Event>
      */
     public void setEndTime( TimeStamp endTime )
     {
-        setTimes( this.startTime, endTime );
+        setTimes( this.startTime, endTime, true );
     }
 
     protected void setEndTime0( TimeStamp endTime )
