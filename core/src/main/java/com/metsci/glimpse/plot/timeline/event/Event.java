@@ -216,7 +216,6 @@ public class Event implements Iterable<Event>
 
         this.startTime = time;
         this.endTime = time;
-        this.overlapRenderingMode = Intersecting;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -229,7 +228,6 @@ public class Event implements Iterable<Event>
 
         this.startTime = startTime;
         this.endTime = endTime;
-        this.overlapRenderingMode = startTime.equals( endTime ) ? Intersecting : Overfull;
 
         this.constraints = new LinkedList<EventConstraint>( );
         this.constraints.add( builtInConstraints );
@@ -854,7 +852,7 @@ public class Event implements Iterable<Event>
      */
     public OverlapRenderingMode getOverlapRenderingMode( )
     {
-        return this.overlapRenderingMode;
+        return startTime.equals( endTime ) ? Intersecting : this.overlapRenderingMode;
     }
 
     /**
