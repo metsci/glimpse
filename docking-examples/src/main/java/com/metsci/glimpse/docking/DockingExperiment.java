@@ -113,20 +113,18 @@ public class DockingExperiment
 
 
 
-        final DockingPane aDocker = new DockingPane( dockingTheme.dividerSize );
+        DockingPaneGroup dockerGroup = new DockingPaneGroup( dockingTheme );
+
+
+        final DockingPane aDocker = dockerGroup.addNewDocker( );
         aDocker.addInitialTile( aTile );
         aDocker.addNeighborTile( bTile, aTile, RIGHT, 0.3 );
 
-        final DockingPane bDocker = new DockingPane( dockingTheme.dividerSize );
+        final DockingPane bDocker = dockerGroup.addNewDocker( );
         bDocker.addInitialTile( cTile );
         bDocker.addNeighborTile( dTile, cTile, Side.TOP, 0.8 );
 
 
-
-
-        DockingPaneGroup dockerGroup = new DockingPaneGroup( );
-        dockerGroup.add( aDocker );
-        dockerGroup.add( bDocker );
 
 
         TileFactory tileFactory = new TileFactory( )

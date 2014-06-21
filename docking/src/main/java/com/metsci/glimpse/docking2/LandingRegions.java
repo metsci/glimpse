@@ -1,10 +1,14 @@
 package com.metsci.glimpse.docking2;
 
+import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import static javax.swing.SwingUtilities.convertPointToScreen;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+
+import javax.swing.JFrame;
 
 import com.metsci.glimpse.docking.Side;
 import com.metsci.glimpse.docking.Tile;
@@ -17,7 +21,7 @@ public class LandingRegions
     public static interface LandingRegion
     {
         Rectangle getIndicator( );
-        void placeView( View view, TileFactory tileFactory );
+        void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory );
     }
 
 
@@ -39,7 +43,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, TileFactory tileFactory )
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
         {
             // Do nothing
         }
@@ -80,7 +84,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, TileFactory tileFactory )
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -125,7 +129,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, TileFactory tileFactory )
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -164,7 +168,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, TileFactory tileFactory )
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
         {
             // If you think about it, you'll wonder why we always insert at viewNum --
             // if we're moving a view a few tabs to the right, then the view's original
@@ -199,10 +203,52 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, TileFactory tileFactory )
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
         {
             tile.addView( view, tile.numViews( ) );
             tile.selectView( view );
+        }
+    }
+
+
+    public static class InNewWindow implements LandingRegion
+    {
+        public final int xOnScreen;
+        public final int yOnScreen;
+        public final int width;
+        public final int height;
+
+        public InNewWindow( int xOnScreen, int yOnScreen, int width, int height )
+        {
+            this.xOnScreen = xOnScreen;
+            this.yOnScreen = yOnScreen;
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public Rectangle getIndicator( )
+        {
+            return new Rectangle( xOnScreen, yOnScreen, width, height );
+        }
+
+        @Override
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        {
+            Tile tile = tileFactory.newTile( );
+            tile.addView( view, 0 );
+
+            DockingPane docker = dockerGroup.addNewDocker( );
+            docker.addInitialTile( tile );
+
+            JFrame frame = new JFrame( );
+
+            // XXX
+            frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
+
+            frame.setContentPane( docker );
+            frame.setBounds( xOnScreen, yOnScreen, width, height );
+            frame.setVisible( true );
         }
     }
 

@@ -28,6 +28,7 @@ import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking2.LandingRegions.BesideExistingTile;
 import com.metsci.glimpse.docking2.LandingRegions.EdgeOfDockingPane;
 import com.metsci.glimpse.docking2.LandingRegions.InExistingTile;
+import com.metsci.glimpse.docking2.LandingRegions.InNewWindow;
 import com.metsci.glimpse.docking2.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking2.LandingRegions.LastInExistingTile;
 import com.metsci.glimpse.docking2.LandingRegions.StayInExistingTile;
@@ -96,7 +97,7 @@ public class DockingMouseAdapter extends MouseAdapter
                 // beside its own tile, unless the tile contains other views.
                 //
                 tile.removeView( draggedView );
-                landingRegion.placeView( draggedView, tileFactory );
+                landingRegion.placeView( draggedView, dockerGroup, tileFactory );
             }
 
             this.dragging = false;
@@ -222,9 +223,10 @@ public class DockingMouseAdapter extends MouseAdapter
             }
         }
 
-        // XXX: New window
 
-        return new StayInExistingTile( fromTile );
+        // Outside all dockers in dockerGroup
+        //
+        return new InNewWindow( pOnScreen.x, pOnScreen.y, fromTile.getWidth( ), fromTile.getHeight( ) );
     }
 
 }

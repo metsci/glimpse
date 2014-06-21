@@ -9,8 +9,12 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 
+import com.metsci.glimpse.docking.DockingTheme;
+
 public class DockingPaneGroup
 {
+
+    public final DockingTheme theme;
 
     protected final Set<DockingPane> dockersMod;
     public final Set<DockingPane> dockers;
@@ -18,8 +22,10 @@ public class DockingPaneGroup
     protected final JFrame landingIndicator;
 
 
-    public DockingPaneGroup( )
+    public DockingPaneGroup( DockingTheme theme )
     {
+        this.theme = theme;
+
         this.dockersMod = new LinkedHashSet<DockingPane>( );
         this.dockers = unmodifiableSet( dockersMod );
 
@@ -30,9 +36,11 @@ public class DockingPaneGroup
         landingIndicator.setBackground( new Color( 1f, 0f, 0f, 0.5f ) );
     }
 
-    public void add( DockingPane docker )
+    public DockingPane addNewDocker( )
     {
+        DockingPane docker = new DockingPane( theme.dividerSize );
         dockersMod.add( docker );
+        return docker;
     }
 
     public void setLandingIndicator( Rectangle bounds )
