@@ -5,23 +5,11 @@ import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
-import static com.metsci.glimpse.docking.Side.BOTTOM;
-import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.RIGHT;
-import static com.metsci.glimpse.docking.Side.TOP;
-import static java.lang.String.format;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
-import static javax.swing.SwingUtilities.convertPointFromScreen;
-import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Window;
-import java.awt.event.MouseEvent;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -30,21 +18,15 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
-import com.metsci.glimpse.docking2.DockingMouseAdapter2;
-import com.metsci.glimpse.docking2.DockingPane2;
-import com.metsci.glimpse.docking2.LandingRegions.BesideExistingTile;
-import com.metsci.glimpse.docking2.LandingRegions.EdgeOfDockingPane;
-import com.metsci.glimpse.docking2.LandingRegions.InExistingTile;
-import com.metsci.glimpse.docking2.LandingRegions.LandingRegion;
-import com.metsci.glimpse.docking2.LandingRegions.LastInExistingTile;
-import com.metsci.glimpse.docking2.TileKeyGenerator;
+import com.metsci.glimpse.docking2.DockingMouseAdapter;
+import com.metsci.glimpse.docking2.DockingPane;
+import com.metsci.glimpse.docking2.DockingPaneGroup;
+import com.metsci.glimpse.docking2.TileFactory;
 
 public class DockingExperiment
 {
@@ -131,147 +113,32 @@ public class DockingExperiment
 
 
 
-        TileKeyGenerator tileKeyGen = new TileKeyGenerator( )
-        {
-            long nextIdNum = 0;
+        final DockingPane aDocker = new DockingPane( dockingTheme.dividerSize );
+        aDocker.addInitialTile( aTile );
+        aDocker.addNeighborTile( bTile, aTile, RIGHT, 0.3 );
 
-            public TileKey newTileKey( )
+        final DockingPane bDocker = new DockingPane( dockingTheme.dividerSize );
+        bDocker.addInitialTile( cTile );
+        bDocker.addNeighborTile( dTile, cTile, Side.TOP, 0.8 );
+
+
+
+
+        DockingPaneGroup dockerGroup = new DockingPaneGroup( );
+        dockerGroup.add( aDocker );
+        dockerGroup.add( bDocker );
+
+
+        TileFactory tileFactory = new TileFactory( )
+        {
+            public Tile newTile( )
             {
-                long idNum = ( nextIdNum++ );
-                return new TileKey( format( "Tile_%02d", idNum ) );
+                return new Tile( dockingTheme );
             }
         };
 
-        final DockingPane2 aDockingPane = new DockingPane2( dockingTheme, tileKeyGen );
-        TileKey aTileKey = aDockingPane.addInitialTile( aTile );
-        TileKey bTileKey = aDockingPane.addNeighborTile( bTile, aTileKey, RIGHT, 0.3 );
 
-        final DockingPane2 bDockingPane = new DockingPane2( dockingTheme, tileKeyGen );
-        TileKey cTileKey = bDockingPane.addInitialTile( cTile );
-        TileKey dTileKey = bDockingPane.addNeighborTile( dTile, cTileKey, Side.TOP, 0.8 );
-
-
-
-
-
-        aTile.addDockingMouseAdapter( new DockingMouseAdapter2( aTile )
-        {
-            // XXX
-            List<DockingPane2> dockingPanes = Arrays.asList( aDockingPane, bDockingPane );
-
-            protected LandingRegion findLandingRegion( ViewKey draggedViewKey, MouseEvent ev )
-            {
-                Point pOnScreen = ev.getLocationOnScreen( );
-
-                // XXX: Ordering? This tile's dockingPane should probably get first dibs
-                for ( DockingPane2 dockingPane : dockingPanes )
-                {
-                    Point pInDock = new Point( pOnScreen );
-                    convertPointFromScreen( pInDock, dockingPane );
-
-                    if ( dockingPane.contains( pInDock ) )
-                    {
-                        Window window = getWindowAncestor( dockingPane );
-                        if ( window != null ) window.toFront( );
-
-
-                        // XXX
-                        TileKey fromTileKey = aTileKey;
-
-                        TileKey toTileKey = dockingPane.findTileAt( pInDock.x, pInDock.y );
-                        Tile toTile = asdf;
-
-
-                        // On own tile, which has no other views
-                        //
-                        if ( toTileKey != null && toTileKey.equals( fromTileKey ) && toTile.numViews( ) == 1 )
-                        {
-                            return null;
-                        }
-
-
-                        // On an existing tab
-                        //
-                        if ( toTileKey != null )
-                        {
-                            Point pInTile = new Point( pOnScreen );
-                            convertPointFromScreen( pInTile, toTile );
-
-                            int viewNum = toTile.viewNumForTabAt( pInTile.x, pInTile.y );
-                            if ( 0 <= viewNum && viewNum < toTile.numViews( ) )
-                            {
-                                return new InExistingTile( dockingPane, toTileKey, viewNum );
-                            }
-                        }
-
-
-                        // Near edge of docking-pane
-                        //
-                        {
-                            int dLeft = pInDock.x;
-                            int dRight = dockingPane.getWidth( ) - 1 - pInDock.x;
-                            int dTop = pInDock.y;
-                            int dBottom = dockingPane.getHeight( ) - 1 - pInDock.y;
-
-                            IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
-                            if ( closest.value < 16 )
-                            {
-                                switch ( closest.index )
-                                {
-                                    case 0: return new EdgeOfDockingPane( dockingPane, LEFT );
-                                    case 1: return new EdgeOfDockingPane( dockingPane, RIGHT );
-                                    case 2: return new EdgeOfDockingPane( dockingPane, TOP );
-                                    case 3: return new EdgeOfDockingPane( dockingPane, BOTTOM );
-                                }
-                            }
-                        }
-
-
-                        // Near edge of an existing tile
-                        //
-                        if ( toTile != null )
-                        {
-                            Point pInTile = new Point( pOnScreen );
-                            convertPointFromScreen( pInTile, toTile );
-
-                            int dLeft = pInTile.x;
-                            int dRight = toTile.getWidth( ) - 1 - pInTile.x;
-                            int dTop = pInTile.y;
-                            int dBottom = toTile.getHeight( ) - 1 - pInTile.y;
-
-                            IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
-                            if ( closest.value < 64 )
-                            {
-                                switch ( closest.index )
-                                {
-                                    case 0: return new BesideExistingTile( dockingPane, toTileKey, LEFT );
-                                    case 1: return new BesideExistingTile( dockingPane, toTileKey, RIGHT );
-                                    case 2: return new BesideExistingTile( dockingPane, toTileKey, TOP );
-                                    case 3: return new BesideExistingTile( dockingPane, toTileKey, BOTTOM );
-                                }
-                            }
-                        }
-
-
-                        // In an existing tile, but not the one we started from, and not near the edge
-                        //
-                        if ( toTileKey != null && !toTileKey.equals( fromTileKey ) )
-                        {
-                            return new LastInExistingTile( dockingPane, toTileKey );
-                        }
-
-
-                        // Nowhere else to land, except back where we started
-                        //
-                        return null;
-                    }
-                }
-
-                // XXX: New window
-
-                return null;
-            }
-        } );
+        aTile.addDockingMouseAdapter( new DockingMouseAdapter( aTile, dockerGroup, tileFactory ) );
 
 
 
@@ -283,7 +150,7 @@ public class DockingExperiment
             {
                 JFrame aFrame = new JFrame( );
                 aFrame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-                aFrame.setContentPane( aDockingPane );
+                aFrame.setContentPane( aDocker );
                 aFrame.setPreferredSize( new Dimension( 1024, 768 ) );
                 aFrame.pack( );
                 aFrame.setLocationByPlatform( true );
@@ -291,7 +158,7 @@ public class DockingExperiment
 
                 JFrame bFrame = new JFrame( );
                 bFrame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-                bFrame.setContentPane( bDockingPane );
+                bFrame.setContentPane( bDocker );
                 bFrame.setPreferredSize( new Dimension( 1024, 768 ) );
                 bFrame.pack( );
                 bFrame.setLocationByPlatform( true );

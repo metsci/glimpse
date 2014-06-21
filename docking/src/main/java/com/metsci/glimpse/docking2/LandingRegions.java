@@ -1,10 +1,10 @@
 package com.metsci.glimpse.docking2;
 
+import java.awt.Component;
 import java.awt.Rectangle;
 
 import com.metsci.glimpse.docking.Side;
 import com.metsci.glimpse.docking.Tile;
-import com.metsci.glimpse.docking.TileKey;
 import com.metsci.glimpse.docking.View;
 
 public class LandingRegions
@@ -14,26 +14,26 @@ public class LandingRegions
     public static interface LandingRegion
     {
         Rectangle getIndicator( );
-        void placeView( View view );
+        void placeView( View view, TileFactory tileFactory );
     }
 
 
     public static class EdgeOfDockingPane implements LandingRegion
     {
-        public final DockingPane2 dockingPane;
+        public final DockingPane docker;
         public final Side edgeOfPane;
 
-        public EdgeOfDockingPane( DockingPane2 dockingPane, Side edgeOfPane )
+        public EdgeOfDockingPane( DockingPane docker, Side edgeOfPane )
         {
-            this.dockingPane = dockingPane;
+            this.docker = docker;
             this.edgeOfPane = edgeOfPane;
         }
 
         @Override
         public Rectangle getIndicator( )
         {
-            int w = dockingPane.getWidth( );
-            int h = dockingPane.getHeight( );
+            int w = docker.getWidth( );
+            int h = docker.getHeight( );
 
             // XXX: To screen coords
             switch ( edgeOfPane )
@@ -48,31 +48,31 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view )
+        public void placeView( View view, TileFactory tileFactory )
         {
-            TileKey newTileKey = dockingPane.addEdgeTile( c, edgeOfPane );
-            addView( view, newTileKey );
+            Tile tile = tileFactory.newTile( );
+            tile.addView( view, 0 );
+            docker.addEdgeTile( tile, edgeOfPane );
         }
     }
 
 
     public static class BesideExistingTile implements LandingRegion
     {
-        public final DockingPane2 dockingPane;
-        public final TileKey neighborKey;
+        public final DockingPane docker;
+        public final Component neighbor;
         public final Side sideOfNeighbor;
 
-        public BesideExistingTile( DockingPane2 dockingPane, TileKey neighborKey, Side sideOfNeighbor )
+        public BesideExistingTile( DockingPane docker, Component neighbor, Side sideOfNeighbor )
         {
-            this.dockingPane = dockingPane;
-            this.neighborKey = neighborKey;
+            this.docker = docker;
+            this.neighbor = neighbor;
             this.sideOfNeighbor = sideOfNeighbor;
         }
 
         @Override
         public Rectangle getIndicator( )
         {
-            Tile neighbor = tile( neighborKey );
             int x = neighbor.getX( );
             int y = neighbor.getY( );
             int w = neighbor.getWidth( );
@@ -91,24 +91,23 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view )
+        public void placeView( View view, TileFactory tileFactory )
         {
-            TileKey newTileKey = addNewTile( neighborKey, sideOfNeighbor );
-            addView( view, newTileKey );
+            Tile tile = tileFactory.newTile( );
+            tile.addView( view, 0 );
+            docker.addNeighborTile( tile, neighbor, sideOfNeighbor );
         }
     }
 
 
     public static class InExistingTile implements LandingRegion
     {
-        public final DockingPane2 dockingPane;
-        public final TileKey tileKey;
+        public final Tile tile;
         public final int viewNum;
 
-        public InExistingTile( DockingPane2 dockingPane, TileKey tileKey, int viewNum )
+        public InExistingTile( Tile tile, int viewNum )
         {
-            this.dockingPane = dockingPane;
-            this.tileKey = tileKey;
+            this.tile = tile;
             this.viewNum = viewNum;
         }
 
@@ -117,7 +116,6 @@ public class LandingRegions
         {
             // XXX: To screen coords
 
-            Tile tile = tile( tileKey );
             Rectangle tabBounds = tile.viewTabBounds( viewNum );
             if ( tabBounds == null )
             {
@@ -130,7 +128,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view )
+        public void placeView( View view, TileFactory tileFactory )
         {
             // If you think about it, you'll wonder why we always insert at viewNum --
             // if we're moving a view a few tabs to the right, then the view's original
@@ -141,21 +139,19 @@ public class LandingRegions
             // to the left -- so if we placed the tab to the left of the indicated tab,
             // it would not end up under the mouse, which feels pretty unsettling.
             //
-            addView( view, tileKey, viewNum );
-            tile( tileKey ).selectView( view );
+            tile.addView( view, viewNum );
+            tile.selectView( view );
         }
     }
 
 
     public static class LastInExistingTile implements LandingRegion
     {
-        public final DockingPane2 dockingPane;
-        public final TileKey tileKey;
+        public final Tile tile;
 
-        public LastInExistingTile( DockingPane2 dockingPane, TileKey tileKey )
+        public LastInExistingTile( Tile tile )
         {
-            this.dockingPane = dockingPane;
-            this.tileKey = tileKey;
+            this.tile = tile;
         }
 
         @Override
@@ -163,14 +159,14 @@ public class LandingRegions
         {
             // XXX: To screen coords
 
-            return tile( tileKey ).getBounds( );
+            return tile.getBounds( );
         }
 
         @Override
-        public void placeView( View view )
+        public void placeView( View view, TileFactory tileFactory )
         {
-            addView( view, tileKey );
-            tile( tileKey ).selectView( view );
+            tile.addView( view, tile.numViews( ) );
+            tile.selectView( view );
         }
     }
 
