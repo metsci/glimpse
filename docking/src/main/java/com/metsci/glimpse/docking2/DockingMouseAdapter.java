@@ -16,7 +16,6 @@ import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -31,6 +30,7 @@ import com.metsci.glimpse.docking2.LandingRegions.EdgeOfDockingPane;
 import com.metsci.glimpse.docking2.LandingRegions.InExistingTile;
 import com.metsci.glimpse.docking2.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking2.LandingRegions.LastInExistingTile;
+import com.metsci.glimpse.docking2.LandingRegions.StayInExistingTile;
 
 public class DockingMouseAdapter extends MouseAdapter
 {
@@ -75,10 +75,8 @@ public class DockingMouseAdapter extends MouseAdapter
         if ( draggedView != null )
         {
             this.dragging = true;
-            LandingRegion landingRegion = findLandingRegion( dockerGroup, tile, ev );
-            Rectangle indicator = ( landingRegion == null ? tile.getBounds( ) : landingRegion.getIndicator( ) );
-            // XXX
-            //indicatorOverlay.setDockingIndicatorRectangle( indicator );
+            LandingRegion region = findLandingRegion( dockerGroup, tile, ev );
+            dockerGroup.setLandingIndicator( region.getIndicator( ) );
         }
     }
 
@@ -103,8 +101,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
             this.dragging = false;
             this.draggedView = null;
-            // XXX
-//            indicatorOverlay.setDockingIndicatorRectangle( null );
+            dockerGroup.setLandingIndicator( null );
         }
     }
 
@@ -141,7 +138,7 @@ public class DockingMouseAdapter extends MouseAdapter
                 //
                 if ( toComp == fromTile && fromTile.numViews( ) == 1 )
                 {
-                    return null;
+                    return new StayInExistingTile( fromTile );
                 }
 
 
@@ -221,13 +218,13 @@ public class DockingMouseAdapter extends MouseAdapter
 
                 // Nowhere else to land, except back where we started
                 //
-                return null;
+                return new StayInExistingTile( fromTile );
             }
         }
 
         // XXX: New window
 
-        return null;
+        return new StayInExistingTile( fromTile );
     }
 
 }

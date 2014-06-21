@@ -1,6 +1,9 @@
 package com.metsci.glimpse.docking2;
 
+import static javax.swing.SwingUtilities.convertPointToScreen;
+
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import com.metsci.glimpse.docking.Side;
@@ -18,6 +21,31 @@ public class LandingRegions
     }
 
 
+    public static class StayInExistingTile implements LandingRegion
+    {
+        public final Tile tile;
+
+        public StayInExistingTile( Tile tile )
+        {
+            this.tile = tile;
+        }
+
+        @Override
+        public Rectangle getIndicator( )
+        {
+            Point pOnScreen = new Point( 0, 0 );
+            convertPointToScreen( pOnScreen, tile );
+            return new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) );
+        }
+
+        @Override
+        public void placeView( View view, TileFactory tileFactory )
+        {
+            // Do nothing
+        }
+    }
+
+
     public static class EdgeOfDockingPane implements LandingRegion
     {
         public final DockingPane docker;
@@ -32,16 +60,20 @@ public class LandingRegions
         @Override
         public Rectangle getIndicator( )
         {
+            Point pOnScreen = new Point( 0, 0 );
+            convertPointToScreen( pOnScreen, docker );
+            int x = pOnScreen.x;
+            int y = pOnScreen.y;
+
             int w = docker.getWidth( );
             int h = docker.getHeight( );
 
-            // XXX: To screen coords
             switch ( edgeOfPane )
             {
-                case LEFT:   return new Rectangle( 0,       0,       64,  h );
-                case RIGHT:  return new Rectangle( w-1-64,  0,       64,  h );
-                case TOP:    return new Rectangle( 0,       0,       w,  64 );
-                case BOTTOM: return new Rectangle( 0,       h-1-64,  w,  64 );
+                case LEFT:   return new Rectangle( x,        y,         64,  h );
+                case RIGHT:  return new Rectangle( x+w-1-64, y,         64,  h );
+                case TOP:    return new Rectangle( x,        y,         w,  64 );
+                case BOTTOM: return new Rectangle( x,        y+h-1-64,  w,  64 );
 
                 default: return null;
             }
@@ -73,12 +105,14 @@ public class LandingRegions
         @Override
         public Rectangle getIndicator( )
         {
-            int x = neighbor.getX( );
-            int y = neighbor.getY( );
+            Point pOnScreen = new Point( 0, 0 );
+            convertPointToScreen( pOnScreen, neighbor );
+            int x = pOnScreen.x;
+            int y = pOnScreen.y;
+
             int w = neighbor.getWidth( );
             int h = neighbor.getHeight( );
 
-            // XXX: To screen coords
             switch ( sideOfNeighbor )
             {
                 case LEFT:   return new Rectangle( x,       y,       w/2, h );
@@ -114,16 +148,18 @@ public class LandingRegions
         @Override
         public Rectangle getIndicator( )
         {
-            // XXX: To screen coords
-
             Rectangle tabBounds = tile.viewTabBounds( viewNum );
             if ( tabBounds == null )
             {
-                return tile.getBounds( );
+                Point pOnScreen = new Point( 0, 0 );
+                convertPointToScreen( pOnScreen, tile );
+                return new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) );
             }
             else
             {
-                return new Rectangle( tile.getX( )+tabBounds.x, tile.getY( )+tabBounds.y, tabBounds.width, tabBounds.height );
+                Point pOnScreen = new Point( tabBounds.x, tabBounds.y );
+                convertPointToScreen( pOnScreen, tile );
+                return new Rectangle( pOnScreen.x, pOnScreen.y, tabBounds.width, tabBounds.height );
             }
         }
 
@@ -157,9 +193,9 @@ public class LandingRegions
         @Override
         public Rectangle getIndicator( )
         {
-            // XXX: To screen coords
-
-            return tile.getBounds( );
+            Point pOnScreen = new Point( 0, 0 );
+            convertPointToScreen( pOnScreen, tile );
+            return new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) );
         }
 
         @Override
