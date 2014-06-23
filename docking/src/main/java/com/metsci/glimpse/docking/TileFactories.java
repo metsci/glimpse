@@ -26,48 +26,31 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.MiscUtils.areEqual;
-
-import java.util.Comparator;
-
-public class ViewKey
+public class TileFactories
 {
 
-    public static final Comparator<ViewKey> alphabeticalOrder = new Comparator<ViewKey>( )
+    public static interface TileFactory
     {
-        public int compare( ViewKey a, ViewKey b )
+        Tile newTile( );
+    }
+
+
+    public static class TileFactoryStandard implements TileFactory
+    {
+        public final DockingPaneGroup dockerGroup;
+
+        public TileFactoryStandard( DockingPaneGroup dockerGroup )
         {
-            return a.viewId.compareTo( b.viewId );
+            this.dockerGroup = dockerGroup;
         }
-    };
 
-
-    public final String viewId;
-
-
-    public ViewKey( String viewId )
-    {
-        this.viewId = viewId;
-    }
-
-    @Override
-    public int hashCode( )
-    {
-        int prime = 5923;
-        int result = 1;
-        result = prime * result + ( viewId == null ? 0 : viewId.hashCode( ) );
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( o == this ) return true;
-        if ( o == null ) return false;
-        if ( o.getClass( ) != getClass( ) ) return false;
-
-        ViewKey other = ( ViewKey ) o;
-        return areEqual( other.viewId, viewId );
+        @Override
+        public Tile newTile( )
+        {
+            Tile tile = new Tile( dockerGroup.theme );
+            tile.addDockingMouseAdapter( new DockingMouseAdapter( tile, dockerGroup, this ) );
+            return tile;
+        }
     }
 
 }

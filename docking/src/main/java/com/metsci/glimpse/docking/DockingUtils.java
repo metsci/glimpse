@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.docking;
 
+import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -43,8 +45,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-
-import static java.awt.ComponentOrientation.*;
 
 public class DockingUtils
 {

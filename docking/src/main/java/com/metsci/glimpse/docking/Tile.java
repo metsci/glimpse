@@ -26,6 +26,18 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
+import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.docking.MiscUtils.newArrayList;
+import static com.metsci.glimpse.docking.MiscUtils.newHashMap;
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_MITER;
+import static java.lang.Math.max;
+import static javax.swing.BorderFactory.createCompoundBorder;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.BorderFactory.createMatteBorder;
+import static javax.swing.SwingConstants.LEFT;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -55,12 +67,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static com.metsci.glimpse.docking.MiscUtils.*;
-import static java.awt.BasicStroke.*;
-import static java.lang.Math.*;
-import static javax.swing.BorderFactory.*;
-import static javax.swing.SwingConstants.*;
+import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 
 public class Tile extends JComponent
 {
