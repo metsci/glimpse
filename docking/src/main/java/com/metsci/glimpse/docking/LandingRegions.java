@@ -44,7 +44,7 @@ public class LandingRegions
     public static interface LandingRegion
     {
         Rectangle getIndicator( );
-        void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory );
+        void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory );
     }
 
 
@@ -66,7 +66,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -109,7 +109,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -154,7 +154,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -193,7 +193,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
         {
             // If you think about it, you'll wonder why we always insert at viewNum --
             // if we're moving a view a few tabs to the right, then the view's original
@@ -228,7 +228,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
         {
             tile.addView( view, tile.numViews( ) );
             tile.selectView( view );
@@ -258,12 +258,12 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
 
-            DockingPane docker = dockerGroup.addNewDocker( );
+            DockingPane docker = dockingGroup.addNewDockingPane( );
             docker.addInitialTile( tile );
 
             JFrame frame = new JFrame( );

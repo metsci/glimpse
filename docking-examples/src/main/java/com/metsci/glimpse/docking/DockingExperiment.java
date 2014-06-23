@@ -64,8 +64,8 @@ public class DockingExperiment
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        DockingPaneGroup dockerGroup = new DockingPaneGroup( dockingTheme );
-        TileFactory tileFactory = new TileFactoryStandard( dockerGroup );
+        DockingGroup dockingGroup = new DockingGroup( dockingTheme );
+        TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
         JPanel aPanel = new JPanel( ) {{ setBackground( Color.red ); }};
@@ -140,7 +140,7 @@ public class DockingExperiment
         cTile.addView( hView, 2 );
 
 
-        final DockingPane docker = dockerGroup.addNewDocker( );
+        final DockingPane docker = dockingGroup.addNewDockingPane( );
         docker.addInitialTile( aTile );
         docker.addNeighborTile( bTile, aTile, LEFT, 0.3 );
         docker.addEdgeTile( cTile, BOTTOM, 0.3 );

@@ -37,18 +37,18 @@ public class TileFactories
 
     public static class TileFactoryStandard implements TileFactory
     {
-        public final DockingPaneGroup dockerGroup;
+        public final DockingGroup dockingGroup;
 
-        public TileFactoryStandard( DockingPaneGroup dockerGroup )
+        public TileFactoryStandard( DockingGroup dockingGroup )
         {
-            this.dockerGroup = dockerGroup;
+            this.dockingGroup = dockingGroup;
         }
 
         @Override
         public Tile newTile( )
         {
-            Tile tile = new Tile( dockerGroup.theme );
-            tile.addDockingMouseAdapter( new DockingMouseAdapter( tile, dockerGroup, this ) );
+            Tile tile = new Tile( dockingGroup.theme );
+            tile.addDockingMouseAdapter( new DockingMouseAdapter( tile, dockingGroup, this ) );
             return tile;
         }
     }

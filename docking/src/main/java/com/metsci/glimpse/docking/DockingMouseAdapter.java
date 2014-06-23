@@ -64,17 +64,17 @@ public class DockingMouseAdapter extends MouseAdapter
 {
 
     protected final Tile tile;
-    protected final DockingPaneGroup dockerGroup;
+    protected final DockingGroup dockingGroup;
     protected final TileFactory tileFactory;
 
     protected boolean dragging = false;
     protected View draggedView = null;
 
 
-    public DockingMouseAdapter( Tile tile, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+    public DockingMouseAdapter( Tile tile, DockingGroup dockingGroup, TileFactory tileFactory )
     {
         this.tile = tile;
-        this.dockerGroup = dockerGroup;
+        this.dockingGroup = dockingGroup;
         this.tileFactory = tileFactory;
 
         this.dragging = false;
@@ -104,16 +104,16 @@ public class DockingMouseAdapter extends MouseAdapter
         {
             this.dragging = true;
 
-            LandingRegion region = findLandingRegion( dockerGroup, tile, ev );
+            LandingRegion region = findLandingRegion( dockingGroup, tile, ev );
             if ( region != null )
             {
-                dockerGroup.setLandingIndicator( region.getIndicator( ) );
+                dockingGroup.setLandingIndicator( region.getIndicator( ) );
             }
             else
             {
                 Point pOnScreen = new Point( 0, 0 );
                 convertPointToScreen( pOnScreen, tile );
-                dockerGroup.setLandingIndicator( new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) ) );
+                dockingGroup.setLandingIndicator( new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) ) );
             }
         }
     }
@@ -123,11 +123,11 @@ public class DockingMouseAdapter extends MouseAdapter
     {
         if ( ev.getButton( ) == BUTTON1 && dragging )
         {
-            LandingRegion landingRegion = findLandingRegion( dockerGroup, tile, ev );
+            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, ev );
             if ( landingRegion != null )
             {
                 tile.removeView( draggedView );
-                landingRegion.placeView( draggedView, dockerGroup, tileFactory );
+                landingRegion.placeView( draggedView, dockingGroup, tileFactory );
 
                 if ( tile.numViews( ) == 0 )
                 {
@@ -138,16 +138,16 @@ public class DockingMouseAdapter extends MouseAdapter
 
             this.dragging = false;
             this.draggedView = null;
-            dockerGroup.setLandingIndicator( null );
+            dockingGroup.setLandingIndicator( null );
         }
     }
 
-    protected static LandingRegion findLandingRegion( DockingPaneGroup dockerGroup, Tile fromTile, MouseEvent ev )
+    protected static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, MouseEvent ev )
     {
         List<DockingPane> dockersInOrder = new ArrayList<>( );
         DockingPane fromDocker = getAncestorOfClass( DockingPane.class, fromTile );
         dockersInOrder.add( fromDocker );
-        for ( DockingPane docker : dockerGroup.dockers )
+        for ( DockingPane docker : dockingGroup.dockers )
         {
             if ( docker != fromDocker )
             {
@@ -268,7 +268,7 @@ public class DockingMouseAdapter extends MouseAdapter
         }
 
 
-        // Outside all dockers in dockerGroup
+        // Not in any docking-pane
         //
         return new InNewWindow( pOnScreen.x, pOnScreen.y, fromTile.getWidth( ), fromTile.getHeight( ) );
     }

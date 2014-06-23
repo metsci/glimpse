@@ -37,7 +37,7 @@ import javax.swing.JFrame;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 
-public class DockingPaneGroup
+public class DockingGroup
 {
 
     public final DockingTheme theme;
@@ -48,7 +48,7 @@ public class DockingPaneGroup
     protected final JFrame landingIndicator;
 
 
-    public DockingPaneGroup( DockingTheme theme )
+    public DockingGroup( DockingTheme theme )
     {
         this.theme = theme;
 
@@ -62,7 +62,7 @@ public class DockingPaneGroup
         landingIndicator.getContentPane( ).setBackground( theme.landingIndicatorColor );
     }
 
-    public DockingPane addNewDocker( )
+    public DockingPane addNewDockingPane( )
     {
         DockingPane docker = new DockingPane( theme.dividerSize );
         dockersMod.add( docker );
