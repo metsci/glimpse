@@ -28,8 +28,6 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static com.metsci.glimpse.docking.MiscUtils.newArrayList;
-import static com.metsci.glimpse.docking.MiscUtils.newHashMap;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static java.lang.Math.max;
@@ -56,6 +54,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -265,11 +265,11 @@ public class Tile extends JComponent
         cardPanel.setBorder( createCompoundBorder( createMatteBorder( 0, lineThickness, lineThickness, lineThickness, lineColor ),
                                                    createEmptyBorder( cardPadding, cardPadding, cardPadding, cardPadding ) ) );
 
-        this.dockingMouseAdapters = newArrayList( );
+        this.dockingMouseAdapters = new ArrayList<>( );
 
 
-        this.viewMap = newHashMap( );
-        this.views = newArrayList( );
+        this.viewMap = new HashMap<>( );
+        this.views = new ArrayList<>( );
         this.selectedView = null;
 
 

@@ -53,7 +53,7 @@ public class DockingPane extends JPanel
         this.gapSize = gapSize;
 
         this.root = null;
-        this.tiles = new HashSet<Component>( );
+        this.tiles = new HashSet<>( );
     }
 
     public void addInitialTile( Component c )

@@ -52,7 +52,7 @@ public class DockingPaneGroup
     {
         this.theme = theme;
 
-        this.dockersMod = new LinkedHashSet<DockingPane>( );
+        this.dockersMod = new LinkedHashSet<>( );
         this.dockers = unmodifiableSet( dockersMod );
 
         this.landingIndicator = new JFrame( );

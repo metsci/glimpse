@@ -133,7 +133,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
     protected static LandingRegion findLandingRegion( DockingPaneGroup dockerGroup, Tile fromTile, MouseEvent ev )
     {
-        List<DockingPane> dockersInOrder = new ArrayList<DockingPane>( );
+        List<DockingPane> dockersInOrder = new ArrayList<>( );
         DockingPane fromDocker = ( DockingPane ) getAncestorOfClass( DockingPane.class, fromTile );
         dockersInOrder.add( fromDocker );
         for ( DockingPane docker : dockerGroup.dockers )

@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.MiscUtils.iround;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static java.lang.Math.round;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -245,7 +245,7 @@ public class SplitPane extends JPanel
                     int minHeightB = 1;
                     int maxHeightA = heightContainer - gapSize - minHeightB;
 
-                    int prelimHeightA = ( int ) round( splitFrac * ( heightContainer - gapSize ) );
+                    int prelimHeightA = iround( splitFrac * ( heightContainer - gapSize ) );
                     int heightA = max( minHeightA, min( maxHeightA, prelimHeightA ) );
                     int yB = heightA + gapSize;
                     int heightB = max( minHeightB, heightContainer - yB );
@@ -259,7 +259,7 @@ public class SplitPane extends JPanel
                     int minWidthB = 1;
                     int maxWidthA = widthContainer - gapSize - minWidthB;
 
-                    int prelimWidthA = ( int ) round( splitFrac * ( widthContainer - gapSize ) );
+                    int prelimWidthA = iround( splitFrac * ( widthContainer - gapSize ) );
                     int widthA = max( minWidthA, min( maxWidthA, prelimWidthA ) );
                     int xB = widthA + gapSize;
                     int widthB = max( minWidthB, widthContainer - xB );

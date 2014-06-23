@@ -34,7 +34,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -57,11 +56,6 @@ public class DockingUtils
         }
     }
 
-    public static interface Supplier<T>
-    {
-        T get( );
-    }
-
     public static interface Runnable1<T>
     {
         void run( T t );
@@ -76,26 +70,6 @@ public class DockingUtils
                 runnable1.run( t );
             }
         };
-    }
-
-    public static <T> T swingGet( final Supplier<T> supplier )
-    {
-        try
-        {
-            final AtomicReference<T> resultRef = new AtomicReference<T>( );
-            SwingUtilities.invokeAndWait( new Runnable( )
-            {
-                public void run( )
-                {
-                    resultRef.set( supplier.get( ) );
-                }
-            } );
-            return resultRef.get( );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( e );
-        }
     }
 
     public static void swingRun( final Runnable runnable )
