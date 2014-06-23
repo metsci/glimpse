@@ -27,6 +27,9 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.MiscUtils.iround;
+import static java.awt.Cursor.E_RESIZE_CURSOR;
+import static java.awt.Cursor.S_RESIZE_CURSOR;
+import static java.awt.Cursor.getPredefinedCursor;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -50,6 +53,8 @@ public class SplitPane extends JPanel
     protected Component childB;
     protected double splitFrac;
 
+    protected JPanel separator;
+
 
     public SplitPane( boolean arrangeVertically )
     {
@@ -72,12 +77,17 @@ public class SplitPane extends JPanel
         this.childB = null;
         this.splitFrac = splitFrac;
 
+        this.separator = new JPanel( );
+        separator.setOpaque( false );
+        separator.setCursor( getPredefinedCursor( arrangeVertically ? S_RESIZE_CURSOR : E_RESIZE_CURSOR ) );
+        add( separator );
+
         SplitLayout layout = new SplitLayout( );
         setLayout( layout );
 
         MouseAdapter mouseAdapter = createMouseAdapter( layout );
-        addMouseListener( mouseAdapter );
-        addMouseMotionListener( mouseAdapter );
+        separator.addMouseListener( mouseAdapter );
+        separator.addMouseMotionListener( mouseAdapter );
     }
 
     protected MouseAdapter createMouseAdapter( final SplitLayout layout )
@@ -90,7 +100,7 @@ public class SplitPane extends JPanel
             {
                 if ( ev.getButton( ) == BUTTON1 && isVisible( childA ) && isVisible( childB ) )
                 {
-                    grab = ( arrangeVertically ? ev.getY( ) - childA.getHeight( ) : ev.getX( ) - childA.getWidth( ) );
+                    grab = ( arrangeVertically ? ev.getY( ) : ev.getX( ) );
                 }
             }
 
@@ -98,7 +108,7 @@ public class SplitPane extends JPanel
             {
                 if ( grab != null )
                 {
-                    int newSizeA = ( arrangeVertically ? ev.getY( ) : ev.getX( ) ) - grab;
+                    int newSizeA = ( arrangeVertically ? childA.getHeight( ) + ev.getY( ) : childA.getWidth( ) + ev.getX( ) ) - grab;
                     int contentSize = ( arrangeVertically ? getHeight( ) : getWidth( ) ) - gapSize;
                     setSplitFrac( ( ( double ) newSizeA ) / ( ( double ) contentSize ) );
                     validate( );
@@ -109,7 +119,7 @@ public class SplitPane extends JPanel
             {
                 if ( ev.getButton( ) == BUTTON1 && grab != null )
                 {
-                    int newSizeA = ( arrangeVertically ? ev.getY( ) : ev.getX( ) ) - grab;
+                    int newSizeA = ( arrangeVertically ? childA.getHeight( ) + ev.getY( ) : childA.getWidth( ) + ev.getX( ) ) - grab;
                     int contentSize = ( arrangeVertically ? getHeight( ) : getWidth( ) ) - gapSize;
                     setSplitFrac( ( ( double ) newSizeA ) / ( ( double ) contentSize ) );
                     validate( );
@@ -278,6 +288,7 @@ public class SplitPane extends JPanel
 
                     childA.setBounds( 0, 0, widthContainer, heightA );
                     childB.setBounds( 0, yB, widthContainer, heightB );
+                    separator.setBounds( 0, heightA, widthContainer, gapSize );
                 }
                 else
                 {
@@ -292,15 +303,21 @@ public class SplitPane extends JPanel
 
                     childA.setBounds( 0, 0, widthA, heightContainer );
                     childB.setBounds( xB, 0, widthB, heightContainer );
+                    separator.setBounds( widthA, 0, gapSize, heightContainer );
                 }
+                separator.setVisible( true );
             }
-            else if ( hasA )
+            else
             {
-                childA.setBounds( 0, 0, widthContainer, heightContainer );
-            }
-            else if ( hasB )
-            {
-                childB.setBounds( 0, 0, widthContainer, heightContainer );
+                if ( hasA )
+                {
+                    childA.setBounds( 0, 0, widthContainer, heightContainer );
+                }
+                else if ( hasB )
+                {
+                    childB.setBounds( 0, 0, widthContainer, heightContainer );
+                }
+                separator.setVisible( false );
             }
         }
     }
