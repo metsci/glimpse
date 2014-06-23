@@ -32,6 +32,8 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
+import javax.swing.SwingUtilities;
+
 /**
  * These utility methods aren't specific to docking, but are used internally by
  * the docking code. They are kept out of DockingUtils not to hide them, but to
@@ -67,6 +69,12 @@ public class MiscUtils
             }
         }
         return new IntAndIndex( vBest, iBest );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public static <T> T getAncestorOfClass( Class<? super T> clazz, Component c )
+    {
+        return ( T ) SwingUtilities.getAncestorOfClass( clazz, c );
     }
 
     public static Point pointRelativeToAncestor( MouseEvent ev, Component ancestor )

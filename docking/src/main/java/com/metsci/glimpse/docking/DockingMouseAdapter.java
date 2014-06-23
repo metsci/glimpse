@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
@@ -37,7 +38,6 @@ import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static javax.swing.SwingUtilities.convertPointFromScreen;
-import static javax.swing.SwingUtilities.getAncestorOfClass;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
@@ -123,6 +123,12 @@ public class DockingMouseAdapter extends MouseAdapter
                 //
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, dockerGroup, tileFactory );
+
+                if ( tile.numViews( ) == 0 )
+                {
+                    DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
+                    docker.removeTile( tile );
+                }
             }
 
             this.dragging = false;
@@ -134,7 +140,7 @@ public class DockingMouseAdapter extends MouseAdapter
     protected static LandingRegion findLandingRegion( DockingPaneGroup dockerGroup, Tile fromTile, MouseEvent ev )
     {
         List<DockingPane> dockersInOrder = new ArrayList<>( );
-        DockingPane fromDocker = ( DockingPane ) getAncestorOfClass( DockingPane.class, fromTile );
+        DockingPane fromDocker = getAncestorOfClass( DockingPane.class, fromTile );
         dockersInOrder.add( fromDocker );
         for ( DockingPane docker : dockerGroup.dockers )
         {

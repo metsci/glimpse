@@ -125,6 +125,32 @@ public class SplitPane extends JPanel
         return ( c != null && c.isVisible( ) );
     }
 
+    public Component getChildA( )
+    {
+        return childA;
+    }
+
+    public Component getChildB( )
+    {
+        return childB;
+    }
+
+    public Component getSibling( Component child )
+    {
+        if ( child == childA )
+        {
+            return childB;
+        }
+        else if ( child == childB )
+        {
+            return childA;
+        }
+        else
+        {
+            throw new RuntimeException( "Component is not a child" );
+        }
+    }
+
     public Object getConstraints( Component child )
     {
         if ( child == childA )

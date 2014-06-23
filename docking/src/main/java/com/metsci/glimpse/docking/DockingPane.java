@@ -68,12 +68,19 @@ public class DockingPane extends JPanel
 
     public void addEdgeTile( Component c, Side edgeOfPane )
     {
-        addNeighborTile( c, root, edgeOfPane, 0.25 );
+        addEdgeTile( c, edgeOfPane, 0.25 );
     }
 
     public void addEdgeTile( Component c, Side edgeOfPane, double extentFrac )
     {
-        addNeighborTile( c, root, edgeOfPane, extentFrac );
+        if ( root == null )
+        {
+            addInitialTile( c );
+        }
+        else
+        {
+            addNeighborTile( c, root, edgeOfPane, extentFrac );
+        }
     }
 
     public void addNeighborTile( Component c, Component neighbor, Side sideOfNeighbor )
@@ -146,6 +153,40 @@ public class DockingPane extends JPanel
             }
         }
         return null;
+    }
+
+    public void removeTile( Component c )
+    {
+        if ( !tiles.contains( c ) ) throw new RuntimeException( "Component is not a tile" );
+
+        Container parent = c.getParent( );
+        if ( parent == this )
+        {
+            this.remove( c );
+            this.root = null;
+        }
+        else
+        {
+            Component sibling = ( ( SplitPane ) parent ).getSibling( c );
+
+            parent.removeAll( );
+
+            Container grandparent = parent.getParent( );
+            if ( grandparent == this )
+            {
+                this.remove( parent );
+                this.add( sibling );
+                this.root = sibling;
+            }
+            else
+            {
+                Object constraints = ( ( SplitPane ) grandparent ).getConstraints( parent );
+                grandparent.remove( parent );
+                grandparent.add( sibling, constraints );
+            }
+        }
+
+        tiles.remove( c );
     }
 
 }
