@@ -64,6 +64,9 @@ public class DockingPane extends JPanel
 
         this.root = c;
         tiles.add( c );
+
+        validate( );
+        repaint( );
     }
 
     public void addEdgeTile( Component c, Side edgeOfPane )
@@ -100,8 +103,8 @@ public class DockingPane extends JPanel
         Container parent = neighbor.getParent( );
         if ( parent == this )
         {
-            parent.remove( neighbor );
-            parent.add( newSplitPane );
+            this.remove( neighbor );
+            this.add( newSplitPane );
             this.root = newSplitPane;
         }
         else
@@ -115,6 +118,9 @@ public class DockingPane extends JPanel
         newSplitPane.add( c, ( newIsChildA ? "A" : "B" ) );
 
         tiles.add( c );
+
+        validate( );
+        repaint( );
     }
 
     public Component findTileAt( int x, int y )
@@ -187,6 +193,9 @@ public class DockingPane extends JPanel
         }
 
         tiles.remove( c );
+
+        validate( );
+        repaint( );
     }
 
 }
