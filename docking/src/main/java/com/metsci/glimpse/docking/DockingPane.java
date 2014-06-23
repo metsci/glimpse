@@ -123,6 +123,11 @@ public class DockingPane extends JPanel
         repaint( );
     }
 
+    public int numTiles( )
+    {
+        return tiles.size( );
+    }
+
     public Component findTileAt( int x, int y )
     {
         if ( contains( x, y ) )

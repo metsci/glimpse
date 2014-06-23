@@ -48,6 +48,33 @@ public class LandingRegions
     }
 
 
+    public static class InEmptyDockingPane implements LandingRegion
+    {
+        public final DockingPane docker;
+
+        public InEmptyDockingPane( DockingPane docker )
+        {
+            this.docker = docker;
+        }
+
+        @Override
+        public Rectangle getIndicator( )
+        {
+            Point pOnScreen = new Point( 0, 0 );
+            convertPointToScreen( pOnScreen, docker );
+            return new Rectangle( pOnScreen.x, pOnScreen.y, docker.getWidth( ), docker.getHeight( ) );
+        }
+
+        @Override
+        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
+        {
+            Tile tile = tileFactory.newTile( );
+            tile.addView( view, 0 );
+            docker.addInitialTile( tile );
+        }
+    }
+
+
     public static class EdgeOfDockingPane implements LandingRegion
     {
         public final DockingPane docker;

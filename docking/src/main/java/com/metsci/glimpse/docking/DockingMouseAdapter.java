@@ -52,6 +52,7 @@ import java.util.List;
 
 import com.metsci.glimpse.docking.LandingRegions.BesideExistingTile;
 import com.metsci.glimpse.docking.LandingRegions.EdgeOfDockingPane;
+import com.metsci.glimpse.docking.LandingRegions.InEmptyDockingPane;
 import com.metsci.glimpse.docking.LandingRegions.InExistingTile;
 import com.metsci.glimpse.docking.LandingRegions.InNewWindow;
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
@@ -192,6 +193,14 @@ public class DockingMouseAdapter extends MouseAdapter
                     {
                         return new InExistingTile( toTile, viewNum );
                     }
+                }
+
+
+                // In an empty docking-pane
+                //
+                if ( docker.numTiles( ) == 0 )
+                {
+                    return new InEmptyDockingPane( docker );
                 }
 
 
