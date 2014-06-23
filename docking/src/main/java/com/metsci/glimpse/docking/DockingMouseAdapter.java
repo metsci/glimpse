@@ -27,7 +27,6 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
-import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
@@ -40,9 +39,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.ListIterator;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -91,29 +88,26 @@ public class DockingMouseAdapter extends MouseAdapter
         {
             if ( !dragging )
             {
-                List<DockingFrame> framesInOrder = new ArrayList<>( );
-                DockingFrame fromFrame = getAncestorOfClass( DockingFrame.class, tile );
-                framesInOrder.add( fromFrame );
-                for ( DockingFrame frame : dockingGroup.frames )
-                {
-                    if ( frame != fromFrame )
-                    {
-                        framesInOrder.add( frame );
-                    }
-                }
-                Collections.reverse( framesInOrder );
+                DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
+                dockingGroup.bringFrameToFront( frame );
 
-                for ( DockingFrame frame : framesInOrder )
+                // Cause the system's window-manager to show our frames in an order
+                // consistent with the way we're going to iterate through them to
+                // choose the landing-region.
+                //
+                // This is necessary because Java does not provide a way to ask the
+                // window-manager which window is on top at a given spot. It might be
+                // possible to kludge a solution together using Robot.getPixelColor
+                // ... but it would be ugly at best.
+                //
+                ListIterator<DockingFrame> it = dockingGroup.frames.listIterator( dockingGroup.frames.size( ) );
+                while ( it.hasPrevious( ) )
                 {
-                    frame.toFront( );
+                    it.previous( ).toFront( );
                 }
             }
 
-
             this.dragging = true;
-
-
-
 
             LandingRegion region = findLandingRegion( dockingGroup, tile, ev.getLocationOnScreen( ) );
             if ( region != null )

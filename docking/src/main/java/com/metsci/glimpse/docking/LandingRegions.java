@@ -27,7 +27,6 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -38,8 +37,6 @@ import static javax.swing.SwingUtilities.convertPointToScreen;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -49,20 +46,9 @@ public class LandingRegions
 
     public static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, Point pOnScreen )
     {
-        List<DockingPane> dockersInOrder = new ArrayList<>( );
-        DockingPane fromDocker = getAncestorOfClass( DockingPane.class, fromTile );
-        dockersInOrder.add( fromDocker );
         for ( DockingFrame frame : dockingGroup.frames )
         {
             DockingPane docker = frame.docker;
-            if ( docker != fromDocker )
-            {
-                dockersInOrder.add( docker );
-            }
-        }
-
-        for ( DockingPane docker : dockersInOrder )
-        {
             Point pInDocker = convertPointFromScreen( pOnScreen, docker );
             if ( docker.contains( pInDocker ) )
             {

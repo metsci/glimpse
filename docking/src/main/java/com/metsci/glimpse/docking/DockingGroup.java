@@ -26,15 +26,15 @@
  */
 package com.metsci.glimpse.docking;
 
-import static java.util.Collections.unmodifiableSet;
+import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -45,8 +45,8 @@ public class DockingGroup
 
     public final DockingTheme theme;
 
-    protected final Set<DockingFrame> framesMod;
-    public final Set<DockingFrame> frames;
+    protected final List<DockingFrame> framesMod;
+    public final List<DockingFrame> frames;
 
     protected final JFrame landingIndicator;
 
@@ -55,8 +55,8 @@ public class DockingGroup
     {
         this.theme = theme;
 
-        this.framesMod = new LinkedHashSet<>( );
-        this.frames = unmodifiableSet( framesMod );
+        this.framesMod = new ArrayList<>( );
+        this.frames = unmodifiableList( framesMod );
 
         this.landingIndicator = new JFrame( );
         landingIndicator.setAlwaysOnTop( true );
@@ -73,6 +73,11 @@ public class DockingGroup
         frame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
         frame.addWindowListener( new WindowAdapter( )
         {
+            public void windowActivated( WindowEvent ev )
+            {
+                bringFrameToFront( frame );
+            }
+
             public void windowClosing( WindowEvent ev )
             {
                 // Frame's close button was clicked
@@ -90,13 +95,21 @@ public class DockingGroup
             }
         } );
 
-        framesMod.add( frame );
+        framesMod.add( 0, frame );
         return frame;
     }
 
     public void removeFrame( DockingFrame frame )
     {
         framesMod.remove( frame );
+    }
+
+    public void bringFrameToFront( DockingFrame frame )
+    {
+        boolean found = framesMod.remove( frame );
+        if ( !found ) throw new RuntimeException( "Frame does not belong to this docking-group" );
+
+        framesMod.add( 0, frame );
     }
 
     public void setLandingIndicator( Rectangle bounds )
