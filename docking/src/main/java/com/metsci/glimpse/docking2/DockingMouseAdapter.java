@@ -32,6 +32,7 @@ import com.metsci.glimpse.docking2.LandingRegions.InNewWindow;
 import com.metsci.glimpse.docking2.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking2.LandingRegions.LastInExistingTile;
 import com.metsci.glimpse.docking2.LandingRegions.StayInExistingTile;
+import com.metsci.glimpse.docking2.TileFactories.TileFactory;
 
 public class DockingMouseAdapter extends MouseAdapter
 {

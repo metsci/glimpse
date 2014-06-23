@@ -26,11 +26,14 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static java.awt.Color.black;
+import static java.awt.Color.darkGray;
+import static java.awt.Color.lightGray;
+import static java.awt.Color.white;
+
 import java.awt.Color;
 import java.util.logging.Logger;
-
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.awt.Color.*;
 
 public class DockingThemes
 {
@@ -39,6 +42,9 @@ public class DockingThemes
 
 
     public static final DockingTheme defaultDockingTheme = new DockingTheme( 5,
+
+                                                                             2,
+                                                                             black,
 
                                                                              1, // Even lineThickness values do NOT work well
                                                                              5,
@@ -58,6 +64,9 @@ public class DockingThemes
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {
         return new DockingTheme( defaultDockingTheme.dividerSize,
+
+                                 defaultDockingTheme.landingIndicatorThickness,
+                                 defaultDockingTheme.landingIndicatorColor,
 
                                  defaultDockingTheme.lineThickness,
                                  defaultDockingTheme.cornerRadius,

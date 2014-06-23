@@ -35,6 +35,9 @@ public class DockingTheme
 
     public final int dividerSize;
 
+    public final int landingIndicatorThickness;
+    public final Color landingIndicatorColor;
+
     /**
      * Even lineThickness values do NOT work well
      */
@@ -55,6 +58,9 @@ public class DockingTheme
 
     public DockingTheme( int dividerSize,
 
+                         int landingIndicatorThickness,
+                         Color landingIndicatorColor,
+
                          int lineThickness, // Even lineThickness values do NOT work well
                          int cornerRadius,
                          int cardPadding,
@@ -70,6 +76,9 @@ public class DockingTheme
                          ImageIcon optionsIcon )
     {
         this.dividerSize = dividerSize;
+
+        this.landingIndicatorThickness = landingIndicatorThickness;
+        this.landingIndicatorColor = landingIndicatorColor;
 
         this.lineThickness = lineThickness;
         this.cornerRadius = cornerRadius;

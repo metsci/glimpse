@@ -32,10 +32,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -52,11 +50,6 @@ import org.jdesktop.swingx.MultiSplitLayout.RowSplit;
  */
 public class MiscUtils
 {
-
-    public static <E> void addAll( List<E> list, int index, E... elements )
-    {
-        list.addAll( index, Arrays.asList( elements ) );
-    }
 
     public static class IntAndIndex
     {

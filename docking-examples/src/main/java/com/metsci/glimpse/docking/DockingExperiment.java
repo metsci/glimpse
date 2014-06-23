@@ -5,7 +5,8 @@ import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.docking.Side.RIGHT;
+import static com.metsci.glimpse.docking.Side.BOTTOM;
+import static com.metsci.glimpse.docking.Side.LEFT;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
 import java.awt.Color;
@@ -23,10 +24,10 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking2.DockingMouseAdapter;
 import com.metsci.glimpse.docking2.DockingPane;
 import com.metsci.glimpse.docking2.DockingPaneGroup;
-import com.metsci.glimpse.docking2.TileFactory;
+import com.metsci.glimpse.docking2.TileFactories.TileFactory;
+import com.metsci.glimpse.docking2.TileFactories.TileFactoryStandard;
 
 public class DockingExperiment
 {
@@ -35,7 +36,11 @@ public class DockingExperiment
     {
         Theme.loadTheme( DockingExperiment.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        final DockingTheme dockingTheme = tinyLafDockingTheme( );
+        DockingTheme dockingTheme = tinyLafDockingTheme( );
+
+
+        DockingPaneGroup dockerGroup = new DockingPaneGroup( dockingTheme );
+        TileFactory tileFactory = new TileFactoryStandard( dockerGroup );
 
 
         JPanel aPanel = new JPanel( ) {{ setBackground( Color.red ); }};
@@ -95,72 +100,41 @@ public class DockingExperiment
         View hView = new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar );
 
 
-        Tile aTile = new Tile( dockingTheme );
+        Tile aTile = tileFactory.newTile( );
         aTile.addView( aView, 0 );
         aTile.addView( bView, 1 );
+        aTile.addView( cView, 2 );
 
-        Tile bTile = new Tile( dockingTheme );
-        bTile.addView( cView, 0 );
-        bTile.addView( dView, 1 );
+        Tile bTile = tileFactory.newTile( );
+        bTile.addView( dView, 0 );
+        bTile.addView( eView, 1 );
 
-        Tile cTile = new Tile( dockingTheme );
-        cTile.addView( eView, 0 );
-        cTile.addView( fView, 1 );
-
-        Tile dTile = new Tile( dockingTheme );
-        dTile.addView( gView, 0 );
-        dTile.addView( hView, 1 );
+        Tile cTile = tileFactory.newTile( );
+        cTile.addView( fView, 0 );
+        cTile.addView( gView, 1 );
+        cTile.addView( hView, 2 );
 
 
-
-        DockingPaneGroup dockerGroup = new DockingPaneGroup( dockingTheme );
-
-
-        final DockingPane aDocker = dockerGroup.addNewDocker( );
-        aDocker.addInitialTile( aTile );
-        aDocker.addNeighborTile( bTile, aTile, RIGHT, 0.3 );
-
-        final DockingPane bDocker = dockerGroup.addNewDocker( );
-        bDocker.addInitialTile( cTile );
-        bDocker.addNeighborTile( dTile, cTile, Side.TOP, 0.8 );
-
-
-
-
-        TileFactory tileFactory = new TileFactory( )
-        {
-            public Tile newTile( )
-            {
-                return new Tile( dockingTheme );
-            }
-        };
-
-
-        aTile.addDockingMouseAdapter( new DockingMouseAdapter( aTile, dockerGroup, tileFactory ) );
-
-
-
+        final DockingPane docker = dockerGroup.addNewDocker( );
+        docker.addInitialTile( aTile );
+        docker.addNeighborTile( bTile, aTile, LEFT, 0.3 );
+        docker.addEdgeTile( cTile, BOTTOM, 0.3 );
 
 
         swingRun( new Runnable( )
         {
             public void run( )
             {
-                JFrame aFrame = new JFrame( );
-                aFrame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-                aFrame.setContentPane( aDocker );
-                aFrame.setPreferredSize( new Dimension( 1024, 768 ) );
-                aFrame.pack( );
-                aFrame.setLocationByPlatform( true );
-                aFrame.setVisible( true );
+                JFrame frame = new JFrame( );
+                frame.setContentPane( docker );
 
-                JFrame bFrame = new JFrame( );
-                bFrame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-                bFrame.setContentPane( bDocker );
-                bFrame.setPreferredSize( new Dimension( 1024, 768 ) );
-                bFrame.pack( );
-                bFrame.setLocationByPlatform( true );
-                bFrame.setVisible( true );
+                // XXX
+                frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
+
+                frame.setPreferredSize( new Dimension( 1024, 768 ) );
+                frame.pack( );
+                frame.setLocationByPlatform( true );
+                frame.setVisible( true );
             }
         });
     }

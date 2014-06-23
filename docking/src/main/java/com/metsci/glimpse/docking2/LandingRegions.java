@@ -4,7 +4,6 @@ import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import static javax.swing.SwingUtilities.convertPointToScreen;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -13,6 +12,7 @@ import javax.swing.JFrame;
 import com.metsci.glimpse.docking.Side;
 import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking2.TileFactories.TileFactory;
 
 public class LandingRegions
 {
@@ -242,11 +242,11 @@ public class LandingRegions
             docker.addInitialTile( tile );
 
             JFrame frame = new JFrame( );
+            frame.setContentPane( docker );
 
             // XXX
             frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
 
-            frame.setContentPane( docker );
             frame.setBounds( xOnScreen, yOnScreen, width, height );
             frame.setVisible( true );
         }

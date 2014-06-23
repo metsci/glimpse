@@ -2,8 +2,8 @@ package com.metsci.glimpse.docking2;
 
 import static java.util.Collections.unmodifiableSet;
 
-import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.geom.Area;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -33,7 +33,7 @@ public class DockingPaneGroup
         landingIndicator.setAlwaysOnTop( true );
         landingIndicator.setFocusable( false );
         landingIndicator.setUndecorated( true );
-        landingIndicator.setBackground( new Color( 1f, 0f, 0f, 0.5f ) );
+        landingIndicator.getContentPane( ).setBackground( theme.landingIndicatorColor );
     }
 
     public DockingPane addNewDocker( )
@@ -52,6 +52,12 @@ public class DockingPaneGroup
         else
         {
             landingIndicator.setBounds( bounds );
+
+            Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
+            int thickness = theme.landingIndicatorThickness;
+            shape.subtract( new Area( new Rectangle( thickness, thickness, bounds.width - 2*thickness, bounds.height - 2*thickness ) ) );
+            landingIndicator.setShape( shape );
+
             landingIndicator.setVisible( true );
         }
     }
