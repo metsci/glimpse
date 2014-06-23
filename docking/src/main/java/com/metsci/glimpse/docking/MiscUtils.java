@@ -77,6 +77,20 @@ public class MiscUtils
         return ( T ) SwingUtilities.getAncestorOfClass( clazz, c );
     }
 
+    public static Point convertPointFromScreen( Point pOnScreen, Component c )
+    {
+        Point pInC = new Point( pOnScreen );
+        SwingUtilities.convertPointFromScreen( pInC, c );
+        return pInC;
+    }
+
+    public static Point convertPointToScreen( Component c, Point pInC )
+    {
+        Point pOnScreen = new Point( pInC );
+        SwingUtilities.convertPointToScreen( pOnScreen, c );
+        return pOnScreen;
+    }
+
     public static Point pointRelativeToAncestor( MouseEvent ev, Component ancestor )
     {
         int i = ev.getX( );

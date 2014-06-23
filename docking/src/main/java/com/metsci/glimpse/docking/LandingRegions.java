@@ -26,25 +26,154 @@
  */
 package com.metsci.glimpse.docking;
 
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
+import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
+import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
+import static com.metsci.glimpse.docking.Side.BOTTOM;
+import static com.metsci.glimpse.docking.Side.LEFT;
+import static com.metsci.glimpse.docking.Side.RIGHT;
+import static com.metsci.glimpse.docking.Side.TOP;
 import static javax.swing.SwingUtilities.convertPointToScreen;
+import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.JFrame;
-
+import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 
 public class LandingRegions
 {
 
+    public static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, Point pOnScreen )
+    {
+        List<DockingPane> dockersInOrder = new ArrayList<>( );
+        DockingPane fromDocker = getAncestorOfClass( DockingPane.class, fromTile );
+        dockersInOrder.add( fromDocker );
+        for ( DockingFrame frame : dockingGroup.frames )
+        {
+            DockingPane docker = frame.docker;
+            if ( docker != fromDocker )
+            {
+                dockersInOrder.add( docker );
+            }
+        }
+
+        for ( DockingPane docker : dockersInOrder )
+        {
+            Point pInDocker = convertPointFromScreen( pOnScreen, docker );
+            if ( docker.contains( pInDocker ) )
+            {
+                Window window = getWindowAncestor( docker );
+                if ( window != null ) window.toFront( );
+
+                return findLandingRegion( docker, fromTile, pOnScreen );
+            }
+        }
+
+        // Not inside any docking-pane
+        return new InNewWindow( dockingGroup, pOnScreen.x, pOnScreen.y, fromTile.getWidth( ), fromTile.getHeight( ) );
+    }
+
+
+    public static LandingRegion findLandingRegion( DockingPane docker, Tile fromTile, Point pOnScreen )
+    {
+        Point pInDocker = convertPointFromScreen( pOnScreen, docker );
+
+        if ( !docker.contains( pInDocker ) )
+        {
+            // Not inside this docking-pane
+            return null;
+        }
+
+        Component toComp = docker.findTileAt( pInDocker.x, pInDocker.y );
+
+        // On own tile, which has no other views
+        if ( toComp == fromTile && fromTile.numViews( ) == 1 )
+        {
+            return null;
+        }
+
+        // On an existing tab
+        if ( toComp instanceof Tile )
+        {
+            Tile toTile = ( Tile ) toComp;
+            Point pInTile = convertPointFromScreen( pOnScreen, toTile );
+            int viewNum = toTile.viewNumForTabAt( pInTile.x, pInTile.y );
+            if ( 0 <= viewNum && viewNum < toTile.numViews( ) )
+            {
+                return new InExistingTile( toTile, viewNum );
+            }
+        }
+
+        // In an empty docking-pane
+        if ( docker.numTiles( ) == 0 )
+        {
+            return new InEmptyDockingPane( docker );
+        }
+
+        // Near edge of docking-pane
+        {
+            int dLeft = pInDocker.x;
+            int dRight = docker.getWidth( ) - 1 - pInDocker.x;
+            int dTop = pInDocker.y;
+            int dBottom = docker.getHeight( ) - 1 - pInDocker.y;
+
+            IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
+            if ( closest.value < 16 )
+            {
+                switch ( closest.index )
+                {
+                    case 0: return new EdgeOfDockingPane( docker, LEFT );
+                    case 1: return new EdgeOfDockingPane( docker, RIGHT );
+                    case 2: return new EdgeOfDockingPane( docker, TOP );
+                    case 3: return new EdgeOfDockingPane( docker, BOTTOM );
+                }
+            }
+        }
+
+        // Near edge of an existing tile
+        if ( toComp != null )
+        {
+            Point pInComp = convertPointFromScreen( pOnScreen, toComp );
+            int dLeft = pInComp.x;
+            int dRight = toComp.getWidth( ) - 1 - pInComp.x;
+            int dTop = pInComp.y;
+            int dBottom = toComp.getHeight( ) - 1 - pInComp.y;
+
+            IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
+            if ( closest.value < 64 )
+            {
+                switch ( closest.index )
+                {
+                    case 0: return new BesideExistingTile( docker, toComp, LEFT );
+                    case 1: return new BesideExistingTile( docker, toComp, RIGHT );
+                    case 2: return new BesideExistingTile( docker, toComp, TOP );
+                    case 3: return new BesideExistingTile( docker, toComp, BOTTOM );
+                }
+            }
+        }
+
+        // In an existing tile, but not the one we started from, and not near the edge
+        if ( toComp != fromTile && toComp instanceof Tile )
+        {
+            Tile toTile = ( Tile ) toComp;
+            return new LastInExistingTile( toTile );
+        }
+
+        // Nowhere else to land, except back where we started
+        return null;
+    }
+
 
     public static interface LandingRegion
     {
         Rectangle getIndicator( );
-        void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory );
+        void placeView( View view, TileFactory tileFactory );
     }
 
 
@@ -66,7 +195,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
+        public void placeView( View view, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -109,7 +238,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
+        public void placeView( View view, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -154,7 +283,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
+        public void placeView( View view, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
@@ -193,7 +322,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
+        public void placeView( View view, TileFactory tileFactory )
         {
             // If you think about it, you'll wonder why we always insert at viewNum --
             // if we're moving a view a few tabs to the right, then the view's original
@@ -228,7 +357,7 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
+        public void placeView( View view, TileFactory tileFactory )
         {
             tile.addView( view, tile.numViews( ) );
             tile.selectView( view );
@@ -238,13 +367,15 @@ public class LandingRegions
 
     public static class InNewWindow implements LandingRegion
     {
+        public final DockingGroup dockingGroup;
         public final int xOnScreen;
         public final int yOnScreen;
         public final int width;
         public final int height;
 
-        public InNewWindow( int xOnScreen, int yOnScreen, int width, int height )
+        public InNewWindow( DockingGroup dockingGroup, int xOnScreen, int yOnScreen, int width, int height )
         {
+            this.dockingGroup = dockingGroup;
             this.xOnScreen = xOnScreen;
             this.yOnScreen = yOnScreen;
             this.width = width;
@@ -258,20 +389,13 @@ public class LandingRegions
         }
 
         @Override
-        public void placeView( View view, DockingGroup dockingGroup, TileFactory tileFactory )
+        public void placeView( View view, TileFactory tileFactory )
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
 
-            DockingPane docker = dockingGroup.addNewDockingPane( );
-            docker.addInitialTile( tile );
-
-            JFrame frame = new JFrame( );
-            frame.setContentPane( docker );
-
-            // XXX
-            frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-
+            DockingFrame frame = dockingGroup.addNewFrame( );
+            frame.docker.addInitialTile( tile );
             frame.setBounds( xOnScreen, yOnScreen, width, height );
             frame.setVisible( true );
         }

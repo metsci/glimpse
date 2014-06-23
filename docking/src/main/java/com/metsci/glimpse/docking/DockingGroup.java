@@ -27,8 +27,11 @@
 package com.metsci.glimpse.docking;
 
 import static java.util.Collections.unmodifiableSet;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -42,8 +45,8 @@ public class DockingGroup
 
     public final DockingTheme theme;
 
-    protected final Set<DockingPane> dockersMod;
-    public final Set<DockingPane> dockers;
+    protected final Set<DockingFrame> framesMod;
+    public final Set<DockingFrame> frames;
 
     protected final JFrame landingIndicator;
 
@@ -52,8 +55,8 @@ public class DockingGroup
     {
         this.theme = theme;
 
-        this.dockersMod = new LinkedHashSet<>( );
-        this.dockers = unmodifiableSet( dockersMod );
+        this.framesMod = new LinkedHashSet<>( );
+        this.frames = unmodifiableSet( framesMod );
 
         this.landingIndicator = new JFrame( );
         landingIndicator.setAlwaysOnTop( true );
@@ -62,11 +65,38 @@ public class DockingGroup
         landingIndicator.getContentPane( ).setBackground( theme.landingIndicatorColor );
     }
 
-    public DockingPane addNewDockingPane( )
+    public DockingFrame addNewFrame( )
     {
         DockingPane docker = new DockingPane( theme.dividerSize );
-        dockersMod.add( docker );
-        return docker;
+
+        final DockingFrame frame = new DockingFrame( docker );
+        frame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
+        frame.addWindowListener( new WindowAdapter( )
+        {
+            public void windowClosing( WindowEvent ev )
+            {
+                // Frame's close button was clicked
+                for ( DockingFrame frame : frames )
+                {
+                    frame.dispose( );
+                }
+                landingIndicator.dispose( );
+            }
+
+            public void windowClosed( WindowEvent ev )
+            {
+                // Frame has been disposed, including programmatically
+                removeFrame( frame );
+            }
+        } );
+
+        framesMod.add( frame );
+        return frame;
+    }
+
+    public void removeFrame( DockingFrame frame )
+    {
+        framesMod.remove( frame );
     }
 
     public void setLandingIndicator( Rectangle bounds )

@@ -30,16 +30,13 @@ import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
 import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -140,28 +137,17 @@ public class DockingExperiment
         cTile.addView( hView, 2 );
 
 
-        final DockingPane docker = dockingGroup.addNewDockingPane( );
+        DockingFrame frame = dockingGroup.addNewFrame( );
+        DockingPane docker = frame.docker;
+
         docker.addInitialTile( aTile );
         docker.addNeighborTile( bTile, aTile, LEFT, 0.3 );
         docker.addEdgeTile( cTile, BOTTOM, 0.3 );
 
-
-        swingRun( new Runnable( )
-        {
-            public void run( )
-            {
-                JFrame frame = new JFrame( );
-                frame.setContentPane( docker );
-
-                // XXX
-                frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-
-                frame.setPreferredSize( new Dimension( 1024, 768 ) );
-                frame.pack( );
-                frame.setLocationByPlatform( true );
-                frame.setVisible( true );
-            }
-        });
+        frame.setPreferredSize( new Dimension( 1024, 768 ) );
+        frame.pack( );
+        frame.setLocationByPlatform( true );
+        frame.setVisible( true );
     }
 
 }

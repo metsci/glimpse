@@ -26,38 +26,21 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
-import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
-import static com.metsci.glimpse.docking.Side.BOTTOM;
-import static com.metsci.glimpse.docking.Side.LEFT;
-import static com.metsci.glimpse.docking.Side.RIGHT;
-import static com.metsci.glimpse.docking.Side.TOP;
 import static java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
-import static javax.swing.SwingUtilities.convertPointFromScreen;
-import static javax.swing.SwingUtilities.convertPointToScreen;
-import static javax.swing.SwingUtilities.getWindowAncestor;
 
-import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.metsci.glimpse.docking.LandingRegions.BesideExistingTile;
-import com.metsci.glimpse.docking.LandingRegions.EdgeOfDockingPane;
-import com.metsci.glimpse.docking.LandingRegions.InEmptyDockingPane;
-import com.metsci.glimpse.docking.LandingRegions.InExistingTile;
-import com.metsci.glimpse.docking.LandingRegions.InNewWindow;
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
-import com.metsci.glimpse.docking.LandingRegions.LastInExistingTile;
-import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 
 public class DockingMouseAdapter extends MouseAdapter
@@ -104,15 +87,14 @@ public class DockingMouseAdapter extends MouseAdapter
         {
             this.dragging = true;
 
-            LandingRegion region = findLandingRegion( dockingGroup, tile, ev );
+            LandingRegion region = findLandingRegion( dockingGroup, tile, ev.getLocationOnScreen( ) );
             if ( region != null )
             {
                 dockingGroup.setLandingIndicator( region.getIndicator( ) );
             }
             else
             {
-                Point pOnScreen = new Point( 0, 0 );
-                convertPointToScreen( pOnScreen, tile );
+                Point pOnScreen = convertPointToScreen( tile, new Point( 0, 0 ) );
                 dockingGroup.setLandingIndicator( new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) ) );
             }
         }
@@ -123,16 +105,25 @@ public class DockingMouseAdapter extends MouseAdapter
     {
         if ( ev.getButton( ) == BUTTON1 && dragging )
         {
-            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, ev );
+            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, ev.getLocationOnScreen( ) );
             if ( landingRegion != null )
             {
                 tile.removeView( draggedView );
-                landingRegion.placeView( draggedView, dockingGroup, tileFactory );
+                landingRegion.placeView( draggedView, tileFactory );
 
                 if ( tile.numViews( ) == 0 )
                 {
                     DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
                     docker.removeTile( tile );
+
+                    if ( docker.numTiles( ) == 0 && dockingGroup.frames.size( ) > 1 )
+                    {
+                        DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
+                        if ( frame != null && frame.getContentPane( ) == docker )
+                        {
+                            frame.dispose( );
+                        }
+                    }
                 }
             }
 
@@ -140,137 +131,6 @@ public class DockingMouseAdapter extends MouseAdapter
             this.draggedView = null;
             dockingGroup.setLandingIndicator( null );
         }
-    }
-
-    protected static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, MouseEvent ev )
-    {
-        List<DockingPane> dockersInOrder = new ArrayList<>( );
-        DockingPane fromDocker = getAncestorOfClass( DockingPane.class, fromTile );
-        dockersInOrder.add( fromDocker );
-        for ( DockingPane docker : dockingGroup.dockers )
-        {
-            if ( docker != fromDocker )
-            {
-                dockersInOrder.add( docker );
-            }
-        }
-
-        Point pOnScreen = ev.getLocationOnScreen( );
-
-        for ( DockingPane docker : dockersInOrder )
-        {
-            Point pInDocker = new Point( pOnScreen );
-            convertPointFromScreen( pInDocker, docker );
-
-            if ( docker.contains( pInDocker ) )
-            {
-                Window window = getWindowAncestor( docker );
-                if ( window != null ) window.toFront( );
-
-
-                Component toComp = docker.findTileAt( pInDocker.x, pInDocker.y );
-
-
-                // On own tile, which has no other views
-                //
-                if ( toComp == fromTile && fromTile.numViews( ) == 1 )
-                {
-                    return null;
-                }
-
-
-                // On an existing tab
-                //
-                if ( toComp instanceof Tile )
-                {
-                    Tile toTile = ( Tile ) toComp;
-
-                    Point pInTile = new Point( pOnScreen );
-                    convertPointFromScreen( pInTile, toTile );
-
-                    int viewNum = toTile.viewNumForTabAt( pInTile.x, pInTile.y );
-                    if ( 0 <= viewNum && viewNum < toTile.numViews( ) )
-                    {
-                        return new InExistingTile( toTile, viewNum );
-                    }
-                }
-
-
-                // In an empty docking-pane
-                //
-                if ( docker.numTiles( ) == 0 )
-                {
-                    return new InEmptyDockingPane( docker );
-                }
-
-
-                // Near edge of docking-pane
-                //
-                {
-                    int dLeft = pInDocker.x;
-                    int dRight = docker.getWidth( ) - 1 - pInDocker.x;
-                    int dTop = pInDocker.y;
-                    int dBottom = docker.getHeight( ) - 1 - pInDocker.y;
-
-                    IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
-                    if ( closest.value < 16 )
-                    {
-                        switch ( closest.index )
-                        {
-                            case 0: return new EdgeOfDockingPane( docker, LEFT );
-                            case 1: return new EdgeOfDockingPane( docker, RIGHT );
-                            case 2: return new EdgeOfDockingPane( docker, TOP );
-                            case 3: return new EdgeOfDockingPane( docker, BOTTOM );
-                        }
-                    }
-                }
-
-
-                // Near edge of an existing tile
-                //
-                if ( toComp != null )
-                {
-                    Point pInComp = new Point( pOnScreen );
-                    convertPointFromScreen( pInComp, toComp );
-
-                    int dLeft = pInComp.x;
-                    int dRight = toComp.getWidth( ) - 1 - pInComp.x;
-                    int dTop = pInComp.y;
-                    int dBottom = toComp.getHeight( ) - 1 - pInComp.y;
-
-                    IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
-                    if ( closest.value < 64 )
-                    {
-                        switch ( closest.index )
-                        {
-                            case 0: return new BesideExistingTile( docker, toComp, LEFT );
-                            case 1: return new BesideExistingTile( docker, toComp, RIGHT );
-                            case 2: return new BesideExistingTile( docker, toComp, TOP );
-                            case 3: return new BesideExistingTile( docker, toComp, BOTTOM );
-                        }
-                    }
-                }
-
-
-                // In an existing tile, but not the one we started from, and not near the edge
-                //
-                if ( toComp != fromTile && toComp instanceof Tile )
-                {
-                    Tile toTile = ( Tile ) toComp;
-                    return new LastInExistingTile( toTile );
-                }
-
-
-                // Nowhere else to land, except back where we started
-                //
-                return null;
-            }
-        }
-
-
-        // Not in any docking-pane
-        //
-        return new InNewWindow( pOnScreen.x, pOnScreen.y, fromTile.getWidth( ), fromTile.getHeight( ) );
     }
 
 }
