@@ -38,10 +38,12 @@ import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static javax.swing.SwingUtilities.convertPointFromScreen;
+import static javax.swing.SwingUtilities.convertPointToScreen;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -54,7 +56,6 @@ import com.metsci.glimpse.docking.LandingRegions.InExistingTile;
 import com.metsci.glimpse.docking.LandingRegions.InNewWindow;
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking.LandingRegions.LastInExistingTile;
-import com.metsci.glimpse.docking.LandingRegions.StayInExistingTile;
 import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 
@@ -101,8 +102,18 @@ public class DockingMouseAdapter extends MouseAdapter
         if ( draggedView != null )
         {
             this.dragging = true;
+
             LandingRegion region = findLandingRegion( dockerGroup, tile, ev );
-            dockerGroup.setLandingIndicator( region.getIndicator( ) );
+            if ( region != null )
+            {
+                dockerGroup.setLandingIndicator( region.getIndicator( ) );
+            }
+            else
+            {
+                Point pOnScreen = new Point( 0, 0 );
+                convertPointToScreen( pOnScreen, tile );
+                dockerGroup.setLandingIndicator( new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) ) );
+            }
         }
     }
 
@@ -114,13 +125,6 @@ public class DockingMouseAdapter extends MouseAdapter
             LandingRegion landingRegion = findLandingRegion( dockerGroup, tile, ev );
             if ( landingRegion != null )
             {
-                // This will remove empty tiles before placing the view.
-                //
-                // This would cause problems if a view were placed relative to its
-                // own tile, and there were no other views in the tile. We get away
-                // with it, though, because we don't allow the dragged view to land
-                // beside its own tile, unless the tile contains other views.
-                //
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, dockerGroup, tileFactory );
 
@@ -170,7 +174,7 @@ public class DockingMouseAdapter extends MouseAdapter
                 //
                 if ( toComp == fromTile && fromTile.numViews( ) == 1 )
                 {
-                    return new StayInExistingTile( fromTile );
+                    return null;
                 }
 
 
@@ -250,7 +254,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
                 // Nowhere else to land, except back where we started
                 //
-                return new StayInExistingTile( fromTile );
+                return null;
             }
         }
 

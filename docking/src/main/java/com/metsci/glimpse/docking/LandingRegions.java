@@ -48,31 +48,6 @@ public class LandingRegions
     }
 
 
-    public static class StayInExistingTile implements LandingRegion
-    {
-        public final Tile tile;
-
-        public StayInExistingTile( Tile tile )
-        {
-            this.tile = tile;
-        }
-
-        @Override
-        public Rectangle getIndicator( )
-        {
-            Point pOnScreen = new Point( 0, 0 );
-            convertPointToScreen( pOnScreen, tile );
-            return new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) );
-        }
-
-        @Override
-        public void placeView( View view, DockingPaneGroup dockerGroup, TileFactory tileFactory )
-        {
-            // Do nothing
-        }
-    }
-
-
     public static class EdgeOfDockingPane implements LandingRegion
     {
         public final DockingPane docker;
