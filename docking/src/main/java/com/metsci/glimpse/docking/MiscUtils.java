@@ -72,7 +72,7 @@ public class MiscUtils
     }
 
     @SuppressWarnings( "unchecked" )
-    public static <T> T getAncestorOfClass( Class<? super T> clazz, Component c )
+    public static <T> T getAncestorOfClass( Class<? extends T> clazz, Component c )
     {
         return ( T ) SwingUtilities.getAncestorOfClass( clazz, c );
     }
