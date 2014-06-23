@@ -34,12 +34,10 @@ import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
 import static javax.swing.SwingUtilities.convertPointToScreen;
-import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,9 +66,6 @@ public class LandingRegions
             Point pInDocker = convertPointFromScreen( pOnScreen, docker );
             if ( docker.contains( pInDocker ) )
             {
-                Window window = getWindowAncestor( docker );
-                if ( window != null ) window.toFront( );
-
                 return findLandingRegion( docker, fromTile, pOnScreen );
             }
         }

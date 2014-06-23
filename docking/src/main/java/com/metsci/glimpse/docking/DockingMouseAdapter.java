@@ -27,6 +27,7 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
@@ -39,6 +40,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -85,7 +89,31 @@ public class DockingMouseAdapter extends MouseAdapter
     {
         if ( draggedView != null )
         {
+            if ( !dragging )
+            {
+                List<DockingFrame> framesInOrder = new ArrayList<>( );
+                DockingFrame fromFrame = getAncestorOfClass( DockingFrame.class, tile );
+                framesInOrder.add( fromFrame );
+                for ( DockingFrame frame : dockingGroup.frames )
+                {
+                    if ( frame != fromFrame )
+                    {
+                        framesInOrder.add( frame );
+                    }
+                }
+                Collections.reverse( framesInOrder );
+
+                for ( DockingFrame frame : framesInOrder )
+                {
+                    frame.toFront( );
+                }
+            }
+
+
             this.dragging = true;
+
+
+
 
             LandingRegion region = findLandingRegion( dockingGroup, tile, ev.getLocationOnScreen( ) );
             if ( region != null )
