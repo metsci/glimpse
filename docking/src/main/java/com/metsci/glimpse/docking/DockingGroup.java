@@ -29,6 +29,7 @@ package com.metsci.glimpse.docking;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
+import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -37,6 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlType;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 
@@ -169,6 +173,114 @@ public class DockingGroup
             landingIndicator.setShape( shape );
 
             landingIndicator.setVisible( true );
+        }
+    }
+
+
+    // Snapshots
+    //
+
+    public List<FrameSnapshot> snapshot( )
+    {
+        List<FrameSnapshot> frameSnapshots = new ArrayList<>( );
+        for ( DockingFrame frame : frames )
+        {
+            SnapshotNode dockerSnapshot = toDockerSnapshot( frame.docker.getSnapshot( ) );
+            frameSnapshots.add( new FrameSnapshot( frame.getBounds( ), dockerSnapshot ) );
+        }
+        return frameSnapshots;
+    }
+
+    public static SnapshotNode toDockerSnapshot( DockingPane.Node node )
+    {
+        if ( node instanceof DockingPane.Leaf )
+        {
+            DockingPane.Leaf leaf = ( DockingPane.Leaf ) node;
+
+            List<String> viewIds = new ArrayList<>( );
+            String selectedViewId = null;
+            Component c = leaf.component;
+            if ( c instanceof Tile )
+            {
+                Tile tile = ( Tile ) c;
+                for ( int i = 0; i < tile.numViews( ); i++ )
+                {
+                    String viewId = tile.view( i ).viewKey.viewId;
+                    viewIds.add( viewId );
+                }
+                selectedViewId = tile.selectedView( ).viewKey.viewId;
+            }
+
+            return new TileSnapshot( viewIds, selectedViewId, leaf.isMaximized );
+        }
+        else if ( node instanceof DockingPane.Split )
+        {
+            DockingPane.Split split = ( DockingPane.Split ) node;
+            return new SplitSnapshot( split.arrangeVertically, split.splitFrac, toDockerSnapshot( split.childA ), toDockerSnapshot( split.childB ) );
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    @XmlType( name="Frame" )
+    public static class FrameSnapshot
+    {
+        public final int x;
+        public final int y;
+        public final int width;
+        public final int height;
+        public final SnapshotNode dockerSnapshot;
+
+        public FrameSnapshot( Rectangle frameBounds, SnapshotNode dockerSnapshot )
+        {
+            this.x = frameBounds.x;
+            this.y = frameBounds.y;
+            this.width = frameBounds.width;
+            this.height = frameBounds.height;
+            this.dockerSnapshot = dockerSnapshot;
+        }
+    }
+
+    @XmlType( name="Node" )
+    public static abstract class SnapshotNode
+    { }
+
+    @XmlType( name="Split" )
+    public static class SplitSnapshot extends SnapshotNode
+    {
+        public final boolean arrangeVertically;
+        public final double splitFrac;
+        public final SnapshotNode childA;
+        public final SnapshotNode childB;
+
+        public SplitSnapshot( boolean arrangeVertically, double splitFrac, SnapshotNode childA, SnapshotNode childB )
+        {
+            this.arrangeVertically = arrangeVertically;
+            this.splitFrac = splitFrac;
+            this.childA = childA;
+            this.childB = childB;
+        }
+    }
+
+    @XmlType( name="Tile" )
+    public static class TileSnapshot extends SnapshotNode
+    {
+        @XmlElementWrapper( name="views" )
+        @XmlElement( name="view" )
+        public final List<String> viewIds;
+
+        @XmlElement( name="selectedView" )
+        public final String selectedViewId;
+
+        public final boolean isMaximized;
+
+        public TileSnapshot( List<String> viewIds, String selectedViewId, boolean isMaximized )
+        {
+            this.viewIds = unmodifiableList( new ArrayList<>( viewIds ) );
+            this.selectedViewId = selectedViewId;
+            this.isMaximized = isMaximized;
         }
     }
 

@@ -307,4 +307,65 @@ public class DockingPane extends JPanel
         this.maximizedTile = null;
     }
 
+
+    // Snapshots
+    //
+
+    public Node getSnapshot( )
+    {
+        return createSnapshot( root );
+    }
+
+    protected Node createSnapshot( Component c )
+    {
+        if ( c instanceof SplitPane )
+        {
+            SplitPane s = ( SplitPane ) c;
+            return new Split( s.arrangeVertically, s.splitFrac, createSnapshot( s.getChildA( ) ), createSnapshot( s.getChildB( ) ) );
+        }
+        else if ( c == maximizedPlaceholder )
+        {
+            return new Leaf( maximizedTile, true );
+        }
+        else if ( c != null )
+        {
+            return new Leaf( c, false );
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static abstract class Node
+    { }
+
+    public static class Split extends Node
+    {
+        public final boolean arrangeVertically;
+        public final double splitFrac;
+        public final Node childA;
+        public final Node childB;
+
+        public Split( boolean arrangeVertically, double splitFrac, Node childA, Node childB )
+        {
+            this.arrangeVertically = arrangeVertically;
+            this.splitFrac = splitFrac;
+            this.childA = childA;
+            this.childB = childB;
+        }
+    }
+
+    public static class Leaf extends Node
+    {
+        public final Component component;
+        public final boolean isMaximized;
+
+        public Leaf( Component component, boolean isMaximized )
+        {
+            this.component = component;
+            this.isMaximized = isMaximized;
+        }
+    }
+
 }
