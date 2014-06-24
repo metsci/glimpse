@@ -43,6 +43,7 @@ import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 public class DockingGroup
 {
 
+    public final String title;
     public final DockingTheme theme;
 
     protected final List<DockingFrame> framesMod;
@@ -51,8 +52,9 @@ public class DockingGroup
     protected final JFrame landingIndicator;
 
 
-    public DockingGroup( DockingTheme theme )
+    public DockingGroup( String title, DockingTheme theme )
     {
+        this.title = title;
         this.theme = theme;
 
         this.framesMod = new ArrayList<>( );
@@ -69,7 +71,7 @@ public class DockingGroup
     {
         DockingPane docker = new DockingPane( theme.dividerSize );
 
-        final DockingFrame frame = new DockingFrame( docker );
+        final DockingFrame frame = new DockingFrame( title, docker );
         frame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
         frame.addWindowListener( new WindowAdapter( )
         {

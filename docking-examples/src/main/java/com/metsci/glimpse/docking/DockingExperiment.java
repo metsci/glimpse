@@ -61,7 +61,7 @@ public class DockingExperiment
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        DockingGroup dockingGroup = new DockingGroup( dockingTheme );
+        DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme );
         TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 

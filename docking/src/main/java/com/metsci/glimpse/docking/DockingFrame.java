@@ -8,9 +8,9 @@ public class DockingFrame extends JFrame
     public final DockingPane docker;
 
 
-    public DockingFrame( DockingPane docker )
+    public DockingFrame( String title, DockingPane docker )
     {
-        super( "DockingFrame" );
+        super( title );
         this.docker = docker;
         setContentPane( docker );
     }
