@@ -111,6 +111,7 @@ public class SplitPane extends JPanel
                     int newSizeA = ( arrangeVertically ? childA.getHeight( ) + ev.getY( ) : childA.getWidth( ) + ev.getX( ) ) - grab;
                     int contentSize = ( arrangeVertically ? getHeight( ) : getWidth( ) ) - gapSize;
                     setSplitFrac( ( ( double ) newSizeA ) / ( ( double ) contentSize ) );
+                    validate( );
                 }
             }
 
@@ -121,6 +122,7 @@ public class SplitPane extends JPanel
                     int newSizeA = ( arrangeVertically ? childA.getHeight( ) + ev.getY( ) : childA.getWidth( ) + ev.getX( ) ) - grab;
                     int contentSize = ( arrangeVertically ? getHeight( ) : getWidth( ) ) - gapSize;
                     setSplitFrac( ( ( double ) newSizeA ) / ( ( double ) contentSize ) );
+                    validate( );
 
                     grab = null;
                 }
@@ -217,14 +219,52 @@ public class SplitPane extends JPanel
             //
             this.splitFrac = splitFrac;
             invalidate( );
-            validate( );
+
+            // Duplicate some layout logic here, to figure out what the child
+            // sizes will be -- so that we can keep child dividers fixed without
+            // getting recursive
+            //
+            int childSizeA;
+            int childSizeB;
+            if ( arrangeVertically )
+            {
+                int heightContainer = getHeight( );
+
+                int minHeightA = 1;
+                int minHeightB = 1;
+                int maxHeightA = heightContainer - gapSize - minHeightB;
+
+                int prelimHeightA = iround( splitFrac * ( heightContainer - gapSize ) );
+                int heightA = max( minHeightA, min( maxHeightA, prelimHeightA ) );
+                int yB = heightA + gapSize;
+                int heightB = max( minHeightB, heightContainer - yB );
+
+                childSizeA = heightA;
+                childSizeB = heightB;
+            }
+            else
+            {
+                int widthContainer = getWidth( );
+
+                int minWidthA = 1;
+                int minWidthB = 1;
+                int maxWidthA = widthContainer - gapSize - minWidthB;
+
+                int prelimWidthA = iround( splitFrac * ( widthContainer - gapSize ) );
+                int widthA = max( minWidthA, min( maxWidthA, prelimWidthA ) );
+                int xB = widthA + gapSize;
+                int widthB = max( minWidthB, widthContainer - xB );
+
+                childSizeA = widthA;
+                childSizeB = widthB;
+            }
 
             // Keep childA's divider fixed
             //
             if ( fixedSizeGrandchildA >= 0 )
             {
                 SplitPane child = ( SplitPane ) childA;
-                int childSize = ( arrangeVertically ? child.getHeight( ) : child.getWidth( ) );
+                int childSize = childSizeA;
                 int grandchildSizeA = fixedSizeGrandchildA;
                 int grandchildSizeB = childSize - child.gapSize - grandchildSizeA;
                 double childFrac = ( ( double ) grandchildSizeA ) / ( ( double ) ( grandchildSizeA + grandchildSizeB ) );
@@ -236,7 +276,7 @@ public class SplitPane extends JPanel
             if ( fixedSizeGrandchildB >= 0 )
             {
                 SplitPane child = ( SplitPane ) childB;
-                int childSize = ( arrangeVertically ? child.getHeight( ) : child.getWidth( ) );
+                int childSize = childSizeB;
                 int grandchildSizeB = fixedSizeGrandchildB;
                 int grandchildSizeA = childSize - child.gapSize - grandchildSizeB;
                 double childFrac = ( ( double ) grandchildSizeA ) / ( ( double ) ( grandchildSizeA + grandchildSizeB ) );
