@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.MiscUtils.createEmptyBorder;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.TOP;
@@ -49,6 +50,7 @@ public class DockingPane extends JPanel
     public DockingPane( int gapSize )
     {
         super( new BorderLayout( ) );
+        setBorder( createEmptyBorder( gapSize/2 ) );
 
         this.gapSize = gapSize;
 

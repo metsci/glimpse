@@ -32,7 +32,9 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 
 /**
  * These utility methods aren't specific to docking, but are used internally by
@@ -101,6 +103,11 @@ public class MiscUtils
             j += c.getY( );
         }
         return new Point( i, j );
+    }
+
+    public static Border createEmptyBorder( int size )
+    {
+        return BorderFactory.createEmptyBorder( size, size, size, size );
     }
 
     public static int iround( double d )
