@@ -43,8 +43,15 @@ import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 public class DockingGroup
 {
 
+    public static enum DockingFrameCloseOperation
+    {
+        DO_NOTHING, DISPOSE_CLOSED_FRAME, DISPOSE_ALL_FRAMES, EXIT_JVM
+    }
+
+
     public final String title;
     public final DockingTheme theme;
+    public final DockingFrameCloseOperation frameCloseOperation;
 
     protected final List<DockingFrame> framesMod;
     public final List<DockingFrame> frames;
@@ -52,10 +59,11 @@ public class DockingGroup
     protected final JFrame landingIndicator;
 
 
-    public DockingGroup( String title, DockingTheme theme )
+    public DockingGroup( String title, DockingTheme theme, DockingFrameCloseOperation frameCloseOperation )
     {
         this.title = title;
         this.theme = theme;
+        this.frameCloseOperation = frameCloseOperation;
 
         this.framesMod = new ArrayList<>( );
         this.frames = unmodifiableList( framesMod );
@@ -80,20 +88,51 @@ public class DockingGroup
                 bringFrameToFront( frame );
             }
 
+            // Frame's close button was clicked
             public void windowClosing( WindowEvent ev )
             {
-                // Frame's close button was clicked
-                for ( DockingFrame frame : frames )
+                switch ( frameCloseOperation )
                 {
-                    frame.dispose( );
+                    case DO_NOTHING:
+                    {
+                        // Do nothing
+                    }
+                    break;
+
+                    case DISPOSE_CLOSED_FRAME:
+                    {
+                        frame.dispose( );
+                    }
+                    break;
+
+                    case DISPOSE_ALL_FRAMES:
+                    {
+                        for ( DockingFrame f : frames ) f.dispose( );
+                    }
+                    break;
+
+                    case EXIT_JVM:
+                    {
+                        // Even if we try to dispose frames here, the JVM
+                        // exits before any disposing actually happens
+                        System.exit( 0 );
+                    }
+                    break;
                 }
-                landingIndicator.dispose( );
             }
 
+            // Frame has been disposed, including programmatically
             public void windowClosed( WindowEvent ev )
             {
-                // Frame has been disposed, including programmatically
                 removeFrame( frame );
+                if ( frames.isEmpty( ) )
+                {
+                    // Dispose the landingIndicator frame, so that the JVM can shut
+                    // down if appropriate. If the landingIndicator is needed again
+                    // (e.g. after a new frame is added to the group), it will be
+                    // automatically resurrected, and will work fine.
+                    landingIndicator.dispose( );
+                }
             }
         } );
 
