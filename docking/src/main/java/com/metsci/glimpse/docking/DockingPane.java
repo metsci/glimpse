@@ -32,6 +32,7 @@ import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.TOP;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.HashSet;
@@ -42,6 +43,13 @@ import javax.swing.JPanel;
 public class DockingPane extends JPanel
 {
 
+    protected final CardLayout layout;
+    protected final JPanel maximizedTileCard;
+    protected final JPanel allTilesCard;
+
+    protected final Component maximizedPlaceholder;
+    protected Component maximizedTile;
+
     protected final int gapSize;
     protected Component root;
     protected final Set<Component> tiles;
@@ -49,11 +57,22 @@ public class DockingPane extends JPanel
 
     public DockingPane( int gapSize )
     {
-        super( new BorderLayout( ) );
+        this.layout = new CardLayout( );
+        setLayout( layout );
         setBorder( createEmptyBorder( gapSize/2 ) );
 
-        this.gapSize = gapSize;
+        this.maximizedTileCard = new JPanel( new BorderLayout( ) );
+        add( maximizedTileCard, "maximizedTile" );
 
+        this.allTilesCard = new JPanel( new BorderLayout( ) );
+        add( allTilesCard, "allTiles" );
+
+        layout.show( this, "allTiles" );
+
+        this.maximizedPlaceholder = new JPanel( );
+        this.maximizedTile = null;
+
+        this.gapSize = gapSize;
         this.root = null;
         this.tiles = new HashSet<>( );
     }
@@ -62,7 +81,7 @@ public class DockingPane extends JPanel
     {
         if ( root != null ) throw new RuntimeException( "At least one tile already exists" );
 
-        add( c );
+        allTilesCard.add( c );
 
         this.root = c;
         tiles.add( c );
@@ -102,11 +121,16 @@ public class DockingPane extends JPanel
         double splitFrac = ( newIsChildA ? extentFrac : 1 - extentFrac );
         SplitPane newSplitPane = new SplitPane( arrangeVertically, splitFrac, gapSize );
 
-        Container parent = neighbor.getParent( );
-        if ( parent == this )
+        if ( neighbor == maximizedTile )
         {
-            this.remove( neighbor );
-            this.add( newSplitPane );
+            neighbor = maximizedPlaceholder;
+        }
+
+        Container parent = neighbor.getParent( );
+        if ( parent == allTilesCard )
+        {
+            allTilesCard.remove( neighbor );
+            allTilesCard.add( newSplitPane );
             this.root = newSplitPane;
         }
         else
@@ -172,10 +196,15 @@ public class DockingPane extends JPanel
     {
         if ( !tiles.contains( c ) ) throw new RuntimeException( "Component is not a tile" );
 
-        Container parent = c.getParent( );
-        if ( parent == this )
+        if ( maximizedTile == c )
         {
-            this.remove( c );
+            _unmaximizeTile( );
+        }
+
+        Container parent = c.getParent( );
+        if ( parent == allTilesCard )
+        {
+            allTilesCard.remove( c );
             this.root = null;
         }
         else
@@ -185,10 +214,10 @@ public class DockingPane extends JPanel
             parent.removeAll( );
 
             Container grandparent = parent.getParent( );
-            if ( grandparent == this )
+            if ( grandparent == allTilesCard )
             {
-                this.remove( parent );
-                this.add( sibling );
+                allTilesCard.remove( parent );
+                allTilesCard.add( sibling );
                 this.root = sibling;
             }
             else
@@ -203,6 +232,79 @@ public class DockingPane extends JPanel
 
         validate( );
         repaint( );
+    }
+
+    public Component getMaximizedTile( )
+    {
+        return maximizedTile;
+    }
+
+    public void maximizeTile( Component c )
+    {
+        if ( !tiles.contains( c ) ) throw new RuntimeException( "Component is not a tile" );
+
+        if ( maximizedTile == c )
+        {
+            return;
+        }
+        else if ( maximizedTile != null )
+        {
+            _unmaximizeTile( );
+        }
+
+        Container parent = c.getParent( );
+        if ( parent == allTilesCard )
+        {
+            allTilesCard.add( maximizedPlaceholder );
+            this.root = maximizedPlaceholder;
+        }
+        else
+        {
+            Object constraints = ( ( SplitPane ) parent ).getConstraints( c );
+            parent.remove( c );
+            parent.add( maximizedPlaceholder, constraints );
+        }
+
+        maximizedTileCard.add( c );
+        layout.show( this, "maximizedTile" );
+
+        this.maximizedTile = c;
+
+        validate( );
+        repaint( );
+    }
+
+    public void unmaximizeTile( )
+    {
+        if ( maximizedTile != null )
+        {
+            _unmaximizeTile( );
+            validate( );
+            repaint( );
+        }
+    }
+
+    protected void _unmaximizeTile( )
+    {
+        maximizedTileCard.remove( maximizedTile );
+
+        Container parent = maximizedPlaceholder.getParent( );
+        if ( parent == allTilesCard )
+        {
+            allTilesCard.remove( maximizedPlaceholder );
+            allTilesCard.add( maximizedTile );
+            this.root = maximizedTile;
+        }
+        else
+        {
+            Object constraints = ( ( SplitPane ) parent ).getConstraints( maximizedPlaceholder );
+            parent.remove( maximizedPlaceholder );
+            parent.add( maximizedTile, constraints );
+        }
+
+        layout.show( this, "allTiles" );
+
+        this.maximizedTile = null;
     }
 
 }

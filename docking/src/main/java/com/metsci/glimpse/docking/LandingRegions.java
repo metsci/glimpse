@@ -98,6 +98,7 @@ public class LandingRegions
         }
 
         // Near edge of docking-pane
+        if ( docker.getMaximizedTile( ) == null )
         {
             int dLeft = pInDocker.x;
             int dRight = docker.getWidth( ) - 1 - pInDocker.x;
@@ -118,7 +119,7 @@ public class LandingRegions
         }
 
         // Near edge of an existing tile
-        if ( toComp != null )
+        if ( docker.getMaximizedTile( ) == null && toComp != null )
         {
             Point pInComp = convertPointFromScreen( pOnScreen, toComp );
             int dLeft = pInComp.x;
