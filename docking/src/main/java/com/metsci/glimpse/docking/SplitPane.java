@@ -46,8 +46,8 @@ import javax.swing.JPanel;
 public class SplitPane extends JPanel
 {
 
-    protected final boolean arrangeVertically;
-    protected final int gapSize;
+    public final boolean arrangeVertically;
+    public final int gapSize;
 
     protected Component childA;
     protected Component childB;
@@ -111,7 +111,6 @@ public class SplitPane extends JPanel
                     int newSizeA = ( arrangeVertically ? childA.getHeight( ) + ev.getY( ) : childA.getWidth( ) + ev.getX( ) ) - grab;
                     int contentSize = ( arrangeVertically ? getHeight( ) : getWidth( ) ) - gapSize;
                     setSplitFrac( ( ( double ) newSizeA ) / ( ( double ) contentSize ) );
-                    validate( );
                 }
             }
 
@@ -122,7 +121,6 @@ public class SplitPane extends JPanel
                     int newSizeA = ( arrangeVertically ? childA.getHeight( ) + ev.getY( ) : childA.getWidth( ) + ev.getX( ) ) - grab;
                     int contentSize = ( arrangeVertically ? getHeight( ) : getWidth( ) ) - gapSize;
                     setSplitFrac( ( ( double ) newSizeA ) / ( ( double ) contentSize ) );
-                    validate( );
 
                     grab = null;
                 }
@@ -177,13 +175,73 @@ public class SplitPane extends JPanel
         }
     }
 
+    public double getSplitFrac( )
+    {
+        return splitFrac;
+    }
+
     public void setSplitFrac( double splitFrac )
     {
         splitFrac = max( 0, min( 1, splitFrac ) );
         if ( splitFrac != this.splitFrac )
         {
+            // Prep to keep childA's divider fixed
+            //
+            int fixedSizeGrandchildA = -1;
+            if ( childA instanceof SplitPane )
+            {
+                SplitPane child = ( SplitPane ) childA;
+                Component grandchildA = child.getChildA( );
+                Component grandchildB = child.getChildB( );
+                if ( child.arrangeVertically == this.arrangeVertically && isVisible( grandchildA ) && isVisible( grandchildB ) )
+                {
+                    fixedSizeGrandchildA = ( arrangeVertically ? grandchildA.getHeight( ) : grandchildA.getWidth( ) );
+                }
+            }
+
+            // Prep to keep childB's divider fixed
+            //
+            int fixedSizeGrandchildB = -1;
+            if ( childB instanceof SplitPane )
+            {
+                SplitPane child = ( SplitPane ) childB;
+                Component grandchildA = child.getChildA( );
+                Component grandchildB = child.getChildB( );
+                if ( child.arrangeVertically == this.arrangeVertically && isVisible( grandchildA ) && isVisible( grandchildB ) )
+                {
+                    fixedSizeGrandchildB = ( arrangeVertically ? grandchildB.getHeight( ) : grandchildB.getWidth( ) );
+                }
+            }
+
+            // Set this split-pane's split-fraction
+            //
             this.splitFrac = splitFrac;
             invalidate( );
+            validate( );
+
+            // Keep childA's divider fixed
+            //
+            if ( fixedSizeGrandchildA >= 0 )
+            {
+                SplitPane child = ( SplitPane ) childA;
+                int childSize = ( arrangeVertically ? child.getHeight( ) : child.getWidth( ) );
+                int grandchildSizeA = fixedSizeGrandchildA;
+                int grandchildSizeB = childSize - child.gapSize - grandchildSizeA;
+                double childFrac = ( ( double ) grandchildSizeA ) / ( ( double ) ( grandchildSizeA + grandchildSizeB ) );
+                child.setSplitFrac( childFrac );
+            }
+
+            // Keep childB's divider fixed
+            //
+            if ( fixedSizeGrandchildB >= 0 )
+            {
+                SplitPane child = ( SplitPane ) childB;
+                int childSize = ( arrangeVertically ? child.getHeight( ) : child.getWidth( ) );
+                int grandchildSizeB = fixedSizeGrandchildB;
+                int grandchildSizeA = childSize - child.gapSize - grandchildSizeB;
+                double childFrac = ( ( double ) grandchildSizeA ) / ( ( double ) ( grandchildSizeA + grandchildSizeB ) );
+                child.setSplitFrac( childFrac );
+            }
         }
     }
 
