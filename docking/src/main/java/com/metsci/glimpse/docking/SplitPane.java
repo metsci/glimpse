@@ -50,6 +50,7 @@ public class SplitPane extends JPanel
 
     public final boolean arrangeVertically;
     public final int gapSize;
+    public final int minChildSize = 1;
 
     protected Component childA;
     protected Component childB;
@@ -186,63 +187,100 @@ public class SplitPane extends JPanel
 
     public void setSplitFrac( double splitFrac )
     {
-        splitFrac = max( 0, min( 1, splitFrac ) );
-        if ( splitFrac == this.splitFrac ) return;
+        int thisSize = ( arrangeVertically ? getHeight( ) : getWidth( ) );
 
         // Prep to keep dividers fixed for childA and its descendants
         //
         List<SplitPane> splitsToTweakA = new ArrayList<>( );
         List<Integer> fixedSizesA = new ArrayList<>( );
-        Component cA = childA;
-        while ( true )
+        if ( isVisible( childA ) && isVisible( childB ) )
         {
-            if ( !( cA instanceof SplitPane ) ) break;
-            SplitPane split = ( SplitPane ) cA;
-
-            if ( split.arrangeVertically != this.arrangeVertically ) break;
-
-            Component descendantA = split.getChildA( );
-            Component descendantB = split.getChildB( );
-            boolean hasA = isVisible( descendantA );
-            boolean hasB = isVisible( descendantB );
-            if ( hasA && hasB )
+            Component c = childA;
+            while ( true )
             {
-                splitsToTweakA.add( split );
-                fixedSizesA.add( arrangeVertically ? descendantA.getHeight( ) : descendantA.getWidth( ) );
-            }
+                if ( !( c instanceof SplitPane ) ) break;
+                SplitPane split = ( SplitPane ) c;
 
-            cA = ( hasB ? descendantB : ( hasA ? descendantA : null ) );
+                if ( split.arrangeVertically != this.arrangeVertically ) break;
+
+                Component descendantA = split.getChildA( );
+                Component descendantB = split.getChildB( );
+                boolean hasA = isVisible( descendantA );
+                boolean hasB = isVisible( descendantB );
+                if ( hasA && hasB )
+                {
+                    splitsToTweakA.add( split );
+                    fixedSizesA.add( arrangeVertically ? descendantA.getHeight( ) : descendantA.getWidth( ) );
+                }
+
+                c = ( hasB ? descendantB : ( hasA ? descendantA : null ) );
+            }
         }
 
         // Prep to keep dividers fixed for childB and its descendants
         //
         List<SplitPane> splitsToTweakB = new ArrayList<>( );
         List<Integer> fixedSizesB = new ArrayList<>( );
-        Component cB = childB;
-        while ( true )
+        if ( isVisible( childA ) && isVisible( childB ) )
         {
-            if ( !( cB instanceof SplitPane ) ) break;
-            SplitPane split = ( SplitPane ) cB;
-
-            if ( split.arrangeVertically != this.arrangeVertically ) break;
-
-            Component descendantA = split.getChildA( );
-            Component descendantB = split.getChildB( );
-            boolean hasA = isVisible( descendantA );
-            boolean hasB = isVisible( descendantB );
-            if ( hasA && hasB )
+            Component c = childB;
+            while ( true )
             {
-                splitsToTweakB.add( split );
-                fixedSizesB.add( arrangeVertically ? descendantB.getHeight( ) : descendantB.getWidth( ) );
-            }
+                if ( !( c instanceof SplitPane ) ) break;
+                SplitPane split = ( SplitPane ) c;
 
-            cB = ( hasA ? descendantA : ( hasB ? descendantB : null ) );
+                if ( split.arrangeVertically != this.arrangeVertically ) break;
+
+                Component descendantA = split.getChildA( );
+                Component descendantB = split.getChildB( );
+                boolean hasA = isVisible( descendantA );
+                boolean hasB = isVisible( descendantB );
+                if ( hasA && hasB )
+                {
+                    splitsToTweakB.add( split );
+                    fixedSizesB.add( arrangeVertically ? descendantB.getHeight( ) : descendantB.getWidth( ) );
+                }
+
+                c = ( hasA ? descendantA : ( hasB ? descendantB : null ) );
+            }
+        }
+
+        // Find minimum split-fraction
+        //
+        double minFrac = 0;
+        if ( !splitsToTweakA.isEmpty( ) )
+        {
+            int sizeA = ( arrangeVertically ? childA.getHeight( ) : childA.getWidth( ) );
+
+            SplitPane adjacentSplit = splitsToTweakA.get( splitsToTweakA.size( ) - 1 );
+            Component victim = adjacentSplit.getChildB( );
+            int available = ( arrangeVertically ? victim.getHeight( ) : victim.getWidth( ) ) - adjacentSplit.minChildSize;
+            int minSizeA = sizeA - available;
+
+            minFrac = ( ( double ) minSizeA ) / ( ( double ) ( thisSize - gapSize ) );
+        }
+
+        // Find maximum split-fraction
+        //
+        double maxFrac = 1;
+        if ( !splitsToTweakB.isEmpty( ) )
+        {
+            int sizeA = ( arrangeVertically ? childA.getHeight( ) : childA.getWidth( ) );
+
+            SplitPane adjacentSplit = splitsToTweakB.get( splitsToTweakB.size( ) - 1 );
+            Component victim = adjacentSplit.getChildA( );
+            int available = ( arrangeVertically ? victim.getHeight( ) : victim.getWidth( ) ) - adjacentSplit.minChildSize;
+            int maxSizeA = sizeA + available;
+
+            maxFrac = ( ( double ) maxSizeA ) / ( ( double ) ( thisSize - gapSize ) );
         }
 
         // Set split-fraction
         //
+        splitFrac = max( minFrac, min( maxFrac, splitFrac ) );
+        if ( splitFrac == this.splitFrac ) return;
         _setSplitFrac( splitFrac );
-        int[] childSizes = computeChildSizes( ( arrangeVertically ? getHeight( ) : getWidth( ) ), gapSize, splitFrac );
+        int[] childSizes = computeChildSizes( thisSize, gapSize, minChildSize, splitFrac );
 
         // Keep dividers fixed for childA and its descendants
         //
@@ -255,7 +293,7 @@ public class SplitPane extends JPanel
 
             double tweakedFrac = ( ( double ) sizeA ) / ( ( double ) ( sizeA + sizeB ) );
             split._setSplitFrac( tweakedFrac );
-            splitSizeA = computeChildSizes( splitSizeA, split.gapSize, split.getSplitFrac( ) )[ 1 ];
+            splitSizeA = computeChildSizes( splitSizeA, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[ 1 ];
         }
 
         // Keep dividers fixed for childB and its descendants
@@ -269,7 +307,7 @@ public class SplitPane extends JPanel
 
             double tweakedFrac = ( ( double ) sizeA ) / ( ( double ) ( sizeA + sizeB ) );
             split._setSplitFrac( tweakedFrac );
-            splitSizeB = computeChildSizes( splitSizeB, split.gapSize, split.getSplitFrac( ) )[ 0 ];
+            splitSizeB = computeChildSizes( splitSizeB, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[ 0 ];
         }
     }
 
@@ -279,15 +317,13 @@ public class SplitPane extends JPanel
         invalidate( );
     }
 
-    protected static int[] computeChildSizes( int containerSize, int gapSize, double splitFrac )
+    protected static int[] computeChildSizes( int containerSize, int gapSize, int minChildSize, double splitFrac )
     {
-        int minSizeA = 1;
-        int minSizeB = 1;
-        int maxSizeA = containerSize - gapSize - minSizeB;
+        int maxSizeA = containerSize - gapSize - minChildSize;
 
         int prelimSizeA = iround( splitFrac * ( containerSize - gapSize ) );
-        int sizeA = max( minSizeA, min( maxSizeA, prelimSizeA ) );
-        int sizeB = max( minSizeB, containerSize - sizeA - gapSize );
+        int sizeA = max( minChildSize, min( maxSizeA, prelimSizeA ) );
+        int sizeB = max( minChildSize, containerSize - sizeA - gapSize );
 
         return new int[] { sizeA, sizeB };
     }
@@ -382,7 +418,7 @@ public class SplitPane extends JPanel
             {
                 if ( arrangeVertically )
                 {
-                    int[] heights = computeChildSizes( heightContainer, gapSize, splitFrac );
+                    int[] heights = computeChildSizes( heightContainer, gapSize, minChildSize, splitFrac );
                     int heightA = heights[ 0 ];
                     int heightB = heights[ 1 ];
 
@@ -392,7 +428,7 @@ public class SplitPane extends JPanel
                 }
                 else
                 {
-                    int[] widths = computeChildSizes( widthContainer, gapSize, splitFrac );
+                    int[] widths = computeChildSizes( widthContainer, gapSize, minChildSize, splitFrac );
                     int widthA = widths[ 0 ];
                     int widthB = widths[ 1 ];
 
