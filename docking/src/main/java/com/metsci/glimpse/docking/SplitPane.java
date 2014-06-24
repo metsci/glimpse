@@ -339,12 +339,12 @@ public class SplitPane extends JPanel
         {
             if ( "A".equalsIgnoreCase( name ) )
             {
-                // XXX: Require childA != childB
+                if ( childA != null ) throw new RuntimeException( "Existing 'A' child must be removed before adding a new one" );
                 childA = c;
             }
             else if ( "B".equalsIgnoreCase( name ) )
             {
-                // XXX: Require childA != childB
+                if ( childB != null ) throw new RuntimeException( "Existing 'B' child must be removed before adding a new one" );
                 childB = c;
             }
             else
