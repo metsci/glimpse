@@ -34,7 +34,7 @@ import javax.swing.JToolBar;
 public class View
 {
 
-    public final ViewKey viewKey;
+    public final String viewId;
     public final String title;
     public final Icon icon;
     public final String tooltip;
@@ -42,14 +42,24 @@ public class View
     public final JToolBar toolbar;
 
 
-    public View( String viewId, String title, Component component )
+    public View( String viewId, Component component, String title )
     {
-        this( viewId, title, null, null, component, null );
+        this( viewId, component, title, null, null, null );
     }
 
-    public View( String viewId, String title, Icon icon, String tooltip, Component component, JToolBar toolbar )
+    public View( String viewId, Component component, String title, String tooltip )
     {
-        this.viewKey = new ViewKey( viewId );
+        this( viewId, component, title, tooltip, null, null );
+    }
+
+    public View( String viewId, Component component, String title, String tooltip, Icon icon )
+    {
+        this( viewId, component, title, tooltip, icon, null );
+    }
+
+    public View( String viewId, Component component, String title, String tooltip, Icon icon, JToolBar toolbar )
+    {
+        this.viewId = viewId;
         this.title = title;
         this.icon = icon;
         this.tooltip = tooltip;

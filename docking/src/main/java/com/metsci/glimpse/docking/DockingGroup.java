@@ -189,7 +189,7 @@ public class DockingGroup
         // XXX: Require no existing content
 
         Map<String,View> viewsById = new HashMap<>( );
-        for ( View v : views ) viewsById.put( v.viewKey.viewId, v );
+        for ( View v : views ) viewsById.put( v.viewId, v );
 
         for ( FrameSnapshot frameSnapshot : snapshot.frameSnapshots )
         {
@@ -275,10 +275,10 @@ public class DockingGroup
                 Tile tile = ( Tile ) c;
                 for ( int i = 0; i < tile.numViews( ); i++ )
                 {
-                    String viewId = tile.view( i ).viewKey.viewId;
+                    String viewId = tile.view( i ).viewId;
                     viewIds.add( viewId );
                 }
-                selectedViewId = tile.selectedView( ).viewKey.viewId;
+                selectedViewId = tile.selectedView( ).viewId;
             }
             else
             {

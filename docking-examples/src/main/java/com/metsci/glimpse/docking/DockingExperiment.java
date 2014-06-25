@@ -118,14 +118,14 @@ public class DockingExperiment
         hToolbar.add( new JButton( "H1" ) );
 
 
-        View aView = new View( "aView", "View A", requireIcon( "icons/ViewA.png" ), null, aPanel, aToolbar );
-        View bView = new View( "bView", "View B", requireIcon( "icons/ViewB.png" ), null, bPanel, bToolbar );
-        View cView = new View( "cView", "View C", requireIcon( "icons/ViewC.png" ), null, cPanel, cToolbar );
-        View dView = new View( "dView", "View D", requireIcon( "icons/ViewD.png" ), null, dPanel, dToolbar );
-        View eView = new View( "eView", "View E", requireIcon( "icons/ViewE.png" ), null, ePanel, eToolbar );
-        View fView = new View( "fView", "View F", requireIcon( "icons/ViewF.png" ), null, fPanel, fToolbar );
-        View gView = new View( "gView", "View G", requireIcon( "icons/ViewG.png" ), null, gPanel, gToolbar );
-        View hView = new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar );
+        View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
+        View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
+        View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
+        View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
+        View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
+        View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
+        View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
+        View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
 
 
 
@@ -134,12 +134,12 @@ public class DockingExperiment
 
 
 
-        TileSnapshot aTileSnapshot = new TileSnapshot( asList( aView.viewKey.viewId, bView.viewKey.viewId ), null, false );
-        TileSnapshot bTileSnapshot = new TileSnapshot( asList( cView.viewKey.viewId, dView.viewKey.viewId ), null, false );
+        TileSnapshot aTileSnapshot = new TileSnapshot( asList( aView.viewId, bView.viewId ), null, false );
+        TileSnapshot bTileSnapshot = new TileSnapshot( asList( cView.viewId, dView.viewId ), null, false );
         SnapshotNode aDockerSnapshot = new SplitSnapshot( false, 0.3, aTileSnapshot, bTileSnapshot );
 
-        TileSnapshot cTileSnapshot = new TileSnapshot( asList( eView.viewKey.viewId, fView.viewKey.viewId ), null, false );
-        TileSnapshot dTileSnapshot = new TileSnapshot( asList( gView.viewKey.viewId, hView.viewKey.viewId ), null, false );
+        TileSnapshot cTileSnapshot = new TileSnapshot( asList( eView.viewId, fView.viewId ), null, false );
+        TileSnapshot dTileSnapshot = new TileSnapshot( asList( gView.viewId, hView.viewId ), null, false );
         SnapshotNode bDockerSnapshot = new SplitSnapshot( true, 0.75, cTileSnapshot, dTileSnapshot );
 
         List<FrameSnapshot> frameSnapshots = new ArrayList<>( );

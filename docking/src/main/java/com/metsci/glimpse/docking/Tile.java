@@ -234,7 +234,7 @@ public class Tile extends JComponent
 
     protected final List<MouseAdapter> dockingMouseAdapters;
 
-    protected final Map<ViewKey,ViewEntry> viewMap;
+    protected final Map<String,ViewEntry> viewMap;
     protected final List<View> views;
     protected View selectedView;
 
@@ -291,7 +291,7 @@ public class Tile extends JComponent
                 {
                     if ( view != selectedView )
                     {
-                        CustomTab tab = viewMap.get( view.viewKey ).tab;
+                        CustomTab tab = viewMap.get( view.viewId ).tab;
 
                         // CAP_BUTT behaves differently when line-width is 1
                         int wExtra = ( lineThickness > 1 ? lineThickness : 0 );
@@ -323,7 +323,7 @@ public class Tile extends JComponent
 
                 for ( View view : views )
                 {
-                    ViewEntry viewEntry = viewMap.get( view.viewKey );
+                    ViewEntry viewEntry = viewMap.get( view.viewId );
                     viewEntry.overflowMenuItem.setVisible( false );
                     viewEntry.tab.setVisible( true );
                 }
@@ -343,7 +343,7 @@ public class Tile extends JComponent
                     ViewEntry lastVisible = null;
                     for ( View view : views )
                     {
-                        ViewEntry viewEntry = viewMap.get( view.viewKey );
+                        ViewEntry viewEntry = viewMap.get( view.viewId );
                         if ( viewEntry.tab.isVisible( ) )
                         {
                             numVisible++;
@@ -386,7 +386,7 @@ public class Tile extends JComponent
                 }
                 else
                 {
-                    JPanel viewCard = viewMap.get( selectedView.viewKey ).card;
+                    JPanel viewCard = viewMap.get( selectedView.viewId ).card;
 
                     JToolBar viewBar = selectedView.toolbar;
                     int xViewBar = xTabBar + wTabBar + ( needsOverflow ? wOverflowBar : 0 );
@@ -426,7 +426,7 @@ public class Tile extends JComponent
                 int wTab = 0;
                 for ( View view : views )
                 {
-                    ViewEntry viewEntry = viewMap.get( view.viewKey );
+                    ViewEntry viewEntry = viewMap.get( view.viewId );
                     wTab = max( wTab, viewEntry.tab.getMinimumSize( ).width );
                 }
                 int wBars = wTab + overflowBar.getMinimumSize( ).width + cornerBar.getMinimumSize( ).width + cornerRadius;
@@ -460,7 +460,7 @@ public class Tile extends JComponent
     {
         JPanel card = new JPanel( new BorderLayout( ) );
         card.add( view.component, BorderLayout.CENTER );
-        cardPanel.add( card, view.viewKey.viewId );
+        cardPanel.add( card, view.viewId );
 
         CustomTab tab = new CustomTab( view );
         tab.addMouseListener( new MouseAdapter( )
@@ -487,7 +487,7 @@ public class Tile extends JComponent
         } );
         overflowPopup.add( overflowMenuItem );
 
-        viewMap.put( view.viewKey, new ViewEntry( view, card, tab, overflowMenuItem ) );
+        viewMap.put( view.viewId, new ViewEntry( view, card, tab, overflowMenuItem ) );
         views.add( viewNum, view );
 
         if ( selectedView == null )
@@ -505,7 +505,7 @@ public class Tile extends JComponent
             selectView( null );
         }
 
-        ViewEntry viewEntry = viewMap.remove( view.viewKey );
+        ViewEntry viewEntry = viewMap.remove( view.viewId );
         overflowPopup.remove( viewEntry.overflowMenuItem );
         tabBar.remove( viewEntry.tab );
         cardPanel.remove( viewEntry.card );
@@ -519,7 +519,7 @@ public class Tile extends JComponent
 
     public boolean hasView( View view )
     {
-        return ( view != null && viewMap.containsKey( view.viewKey ) );
+        return ( view != null && viewMap.containsKey( view.viewId ) );
     }
 
     public void selectView( View view )
@@ -528,16 +528,16 @@ public class Tile extends JComponent
 
         if ( selectedView != null )
         {
-            ViewEntry viewEntry = viewMap.get( selectedView.viewKey );
+            ViewEntry viewEntry = viewMap.get( selectedView.viewId );
             viewEntry.tab.setSelected( false );
             cardPanel.setVisible( false );
         }
 
         if ( view != null )
         {
-            ViewEntry viewEntry = viewMap.get( view.viewKey );
+            ViewEntry viewEntry = viewMap.get( view.viewId );
             viewEntry.tab.setSelected( true );
-            cardLayout.show( cardPanel, view.viewKey.viewId );
+            cardLayout.show( cardPanel, view.viewId );
             cardPanel.setVisible( true );
         }
 
@@ -619,7 +619,7 @@ public class Tile extends JComponent
     {
         for ( View view : views )
         {
-            CustomTab tab = viewMap.get( view.viewKey ).tab;
+            CustomTab tab = viewMap.get( view.viewId ).tab;
             addMouseAdapter( tab, mouseAdapter );
         }
 
@@ -635,7 +635,7 @@ public class Tile extends JComponent
 
     protected ViewEntry viewEntry( int viewNum )
     {
-        return viewMap.get( views.get( viewNum ).viewKey );
+        return viewMap.get( views.get( viewNum ).viewId );
     }
 
 
