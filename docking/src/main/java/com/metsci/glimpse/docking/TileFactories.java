@@ -66,14 +66,14 @@ public class TileFactories
                 public void actionPerformed( ActionEvent ev )
                 {
                     DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
-                    if ( docker.getMaximizedTile( ) == tile )
+                    if ( docker.getMaximizedLeaf( ) == tile )
                     {
-                        docker.unmaximizeTile( );
+                        docker.unmaximizeLeaf( );
                         maximizeButton.setIcon( theme.maximizeIcon );
                     }
                     else
                     {
-                        docker.maximizeTile( tile );
+                        docker.maximizeLeaf( tile );
                         maximizeButton.setIcon( theme.restoreIcon );
                     }
                 }

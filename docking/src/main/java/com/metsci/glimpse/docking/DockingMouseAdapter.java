@@ -136,9 +136,9 @@ public class DockingMouseAdapter extends MouseAdapter
                 if ( tile.numViews( ) == 0 )
                 {
                     DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
-                    docker.removeTile( tile );
+                    docker.removeLeaf( tile );
 
-                    if ( docker.numTiles( ) == 0 && dockingGroup.frames.size( ) > 1 )
+                    if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
                     {
                         DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
                         if ( frame != null && frame.getContentPane( ) == docker )

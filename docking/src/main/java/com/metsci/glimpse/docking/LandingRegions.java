@@ -71,18 +71,18 @@ public class LandingRegions
             return null;
         }
 
-        Component toComp = docker.findTileAt( pInDocker.x, pInDocker.y );
+        Component toLeaf = docker.findLeafAt( pInDocker.x, pInDocker.y );
 
         // On own tile, which has no other views
-        if ( toComp == fromTile && fromTile.numViews( ) == 1 )
+        if ( toLeaf == fromTile && fromTile.numViews( ) == 1 )
         {
             return null;
         }
 
         // On an existing tab
-        if ( toComp instanceof Tile )
+        if ( toLeaf instanceof Tile )
         {
-            Tile toTile = ( Tile ) toComp;
+            Tile toTile = ( Tile ) toLeaf;
             Point pInTile = convertPointFromScreen( pOnScreen, toTile );
             int viewNum = toTile.viewNumForTabAt( pInTile.x, pInTile.y );
             if ( 0 <= viewNum && viewNum < toTile.numViews( ) )
@@ -92,13 +92,13 @@ public class LandingRegions
         }
 
         // In an empty docking-pane
-        if ( docker.numTiles( ) == 0 )
+        if ( docker.numLeaves( ) == 0 )
         {
             return new InEmptyDockingPane( docker );
         }
 
         // Near edge of docking-pane
-        if ( docker.getMaximizedTile( ) == null )
+        if ( docker.getMaximizedLeaf( ) == null )
         {
             int dLeft = pInDocker.x;
             int dRight = docker.getWidth( ) - 1 - pInDocker.x;
@@ -118,32 +118,32 @@ public class LandingRegions
             }
         }
 
-        // Near edge of an existing tile
-        if ( docker.getMaximizedTile( ) == null && toComp != null )
+        // Near edge of an existing leaf
+        if ( docker.getMaximizedLeaf( ) == null && toLeaf != null )
         {
-            Point pInComp = convertPointFromScreen( pOnScreen, toComp );
-            int dLeft = pInComp.x;
-            int dRight = toComp.getWidth( ) - 1 - pInComp.x;
-            int dTop = pInComp.y;
-            int dBottom = toComp.getHeight( ) - 1 - pInComp.y;
+            Point pInLeaf = convertPointFromScreen( pOnScreen, toLeaf );
+            int dLeft = pInLeaf.x;
+            int dRight = toLeaf.getWidth( ) - 1 - pInLeaf.x;
+            int dTop = pInLeaf.y;
+            int dBottom = toLeaf.getHeight( ) - 1 - pInLeaf.y;
 
             IntAndIndex closest = minValueAndIndex( dLeft, dRight, dTop, dBottom );
             if ( closest.value < 64 )
             {
                 switch ( closest.index )
                 {
-                    case 0: return new BesideExistingTile( docker, toComp, LEFT );
-                    case 1: return new BesideExistingTile( docker, toComp, RIGHT );
-                    case 2: return new BesideExistingTile( docker, toComp, TOP );
-                    case 3: return new BesideExistingTile( docker, toComp, BOTTOM );
+                    case 0: return new BesideExistingTile( docker, toLeaf, LEFT );
+                    case 1: return new BesideExistingTile( docker, toLeaf, RIGHT );
+                    case 2: return new BesideExistingTile( docker, toLeaf, TOP );
+                    case 3: return new BesideExistingTile( docker, toLeaf, BOTTOM );
                 }
             }
         }
 
         // In an existing tile, but not the one we started from, and not near the edge
-        if ( toComp != fromTile && toComp instanceof Tile )
+        if ( toLeaf != fromTile && toLeaf instanceof Tile )
         {
-            Tile toTile = ( Tile ) toComp;
+            Tile toTile = ( Tile ) toLeaf;
             return new LastInExistingTile( toTile );
         }
 
@@ -181,7 +181,7 @@ public class LandingRegions
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
-            docker.addInitialTile( tile );
+            docker.addInitialLeaf( tile );
         }
     }
 
@@ -224,7 +224,7 @@ public class LandingRegions
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
-            docker.addEdgeTile( tile, edgeOfPane );
+            docker.addEdgeLeaf( tile, edgeOfPane );
         }
     }
 
@@ -269,7 +269,7 @@ public class LandingRegions
         {
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
-            docker.addNeighborTile( tile, neighbor, sideOfNeighbor );
+            docker.addNeighborLeaf( tile, neighbor, sideOfNeighbor );
         }
     }
 
@@ -377,7 +377,7 @@ public class LandingRegions
             tile.addView( view, 0 );
 
             DockingFrame frame = dockingGroup.addNewFrame( );
-            frame.docker.addInitialTile( tile );
+            frame.docker.addInitialLeaf( tile );
             frame.setBounds( xOnScreen, yOnScreen, width, height );
             frame.setVisible( true );
         }

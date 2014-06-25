@@ -45,21 +45,21 @@ import javax.swing.JPanel;
 
 public class DockingPane extends JPanel
 {
-    protected static final String MAXIMIZED_TILE_CARD = "maximizedTile";
-    protected static final String ALL_TILES_CARD = "allTiles";
+    protected static final String MAXIMIZED_LEAF_CARD = "maximizedLeaf";
+    protected static final String ALL_LEAVES_CARD = "allLeaves";
 
 
     protected final CardLayout layout;
-    protected final JPanel maximizedTileCard;
-    protected final JPanel allTilesCard;
+    protected final JPanel maximizedLeafCard;
+    protected final JPanel allLeavesCard;
 
     protected final Component maximizedPlaceholder;
-    protected Component maximizedTile;
+    protected Component maximizedLeaf;
 
     protected final int gapSize;
-    protected Component allTilesRoot;
-    protected final Set<Component> tiles;
-    protected final Set<Component> tilesUnmod;
+    protected Component allLeavesRoot;
+    protected final Set<Component> leaves;
+    protected final Set<Component> leavesUnmod;
 
 
     public DockingPane( int gapSize )
@@ -68,59 +68,59 @@ public class DockingPane extends JPanel
         setLayout( layout );
         setBorder( createEmptyBorder( gapSize/2 ) );
 
-        this.maximizedTileCard = new JPanel( new BorderLayout( ) );
-        add( maximizedTileCard, MAXIMIZED_TILE_CARD );
+        this.maximizedLeafCard = new JPanel( new BorderLayout( ) );
+        add( maximizedLeafCard, MAXIMIZED_LEAF_CARD );
 
-        this.allTilesCard = new JPanel( new BorderLayout( ) );
-        add( allTilesCard, ALL_TILES_CARD );
+        this.allLeavesCard = new JPanel( new BorderLayout( ) );
+        add( allLeavesCard, ALL_LEAVES_CARD );
 
-        layout.show( this, ALL_TILES_CARD );
+        layout.show( this, ALL_LEAVES_CARD );
 
         this.maximizedPlaceholder = new JPanel( );
-        this.maximizedTile = null;
+        this.maximizedLeaf = null;
 
         this.gapSize = gapSize;
-        this.allTilesRoot = null;
-        this.tiles = new LinkedHashSet<>( );
-        this.tilesUnmod = unmodifiableSet( tiles );
+        this.allLeavesRoot = null;
+        this.leaves = new LinkedHashSet<>( );
+        this.leavesUnmod = unmodifiableSet( leaves );
     }
 
-    public void addInitialTile( Component c )
+    public void addInitialLeaf( Component c )
     {
-        if ( allTilesRoot != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
+        if ( allLeavesRoot != null || !leaves.isEmpty( ) ) throw new RuntimeException( "At least one leaf already exists" );
 
-        allTilesCard.add( c );
+        allLeavesCard.add( c );
 
-        this.allTilesRoot = c;
-        tiles.add( c );
+        this.allLeavesRoot = c;
+        leaves.add( c );
 
         validate( );
         repaint( );
     }
 
-    public void addEdgeTile( Component c, Side edgeOfPane )
+    public void addEdgeLeaf( Component c, Side edgeOfPane )
     {
-        addEdgeTile( c, edgeOfPane, 0.25 );
+        addEdgeLeaf( c, edgeOfPane, 0.25 );
     }
 
-    public void addEdgeTile( Component c, Side edgeOfPane, double extentFrac )
+    public void addEdgeLeaf( Component c, Side edgeOfPane, double extentFrac )
     {
-        if ( allTilesRoot == null )
+        if ( allLeavesRoot == null )
         {
-            addInitialTile( c );
+            addInitialLeaf( c );
         }
         else
         {
-            addNeighborTile( c, allTilesRoot, edgeOfPane, extentFrac );
+            addNeighborLeaf( c, allLeavesRoot, edgeOfPane, extentFrac );
         }
     }
 
-    public void addNeighborTile( Component c, Component neighbor, Side sideOfNeighbor )
+    public void addNeighborLeaf( Component c, Component neighbor, Side sideOfNeighbor )
     {
-        addNeighborTile( c, neighbor, sideOfNeighbor, 0.5 );
+        addNeighborLeaf( c, neighbor, sideOfNeighbor, 0.5 );
     }
 
-    public void addNeighborTile( Component c, Component neighbor, Side sideOfNeighbor, double extentFrac )
+    public void addNeighborLeaf( Component c, Component neighbor, Side sideOfNeighbor, double extentFrac )
     {
         if ( extentFrac < 0 || extentFrac > 1 ) throw new IllegalArgumentException( "Value for extentFrac is outside [0,1]: " + extentFrac );
 
@@ -129,17 +129,17 @@ public class DockingPane extends JPanel
         double splitFrac = ( newIsChildA ? extentFrac : 1 - extentFrac );
         SplitPane newSplitPane = new SplitPane( arrangeVertically, splitFrac, gapSize );
 
-        if ( neighbor == maximizedTile )
+        if ( neighbor == maximizedLeaf )
         {
             neighbor = maximizedPlaceholder;
         }
 
         Container parent = neighbor.getParent( );
-        if ( parent == allTilesCard )
+        if ( parent == allLeavesCard )
         {
-            allTilesCard.remove( neighbor );
-            allTilesCard.add( newSplitPane );
-            this.allTilesRoot = newSplitPane;
+            allLeavesCard.remove( neighbor );
+            allLeavesCard.add( newSplitPane );
+            this.allLeavesRoot = newSplitPane;
         }
         else
         {
@@ -151,27 +151,27 @@ public class DockingPane extends JPanel
         newSplitPane.add( neighbor, ( newIsChildA ? CHILD_B : CHILD_A ) );
         newSplitPane.add( c, ( newIsChildA ? CHILD_A : CHILD_B ) );
 
-        tiles.add( c );
+        leaves.add( c );
 
         validate( );
         repaint( );
     }
 
-    public int numTiles( )
+    public int numLeaves( )
     {
-        return tiles.size( );
+        return leaves.size( );
     }
 
-    public Set<Component> tiles( )
+    public Set<Component> leaves( )
     {
-        return tilesUnmod;
+        return leavesUnmod;
     }
 
-    public Component findTileAt( int x, int y )
+    public Component findLeafAt( int x, int y )
     {
         if ( contains( x, y ) )
         {
-            return _findTileAt( this, x, y );
+            return _findLeafAt( this, x, y );
         }
         else
         {
@@ -179,7 +179,7 @@ public class DockingPane extends JPanel
         }
     }
 
-    protected Component _findTileAt( Container parent, int xInParent, int yInParent )
+    protected Component _findLeafAt( Container parent, int xInParent, int yInParent )
     {
         for ( int i = 0, N = parent.getComponentCount( ); i < N; i++ )
         {
@@ -191,13 +191,13 @@ public class DockingPane extends JPanel
 
                 if ( child.contains( xInChild, yInChild ) )
                 {
-                    if ( tiles.contains( child ) )
+                    if ( leaves.contains( child ) )
                     {
                         return child;
                     }
                     else if ( child instanceof Container )
                     {
-                        return _findTileAt( ( Container ) child, xInChild, yInChild );
+                        return _findLeafAt( ( Container ) child, xInChild, yInChild );
                     }
                 }
             }
@@ -205,20 +205,20 @@ public class DockingPane extends JPanel
         return null;
     }
 
-    public void removeTile( Component c )
+    public void removeLeaf( Component c )
     {
-        if ( !tiles.contains( c ) ) throw new RuntimeException( "Component is not a tile" );
+        if ( !leaves.contains( c ) ) throw new RuntimeException( "Component is not a leaf" );
 
-        if ( maximizedTile == c )
+        if ( maximizedLeaf == c )
         {
-            _unmaximizeTile( );
+            _unmaximizeLeaf( );
         }
 
         Container parent = c.getParent( );
-        if ( parent == allTilesCard )
+        if ( parent == allLeavesCard )
         {
-            allTilesCard.remove( c );
-            this.allTilesRoot = null;
+            allLeavesCard.remove( c );
+            this.allLeavesRoot = null;
         }
         else
         {
@@ -227,11 +227,11 @@ public class DockingPane extends JPanel
             parent.removeAll( );
 
             Container grandparent = parent.getParent( );
-            if ( grandparent == allTilesCard )
+            if ( grandparent == allLeavesCard )
             {
-                allTilesCard.remove( parent );
-                allTilesCard.add( sibling );
-                this.allTilesRoot = sibling;
+                allLeavesCard.remove( parent );
+                allLeavesCard.add( sibling );
+                this.allLeavesRoot = sibling;
             }
             else
             {
@@ -241,35 +241,35 @@ public class DockingPane extends JPanel
             }
         }
 
-        tiles.remove( c );
+        leaves.remove( c );
 
         validate( );
         repaint( );
     }
 
-    public Component getMaximizedTile( )
+    public Component getMaximizedLeaf( )
     {
-        return maximizedTile;
+        return maximizedLeaf;
     }
 
-    public void maximizeTile( Component c )
+    public void maximizeLeaf( Component c )
     {
-        if ( !tiles.contains( c ) ) throw new RuntimeException( "Component is not a tile" );
+        if ( !leaves.contains( c ) ) throw new RuntimeException( "Component is not a leaf" );
 
-        if ( maximizedTile == c )
+        if ( maximizedLeaf == c )
         {
             return;
         }
-        else if ( maximizedTile != null )
+        else if ( maximizedLeaf != null )
         {
-            _unmaximizeTile( );
+            _unmaximizeLeaf( );
         }
 
         Container parent = c.getParent( );
-        if ( parent == allTilesCard )
+        if ( parent == allLeavesCard )
         {
-            allTilesCard.add( maximizedPlaceholder );
-            this.allTilesRoot = maximizedPlaceholder;
+            allLeavesCard.add( maximizedPlaceholder );
+            this.allLeavesRoot = maximizedPlaceholder;
         }
         else
         {
@@ -278,46 +278,46 @@ public class DockingPane extends JPanel
             parent.add( maximizedPlaceholder, constraints );
         }
 
-        maximizedTileCard.add( c );
-        layout.show( this, MAXIMIZED_TILE_CARD );
+        maximizedLeafCard.add( c );
+        layout.show( this, MAXIMIZED_LEAF_CARD );
 
-        this.maximizedTile = c;
+        this.maximizedLeaf = c;
 
         validate( );
         repaint( );
     }
 
-    public void unmaximizeTile( )
+    public void unmaximizeLeaf( )
     {
-        if ( maximizedTile != null )
+        if ( maximizedLeaf != null )
         {
-            _unmaximizeTile( );
+            _unmaximizeLeaf( );
             validate( );
             repaint( );
         }
     }
 
-    protected void _unmaximizeTile( )
+    protected void _unmaximizeLeaf( )
     {
-        maximizedTileCard.remove( maximizedTile );
+        maximizedLeafCard.remove( maximizedLeaf );
 
         Container parent = maximizedPlaceholder.getParent( );
-        if ( parent == allTilesCard )
+        if ( parent == allLeavesCard )
         {
-            allTilesCard.remove( maximizedPlaceholder );
-            allTilesCard.add( maximizedTile );
-            this.allTilesRoot = maximizedTile;
+            allLeavesCard.remove( maximizedPlaceholder );
+            allLeavesCard.add( maximizedLeaf );
+            this.allLeavesRoot = maximizedLeaf;
         }
         else
         {
             Object constraints = ( ( SplitPane ) parent ).getConstraints( maximizedPlaceholder );
             parent.remove( maximizedPlaceholder );
-            parent.add( maximizedTile, constraints );
+            parent.add( maximizedLeaf, constraints );
         }
 
-        layout.show( this, ALL_TILES_CARD );
+        layout.show( this, ALL_LEAVES_CARD );
 
-        this.maximizedTile = null;
+        this.maximizedLeaf = null;
     }
 
 
@@ -326,24 +326,24 @@ public class DockingPane extends JPanel
 
     public void restore( Node rootNode )
     {
-        if ( allTilesRoot != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
+        if ( allLeavesRoot != null || !leaves.isEmpty( ) ) throw new RuntimeException( "At least one leaf already exists" );
 
-        Component newRoot = toComponentTree( rootNode, this.tiles );
+        Component newRoot = toComponentTree( rootNode, this.leaves );
 
-        allTilesCard.add( newRoot );
-        this.allTilesRoot = newRoot;
+        allLeavesCard.add( newRoot );
+        this.allLeavesRoot = newRoot;
 
         validate( );
         repaint( );
     }
 
-    protected Component toComponentTree( Node node, Set<Component> tiles_OUT )
+    protected Component toComponentTree( Node node, Set<Component> leaves_OUT )
     {
         if ( node instanceof Split )
         {
             Split split = ( Split ) node;
-            Component childA = toComponentTree( split.childA, tiles_OUT );
-            Component childB = toComponentTree( split.childB, tiles_OUT );
+            Component childA = toComponentTree( split.childA, leaves_OUT );
+            Component childB = toComponentTree( split.childB, leaves_OUT );
 
             if ( childA != null && childB != null )
             {
@@ -370,7 +370,7 @@ public class DockingPane extends JPanel
             Component c = ( ( Leaf ) node ).component;
             if ( c != null )
             {
-                tiles_OUT.add( c );
+                leaves_OUT.add( c );
             }
             return c;
         }
@@ -382,7 +382,7 @@ public class DockingPane extends JPanel
 
     public Node snapshot( )
     {
-        return createSnapshot( allTilesRoot );
+        return createSnapshot( allLeavesRoot );
     }
 
     protected Node createSnapshot( Component c )
@@ -394,7 +394,7 @@ public class DockingPane extends JPanel
         }
         else if ( c == maximizedPlaceholder )
         {
-            return new Leaf( maximizedTile, true );
+            return new Leaf( maximizedLeaf, true );
         }
         else if ( c != null )
         {

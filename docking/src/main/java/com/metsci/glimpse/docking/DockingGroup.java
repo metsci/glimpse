@@ -221,7 +221,7 @@ public class DockingGroup
                 Tile tile = tileFactory.newTile( );
                 appendViewsToTile( tile, remainingViews.values( ) );
                 frame = addNewFrame( );
-                frame.docker.addInitialTile( tile );
+                frame.docker.addInitialLeaf( tile );
                 frame.setPreferredSize( new Dimension( 1024, 768 ) );
                 frame.pack( );
                 frame.setLocationByPlatform( true );
@@ -235,7 +235,7 @@ public class DockingGroup
                 {
                     tile = tileFactory.newTile( );
                     appendViewsToTile( tile, remainingViews.values( ) );
-                    frame.docker.addEdgeTile( tile, LEFT );
+                    frame.docker.addEdgeLeaf( tile, LEFT );
                 }
                 else
                 {
@@ -265,7 +265,7 @@ public class DockingGroup
     {
         int largestArea = -1;
         Tile largestTile = null;
-        for ( Component c : docker.tiles( ) )
+        for ( Component c : docker.leaves( ) )
         {
             int area = c.getWidth( ) * c.getHeight( );
             if ( area > largestArea && c instanceof Tile )
