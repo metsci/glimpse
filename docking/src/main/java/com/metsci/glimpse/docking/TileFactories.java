@@ -58,7 +58,7 @@ public class TileFactories
         {
             final DockingTheme theme = dockingGroup.theme;
             final JButton maximizeButton = new JButton( theme.maximizeIcon );
-            final Tile tile = new Tile( theme, maximizeButton );
+            final Tile tile = new TileImpl( theme, maximizeButton );
             tile.addDockingMouseAdapter( new DockingMouseAdapter( tile, dockingGroup, this ) );
 
             maximizeButton.addActionListener( new ActionListener( )
