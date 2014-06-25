@@ -27,6 +27,8 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
+import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -35,6 +37,8 @@ import static com.metsci.glimpse.docking.Side.TOP;
 import static javax.swing.SwingUtilities.convertPointToScreen;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -44,7 +48,7 @@ import com.metsci.glimpse.docking.TileFactories.TileFactory;
 public class LandingRegions
 {
 
-    public static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, Point pOnScreen )
+    public static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, int fromViewNum, Point pOnScreen )
     {
         for ( DockingFrame frame : dockingGroup.frames )
         {
@@ -52,16 +56,29 @@ public class LandingRegions
             Point pInDocker = convertPointFromScreen( pOnScreen, docker );
             if ( docker.contains( pInDocker ) )
             {
-                return findLandingRegion( docker, fromTile, pOnScreen );
+                return findLandingRegion( docker, fromTile, fromViewNum, pOnScreen );
             }
         }
 
         // Not inside any docking-pane
-        return new InNewWindow( dockingGroup, pOnScreen.x, pOnScreen.y, fromTile.getWidth( ), fromTile.getHeight( ) );
+        DockingFrame frame = getAncestorOfClass( DockingFrame.class, fromTile );
+        DockingPane docker = getAncestorOfClass( DockingPane.class, fromTile );
+        Point frameOrigin = convertPointToScreen( frame, new Point( 0, 0 ) );
+        Point dockerOrigin = convertPointToScreen( docker, new Point( 0, 0 ) );
+        Insets dockerInsets = docker.getInsets( );
+        int xInset = ( dockerOrigin.x - frameOrigin.x ) + dockerInsets.left;
+        int yInset = ( dockerOrigin.y - frameOrigin.y ) + dockerInsets.top;
+
+        Rectangle firstTabBounds = fromTile.viewTabBounds( 0 );
+        Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
+        int xTileOffset = firstTabBounds.x + 7*draggedTabBounds.width/16;
+        int yTileOffset = firstTabBounds.y + 5*draggedTabBounds.height/8;
+
+        return new InNewWindow( dockingGroup, pOnScreen.x - xTileOffset, pOnScreen.y - yTileOffset, fromTile.getWidth( ), fromTile.getHeight( ), xInset, yInset );
     }
 
 
-    public static LandingRegion findLandingRegion( DockingPane docker, Tile fromTile, Point pOnScreen )
+    public static LandingRegion findLandingRegion( DockingPane docker, Tile fromTile, int fromViewNum, Point pOnScreen )
     {
         Point pInDocker = convertPointFromScreen( pOnScreen, docker );
 
@@ -354,14 +371,18 @@ public class LandingRegions
         public final int yOnScreen;
         public final int width;
         public final int height;
+        public final int xFrameInset;
+        public final int yFrameInset;
 
-        public InNewWindow( DockingGroup dockingGroup, int xOnScreen, int yOnScreen, int width, int height )
+        public InNewWindow( DockingGroup dockingGroup, int xOnScreen, int yOnScreen, int width, int height, int xFrameInset, int yFrameInset )
         {
             this.dockingGroup = dockingGroup;
             this.xOnScreen = xOnScreen;
             this.yOnScreen = yOnScreen;
             this.width = width;
             this.height = height;
+            this.xFrameInset = xFrameInset;
+            this.yFrameInset = yFrameInset;
         }
 
         @Override
@@ -378,7 +399,9 @@ public class LandingRegions
 
             DockingFrame frame = dockingGroup.addNewFrame( );
             frame.docker.addInitialLeaf( tile );
-            frame.setBounds( xOnScreen, yOnScreen, width, height );
+            frame.setLocation( xOnScreen - xFrameInset, yOnScreen - yFrameInset );
+            tile.setPreferredSize( new Dimension( width, height ) );
+            frame.pack( );
             frame.setVisible( true );
         }
     }

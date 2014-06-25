@@ -53,6 +53,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
     protected boolean dragging = false;
     protected View draggedView = null;
+    protected int draggedViewNum = -1;
 
 
     public DockingMouseAdapter( Tile tile, DockingGroup dockingGroup, TileFactory tileFactory )
@@ -63,6 +64,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
         this.dragging = false;
         this.draggedView = null;
+        this.draggedViewNum = -1;
     }
 
     @Override
@@ -76,6 +78,7 @@ public class DockingMouseAdapter extends MouseAdapter
             if ( 0 <= viewNum && viewNum < tile.numViews( ) )
             {
                 this.draggedView = tile.view( viewNum );
+                this.draggedViewNum = viewNum;
                 this.dragging = false;
             }
         }
@@ -109,7 +112,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
             this.dragging = true;
 
-            LandingRegion region = findLandingRegion( dockingGroup, tile, ev.getLocationOnScreen( ) );
+            LandingRegion region = findLandingRegion( dockingGroup, tile, draggedViewNum, ev.getLocationOnScreen( ) );
             if ( region != null )
             {
                 dockingGroup.setLandingIndicator( region.getIndicator( ) );
@@ -127,7 +130,7 @@ public class DockingMouseAdapter extends MouseAdapter
     {
         if ( ev.getButton( ) == BUTTON1 && dragging )
         {
-            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, ev.getLocationOnScreen( ) );
+            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, draggedViewNum, ev.getLocationOnScreen( ) );
             if ( landingRegion != null )
             {
                 tile.removeView( draggedView );
@@ -151,6 +154,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
             this.dragging = false;
             this.draggedView = null;
+            this.draggedViewNum = -1;
             dockingGroup.setLandingIndicator( null );
         }
     }
