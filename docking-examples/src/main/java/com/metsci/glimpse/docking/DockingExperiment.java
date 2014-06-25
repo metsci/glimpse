@@ -26,8 +26,11 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingGroup.readArrangementXml;
+import static com.metsci.glimpse.docking.DockingGroup.writeArrangementXml;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
+import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
@@ -39,11 +42,11 @@ import static java.awt.Color.magenta;
 import static java.awt.Color.red;
 import static java.awt.Color.white;
 import static java.awt.Color.yellow;
-import static java.util.Arrays.asList;
+import static java.util.logging.Level.WARNING;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -56,10 +59,7 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.DockingGroup.DockerArrangementNode;
-import com.metsci.glimpse.docking.DockingGroup.DockerArrangementSplit;
-import com.metsci.glimpse.docking.DockingGroup.DockerArrangementTile;
-import com.metsci.glimpse.docking.DockingGroup.FrameArrangement;
+import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroup.GroupArrangement;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -67,6 +67,8 @@ import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 
 public class DockingExperiment
 {
+    protected static final Logger logger = Logger.getLogger( DockingExperiment.class.getName( ) );
+
 
     public static void main( String[] args ) throws Exception
     {
@@ -75,7 +77,7 @@ public class DockingExperiment
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
+        final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
         TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
@@ -142,22 +144,17 @@ public class DockingExperiment
 
 
 
-        DockerArrangementTile aArrTile= new DockerArrangementTile( asList( aView.viewId, bView.viewId ), null, false );
-        DockerArrangementTile bArrTile = new DockerArrangementTile( asList( cView.viewId, dView.viewId ), null, false );
-        DockerArrangementNode aDockerArr = new DockerArrangementSplit( false, 0.3, aArrTile, bArrTile );
-
-        DockerArrangementTile cArrTile = new DockerArrangementTile( asList( eView.viewId, fView.viewId ), null, false );
-        DockerArrangementTile dArrTile = new DockerArrangementTile( asList( gView.viewId, hView.viewId ), null, false );
-        DockerArrangementNode bDockerArr = new DockerArrangementSplit( true, 0.75, cArrTile, dArrTile );
-
-        List<FrameArrangement> frameArrs = new ArrayList<>( );
-        frameArrs.add( new FrameArrangement( aDockerArr, 50, 50, 1024, 768 ) );
-        frameArrs.add( new FrameArrangement( bDockerArr, 1100, 150, 800, 600 ) );
-
-        GroupArrangement groupArr = new GroupArrangement( frameArrs );
+        GroupArrangement groupArr = loadDockingArrangement( "docking-experiment" );
 
         dockingGroup.restoreArrangement( groupArr, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
 
+        dockingGroup.addListener( new DockingGroupAdapter( )
+        {
+            public void disposingAllFrames( )
+            {
+                saveDockingArrangement( "docking-experiment", dockingGroup.captureArrangement( ) );
+            }
+        } );
 
 //        Tile aTile = tileFactory.newTile( );
 //        aTile.addView( aView, 0 );
@@ -193,6 +190,47 @@ public class DockingExperiment
         JPanel panel = new JPanel( );
         panel.setBackground( color );
         return panel;
+    }
+
+
+    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
+    {
+        try
+        {
+            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
+            writeArrangementXml( groupArr, arrFile );
+        }
+        catch ( Exception e )
+        {
+            logger.log( WARNING, "Failed to write docking arrangement to file", e );
+        }
+    }
+
+    public static GroupArrangement loadDockingArrangement( String appName )
+    {
+        try
+        {
+            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
+            if ( arrFile.exists( ) )
+            {
+                return readArrangementXml( arrFile );
+            }
+        }
+        catch ( Exception e )
+        {
+            logger.log( WARNING, "Failed to load docking arrangement from file", e );
+        }
+
+        try
+        {
+            return readArrangementXml( DockingExperiment.class.getClassLoader( ).getResourceAsStream( "docking/experiment-arrangement-default.xml" ) );
+        }
+        catch ( Exception e )
+        {
+            logger.log( WARNING, "Failed to load default docking arrangement from resource", e );
+        }
+
+        return null;
     }
 
 }

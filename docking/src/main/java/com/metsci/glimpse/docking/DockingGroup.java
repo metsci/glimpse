@@ -48,8 +48,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.xml.bind.JAXBContext;
@@ -74,6 +76,20 @@ public class DockingGroup
     }
 
 
+    public static interface DockingGroupListener
+    {
+        void disposingAllFrames( );
+        void disposingFrame( DockingFrame frame );
+    }
+
+
+    public static class DockingGroupAdapter implements DockingGroupListener
+    {
+        public void disposingAllFrames( ) { }
+        public void disposingFrame( DockingFrame frame ) { }
+    }
+
+
     public final String title;
     public final DockingTheme theme;
     public final DockingFrameCloseOperation frameCloseOperation;
@@ -82,6 +98,8 @@ public class DockingGroup
     public final List<DockingFrame> frames;
 
     protected final JFrame landingIndicator;
+
+    protected final Set<DockingGroupListener> listeners;
 
 
     public DockingGroup( String title, DockingTheme theme, DockingFrameCloseOperation frameCloseOperation )
@@ -98,6 +116,18 @@ public class DockingGroup
         landingIndicator.setFocusable( false );
         landingIndicator.setUndecorated( true );
         landingIndicator.getContentPane( ).setBackground( theme.landingIndicatorColor );
+
+        this.listeners = new LinkedHashSet<>( );
+    }
+
+    public void addListener( DockingGroupListener listener )
+    {
+        listeners.add( listener );
+    }
+
+    public void removeListener( DockingGroupListener listener )
+    {
+        listeners.remove( listener );
     }
 
     public DockingFrame addNewFrame( )
@@ -126,20 +156,47 @@ public class DockingGroup
 
                     case DISPOSE_CLOSED_FRAME:
                     {
+                        for ( DockingGroupListener listener : listeners )
+                        {
+                            listener.disposingFrame( frame );
+                        }
                         frame.dispose( );
                     }
                     break;
 
                     case DISPOSE_ALL_FRAMES:
                     {
-                        for ( DockingFrame f : frames ) f.dispose( );
+                        for ( DockingGroupListener listener : listeners )
+                        {
+                            listener.disposingAllFrames( );
+                        }
+                        for ( DockingFrame frame : frames )
+                        {
+                            for ( DockingGroupListener listener : listeners )
+                            {
+                                listener.disposingFrame( frame );
+                            }
+                            frame.dispose( );
+                        }
                     }
                     break;
 
                     case EXIT_JVM:
                     {
-                        // Even if we try to dispose frames here, the JVM
-                        // exits before any disposing actually happens
+                        for ( DockingGroupListener listener : listeners )
+                        {
+                            listener.disposingAllFrames( );
+                        }
+                        for ( DockingFrame frame : frames )
+                        {
+                            for ( DockingGroupListener listener : listeners )
+                            {
+                                listener.disposingFrame( frame );
+                            }
+                            // Even if we try to dispose frames here, the JVM
+                            // exits before any disposing actually happens
+                            //frame.dispose( );
+                        }
                         System.exit( 0 );
                     }
                     break;
@@ -213,17 +270,20 @@ public class DockingGroup
         Map<String,View> remainingViews = new LinkedHashMap<>( );
         for ( View v : views ) remainingViews.put( v.viewId, v );
 
-        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        if ( groupArr != null )
         {
-            MultiSplitPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
-            if ( dockerRoot != null )
+            for ( FrameArrangement frameArr : groupArr.frameArrs )
             {
-                DockingFrame frame = addNewFrame( );
-                frame.docker.restore( dockerRoot );
-                frame.setLocation( frameArr.x, frameArr.y );
-                frame.setPreferredSize( new Dimension( frameArr.width, frameArr.height ) );
-                frame.pack( );
-                frame.setVisible( true );
+                MultiSplitPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
+                if ( dockerRoot != null )
+                {
+                    DockingFrame frame = addNewFrame( );
+                    frame.docker.restore( dockerRoot );
+                    frame.setLocation( frameArr.x, frameArr.y );
+                    frame.setPreferredSize( new Dimension( frameArr.width, frameArr.height ) );
+                    frame.pack( );
+                    frame.setVisible( true );
+                }
             }
         }
 
@@ -505,7 +565,7 @@ public class DockingGroup
 
     public static Marshaller newJaxbMarshaller( ) throws IOException, JAXBException
     {
-        Marshaller marshaller = JAXBContext.newInstance( DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createMarshaller( );
+        Marshaller marshaller = JAXBContext.newInstance( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createMarshaller( );
         marshaller.setProperty( JAXB_FORMATTED_OUTPUT, true );
         return marshaller;
     }
@@ -532,7 +592,7 @@ public class DockingGroup
 
     public static Unmarshaller newJaxbUnmarshaller( ) throws JAXBException, IOException
     {
-        Unmarshaller unmarshaller = JAXBContext.newInstance( DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createUnmarshaller( );
+        Unmarshaller unmarshaller = JAXBContext.newInstance( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createUnmarshaller( );
         return unmarshaller;
     }
 
