@@ -31,6 +31,14 @@ import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static java.awt.Color.blue;
+import static java.awt.Color.cyan;
+import static java.awt.Color.gray;
+import static java.awt.Color.green;
+import static java.awt.Color.magenta;
+import static java.awt.Color.red;
+import static java.awt.Color.white;
+import static java.awt.Color.yellow;
 import static java.util.Arrays.asList;
 
 import java.awt.Color;
@@ -71,14 +79,14 @@ public class DockingExperiment
         TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
-        JPanel aPanel = new JPanel( ) {{ setBackground( Color.red ); }};
-        JPanel bPanel = new JPanel( ) {{ setBackground( Color.green ); }};
-        JPanel cPanel = new JPanel( ) {{ setBackground( Color.blue ); }};
-        JPanel dPanel = new JPanel( ) {{ setBackground( Color.cyan ); }};
-        JPanel ePanel = new JPanel( ) {{ setBackground( Color.magenta ); }};
-        JPanel fPanel = new JPanel( ) {{ setBackground( Color.yellow ); }};
-        JPanel gPanel = new JPanel( ) {{ setBackground( Color.gray ); }};
-        JPanel hPanel = new JPanel( ) {{ setBackground( Color.white ); }};
+        JPanel aPanel = newSolidPanel( red );
+        JPanel bPanel = newSolidPanel( green );
+        JPanel cPanel = newSolidPanel( blue );
+        JPanel dPanel = newSolidPanel( cyan );
+        JPanel ePanel = newSolidPanel( magenta );
+        JPanel fPanel = newSolidPanel( yellow );
+        JPanel gPanel = newSolidPanel( gray );
+        JPanel hPanel = newSolidPanel( white );
 
 
         JToolBar aToolbar = newToolbar( true );
@@ -177,6 +185,14 @@ public class DockingExperiment
 //        frame.pack( );
 //        frame.setLocationByPlatform( true );
 //        frame.setVisible( true );
+    }
+
+
+    public static JPanel newSolidPanel( Color color )
+    {
+        JPanel panel = new JPanel( );
+        panel.setBackground( color );
+        return panel;
     }
 
 }
