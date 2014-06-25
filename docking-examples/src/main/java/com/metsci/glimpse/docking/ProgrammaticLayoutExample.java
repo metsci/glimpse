@@ -34,7 +34,7 @@ public class ProgrammaticLayoutExample
         DockingTheme dockingTheme = tinyLafDockingTheme( );
         
         // create the docking pane
-        final DockingPane dockingPane = new DockingPane( dockingTheme );
+        final MultiSplitPane dockingPane = new MultiSplitPane( dockingTheme );
         
         // create a frame to contain the docking pane
         final JFrame frame = new JFrame( "Docking Example" );

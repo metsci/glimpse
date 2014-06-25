@@ -31,10 +31,10 @@ import javax.swing.JFrame;
 public class DockingFrame extends JFrame
 {
 
-    public final DockingPane docker;
+    public final MultiSplitPane docker;
 
 
-    public DockingFrame( String title, DockingPane docker )
+    public DockingFrame( String title, MultiSplitPane docker )
     {
         super( title );
         this.docker = docker;

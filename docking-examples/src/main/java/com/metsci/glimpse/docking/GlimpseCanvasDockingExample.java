@@ -1,6 +1,6 @@
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
+import static com.metsci.glimpse.docking.MultiSplitPane.Arrangement.*;
 import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.util.logging.Level.*;
@@ -24,7 +24,7 @@ import net.sf.tinylaf.TinyLookAndFeel;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
-import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
+import com.metsci.glimpse.docking.MultiSplitPane.Arrangement.ArrangementNode;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.examples.basic.ScatterplotExample;
 import com.metsci.glimpse.gl.util.GLUtils;
@@ -51,7 +51,7 @@ public class GlimpseCanvasDockingExample
         bPanel.setLayout( new BorderLayout( ) );
         
         // set up two docking panes
-        final DockingPane dockingPane = new DockingPane( dockingTheme );
+        final MultiSplitPane dockingPane = new MultiSplitPane( dockingTheme );
         dockingPane.addView( new View( "aView", "View A", requireIcon( "icons/ViewA.png" ), null, aPanel, null ) );
         dockingPane.addView( new View( "bView", "View B", requireIcon( "icons/ViewB.png" ), null, bPanel, null ) );
 

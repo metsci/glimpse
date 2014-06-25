@@ -52,7 +52,7 @@ public class LandingRegions
     {
         for ( DockingFrame frame : dockingGroup.frames )
         {
-            DockingPane docker = frame.docker;
+            MultiSplitPane docker = frame.docker;
             Point pInDocker = convertPointFromScreen( pOnScreen, docker );
             if ( docker.contains( pInDocker ) )
             {
@@ -62,7 +62,7 @@ public class LandingRegions
 
         // Not inside any docking-pane
         DockingFrame frame = getAncestorOfClass( DockingFrame.class, fromTile );
-        DockingPane docker = getAncestorOfClass( DockingPane.class, fromTile );
+        MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, fromTile );
         Point frameOrigin = convertPointToScreen( frame, new Point( 0, 0 ) );
         Point dockerOrigin = convertPointToScreen( docker, new Point( 0, 0 ) );
         Insets dockerInsets = docker.getInsets( );
@@ -78,7 +78,7 @@ public class LandingRegions
     }
 
 
-    public static LandingRegion findLandingRegion( DockingPane docker, Tile fromTile, int fromViewNum, Point pOnScreen )
+    public static LandingRegion findLandingRegion( MultiSplitPane docker, Tile fromTile, int fromViewNum, Point pOnScreen )
     {
         Point pInDocker = convertPointFromScreen( pOnScreen, docker );
 
@@ -178,9 +178,9 @@ public class LandingRegions
 
     public static class InEmptyDockingPane implements LandingRegion
     {
-        public final DockingPane docker;
+        public final MultiSplitPane docker;
 
-        public InEmptyDockingPane( DockingPane docker )
+        public InEmptyDockingPane( MultiSplitPane docker )
         {
             this.docker = docker;
         }
@@ -205,10 +205,10 @@ public class LandingRegions
 
     public static class EdgeOfDockingPane implements LandingRegion
     {
-        public final DockingPane docker;
+        public final MultiSplitPane docker;
         public final Side edgeOfPane;
 
-        public EdgeOfDockingPane( DockingPane docker, Side edgeOfPane )
+        public EdgeOfDockingPane( MultiSplitPane docker, Side edgeOfPane )
         {
             this.docker = docker;
             this.edgeOfPane = edgeOfPane;
@@ -248,11 +248,11 @@ public class LandingRegions
 
     public static class BesideExistingTile implements LandingRegion
     {
-        public final DockingPane docker;
+        public final MultiSplitPane docker;
         public final Component neighbor;
         public final Side sideOfNeighbor;
 
-        public BesideExistingTile( DockingPane docker, Component neighbor, Side sideOfNeighbor )
+        public BesideExistingTile( MultiSplitPane docker, Component neighbor, Side sideOfNeighbor )
         {
             this.docker = docker;
             this.neighbor = neighbor;

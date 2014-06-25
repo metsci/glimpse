@@ -88,7 +88,7 @@ public class DockingGroup
 
     public DockingFrame addNewFrame( )
     {
-        DockingPane docker = new DockingPane( theme.dividerSize );
+        MultiSplitPane docker = new MultiSplitPane( theme.dividerSize );
 
         final DockingFrame frame = new DockingFrame( title, docker );
         frame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
@@ -201,7 +201,7 @@ public class DockingGroup
 
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            DockingPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
+            MultiSplitPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
             if ( dockerRoot != null )
             {
                 DockingFrame frame = addNewFrame( );
@@ -261,7 +261,7 @@ public class DockingGroup
         return largestFrame;
     }
 
-    protected static Tile findLargestTile( DockingPane docker )
+    protected static Tile findLargestTile( MultiSplitPane docker )
     {
         int largestArea = -1;
         Tile largestTile = null;
@@ -297,7 +297,7 @@ public class DockingGroup
         return new GroupArrangement( frameArrs );
     }
 
-    protected static DockingPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
+    protected static MultiSplitPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
     {
         if ( arrNode instanceof DockerArrangementTile )
         {
@@ -330,18 +330,18 @@ public class DockingGroup
                     tile.selectView( selectedView );
                 }
 
-                return new DockingPane.Leaf( tile, arrTile.isMaximized );
+                return new MultiSplitPane.Leaf( tile, arrTile.isMaximized );
             }
         }
         else if ( arrNode instanceof DockerArrangementSplit )
         {
             DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
-            DockingPane.Node childA = toDockingPaneNode( arrSplit.childA, remainingViews_INOUT, tileFactory );
-            DockingPane.Node childB = toDockingPaneNode( arrSplit.childB, remainingViews_INOUT, tileFactory );
+            MultiSplitPane.Node childA = toDockingPaneNode( arrSplit.childA, remainingViews_INOUT, tileFactory );
+            MultiSplitPane.Node childB = toDockingPaneNode( arrSplit.childB, remainingViews_INOUT, tileFactory );
 
             if ( childA != null && childB != null )
             {
-                return new DockingPane.Split( arrSplit.arrangeVertically, arrSplit.splitFrac, childA, childB );
+                return new MultiSplitPane.Split( arrSplit.arrangeVertically, arrSplit.splitFrac, childA, childB );
             }
             else if ( childA != null )
             {
@@ -366,11 +366,11 @@ public class DockingGroup
         }
     }
 
-    protected static DockerArrangementNode toDockerArrNode( DockingPane.Node node )
+    protected static DockerArrangementNode toDockerArrNode( MultiSplitPane.Node node )
     {
-        if ( node instanceof DockingPane.Leaf )
+        if ( node instanceof MultiSplitPane.Leaf )
         {
-            DockingPane.Leaf leaf = ( DockingPane.Leaf ) node;
+            MultiSplitPane.Leaf leaf = ( MultiSplitPane.Leaf ) node;
 
             List<String> viewIds = new ArrayList<>( );
             String selectedViewId = null;
@@ -392,9 +392,9 @@ public class DockingGroup
 
             return new DockerArrangementTile( viewIds, selectedViewId, leaf.isMaximized );
         }
-        else if ( node instanceof DockingPane.Split )
+        else if ( node instanceof MultiSplitPane.Split )
         {
-            DockingPane.Split split = ( DockingPane.Split ) node;
+            MultiSplitPane.Split split = ( MultiSplitPane.Split ) node;
             DockerArrangementNode childA = toDockerArrNode( split.childA );
             DockerArrangementNode childB = toDockerArrNode( split.childB );
             return new DockerArrangementSplit( split.arrangeVertically, split.splitFrac, childA, childB );
@@ -405,7 +405,7 @@ public class DockingGroup
         }
         else
         {
-            throw new RuntimeException( "Unrecognized subclass of " + DockingPane.Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
+            throw new RuntimeException( "Unrecognized subclass of " + MultiSplitPane.Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 

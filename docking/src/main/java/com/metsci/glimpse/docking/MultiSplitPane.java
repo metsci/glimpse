@@ -43,7 +43,7 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-public class DockingPane extends JPanel
+public class MultiSplitPane extends JPanel
 {
     protected static final String MAXIMIZED_LEAF_CARD = "maximizedLeaf";
     protected static final String ALL_LEAVES_CARD = "allLeaves";
@@ -62,7 +62,7 @@ public class DockingPane extends JPanel
     protected final Set<Component> leavesUnmod;
 
 
-    public DockingPane( int gapSize )
+    public MultiSplitPane( int gapSize )
     {
         this.layout = new CardLayout( );
         setLayout( layout );

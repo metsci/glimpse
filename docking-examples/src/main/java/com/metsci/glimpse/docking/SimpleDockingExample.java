@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingPane.Arrangement.*;
+import static com.metsci.glimpse.docking.MultiSplitPane.Arrangement.*;
 import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static java.util.logging.Level.*;
@@ -52,7 +52,7 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.DockingPane.Arrangement.ArrangementNode;
+import com.metsci.glimpse.docking.MultiSplitPane.Arrangement.ArrangementNode;
 
 public class SimpleDockingExample
 {
@@ -113,7 +113,7 @@ public class SimpleDockingExample
         hToolbar.add( new JButton( "H1" ) );
 
 
-        final DockingPane dockingPane = new DockingPane( dockingTheme );
+        final MultiSplitPane dockingPane = new MultiSplitPane( dockingTheme );
         dockingPane.addView( new View( "aView", "View A", requireIcon( "icons/ViewA.png" ), null, aPanel, aToolbar ) );
         dockingPane.addView( new View( "bView", "View B", requireIcon( "icons/ViewB.png" ), null, bPanel, bToolbar ) );
         dockingPane.addView( new View( "cView", "View C", requireIcon( "icons/ViewC.png" ), null, cPanel, cToolbar ) );

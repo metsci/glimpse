@@ -65,7 +65,7 @@ public class TileFactories
                 public void paintComponent( Graphics g )
                 {
                     Tile tile = tileRef[ 0 ];
-                    DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
+                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
                     setIcon( docker.getMaximizedLeaf( ) == tile ? theme.restoreIcon : theme.maximizeIcon );
 
                     super.paintComponent( g );
@@ -80,7 +80,7 @@ public class TileFactories
             {
                 public void actionPerformed( ActionEvent ev )
                 {
-                    DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
+                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
                     if ( docker.getMaximizedLeaf( ) == tile )
                     {
                         docker.unmaximizeLeaf( );

@@ -138,7 +138,7 @@ public class DockingMouseAdapter extends MouseAdapter
 
                 if ( tile.numViews( ) == 0 )
                 {
-                    DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
+                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
                     docker.removeLeaf( tile );
 
                     if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
