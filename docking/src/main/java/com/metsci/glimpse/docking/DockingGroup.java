@@ -356,6 +356,10 @@ public class DockingGroup
                 return null;
             }
         }
+        else if ( arrNode == null )
+        {
+            return null;
+        }
         else
         {
             throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
@@ -395,9 +399,13 @@ public class DockingGroup
             DockerArrangementNode childB = toDockerArrNode( split.childB );
             return new DockerArrangementSplit( split.arrangeVertically, split.splitFrac, childA, childB );
         }
-        else
+        else if ( node == null )
         {
             return null;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockingPane.Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 

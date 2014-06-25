@@ -28,6 +28,7 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -57,9 +58,23 @@ public class TileFactories
         public Tile newTile( )
         {
             final DockingTheme theme = dockingGroup.theme;
-            final JButton maximizeButton = new JButton( theme.maximizeIcon );
+
+            final Tile[] tileRef = { null };
+            final JButton maximizeButton = new JButton( theme.maximizeIcon )
+            {
+                public void paintComponent( Graphics g )
+                {
+                    Tile tile = tileRef[ 0 ];
+                    DockingPane docker = getAncestorOfClass( DockingPane.class, tile );
+                    setIcon( docker.getMaximizedLeaf( ) == tile ? theme.restoreIcon : theme.maximizeIcon );
+
+                    super.paintComponent( g );
+                }
+            };
+
             final Tile tile = new TileImpl( theme, maximizeButton );
             tile.addDockingMouseAdapter( new DockingMouseAdapter( tile, dockingGroup, this ) );
+            tileRef[ 0 ] = tile;
 
             maximizeButton.addActionListener( new ActionListener( )
             {
@@ -69,12 +84,10 @@ public class TileFactories
                     if ( docker.getMaximizedLeaf( ) == tile )
                     {
                         docker.unmaximizeLeaf( );
-                        maximizeButton.setIcon( theme.maximizeIcon );
                     }
                     else
                     {
                         docker.maximizeLeaf( tile );
-                        maximizeButton.setIcon( theme.restoreIcon );
                     }
                 }
             } );

@@ -211,7 +211,7 @@ public class DockingPane extends JPanel
 
         if ( maximizedLeaf == c )
         {
-            _unmaximizeLeaf( );
+            unmaximizeLeaf( );
         }
 
         Container parent = c.getParent( );
@@ -262,7 +262,7 @@ public class DockingPane extends JPanel
         }
         else if ( maximizedLeaf != null )
         {
-            _unmaximizeLeaf( );
+            unmaximizeLeaf( );
         }
 
         Container parent = c.getParent( );
@@ -279,26 +279,17 @@ public class DockingPane extends JPanel
         }
 
         maximizedLeafCard.add( c );
-        layout.show( this, MAXIMIZED_LEAF_CARD );
-
         this.maximizedLeaf = c;
 
+        layout.show( this, MAXIMIZED_LEAF_CARD );
         validate( );
         repaint( );
     }
 
     public void unmaximizeLeaf( )
     {
-        if ( maximizedLeaf != null )
-        {
-            _unmaximizeLeaf( );
-            validate( );
-            repaint( );
-        }
-    }
+        if ( maximizedLeaf == null ) return;
 
-    protected void _unmaximizeLeaf( )
-    {
         maximizedLeafCard.remove( maximizedLeaf );
 
         Container parent = maximizedPlaceholder.getParent( );
@@ -315,9 +306,11 @@ public class DockingPane extends JPanel
             parent.add( maximizedLeaf, constraints );
         }
 
-        layout.show( this, ALL_LEAVES_CARD );
-
         this.maximizedLeaf = null;
+
+        layout.show( this, ALL_LEAVES_CARD );
+        validate( );
+        repaint( );
     }
 
 
@@ -333,8 +326,54 @@ public class DockingPane extends JPanel
         allLeavesCard.add( newRoot );
         this.allLeavesRoot = newRoot;
 
+        Component toMaximize = findMaximized( rootNode );
+        if ( toMaximize != null )
+        {
+            maximizeLeaf( toMaximize );
+        }
+
         validate( );
         repaint( );
+    }
+
+    protected Component findMaximized( Node node )
+    {
+        if ( node instanceof Split )
+        {
+            Split split = ( Split ) node;
+            Component maximizedA = findMaximized( split.childA );
+            Component maximizedB = findMaximized( split.childB );
+
+            if ( maximizedA != null && maximizedB != null )
+            {
+                throw new RuntimeException( "Cannot maximize more than one leaf" );
+            }
+            else if ( maximizedA != null )
+            {
+                return maximizedA;
+            }
+            else if ( maximizedB != null )
+            {
+                return maximizedB;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else if ( node instanceof Leaf )
+        {
+            Leaf leaf = ( Leaf ) node;
+            return ( leaf.isMaximized ? leaf.component : null );
+        }
+        else if ( node == null )
+        {
+            return null;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
+        }
     }
 
     protected Component toComponentTree( Node node, Set<Component> leaves_OUT )
@@ -374,6 +413,10 @@ public class DockingPane extends JPanel
             }
             return c;
         }
+        else if ( node == null )
+        {
+            return null;
+        }
         else
         {
             throw new RuntimeException( "Unrecognized subclass of " + Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
@@ -396,13 +439,13 @@ public class DockingPane extends JPanel
         {
             return new Leaf( maximizedLeaf, true );
         }
-        else if ( c != null )
+        else if ( c == null )
         {
-            return new Leaf( c, false );
+            return null;
         }
         else
         {
-            return null;
+            return new Leaf( c, false );
         }
     }
 
