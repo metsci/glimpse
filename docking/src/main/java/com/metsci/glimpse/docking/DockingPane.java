@@ -57,7 +57,7 @@ public class DockingPane extends JPanel
     protected Component maximizedTile;
 
     protected final int gapSize;
-    protected Component root;
+    protected Component allTilesRoot;
     protected final Set<Component> tiles;
     protected final Set<Component> tilesUnmod;
 
@@ -80,18 +80,18 @@ public class DockingPane extends JPanel
         this.maximizedTile = null;
 
         this.gapSize = gapSize;
-        this.root = null;
+        this.allTilesRoot = null;
         this.tiles = new LinkedHashSet<>( );
         this.tilesUnmod = unmodifiableSet( tiles );
     }
 
     public void addInitialTile( Component c )
     {
-        if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
+        if ( allTilesRoot != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
 
         allTilesCard.add( c );
 
-        this.root = c;
+        this.allTilesRoot = c;
         tiles.add( c );
 
         validate( );
@@ -105,13 +105,13 @@ public class DockingPane extends JPanel
 
     public void addEdgeTile( Component c, Side edgeOfPane, double extentFrac )
     {
-        if ( root == null )
+        if ( allTilesRoot == null )
         {
             addInitialTile( c );
         }
         else
         {
-            addNeighborTile( c, root, edgeOfPane, extentFrac );
+            addNeighborTile( c, allTilesRoot, edgeOfPane, extentFrac );
         }
     }
 
@@ -139,7 +139,7 @@ public class DockingPane extends JPanel
         {
             allTilesCard.remove( neighbor );
             allTilesCard.add( newSplitPane );
-            this.root = newSplitPane;
+            this.allTilesRoot = newSplitPane;
         }
         else
         {
@@ -218,7 +218,7 @@ public class DockingPane extends JPanel
         if ( parent == allTilesCard )
         {
             allTilesCard.remove( c );
-            this.root = null;
+            this.allTilesRoot = null;
         }
         else
         {
@@ -231,7 +231,7 @@ public class DockingPane extends JPanel
             {
                 allTilesCard.remove( parent );
                 allTilesCard.add( sibling );
-                this.root = sibling;
+                this.allTilesRoot = sibling;
             }
             else
             {
@@ -269,7 +269,7 @@ public class DockingPane extends JPanel
         if ( parent == allTilesCard )
         {
             allTilesCard.add( maximizedPlaceholder );
-            this.root = maximizedPlaceholder;
+            this.allTilesRoot = maximizedPlaceholder;
         }
         else
         {
@@ -306,7 +306,7 @@ public class DockingPane extends JPanel
         {
             allTilesCard.remove( maximizedPlaceholder );
             allTilesCard.add( maximizedTile );
-            this.root = maximizedTile;
+            this.allTilesRoot = maximizedTile;
         }
         else
         {
@@ -326,12 +326,12 @@ public class DockingPane extends JPanel
 
     public void restore( Node rootNode )
     {
-        if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
+        if ( allTilesRoot != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
 
         Component newRoot = toComponentTree( rootNode, this.tiles );
 
         allTilesCard.add( newRoot );
-        this.root = newRoot;
+        this.allTilesRoot = newRoot;
 
         validate( );
         repaint( );
@@ -382,7 +382,7 @@ public class DockingPane extends JPanel
 
     public Node snapshot( )
     {
-        return createSnapshot( root );
+        return createSnapshot( allTilesRoot );
     }
 
     protected Node createSnapshot( Component c )
