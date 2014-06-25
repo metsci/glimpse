@@ -30,6 +30,8 @@ import static com.metsci.glimpse.docking.MiscUtils.createEmptyBorder;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.TOP;
+import static com.metsci.glimpse.docking.SplitPane.CHILD_A;
+import static com.metsci.glimpse.docking.SplitPane.CHILD_B;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -42,6 +44,9 @@ import javax.swing.JPanel;
 
 public class DockingPane extends JPanel
 {
+    protected static final String MAXIMIZED_TILE_CARD = "maximizedTile";
+    protected static final String ALL_TILES_CARD = "allTiles";
+
 
     protected final CardLayout layout;
     protected final JPanel maximizedTileCard;
@@ -62,12 +67,12 @@ public class DockingPane extends JPanel
         setBorder( createEmptyBorder( gapSize/2 ) );
 
         this.maximizedTileCard = new JPanel( new BorderLayout( ) );
-        add( maximizedTileCard, "maximizedTile" );
+        add( maximizedTileCard, MAXIMIZED_TILE_CARD );
 
         this.allTilesCard = new JPanel( new BorderLayout( ) );
-        add( allTilesCard, "allTiles" );
+        add( allTilesCard, ALL_TILES_CARD );
 
-        layout.show( this, "allTiles" );
+        layout.show( this, ALL_TILES_CARD );
 
         this.maximizedPlaceholder = new JPanel( );
         this.maximizedTile = null;
@@ -140,8 +145,8 @@ public class DockingPane extends JPanel
             parent.add( newSplitPane, constraints );
         }
 
-        newSplitPane.add( neighbor, ( newIsChildA ? "B" : "A" ) );
-        newSplitPane.add( c, ( newIsChildA ? "A" : "B" ) );
+        newSplitPane.add( neighbor, ( newIsChildA ? CHILD_B : CHILD_A ) );
+        newSplitPane.add( c, ( newIsChildA ? CHILD_A : CHILD_B ) );
 
         tiles.add( c );
 
@@ -266,7 +271,7 @@ public class DockingPane extends JPanel
         }
 
         maximizedTileCard.add( c );
-        layout.show( this, "maximizedTile" );
+        layout.show( this, MAXIMIZED_TILE_CARD );
 
         this.maximizedTile = c;
 
@@ -302,7 +307,7 @@ public class DockingPane extends JPanel
             parent.add( maximizedTile, constraints );
         }
 
-        layout.show( this, "allTiles" );
+        layout.show( this, ALL_TILES_CARD );
 
         this.maximizedTile = null;
     }
@@ -319,8 +324,8 @@ public class DockingPane extends JPanel
 
             Split split = ( Split ) node;
             SplitPane splitPane = new SplitPane( split.arrangeVertically, split.splitFrac, gapSize );
-            splitPane.add( toComponentTree( split.childA, tiles_OUT ), "A" );
-            splitPane.add( toComponentTree( split.childB, tiles_OUT ), "B" );
+            splitPane.add( toComponentTree( split.childA, tiles_OUT ), CHILD_A );
+            splitPane.add( toComponentTree( split.childB, tiles_OUT ), CHILD_B );
             return splitPane;
         }
         else if ( node instanceof Leaf )

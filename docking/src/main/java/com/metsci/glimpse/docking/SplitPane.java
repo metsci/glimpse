@@ -47,6 +47,9 @@ import javax.swing.JPanel;
 
 public class SplitPane extends JPanel
 {
+    protected static final String CHILD_A = "A";
+    protected static final String CHILD_B = "B";
+
 
     public final boolean arrangeVertically;
     public final int gapSize;
@@ -158,11 +161,11 @@ public class SplitPane extends JPanel
     {
         if ( child == childA )
         {
-            return "A";
+            return CHILD_A;
         }
         else if ( child == childB )
         {
-            return "B";
+            return CHILD_B;
         }
         else
         {
@@ -327,12 +330,12 @@ public class SplitPane extends JPanel
         @Override
         public void addLayoutComponent( String name, Component c )
         {
-            if ( "A".equalsIgnoreCase( name ) )
+            if ( CHILD_A.equalsIgnoreCase( name ) )
             {
                 if ( childA != null ) throw new RuntimeException( "Existing 'A' child must be removed before adding a new one" );
                 childA = c;
             }
-            else if ( "B".equalsIgnoreCase( name ) )
+            else if ( CHILD_B.equalsIgnoreCase( name ) )
             {
                 if ( childB != null ) throw new RuntimeException( "Existing 'B' child must be removed before adding a new one" );
                 childB = c;
