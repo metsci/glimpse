@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.Side.LEFT;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
@@ -36,7 +37,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -188,24 +190,94 @@ public class DockingGroup
     {
         if ( !frames.isEmpty( ) ) throw new RuntimeException( "At least one frame already exists" );
 
-        Map<String,View> viewsById = new HashMap<>( );
-        for ( View v : views ) viewsById.put( v.viewId, v );
+        Map<String,View> remainingViews = new LinkedHashMap<>( );
+        for ( View v : views ) remainingViews.put( v.viewId, v );
 
         for ( FrameSnapshot frameSnapshot : snapshot.frameSnapshots )
         {
-            DockingPane.Node dockerSnapshot = toDockingPaneSnapshot( frameSnapshot.dockerSnapshot, viewsById, tileFactory );
-
-            // XXX: Skip empty dockerSnapshots
-
-            DockingFrame frame = addNewFrame( );
-            frame.docker.restore( dockerSnapshot );
-            frame.setLocation( frameSnapshot.x, frameSnapshot.y );
-            frame.setPreferredSize( new Dimension( frameSnapshot.width, frameSnapshot.height ) );
-            frame.pack( );
-            frame.setVisible( true );
+            DockingPane.Node dockerSnapshot = toDockingPaneSnapshot( frameSnapshot.dockerSnapshot, remainingViews, tileFactory );
+            if ( dockerSnapshot != null )
+            {
+                DockingFrame frame = addNewFrame( );
+                frame.docker.restore( dockerSnapshot );
+                frame.setLocation( frameSnapshot.x, frameSnapshot.y );
+                frame.setPreferredSize( new Dimension( frameSnapshot.width, frameSnapshot.height ) );
+                frame.pack( );
+                frame.setVisible( true );
+            }
         }
 
-        // XXX: Place leftover views
+        if ( !remainingViews.isEmpty( ) )
+        {
+            DockingFrame frame;
+            if ( frames.isEmpty( ) )
+            {
+                Tile tile = tileFactory.newTile( );
+                appendViewsToTile( tile, remainingViews.values( ) );
+                frame = addNewFrame( );
+                frame.docker.addInitialTile( tile );
+                frame.setPreferredSize( new Dimension( 1024, 768 ) );
+                frame.pack( );
+                frame.setLocationByPlatform( true );
+                frame.setVisible( true );
+            }
+            else
+            {
+                frame = findLargestFrame( frames );
+                Tile tile = findLargestTile( frame.docker );
+                if ( tile == null )
+                {
+                    tile = tileFactory.newTile( );
+                    appendViewsToTile( tile, remainingViews.values( ) );
+                    frame.docker.addEdgeTile( tile, LEFT );
+                }
+                else
+                {
+                    appendViewsToTile( tile, remainingViews.values( ) );
+                }
+            }
+        }
+    }
+
+    protected static DockingFrame findLargestFrame( Collection<DockingFrame> frames )
+    {
+        int largestArea = -1;
+        DockingFrame largestFrame = null;
+        for ( DockingFrame frame : frames )
+        {
+            int area = frame.getWidth( ) * frame.getHeight( );
+            if ( area > largestArea )
+            {
+                largestFrame = frame;
+                largestArea = area;
+            }
+        }
+        return largestFrame;
+    }
+
+    protected static Tile findLargestTile( DockingPane docker )
+    {
+        int largestArea = -1;
+        Tile largestTile = null;
+        for ( Component c : docker.tiles( ) )
+        {
+            int area = c.getWidth( ) * c.getHeight( );
+            if ( area > largestArea && c instanceof Tile )
+            {
+                largestTile = ( Tile ) c;
+                largestArea = area;
+            }
+        }
+        return largestTile;
+    }
+
+    protected static void appendViewsToTile( Tile tile, Collection<View> views )
+    {
+        for ( View view : views )
+        {
+            int viewNum = tile.numViews( );
+            tile.addView( view, viewNum );
+        }
     }
 
     public GroupSnapshot snapshot( )
@@ -219,45 +291,68 @@ public class DockingGroup
         return new GroupSnapshot( frameSnapshots );
     }
 
-    protected static DockingPane.Node toDockingPaneSnapshot( SnapshotNode node, Map<String,View> viewsById, TileFactory tileFactory )
+    protected static DockingPane.Node toDockingPaneSnapshot( SnapshotNode node, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
     {
         if ( node instanceof TileSnapshot )
         {
             TileSnapshot tileSnapshot = ( TileSnapshot ) node;
 
-            // XXX: Handle empty tiles
-
-            Tile tile = tileFactory.newTile( );
-
-            int nextViewNum = 0;
+            Map<String,View> views = new LinkedHashMap<>( );
             for ( String viewId : tileSnapshot.viewIds )
             {
-                View view = viewsById.get( viewId );
-                if ( view != null )
+                View view = remainingViews_INOUT.remove( viewId );
+                if ( view != null ) views.put( viewId, view );
+            }
+
+            if ( views.isEmpty( ) )
+            {
+                return null;
+            }
+            else
+            {
+                Tile tile = tileFactory.newTile( );
+
+                for ( View view : views.values( ) )
                 {
-                    int viewNum = ( nextViewNum++ );
+                    int viewNum = tile.numViews( );
                     tile.addView( view, viewNum );
                 }
-            }
 
-            View selectedView = viewsById.get( tileSnapshot.selectedViewId );
-            if ( selectedView != null )
-            {
-                tile.selectView( selectedView );
-            }
+                View selectedView = views.get( tileSnapshot.selectedViewId );
+                if ( selectedView != null )
+                {
+                    tile.selectView( selectedView );
+                }
 
-            return new DockingPane.Leaf( tile, tileSnapshot.isMaximized );
+                return new DockingPane.Leaf( tile, tileSnapshot.isMaximized );
+            }
         }
         else if ( node instanceof SplitSnapshot )
         {
             SplitSnapshot splitSnapshot = ( SplitSnapshot ) node;
-            DockingPane.Node childA = toDockingPaneSnapshot( splitSnapshot.childA, viewsById, tileFactory );
-            DockingPane.Node childB = toDockingPaneSnapshot( splitSnapshot.childB, viewsById, tileFactory );
-            return new DockingPane.Split( splitSnapshot.arrangeVertically, splitSnapshot.splitFrac, childA, childB );
+            DockingPane.Node childA = toDockingPaneSnapshot( splitSnapshot.childA, remainingViews_INOUT, tileFactory );
+            DockingPane.Node childB = toDockingPaneSnapshot( splitSnapshot.childB, remainingViews_INOUT, tileFactory );
+
+            if ( childA != null && childB != null )
+            {
+                return new DockingPane.Split( splitSnapshot.arrangeVertically, splitSnapshot.splitFrac, childA, childB );
+            }
+            else if ( childA != null )
+            {
+                return childA;
+            }
+            else if ( childB != null )
+            {
+                return childB;
+            }
+            else
+            {
+                return null;
+            }
         }
         else
         {
-            return null;
+            throw new RuntimeException( "Unrecognized subclass of " + SnapshotNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 

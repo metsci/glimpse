@@ -32,12 +32,13 @@ import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.TOP;
 import static com.metsci.glimpse.docking.SplitPane.CHILD_A;
 import static com.metsci.glimpse.docking.SplitPane.CHILD_B;
+import static java.util.Collections.unmodifiableSet;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -58,6 +59,7 @@ public class DockingPane extends JPanel
     protected final int gapSize;
     protected Component root;
     protected final Set<Component> tiles;
+    protected final Set<Component> tilesUnmod;
 
 
     public DockingPane( int gapSize )
@@ -79,7 +81,8 @@ public class DockingPane extends JPanel
 
         this.gapSize = gapSize;
         this.root = null;
-        this.tiles = new HashSet<>( );
+        this.tiles = new LinkedHashSet<>( );
+        this.tilesUnmod = unmodifiableSet( tiles );
     }
 
     public void addInitialTile( Component c )
@@ -157,6 +160,11 @@ public class DockingPane extends JPanel
     public int numTiles( )
     {
         return tiles.size( );
+    }
+
+    public Set<Component> tiles( )
+    {
+        return tilesUnmod;
     }
 
     public Component findTileAt( int x, int y )
