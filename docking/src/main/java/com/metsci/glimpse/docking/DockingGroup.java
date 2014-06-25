@@ -186,7 +186,7 @@ public class DockingGroup
 
     public void restore( GroupSnapshot snapshot, TileFactory tileFactory, View... views )
     {
-        // XXX: Require no existing content
+        if ( !frames.isEmpty( ) ) throw new RuntimeException( "At least one frame already exists" );
 
         Map<String,View> viewsById = new HashMap<>( );
         for ( View v : views ) viewsById.put( v.viewId, v );

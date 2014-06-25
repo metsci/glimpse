@@ -316,17 +316,46 @@ public class DockingPane extends JPanel
     // Snapshots
     //
 
+    public void restore( Node node )
+    {
+        if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
+
+        Component newRoot = toComponentTree( node, this.tiles );
+
+        allTilesCard.add( newRoot );
+        this.root = newRoot;
+
+        validate( );
+        repaint( );
+    }
+
     protected Component toComponentTree( Node node, Set<Component> tiles_OUT )
     {
         if ( node instanceof Split )
         {
-            // XXX: Handle empty splits
-
             Split split = ( Split ) node;
-            SplitPane splitPane = new SplitPane( split.arrangeVertically, split.splitFrac, gapSize );
-            splitPane.add( toComponentTree( split.childA, tiles_OUT ), CHILD_A );
-            splitPane.add( toComponentTree( split.childB, tiles_OUT ), CHILD_B );
-            return splitPane;
+            Component childA = toComponentTree( split.childA, tiles_OUT );
+            Component childB = toComponentTree( split.childB, tiles_OUT );
+
+            if ( childA != null && childB != null )
+            {
+                SplitPane splitPane = new SplitPane( split.arrangeVertically, split.splitFrac, gapSize );
+                splitPane.add( childA, CHILD_A );
+                splitPane.add( childB, CHILD_B );
+                return splitPane;
+            }
+            else if ( childA != null )
+            {
+                return childA;
+            }
+            else if ( childB != null )
+            {
+                return childB;
+            }
+            else
+            {
+                return null;
+            }
         }
         else if ( node instanceof Leaf )
         {
@@ -339,21 +368,8 @@ public class DockingPane extends JPanel
         }
         else
         {
-            return null;
+            throw new RuntimeException( "Unrecognized subclass of " + Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
-    }
-
-    public void restore( Node node )
-    {
-        if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
-
-        Component newRoot = toComponentTree( node, this.tiles );
-
-        allTilesCard.add( newRoot );
-        this.root = newRoot;
-
-        validate( );
-        repaint( );
     }
 
     public Node snapshot( )
