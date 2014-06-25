@@ -187,27 +187,27 @@ public class DockingGroup
     // Snapshots
     //
 
-    public void restore( GroupSnapshot snapshot, TileFactory tileFactory, View... views )
+    public void restoreArrangement( GroupArrangement groupArr, TileFactory tileFactory, View... views )
     {
-        restore( snapshot, tileFactory, asList( views ) );
+        restoreArrangement( groupArr, tileFactory, asList( views ) );
     }
 
-    public void restore( GroupSnapshot snapshot, TileFactory tileFactory, Collection<View> views )
+    public void restoreArrangement( GroupArrangement groupArr, TileFactory tileFactory, Collection<View> views )
     {
         if ( !frames.isEmpty( ) ) throw new RuntimeException( "At least one frame already exists" );
 
         Map<String,View> remainingViews = new LinkedHashMap<>( );
         for ( View v : views ) remainingViews.put( v.viewId, v );
 
-        for ( FrameSnapshot frameSnapshot : snapshot.frameSnapshots )
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            DockingPane.Node dockerSnapshot = toDockingPaneSnapshot( frameSnapshot.dockerSnapshot, remainingViews, tileFactory );
-            if ( dockerSnapshot != null )
+            DockingPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
+            if ( dockerRoot != null )
             {
                 DockingFrame frame = addNewFrame( );
-                frame.docker.restore( dockerSnapshot );
-                frame.setLocation( frameSnapshot.x, frameSnapshot.y );
-                frame.setPreferredSize( new Dimension( frameSnapshot.width, frameSnapshot.height ) );
+                frame.docker.restore( dockerRoot );
+                frame.setLocation( frameArr.x, frameArr.y );
+                frame.setPreferredSize( new Dimension( frameArr.width, frameArr.height ) );
                 frame.pack( );
                 frame.setVisible( true );
             }
@@ -286,25 +286,25 @@ public class DockingGroup
         }
     }
 
-    public GroupSnapshot snapshot( )
+    public GroupArrangement captureArrangement( )
     {
-        List<FrameSnapshot> frameSnapshots = new ArrayList<>( );
+        List<FrameArrangement> frameArrs = new ArrayList<>( );
         for ( DockingFrame frame : frames )
         {
-            SnapshotNode dockerSnapshot = fromDockingPaneSnapshot( frame.docker.snapshot( ) );
-            frameSnapshots.add( new FrameSnapshot( dockerSnapshot, frame.getBounds( ) ) );
+            DockerArrangementNode dockerArr = toDockerArrNode( frame.docker.snapshot( ) );
+            frameArrs.add( new FrameArrangement( dockerArr, frame.getBounds( ) ) );
         }
-        return new GroupSnapshot( frameSnapshots );
+        return new GroupArrangement( frameArrs );
     }
 
-    protected static DockingPane.Node toDockingPaneSnapshot( SnapshotNode node, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
+    protected static DockingPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
     {
-        if ( node instanceof TileSnapshot )
+        if ( arrNode instanceof DockerArrangementTile )
         {
-            TileSnapshot tileSnapshot = ( TileSnapshot ) node;
+            DockerArrangementTile arrTile = ( DockerArrangementTile ) arrNode;
 
             Map<String,View> views = new LinkedHashMap<>( );
-            for ( String viewId : tileSnapshot.viewIds )
+            for ( String viewId : arrTile.viewIds )
             {
                 View view = remainingViews_INOUT.remove( viewId );
                 if ( view != null ) views.put( viewId, view );
@@ -324,24 +324,24 @@ public class DockingGroup
                     tile.addView( view, viewNum );
                 }
 
-                View selectedView = views.get( tileSnapshot.selectedViewId );
+                View selectedView = views.get( arrTile.selectedViewId );
                 if ( selectedView != null )
                 {
                     tile.selectView( selectedView );
                 }
 
-                return new DockingPane.Leaf( tile, tileSnapshot.isMaximized );
+                return new DockingPane.Leaf( tile, arrTile.isMaximized );
             }
         }
-        else if ( node instanceof SplitSnapshot )
+        else if ( arrNode instanceof DockerArrangementSplit )
         {
-            SplitSnapshot splitSnapshot = ( SplitSnapshot ) node;
-            DockingPane.Node childA = toDockingPaneSnapshot( splitSnapshot.childA, remainingViews_INOUT, tileFactory );
-            DockingPane.Node childB = toDockingPaneSnapshot( splitSnapshot.childB, remainingViews_INOUT, tileFactory );
+            DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
+            DockingPane.Node childA = toDockingPaneNode( arrSplit.childA, remainingViews_INOUT, tileFactory );
+            DockingPane.Node childB = toDockingPaneNode( arrSplit.childB, remainingViews_INOUT, tileFactory );
 
             if ( childA != null && childB != null )
             {
-                return new DockingPane.Split( splitSnapshot.arrangeVertically, splitSnapshot.splitFrac, childA, childB );
+                return new DockingPane.Split( arrSplit.arrangeVertically, arrSplit.splitFrac, childA, childB );
             }
             else if ( childA != null )
             {
@@ -358,11 +358,11 @@ public class DockingGroup
         }
         else
         {
-            throw new RuntimeException( "Unrecognized subclass of " + SnapshotNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
         }
     }
 
-    protected static SnapshotNode fromDockingPaneSnapshot( DockingPane.Node node )
+    protected static DockerArrangementNode toDockerArrNode( DockingPane.Node node )
     {
         if ( node instanceof DockingPane.Leaf )
         {
@@ -386,14 +386,14 @@ public class DockingGroup
                 // XXX: Handle arbitrary components
             }
 
-            return new TileSnapshot( viewIds, selectedViewId, leaf.isMaximized );
+            return new DockerArrangementTile( viewIds, selectedViewId, leaf.isMaximized );
         }
         else if ( node instanceof DockingPane.Split )
         {
             DockingPane.Split split = ( DockingPane.Split ) node;
-            SnapshotNode childA = fromDockingPaneSnapshot( split.childA );
-            SnapshotNode childB = fromDockingPaneSnapshot( split.childB );
-            return new SplitSnapshot( split.arrangeVertically, split.splitFrac, childA, childB );
+            DockerArrangementNode childA = toDockerArrNode( split.childA );
+            DockerArrangementNode childB = toDockerArrNode( split.childB );
+            return new DockerArrangementSplit( split.arrangeVertically, split.splitFrac, childA, childB );
         }
         else
         {
@@ -402,20 +402,20 @@ public class DockingGroup
     }
 
     @XmlType( name="Group" )
-    public static class GroupSnapshot
+    public static class GroupArrangement
     {
         @XmlElementWrapper( name="frames" )
         @XmlElement( name="frame" )
-        public List<FrameSnapshot> frameSnapshots;
+        public List<FrameArrangement> frameArrs;
 
-        public GroupSnapshot( List<FrameSnapshot> frameSnapshots )
+        public GroupArrangement( List<FrameArrangement> frameArrs )
         {
-            this.frameSnapshots = frameSnapshots;
+            this.frameArrs = frameArrs;
         }
     }
 
     @XmlType( name="Frame" )
-    public static class FrameSnapshot
+    public static class FrameArrangement
     {
         public int x;
         public int y;
@@ -423,36 +423,36 @@ public class DockingGroup
         public int height;
 
         @XmlElement( name="docker" )
-        public SnapshotNode dockerSnapshot;
+        public DockerArrangementNode dockerArr;
 
-        public FrameSnapshot( SnapshotNode dockerSnapshot, Rectangle frameBounds )
+        public FrameArrangement( DockerArrangementNode dockerArr, Rectangle frameBounds )
         {
-            this( dockerSnapshot, frameBounds.x, frameBounds.y, frameBounds.width, frameBounds.height );
+            this( dockerArr, frameBounds.x, frameBounds.y, frameBounds.width, frameBounds.height );
         }
 
-        public FrameSnapshot( SnapshotNode dockerSnapshot, int x, int y, int width, int height )
+        public FrameArrangement( DockerArrangementNode dockerArr, int x, int y, int width, int height )
         {
             this.x = x;
             this.y = y;
             this.width = width;
             this.height = height;
-            this.dockerSnapshot = dockerSnapshot;
+            this.dockerArr = dockerArr;
         }
     }
 
     @XmlType( name="Node" )
-    public static abstract class SnapshotNode
+    public static abstract class DockerArrangementNode
     { }
 
     @XmlType( name="Split" )
-    public static class SplitSnapshot extends SnapshotNode
+    public static class DockerArrangementSplit extends DockerArrangementNode
     {
         public boolean arrangeVertically;
         public double splitFrac;
-        public SnapshotNode childA;
-        public SnapshotNode childB;
+        public DockerArrangementNode childA;
+        public DockerArrangementNode childB;
 
-        public SplitSnapshot( boolean arrangeVertically, double splitFrac, SnapshotNode childA, SnapshotNode childB )
+        public DockerArrangementSplit( boolean arrangeVertically, double splitFrac, DockerArrangementNode childA, DockerArrangementNode childB )
         {
             this.arrangeVertically = arrangeVertically;
             this.splitFrac = splitFrac;
@@ -462,7 +462,7 @@ public class DockingGroup
     }
 
     @XmlType( name="Tile" )
-    public static class TileSnapshot extends SnapshotNode
+    public static class DockerArrangementTile extends DockerArrangementNode
     {
         @XmlElementWrapper( name="views" )
         @XmlElement( name="view" )
@@ -473,7 +473,7 @@ public class DockingGroup
 
         public boolean isMaximized;
 
-        public TileSnapshot( List<String> viewIds, String selectedViewId, boolean isMaximized )
+        public DockerArrangementTile( List<String> viewIds, String selectedViewId, boolean isMaximized )
         {
             this.viewIds = viewIds;
             this.selectedViewId = selectedViewId;

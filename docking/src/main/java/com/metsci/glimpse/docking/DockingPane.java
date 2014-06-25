@@ -324,11 +324,11 @@ public class DockingPane extends JPanel
     // Snapshots
     //
 
-    public void restore( Node node )
+    public void restore( Node rootNode )
     {
         if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
 
-        Component newRoot = toComponentTree( node, this.tiles );
+        Component newRoot = toComponentTree( rootNode, this.tiles );
 
         allTilesCard.add( newRoot );
         this.root = newRoot;

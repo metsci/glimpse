@@ -48,11 +48,11 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.DockingGroup.FrameSnapshot;
-import com.metsci.glimpse.docking.DockingGroup.GroupSnapshot;
-import com.metsci.glimpse.docking.DockingGroup.SnapshotNode;
-import com.metsci.glimpse.docking.DockingGroup.SplitSnapshot;
-import com.metsci.glimpse.docking.DockingGroup.TileSnapshot;
+import com.metsci.glimpse.docking.DockingGroup.DockerArrangementNode;
+import com.metsci.glimpse.docking.DockingGroup.DockerArrangementSplit;
+import com.metsci.glimpse.docking.DockingGroup.DockerArrangementTile;
+import com.metsci.glimpse.docking.DockingGroup.FrameArrangement;
+import com.metsci.glimpse.docking.DockingGroup.GroupArrangement;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
@@ -134,21 +134,21 @@ public class DockingExperiment
 
 
 
-        TileSnapshot aTileSnapshot = new TileSnapshot( asList( aView.viewId, bView.viewId ), null, false );
-        TileSnapshot bTileSnapshot = new TileSnapshot( asList( cView.viewId, dView.viewId ), null, false );
-        SnapshotNode aDockerSnapshot = new SplitSnapshot( false, 0.3, aTileSnapshot, bTileSnapshot );
+        DockerArrangementTile aArrTile= new DockerArrangementTile( asList( aView.viewId, bView.viewId ), null, false );
+        DockerArrangementTile bArrTile = new DockerArrangementTile( asList( cView.viewId, dView.viewId ), null, false );
+        DockerArrangementNode aDockerArr = new DockerArrangementSplit( false, 0.3, aArrTile, bArrTile );
 
-        TileSnapshot cTileSnapshot = new TileSnapshot( asList( eView.viewId, fView.viewId ), null, false );
-        TileSnapshot dTileSnapshot = new TileSnapshot( asList( gView.viewId, hView.viewId ), null, false );
-        SnapshotNode bDockerSnapshot = new SplitSnapshot( true, 0.75, cTileSnapshot, dTileSnapshot );
+        DockerArrangementTile cArrTile = new DockerArrangementTile( asList( eView.viewId, fView.viewId ), null, false );
+        DockerArrangementTile dArrTile = new DockerArrangementTile( asList( gView.viewId, hView.viewId ), null, false );
+        DockerArrangementNode bDockerArr = new DockerArrangementSplit( true, 0.75, cArrTile, dArrTile );
 
-        List<FrameSnapshot> frameSnapshots = new ArrayList<>( );
-        frameSnapshots.add( new FrameSnapshot( aDockerSnapshot, 50, 50, 1024, 768 ) );
-        frameSnapshots.add( new FrameSnapshot( bDockerSnapshot, 1100, 150, 800, 600 ) );
+        List<FrameArrangement> frameArrs = new ArrayList<>( );
+        frameArrs.add( new FrameArrangement( aDockerArr, 50, 50, 1024, 768 ) );
+        frameArrs.add( new FrameArrangement( bDockerArr, 1100, 150, 800, 600 ) );
 
-        GroupSnapshot dockingGroupSnapshot = new GroupSnapshot( frameSnapshots );
+        GroupArrangement groupArr = new GroupArrangement( frameArrs );
 
-        dockingGroup.restore( dockingGroupSnapshot, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
+        dockingGroup.restoreArrangement( groupArr, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
 
 
 //        Tile aTile = tileFactory.newTile( );
