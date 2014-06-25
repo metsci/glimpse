@@ -79,7 +79,7 @@ public class DockingPane extends JPanel
 
     public void addInitialTile( Component c )
     {
-        if ( root != null ) throw new RuntimeException( "At least one tile already exists" );
+        if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
 
         allTilesCard.add( c );
 
@@ -311,7 +311,47 @@ public class DockingPane extends JPanel
     // Snapshots
     //
 
-    public Node getSnapshot( )
+    protected Component toComponentTree( Node node, Set<Component> tiles_OUT )
+    {
+        if ( node instanceof Split )
+        {
+            // XXX: Handle empty splits
+
+            Split split = ( Split ) node;
+            SplitPane splitPane = new SplitPane( split.arrangeVertically, split.splitFrac, gapSize );
+            splitPane.add( toComponentTree( split.childA, tiles_OUT ), "A" );
+            splitPane.add( toComponentTree( split.childB, tiles_OUT ), "B" );
+            return splitPane;
+        }
+        else if ( node instanceof Leaf )
+        {
+            Component c = ( ( Leaf ) node ).component;
+            if ( c != null )
+            {
+                tiles_OUT.add( c );
+            }
+            return c;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void restore( Node node )
+    {
+        if ( root != null || !tiles.isEmpty( ) ) throw new RuntimeException( "At least one tile already exists" );
+
+        Component newRoot = toComponentTree( node, this.tiles );
+
+        allTilesCard.add( newRoot );
+        this.root = newRoot;
+
+        validate( );
+        repaint( );
+    }
+
+    public Node snapshot( )
     {
         return createSnapshot( root );
     }

@@ -31,11 +31,11 @@ import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.Side.BOTTOM;
-import static com.metsci.glimpse.docking.Side.LEFT;
+import static java.util.Arrays.asList;
 
 import java.awt.Color;
-import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -48,6 +48,11 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
+import com.metsci.glimpse.docking.DockingGroup.FrameSnapshot;
+import com.metsci.glimpse.docking.DockingGroup.GroupSnapshot;
+import com.metsci.glimpse.docking.DockingGroup.SnapshotNode;
+import com.metsci.glimpse.docking.DockingGroup.SplitSnapshot;
+import com.metsci.glimpse.docking.DockingGroup.TileSnapshot;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
@@ -123,32 +128,55 @@ public class DockingExperiment
         View hView = new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar );
 
 
-        Tile aTile = tileFactory.newTile( );
-        aTile.addView( aView, 0 );
-        aTile.addView( bView, 1 );
-        aTile.addView( cView, 2 );
-
-        Tile bTile = tileFactory.newTile( );
-        bTile.addView( dView, 0 );
-        bTile.addView( eView, 1 );
-
-        Tile cTile = tileFactory.newTile( );
-        cTile.addView( fView, 0 );
-        cTile.addView( gView, 1 );
-        cTile.addView( hView, 2 );
 
 
-        DockingFrame frame = dockingGroup.addNewFrame( );
-        DockingPane docker = frame.docker;
 
-        docker.addInitialTile( aTile );
-        docker.addNeighborTile( bTile, aTile, LEFT, 0.3 );
-        docker.addEdgeTile( cTile, BOTTOM, 0.3 );
 
-        frame.setPreferredSize( new Dimension( 1024, 768 ) );
-        frame.pack( );
-        frame.setLocationByPlatform( true );
-        frame.setVisible( true );
+
+
+        TileSnapshot aTileSnapshot = new TileSnapshot( asList( aView.viewKey.viewId, bView.viewKey.viewId ), null, false );
+        TileSnapshot bTileSnapshot = new TileSnapshot( asList( cView.viewKey.viewId, dView.viewKey.viewId ), null, false );
+        SnapshotNode aDockerSnapshot = new SplitSnapshot( false, 0.3, aTileSnapshot, bTileSnapshot );
+
+        TileSnapshot cTileSnapshot = new TileSnapshot( asList( eView.viewKey.viewId, fView.viewKey.viewId ), null, false );
+        TileSnapshot dTileSnapshot = new TileSnapshot( asList( gView.viewKey.viewId, hView.viewKey.viewId ), null, false );
+        SnapshotNode bDockerSnapshot = new SplitSnapshot( true, 0.75, cTileSnapshot, dTileSnapshot );
+
+        List<FrameSnapshot> frameSnapshots = new ArrayList<>( );
+        frameSnapshots.add( new FrameSnapshot( aDockerSnapshot, 50, 50, 1024, 768 ) );
+        frameSnapshots.add( new FrameSnapshot( bDockerSnapshot, 1100, 150, 800, 600 ) );
+
+        GroupSnapshot dockingGroupSnapshot = new GroupSnapshot( frameSnapshots );
+
+        dockingGroup.restore( dockingGroupSnapshot, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
+
+
+//        Tile aTile = tileFactory.newTile( );
+//        aTile.addView( aView, 0 );
+//        aTile.addView( bView, 1 );
+//        aTile.addView( cView, 2 );
+//
+//        Tile bTile = tileFactory.newTile( );
+//        bTile.addView( dView, 0 );
+//        bTile.addView( eView, 1 );
+//
+//        Tile cTile = tileFactory.newTile( );
+//        cTile.addView( fView, 0 );
+//        cTile.addView( gView, 1 );
+//        cTile.addView( hView, 2 );
+//
+//
+//        DockingFrame frame = dockingGroup.addNewFrame( );
+//        DockingPane docker = frame.docker;
+//
+//        docker.addInitialTile( aTile );
+//        docker.addNeighborTile( bTile, aTile, LEFT, 0.3 );
+//        docker.addEdgeTile( cTile, BOTTOM, 0.3 );
+//
+//        frame.setPreferredSize( new Dimension( 1024, 768 ) );
+//        frame.pack( );
+//        frame.setLocationByPlatform( true );
+//        frame.setVisible( true );
     }
 
 }
