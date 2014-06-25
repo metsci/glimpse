@@ -59,16 +59,6 @@ public class SplitPane extends JPanel
     protected JPanel separator;
 
 
-    public SplitPane( boolean arrangeVertically )
-    {
-        this( arrangeVertically, 0.5 );
-    }
-
-    public SplitPane( boolean arrangeVertically, double splitFrac )
-    {
-        this( arrangeVertically, splitFrac, 7 );
-    }
-
     public SplitPane( boolean arrangeVertically, double splitFrac, int gapSize )
     {
         super( null );
