@@ -27,6 +27,7 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.Side.LEFT;
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
@@ -187,6 +188,11 @@ public class DockingGroup
     //
 
     public void restore( GroupSnapshot snapshot, TileFactory tileFactory, View... views )
+    {
+        restore( snapshot, tileFactory, asList( views ) );
+    }
+
+    public void restore( GroupSnapshot snapshot, TileFactory tileFactory, Collection<View> views )
     {
         if ( !frames.isEmpty( ) ) throw new RuntimeException( "At least one frame already exists" );
 
