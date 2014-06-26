@@ -66,7 +66,7 @@ public class TileFactories
                 {
                     Tile tile = tileRef[ 0 ];
                     MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-                    setIcon( docker.getMaximizedLeaf( ) == tile ? theme.restoreIcon : theme.maximizeIcon );
+                    setIcon( docker.getMaximizedLeaf( ) == tile ? theme.unmaximizeIcon : theme.maximizeIcon );
 
                     super.paintComponent( g );
                 }

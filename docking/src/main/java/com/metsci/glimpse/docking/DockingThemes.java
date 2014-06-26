@@ -65,7 +65,7 @@ public class DockingThemes
         public final Color unselectedTextColor;
 
         public final ImageIcon maximizeIcon;
-        public final ImageIcon restoreIcon;
+        public final ImageIcon unmaximizeIcon;
         public final ImageIcon optionsIcon;
 
 
@@ -85,7 +85,7 @@ public class DockingThemes
                              Color unselectedTextColor,
 
                              ImageIcon maximizeIcon,
-                             ImageIcon restoreIcon,
+                             ImageIcon unmaximizeIcon,
                              ImageIcon optionsIcon )
         {
             this.dividerSize = dividerSize;
@@ -104,7 +104,7 @@ public class DockingThemes
             this.unselectedTextColor = unselectedTextColor;
 
             this.maximizeIcon = maximizeIcon;
-            this.restoreIcon = restoreIcon;
+            this.unmaximizeIcon = unmaximizeIcon;
             this.optionsIcon = optionsIcon;
         }
 
@@ -127,7 +127,7 @@ public class DockingThemes
                                                                              darkGray,
 
                                                                              requireIcon( "icons/maximize.gif" ),
-                                                                             requireIcon( "icons/restore.gif" ),
+                                                                             requireIcon( "icons/unmaximize.gif" ),
                                                                              requireIcon( "icons/options.gif" ) );
 
 
@@ -149,7 +149,7 @@ public class DockingThemes
                                  textColor,
 
                                  defaultDockingTheme.maximizeIcon,
-                                 defaultDockingTheme.restoreIcon,
+                                 defaultDockingTheme.unmaximizeIcon,
                                  defaultDockingTheme.optionsIcon );
     }
 
