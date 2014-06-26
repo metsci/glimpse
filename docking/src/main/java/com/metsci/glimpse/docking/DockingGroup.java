@@ -32,7 +32,6 @@ import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -268,8 +267,7 @@ public class DockingGroup
                     DockingFrame frame = addNewFrame( );
                     frame.docker.restore( dockerRoot );
                     frame.setLocation( frameArr.x, frameArr.y );
-                    frame.setPreferredSize( new Dimension( frameArr.width, frameArr.height ) );
-                    frame.pack( );
+                    frame.setSize( frameArr.width, frameArr.height );
                     frame.setVisible( true );
                 }
             }
@@ -284,9 +282,8 @@ public class DockingGroup
                 appendViewsToTile( tile, remainingViews.values( ) );
                 frame = addNewFrame( );
                 frame.docker.addInitialLeaf( tile );
-                frame.setPreferredSize( new Dimension( 1024, 768 ) );
-                frame.pack( );
                 frame.setLocationByPlatform( true );
+                frame.setSize( 1024, 768 );
                 frame.setVisible( true );
             }
             else
