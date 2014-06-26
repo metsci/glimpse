@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingGroup.readArrangementXml;
-import static com.metsci.glimpse.docking.DockingGroup.writeArrangementXml;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.Side.BOTTOM;
+import static com.metsci.glimpse.docking.Side.LEFT;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -42,10 +41,9 @@ import static java.awt.Color.magenta;
 import static java.awt.Color.red;
 import static java.awt.Color.white;
 import static java.awt.Color.yellow;
-import static java.util.logging.Level.WARNING;
 
 import java.awt.Color;
-import java.io.File;
+import java.awt.Dimension;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -59,20 +57,18 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 
-public class DockingExperiment
+public class ProgrammaticDockingExample
 {
-    protected static final Logger logger = Logger.getLogger( DockingExperiment.class.getName( ) );
+    protected static final Logger logger = Logger.getLogger( ProgrammaticDockingExample.class.getName( ) );
 
 
     public static void main( String[] args ) throws Exception
     {
-        Theme.loadTheme( DockingExperiment.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+        Theme.loadTheme( ProgrammaticDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
@@ -139,49 +135,32 @@ public class DockingExperiment
 
 
 
+        Tile aTile = tileFactory.newTile( );
+        aTile.addView( aView, 0 );
+        aTile.addView( bView, 1 );
+        aTile.addView( cView, 2 );
+
+        Tile bTile = tileFactory.newTile( );
+        bTile.addView( dView, 0 );
+        bTile.addView( eView, 1 );
+
+        Tile cTile = tileFactory.newTile( );
+        cTile.addView( fView, 0 );
+        cTile.addView( gView, 1 );
+        cTile.addView( hView, 2 );
 
 
+        DockingFrame frame = dockingGroup.addNewFrame( );
+        MultiSplitPane docker = frame.docker;
 
+        docker.addInitialLeaf( aTile );
+        docker.addNeighborLeaf( bTile, aTile, LEFT, 0.3 );
+        docker.addEdgeLeaf( cTile, BOTTOM, 0.3 );
 
-
-        GroupArrangement groupArr = loadDockingArrangement( "docking-experiment" );
-
-        dockingGroup.restoreArrangement( groupArr, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
-
-        dockingGroup.addListener( new DockingGroupAdapter( )
-        {
-            public void disposingAllFrames( )
-            {
-                saveDockingArrangement( "docking-experiment", dockingGroup.captureArrangement( ) );
-            }
-        } );
-
-//        Tile aTile = tileFactory.newTile( );
-//        aTile.addView( aView, 0 );
-//        aTile.addView( bView, 1 );
-//        aTile.addView( cView, 2 );
-//
-//        Tile bTile = tileFactory.newTile( );
-//        bTile.addView( dView, 0 );
-//        bTile.addView( eView, 1 );
-//
-//        Tile cTile = tileFactory.newTile( );
-//        cTile.addView( fView, 0 );
-//        cTile.addView( gView, 1 );
-//        cTile.addView( hView, 2 );
-//
-//
-//        DockingFrame frame = dockingGroup.addNewFrame( );
-//        DockingPane docker = frame.docker;
-//
-//        docker.addInitialTile( aTile );
-//        docker.addNeighborTile( bTile, aTile, LEFT, 0.3 );
-//        docker.addEdgeTile( cTile, BOTTOM, 0.3 );
-//
-//        frame.setPreferredSize( new Dimension( 1024, 768 ) );
-//        frame.pack( );
-//        frame.setLocationByPlatform( true );
-//        frame.setVisible( true );
+        frame.setPreferredSize( new Dimension( 1024, 768 ) );
+        frame.pack( );
+        frame.setLocationByPlatform( true );
+        frame.setVisible( true );
     }
 
 
@@ -190,47 +169,6 @@ public class DockingExperiment
         JPanel panel = new JPanel( );
         panel.setBackground( color );
         return panel;
-    }
-
-
-    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeArrangementXml( groupArr, arrFile );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to write docking arrangement to file", e );
-        }
-    }
-
-    public static GroupArrangement loadDockingArrangement( String appName )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            if ( arrFile.exists( ) )
-            {
-                return readArrangementXml( arrFile );
-            }
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load docking arrangement from file", e );
-        }
-
-        try
-        {
-            return readArrangementXml( DockingExperiment.class.getClassLoader( ).getResourceAsStream( "docking/experiment-arrangement-default.xml" ) );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load default docking arrangement from resource", e );
-        }
-
-        return null;
     }
 
 }

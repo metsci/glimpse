@@ -30,7 +30,6 @@ import static com.metsci.glimpse.docking.Side.LEFT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
-import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -38,13 +37,6 @@ import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -54,11 +46,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JFrame;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -497,67 +484,4 @@ public class DockingGroup
         }
     }
 
-    public static Marshaller newJaxbMarshaller( ) throws IOException, JAXBException
-    {
-        Marshaller marshaller = JAXBContext.newInstance( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createMarshaller( );
-        marshaller.setProperty( JAXB_FORMATTED_OUTPUT, true );
-        return marshaller;
-    }
-
-    public static void writeArrangementXml( GroupArrangement groupArr, File file ) throws JAXBException, IOException
-    {
-        newJaxbMarshaller( ).marshal( groupArr, file );
-    }
-
-    public static void writeArrangementXml( GroupArrangement groupArr, Writer writer ) throws JAXBException, IOException
-    {
-        newJaxbMarshaller( ).marshal( groupArr, writer );
-    }
-
-    public static void writeArrangementXml( GroupArrangement groupArr, OutputStream stream ) throws JAXBException, IOException
-    {
-        newJaxbMarshaller( ).marshal( groupArr, stream );
-    }
-
-    public static Unmarshaller newJaxbUnmarshaller( ) throws JAXBException, IOException
-    {
-        Unmarshaller unmarshaller = JAXBContext.newInstance( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createUnmarshaller( );
-        return unmarshaller;
-    }
-
-    protected static GroupArrangement castToArrangement( Object object )
-    {
-        if ( object instanceof GroupArrangement )
-        {
-            return ( GroupArrangement ) object;
-        }
-        else if ( object instanceof JAXBElement )
-        {
-            return castToArrangement( ( ( JAXBElement<?> ) object ).getValue( ) );
-        }
-        else
-        {
-            throw new ClassCastException( "Object is neither a " + GroupArrangement.class.getName( ) + " nor a " + JAXBElement.class.getName( ) + ": classname = " + object.getClass( ).getName( ) );
-        }
-    }
-
-    public static GroupArrangement readArrangementXml( URL url ) throws JAXBException, IOException
-    {
-        return castToArrangement( newJaxbUnmarshaller( ).unmarshal( url ) );
-    }
-
-    public static GroupArrangement readArrangementXml( File file ) throws JAXBException, IOException
-    {
-        return castToArrangement( newJaxbUnmarshaller( ).unmarshal( file ) );
-    }
-
-    public static GroupArrangement readArrangementXml( Reader reader ) throws JAXBException, IOException
-    {
-        return castToArrangement( newJaxbUnmarshaller( ).unmarshal( reader ) );
-    }
-
-    public static GroupArrangement readArrangementXml( InputStream stream ) throws JAXBException, IOException
-    {
-        return castToArrangement( newJaxbUnmarshaller( ).unmarshal( stream ) );
-    }
 }

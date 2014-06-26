@@ -26,39 +26,50 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.MultiSplitPane.Arrangement.*;
-import static com.metsci.glimpse.docking.DockingThemes.*;
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.util.logging.Level.*;
-import static javax.swing.JFrame.*;
+import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
+import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
+import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
+import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
+import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
+import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
+import static java.awt.Color.blue;
+import static java.awt.Color.cyan;
+import static java.awt.Color.gray;
+import static java.awt.Color.green;
+import static java.awt.Color.magenta;
+import static java.awt.Color.red;
+import static java.awt.Color.white;
+import static java.awt.Color.yellow;
+import static java.util.logging.Level.WARNING;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.MultiSplitPane.Arrangement.ArrangementNode;
+import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
+import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
+import com.metsci.glimpse.docking.TileFactories.TileFactory;
+import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class SimpleDockingExample
 {
     protected static final Logger logger = Logger.getLogger( SimpleDockingExample.class.getName( ) );
 
-    @SuppressWarnings( "serial" )
+
     public static void main( String[] args ) throws Exception
     {
         Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
@@ -66,14 +77,18 @@ public class SimpleDockingExample
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        JPanel aPanel = new JPanel( ) {{ setBackground( Color.red ); }};
-        JPanel bPanel = new JPanel( ) {{ setBackground( Color.green ); }};
-        JPanel cPanel = new JPanel( ) {{ setBackground( Color.blue ); }};
-        JPanel dPanel = new JPanel( ) {{ setBackground( Color.cyan ); }};
-        JPanel ePanel = new JPanel( ) {{ setBackground( Color.magenta ); }};
-        JPanel fPanel = new JPanel( ) {{ setBackground( Color.yellow ); }};
-        JPanel gPanel = new JPanel( ) {{ setBackground( Color.gray ); }};
-        JPanel hPanel = new JPanel( ) {{ setBackground( Color.white ); }};
+        final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
+        TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+
+
+        JPanel aPanel = newSolidPanel( red );
+        JPanel bPanel = newSolidPanel( green );
+        JPanel cPanel = newSolidPanel( blue );
+        JPanel dPanel = newSolidPanel( cyan );
+        JPanel ePanel = newSolidPanel( magenta );
+        JPanel fPanel = newSolidPanel( yellow );
+        JPanel gPanel = newSolidPanel( gray );
+        JPanel hPanel = newSolidPanel( white );
 
 
         JToolBar aToolbar = newToolbar( true );
@@ -113,50 +128,44 @@ public class SimpleDockingExample
         hToolbar.add( new JButton( "H1" ) );
 
 
-        final MultiSplitPane dockingPane = new MultiSplitPane( dockingTheme );
-        dockingPane.addView( new View( "aView", "View A", requireIcon( "icons/ViewA.png" ), null, aPanel, aToolbar ) );
-        dockingPane.addView( new View( "bView", "View B", requireIcon( "icons/ViewB.png" ), null, bPanel, bToolbar ) );
-        dockingPane.addView( new View( "cView", "View C", requireIcon( "icons/ViewC.png" ), null, cPanel, cToolbar ) );
-        dockingPane.addView( new View( "dView", "View D", requireIcon( "icons/ViewD.png" ), null, dPanel, dToolbar ) );
-        dockingPane.addView( new View( "eView", "View E", requireIcon( "icons/ViewE.png" ), null, ePanel, eToolbar ) );
-        dockingPane.addView( new View( "fView", "View F", requireIcon( "icons/ViewF.png" ), null, fPanel, fToolbar ) );
-        dockingPane.addView( new View( "gView", "View G", requireIcon( "icons/ViewG.png" ), null, gPanel, gToolbar ) );
-        dockingPane.addView( new View( "hView", "View H", requireIcon( "icons/ViewH.png" ), null, hPanel, hToolbar ) );
+        View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
+        View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
+        View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
+        View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
+        View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
+        View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
+        View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
+        View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
 
-        final JFrame frame = new JFrame( "Docking Example" );
-        frame.setDefaultCloseOperation( EXIT_ON_CLOSE );
-        
-        SwingUtilities.invokeAndWait( new Runnable( )
+
+
+        final String appName = "simple-docking-example";
+        GroupArrangement groupArr = loadDockingArrangement( appName );
+        dockingGroup.restoreArrangement( groupArr, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
+        dockingGroup.addListener( new DockingGroupAdapter( )
         {
-            @Override
-            public void run( )
+            public void disposingAllFrames( )
             {
-                frame.setContentPane( dockingPane );
-            }
-        });
-        
-        frame.setPreferredSize( new Dimension( 1600, 900 ) );
-        frame.pack( );
-
-        swingRun( dockingPane.restoreArrangement, loadDockingArrangement( "simple-docking-example" ) );
-
-        frame.addWindowListener( new WindowAdapter( )
-        {
-            public void windowClosing( WindowEvent ev )
-            {
-                saveDockingArrangement( "simple-docking-example", dockingPane.captureArrangement( ) );
+                saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
             }
         } );
-
-        frame.setVisible( true );
     }
 
-    public static void saveDockingArrangement( String appName, ArrangementNode arrangement )
+
+    public static JPanel newSolidPanel( Color color )
+    {
+        JPanel panel = new JPanel( );
+        panel.setBackground( color );
+        return panel;
+    }
+
+
+    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
     {
         try
         {
-            File arrangementFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeDockingArrangementXml( arrangement, arrangementFile );
+            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
+            writeArrangementXml( groupArr, arrFile );
         }
         catch ( Exception e )
         {
@@ -164,14 +173,14 @@ public class SimpleDockingExample
         }
     }
 
-    public static ArrangementNode loadDockingArrangement( String appName )
+    public static GroupArrangement loadDockingArrangement( String appName )
     {
         try
         {
-            File arrangementFile = new File( createAppDir( appName ), "arrangement.xml" );
-            if ( arrangementFile.exists( ) )
+            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
+            if ( arrFile.exists( ) )
             {
-                return readDockingArrangementXml( arrangementFile );
+                return readArrangementXml( arrFile );
             }
         }
         catch ( Exception e )
@@ -181,12 +190,14 @@ public class SimpleDockingExample
 
         try
         {
-            return readDockingArrangementXml( SimpleDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/simple-arrangement-default.xml" ) );
+            return readArrangementXml( SimpleDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/simple-arrangement-default.xml" ) );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( e );
+            logger.log( WARNING, "Failed to load default docking arrangement from resource", e );
         }
+
+        return null;
     }
 
 }
