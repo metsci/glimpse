@@ -26,11 +26,16 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static java.awt.Color.black;
+import static java.awt.Color.darkGray;
+import static java.awt.Color.lightGray;
+import static java.awt.Color.white;
+
 import java.awt.Color;
 import java.util.logging.Logger;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static java.awt.Color.*;
+import javax.swing.ImageIcon;
 
 public class DockingThemes
 {
@@ -38,7 +43,78 @@ public class DockingThemes
     protected static final Logger logger = Logger.getLogger( DockingThemes.class.getName( ) );
 
 
+    public static class DockingTheme
+    {
+
+        public final int dividerSize;
+
+        public final int landingIndicatorThickness;
+        public final Color landingIndicatorColor;
+
+        /**
+         * Even lineThickness values do NOT work well
+         */
+        public final int lineThickness;
+        public final int cornerRadius;
+        public final int cardPadding;
+        public final int labelPadding;
+
+        public final Color lineColor;
+        public final Color highlightColor;
+        public final Color selectedTextColor;
+        public final Color unselectedTextColor;
+
+        public final ImageIcon maximizeIcon;
+        public final ImageIcon unmaximizeIcon;
+        public final ImageIcon optionsIcon;
+
+
+        public DockingTheme( int dividerSize,
+
+                             int landingIndicatorThickness,
+                             Color landingIndicatorColor,
+
+                             int lineThickness, // Even lineThickness values do NOT work well
+                             int cornerRadius,
+                             int cardPadding,
+                             int labelPadding,
+
+                             Color lineColor,
+                             Color highlightColor,
+                             Color selectedTextColor,
+                             Color unselectedTextColor,
+
+                             ImageIcon maximizeIcon,
+                             ImageIcon unmaximizeIcon,
+                             ImageIcon optionsIcon )
+        {
+            this.dividerSize = dividerSize;
+
+            this.landingIndicatorThickness = landingIndicatorThickness;
+            this.landingIndicatorColor = landingIndicatorColor;
+
+            this.lineThickness = lineThickness;
+            this.cornerRadius = cornerRadius;
+            this.cardPadding = cardPadding;
+            this.labelPadding = labelPadding;
+
+            this.lineColor = lineColor;
+            this.highlightColor = highlightColor;
+            this.selectedTextColor = selectedTextColor;
+            this.unselectedTextColor = unselectedTextColor;
+
+            this.maximizeIcon = maximizeIcon;
+            this.unmaximizeIcon = unmaximizeIcon;
+            this.optionsIcon = optionsIcon;
+        }
+
+    }
+
+
     public static final DockingTheme defaultDockingTheme = new DockingTheme( 5,
+
+                                                                             2,
+                                                                             black,
 
                                                                              1, // Even lineThickness values do NOT work well
                                                                              5,
@@ -51,13 +127,16 @@ public class DockingThemes
                                                                              darkGray,
 
                                                                              requireIcon( "icons/maximize.gif" ),
-                                                                             requireIcon( "icons/restore.gif" ),
+                                                                             requireIcon( "icons/unmaximize.gif" ),
                                                                              requireIcon( "icons/options.gif" ) );
 
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {
         return new DockingTheme( defaultDockingTheme.dividerSize,
+
+                                 defaultDockingTheme.landingIndicatorThickness,
+                                 defaultDockingTheme.landingIndicatorColor,
 
                                  defaultDockingTheme.lineThickness,
                                  defaultDockingTheme.cornerRadius,
@@ -70,7 +149,7 @@ public class DockingThemes
                                  textColor,
 
                                  defaultDockingTheme.maximizeIcon,
-                                 defaultDockingTheme.restoreIcon,
+                                 defaultDockingTheme.unmaximizeIcon,
                                  defaultDockingTheme.optionsIcon );
     }
 

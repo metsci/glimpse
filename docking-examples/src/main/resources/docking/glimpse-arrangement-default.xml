@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Split">
-    <extent>1.0</extent>
-    <isRow>true</isRow>
-    <children>
-        <child xsi:type="Leaf">
-            <extent>788.0</extent>
-            <views>
-                <view>aView</view>
-            </views>
-            <selectedView>aView</selectedView>
-            <isMaximized>false</isMaximized>
-        </child>
-        <child xsi:type="Leaf">
-            <extent>787.0</extent>
-            <views>
-                <view>bView</view>
-            </views>
-            <selectedView>bView</selectedView>
-            <isMaximized>false</isMaximized>
-        </child>
-    </children>
-</model>
+<group xmlns="http://glimpse.metsci.com/docking" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <frames>
+        <frame>
+            <x>100</x>
+            <y>100</y>
+            <width>1600</width>
+            <height>900</height>
+            <docker xsi:type="Split">
+                <arrangeVertically>false</arrangeVertically>
+                <splitFrac>0.5</splitFrac>
+                <childA xsi:type="Tile">
+                    <views>
+                        <view>aView</view>
+                    </views>
+                    <selectedView>aView</selectedView>
+                    <isMaximized>false</isMaximized>
+                </childA>
+                <childB xsi:type="Tile">
+                    <views>
+                        <view>bView</view>
+                    </views>
+                    <selectedView>aView</selectedView>
+                    <isMaximized>false</isMaximized>
+                </childB>
+            </docker>
+        </frame>
+    </frames>
+</group>
