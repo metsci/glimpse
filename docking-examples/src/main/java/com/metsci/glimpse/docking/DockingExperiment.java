@@ -60,10 +60,10 @@ import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
-import com.metsci.glimpse.docking.DockingGroup.GroupArrangement;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingExperiment
 {

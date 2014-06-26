@@ -59,13 +59,14 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.namespace.QName;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
+import com.metsci.glimpse.docking.xml.DockerArrangementNode;
+import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
+import com.metsci.glimpse.docking.xml.DockerArrangementTile;
+import com.metsci.glimpse.docking.xml.FrameArrangement;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroup
 {
@@ -362,13 +363,19 @@ public class DockingGroup
 
     public GroupArrangement captureArrangement( )
     {
-        List<FrameArrangement> frameArrs = new ArrayList<>( );
+        GroupArrangement groupArr = new GroupArrangement( );
         for ( DockingFrame frame : frames )
         {
-            DockerArrangementNode dockerArr = toDockerArrNode( frame.docker.snapshot( ) );
-            frameArrs.add( new FrameArrangement( dockerArr, frame.getBounds( ) ) );
+            FrameArrangement frameArr = new FrameArrangement( );
+            frameArr.dockerArr = toDockerArrNode( frame.docker.snapshot( ) );
+            frameArr.x = frame.getX( );
+            frameArr.y = frame.getY( );
+            frameArr.width = frame.getWidth( );
+            frameArr.height = frame.getHeight( );
+
+            groupArr.frameArrs.add( frameArr );
         }
-        return new GroupArrangement( frameArrs );
+        return groupArr;
     }
 
     protected static MultiSplitPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
@@ -464,14 +471,21 @@ public class DockingGroup
                 // XXX: Handle arbitrary components
             }
 
-            return new DockerArrangementTile( viewIds, selectedViewId, leaf.isMaximized );
+            DockerArrangementTile arrTile = new DockerArrangementTile( );
+            arrTile.viewIds = viewIds;
+            arrTile.selectedViewId = selectedViewId;
+            arrTile.isMaximized = leaf.isMaximized;
+            return arrTile;
         }
         else if ( node instanceof MultiSplitPane.Split )
         {
             MultiSplitPane.Split split = ( MultiSplitPane.Split ) node;
-            DockerArrangementNode childA = toDockerArrNode( split.childA );
-            DockerArrangementNode childB = toDockerArrNode( split.childB );
-            return new DockerArrangementSplit( split.arrangeVertically, split.splitFrac, childA, childB );
+            DockerArrangementSplit arrSplit = new DockerArrangementSplit( );
+            arrSplit.arrangeVertically = split.arrangeVertically;
+            arrSplit.splitFrac = split.splitFrac;
+            arrSplit.childA = toDockerArrNode( split.childA );
+            arrSplit.childB = toDockerArrNode( split.childB );
+            return arrSplit;
         }
         else if ( node == null )
         {
@@ -483,86 +497,6 @@ public class DockingGroup
         }
     }
 
-    @XmlType( name="Group" )
-    public static class GroupArrangement
-    {
-        @XmlElementWrapper( name="frames" )
-        @XmlElement( name="frame" )
-        public List<FrameArrangement> frameArrs;
-
-        public GroupArrangement( List<FrameArrangement> frameArrs )
-        {
-            this.frameArrs = frameArrs;
-        }
-    }
-
-    @XmlType( name="Frame" )
-    public static class FrameArrangement
-    {
-        public int x;
-        public int y;
-        public int width;
-        public int height;
-
-        @XmlElement( name="docker" )
-        public DockerArrangementNode dockerArr;
-
-        public FrameArrangement( DockerArrangementNode dockerArr, Rectangle frameBounds )
-        {
-            this( dockerArr, frameBounds.x, frameBounds.y, frameBounds.width, frameBounds.height );
-        }
-
-        public FrameArrangement( DockerArrangementNode dockerArr, int x, int y, int width, int height )
-        {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-            this.dockerArr = dockerArr;
-        }
-    }
-
-    @XmlType( name="Node" )
-    public static abstract class DockerArrangementNode
-    { }
-
-    @XmlType( name="Split" )
-    public static class DockerArrangementSplit extends DockerArrangementNode
-    {
-        public boolean arrangeVertically;
-        public double splitFrac;
-        public DockerArrangementNode childA;
-        public DockerArrangementNode childB;
-
-        public DockerArrangementSplit( boolean arrangeVertically, double splitFrac, DockerArrangementNode childA, DockerArrangementNode childB )
-        {
-            this.arrangeVertically = arrangeVertically;
-            this.splitFrac = splitFrac;
-            this.childA = childA;
-            this.childB = childB;
-        }
-    }
-
-    @XmlType( name="Tile" )
-    public static class DockerArrangementTile extends DockerArrangementNode
-    {
-        @XmlElementWrapper( name="views" )
-        @XmlElement( name="view" )
-        public List<String> viewIds;
-
-        @XmlElement( name="selectedView" )
-        public String selectedViewId;
-
-        public boolean isMaximized;
-
-        public DockerArrangementTile( List<String> viewIds, String selectedViewId, boolean isMaximized )
-        {
-            this.viewIds = viewIds;
-            this.selectedViewId = selectedViewId;
-            this.isMaximized = isMaximized;
-        }
-    }
-
     public static Marshaller newJaxbMarshaller( ) throws IOException, JAXBException
     {
         Marshaller marshaller = JAXBContext.newInstance( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ).createMarshaller( );
@@ -570,24 +504,19 @@ public class DockingGroup
         return marshaller;
     }
 
-    public static JAXBElement<GroupArrangement> newJaxbRoot( GroupArrangement groupArr )
-    {
-        return new JAXBElement<GroupArrangement>( new QName( "group" ), GroupArrangement.class, groupArr );
-    }
-
     public static void writeArrangementXml( GroupArrangement groupArr, File file ) throws JAXBException, IOException
     {
-        newJaxbMarshaller( ).marshal( newJaxbRoot( groupArr ), file );
+        newJaxbMarshaller( ).marshal( groupArr, file );
     }
 
     public static void writeArrangementXml( GroupArrangement groupArr, Writer writer ) throws JAXBException, IOException
     {
-        newJaxbMarshaller( ).marshal( newJaxbRoot( groupArr ), writer );
+        newJaxbMarshaller( ).marshal( groupArr, writer );
     }
 
     public static void writeArrangementXml( GroupArrangement groupArr, OutputStream stream ) throws JAXBException, IOException
     {
-        newJaxbMarshaller( ).marshal( newJaxbRoot( groupArr ), stream );
+        newJaxbMarshaller( ).marshal( groupArr, stream );
     }
 
     public static Unmarshaller newJaxbUnmarshaller( ) throws JAXBException, IOException
