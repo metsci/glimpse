@@ -30,17 +30,16 @@ import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static java.util.logging.Level.WARNING;
 
-import java.awt.BorderLayout;
 import java.io.File;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLOffscreenAutoDrawable;
-import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import net.sf.tinylaf.Theme;
@@ -70,38 +69,49 @@ public class GlimpseDockingExample
 
         final String appName = "glimpse-docking-example";
         final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
-        TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+        final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
         GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
-        JPanel aPanel = new JPanel( new BorderLayout( ) );
         NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         aCanvas.addLayout( new HeatMapExample( ).getLayout( ) );
-        aPanel.add( aCanvas );
 
-        JPanel bPanel = new JPanel( new BorderLayout( ) );
         NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         bCanvas.addLayout( new ScatterplotExample( ).getLayout( ) );
-        bPanel.add( bCanvas );
 
-        FPSAnimator animator = new FPSAnimator( 60 );
+        final FPSAnimator animator = new FPSAnimator( 60 );
         animator.add( aCanvas.getGLDrawable( ) );
         animator.add( bCanvas.getGLDrawable( ) );
         animator.start( );
 
 
-        View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ) );
-        View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ) );
-
-
-        GroupArrangement groupArr = loadDockingArrangement( appName );
-        dockingGroup.restoreArrangement( groupArr, tileFactory, aView, bView );
-        dockingGroup.addListener( new DockingGroupAdapter( )
+        final View[] views =
         {
-            public void disposingAllFrames( )
+            new View( "aView", aCanvas, "View A", null, requireIcon( "icons/ViewA.png" ) ),
+            new View( "bView", bCanvas, "View B", null, requireIcon( "icons/ViewB.png" ) )
+        };
+
+
+        // Certain components are picky about being added to a frame from the Swing thread
+        // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good
+        // idea to call dockingGroup.restoreArrangement() on the Swing thread, whether you
+        // are using such picky components or not.
+        //
+        swingRun( new Runnable( )
+        {
+            public void run( )
             {
-                saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
+                GroupArrangement groupArr = loadDockingArrangement( appName );
+                dockingGroup.restoreArrangement( groupArr, tileFactory, views );
+                dockingGroup.addListener( new DockingGroupAdapter( )
+                {
+                    public void disposingAllFrames( )
+                    {
+                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
+                        animator.stop( );
+                    }
+                } );
             }
         } );
     }

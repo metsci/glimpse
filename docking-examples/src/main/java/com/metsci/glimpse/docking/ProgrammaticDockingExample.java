@@ -31,8 +31,10 @@ import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
+import static com.metsci.glimpse.docking.SimpleDockingExample.newSolidPanel;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -42,7 +44,6 @@ import static java.awt.Color.red;
 import static java.awt.Color.white;
 import static java.awt.Color.yellow;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.util.logging.Logger;
 
@@ -74,8 +75,11 @@ public class ProgrammaticDockingExample
 
 
         final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
-        TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+        final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
+
+        // View Components
+        //
 
         JPanel aPanel = newSolidPanel( red );
         JPanel bPanel = newSolidPanel( green );
@@ -86,6 +90,9 @@ public class ProgrammaticDockingExample
         JPanel gPanel = newSolidPanel( gray );
         JPanel hPanel = newSolidPanel( white );
 
+
+        // View Toolbars
+        //
 
         JToolBar aToolbar = newToolbar( true );
         aToolbar.add( new JButton( "A1" ) );
@@ -124,51 +131,55 @@ public class ProgrammaticDockingExample
         hToolbar.add( new JButton( "H1" ) );
 
 
-        View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
-        View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
-        View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
-        View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
-        View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
-        View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
-        View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
-        View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
+        // Views
+        //
+
+        final View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
+        final View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
+        final View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
+        final View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
+        final View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
+        final View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
+        final View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
+        final View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
 
 
+        // Certain components are picky about being added to a frame from the Swing thread
+        // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good
+        // idea to call dockingGroup.restoreArrangement() on the Swing thread, whether you
+        // are using such picky components or not.
+        //
+        swingRun( new Runnable( )
+        {
+            public void run( )
+            {
+                Tile aTile = tileFactory.newTile( );
+                aTile.addView( aView, 0 );
+                aTile.addView( bView, 1 );
+                aTile.addView( cView, 2 );
 
-        Tile aTile = tileFactory.newTile( );
-        aTile.addView( aView, 0 );
-        aTile.addView( bView, 1 );
-        aTile.addView( cView, 2 );
+                Tile bTile = tileFactory.newTile( );
+                bTile.addView( dView, 0 );
+                bTile.addView( eView, 1 );
 
-        Tile bTile = tileFactory.newTile( );
-        bTile.addView( dView, 0 );
-        bTile.addView( eView, 1 );
+                Tile cTile = tileFactory.newTile( );
+                cTile.addView( fView, 0 );
+                cTile.addView( gView, 1 );
+                cTile.addView( hView, 2 );
 
-        Tile cTile = tileFactory.newTile( );
-        cTile.addView( fView, 0 );
-        cTile.addView( gView, 1 );
-        cTile.addView( hView, 2 );
+                DockingFrame frame = dockingGroup.addNewFrame( );
+                MultiSplitPane docker = frame.docker;
 
+                docker.addInitialLeaf( aTile );
+                docker.addNeighborLeaf( bTile, aTile, LEFT, 0.3 );
+                docker.addEdgeLeaf( cTile, BOTTOM, 0.3 );
 
-        DockingFrame frame = dockingGroup.addNewFrame( );
-        MultiSplitPane docker = frame.docker;
-
-        docker.addInitialLeaf( aTile );
-        docker.addNeighborLeaf( bTile, aTile, LEFT, 0.3 );
-        docker.addEdgeLeaf( cTile, BOTTOM, 0.3 );
-
-        frame.setPreferredSize( new Dimension( 1024, 768 ) );
-        frame.pack( );
-        frame.setLocationByPlatform( true );
-        frame.setVisible( true );
-    }
-
-
-    public static JPanel newSolidPanel( Color color )
-    {
-        JPanel panel = new JPanel( );
-        panel.setBackground( color );
-        return panel;
+                frame.setPreferredSize( new Dimension( 1024, 768 ) );
+                frame.pack( );
+                frame.setLocationByPlatform( true );
+                frame.setVisible( true );
+            }
+        } );
     }
 
 }

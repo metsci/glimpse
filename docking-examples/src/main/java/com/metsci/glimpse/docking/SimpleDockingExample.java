@@ -32,6 +32,7 @@ import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static java.awt.Color.blue;
@@ -79,8 +80,11 @@ public class SimpleDockingExample
 
         final String appName = "simple-docking-example";
         final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
-        TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+        final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
+
+        // View Components
+        //
 
         JPanel aPanel = newSolidPanel( red );
         JPanel bPanel = newSolidPanel( green );
@@ -91,6 +95,9 @@ public class SimpleDockingExample
         JPanel gPanel = newSolidPanel( gray );
         JPanel hPanel = newSolidPanel( white );
 
+
+        // View Toolbars
+        //
 
         JToolBar aToolbar = newToolbar( true );
         aToolbar.add( new JButton( "A1" ) );
@@ -129,23 +136,40 @@ public class SimpleDockingExample
         hToolbar.add( new JButton( "H1" ) );
 
 
-        View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
-        View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
-        View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
-        View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
-        View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
-        View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
-        View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
-        View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
+        // Views
+        //
 
-
-        GroupArrangement groupArr = loadDockingArrangement( appName );
-        dockingGroup.restoreArrangement( groupArr, tileFactory, aView, bView, cView, dView, eView, fView, gView, hView );
-        dockingGroup.addListener( new DockingGroupAdapter( )
+        final View[] views =
         {
-            public void disposingAllFrames( )
+            new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar ),
+            new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar ),
+            new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar ),
+            new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar ),
+            new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar ),
+            new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar ),
+            new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar ),
+            new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar )
+        };
+
+
+        // Certain components are picky about being added to a frame from the Swing thread
+        // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good
+        // idea to call dockingGroup.restoreArrangement() on the Swing thread, whether you
+        // are using such picky components or not.
+        //
+        swingRun( new Runnable( )
+        {
+            public void run( )
             {
-                saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
+                GroupArrangement groupArr = loadDockingArrangement( appName );
+                dockingGroup.restoreArrangement( groupArr, tileFactory, views );
+                dockingGroup.addListener( new DockingGroupAdapter( )
+                {
+                    public void disposingAllFrames( )
+                    {
+                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
+                    }
+                } );
             }
         } );
     }
