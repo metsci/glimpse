@@ -80,7 +80,7 @@ public class GlimpseDockingExample
         NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         bCanvas.addLayout( new ScatterplotExample( ).getLayout( ) );
 
-        final FPSAnimator animator = new FPSAnimator( 60 );
+        final FPSAnimator animator = new FPSAnimator( 30 );
         animator.add( aCanvas.getGLDrawable( ) );
         animator.add( bCanvas.getGLDrawable( ) );
         animator.start( );
