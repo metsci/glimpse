@@ -31,6 +31,9 @@ import static java.lang.Math.round;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.SwingUtilities;
@@ -118,6 +121,35 @@ public class MiscUtils
     public static boolean areEqual( Object a, Object b )
     {
         return ( a == b || ( a != null && a.equals( b ) ) );
+    }
+
+    public static <T> Iterable<T> reversed( final List<T> list )
+    {
+        return new Iterable<T>( )
+        {
+            public Iterator<T> iterator( )
+            {
+                return new Iterator<T>( )
+                {
+                    final ListIterator<T> it = list.listIterator( list.size( ) );
+
+                    public boolean hasNext( )
+                    {
+                        return it.hasPrevious( );
+                    }
+
+                    public T next( )
+                    {
+                        return it.previous( );
+                    }
+
+                    public void remove( )
+                    {
+                        it.remove( );
+                    }
+                };
+            }
+        };
     }
 
 }

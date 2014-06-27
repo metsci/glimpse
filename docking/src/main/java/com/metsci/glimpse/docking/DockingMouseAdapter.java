@@ -30,6 +30,7 @@ import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
@@ -39,7 +40,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ListIterator;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -103,10 +103,9 @@ public class DockingMouseAdapter extends MouseAdapter
                 // possible to kludge a solution together using Robot.getPixelColor
                 // ... but it would be ugly at best.
                 //
-                ListIterator<DockingFrame> it = dockingGroup.frames.listIterator( dockingGroup.frames.size( ) );
-                while ( it.hasPrevious( ) )
+                for ( DockingFrame f : reversed( dockingGroup.frames ) )
                 {
-                    it.previous( ).toFront( );
+                    f.toFront( );
                 }
             }
 

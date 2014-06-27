@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -259,7 +260,7 @@ public class DockingGroup
 
         if ( groupArr != null )
         {
-            for ( FrameArrangement frameArr : groupArr.frameArrs )
+            for ( FrameArrangement frameArr : reversed( groupArr.frameArrs ) )
             {
                 MultiSplitPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
                 if ( dockerRoot != null )
