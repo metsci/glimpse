@@ -162,6 +162,7 @@ public class DockingThemes
         }
         catch ( Exception e )
         {
+            e.printStackTrace( System.err );
             logger.warning( "TinyLaF is not accessible; default docking theme will be used" );
             return defaultDockingTheme;
         }
@@ -174,8 +175,8 @@ public class DockingThemes
 
     public static Color tinyLafColor( String fieldName ) throws Exception
     {
-        Object sbRef = Class.forName( "de.muntjak.tinylookandfeel.Theme" ).getField( fieldName ).get( null );
-        return ( Color ) Class.forName( "de.muntjak.tinylookandfeel.util.SBReference" ).getMethod( "getColor" ).invoke( sbRef );
+        Object sbRef = Class.forName( "net.sf.tinylaf.Theme" ).getField( fieldName ).get( null );
+        return ( Color ) Class.forName( "net.sf.tinylaf.util.SBReference" ).getMethod( "getColor" ).invoke( sbRef );
     }
 
 }
