@@ -48,6 +48,7 @@ import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
 import com.jogamp.opengl.util.FPSAnimator;
+import com.metsci.glimpse.WheelFix;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
@@ -75,10 +76,10 @@ public class GlimpseDockingExample
 
         GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
-        NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
+        final NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
 
-        NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
+        final NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
 
         final FPSAnimator animator = new FPSAnimator( 30 );
@@ -111,6 +112,24 @@ public class GlimpseDockingExample
                     {
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                         animator.stop( );
+                    }
+                } );
+
+                // XXX: Find a good place for this to live
+                aCanvas.getCanvas( ).getNEWTChild( ).runOnEDTIfAvail( false, new Runnable( )
+                {
+                    public void run( )
+                    {
+                        WheelFix.activateInputFix( );
+                    }
+                } );
+
+                // XXX: Find a good place for this to live
+                bCanvas.getCanvas( ).getNEWTChild( ).runOnEDTIfAvail( false, new Runnable( )
+                {
+                    public void run( )
+                    {
+                        WheelFix.activateInputFix( );
                     }
                 } );
             }
