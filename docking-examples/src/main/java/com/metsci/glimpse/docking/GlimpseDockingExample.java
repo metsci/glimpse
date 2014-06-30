@@ -34,6 +34,8 @@ import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
+import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
+import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static java.util.logging.Level.WARNING;
 
 import java.io.File;
@@ -52,8 +54,7 @@ import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.examples.basic.ScatterplotExample;
+import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
 
 public class GlimpseDockingExample
 {
@@ -75,10 +76,10 @@ public class GlimpseDockingExample
         GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
         NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
-        aCanvas.addLayout( new HeatMapExample( ).getLayout( ) );
+        aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
 
         NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
-        bCanvas.addLayout( new ScatterplotExample( ).getLayout( ) );
+        bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
 
         final FPSAnimator animator = new FPSAnimator( 30 );
         animator.add( aCanvas.getGLDrawable( ) );
