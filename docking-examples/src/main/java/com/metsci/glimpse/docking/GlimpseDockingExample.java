@@ -48,7 +48,6 @@ import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
 import com.jogamp.opengl.util.FPSAnimator;
-import com.metsci.glimpse.WheelFix;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
@@ -56,6 +55,7 @@ import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
+import com.metsci.glimpse.support.wheelfix.WheelFix;
 
 public class GlimpseDockingExample
 {
@@ -114,26 +114,10 @@ public class GlimpseDockingExample
                         animator.stop( );
                     }
                 } );
-
-                // XXX: Find a good place for this to live
-                aCanvas.getCanvas( ).getNEWTChild( ).runOnEDTIfAvail( false, new Runnable( )
-                {
-                    public void run( )
-                    {
-                        WheelFix.activateInputFix( );
-                    }
-                } );
-
-                // XXX: Find a good place for this to live
-                bCanvas.getCanvas( ).getNEWTChild( ).runOnEDTIfAvail( false, new Runnable( )
-                {
-                    public void run( )
-                    {
-                        WheelFix.activateInputFix( );
-                    }
-                } );
             }
         } );
+
+        WheelFix.applyWheelFix( );
     }
 
 
