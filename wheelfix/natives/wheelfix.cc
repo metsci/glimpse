@@ -24,10 +24,10 @@ jstring getErrorString( JNIEnv *env, jint errorCode )
 }
 
 
-LRESULT CALLBACK hookProc( int code, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
 {
     MSG *msg = ( MSG * ) lParam;
-    if ( code >= 0 && msg->message == WM_MOUSEWHEEL )
+    if ( nCode == HC_ACTION && msg->message == WM_MOUSEWHEEL )
     {
         HWND hwndHovered = WindowFromPoint( msg->pt );
         if ( msg->hwnd != hwndHovered )
@@ -47,7 +47,7 @@ LRESULT CALLBACK hookProc( int code, WPARAM wParam, LPARAM lParam )
             msg->message = WM_NULL;
         }
     }
-    return CallNextHookEx( NULL, code, wParam, lParam );
+    return CallNextHookEx( NULL, nCode, wParam, lParam );
 }
 
 
