@@ -39,7 +39,7 @@ package com.metsci.glimpse.support.projection;
  * @author ulman
  *
  */
-public interface InvertibleProjection
+public interface InvertibleProjection extends Projection
 {
     /**
      * Given a position in physical units, return the corresponding location

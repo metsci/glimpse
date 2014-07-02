@@ -36,7 +36,7 @@ import com.metsci.glimpse.axis.Axis2D;
  * @author ulman
  *
  */
-public class FlatProjection implements Projection, InvertibleProjection
+public class FlatProjection implements InvertibleProjection
 {
     protected double minX, maxX, minY, maxY;
     protected double minTexX, maxTexX, minTexY, maxTexY;
