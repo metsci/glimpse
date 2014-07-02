@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <unordered_set>
-#include "com_metsci_glimpse_support_wheelfix_WheelFix.h"
+#include "com_metsci_glimpse_wheelfix_WheelFix.h"
 
 
 DWORD _pid = GetCurrentProcessId( );
@@ -77,7 +77,7 @@ BOOL CALLBACK setHookIfNeeded( HWND hwnd, LPARAM lParam )
 }
 
 
-jstring JNICALL Java_com_metsci_glimpse_support_wheelfix_WheelFix__1activateWheelFix( JNIEnv *env, jclass jthis )
+jstring JNICALL Java_com_metsci_glimpse_wheelfix_WheelFix__1applyWheelFix( JNIEnv *env, jclass jthis )
 {
     BOOL success = EnumWindows( setHookIfNeeded, ( LPARAM ) NULL );
     return ( success ? NULL : getErrorString( env, GetLastError( ) ) );
