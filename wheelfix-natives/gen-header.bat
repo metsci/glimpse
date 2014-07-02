@@ -1,1 +1,2 @@
-javah -classpath C:/Users/mike/metron/projects/glimpse/code/core/target/classes -jni com.metsci.glimpse.support.wheelfix.WheelFix
+@echo off
+javah -classpath ../core/target/classes -d build com.metsci.glimpse.support.wheelfix.WheelFix
