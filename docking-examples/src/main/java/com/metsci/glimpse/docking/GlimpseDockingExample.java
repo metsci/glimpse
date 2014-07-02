@@ -55,6 +55,7 @@ import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
+import com.metsci.glimpse.wheelfix.WheelFix;
 
 public class GlimpseDockingExample
 {
@@ -115,6 +116,8 @@ public class GlimpseDockingExample
                 } );
             }
         } );
+
+        WheelFix.applyWheelFix( );
     }
 
 
