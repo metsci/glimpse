@@ -76,10 +76,10 @@ public class GlimpseDockingExample
 
         GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
-        final NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
+        NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
 
-        final NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
+        NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
         bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
 
         final FPSAnimator animator = new FPSAnimator( 30 );
