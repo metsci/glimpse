@@ -29,126 +29,68 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
-import static java.awt.Color.blue;
-import static java.awt.Color.cyan;
-import static java.awt.Color.gray;
-import static java.awt.Color.green;
-import static java.awt.Color.magenta;
-import static java.awt.Color.red;
-import static java.awt.Color.white;
-import static java.awt.Color.yellow;
+import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
+import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
+import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static java.util.logging.Level.WARNING;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.swing.UIManager;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
+import com.jogamp.opengl.util.FPSAnimator;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
 
-public class SimpleDockingExample
+public class GlimpseDockingExample
 {
-    protected static final Logger logger = Logger.getLogger( SimpleDockingExample.class.getName( ) );
+    protected static final Logger logger = Logger.getLogger( GlimpseDockingExample.class.getName( ) );
 
 
     public static void main( String[] args ) throws Exception
     {
-        Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+        Theme.loadTheme( GlimpseDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        final String appName = "simple-docking-example";
+        final String appName = "glimpse-docking-example";
         final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
-        // View Components
-        //
+        GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
-        JPanel aPanel = newSolidPanel( red );
-        JPanel bPanel = newSolidPanel( green );
-        JPanel cPanel = newSolidPanel( blue );
-        JPanel dPanel = newSolidPanel( cyan );
-        JPanel ePanel = newSolidPanel( magenta );
-        JPanel fPanel = newSolidPanel( yellow );
-        JPanel gPanel = newSolidPanel( gray );
-        JPanel hPanel = newSolidPanel( white );
+        NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
+        aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
 
+        NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
+        bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
 
-        // View Toolbars
-        //
+        final FPSAnimator animator = new FPSAnimator( 30 );
+        animator.add( aCanvas.getGLDrawable( ) );
+        animator.add( bCanvas.getGLDrawable( ) );
+        animator.start( );
 
-        JToolBar aToolbar = newToolbar( true );
-        aToolbar.add( new JButton( "A1" ) );
-        aToolbar.add( new JButton( "A2" ) );
-        aToolbar.add( new JButton( "A3" ) );
-
-        JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-        JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
-        aOptionsPopup.add( new JMenuItem( "Option 1" ) );
-        aToolbar.add( aOptionsButton );
-
-        JToolBar bToolbar = newToolbar( true );
-        bToolbar.add( new JButton( "B1" ) );
-
-        JToolBar cToolbar = null;
-
-        JToolBar dToolbar = newToolbar( true );
-        dToolbar.add( new JButton( "D1" ) );
-        dToolbar.add( new JButton( "D2" ) );
-        dToolbar.add( new JButton( "D3" ) );
-        dToolbar.add( new JButton( "D4" ) );
-        dToolbar.add( new JButton( "D5" ) );
-
-        JToolBar eToolbar = newToolbar( true );
-        eToolbar.add( new JButton( "E1" ) );
-        eToolbar.add( new JButton( "E2" ) );
-
-        JToolBar fToolbar = newToolbar( true );
-        fToolbar.add( new JButton( "F1" ) );
-        fToolbar.add( new JButton( "F2" ) );
-        fToolbar.add( new JButton( "F3" ) );
-
-        JToolBar gToolbar = newToolbar( true );
-
-        JToolBar hToolbar = newToolbar( true );
-        hToolbar.add( new JButton( "H1" ) );
-
-
-        // Views
-        //
 
         final View[] views =
         {
-            new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-            new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-            new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-            new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-            new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-            new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-            new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-            new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar )
+            new View( "aView", aCanvas, "View A", null, requireIcon( "icons/ViewA.png" ) ),
+            new View( "bView", bCanvas, "View B", null, requireIcon( "icons/ViewB.png" ) )
         };
 
 
@@ -168,18 +110,11 @@ public class SimpleDockingExample
                     public void disposingAllFrames( )
                     {
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
+                        animator.stop( );
                     }
                 } );
             }
         } );
-    }
-
-
-    public static JPanel newSolidPanel( Color color )
-    {
-        JPanel panel = new JPanel( );
-        panel.setBackground( color );
-        return panel;
     }
 
 
@@ -214,7 +149,7 @@ public class SimpleDockingExample
 
         try
         {
-            return readArrangementXml( SimpleDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/simple-arrangement-default.xml" ) );
+            return readArrangementXml( GlimpseDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/glimpse-arrangement-default.xml" ) );
         }
         catch ( Exception e )
         {

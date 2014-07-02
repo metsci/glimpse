@@ -53,6 +53,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 // Jogamp / NEWT Links:
@@ -351,6 +352,19 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     }
 
     @Override
+    public void addDisposeListener( GLRunnable runnable )
+    {
+        this.disposeListeners.add( runnable );
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+    
+    @Override
     public void disposeAttached( )
     {
         this.getGLDrawable( ).invoke( false, new GLRunnable( )
@@ -363,14 +377,26 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                     layout.dispose( getGlimpseContext( ) );
                 }
                 
-                return false;
+                // after layouts are disposed they should not be painted
+                // so remove them from the canvas
+                removeAllLayouts( );
+                
+                return true;
             }
         } );
     }
-
+    
     @Override
-    public void addDisposeListener( GLRunnable runnable )
+    public void disposePainter( final GlimpsePainter painter )
     {
-        this.disposeListeners.add( runnable );
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }

@@ -231,24 +231,6 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     }
 
     @Override
-    public void disposeAttached( )
-    {
-        this.drawable.invoke( false, new GLRunnable( )
-        {
-            @Override
-            public boolean run( GLAutoDrawable drawable )
-            {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-                
-                return false;
-            }
-        } );
-    }
-
-    @Override
     public boolean isDestroyed( )
     {
         return this.isDestroyed;

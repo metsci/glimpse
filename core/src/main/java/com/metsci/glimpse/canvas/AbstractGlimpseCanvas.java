@@ -29,12 +29,14 @@ package com.metsci.glimpse.canvas;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLRunnable;
 
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
@@ -135,5 +137,48 @@ public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
         {
             target.setLookAndFeel( laf );
         }
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+    
+    @Override
+    public void disposeAttached( )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                // after layouts are disposed they should not be painted
+                // so remove them from the canvas
+                removeAllLayouts( );
+                
+                return true;
+            }
+        } );
+    }
+    
+    @Override
+    public void disposePainter( final GlimpsePainter painter )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }

@@ -44,6 +44,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -255,12 +256,6 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     }
 
     @Override
-    public void disposeAttached( )
-    {
-        // not a fully featured GlimpseCanvas
-    }
-
-    @Override
     public boolean isDestroyed( )
     {
         return this.isDisposed;
@@ -270,5 +265,32 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     public void addDisposeListener( GLRunnable runnable )
     {
         // not a fully featured GlimpseCanvas
+    }
+    
+    @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+    
+    @Override
+    public void disposeAttached( )
+    {
+        // not a fully featured GlimpseCanvas
+    }
+    
+    @Override
+    public void disposePainter( final GlimpsePainter painter )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }

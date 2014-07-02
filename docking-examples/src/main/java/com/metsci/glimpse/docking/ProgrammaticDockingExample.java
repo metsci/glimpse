@@ -28,13 +28,13 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
-import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
+import static com.metsci.glimpse.docking.Side.BOTTOM;
+import static com.metsci.glimpse.docking.Side.LEFT;
+import static com.metsci.glimpse.docking.SimpleDockingExample.newSolidPanel;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -43,10 +43,8 @@ import static java.awt.Color.magenta;
 import static java.awt.Color.red;
 import static java.awt.Color.white;
 import static java.awt.Color.yellow;
-import static java.util.logging.Level.WARNING;
 
-import java.awt.Color;
-import java.io.File;
+import java.awt.Dimension;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -60,25 +58,22 @@ import javax.swing.UIManager;
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
-import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 
-public class SimpleDockingExample
+public class ProgrammaticDockingExample
 {
-    protected static final Logger logger = Logger.getLogger( SimpleDockingExample.class.getName( ) );
+    protected static final Logger logger = Logger.getLogger( ProgrammaticDockingExample.class.getName( ) );
 
 
     public static void main( String[] args ) throws Exception
     {
-        Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+        Theme.loadTheme( ProgrammaticDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        final String appName = "simple-docking-example";
         final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
@@ -139,17 +134,14 @@ public class SimpleDockingExample
         // Views
         //
 
-        final View[] views =
-        {
-            new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-            new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-            new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-            new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-            new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-            new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-            new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-            new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar )
-        };
+        final View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
+        final View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
+        final View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
+        final View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
+        final View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
+        final View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
+        final View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
+        final View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
 
 
         // Certain components are picky about being added to a frame from the Swing thread
@@ -161,67 +153,33 @@ public class SimpleDockingExample
         {
             public void run( )
             {
-                GroupArrangement groupArr = loadDockingArrangement( appName );
-                dockingGroup.restoreArrangement( groupArr, tileFactory, views );
-                dockingGroup.addListener( new DockingGroupAdapter( )
-                {
-                    public void disposingAllFrames( )
-                    {
-                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
-                    }
-                } );
+                Tile aTile = tileFactory.newTile( );
+                aTile.addView( aView, 0 );
+                aTile.addView( bView, 1 );
+                aTile.addView( cView, 2 );
+
+                Tile bTile = tileFactory.newTile( );
+                bTile.addView( dView, 0 );
+                bTile.addView( eView, 1 );
+
+                Tile cTile = tileFactory.newTile( );
+                cTile.addView( fView, 0 );
+                cTile.addView( gView, 1 );
+                cTile.addView( hView, 2 );
+
+                DockingFrame frame = dockingGroup.addNewFrame( );
+                MultiSplitPane docker = frame.docker;
+
+                docker.addInitialLeaf( aTile );
+                docker.addNeighborLeaf( bTile, aTile, LEFT, 0.3 );
+                docker.addEdgeLeaf( cTile, BOTTOM, 0.3 );
+
+                frame.setPreferredSize( new Dimension( 1024, 768 ) );
+                frame.pack( );
+                frame.setLocationByPlatform( true );
+                frame.setVisible( true );
             }
         } );
-    }
-
-
-    public static JPanel newSolidPanel( Color color )
-    {
-        JPanel panel = new JPanel( );
-        panel.setBackground( color );
-        return panel;
-    }
-
-
-    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeArrangementXml( groupArr, arrFile );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to write docking arrangement to file", e );
-        }
-    }
-
-
-    public static GroupArrangement loadDockingArrangement( String appName )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            if ( arrFile.exists( ) )
-            {
-                return readArrangementXml( arrFile );
-            }
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load docking arrangement from file", e );
-        }
-
-        try
-        {
-            return readArrangementXml( SimpleDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/simple-arrangement-default.xml" ) );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load default docking arrangement from resource", e );
-        }
-
-        return null;
     }
 
 }

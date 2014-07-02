@@ -26,48 +26,19 @@
  */
 package com.metsci.glimpse.docking;
 
-import java.util.Comparator;
+import javax.swing.JFrame;
 
-import static com.metsci.glimpse.docking.MiscUtils.*;
-
-public class ViewKey
+public class DockingFrame extends JFrame
 {
 
-    public static final Comparator<ViewKey> alphabeticalOrder = new Comparator<ViewKey>( )
+    public final MultiSplitPane docker;
+
+
+    public DockingFrame( String title, MultiSplitPane docker )
     {
-        public int compare( ViewKey a, ViewKey b )
-        {
-            return a.viewId.compareTo( b.viewId );
-        }
-    };
-
-
-    public final String viewId;
-
-
-    public ViewKey( String viewId )
-    {
-        this.viewId = viewId;
-    }
-
-    @Override
-    public int hashCode( )
-    {
-        int prime = 5923;
-        int result = 1;
-        result = prime * result + ( viewId == null ? 0 : viewId.hashCode( ) );
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( o == this ) return true;
-        if ( o == null ) return false;
-        if ( o.getClass( ) != getClass( ) ) return false;
-
-        ViewKey other = ( ViewKey ) o;
-        return areEqual( other.viewId, viewId );
+        super( title );
+        this.docker = docker;
+        setContentPane( docker );
     }
 
 }
