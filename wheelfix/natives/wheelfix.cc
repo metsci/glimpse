@@ -1,6 +1,17 @@
 #include <windows.h>
+#include <winuser.h>
+
+// Even if WINVER isn't set high enough for H-WHEEL to be
+// defined, the way we use it (to check event-type) is still
+// safe -- so just define it ourselves
+#ifndef WM_MOUSEHWHEEL
+#define WM_MOUSEHWHEEL 0x020E
+#endif
+
 #include <unordered_set>
 #include "com_metsci_glimpse_wheelfix_WheelFix.h"
+
+
 
 
 DWORD _pid = GetCurrentProcessId( );
@@ -27,7 +38,7 @@ jstring getErrorString( JNIEnv *env, jint errorCode )
 LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
 {
     MSG *msg = ( MSG * ) lParam;
-    if ( nCode == HC_ACTION && msg->message == WM_MOUSEWHEEL )
+    if ( nCode == HC_ACTION && ( msg->message == WM_MOUSEWHEEL || msg->message == WM_MOUSEHWHEEL ) )
     {
         HWND hwndHovered = WindowFromPoint( msg->pt );
         if ( msg->hwnd != hwndHovered )
@@ -39,7 +50,7 @@ LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
                 GetWindowThreadProcessId( hwndHovered, &pidHovered );
                 if ( pidHovered == _pid )
                 {
-                    PostMessage( hwndHovered, WM_MOUSEWHEEL, msg->wParam, msg->lParam );
+                    PostMessage( hwndHovered, msg->message, msg->wParam, msg->lParam );
                 }
             }
             
