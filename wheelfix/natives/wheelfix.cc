@@ -42,7 +42,7 @@ LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
     {
         return CallNextHookEx( NULL, nCode, wParam, lParam );
     }
-    
+
     MSG *msg = ( MSG * ) lParam;
     if ( nCode == HC_ACTION && ( msg->message == WM_MOUSEWHEEL || msg->message == WM_MOUSEHWHEEL ) )
     {
@@ -59,7 +59,7 @@ LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
                     PostMessage( hwndHovered, msg->message, msg->wParam, msg->lParam );
                 }
             }
-            
+
             // Squash the original message
             msg->message = WM_NULL;
         }
@@ -84,7 +84,7 @@ BOOL CALLBACK setHookIfNeeded( HWND hwnd, LPARAM lParam )
                     ReleaseMutex( _mutex );
                     return FALSE;
                 }
-                
+
                 _threadsWithFix.insert( tidHwnd );
             }
         }
