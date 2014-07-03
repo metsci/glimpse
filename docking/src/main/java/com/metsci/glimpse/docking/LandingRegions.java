@@ -34,6 +34,7 @@ import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
+import static java.awt.Frame.ICONIFIED;
 import static javax.swing.SwingUtilities.convertPointToScreen;
 
 import java.awt.Component;
@@ -52,7 +53,12 @@ public class LandingRegions
     {
         for ( DockingFrame frame : dockingGroup.frames )
         {
+            if ( !frame.isVisible( ) ) continue;
+            if ( ( frame.getExtendedState( ) & ICONIFIED ) != 0 ) continue;
+
             MultiSplitPane docker = frame.docker;
+            if ( !docker.isVisible( ) ) continue;
+
             Point pInDocker = convertPointFromScreen( pOnScreen, docker );
             if ( docker.contains( pInDocker ) )
             {
