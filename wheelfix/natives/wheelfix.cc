@@ -13,7 +13,6 @@
 
 
 
-
 DWORD _pid = GetCurrentProcessId( );
 HANDLE _mutex = CreateMutex( NULL, FALSE, NULL );
 std::unordered_set<DWORD> _threadsWithFix;
@@ -46,17 +45,40 @@ LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
     MSG *msg = ( MSG * ) lParam;
     if ( nCode == HC_ACTION && ( msg->message == WM_MOUSEWHEEL || msg->message == WM_MOUSEHWHEEL ) )
     {
-        HWND hwndHovered = WindowFromPoint( msg->pt );
-        if ( msg->hwnd != hwndHovered )
+        HWND hwndDest = NULL;
+
+        // When dragging, wheel events go to the capture window
+        DWORD tid = GetWindowThreadProcessId( msg->hwnd, NULL );
+        if ( tid == GetCurrentThreadId( ) )
         {
-            // Post an equivalent message to the hovered window
-            if ( hwndHovered != NULL )
+            hwndDest = GetCapture( );
+        }
+        else
+        {
+            GUITHREADINFO guiThreadInfo;
+            guiThreadInfo.cbSize = sizeof( GUITHREADINFO );
+            if ( GetGUIThreadInfo( tid, &guiThreadInfo ) )
+            {
+                hwndDest = guiThreadInfo.hwndCapture;
+            }
+        }
+
+        // Otherwise, wheel events go to the hovered window
+        if ( !hwndDest )
+        {
+            hwndDest = WindowFromPoint( msg->pt );
+        }
+
+        if ( msg->hwnd != hwndDest )
+        {
+            // Post an equivalent message to the destination window
+            if ( hwndDest )
             {
                 DWORD pidHovered;
-                GetWindowThreadProcessId( hwndHovered, &pidHovered );
+                GetWindowThreadProcessId( hwndDest, &pidHovered );
                 if ( pidHovered == _pid )
                 {
-                    PostMessage( hwndHovered, msg->message, msg->wParam, msg->lParam );
+                    PostMessage( hwndDest, msg->message, msg->wParam, msg->lParam );
                 }
             }
 
