@@ -37,6 +37,12 @@ jstring getErrorString( JNIEnv *env, jint errorCode )
 
 LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
 {
+    // Special case -- handle up here so it doesn't get messed with accidentally
+    if ( nCode < 0 )
+    {
+        return CallNextHookEx( NULL, nCode, wParam, lParam );
+    }
+    
     MSG *msg = ( MSG * ) lParam;
     if ( nCode == HC_ACTION && ( msg->message == WM_MOUSEWHEEL || msg->message == WM_MOUSEHWHEEL ) )
     {
