@@ -27,10 +27,15 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
+import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
+import static java.awt.event.MouseEvent.BUTTON1;
 
+import java.awt.AWTEvent;
 import java.awt.Graphics;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JButton;
 
@@ -73,8 +78,33 @@ public class TileFactories
             };
 
             final Tile tile = new TileImpl( theme, maximizeButton );
-            tile.addDockingMouseAdapter( new DockingMouseAdapter( tile, dockingGroup, this ) );
             tileRef[ 0 ] = tile;
+
+            final DockingMouseAdapter mouseAdapter = new DockingMouseAdapter( tile, dockingGroup, this );
+            tile.addDockingMouseAdapter( mouseAdapter );
+
+            // If the mouse-wheel is scrolled during a drag, the drag target stops receiving mouse events
+            // (due to a bug somewhere in java.awt.LightweightDispatcher). It does not receive any more
+            // drag events, nor does it receive the release event that should terminate the drag.
+            //
+            // Since no more drag events are going to get through, the best thing to do is to notify the
+            // DockingMouseAdapter that the drag has terminated. This will cause the the dragged view to
+            // land, as if the mouse had been released.
+            //
+            // Not even the wheel event itself makes it through to listeners, so we have to add an AWT global
+            // listener. If there is not a drag in progress, DockingMouseAdapter.mouseReleased will have no
+            // effect.
+            //
+            tile.getToolkit( ).addAWTEventListener( new AWTEventListener( )
+            {
+                public void eventDispatched( AWTEvent ev )
+                {
+                    if ( ev instanceof MouseWheelEvent )
+                    {
+                        mouseAdapter.mouseReleased( BUTTON1, ( ( MouseWheelEvent ) ev ).getLocationOnScreen( ) );
+                    }
+                }
+            }, MOUSE_WHEEL_EVENT_MASK );
 
             maximizeButton.addActionListener( new ActionListener( )
             {

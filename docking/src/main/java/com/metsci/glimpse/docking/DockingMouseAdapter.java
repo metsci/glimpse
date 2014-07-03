@@ -127,9 +127,14 @@ public class DockingMouseAdapter extends MouseAdapter
     @Override
     public void mouseReleased( MouseEvent ev )
     {
-        if ( ev.getButton( ) == BUTTON1 && dragging )
+        mouseReleased( ev.getButton( ), ev.getLocationOnScreen( ) );
+    }
+
+    public void mouseReleased( int button, Point locationOnScreen )
+    {
+        if ( button == BUTTON1 && dragging )
         {
-            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, draggedViewNum, ev.getLocationOnScreen( ) );
+            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, draggedViewNum, locationOnScreen );
             if ( landingRegion != null )
             {
                 tile.removeView( draggedView );
