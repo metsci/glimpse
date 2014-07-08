@@ -36,7 +36,6 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -44,8 +43,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.JFrame;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
@@ -85,7 +82,7 @@ public class DockingGroup
     protected final List<DockingFrame> framesMod;
     public final List<DockingFrame> frames;
 
-    protected final JFrame landingIndicator;
+    protected final LandingIndicator landingIndicator;
 
     protected final Set<DockingGroupListener> listeners;
 
@@ -99,11 +96,7 @@ public class DockingGroup
         this.framesMod = new ArrayList<>( );
         this.frames = unmodifiableList( framesMod );
 
-        this.landingIndicator = new JFrame( );
-        landingIndicator.setAlwaysOnTop( true );
-        landingIndicator.setFocusable( false );
-        landingIndicator.setUndecorated( true );
-        landingIndicator.getContentPane( ).setBackground( theme.landingIndicatorColor );
+        this.landingIndicator = new LandingIndicator( theme );
 
         this.listeners = new LinkedHashSet<>( );
     }
@@ -225,21 +218,7 @@ public class DockingGroup
 
     public void setLandingIndicator( Rectangle bounds )
     {
-        if ( bounds == null )
-        {
-            landingIndicator.setVisible( false );
-        }
-        else
-        {
-            landingIndicator.setBounds( bounds );
-
-            Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
-            int thickness = theme.landingIndicatorThickness;
-            shape.subtract( new Area( new Rectangle( thickness, thickness, bounds.width - 2*thickness, bounds.height - 2*thickness ) ) );
-            landingIndicator.setShape( shape );
-
-            landingIndicator.setVisible( true );
-        }
+        landingIndicator.setBounds( bounds );
     }
 
 
