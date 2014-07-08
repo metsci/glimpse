@@ -2,7 +2,9 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.OPAQUE_WINDOW;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.SHAPED_WINDOW;
+import static com.metsci.glimpse.docking.LandingIndicator.ReprType.TRANSLUCENT_WINDOW;
 import static java.awt.GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT;
+import static java.awt.GraphicsDevice.WindowTranslucency.TRANSLUCENT;
 import static javax.swing.BorderFactory.createLineBorder;
 
 import java.awt.GraphicsDevice;
@@ -20,6 +22,7 @@ public class LandingIndicator
     protected static enum ReprType
     {
         OPAQUE_WINDOW,
+        TRANSLUCENT_WINDOW,
         SHAPED_WINDOW
     }
 
@@ -71,6 +74,17 @@ public class LandingIndicator
                 Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
                 shape.subtract( new Area( new Rectangle( thickness, thickness, bounds.width - 2*thickness, bounds.height - 2*thickness ) ) );
                 frame.setShape( shape );
+            }
+            else if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
+            {
+                if ( recentReprType != TRANSLUCENT_WINDOW )
+                {
+                    frame.setShape( null );
+                    frameContent.setBackground( null );
+                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
+                    frame.setOpacity( 0.5f );
+                    this.recentReprType = TRANSLUCENT_WINDOW;
+                }
             }
             else
             {
