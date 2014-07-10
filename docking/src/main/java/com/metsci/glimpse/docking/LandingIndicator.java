@@ -60,7 +60,18 @@ public class LandingIndicator
             frame.setBounds( bounds );
 
             GraphicsDevice device = frame.getGraphicsConfiguration( ).getDevice( );
-            if ( device.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT ) )
+            if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
+            {
+                if ( recentReprType != TRANSLUCENT_WINDOW )
+                {
+                    frame.setShape( null );
+                    frameContent.setBackground( null );
+                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
+                    frame.setOpacity( 0.5f );
+                    this.recentReprType = TRANSLUCENT_WINDOW;
+                }
+            }
+            else if ( device.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT ) )
             {
                 if ( recentReprType != SHAPED_WINDOW )
                 {
@@ -74,17 +85,6 @@ public class LandingIndicator
                 Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
                 shape.subtract( new Area( new Rectangle( thickness, thickness, bounds.width - 2*thickness, bounds.height - 2*thickness ) ) );
                 frame.setShape( shape );
-            }
-            else if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
-            {
-                if ( recentReprType != TRANSLUCENT_WINDOW )
-                {
-                    frame.setShape( null );
-                    frameContent.setBackground( null );
-                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
-                    frame.setOpacity( 0.5f );
-                    this.recentReprType = TRANSLUCENT_WINDOW;
-                }
             }
             else
             {
