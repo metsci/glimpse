@@ -41,7 +41,6 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -98,6 +97,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwtGlimpseCanvas( Composite parent, GLProfile glProfile, GLContext context, int options )
     {
         super( parent, options );
@@ -107,6 +107,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
     {
         this( parent, GLProfile.get( profile ), context, options );
@@ -124,7 +125,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         FillLayout layout = new FillLayout( );
         this.setLayout( layout );
 
-        this.glCanvas = new NewtCanvasSWT( this, SWT.NONE, glWindow );
+        this.glCanvas = new BugFixNewtCanvasSWT( this, options, glWindow );
 
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
