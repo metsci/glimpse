@@ -90,6 +90,32 @@ LRESULT CALLBACK getMsgProc( int nCode, WPARAM wParam, LPARAM lParam )
 }
 
 
+LRESULT CALLBACK callWndProc( int nCode, WPARAM wParam, LPARAM lParam )
+{
+    // Special case -- handle up here so it doesn't get messed with accidentally
+    if ( nCode < 0 )
+    {
+        return CallNextHookEx( NULL, nCode, wParam, lParam );
+    }
+
+    CWPSTRUCT *msg = ( CWPSTRUCT * ) lParam;
+    if ( nCode == HC_ACTION && msg->message == WM_EXITSIZEMOVE )
+    {
+        WINDOWPLACEMENT wndPlacement;
+        GetWindowPlacement( msg->hwnd, &wndPlacement );
+
+        RECT snappedRect;
+        GetWindowRect( msg->hwnd, &snappedRect );
+
+        if ( !EqualRect( &snappedRect, &( wndPlacement.rcNormalPosition ) ) )
+        {
+            // XXX: Get AWT to fire a window-resize
+        }
+    }
+    return CallNextHookEx( NULL, nCode, wParam, lParam );
+}
+
+
 BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam )
 {
     DWORD pidHwnd;
@@ -100,9 +126,18 @@ BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam )
         {
             if ( _threadsWithFix.find( tidHwnd ) == _threadsWithFix.end( ) )
             {
-                HHOOK hHook = SetWindowsHookEx( WH_GETMESSAGE, getMsgProc, NULL, tidHwnd );
-                if ( hHook == NULL )
+                HHOOK hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, getMsgProc, NULL, tidHwnd );
+                if ( hGetMsgHook == NULL )
                 {
+                    ReleaseMutex( _mutex );
+                    return FALSE;
+                }
+
+                HHOOK hCallWndHook = SetWindowsHookEx( WH_CALLWNDPROC, callWndProc, NULL, tidHwnd );
+                if ( hCallWndHook == NULL )
+                {
+                    // XXX: This unhook probably trashes the last-error code
+                    UnhookWindowsHookEx( hGetMsgHook );
                     ReleaseMutex( _mutex );
                     return FALSE;
                 }
