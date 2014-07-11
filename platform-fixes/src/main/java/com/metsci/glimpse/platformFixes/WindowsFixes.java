@@ -2,9 +2,14 @@ package com.metsci.glimpse.platformFixes;
 
 import static com.metsci.glimpse.util.jnlu.FileUtils.copy;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static java.awt.Window.getOwnerlessWindows;
 
+import java.awt.Window;
+import java.awt.peer.ComponentPeer;
 import java.io.File;
 import java.net.URL;
+
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.util.jnlu.FileUtils;
 
@@ -22,6 +27,63 @@ public class WindowsFixes
     }
 
     private static native String _applyFixes( );
+
+    // Called from native code
+    private static void handleVerticalMaximize( final long hwnd )
+    {
+        SwingUtilities.invokeLater( new Runnable( )
+        {
+            public void run( )
+            {
+                Window window = findWindow( hwnd );
+                if ( window != null )
+                {
+                    window.invalidate( );
+                    window.validate( );
+                }
+            }
+        } );
+    }
+
+    private static Window findWindow( long hwnd )
+    {
+        // A map would scale better as the number of windows increases ...
+        // but that would require bookkeeping, and presumably there won't be
+        // all that many top-level windows
+        //
+        for ( Window w : getOwnerlessWindows( ) )
+        {
+            Long h = getHwnd( w );
+            if ( h != null && h == hwnd )
+            {
+                return w;
+            }
+        }
+        return null;
+    }
+
+    private static Long getHwnd( Window window )
+    {
+        try
+        {
+            @SuppressWarnings( "deprecation" )
+            ComponentPeer peer = window.getPeer( );
+            Class<?> wcpClass = Class.forName( "sun.awt.windows.WComponentPeer" );
+            if ( wcpClass.isInstance( peer ) )
+            {
+                return ( Long ) wcpClass.getMethod( "getHWnd" ).invoke( peer );
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch ( Exception e )
+        {
+            return null;
+        }
+    }
+
 
 
     public static final LibraryList libs = getLibs( );

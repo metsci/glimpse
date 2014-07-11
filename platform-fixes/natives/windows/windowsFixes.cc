@@ -8,14 +8,93 @@
 #define WM_MOUSEHWHEEL 0x020E
 #endif
 
+#include <atomic>
 #include <unordered_set>
 #include "com_metsci_glimpse_platformFixes_WindowsFixes.h"
 
 
 
-DWORD _pid = GetCurrentProcessId( );
-HANDLE _mutex = CreateMutex( NULL, FALSE, NULL );
+//#define DEBUG
+
+
+
+#ifdef DEBUG
+std::atomic<HANDLE> _logMutex;
+std::atomic<FILE *> _log;
+void log( const char *fmt, ... )
+{
+    va_list args;
+    va_start( args, fmt );
+
+    WaitForSingleObject( _logMutex, INFINITE );
+    {
+        vfprintf( _log, fmt, args );
+        fflush( _log );
+    }
+    ReleaseMutex( _logMutex );
+
+    va_end( args );
+}
+#endif
+
+
+
+jstring getErrorString( JNIEnv *env, jint errorCode );
+jclass findClassGlobal( JNIEnv *env, const char *classname );
+JNIEnv *getJavaEnv( );
+BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam );
+LRESULT CALLBACK getMsgProc( int nCode, WPARAM wParam, LPARAM lParam );
+LRESULT CALLBACK callWndProc( int nCode, WPARAM wParam, LPARAM lParam );
+
+
+
+std::atomic<DWORD> _pid;
+std::atomic<JavaVM *> _jvm;
+
+std::atomic<jclass> _windowsFixesClass;
+std::atomic<jmethodID> _handleVerticalMaximizeMID;
+
+std::atomic<HANDLE> _threadsWithFixMutex;
 std::unordered_set<DWORD> _threadsWithFix;
+
+
+
+
+JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM *jvm, void *reserved )
+{
+    #ifdef DEBUG
+    _logMutex = CreateMutex( NULL, FALSE, NULL );
+    _log = fopen( "log_windowsFixes.txt", "w" );
+    #endif
+
+    _pid = GetCurrentProcessId( );
+    _jvm = jvm;
+    _threadsWithFixMutex = CreateMutex( NULL, FALSE, NULL );
+
+    JNIEnv *env;
+    jvm->GetEnv( ( void ** ) &env, JNI_VERSION_1_6 );
+    if ( env )
+    {
+        _windowsFixesClass = findClassGlobal( env, "com/metsci/glimpse/platformFixes/WindowsFixes" );
+        _handleVerticalMaximizeMID = env->GetStaticMethodID( _windowsFixesClass, "handleVerticalMaximize", "(J)V" );
+    }
+    else
+    {
+        _windowsFixesClass = NULL;
+        _handleVerticalMaximizeMID = NULL;
+    }
+
+    return JNI_VERSION_1_6;
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_com_metsci_glimpse_platformFixes_WindowsFixes__1applyFixes( JNIEnv *env, jclass jthis )
+{
+    BOOL success = EnumWindows( setHooksIfNeeded, ( LPARAM ) NULL );
+    return ( success ? NULL : getErrorString( env, GetLastError( ) ) );
+}
+
 
 
 jstring getErrorString( JNIEnv *env, jint errorCode )
@@ -32,6 +111,76 @@ jstring getErrorString( JNIEnv *env, jint errorCode )
     LocalFree( buf );
     return errorString;
 }
+
+
+
+jclass findClassGlobal( JNIEnv *env, const char *classname )
+{
+    jclass classLocal = env->FindClass( classname );
+    if ( classLocal )
+    {
+        jclass classGlobal = ( jclass ) env->NewGlobalRef( classLocal );
+        env->DeleteLocalRef( classLocal );
+        return classGlobal;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+
+
+JNIEnv *getJavaEnv( )
+{
+    JNIEnv *env = NULL;
+    JavaVM *jvm = _jvm;
+    if ( jvm )
+    {
+        if ( jvm->GetEnv( ( void ** ) &env, JNI_VERSION_1_6 ) == JNI_EDETACHED )
+        {
+            jvm->AttachCurrentThreadAsDaemon( ( void ** ) &env, NULL );
+        }
+    }
+    return env;
+}
+
+
+
+BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam )
+{
+    DWORD pidHwnd;
+    DWORD tidHwnd = GetWindowThreadProcessId( hwnd, &pidHwnd );
+    if ( pidHwnd == _pid )
+    {
+        WaitForSingleObject( _threadsWithFixMutex, INFINITE );
+        {
+            if ( _threadsWithFix.find( tidHwnd ) == _threadsWithFix.end( ) )
+            {
+                HHOOK hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, getMsgProc, NULL, tidHwnd );
+                if ( hGetMsgHook == NULL )
+                {
+                    ReleaseMutex( _threadsWithFixMutex );
+                    return FALSE;
+                }
+
+                HHOOK hCallWndHook = SetWindowsHookEx( WH_CALLWNDPROC, callWndProc, NULL, tidHwnd );
+                if ( hCallWndHook == NULL )
+                {
+                    // XXX: This unhook probably trashes the last-error code
+                    UnhookWindowsHookEx( hGetMsgHook );
+                    ReleaseMutex( _threadsWithFixMutex );
+                    return FALSE;
+                }
+
+                _threadsWithFix.insert( tidHwnd );
+            }
+        }
+        ReleaseMutex( _threadsWithFixMutex );
+    }
+    return TRUE;
+}
+
 
 
 LRESULT CALLBACK getMsgProc( int nCode, WPARAM wParam, LPARAM lParam )
@@ -109,50 +258,12 @@ LRESULT CALLBACK callWndProc( int nCode, WPARAM wParam, LPARAM lParam )
 
         if ( !EqualRect( &snappedRect, &( wndPlacement.rcNormalPosition ) ) )
         {
-            // XXX: Get AWT to fire a window-resize
+            JNIEnv *env = getJavaEnv( );
+            if ( env )
+            {
+                env->CallStaticVoidMethod( _windowsFixesClass, _handleVerticalMaximizeMID, msg->hwnd );
+            }
         }
     }
     return CallNextHookEx( NULL, nCode, wParam, lParam );
-}
-
-
-BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam )
-{
-    DWORD pidHwnd;
-    DWORD tidHwnd = GetWindowThreadProcessId( hwnd, &pidHwnd );
-    if ( pidHwnd == _pid )
-    {
-        WaitForSingleObject( _mutex, INFINITE );
-        {
-            if ( _threadsWithFix.find( tidHwnd ) == _threadsWithFix.end( ) )
-            {
-                HHOOK hGetMsgHook = SetWindowsHookEx( WH_GETMESSAGE, getMsgProc, NULL, tidHwnd );
-                if ( hGetMsgHook == NULL )
-                {
-                    ReleaseMutex( _mutex );
-                    return FALSE;
-                }
-
-                HHOOK hCallWndHook = SetWindowsHookEx( WH_CALLWNDPROC, callWndProc, NULL, tidHwnd );
-                if ( hCallWndHook == NULL )
-                {
-                    // XXX: This unhook probably trashes the last-error code
-                    UnhookWindowsHookEx( hGetMsgHook );
-                    ReleaseMutex( _mutex );
-                    return FALSE;
-                }
-
-                _threadsWithFix.insert( tidHwnd );
-            }
-        }
-        ReleaseMutex( _mutex );
-    }
-    return TRUE;
-}
-
-
-jstring JNICALL Java_com_metsci_glimpse_platformFixes_WindowsFixes__1applyFixes( JNIEnv *env, jclass jthis )
-{
-    BOOL success = EnumWindows( setHooksIfNeeded, ( LPARAM ) NULL );
-    return ( success ? NULL : getErrorString( env, GetLastError( ) ) );
 }
