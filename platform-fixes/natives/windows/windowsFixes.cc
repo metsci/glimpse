@@ -9,7 +9,7 @@
 #endif
 
 #include <unordered_set>
-#include "com_metsci_glimpse_wheelfix_WheelFix.h"
+#include "com_metsci_glimpse_platformFixes_WindowsFixes.h"
 
 
 
@@ -34,7 +34,7 @@ jstring getErrorString( JNIEnv *env, jint errorCode )
 }
 
 
-LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK getMsgProc( int nCode, WPARAM wParam, LPARAM lParam )
 {
     // Special case -- handle up here so it doesn't get messed with accidentally
     if ( nCode < 0 )
@@ -90,7 +90,7 @@ LRESULT CALLBACK hookProc( int nCode, WPARAM wParam, LPARAM lParam )
 }
 
 
-BOOL CALLBACK setHookIfNeeded( HWND hwnd, LPARAM lParam )
+BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam )
 {
     DWORD pidHwnd;
     DWORD tidHwnd = GetWindowThreadProcessId( hwnd, &pidHwnd );
@@ -100,7 +100,7 @@ BOOL CALLBACK setHookIfNeeded( HWND hwnd, LPARAM lParam )
         {
             if ( _threadsWithFix.find( tidHwnd ) == _threadsWithFix.end( ) )
             {
-                HHOOK hHook = SetWindowsHookEx( WH_GETMESSAGE, hookProc, NULL, tidHwnd );
+                HHOOK hHook = SetWindowsHookEx( WH_GETMESSAGE, getMsgProc, NULL, tidHwnd );
                 if ( hHook == NULL )
                 {
                     ReleaseMutex( _mutex );
@@ -116,8 +116,8 @@ BOOL CALLBACK setHookIfNeeded( HWND hwnd, LPARAM lParam )
 }
 
 
-jstring JNICALL Java_com_metsci_glimpse_wheelfix_WheelFix__1applyWheelFix( JNIEnv *env, jclass jthis )
+jstring JNICALL Java_com_metsci_glimpse_platformFixes_WindowsFixes__1applyFixes( JNIEnv *env, jclass jthis )
 {
-    BOOL success = EnumWindows( setHookIfNeeded, ( LPARAM ) NULL );
+    BOOL success = EnumWindows( setHooksIfNeeded, ( LPARAM ) NULL );
     return ( success ? NULL : getErrorString( env, GetLastError( ) ) );
 }

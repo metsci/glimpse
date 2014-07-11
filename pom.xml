@@ -54,7 +54,7 @@
 
         <module>util</module>
 
-        <module>wheelfix</module>
+        <module>platform-fixes</module>
 
         <module>core</module>
         <module>core-examples</module>

@@ -14,7 +14,7 @@
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-wheelfix</artifactId>
+            <artifactId>glimpse-platform-fixes</artifactId>
             <version>${parent.version}</version>
         </dependency>
 

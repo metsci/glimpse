@@ -7,7 +7,7 @@
         <version>CURRENT-SNAPSHOT</version>
     </parent>
 
-    <artifactId>glimpse-wheelfix</artifactId>
+    <artifactId>glimpse-platform-fixes</artifactId>
 
     <dependencies>
 
