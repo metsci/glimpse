@@ -34,7 +34,7 @@ import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
-import static com.metsci.glimpse.platformFixes.WindowsFixes.fixWindowsQuirks;
+import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static java.util.logging.Level.WARNING;
@@ -64,7 +64,7 @@ public class GlimpseDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        fixWindowsQuirks( );
+        fixPlatformQuirks( );
 
         Theme.loadTheme( GlimpseDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
