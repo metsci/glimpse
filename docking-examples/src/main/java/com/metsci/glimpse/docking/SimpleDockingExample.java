@@ -35,6 +35,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
+import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -73,6 +74,8 @@ public class SimpleDockingExample
 
     public static void main( String[] args ) throws Exception
     {
+        fixPlatformQuirks( );
+
         Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
