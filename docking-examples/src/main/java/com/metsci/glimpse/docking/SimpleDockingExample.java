@@ -35,6 +35,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
+import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -82,7 +83,8 @@ public class SimpleDockingExample
 
 
         final String appName = "simple-docking-example";
-        final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
+        final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+        dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
@@ -168,7 +170,7 @@ public class SimpleDockingExample
                 dockingGroup.restoreArrangement( groupArr, tileFactory, views );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
-                    public void disposingAllFrames( )
+                    public void disposingAllFrames( DockingGroup group )
                     {
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                     }

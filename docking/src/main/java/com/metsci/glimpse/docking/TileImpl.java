@@ -56,8 +56,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -236,6 +238,8 @@ public class TileImpl extends Tile
     protected final Map<String,ViewEntry> viewMap;
     protected final List<View> views;
     protected View selectedView;
+
+    protected final Set<TileListener> listeners;
 
 
     public TileImpl( DockingTheme theme, Component... cornerComponents )
@@ -438,23 +442,41 @@ public class TileImpl extends Tile
         setLayout( new BorderLayout( ) );
         add( topBar, BorderLayout.NORTH );
         add( cardPanel, BorderLayout.CENTER );
+
+        this.listeners = new LinkedHashSet<>( );
     }
 
+    @Override
+    public void addListener( TileListener listener )
+    {
+        listeners.add( listener );
+    }
+
+    @Override
+    public void removeListener( TileListener listener )
+    {
+        listeners.remove( listener );
+    }
+
+    @Override
     public int numViews( )
     {
         return views.size( );
     }
 
+    @Override
     public View view( int viewNum )
     {
         return views.get( viewNum );
     }
 
+    @Override
     public View selectedView( )
     {
         return selectedView;
     }
 
+    @Override
     public void addView( final View view, int viewNum )
     {
         JPanel card = new JPanel( new BorderLayout( ) );
@@ -489,12 +511,18 @@ public class TileImpl extends Tile
         viewMap.put( view.viewId, new ViewEntry( view, card, tab, overflowMenuItem ) );
         views.add( viewNum, view );
 
+        for ( TileListener listener : listeners )
+        {
+            listener.addedView( view );
+        }
+
         if ( selectedView == null )
         {
             selectView( view );
         }
     }
 
+    @Override
     public void removeView( View view )
     {
         boolean removingSelectedView = ( view == selectedView );
@@ -510,17 +538,24 @@ public class TileImpl extends Tile
         cardPanel.remove( viewEntry.card );
         views.remove( view );
 
+        for ( TileListener listener : listeners )
+        {
+            listener.removedView( view );
+        }
+
         if ( removingSelectedView && !views.isEmpty( ) )
         {
             selectView( views.get( 0 ) );
         }
     }
 
+    @Override
     public boolean hasView( View view )
     {
         return ( view != null && viewMap.containsKey( view.viewId ) );
     }
 
+    @Override
     public void selectView( View view )
     {
         if ( view == selectedView ) return;
@@ -544,8 +579,14 @@ public class TileImpl extends Tile
 
         topBar.doLayout( );
         topBar.repaint( );
+
+        for ( TileListener listener : listeners )
+        {
+            listener.selectedView( view );
+        }
     }
 
+    @Override
     public int viewNumForTabAt( int x, int y )
     {
         for ( int viewNum = 0; viewNum < numViews( ); viewNum++ )
@@ -559,6 +600,7 @@ public class TileImpl extends Tile
         return -1;
     }
 
+    @Override
     public Rectangle viewTabBounds( int viewNum )
     {
         Rectangle bounds = tabBounds( viewNum );
@@ -614,6 +656,7 @@ public class TileImpl extends Tile
         return views.size( );
     }
 
+    @Override
     public void addDockingMouseAdapter( MouseAdapter mouseAdapter )
     {
         for ( View view : views )

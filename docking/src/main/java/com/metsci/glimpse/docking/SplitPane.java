@@ -41,12 +41,21 @@ import java.awt.LayoutManager;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JPanel;
 
 public class SplitPane extends JPanel
 {
+
+    public static interface SplitPaneListener
+    {
+        void movedDivider( );
+    }
+
+
     protected static final String CHILD_A = "A";
     protected static final String CHILD_B = "B";
 
@@ -59,7 +68,9 @@ public class SplitPane extends JPanel
     protected Component childB;
     protected double splitFrac;
 
-    protected JPanel separator;
+    protected JPanel divider;
+
+    protected final Set<SplitPaneListener> listeners;
 
 
     public SplitPane( boolean arrangeVertically, double splitFrac, int gapSize )
@@ -73,17 +84,29 @@ public class SplitPane extends JPanel
         this.childB = null;
         this.splitFrac = splitFrac;
 
-        this.separator = new JPanel( );
-        separator.setOpaque( false );
-        separator.setCursor( getPredefinedCursor( arrangeVertically ? S_RESIZE_CURSOR : E_RESIZE_CURSOR ) );
-        add( separator );
+        this.divider = new JPanel( );
+        divider.setOpaque( false );
+        divider.setCursor( getPredefinedCursor( arrangeVertically ? S_RESIZE_CURSOR : E_RESIZE_CURSOR ) );
+        add( divider );
 
         SplitLayout layout = new SplitLayout( );
         setLayout( layout );
 
         MouseAdapter mouseAdapter = createMouseAdapter( layout );
-        separator.addMouseListener( mouseAdapter );
-        separator.addMouseMotionListener( mouseAdapter );
+        divider.addMouseListener( mouseAdapter );
+        divider.addMouseMotionListener( mouseAdapter );
+
+        this.listeners = new LinkedHashSet<>( );
+    }
+
+    public void addListener( SplitPaneListener listener )
+    {
+        listeners.add( listener );
+    }
+
+    public void removeListener( SplitPaneListener listener )
+    {
+        listeners.remove( listener );
     }
 
     protected MouseAdapter createMouseAdapter( final SplitLayout layout )
@@ -302,6 +325,13 @@ public class SplitPane extends JPanel
             split._setSplitFrac( tweakedFrac );
             splitSizeB = computeChildSizes( splitSizeB, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[ 0 ];
         }
+
+        // Notify listeners
+        //
+        for ( SplitPaneListener listener : listeners )
+        {
+            listener.movedDivider( );
+        }
     }
 
     protected void _setSplitFrac( double splitFrac )
@@ -417,7 +447,7 @@ public class SplitPane extends JPanel
 
                     childA.setBounds( 0, 0, widthContainer, heightA );
                     childB.setBounds( 0, heightA + gapSize, widthContainer, heightB );
-                    separator.setBounds( 0, heightA, widthContainer, gapSize );
+                    divider.setBounds( 0, heightA, widthContainer, gapSize );
                 }
                 else
                 {
@@ -427,9 +457,9 @@ public class SplitPane extends JPanel
 
                     childA.setBounds( 0, 0, widthA, heightContainer );
                     childB.setBounds( widthA + gapSize, 0, widthB, heightContainer );
-                    separator.setBounds( widthA, 0, gapSize, heightContainer );
+                    divider.setBounds( widthA, 0, gapSize, heightContainer );
                 }
-                separator.setVisible( true );
+                divider.setVisible( true );
             }
             else
             {
@@ -441,7 +471,7 @@ public class SplitPane extends JPanel
                 {
                     childB.setBounds( 0, 0, widthContainer, heightContainer );
                 }
-                separator.setVisible( false );
+                divider.setVisible( false );
             }
         }
     }

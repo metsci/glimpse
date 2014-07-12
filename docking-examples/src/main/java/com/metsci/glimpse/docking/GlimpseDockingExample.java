@@ -33,6 +33,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
+import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
@@ -72,7 +73,8 @@ public class GlimpseDockingExample
 
 
         final String appName = "glimpse-docking-example";
-        final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
+        final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+        dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 
@@ -110,7 +112,7 @@ public class GlimpseDockingExample
                 dockingGroup.restoreArrangement( groupArr, tileFactory, views );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
-                    public void disposingAllFrames( )
+                    public void disposingAllFrames( DockingGroup group )
                     {
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                         animator.stop( );

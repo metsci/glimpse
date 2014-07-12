@@ -34,6 +34,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -216,6 +217,47 @@ public class DockingUtils
         if ( !appDir.canWrite( ) ) throw new RuntimeException( "Do not have write permission on app dir: " + appDir.getAbsolutePath( ) );
 
         return appDir;
+    }
+
+    public static <C extends Component> C findLargestComponent( Collection<C> components )
+    {
+        int largestArea = -1;
+        C largestComponent = null;
+        for ( C c : components )
+        {
+            int area = c.getWidth( ) * c.getHeight( );
+            if ( area > largestArea )
+            {
+                largestComponent = c;
+                largestArea = area;
+            }
+        }
+        return largestComponent;
+    }
+
+    public static Tile findLargestTile( MultiSplitPane docker )
+    {
+        int largestArea = -1;
+        Tile largestTile = null;
+        for ( Component c : docker.leaves( ) )
+        {
+            int area = c.getWidth( ) * c.getHeight( );
+            if ( area > largestArea && c instanceof Tile )
+            {
+                largestTile = ( Tile ) c;
+                largestArea = area;
+            }
+        }
+        return largestTile;
+    }
+
+    public static void appendViewsToTile( Tile tile, Collection<View> views )
+    {
+        for ( View view : views )
+        {
+            int viewNum = tile.numViews( );
+            tile.addView( view, viewNum );
+        }
     }
 
 }

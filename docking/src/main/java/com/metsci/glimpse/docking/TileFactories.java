@@ -80,6 +80,8 @@ public class TileFactories
             final Tile tile = new TileImpl( theme, maximizeButton );
             tileRef[ 0 ] = tile;
 
+            dockingGroup.attachListenerTo( tile );
+
             final DockingMouseAdapter mouseAdapter = new DockingMouseAdapter( tile, dockingGroup, this );
             tile.addDockingMouseAdapter( mouseAdapter );
 

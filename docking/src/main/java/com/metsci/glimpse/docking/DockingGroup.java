@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
+import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
+import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static java.util.Arrays.asList;
@@ -45,6 +48,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
+import com.metsci.glimpse.docking.MultiSplitPane.MultiSplitPaneListener;
+import com.metsci.glimpse.docking.Tile.TileListener;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
@@ -63,19 +68,45 @@ public class DockingGroup
 
     public static interface DockingGroupListener
     {
-        void disposingAllFrames( );
-        void disposingFrame( DockingFrame frame );
+        void addedView( Tile tile, View view );
+        void removedView( Tile tile, View view );
+        void selectedView( Tile tile, View view );
+
+        void addedLeaf( MultiSplitPane docker, Component leaf );
+        void removedLeaf( MultiSplitPane docker, Component leaf );
+        void movedDivider( MultiSplitPane docker, SplitPane splitPane );
+        void maximizedLeaf( MultiSplitPane docker, Component leaf );
+        void unmaximizedLeaf( MultiSplitPane docker, Component leaf );
+        void restoredTree( MultiSplitPane docker );
+
+        void addedFrame( DockingGroup group, DockingFrame frame );
+        void disposingAllFrames( DockingGroup group );
+        void disposingFrame( DockingGroup group, DockingFrame frame );
+        void disposedFrame( DockingGroup group, DockingFrame frame );
     }
 
 
     public static class DockingGroupAdapter implements DockingGroupListener
     {
-        public void disposingAllFrames( ) { }
-        public void disposingFrame( DockingFrame frame ) { }
+        public void addedView( Tile tile, View view ) { }
+        public void removedView( Tile tile, View view ) { }
+        public void selectedView( Tile tile, View view ) { }
+
+        public void addedLeaf( MultiSplitPane docker, Component leaf ) { }
+        public void removedLeaf( MultiSplitPane docker, Component leaf ) { }
+        public void movedDivider( MultiSplitPane docker, SplitPane splitPane ) { }
+        public void maximizedLeaf( MultiSplitPane docker, Component leaf ) { }
+        public void unmaximizedLeaf( MultiSplitPane docker, Component leaf ) { }
+        public void restoredTree( MultiSplitPane docker ) { }
+
+        public void addedFrame( DockingGroup group, DockingFrame frame ) { }
+        public void disposingAllFrames( DockingGroup group ) { }
+        public void disposingFrame( DockingGroup group, DockingFrame frame ) { }
+        public void disposedFrame( DockingGroup group, DockingFrame frame ) { }
     }
 
 
-    public final String title;
+
     public final DockingTheme theme;
     public final DockingFrameCloseOperation frameCloseOperation;
 
@@ -87,9 +118,8 @@ public class DockingGroup
     protected final Set<DockingGroupListener> listeners;
 
 
-    public DockingGroup( String title, DockingTheme theme, DockingFrameCloseOperation frameCloseOperation )
+    public DockingGroup( DockingTheme theme, DockingFrameCloseOperation frameCloseOperation )
     {
-        this.title = title;
         this.theme = theme;
         this.frameCloseOperation = frameCloseOperation;
 
@@ -114,8 +144,9 @@ public class DockingGroup
     public DockingFrame addNewFrame( )
     {
         MultiSplitPane docker = new MultiSplitPane( theme.dividerSize );
+        attachListenerTo( docker );
 
-        final DockingFrame frame = new DockingFrame( title, docker );
+        final DockingFrame frame = new DockingFrame( docker );
         frame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
         frame.addWindowListener( new WindowAdapter( )
         {
@@ -137,9 +168,16 @@ public class DockingGroup
 
                     case DISPOSE_CLOSED_FRAME:
                     {
+                        if ( frames.size( ) == 1 )
+                        {
+                            for ( DockingGroupListener listener : listeners )
+                            {
+                                listener.disposingAllFrames( DockingGroup.this );
+                            }
+                        }
                         for ( DockingGroupListener listener : listeners )
                         {
-                            listener.disposingFrame( frame );
+                            listener.disposingFrame( DockingGroup.this, frame );
                         }
                         frame.dispose( );
                     }
@@ -149,13 +187,13 @@ public class DockingGroup
                     {
                         for ( DockingGroupListener listener : listeners )
                         {
-                            listener.disposingAllFrames( );
+                            listener.disposingAllFrames( DockingGroup.this );
                         }
                         for ( DockingFrame frame : frames )
                         {
                             for ( DockingGroupListener listener : listeners )
                             {
-                                listener.disposingFrame( frame );
+                                listener.disposingFrame( DockingGroup.this, frame );
                             }
                             frame.dispose( );
                         }
@@ -166,18 +204,17 @@ public class DockingGroup
                     {
                         for ( DockingGroupListener listener : listeners )
                         {
-                            listener.disposingAllFrames( );
+                            listener.disposingAllFrames( DockingGroup.this );
                         }
                         for ( DockingFrame frame : frames )
                         {
                             for ( DockingGroupListener listener : listeners )
                             {
-                                listener.disposingFrame( frame );
+                                listener.disposingFrame( DockingGroup.this, frame );
                             }
-                            // Even if we try to dispose frames here, the JVM
-                            // exits before any disposing actually happens
-                            //frame.dispose( );
+                            frame.dispose( );
                         }
+                        // XXX: Can we keep this from interrupting the dispose calls? Should we?
                         System.exit( 0 );
                     }
                     break;
@@ -187,7 +224,13 @@ public class DockingGroup
             // Frame has been disposed, including programmatically
             public void windowClosed( WindowEvent ev )
             {
-                removeFrame( frame );
+                framesMod.remove( frame );
+
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.disposedFrame( DockingGroup.this, frame );
+                }
+
                 if ( frames.isEmpty( ) )
                 {
                     // Dispose the landingIndicator frame, so that the JVM can shut
@@ -200,12 +243,95 @@ public class DockingGroup
         } );
 
         framesMod.add( 0, frame );
+        for ( DockingGroupListener listener : listeners )
+        {
+            listener.addedFrame( this, frame );
+        }
         return frame;
     }
 
-    public void removeFrame( DockingFrame frame )
+    protected void attachListenerTo( final MultiSplitPane docker )
     {
-        framesMod.remove( frame );
+        docker.addListener( new MultiSplitPaneListener( )
+        {
+            public void addedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.addedLeaf( docker, leaf );
+                }
+            }
+
+            public void removedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.removedLeaf( docker, leaf );
+                }
+            }
+
+            public void movedDivider( SplitPane splitPane )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.movedDivider( docker, splitPane );
+                }
+            }
+
+            public void maximizedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.maximizedLeaf( docker, leaf );
+                }
+            }
+
+            public void unmaximizedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.unmaximizedLeaf( docker, leaf );
+                }
+            }
+
+            public void restoredTree( )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.restoredTree( docker );
+                }
+            }
+        } );
+    }
+
+    protected void attachListenerTo( final Tile tile )
+    {
+        tile.addListener( new TileListener( )
+        {
+            public void addedView( View view )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.addedView( tile, view );
+                }
+            }
+
+            public void removedView( View view )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.removedView( tile, view );
+                }
+            }
+
+            public void selectedView( View view )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.selectedView( tile, view );
+                }
+            }
+        } );
     }
 
     public void bringFrameToFront( DockingFrame frame )
@@ -268,7 +394,7 @@ public class DockingGroup
             }
             else
             {
-                frame = findLargestFrame( frames );
+                frame = findLargestComponent( frames );
                 Tile tile = findLargestTile( frame.docker );
                 if ( tile == null )
                 {
@@ -281,47 +407,6 @@ public class DockingGroup
                     appendViewsToTile( tile, remainingViews.values( ) );
                 }
             }
-        }
-    }
-
-    protected static DockingFrame findLargestFrame( Collection<DockingFrame> frames )
-    {
-        int largestArea = -1;
-        DockingFrame largestFrame = null;
-        for ( DockingFrame frame : frames )
-        {
-            int area = frame.getWidth( ) * frame.getHeight( );
-            if ( area > largestArea )
-            {
-                largestFrame = frame;
-                largestArea = area;
-            }
-        }
-        return largestFrame;
-    }
-
-    protected static Tile findLargestTile( MultiSplitPane docker )
-    {
-        int largestArea = -1;
-        Tile largestTile = null;
-        for ( Component c : docker.leaves( ) )
-        {
-            int area = c.getWidth( ) * c.getHeight( );
-            if ( area > largestArea && c instanceof Tile )
-            {
-                largestTile = ( Tile ) c;
-                largestArea = area;
-            }
-        }
-        return largestTile;
-    }
-
-    protected static void appendViewsToTile( Tile tile, Collection<View> views )
-    {
-        for ( View view : views )
-        {
-            int viewNum = tile.numViews( );
-            tile.addView( view, viewNum );
         }
     }
 

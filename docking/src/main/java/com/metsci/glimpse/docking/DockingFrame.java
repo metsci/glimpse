@@ -34,9 +34,8 @@ public class DockingFrame extends JFrame
     public final MultiSplitPane docker;
 
 
-    public DockingFrame( String title, MultiSplitPane docker )
+    public DockingFrame( MultiSplitPane docker )
     {
-        super( title );
         this.docker = docker;
         setContentPane( docker );
     }

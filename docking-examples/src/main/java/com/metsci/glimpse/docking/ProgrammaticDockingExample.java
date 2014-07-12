@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
@@ -74,7 +75,8 @@ public class ProgrammaticDockingExample
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
 
-        final DockingGroup dockingGroup = new DockingGroup( "Docking Example", dockingTheme, DISPOSE_ALL_FRAMES );
+        final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+        dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
 

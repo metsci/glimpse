@@ -43,8 +43,33 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+import com.metsci.glimpse.docking.SplitPane.SplitPaneListener;
+
 public class MultiSplitPane extends JPanel
 {
+
+    public static interface MultiSplitPaneListener
+    {
+        void addedLeaf( Component leaf );
+        void removedLeaf( Component leaf );
+        void movedDivider( SplitPane splitPane );
+        void maximizedLeaf( Component leaf );
+        void unmaximizedLeaf( Component leaf );
+        void restoredTree( );
+    }
+
+
+    public static class MultiSplitPaneAdapter implements MultiSplitPaneListener
+    {
+        public void addedLeaf( Component leaf ) { }
+        public void removedLeaf( Component leaf ) { }
+        public void movedDivider( SplitPane splitPane ) { }
+        public void maximizedLeaf( Component leaf ) { }
+        public void unmaximizedLeaf( Component leaf ) { }
+        public void restoredTree( ) { }
+    }
+
+
     protected static final String MAXIMIZED_LEAF_CARD = "maximizedLeaf";
     protected static final String ALL_LEAVES_CARD = "allLeaves";
 
@@ -60,6 +85,8 @@ public class MultiSplitPane extends JPanel
     protected Component allLeavesRoot;
     protected final Set<Component> leaves;
     protected final Set<Component> leavesUnmod;
+
+    protected final Set<MultiSplitPaneListener> listeners;
 
 
     public MultiSplitPane( int gapSize )
@@ -83,6 +110,18 @@ public class MultiSplitPane extends JPanel
         this.allLeavesRoot = null;
         this.leaves = new LinkedHashSet<>( );
         this.leavesUnmod = unmodifiableSet( leaves );
+
+        this.listeners = new LinkedHashSet<>( );
+    }
+
+    public void addListener( MultiSplitPaneListener listener )
+    {
+        listeners.add( listener );
+    }
+
+    public void removeListener( MultiSplitPaneListener listener )
+    {
+        listeners.remove( listener );
     }
 
     public void addInitialLeaf( Component c )
@@ -96,6 +135,11 @@ public class MultiSplitPane extends JPanel
 
         validate( );
         repaint( );
+
+        for ( MultiSplitPaneListener listener : listeners )
+        {
+            listener.addedLeaf( c );
+        }
     }
 
     public void addEdgeLeaf( Component c, Side edgeOfPane )
@@ -127,7 +171,17 @@ public class MultiSplitPane extends JPanel
         boolean arrangeVertically = ( sideOfNeighbor == TOP || sideOfNeighbor == BOTTOM );
         boolean newIsChildA = ( sideOfNeighbor == LEFT || sideOfNeighbor == TOP );
         double splitFrac = ( newIsChildA ? extentFrac : 1 - extentFrac );
-        SplitPane newSplitPane = new SplitPane( arrangeVertically, splitFrac, gapSize );
+        final SplitPane newSplitPane = new SplitPane( arrangeVertically, splitFrac, gapSize );
+        newSplitPane.addListener( new SplitPaneListener( )
+        {
+            public void movedDivider( )
+            {
+                for ( MultiSplitPaneListener listener : listeners )
+                {
+                    listener.movedDivider( newSplitPane );
+                }
+            }
+        } );
 
         if ( neighbor == maximizedLeaf )
         {
@@ -155,6 +209,11 @@ public class MultiSplitPane extends JPanel
 
         validate( );
         repaint( );
+
+        for ( MultiSplitPaneListener listener : listeners )
+        {
+            listener.addedLeaf( c );
+        }
     }
 
     public int numLeaves( )
@@ -245,6 +304,11 @@ public class MultiSplitPane extends JPanel
 
         validate( );
         repaint( );
+
+        for ( MultiSplitPaneListener listener : listeners )
+        {
+            listener.removedLeaf( c );
+        }
     }
 
     public Component getMaximizedLeaf( )
@@ -284,6 +348,11 @@ public class MultiSplitPane extends JPanel
         layout.show( this, MAXIMIZED_LEAF_CARD );
         validate( );
         repaint( );
+
+        for ( MultiSplitPaneListener listener : listeners )
+        {
+            listener.maximizedLeaf( c );
+        }
     }
 
     public void unmaximizeLeaf( )
@@ -306,22 +375,52 @@ public class MultiSplitPane extends JPanel
             parent.add( maximizedLeaf, constraints );
         }
 
+        Component c = maximizedLeaf;
         this.maximizedLeaf = null;
 
         layout.show( this, ALL_LEAVES_CARD );
         validate( );
         repaint( );
+
+        for ( MultiSplitPaneListener listener : listeners )
+        {
+            listener.unmaximizedLeaf( c );
+        }
     }
 
 
     // Snapshots
     //
 
+
+    protected void attachSplitPaneListeners( Component c )
+    {
+        if ( c instanceof SplitPane )
+        {
+            final SplitPane splitPane = ( SplitPane ) c;
+            splitPane.addListener( new SplitPaneListener( )
+            {
+                public void movedDivider( )
+                {
+                    for ( MultiSplitPaneListener listener : listeners )
+                    {
+                        listener.movedDivider( splitPane );
+                    }
+                }
+            } );
+
+            attachSplitPaneListeners( splitPane.getChildA( ) );
+            attachSplitPaneListeners( splitPane.getChildB( ) );
+        }
+    }
+
+
     public void restore( Node rootNode )
     {
         if ( allLeavesRoot != null || !leaves.isEmpty( ) ) throw new RuntimeException( "At least one leaf already exists" );
 
         Component newRoot = toComponentTree( rootNode, this.leaves );
+        attachSplitPaneListeners( newRoot );
 
         allLeavesCard.add( newRoot );
         this.allLeavesRoot = newRoot;
@@ -334,6 +433,11 @@ public class MultiSplitPane extends JPanel
 
         validate( );
         repaint( );
+
+        for ( MultiSplitPaneListener listener : listeners )
+        {
+            listener.restoredTree( );
+        }
     }
 
     protected Component findMaximized( Node node )
