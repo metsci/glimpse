@@ -99,7 +99,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
     public void autoAdjustAxisBounds( Axis2D axis )
     {
         axis.getAxisX( ).setMin( minX );
-        axis.getAxisX( ).setMax( maxX );
+        axis.getAxisX( ).setMax( maxX + getBinSize() );
         axis.getAxisY( ).setMin( minY );
         axis.getAxisY( ).setMax( maxY );
     }
