@@ -55,10 +55,11 @@ public class HistogramPainter extends GlimpseDataPainter2D
 
     protected float[] barColor = new float[] { 1.0f, 0.0f, 0.0f, 0.6f };
 
-    protected int dataSize = 0;
     protected int[] bufferHandle = null;
     protected FloatBuffer dataBuffer = null;
     protected ReentrantLock dataBufferLock = null;
+
+    protected volatile int dataSize = 0;
     protected volatile boolean newData = false;
     protected volatile boolean bufferInitialized = false;
 
@@ -74,7 +75,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
 
     public HistogramPainter( boolean asDensity )
     {
-        dataBufferLock = new ReentrantLock( );
+        this.dataBufferLock = new ReentrantLock( );
         this.asDensity = asDensity;
     }
     
@@ -213,9 +214,10 @@ public class HistogramPainter extends GlimpseDataPainter2D
         dataBufferLock.lock( );
         try
         {
+            newData = true;
+            
             this.binSize = binSize;
 
-            
             minY = 0;
             maxY = 0;
 
@@ -249,8 +251,6 @@ public class HistogramPainter extends GlimpseDataPainter2D
                 dataBuffer.put( bin + this.binSize ).put( freq );
                 dataBuffer.put( bin + this.binSize ).put( 0 );
             }
-
-            newData = true;
         }
         finally
         {
@@ -346,13 +346,17 @@ public class HistogramPainter extends GlimpseDataPainter2D
 
         gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
+        int dataSizeTemp = dataSize;
+        
         if ( newData )
         {
             dataBufferLock.lock( );
             try
             {
+                dataSizeTemp = dataSize;
+                
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * FLOATS_PER_BAR * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSizeTemp * FLOATS_PER_BAR * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 
                 glHandleError( gl );
 
@@ -370,6 +374,6 @@ public class HistogramPainter extends GlimpseDataPainter2D
 
         gl.glColor4fv( barColor, 0 );
 
-        gl.glDrawArrays( GL2.GL_QUADS, 0, dataSize * 4 );
+        gl.glDrawArrays( GL2.GL_QUADS, 0, dataSizeTemp * 4 );
     }
 }
