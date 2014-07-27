@@ -30,6 +30,9 @@ import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
 import static java.lang.Math.max;
 import static javax.swing.BorderFactory.createCompoundBorder;
 import static javax.swing.BorderFactory.createEmptyBorder;
@@ -105,7 +108,7 @@ public class TileImpl extends Tile
             // Add extra space on top and right, because text is right up against the edge
             label.setBorder( createEmptyBorder( 2, lineThickness + labelPadding, 0, labelPadding + 2 ) );
 
-            add( label, BorderLayout.CENTER );
+            add( label, CENTER );
         }
 
         public void setSelected( boolean selected )
@@ -405,7 +408,7 @@ public class TileImpl extends Tile
                     else
                     {
                         viewBarHolder.setVisible( false );
-                        viewCard.add( viewBar, BorderLayout.NORTH );
+                        viewCard.add( viewBar, NORTH );
                     }
                 }
 
@@ -440,8 +443,8 @@ public class TileImpl extends Tile
 
 
         setLayout( new BorderLayout( ) );
-        add( topBar, BorderLayout.NORTH );
-        add( cardPanel, BorderLayout.CENTER );
+        add( topBar, NORTH );
+        add( cardPanel, CENTER );
 
         this.listeners = new LinkedHashSet<>( );
     }
