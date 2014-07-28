@@ -146,14 +146,14 @@ public class SimpleDockingExample
 
         final View[] views =
         {
-            new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-            new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-            new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-            new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-            new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-            new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-            new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-            new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar )
+            new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
+            new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
+            new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
+            new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
+            new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
+            new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
+            new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
+            new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar )
         };
 
 

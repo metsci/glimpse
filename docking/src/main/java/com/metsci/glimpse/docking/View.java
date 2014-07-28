@@ -35,35 +35,42 @@ public class View
 {
 
     public final String viewId;
-    public final String title;
-    public final Icon icon;
-    public final String tooltip;
     public final Component component;
+    public final String title;
+    public final boolean closeable;
+    public final String tooltip;
+    public final Icon icon;
     public final JToolBar toolbar;
 
 
     public View( String viewId, Component component, String title )
     {
-        this( viewId, component, title, null, null, null );
+        this( viewId, component, title, false, null, null, null );
     }
 
-    public View( String viewId, Component component, String title, String tooltip )
+    public View( String viewId, Component component, String title, boolean closeable )
     {
-        this( viewId, component, title, tooltip, null, null );
+        this( viewId, component, title, closeable, null, null, null );
     }
 
-    public View( String viewId, Component component, String title, String tooltip, Icon icon )
+    public View( String viewId, Component component, String title, boolean closeable, String tooltip )
     {
-        this( viewId, component, title, tooltip, icon, null );
+        this( viewId, component, title, closeable, tooltip, null, null );
     }
 
-    public View( String viewId, Component component, String title, String tooltip, Icon icon, JToolBar toolbar )
+    public View( String viewId, Component component, String title, boolean closeable, String tooltip, Icon icon )
+    {
+        this( viewId, component, title, closeable, tooltip, icon, null );
+    }
+
+    public View( String viewId, Component component, String title, boolean closeable, String tooltip, Icon icon, JToolBar toolbar )
     {
         this.viewId = viewId;
-        this.title = title;
-        this.icon = icon;
-        this.tooltip = tooltip;
         this.component = component;
+        this.title = title;
+        this.closeable = closeable;
+        this.tooltip = tooltip;
+        this.icon = icon;
         this.toolbar = toolbar;
     }
 

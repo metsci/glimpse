@@ -94,8 +94,8 @@ public class GlimpseDockingExample
 
         final View[] views =
         {
-            new View( "aView", aCanvas, "View A", null, requireIcon( "icons/ViewA.png" ) ),
-            new View( "bView", bCanvas, "View B", null, requireIcon( "icons/ViewB.png" ) )
+            new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ),
+            new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) )
         };
 
 

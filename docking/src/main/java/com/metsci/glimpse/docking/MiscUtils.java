@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
@@ -111,6 +112,13 @@ public class MiscUtils
     public static Border createEmptyBorder( int size )
     {
         return BorderFactory.createEmptyBorder( size, size, size, size );
+    }
+
+    public static Box createVerticalBox( Component... cs )
+    {
+        Box box = Box.createVerticalBox( );
+        for ( Component c : cs ) box.add( c );
+        return box;
     }
 
     public static int iround( double d )

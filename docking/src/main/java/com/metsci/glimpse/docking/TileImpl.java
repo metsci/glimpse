@@ -28,6 +28,7 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.BorderLayout.CENTER;
@@ -37,6 +38,7 @@ import static java.lang.Math.max;
 import static javax.swing.BorderFactory.createCompoundBorder;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.BorderFactory.createMatteBorder;
+import static javax.swing.Box.createVerticalGlue;
 import static javax.swing.SwingConstants.LEFT;
 
 import java.awt.BasicStroke;
@@ -64,6 +66,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -88,6 +93,10 @@ public class TileImpl extends Tile
         protected final Color selectedTextColor = theme.selectedTextColor;
         protected final Color unselectedTextColor = theme.unselectedTextColor;
 
+        public final ImageIcon closeIcon = theme.closeViewIcon;
+        public final ImageIcon closeHoveredIcon = theme.closeViewHoveredIcon;
+        public final ImageIcon closePressedIcon = theme.closeViewPressedIcon;
+
         protected final View view;
         protected boolean selected;
         protected final JLabel label;
@@ -109,6 +118,22 @@ public class TileImpl extends Tile
             label.setBorder( createEmptyBorder( 2, lineThickness + labelPadding, 0, labelPadding + 2 ) );
 
             add( label, CENTER );
+
+            if ( view.closeable )
+            {
+                JButton closeButton = new JButton( );
+                closeButton.setOpaque( false );
+                closeButton.setBorder( createEmptyBorder( 2, 0, 0, lineThickness + labelPadding ) );
+
+                closeButton.setIcon( closeIcon );
+                closeButton.setRolloverIcon( closeHoveredIcon );
+                closeButton.setPressedIcon( closePressedIcon );
+
+                // XXX: closeButton action
+
+                Box closeParent = createVerticalBox( createVerticalGlue( ), closeButton, createVerticalGlue( ) );
+                add( closeParent, EAST );
+            }
         }
 
         public void setSelected( boolean selected )

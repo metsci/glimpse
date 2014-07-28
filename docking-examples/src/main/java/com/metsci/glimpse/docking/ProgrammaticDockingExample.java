@@ -136,14 +136,14 @@ public class ProgrammaticDockingExample
         // Views
         //
 
-        final View aView = new View( "aView", aPanel, "View A", null, requireIcon( "icons/ViewA.png" ), aToolbar );
-        final View bView = new View( "bView", bPanel, "View B", null, requireIcon( "icons/ViewB.png" ), bToolbar );
-        final View cView = new View( "cView", cPanel, "View C", null, requireIcon( "icons/ViewC.png" ), cToolbar );
-        final View dView = new View( "dView", dPanel, "View D", null, requireIcon( "icons/ViewD.png" ), dToolbar );
-        final View eView = new View( "eView", ePanel, "View E", null, requireIcon( "icons/ViewE.png" ), eToolbar );
-        final View fView = new View( "fView", fPanel, "View F", null, requireIcon( "icons/ViewF.png" ), fToolbar );
-        final View gView = new View( "gView", gPanel, "View G", null, requireIcon( "icons/ViewG.png" ), gToolbar );
-        final View hView = new View( "hView", hPanel, "View H", null, requireIcon( "icons/ViewH.png" ), hToolbar );
+        final View aView = new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar );
+        final View bView = new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar );
+        final View cView = new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar );
+        final View dView = new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar );
+        final View eView = new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar );
+        final View fView = new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar );
+        final View gView = new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar );
+        final View hView = new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar );
 
 
         // Certain components are picky about being added to a frame from the Swing thread

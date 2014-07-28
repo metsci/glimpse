@@ -68,6 +68,10 @@ public class DockingThemes
         public final ImageIcon unmaximizeIcon;
         public final ImageIcon optionsIcon;
 
+        public final ImageIcon closeViewIcon;
+        public final ImageIcon closeViewHoveredIcon;
+        public final ImageIcon closeViewPressedIcon;
+
 
         public DockingTheme( int dividerSize,
 
@@ -86,7 +90,11 @@ public class DockingThemes
 
                              ImageIcon maximizeIcon,
                              ImageIcon unmaximizeIcon,
-                             ImageIcon optionsIcon )
+                             ImageIcon optionsIcon,
+
+                             ImageIcon closeViewIcon,
+                             ImageIcon closeViewHoveredIcon,
+                             ImageIcon closeViewPressedIcon )
         {
             this.dividerSize = dividerSize;
 
@@ -106,6 +114,10 @@ public class DockingThemes
             this.maximizeIcon = maximizeIcon;
             this.unmaximizeIcon = unmaximizeIcon;
             this.optionsIcon = optionsIcon;
+
+            this.closeViewIcon = closeViewIcon;
+            this.closeViewHoveredIcon = closeViewHoveredIcon;
+            this.closeViewPressedIcon = closeViewPressedIcon;
         }
 
     }
@@ -128,7 +140,11 @@ public class DockingThemes
 
                                                                              requireIcon( "icons/maximize.gif" ),
                                                                              requireIcon( "icons/unmaximize.gif" ),
-                                                                             requireIcon( "icons/options.gif" ) );
+                                                                             requireIcon( "icons/options.gif" ),
+
+                                                                             requireIcon( "icons/chromium/close.png" ),
+                                                                             requireIcon( "icons/chromium/close_h.png" ),
+                                                                             requireIcon( "icons/chromium/close_p.png" ) );
 
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
@@ -150,7 +166,11 @@ public class DockingThemes
 
                                  defaultDockingTheme.maximizeIcon,
                                  defaultDockingTheme.unmaximizeIcon,
-                                 defaultDockingTheme.optionsIcon );
+                                 defaultDockingTheme.optionsIcon,
+
+                                 defaultDockingTheme.closeViewIcon,
+                                 defaultDockingTheme.closeViewHoveredIcon,
+                                 defaultDockingTheme.closeViewPressedIcon );
     }
 
 
