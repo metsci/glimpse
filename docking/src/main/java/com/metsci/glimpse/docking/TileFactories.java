@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.Box.createVerticalGlue;
 
 import java.awt.AWTEvent;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
@@ -40,6 +44,7 @@ import java.awt.event.MouseWheelEvent;
 import javax.swing.JButton;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
+import com.metsci.glimpse.docking.TileImpl.TabComponentFactory;
 
 public class TileFactories
 {
@@ -77,7 +82,63 @@ public class TileFactories
                 }
             };
 
-            final Tile tile = new TileImpl( theme, maximizeButton );
+
+
+
+            TabComponentFactory tabCornerComponentFactory = new TabComponentFactory( )
+            {
+                public Component createComponent( final Tile tile, final View view )
+                {
+                    if ( view.closeable )
+                    {
+                        JButton closeButton = new JButton( );
+                        closeButton.setOpaque( false );
+                        closeButton.setBorder( createEmptyBorder( 2, 0, 0, theme.lineThickness + theme.labelPadding ) );
+
+                        closeButton.setIcon( theme.closeViewIcon );
+                        closeButton.setRolloverIcon( theme.closeViewHoveredIcon );
+                        closeButton.setPressedIcon( theme.closeViewPressedIcon );
+
+                        closeButton.addActionListener( new ActionListener( )
+                        {
+                            public void actionPerformed( ActionEvent ev )
+                            {
+                                tile.removeView( view );
+
+                                if ( tile.numViews( ) == 0 )
+                                {
+                                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
+                                    docker.removeLeaf( tile );
+
+                                    if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
+                                    {
+                                        DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
+                                        if ( frame != null && frame.getContentPane( ) == docker )
+                                        {
+                                            frame.dispose( );
+                                        }
+                                    }
+                                }
+                            }
+                        } );
+
+                        return createVerticalBox( createVerticalGlue( ), closeButton, createVerticalGlue( ) );
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            };
+
+
+
+
+
+
+
+
+            final Tile tile = new TileImpl( theme, tabCornerComponentFactory, new Component[] { maximizeButton } );
             tileRef[ 0 ] = tile;
 
             dockingGroup.attachListenerTo( tile );

@@ -28,7 +28,6 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.BorderLayout.CENTER;
@@ -38,7 +37,6 @@ import static java.lang.Math.max;
 import static javax.swing.BorderFactory.createCompoundBorder;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.BorderFactory.createMatteBorder;
-import static javax.swing.Box.createVerticalGlue;
 import static javax.swing.SwingConstants.LEFT;
 
 import java.awt.BasicStroke;
@@ -66,9 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.Box;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -80,6 +76,13 @@ import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 
 public class TileImpl extends Tile
 {
+
+
+    public static interface TabComponentFactory
+    {
+        Component createComponent( Tile tile, View view );
+    }
+
 
 
     protected class CustomTab extends JPanel
@@ -119,20 +122,10 @@ public class TileImpl extends Tile
 
             add( label, CENTER );
 
-            if ( view.closeable )
+            Component cornerComponent = tabCornerComponentFactory.createComponent( TileImpl.this, view );
+            if ( cornerComponent != null )
             {
-                JButton closeButton = new JButton( );
-                closeButton.setOpaque( false );
-                closeButton.setBorder( createEmptyBorder( 2, 0, 0, lineThickness + labelPadding ) );
-
-                closeButton.setIcon( closeIcon );
-                closeButton.setRolloverIcon( closeHoveredIcon );
-                closeButton.setPressedIcon( closePressedIcon );
-
-                // XXX: closeButton action
-
-                Box closeParent = createVerticalBox( createVerticalGlue( ), closeButton, createVerticalGlue( ) );
-                add( closeParent, EAST );
+                add( cornerComponent, EAST );
             }
         }
 
@@ -245,6 +238,7 @@ public class TileImpl extends Tile
 
 
     protected final DockingTheme theme;
+    protected final TabComponentFactory tabCornerComponentFactory;
 
     protected final JPanel topBar;
 
@@ -270,13 +264,15 @@ public class TileImpl extends Tile
     protected final Set<TileListener> listeners;
 
 
-    public TileImpl( DockingTheme theme, Component... cornerComponents )
+    public TileImpl( DockingTheme theme, TabComponentFactory tabCornerComponentFactory, Component[] tileCornerComponents )
     {
         this.theme = theme;
         final int lineThickness = theme.lineThickness;
         final int cornerRadius = theme.cornerRadius;
         final int cardPadding = theme.cardPadding;
         final Color lineColor = theme.lineColor;
+
+        this.tabCornerComponentFactory = tabCornerComponentFactory;
 
         this.tabBar = newToolbar( false );
         tabBar.setBorder( null );
@@ -287,7 +283,7 @@ public class TileImpl extends Tile
         overflowBar.add( overflowPopupButton );
 
         this.cornerBar = newToolbar( true );
-        for ( Component c : cornerComponents ) cornerBar.add( c );
+        for ( Component c : tileCornerComponents ) cornerBar.add( c );
 
         this.viewBarHolder = new JPanel( new GridLayout( 1, 1 ) );
 
@@ -575,6 +571,9 @@ public class TileImpl extends Tile
         {
             selectView( views.get( 0 ) );
         }
+
+        validate( );
+        repaint( );
     }
 
     @Override
