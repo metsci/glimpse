@@ -513,7 +513,8 @@ public class DockingGroup
                     String viewId = tile.view( i ).viewId;
                     viewIds.add( viewId );
                 }
-                selectedViewId = tile.selectedView( ).viewId;
+                View selectedView = tile.selectedView( );
+                selectedViewId = ( selectedView == null ? null : selectedView.viewId );
             }
             else
             {
