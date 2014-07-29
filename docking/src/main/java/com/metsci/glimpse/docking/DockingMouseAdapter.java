@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingGroup.pruneEmptyTileAndFrame;
 import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
@@ -139,21 +140,7 @@ public class DockingMouseAdapter extends MouseAdapter
             {
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, tileFactory );
-
-                if ( tile.numViews( ) == 0 )
-                {
-                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-                    docker.removeLeaf( tile );
-
-                    if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
-                    {
-                        DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
-                        if ( frame != null && frame.getContentPane( ) == docker )
-                        {
-                            frame.dispose( );
-                        }
-                    }
-                }
+                pruneEmptyTileAndFrame( dockingGroup, tile );
             }
 
             this.dragging = false;

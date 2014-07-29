@@ -29,6 +29,7 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
+import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static java.util.Arrays.asList;
@@ -103,6 +104,24 @@ public class DockingGroup
         public void disposingAllFrames( DockingGroup group ) { }
         public void disposingFrame( DockingGroup group, DockingFrame frame ) { }
         public void disposedFrame( DockingGroup group, DockingFrame frame ) { }
+    }
+
+    public static void pruneEmptyTileAndFrame( DockingGroup dockingGroup, Tile tile )
+    {
+        if ( tile.numViews( ) == 0 )
+        {
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
+            docker.removeLeaf( tile );
+
+            if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
+            {
+                DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
+                if ( frame != null && frame.getContentPane( ) == docker )
+                {
+                    frame.dispose( );
+                }
+            }
+        }
     }
 
 

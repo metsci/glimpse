@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingGroup.pruneEmptyTileAndFrame;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
@@ -82,9 +83,6 @@ public class TileFactories
                 }
             };
 
-
-
-
             TabComponentFactory tabCornerComponentFactory = new TabComponentFactory( )
             {
                 public Component createComponent( final Tile tile, final View view )
@@ -104,21 +102,7 @@ public class TileFactories
                             public void actionPerformed( ActionEvent ev )
                             {
                                 tile.removeView( view );
-
-                                if ( tile.numViews( ) == 0 )
-                                {
-                                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-                                    docker.removeLeaf( tile );
-
-                                    if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
-                                    {
-                                        DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
-                                        if ( frame != null && frame.getContentPane( ) == docker )
-                                        {
-                                            frame.dispose( );
-                                        }
-                                    }
-                                }
+                                pruneEmptyTileAndFrame( dockingGroup, tile );
                             }
                         } );
 
@@ -130,13 +114,6 @@ public class TileFactories
                     }
                 }
             };
-
-
-
-
-
-
-
 
             final Tile tile = new TileImpl( theme, tabCornerComponentFactory, new Component[] { maximizeButton } );
             tileRef[ 0 ] = tile;
