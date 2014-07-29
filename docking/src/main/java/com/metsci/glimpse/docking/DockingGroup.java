@@ -29,6 +29,7 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
+import static com.metsci.glimpse.docking.DockingUtils.findUncloseableViews;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -42,6 +43,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -187,14 +189,44 @@ public class DockingGroup
 
                     case DISPOSE_CLOSED_FRAME:
                     {
-                        for ( DockingGroupListener listener : listeners )
+                        Set<View> uncloseableViews = findUncloseableViews( frame.docker );
+                        if ( !uncloseableViews.isEmpty( ) && frames.size( ) == 1 )
                         {
-                            listener.disposingFrame( DockingGroup.this, frame );
+                            // Don't dispose frame, since that would close uncloseable views
+                            // XXX: Maybe show an explanatory dialog box?
                         }
+                        else
+                        {
+                            for ( DockingGroupListener listener : listeners )
+                            {
+                                listener.disposingFrame( DockingGroup.this, frame );
+                            }
 
-                        // XXX: If frame has uncloseable views, move them somewhere else
+                            // Relocate orphaned uncloseable views
+                            //
+                            // If we're closing the last frame, then there's no place to move views to.
+                            // However, because of the surrounding if-else, we would only get here if
+                            // there were no uncloseable views, so it all works out.
+                            //
+                            if ( frames.size( ) > 1 )
+                            {
+                                Set<DockingFrame> framesRemaining = new HashSet<>( frames );
+                                framesRemaining.remove( frame );
+                                DockingFrame toFrame = findLargestComponent( framesRemaining );
+                                Tile toTile = findLargestTile( toFrame.docker );
+                                for ( View view : uncloseableViews )
+                                {
+                                    Tile fromTile = getAncestorOfClass( Tile.class, view.component );
+                                    if ( fromTile != null )
+                                    {
+                                        fromTile.removeView( view );
+                                    }
+                                    toTile.addView( view, toTile.numViews( ) );
+                                }
+                            }
 
-                        frame.dispose( );
+                            frame.dispose( );
+                        }
                     }
                     break;
 

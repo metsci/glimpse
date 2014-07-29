@@ -35,6 +35,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -249,6 +251,27 @@ public class DockingUtils
             }
         }
         return largestTile;
+    }
+
+    public static Set<View> findUncloseableViews( MultiSplitPane docker )
+    {
+        Set<View> uncloseableViews = new HashSet<>( );
+        for ( Component c : docker.leaves( ) )
+        {
+            if ( c instanceof Tile )
+            {
+                Tile tile = ( Tile ) c;
+                for ( int i = 0; i < tile.numViews( ); i++ )
+                {
+                    View view = tile.view( i );
+                    if ( !view.closeable )
+                    {
+                        uncloseableViews.add( view );
+                    }
+                }
+            }
+        }
+        return uncloseableViews;
     }
 
     public static void appendViewsToTile( Tile tile, Collection<View> views )
