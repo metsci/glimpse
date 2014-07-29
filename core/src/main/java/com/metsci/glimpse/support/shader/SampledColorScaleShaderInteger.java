@@ -32,16 +32,14 @@ import com.metsci.glimpse.axis.Axis1D;
 
 public class SampledColorScaleShaderInteger extends SampledColorScaleShader
 {
-    /**
-     * @param colorAxis color axis producing events
-     * @param targetTexUnit 2D texture unit which is the target of color-mapping
-     * @param colorTexUnit 1D texture unit containing color-map
-     * @throws IOException if the shader source file cannot be read
-     */
     public SampledColorScaleShaderInteger( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
-        super( "shaders/colormap/sampled_colorscale_shader_integer.fs" );
+        super( colorAxis, targetTexUnit, colorTexUnit );
+    }
 
-        initialize( colorAxis, targetTexUnit, colorTexUnit );
+    @Override
+    protected void addShaders( )
+    {
+        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader_integer.fs" );   
     }
 }

@@ -31,7 +31,6 @@ import java.io.IOException;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -95,7 +94,7 @@ public class RasterNavigationChartExample implements GlimpseLayoutProvider
         try
         {
             SampledColorScaleShaderInteger fragShader = new SampledColorScaleShaderInteger( plot.getAxisZ( ), 0, 1 );
-            painter.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
+            painter.setShaderProgram( fragShader );
 
             data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "data/ENCSample.bsb" ) );
             mercatorProjection = new MercatorProjection( );

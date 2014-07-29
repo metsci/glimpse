@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.examples.animated;
 
+import static java.lang.Math.*;
+
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture2D;
 import com.metsci.glimpse.gl.texture.FloatTexture2D.MutatorFloat2D;
@@ -42,8 +43,6 @@ import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.shader.SampledColorScaleShader;
-
-import static java.lang.Math.*;
 
 /**
  * Demonstrates dynamically updating the data stored in a texture.
@@ -123,7 +122,7 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
             e.printStackTrace( );
             throw new RuntimeException( e );
         }
-        painter.setPipeline( new Pipeline( "colormap", null, null, shader ) );
+        painter.setShaderProgram( shader );
 
         // setup a thread that will mutate the target texture at regular intervals
         new Thread( new Runnable( )

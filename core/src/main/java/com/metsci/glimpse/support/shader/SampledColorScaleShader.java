@@ -26,18 +26,13 @@
  */
 package com.metsci.glimpse.support.shader;
 
-import static com.metsci.glimpse.gl.shader.ShaderType.*;
-
 import java.io.IOException;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.gl.shader.Shader;
-import com.metsci.glimpse.gl.shader.ShaderArg;
-import com.metsci.glimpse.gl.shader.ShaderSource;
-import com.metsci.glimpse.util.io.StreamOpener;
+import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 
 /**
  * A shader which colors a 2D data texture using values sampled from a color
@@ -46,14 +41,14 @@ import com.metsci.glimpse.util.io.StreamOpener;
  * @author ulman
  *
  */
-public class SampledColorScaleShader extends Shader implements AxisListener1D
+public class SampledColorScaleShader extends GlimpseShaderProgram implements AxisListener1D
 {
-    private ShaderArg dataMin;
-    private ShaderArg dataMax;
+    private GLUniformData dataMin;
+    private GLUniformData dataMax;
 
-    private ShaderArg alpha;
-    private ShaderArg dataTexUnit;
-    private ShaderArg colorTexUnit;
+    private GLUniformData alpha;
+    private GLUniformData dataTexUnit;
+    private GLUniformData colorTexUnit;
 
     /**
      * @param colorAxis color axis producing events
@@ -63,89 +58,56 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
      */
     public SampledColorScaleShader( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
-        super( "sampled_colorscale_shader", fragment, readSource( "shaders/colormap/sampled_colorscale_shader.fs" ) );
-
         initialize( colorAxis, targetTexUnit, colorTexUnit );
     }
-
-    protected SampledColorScaleShader( String source ) throws IOException
+    
+    protected void addShaders( )
     {
-        super( "sampled_colorscale_shader", fragment, readSource( source ) );
+        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader.fs" );   
     }
-
+    
     protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
+        this.addShaders( );
+        
+        this.dataMin = this.addUniformData( new GLUniformData( "dataMin", getMin( colorAxis ) ) );
+        this.dataMax = this.addUniformData( new GLUniformData( "dataMax", getMax( colorAxis ) ) );
+        this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
+        this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", targetTexUnit ) );
+        this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
+
         colorAxis.addAxisListener( this );
-
-        this.dataMin = getArg( "dataMin" );
-        this.dataMin.setValue( getMin( colorAxis ) );
-
-        this.dataMax = getArg( "dataMax" );
-        this.dataMax.setValue( getMax( colorAxis ) );
-
-        this.alpha = getArg( "alpha" );
-        this.alpha.setValue( 1f );
-
-        this.dataTexUnit = getArg( "datatex" );
-        this.dataTexUnit.setValue( targetTexUnit );
-
-        this.colorTexUnit = getArg( "colortex" );
-        this.colorTexUnit.setValue( colorTexUnit );
-    }
-
-    private final static ShaderSource readSource( String source ) throws IOException
-    {
-        return new ShaderSource( source, StreamOpener.fileThenResource );
     }
 
     public void setAlpha( float alpha )
     {
-        this.alpha.setValue( alpha );
-    }
-
-    @Override
-    public boolean preLink( GL gl, int glProgramHandle )
-    {
-        // empty
-        return true;
-    }
-
-    @Override
-    public void preDisplay( GL gl )
-    {
-        // empty
-    }
-
-    @Override
-    public void postDisplay( GL gl )
-    {
-        // empty
+        this.alpha.setData( alpha );
     }
 
     @Override
     public void axisUpdated( Axis1D axis )
     {
-        dataMin.setValue( getMin( axis ) );
-        dataMax.setValue( getMax( axis ) );
+        dataMin.setData( getMin( axis ) );
+        dataMax.setData( getMax( axis ) );
     }
 
     public void setTargetTexUnit( int unit )
     {
-        dataTexUnit.setValue( unit );
+        dataTexUnit.setData( unit );
     }
 
     public void setColorTexUnit( int unit )
     {
-        colorTexUnit.setValue( unit );
+        colorTexUnit.setData( unit );
     }
 
-    protected double getMin( Axis1D axis )
+    protected float getMin( Axis1D axis )
     {
-        return axis.getMin( );
+        return ( float ) axis.getMin( );
     }
 
-    protected double getMax( Axis1D axis )
+    protected float getMax( Axis1D axis )
     {
-        return axis.getMax( );
+        return ( float ) axis.getMax( );
     }
 }

@@ -28,7 +28,6 @@ package com.metsci.glimpse.examples.shader;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -68,11 +67,8 @@ public class ShadedTexturePainterExample implements GlimpseLayoutProvider
         // create a shader which colors a 2D texture according to a 1D color map
         SampledColorScaleShader shader = new SampledColorScaleShader( plot.getAxisZ( ), 0, 1 );
 
-        // create a pipeline to contain the shader (the pipeline could also include vertex and geometry shaders)
-        Pipeline pipeline = new Pipeline( "colormap", null, null, shader );
-
         // associated the pipeline with the painter
-        painter.setPipeline( pipeline );
+        painter.setShaderProgram( shader );
 
         // generate some data to display
         double[][] data = HeatMapExample.generateData( 1000, 1000 );

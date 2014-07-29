@@ -35,12 +35,17 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
@@ -107,6 +112,35 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         EventPlotInfo events2 = plot.createEventPlot( "event-2" );
         EventPlotInfo events3 = plot.createEventPlot( "event-3" );
 
+        GlimpseLayout overlay = new GlimpseLayout( ); 
+        overlay.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getRed( ) ) );
+        overlay.setEventConsumer( false );
+        
+        events1.getLayout( ).addLayout( overlay );
+        
+        overlay.setLayoutData( "pos container.x container.y container.x2 container.y2" );
+        
+        overlay.addGlimpseMouseListener( new GlimpseMouseAdapter( )
+        {
+            @Override
+            public void mousePressed( GlimpseMouseEvent event )
+            {
+                System.out.println( "TOP" );
+                
+                if ( Math.random( ) < .5 ) event.setHandled( true );
+            }
+        } );
+        
+        events1.getLayout( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
+        {
+            @Override
+            public void mousePressed( GlimpseMouseEvent event )
+            {
+                System.out.println( "BOTTOM" );
+            }
+        } );
+        
+        
         // set the text label displayed to the left of each plot
         events1.setLabelText( "Snail Schedule" );
         events2.setLabelText( "Holidays" );
@@ -288,6 +322,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
                 }
             }
         } );
+        
+        
+        plot.setTimeAxisMouseListener( new AxisMouseListener1D( ) );
 
         return plot;
     }

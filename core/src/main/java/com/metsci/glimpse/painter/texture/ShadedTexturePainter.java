@@ -36,7 +36,7 @@ import javax.media.opengl.GLContext;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.shader.Pipeline;
+import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.gl.texture.Texture;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
@@ -59,7 +59,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     protected Set<TextureUnit<DrawableTexture>> drawableTextures;
 
     // the shader pipeline
-    protected Pipeline pipeline;
+    protected GlimpseShaderProgram program;
 
     public ShadedTexturePainter( )
     {
@@ -67,12 +67,12 @@ public class ShadedTexturePainter extends GlimpsePainter2D
         this.drawableTextures = new HashSet<TextureUnit<DrawableTexture>>( );
     }
 
-    public void setPipeline( Pipeline pipeline )
+    public void setShaderProgram( GlimpseShaderProgram program )
     {
         lock.lock( );
         try
         {
-            this.pipeline = pipeline;
+            this.program = program;
         }
         finally
         {
@@ -171,7 +171,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         lock.lock( );
         try
@@ -180,7 +180,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
             gl.glLoadIdentity( );
             gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
 
-            if ( pipeline != null ) pipeline.beginUse( gl );
+            if ( program != null ) program.useProgram( gl, true );
             try
             {
                 for ( TextureUnit<Texture> textureUnit : nonDrawableTextures )
@@ -195,7 +195,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
             }
             finally
             {
-                if ( pipeline != null ) pipeline.endUse( gl );
+                if ( program != null ) program.useProgram( gl, false );
             }
         }
         finally
@@ -261,6 +261,6 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     @Override
     public void dispose( GLContext context )
     {
-        if ( pipeline != null ) pipeline.dispose( context );
+        if ( program != null ) program.dispose( context );
     }
 }

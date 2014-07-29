@@ -27,14 +27,13 @@
 package com.metsci.glimpse.painter.texture;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.shader.SampledColorScaleShader;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
-import java.util.logging.Logger;
 
 /**
  * A simplified facade to {@link ShadedTexturePainter} which applies
@@ -51,7 +50,7 @@ public class HeatMapPainter extends ShadedTexturePainter
     protected FloatTextureProjected2D heatMap;
     protected ColorTexture1D colorScale;
 
-    protected SampledColorScaleShader fragShader;
+    protected SampledColorScaleShader program;
 
     public HeatMapPainter( Axis1D axis )
     {
@@ -67,8 +66,8 @@ public class HeatMapPainter extends ShadedTexturePainter
 
     protected void loadDefaultPipeline( Axis1D axis ) throws IOException
     {
-        this.fragShader = new SampledColorScaleShader( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
-        this.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
+        this.program = new SampledColorScaleShader( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+        this.setShaderProgram( this.program );
     }
 
     public void setAlpha( float alpha )
@@ -76,7 +75,7 @@ public class HeatMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            this.fragShader.setAlpha( alpha );
+            this.program.setAlpha( alpha );
         }
         finally
         {

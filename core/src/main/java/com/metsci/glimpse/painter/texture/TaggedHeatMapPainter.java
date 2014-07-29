@@ -73,7 +73,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     {
         this.fragShader = new TaggedColorScaleShader( (TaggedAxis1D) axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, DEFAULT_DATA_COORD_UNIT, DEFAULT_TEX_COORD_UNIT );
 
-        this.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
+        this.setShaderProgram( this.fragShader );
     }
 
     public void setAlpha( float alpha )
