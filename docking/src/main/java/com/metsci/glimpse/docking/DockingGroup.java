@@ -187,17 +187,13 @@ public class DockingGroup
 
                     case DISPOSE_CLOSED_FRAME:
                     {
-                        if ( frames.size( ) == 1 )
-                        {
-                            for ( DockingGroupListener listener : listeners )
-                            {
-                                listener.disposingAllFrames( DockingGroup.this );
-                            }
-                        }
                         for ( DockingGroupListener listener : listeners )
                         {
                             listener.disposingFrame( DockingGroup.this, frame );
                         }
+
+                        // XXX: If frame has uncloseable views, move them somewhere else
+
                         frame.dispose( );
                     }
                     break;
