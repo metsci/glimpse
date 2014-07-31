@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingGroup.pruneEmptyTileAndFrame;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
@@ -101,8 +100,7 @@ public class TileFactories
                         {
                             public void actionPerformed( ActionEvent ev )
                             {
-                                tile.removeView( view );
-                                pruneEmptyTileAndFrame( dockingGroup, tile );
+                                dockingGroup.closeView( view );
                             }
                         } );
 

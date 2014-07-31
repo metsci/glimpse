@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
-import static com.metsci.glimpse.docking.DockingUtils.findUncloseableViews;
+import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -43,7 +44,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -86,6 +86,9 @@ public class DockingGroup
         void disposingAllFrames( DockingGroup group );
         void disposingFrame( DockingGroup group, DockingFrame frame );
         void disposedFrame( DockingGroup group, DockingFrame frame );
+
+        void closingView( DockingGroup group, View view );
+        void closedView( DockingGroup group, View view );
     }
 
 
@@ -106,6 +109,9 @@ public class DockingGroup
         public void disposingAllFrames( DockingGroup group ) { }
         public void disposingFrame( DockingGroup group, DockingFrame frame ) { }
         public void disposedFrame( DockingGroup group, DockingFrame frame ) { }
+
+        public void closingView( DockingGroup group, View view ) { }
+        public void closedView( DockingGroup group, View view ) { }
     }
 
     public static void pruneEmptyTileAndFrame( DockingGroup dockingGroup, Tile tile )
@@ -115,7 +121,7 @@ public class DockingGroup
             MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
             docker.removeLeaf( tile );
 
-            if ( docker.numLeaves( ) == 0 && dockingGroup.frames.size( ) > 1 )
+            if ( docker.numLeaves( ) == 0 )
             {
                 DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
                 if ( frame != null && frame.getContentPane( ) == docker )
@@ -189,43 +195,36 @@ public class DockingGroup
 
                     case DISPOSE_CLOSED_FRAME:
                     {
-                        Set<View> uncloseableViews = findUncloseableViews( frame.docker );
-                        if ( !uncloseableViews.isEmpty( ) && frames.size( ) == 1 )
-                        {
-                            // Don't dispose frame, since that would close uncloseable views
-                            // XXX: Maybe show an explanatory dialog box?
-                        }
-                        else
+                        Set<View> views = findViews( frame.docker );
+                        if ( allViewsAreCloseable( views ) )
                         {
                             for ( DockingGroupListener listener : listeners )
                             {
                                 listener.disposingFrame( DockingGroup.this, frame );
                             }
 
-                            // Relocate orphaned uncloseable views
-                            //
-                            // If we're closing the last frame, then there's no place to move views to.
-                            // However, because of the surrounding if-else, we would only get here if
-                            // there were no uncloseable views, so it all works out.
-                            //
-                            if ( frames.size( ) > 1 )
+                            for ( View view : views )
                             {
-                                Set<DockingFrame> framesRemaining = new HashSet<>( frames );
-                                framesRemaining.remove( frame );
-                                DockingFrame toFrame = findLargestComponent( framesRemaining );
-                                Tile toTile = findLargestTile( toFrame.docker );
-                                for ( View view : uncloseableViews )
+                                for ( DockingGroupListener listener : listeners )
                                 {
-                                    Tile fromTile = getAncestorOfClass( Tile.class, view.component );
-                                    if ( fromTile != null )
-                                    {
-                                        fromTile.removeView( view );
-                                    }
-                                    toTile.addView( view, toTile.numViews( ) );
+                                    listener.closingView( DockingGroup.this, view );
                                 }
                             }
 
                             frame.dispose( );
+
+                            for ( View view : views )
+                            {
+                                for ( DockingGroupListener listener : listeners )
+                                {
+                                    listener.closedView( DockingGroup.this, view );
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Don't dispose frame, since that would close uncloseable views
+                            // XXX: Maybe show an explanatory dialog box?
                         }
                     }
                     break;
@@ -392,6 +391,25 @@ public class DockingGroup
     public void setLandingIndicator( Rectangle bounds )
     {
         landingIndicator.setBounds( bounds );
+    }
+
+    public void closeView( View view )
+    {
+        Tile tile = getAncestorOfClass( Tile.class, view.component );
+        if ( tile == null ) throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
+
+        for ( DockingGroupListener listener : listeners )
+        {
+            listener.closingView( this, view );
+        }
+
+        tile.removeView( view );
+        pruneEmptyTileAndFrame( this, tile );
+
+        for ( DockingGroupListener listener : listeners )
+        {
+            listener.closedView( this, view );
+        }
     }
 
 
