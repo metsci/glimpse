@@ -49,6 +49,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.MultiSplitPane.MultiSplitPaneListener;
@@ -62,6 +63,9 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroup
 {
+
+    private static final Logger logger = Logger.getLogger( DockingGroup.class.getName( ) );
+
 
     public static enum DockingFrameCloseOperation
     {
@@ -223,8 +227,7 @@ public class DockingGroup
                         }
                         else
                         {
-                            // Don't dispose frame, since that would close uncloseable views
-                            // XXX: Maybe show an explanatory dialog box?
+                            logger.warning( "Refusing to dispose frame, because it contains uncloseable views" );
                         }
                     }
                     break;
