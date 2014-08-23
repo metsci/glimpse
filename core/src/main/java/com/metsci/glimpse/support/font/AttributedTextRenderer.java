@@ -72,14 +72,12 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
-import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
 import jogamp.opengl.Debug;
 
 import com.jogamp.common.nio.Buffers;
-
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.awt.TextureRenderer;
 import com.jogamp.opengl.util.packrect.BackingStoreManager;
@@ -88,6 +86,7 @@ import com.jogamp.opengl.util.packrect.RectVisitor;
 import com.jogamp.opengl.util.packrect.RectanglePacker;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /** Renders bitmapped Java 2D text into an OpenGL window with high
     performance, full Unicode support, and a simple API. Performs
@@ -1033,7 +1032,10 @@ public class AttributedTextRenderer
     {
         dbgFrame = new Frame( "TextRenderer Debug Output" );
 
-        GLCanvas dbgCanvas = new GLCanvas( new GLCapabilities( GLProfile.get( GLProfile.GL2 ) ), null, GLContext.getCurrent( ), null );
+        GLCanvas dbgCanvas = new GLCanvas( new GLCapabilities( GLUtils.getDefaultGLProfile( ) ), null, null );
+
+        dbgCanvas.setSharedContext( GLContext.getCurrent( ) );
+
         dbgCanvas.addGLEventListener( new DebugListener( dbgFrame ) );
         dbgFrame.add( dbgCanvas );
 
