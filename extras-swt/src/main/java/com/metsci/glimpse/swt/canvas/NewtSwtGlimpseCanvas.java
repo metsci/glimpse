@@ -125,7 +125,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         FillLayout layout = new FillLayout( );
         this.setLayout( layout );
 
-        this.glCanvas = new BugFixNewtCanvasSWT( this, options, glWindow );
+        this.glCanvas = new NewtCanvasSWT( this, options, glWindow );
 
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
