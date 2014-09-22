@@ -80,15 +80,43 @@ public class StackTraceUtils
             return "n/a";
         }
 
-        StringBuffer sb = new StringBuffer("called by...");
-        sb.append(String.format("%n"));
+        StringBuilder sb = new StringBuilder("called by...");
         while (index < trace.length)
         {
             StackTraceElement elem = trace[index];
+            sb.append(String.format("%n%s.%s line %s", elem.getClassName(), elem.getMethodName(),
+                                    elem.getLineNumber()));
+            nBack--;
+            if (nBack <= 0)
+            {
+                break;
+            }
 
-            String className = elem.getClassName();
-            sb.append(className + "." + elem.getMethodName() + " line " + elem.getLineNumber());
-            sb.append(String.format("%n"));
+            index++;
+        }
+
+        return sb.toString();
+    }
+
+    public static String stackTraceToString(Exception e, int nBack)
+    {
+        return stackTraceToString(e.getStackTrace(), nBack);
+    }
+
+    public static String stackTraceToString(StackTraceElement[] trace, int nBack)
+    {
+        int index = 0;
+        if (trace.length < (index + 1))
+        {
+            return "n/a";
+        }
+
+        StringBuilder sb = new StringBuilder("trace...");
+        while (index < trace.length)
+        {
+            StackTraceElement elem = trace[index];
+            sb.append(String.format("%n%s.%s line %s", elem.getClassName(), elem.getMethodName(),
+                                    elem.getLineNumber()));
             nBack--;
             if (nBack <= 0)
             {

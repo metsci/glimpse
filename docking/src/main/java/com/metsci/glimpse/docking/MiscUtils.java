@@ -26,23 +26,19 @@
  */
 package com.metsci.glimpse.docking;
 
+import static java.lang.Math.round;
+
 import java.awt.Component;
-import java.awt.Insets;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.ListIterator;
 
-import javax.swing.JComponent;
-
-import org.jdesktop.swingx.MultiSplitLayout.ColSplit;
-import org.jdesktop.swingx.MultiSplitLayout.Node;
-import org.jdesktop.swingx.MultiSplitLayout.RowSplit;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 
 /**
  * These utility methods aren't specific to docking, but are used internally by
@@ -52,11 +48,6 @@ import org.jdesktop.swingx.MultiSplitLayout.RowSplit;
  */
 public class MiscUtils
 {
-
-    public static <E> void addAll( List<E> list, int index, E... elements )
-    {
-        list.addAll( index, Arrays.asList( elements ) );
-    }
 
     public static class IntAndIndex
     {
@@ -86,6 +77,26 @@ public class MiscUtils
         return new IntAndIndex( vBest, iBest );
     }
 
+    @SuppressWarnings( "unchecked" )
+    public static <T> T getAncestorOfClass( Class<? extends T> clazz, Component c )
+    {
+        return ( T ) SwingUtilities.getAncestorOfClass( clazz, c );
+    }
+
+    public static Point convertPointFromScreen( Point pOnScreen, Component c )
+    {
+        Point pInC = new Point( pOnScreen );
+        SwingUtilities.convertPointFromScreen( pInC, c );
+        return pInC;
+    }
+
+    public static Point convertPointToScreen( Component c, Point pInC )
+    {
+        Point pOnScreen = new Point( pInC );
+        SwingUtilities.convertPointToScreen( pOnScreen, c );
+        return pOnScreen;
+    }
+
     public static Point pointRelativeToAncestor( MouseEvent ev, Component ancestor )
     {
         int i = ev.getX( );
@@ -98,77 +109,55 @@ public class MiscUtils
         return new Point( i, j );
     }
 
-    public static Rectangle innerBounds( JComponent c )
+    public static Border createEmptyBorder( int size )
     {
-        Insets insets = c.getInsets( );
-        return new Rectangle( insets.left,
-                              insets.top,
-                              c.getWidth( ) - insets.left - insets.right,
-                              c.getHeight( ) - insets.top - insets.bottom );
+        return BorderFactory.createEmptyBorder( size, size, size, size );
     }
 
-    public static int xAfter( Rectangle r )
+    public static Box createVerticalBox( Component... cs )
     {
-        return r.x + r.width;
-    }
-
-    public static int yAfter( Rectangle r )
-    {
-        return r.y + r.height;
-    }
-
-    public static int xAfter( Node node )
-    {
-        return xAfter( node.getBounds( ) );
-    }
-
-    public static int yAfter( Node node )
-    {
-        return yAfter( node.getBounds( ) );
-    }
-
-    public static RowSplit newRowSplit( Rectangle bounds, Node... children )
-    {
-        RowSplit row = new RowSplit( children );
-        row.setBounds( bounds );
-        return row;
-    }
-
-    public static ColSplit newColSplit( Rectangle bounds, Node... children )
-    {
-        ColSplit col = new ColSplit( children );
-        col.setBounds( bounds );
-        return col;
+        Box box = Box.createVerticalBox( );
+        for ( Component c : cs ) box.add( c );
+        return box;
     }
 
     public static int iround( double d )
     {
-        return Math.round( ( float ) d );
-    }
-
-    public static <E> ArrayList<E> newArrayList( )
-    {
-        return new ArrayList<E>( );
-    }
-
-    public static <E> ArrayList<E> newArrayList( Collection<? extends E> c )
-    {
-        return new ArrayList<E>( c );
-    }
-
-    public static <K,V> HashMap<K,V> newHashMap( )
-    {
-        return new HashMap<K,V>( );
-    }
-
-    public static <K,V> HashMap<K,V> newHashMap( Map<? extends K,? extends V> m )
-    {
-        return new HashMap<K,V>( m );
+        return round( ( float ) d );
     }
 
     public static boolean areEqual( Object a, Object b )
     {
         return ( a == b || ( a != null && a.equals( b ) ) );
+    }
+
+    public static <T> Iterable<T> reversed( final List<T> list )
+    {
+        return new Iterable<T>( )
+        {
+            public Iterator<T> iterator( )
+            {
+                return new Iterator<T>( )
+                {
+                    final ListIterator<T> it = list.listIterator( list.size( ) );
+
+                    public boolean hasNext( )
+                    {
+                        return it.hasPrevious( );
+                    }
+
+                    public T next( )
+                    {
+                        return it.previous( );
+                    }
+
+                    public void remove( )
+                    {
+                        it.remove( );
+                    }
+                };
+            }
+        };
     }
 
 }

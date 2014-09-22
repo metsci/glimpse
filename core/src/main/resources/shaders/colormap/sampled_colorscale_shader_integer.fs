@@ -1,7 +1,7 @@
 // this extension is required in order to use integer textures (isampler2D)
 #extension GL_EXT_gpu_shader4 : require
 
-uniform isampler2D datatex;
+uniform usampler2D datatex;
 uniform sampler1D colortex;
 
 uniform float dataMin;

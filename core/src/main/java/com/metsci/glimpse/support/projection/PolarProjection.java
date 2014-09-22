@@ -34,7 +34,7 @@ import com.metsci.glimpse.util.units.Azimuth;
  *
  * @author ulman
  */
-public class PolarProjection implements Projection, InvertibleProjection
+public class PolarProjection implements InvertibleProjection
 {
     protected double minRange, maxRange, startTheta, endTheta;
 

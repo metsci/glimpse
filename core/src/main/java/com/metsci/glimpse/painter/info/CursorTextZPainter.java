@@ -28,6 +28,7 @@ package com.metsci.glimpse.painter.info;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.support.texture.TextureProjected2D;
 
 /**
  * In addition to displaying the coordinates of the cursor
@@ -40,9 +41,9 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class CursorTextZPainter extends CursorTextPainter
 {
-    protected FloatTextureProjected2D texture;
+    protected TextureProjected2D texture;
 
-    public void setTexture( FloatTextureProjected2D texture )
+    public void setTexture( TextureProjected2D texture )
     {
         this.texture = texture;
     }

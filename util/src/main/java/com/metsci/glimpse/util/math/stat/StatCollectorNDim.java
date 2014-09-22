@@ -320,6 +320,11 @@ public class StatCollectorNDim
 
             correlation = -1.0;
         }
+        else if (Double.isNaN(correlation))
+        {
+            logWarning(logger, "correlation NaN, replacing with 0.0");
+            correlation = 0.0;
+        }
 
         return correlation;
     }

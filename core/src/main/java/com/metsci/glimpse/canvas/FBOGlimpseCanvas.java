@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -36,12 +36,11 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLFBODrawable;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 
-import com.jogamp.opengl.FBObject.TextureAttachment;
+import com.jogamp.opengl.FBObject.Colorbuffer;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
@@ -52,9 +51,12 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 
+// example JOGL FBO Usage: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/acore/TestFBOOffThreadSharedContextMix2DemosES2NEWT.java
 public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
 {
     private static final Logger logger = Logger.getLogger( FBOGlimpseCanvas.class.getName( ) );
+
+    public static final int DEFAULT_TEXTURE_UNIT = 0;
 
     protected GLProfile glProfile;
     protected GLOffscreenAutoDrawable.FBO drawable;
@@ -64,12 +66,12 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         init( glProfile, null, width, height );
     }
-    
+
     public FBOGlimpseCanvas( GLContext glContext, int width, int height )
     {
         init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height );
     }
-    
+
     /**
      * @deprecated Use {@link #FBOGlimpseCanvas(GLContext,int,int)} instead. The context implicitly provides a GLProfile.
      */
@@ -77,7 +79,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         this( GLProfile.get( glProfileName ), glContext, width, height );
     }
-    
+
     /**
      * @deprecated Use {@link #FBOGlimpseCanvas(GLContext,int,int)} instead. The context implicitly provides a GLProfile.
      */
@@ -85,21 +87,21 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         init( glProfile, glContext, width, height );
     }
-    
+
     private void init( GLProfile glProfile, GLContext glContext, int width, int height )
     {
         this.glProfile = glProfile;
         this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( glContext );
         this.drawable.addGLEventListener( createGLEventListener( ) );
-        this.drawable.setSize( width, height );
-        this.drawable.setRealized( true );
+        this.drawable.setSurfaceSize( width, height );
+        this.drawable.setTextureUnit( DEFAULT_TEXTURE_UNIT );
     }
-    
+
     public void resize( int width, int height )
     {
-        this.drawable.setSize( width, height );
+        this.drawable.setSurfaceSize( width, height );
     }
-    
+
     public BufferedImage toBufferedImage( )
     {
         GLContext glContext = this.drawable.getContext( );
@@ -108,7 +110,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
         {
             this.paint( );
             AWTGLReadBufferUtil util = new AWTGLReadBufferUtil( this.glProfile, true );
-            return util.readPixelsToBufferedImage( glContext.getGL( ), true );   
+            return util.readPixelsToBufferedImage( glContext.getGL( ), true );
         }
         finally
         {
@@ -116,17 +118,20 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
         }
     }
 
+    //XXX this link probably no longer relevant to 2.2.0
     // see: http://forum.jogamp.org/querying-textures-bound-to-default-draw-read-framebuffers-td4026564.html
     public int getTextureUnit( )
     {
-        GLFBODrawable delegate = ( GLFBODrawable ) drawable.getDelegatedDrawable( );
-        TextureAttachment texAttach = delegate.getTextureBuffer( GL.GL_FRONT );
-        return texAttach.getName( );
+        int unit = drawable.getColorbuffer( GL.GL_FRONT ).getName( );
+        System.out.println( unit );
+
+        return unit;
     }
 
     public TextureProjected2D getProjectedTexture( )
     {
-        return new ExternalTextureProjected2D( getTextureUnit( ), drawable.getWidth( ), drawable.getHeight( ), false );
+        Colorbuffer b = drawable.getColorbuffer( GL.GL_FRONT );
+        return new ExternalTextureProjected2D( getTextureUnit( ), b.getWidth( ), b.getHeight( ), false );
     }
 
     public Texture getTexture( )
@@ -189,7 +194,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         return this.glProfile;
     }
-    
+
     @Override
     public GLOffscreenAutoDrawable.FBO getGLDrawable( )
     {
@@ -211,7 +216,8 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     @Override
     public GlimpseBounds getTargetBounds( )
     {
-        return new GlimpseBounds( new Dimension( drawable.getWidth( ), drawable.getHeight( ) ) );
+        Colorbuffer b = drawable.getColorbuffer( GL.GL_FRONT );
+        return new GlimpseBounds( new Dimension( b.getWidth( ), b.getHeight( ) ) );
     }
 
     @Override
@@ -219,7 +225,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         return getTargetBounds( );
     }
-    
+
     @Override
     public void destroy( )
     {
@@ -228,24 +234,6 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
             this.drawable.destroy( );
             this.isDestroyed = true;
         }
-    }
-
-    @Override
-    public void disposeAttached( )
-    {
-        this.drawable.invoke( false, new GLRunnable( )
-        {
-            @Override
-            public boolean run( GLAutoDrawable drawable )
-            {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-                
-                return false;
-            }
-        } );
     }
 
     @Override

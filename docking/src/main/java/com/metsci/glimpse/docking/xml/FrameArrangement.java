@@ -24,39 +24,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.xml;
 
-import static com.metsci.glimpse.docking.MiscUtils.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
-public class TileKey
+@XmlType( name="Frame" )
+public class FrameArrangement
 {
 
-    public final String leafId;
+    public int x = 50;
+    public int y = 50;
+    public int width = 800;
+    public int height = 600;
 
-
-    public TileKey( String leafId )
-    {
-        this.leafId = leafId;
-    }
-
-    @Override
-    public int hashCode( )
-    {
-        int prime = 3331;
-        int result = 1;
-        result = prime * result + ( leafId == null ? 0 : leafId.hashCode( ) );
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( o == this ) return true;
-        if ( o == null ) return false;
-        if ( o.getClass( ) != getClass( ) ) return false;
-
-        TileKey other = ( TileKey ) o;
-        return areEqual( other.leafId, leafId );
-    }
+    @XmlElement( name="docker" )
+    public DockerArrangementNode dockerArr = null;
 
 }

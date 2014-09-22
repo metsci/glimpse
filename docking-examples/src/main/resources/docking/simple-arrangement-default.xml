@@ -1,55 +1,45 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Split">
-    <extent>1.0</extent>
-    <isRow>true</isRow>
-    <children>
-        <child xsi:type="Leaf">
-            <extent>330.0</extent>
-            <views>
-                <view>aView</view>
-            </views>
-            <selectedView>aView</selectedView>
-            <isMaximized>false</isMaximized>
-        </child>
-        <child xsi:type="Split">
-            <extent>1245.0</extent>
-            <isRow>false</isRow>
-            <children>
-                <child xsi:type="Split">
-                    <extent>691.0</extent>
-                    <isRow>true</isRow>
-                    <children>
-                        <child xsi:type="Leaf">
-                            <extent>895.0</extent>
-                            <views>
-                                <view>bView</view>
-                                <view>cView</view>
-                            </views>
-                            <selectedView>cView</selectedView>
-                            <isMaximized>false</isMaximized>
-                        </child>
-                        <child xsi:type="Leaf">
-                            <extent>345.0</extent>
-                            <views>
-                                <view>dView</view>
-                                <view>eView</view>
-                                <view>fView</view>
-                            </views>
-                            <selectedView>eView</selectedView>
-                            <isMaximized>false</isMaximized>
-                        </child>
-                    </children>
-                </child>
-                <child xsi:type="Leaf">
-                    <extent>164.0</extent>
+<group xmlns="http://glimpse.metsci.com/docking" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <frames>
+        <frame>
+            <x>100</x>
+            <y>100</y>
+            <width>1024</width>
+            <height>768</height>
+            <docker xsi:type="Split">
+                <arrangeVertically>true</arrangeVertically>
+                <splitFrac>0.75</splitFrac>
+                <childA xsi:type="Split">
+                    <arrangeVertically>false</arrangeVertically>
+                    <splitFrac>0.25</splitFrac>
+                    <childA xsi:type="Tile">
+                        <views>
+                            <view>aView</view>
+                            <view>bView</view>
+                        </views>
+                        <selectedView>aView</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childA>
+                    <childB xsi:type="Tile">
+                        <views>
+                            <view>cView</view>
+                            <view>dView</view>
+                        </views>
+                        <selectedView>cView</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childB>
+                </childA>
+                <childB xsi:type="Tile">
                     <views>
+                        <view>eView</view>
+                        <view>fView</view>
                         <view>gView</view>
                         <view>hView</view>
                     </views>
-                    <selectedView>gView</selectedView>
+                    <selectedView>eView</selectedView>
                     <isMaximized>false</isMaximized>
-                </child>
-            </children>
-        </child>
-    </children>
-</model>
+                </childB>
+            </docker>
+        </frame>
+    </frames>
+</group>

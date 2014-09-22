@@ -28,13 +28,17 @@ package com.metsci.glimpse.canvas;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 
+import jogamp.opengl.GLDrawableImpl;
+
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 
 /**
  * A heavy weight target for Glimpse rendering. Represents
@@ -57,11 +61,6 @@ public interface GlimpseCanvas extends GlimpseTarget
     public GlimpseContext getGlimpseContext( );
 
     public GlimpseBounds getTargetBounds( );
-
-    /**
-     * Clears the canvas, removing all attached GlimpseLayouts.
-     */
-    public void removeAllLayouts( );
 
     /**
      * Lays out any {@link com.metsci.glimpse.layout.GlimpseLayout} instances
@@ -96,6 +95,28 @@ public interface GlimpseCanvas extends GlimpseTarget
      * </code>
      */
     public void dispose( );
+    
+    /**
+     * <p>Calls {@link GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
+     * this GlimpseCanvas is active. Generally this call is equivalent to:</p>
+     * 
+     * <code>
+     *  this.getGLDrawable( ).invoke( false, new GLRunnable( )
+     *  {
+     *      @Override
+     *      public boolean run( GLAutoDrawable drawable )
+     *      {
+     *          painter.dispose( getGlimpseContext( ) );
+     *          return true;
+     *      }
+     *  } );
+     * </code>
+     * 
+     * <p>The GlimpsePainter should be removed from all GlimpseLayouts via
+     * {@link GlimpseLayout#removePainter(GlimpsePainter)} before disposePainter is called. After the GlimpsePainter
+     * is disposed, it will no longer be valid for drawing on any GlimpseCanvas.</p>
+     */
+    public void disposePainter( GlimpsePainter painter );
     
     /**
      * @return whether or not {@code #dispose()} has been successfully called. Once true, this GlimpseCanvas is no longer valid for rendering.

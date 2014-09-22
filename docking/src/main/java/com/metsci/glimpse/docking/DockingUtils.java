@@ -26,13 +26,17 @@
  */
 package com.metsci.glimpse.docking;
 
+import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -44,8 +48,6 @@ import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-import static java.awt.ComponentOrientation.*;
-
 public class DockingUtils
 {
 
@@ -55,11 +57,6 @@ public class DockingUtils
         {
             throw new RuntimeException( "This operation is only allowed on the Swing/AWT event-dispatch thread" );
         }
-    }
-
-    public static interface Supplier<T>
-    {
-        T get( );
     }
 
     public static interface Runnable1<T>
@@ -76,26 +73,6 @@ public class DockingUtils
                 runnable1.run( t );
             }
         };
-    }
-
-    public static <T> T swingGet( final Supplier<T> supplier )
-    {
-        try
-        {
-            final AtomicReference<T> resultRef = new AtomicReference<T>( );
-            SwingUtilities.invokeAndWait( new Runnable( )
-            {
-                public void run( )
-                {
-                    resultRef.set( supplier.get( ) );
-                }
-            } );
-            return resultRef.get( );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( e );
-        }
     }
 
     public static void swingRun( final Runnable runnable )
@@ -242,6 +219,76 @@ public class DockingUtils
         if ( !appDir.canWrite( ) ) throw new RuntimeException( "Do not have write permission on app dir: " + appDir.getAbsolutePath( ) );
 
         return appDir;
+    }
+
+    public static <C extends Component> C findLargestComponent( Collection<C> components )
+    {
+        int largestArea = -1;
+        C largestComponent = null;
+        for ( C c : components )
+        {
+            int area = c.getWidth( ) * c.getHeight( );
+            if ( area > largestArea )
+            {
+                largestComponent = c;
+                largestArea = area;
+            }
+        }
+        return largestComponent;
+    }
+
+    public static Tile findLargestTile( MultiSplitPane docker )
+    {
+        int largestArea = -1;
+        Tile largestTile = null;
+        for ( Component c : docker.leaves( ) )
+        {
+            int area = c.getWidth( ) * c.getHeight( );
+            if ( area > largestArea && c instanceof Tile )
+            {
+                largestTile = ( Tile ) c;
+                largestArea = area;
+            }
+        }
+        return largestTile;
+    }
+
+    public static Set<View> findViews( MultiSplitPane docker )
+    {
+        Set<View> views = new HashSet<>( );
+        for ( Component c : docker.leaves( ) )
+        {
+            if ( c instanceof Tile )
+            {
+                Tile tile = ( Tile ) c;
+                for ( int i = 0; i < tile.numViews( ); i++ )
+                {
+                    views.add( tile.view( i ) );
+                }
+            }
+        }
+        return views;
+    }
+
+    public static boolean allViewsAreCloseable( Iterable<View> views )
+    {
+        for ( View view : views )
+        {
+            if ( !view.closeable )
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void appendViewsToTile( Tile tile, Collection<View> views )
+    {
+        for ( View view : views )
+        {
+            int viewNum = tile.numViews( );
+            tile.addView( view, viewNum );
+        }
     }
 
 }

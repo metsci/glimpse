@@ -41,7 +41,6 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
@@ -60,6 +59,7 @@ import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
@@ -97,6 +97,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwtGlimpseCanvas( Composite parent, GLProfile glProfile, GLContext context, int options )
     {
         super( parent, options );
@@ -106,6 +107,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwtGlimpseCanvas( Composite parent, String profile, GLContext context, int options )
     {
         this( parent, GLProfile.get( profile ), context, options );
@@ -123,7 +125,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         FillLayout layout = new FillLayout( );
         this.setLayout( layout );
 
-        this.glCanvas = new NewtCanvasSWT( this, SWT.NONE, glWindow );
+        this.glCanvas = new NewtCanvasSWT( this, options, glWindow );
 
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
@@ -370,6 +372,13 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     }
     
     @Override
+    public void dispose( )
+    {
+        disposeAttached( );
+        destroy( );
+    }
+    
+    @Override
     public void disposeAttached( )
     {
         this.getGLDrawable( ).invoke( false, new GLRunnable( )
@@ -381,16 +390,27 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-
-                return false;
+                
+                // after layouts are disposed they should not be painted
+                // so remove them from the canvas
+                removeAllLayouts( );
+                
+                return true;
             }
         } );
     }
     
     @Override
-    public void dispose( )
+    public void disposePainter( final GlimpsePainter painter )
     {
-        disposeAttached( );
-        destroy( );
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }
