@@ -24,50 +24,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.platformFixes;
 
-import java.util.Comparator;
-
-import static com.metsci.glimpse.docking.MiscUtils.*;
-
-public class ViewKey
+public class PlatformFixes
 {
 
-    public static final Comparator<ViewKey> alphabeticalOrder = new Comparator<ViewKey>( )
+
+    public static void fixPlatformQuirks( )
     {
-        public int compare( ViewKey a, ViewKey b )
-        {
-            return a.viewId.compareTo( b.viewId );
-        }
-    };
+        // Call the platform-specific function for each platform ... only
+        // the one for the platform we're on will have any effect
 
-
-    public final String viewId;
-
-
-    public ViewKey( String viewId )
-    {
-        this.viewId = viewId;
+        WindowsFixes.fixWindowsQuirks( );
     }
 
-    @Override
-    public int hashCode( )
+
+    public static void applyPlatformFixes( )
     {
-        int prime = 5923;
-        int result = 1;
-        result = prime * result + ( viewId == null ? 0 : viewId.hashCode( ) );
-        return result;
+        // Call the platform-specific function for each platform ... only
+        // the one for the platform we're on will have any effect
+
+        WindowsFixes.applyWindowsFixes( );
     }
 
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( o == this ) return true;
-        if ( o == null ) return false;
-        if ( o.getClass( ) != getClass( ) ) return false;
-
-        ViewKey other = ( ViewKey ) o;
-        return areEqual( other.viewId, viewId );
-    }
 
 }

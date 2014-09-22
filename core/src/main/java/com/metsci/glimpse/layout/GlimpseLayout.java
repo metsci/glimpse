@@ -220,8 +220,12 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             lock.unlock( );
         }
     }
-
-    public void removeAll( )
+    
+    /**
+     * Removes all GlimpseLayouts added via {@code #addLayout(GlimpseLayout)}.
+     */
+    @Override
+    public void removeAllLayouts( )
     {
         lock.lock( );
         try
@@ -234,6 +238,17 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         {
             lock.unlock( );
         }
+    }
+
+    /**
+     * Historical accident caused removeAll() and removeAllLayouts() to both exist
+     * they are both retained for backwards compatibility.
+     * 
+     * @deprecated see {@link #removeAllLayouts()}
+     */
+    public void removeAll( )
+    {
+        removeAllLayouts( );
     }
 
     /**

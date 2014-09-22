@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.event.mouse;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -273,6 +274,6 @@ public class GlimpseMouseEvent
     @Override
     public String toString( )
     {
-        return String.format( "x: %d y: %d wheel: %d click: %d button: %s modifier: %s", x, y, wheelIncrement, clickCount, buttons, modifiers);
+        return String.format( "x: %s y: %s wheel: %f click: %d button: %s modifier: %s", Arrays.toString( x ), Arrays.toString( y ), wheelIncrement, clickCount, buttons, modifiers);
     }
 }

@@ -26,16 +26,19 @@
  */
 package com.metsci.glimpse.examples.basic;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.FloatBuffer;
+import java.nio.ByteBuffer;
+
+import javax.imageio.ImageIO;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.texture.ColorTextureProjected2D;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D;
+import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
+import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
 import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
@@ -78,13 +81,11 @@ public class ImageExample implements GlimpseLayoutProvider
         // set the size of the selection box to 100.0 units
         plot.setSelectionSize( 100.0f );
 
-        // create an OpenGL texture wrapper object
-        final ColorTextureProjected2D texture1 = new ColorTextureProjected2D( 0, 0 );
-
+        BufferedImage img = null;
         // load image data from a file
         try
         {
-            texture1.setData( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) );
+            img = ImageIO.read( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) );
         }
         catch ( IOException e )
         {
@@ -92,26 +93,31 @@ public class ImageExample implements GlimpseLayoutProvider
             throw new RuntimeException( e );
         }
 
+        // create an OpenGL texture wrapper object
+        final RGBATextureProjected2D texture1 = new RGBATextureProjected2D( img );
+
         // set a projection to display the data without distortion
         texture1.setProjection( new FlatProjection( 0, texture1.getDimensionSize( 0 ), 0, texture1.getDimensionSize( 1 ) ) );
 
         // create another an OpenGL texture wrapper object
-        ColorTextureProjected2D texture2 = new ColorTextureProjected2D( 400, 400 );
+        RGBATextureProjected2D texture2 = new RGBATextureProjected2D( 400, 400 );
 
         // add data to the texture directly
-        texture2.mutate( new MutatorFloat2D( )
+        texture2.mutate( new MutatorByte2D( )
         {
+
             @Override
-            public void mutate( FloatBuffer data, int dataSizeX, int dataSizeY )
+            public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
             {
+
                 for ( int y = 0; y < dataSizeY; y++ )
                 {
                     for ( int x = 0; x < dataSizeX; x++ )
                     {
-                        data.put( ( float ) ( ( Math.random( ) * 100 + ( x * y ) ) / ( 420 * 420 ) ) );
-                        data.put( ( float ) 0.2 );
-                        data.put( ( float ) 0.3 + ( y / ( float ) dataSizeY ) * 0.3f );
-                        data.put( ( float ) 0.5 );
+                        data.put( ( byte ) ( 255 * ( Math.random( ) * 100 + ( x * y ) ) / ( 420 * 420 ) ) );
+                        data.put( ( byte ) 50 );
+                        data.put( ( byte ) ( 255 * ( 0.3 + ( y / ( float ) dataSizeY ) * 0.3f ) ) );
+                        data.put( ( byte ) 127 );
                     }
                 }
             }

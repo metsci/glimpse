@@ -373,6 +373,7 @@ public class Pulsator
             }
         };
 
+        t.setDaemon( true );
         t.start( );
     }
 }

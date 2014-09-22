@@ -38,7 +38,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
  *
  * @author ulman
  */
-public class LatLonProjection implements Projection, InvertibleProjection
+public class LatLonProjection implements InvertibleProjection
 {
     public static final double SIZE_DOWNSAMPLE = 0.1;
 

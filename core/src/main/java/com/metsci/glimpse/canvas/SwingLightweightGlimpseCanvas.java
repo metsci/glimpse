@@ -56,6 +56,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.swing.MouseWrapperSwing;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -409,24 +410,6 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         this.isEventGenerator = generate;
     }
-    
-    @Override
-    public void disposeAttached( )
-    {
-        this.getGLDrawable( ).invoke( false, new GLRunnable( )
-        {
-            @Override
-            public boolean run( GLAutoDrawable drawable )
-            {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-
-                return false;
-            }
-        } );
-    }
 
     @Override
     public boolean isDestroyed( )
@@ -456,5 +439,41 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         disposeAttached( );
         destroy( );
+    }
+    
+    @Override
+    public void disposeAttached( )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.dispose( getGlimpseContext( ) );
+                }
+                
+                // after layouts are disposed they should not be painted
+                // so remove them from the canvas
+                removeAllLayouts( );
+                
+                return true;
+            }
+        } );
+    }
+    
+    @Override
+    public void disposePainter( final GlimpsePainter painter )
+    {
+        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        {
+            @Override
+            public boolean run( GLAutoDrawable drawable )
+            {
+                painter.dispose( getGlimpseContext( ) );
+                return true;
+            }
+        } );
     }
 }

@@ -36,6 +36,7 @@ import javax.media.opengl.GL2;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
@@ -107,6 +108,9 @@ public class DefaultEventPainter implements EventPainter
         int height = bounds.getHeight( );
         int width = bounds.getWidth( );
 
+        Orientation orient = plot.getOrientation();
+        int size = orient == Orientation.HORIZONTAL ? height : width;
+        
         int buffer = info.getEventPadding( );
 
         // the size of the event in pixels perpendicular to the time axis
@@ -147,7 +151,7 @@ public class DefaultEventPainter implements EventPainter
 
         // start positions of the next event in this row
         double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : axis.getMax( );
-        int nextStartPixel = nextEvent != null ? axis.valueToScreenPixel( nextStartValue ) : width;
+        int nextStartPixel = nextEvent != null ? axis.valueToScreenPixel( nextStartValue ) : size;
 
         EventSelectionHandler selectionHandler = info.getEventSelectionHandler( );
         boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );

@@ -12,11 +12,17 @@
 
     <dependencies>
 
-		<dependency>
-			<groupId>com.metsci.glimpse</groupId>
-			<artifactId>glimpse-docking</artifactId>
-			<version>${parent.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-platform-fixes</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-docking</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
