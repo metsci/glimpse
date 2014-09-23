@@ -4,9 +4,9 @@ http://help.rubygems.org/discussions/problems/350-installing-rubygems-137-and-je
 
 === To Test Locally
 
-jekyll --server --no-auto --safe --base-url '/glimpse'
+sudo jekyll serve --baseurl '/glimpse'
 
 === Browse
 
-http://localhost:4000/glimpse/index.html
+http://0.0.0.0:4000/glimpse/
 

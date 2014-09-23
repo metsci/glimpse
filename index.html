@@ -28,7 +28,7 @@ title: Home
   {% for post in site.categories.news limit: 1 %}
     <div class="front">
         <div align="right" class="date-container">{{ post.date | date:"%a, %e %b %y" | upcase }}</div>
-        <h2><a href={{ post.url }}>{{ post.title }}</a></h2>
+        <h2><a href=/glimpse{{ post.url }}>{{ post.title }}</a></h2>
         {{ post.content }}
     </div>
   {% endfor %}

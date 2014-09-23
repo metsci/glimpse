@@ -1,0 +1,6 @@
+---
+layout: default
+title: Glimpse 2.1.4 Release
+---
+
+<p>Updated Glimpse to JOGL 2.2.0. Enhanced Glimpse docking frames: tearing views out into separate windows is now supported!</p>

@@ -13,7 +13,7 @@ title: News
         <div align="right" class="date-container">{{ post.date | date:"%A, %e %B %Y" | upcase }}</div>
       {% endif %}
       {% capture prev_post_date %}{{ post.date | date: "%Y%m%d" }}{% endcapture %}
-        <h2><a href={{ post.url }}>{{ post.title }}</a></h2>
+        <h2><a href=/glimpse{{ post.url }}>{{ post.title }}</a></h2>
         {{ post.content }}
     </div>
     {% if forloop.last == false %}
