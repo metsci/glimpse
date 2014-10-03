@@ -28,9 +28,12 @@ package com.metsci.glimpse.canvas;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
+
+import jogamp.opengl.GLDrawableImpl;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -94,13 +97,24 @@ public interface GlimpseCanvas extends GlimpseTarget
     public void dispose( );
     
     /**
-     * <p>Calls {@code GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
-     * this GlimpseCanvas is active.</p>
+     * <p>Calls {@link GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
+     * this GlimpseCanvas is active. Generally this call is equivalent to:</p>
      * 
-     * <p>The GlimpsePainter should not be currently attached to a GlimpseLayout attached to any GlimpseCanvas
-     * (as it will no longer be valid for drawing). However, it should have been attached, at some point, to a
-     * GlimpseLayout attached to this GlimpseCanvas (so that it allocated OpenGL resources on the GLContext
-     * associated with this GlimpseCanvas).</p>
+     * <code>
+     *  this.getGLDrawable( ).invoke( false, new GLRunnable( )
+     *  {
+     *      @Override
+     *      public boolean run( GLAutoDrawable drawable )
+     *      {
+     *          painter.dispose( getGlimpseContext( ) );
+     *          return true;
+     *      }
+     *  } );
+     * </code>
+     * 
+     * <p>The GlimpsePainter should be removed from all GlimpseLayouts via
+     * {@link GlimpseLayout#removePainter(GlimpsePainter)} before disposePainter is called. After the GlimpsePainter
+     * is disposed, it will no longer be valid for drawing on any GlimpseCanvas.</p>
      */
     public void disposePainter( GlimpsePainter painter );
     

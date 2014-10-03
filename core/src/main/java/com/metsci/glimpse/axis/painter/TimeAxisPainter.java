@@ -50,7 +50,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  *
  * @author ulman
  */
-public abstract class TimeAxisPainter extends GlimpsePainter1D
+public abstract class TimeAxisPainter extends NumericAxisPainter
 {
     protected float[] tickColor;
     protected float[] textColor;
@@ -76,6 +76,7 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
 
     public TimeAxisPainter( TimeAxisLabelHandler handler )
     {
+        super(handler);
         this.handler = handler;
 
         this.newFont = FontUtils.getBitstreamVeraSansPlain( 12.0f );

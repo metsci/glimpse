@@ -1207,7 +1207,7 @@ public class Event implements Iterable<Event>
         double insideBoxSpace = remainingSpaceX - buffer;
         double outsideBoxSpace = nextStartPixel - pixelX - buffer;
 
-        switch ( overlapRenderingMode )
+        switch ( getOverlapRenderingMode( ) )
         {
             case Overfull:
                 return insideBoxSpace;
@@ -1221,16 +1221,16 @@ public class Event implements Iterable<Event>
 
     protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return bounds.getWidth( ) + buffer > remainingSpaceX && overlapRenderingMode == Overfull;
+        return bounds.getWidth( ) + buffer > remainingSpaceX && getOverlapRenderingMode( ) == Overfull;
     }
 
     protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
     {
-        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && overlapRenderingMode == Intersecting;
+        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && getOverlapRenderingMode( ) == Intersecting;
     }
 
     protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
     {
-        return ( size + buffer > remainingSpaceX && overlapRenderingMode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && overlapRenderingMode == Intersecting );
+        return ( size + buffer > remainingSpaceX && getOverlapRenderingMode( ) == Overfull ) || ( pixelX + size + buffer > nextStartPixel && getOverlapRenderingMode( ) == Intersecting );
     }
 }

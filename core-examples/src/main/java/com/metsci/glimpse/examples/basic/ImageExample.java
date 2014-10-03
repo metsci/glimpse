@@ -28,9 +28,7 @@ package com.metsci.glimpse.examples.basic;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 
 import javax.imageio.ImageIO;
 
@@ -94,7 +92,7 @@ public class ImageExample implements GlimpseLayoutProvider
             e.printStackTrace( );
             throw new RuntimeException( e );
         }
-        
+
         // create an OpenGL texture wrapper object
         final RGBATextureProjected2D texture1 = new RGBATextureProjected2D( img );
 
@@ -105,10 +103,12 @@ public class ImageExample implements GlimpseLayoutProvider
         RGBATextureProjected2D texture2 = new RGBATextureProjected2D( 400, 400 );
 
         // add data to the texture directly
-        texture2.mutate( new MutatorByte2D() {
-            
+        texture2.mutate( new MutatorByte2D( )
+        {
+
             @Override
-            public void mutate(ByteBuffer data, int dataSizeX, int dataSizeY) {
+            public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
+            {
 
                 for ( int y = 0; y < dataSizeY; y++ )
                 {
@@ -116,12 +116,12 @@ public class ImageExample implements GlimpseLayoutProvider
                     {
                         data.put( ( byte ) ( 255 * ( Math.random( ) * 100 + ( x * y ) ) / ( 420 * 420 ) ) );
                         data.put( ( byte ) 50 );
-                        data.put( ( byte ) ( 255 * (0.3 + ( y / ( float ) dataSizeY ) * 0.3f) ) );
+                        data.put( ( byte ) ( 255 * ( 0.3 + ( y / ( float ) dataSizeY ) * 0.3f ) ) );
                         data.put( ( byte ) 127 );
                     }
                 }
             }
-        });
+        } );
 
         // set a projection to position the texture
         texture2.setProjection( new FlatProjection( -50, 350, -100, 300 ) );

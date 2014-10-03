@@ -62,10 +62,10 @@
 		<concept id="conical_true_flag">
 			<info>
 				<name>
-					<value>True Bearing?</value>
+					<value>Is Resolved Bearing?</value>
 				</name>
 				<description>
-					<value>A flag indicating whether a bearing sensor observation represents a absolute/true (if true) or conical (if false) bearing.</value>
+					<value>A flag indicating whether a bearing sensor observation represents a resolved (absolute) (if true) or unresolved (conical) (if false) bearing.</value>
 				</description>
 			</info>
 			<type ref="boolean" />
