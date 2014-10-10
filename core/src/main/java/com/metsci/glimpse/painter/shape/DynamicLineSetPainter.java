@@ -70,11 +70,10 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     protected float lineWidth;
 
-    // number of floats in pointBuffer
-    protected int bufferSize;
-
     protected GLFloatBuffer colorBuffer;
     protected GLFloatBuffer2D pointBuffer;
+    
+    protected FloatBuffer tempBuffer;
 
     // point id (which can be any object) -> index into pointBuffer
     // good place for Guava BiMap here...
@@ -84,6 +83,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected ReentrantLock lock;
 
     protected IntsArray searchResults;
+    
+    protected int initialSize;
 
     public DynamicLineSetPainter( )
     {
@@ -92,8 +93,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     public DynamicLineSetPainter( int initialSize )
     {
+        this.initialSize = initialSize;
         this.lineWidth = DEFAULT_LINE_WIDTH;
-        this.bufferSize = initialSize;
+        
         this.lock = new ReentrantLock( );
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
@@ -152,8 +154,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         try
         {
             int newPoints = accumulator.getSize( );
-            int currentSize = idMap.size( );
-            if ( bufferSize < currentSize + newPoints )
+            int currentSize = getSize( );
+            if ( getCapacity( ) < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
@@ -189,8 +191,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            int currentSize = idMap.size( );
-            if ( bufferSize < currentSize + 1 )
+            int currentSize = getSize( );
+            if ( getCapacity( ) < currentSize + 1 )
             {
                 growBuffers( currentSize + 1 );
             }
@@ -227,6 +229,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         {
             this.idMap.clear( );
             this.indexMap.clear( );
+            this.pointBuffer = new GLFloatBuffer2D( initialSize, true );
+            this.colorBuffer = new GLFloatBuffer( initialSize, 4 );
         }
         finally
         {
@@ -236,7 +240,17 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     
     public void removeLine( Object id )
     {
-        throw new UnsupportedOperationException( "removeLine() is not yet supported" );
+        lock.lock( );
+        try
+        {
+            int index = getIndex( id, false );
+            if ( index == -1 ) return; // nothing to remove, the point does not exist
+            delete( index );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     @Override
@@ -269,7 +283,114 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
+    
+    protected int getSize( )
+    {
+        return this.idMap.size( );
+    }
+    
+    protected int getCapacity( )
+    {
+        // divide by 2 in order to count lines, not vertices
+        return this.pointBuffer.getMaxVertices( ) / 2;
+    }
+    
+    protected void delete( final int index )
+    {
+        final int size = this.getSize( );
+        final int shift = size - index - 1;
+     
+        // remove the object from the index and id maps
+        Object id = this.indexMap.remove( index );
+        this.idMap.remove( id );
+        
+        //XXX this is a very slow 
+        // shift everything down in the index map
+        for ( int i = index + 1 ; i < size ; i++ )
+        {
+            id = this.indexMap.remove( i );
+            this.indexMap.put( i-1, id );
+            this.idMap.put( id, i-1 );
+        }
+        
+        // special case when we are deleting the last vertex (no data must be shifted)
+        // this is equivalent to shift == 0
+        if ( index == size - 1 )
+        {
+            this.colorBuffer.mutate( new Mutator( )
+            {
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    data.limit( index * length * 2 );
+                }
+            } );
+            
+            this.pointBuffer.mutateIndexed( new IndexedMutator( )
+            {
+                @Override
+                public int getUpdateIndex( )
+                {
+                    return index * 2;
+                }
 
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    data.limit( index * length * 2 );
+                }
+            } );
+        }
+        else
+        {            
+            this.colorBuffer.mutate( new Mutator( )
+            {
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    shift( data, size, index, shift, length * 2 );
+                }
+            } );
+            
+            this.pointBuffer.mutateIndexed( new IndexedMutator( )
+            {
+                @Override
+                public int getUpdateIndex( )
+                {
+                    return index * 2;
+                }
+
+                @Override
+                public void mutate( FloatBuffer data, int length )
+                {
+                    shift( data, size, index, shift, length * 2 );
+                }
+            } );
+        }
+    }
+
+    protected void shift( FloatBuffer data, int size, int index, int shift, int length )
+    {
+        // lazy load tempBuffer (only needed if removePoint is called)
+        if ( tempBuffer == null || tempBuffer.capacity( ) < shift * length )
+        {
+            tempBuffer = FloatBuffer.allocate( shift * length );
+        }
+        
+        // copy the data to shift into tempBuffer
+        tempBuffer.position( 0 );
+        tempBuffer.limit( shift * length );
+        data.position( ( index + 1 ) * length );
+        data.limit( size * length );
+        tempBuffer.put( data );
+        
+        // copy the data back, shifted left by one, to data buffer
+        tempBuffer.rewind( );
+        data.position( index * length );
+        data.limit( ( size - 1 ) * length );
+        data.put( tempBuffer );
+    }
+    
     protected void mutateColor( final int index, final float[] color )
     {
         this.colorBuffer.mutate( new Mutator( )
@@ -297,7 +418,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             @Override
             public int getUpdateIndex( )
             {
-                return index;
+                return index * 2;
             }
 
             @Override
@@ -415,7 +536,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             }
             else
             {
-                throw new IllegalArgumentException( String.format( "Id %s does not exist.", id ) );
+                return -1;
             }
         }
 
@@ -424,10 +545,10 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     protected void growBuffers( int minSize )
     {
-        this.bufferSize = Math.max( ( int ) ( this.bufferSize * GROWTH_FACTOR ), minSize );
+        minSize = Math.max( ( int ) ( getCapacity( ) * GROWTH_FACTOR ), minSize );
 
-        this.pointBuffer.ensureCapacity( bufferSize * 2 );
-        this.colorBuffer.ensureCapacity( bufferSize * 2 );
+        this.pointBuffer.ensureCapacity( minSize * 2 );
+        this.colorBuffer.ensureCapacity( minSize * 2 );
     }
 
     public static class BulkLineAccumulator
