@@ -28,13 +28,16 @@ package com.metsci.glimpse.painter.shape;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL2;
 
+import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
@@ -72,7 +75,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     protected GLFloatBuffer colorBuffer;
     protected GLFloatBuffer2D pointBuffer;
-    
+
     protected FloatBuffer tempBuffer;
 
     // point id (which can be any object) -> index into pointBuffer
@@ -83,7 +86,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected ReentrantLock lock;
 
     protected IntsArray searchResults;
-    
+
     protected int initialSize;
 
     public DynamicLineSetPainter( )
@@ -95,7 +98,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     {
         this.initialSize = initialSize;
         this.lineWidth = DEFAULT_LINE_WIDTH;
-        
+
         this.lock = new ReentrantLock( );
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
@@ -153,12 +156,14 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            int newPoints = accumulator.getSize( );
+            int newPoints = accumulator.getAddedSize( );
             int currentSize = getSize( );
             if ( getCapacity( ) < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
+
+            deletePositions( accumulator );
 
             mutatePositions( accumulator );
         }
@@ -237,7 +242,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
-    
+
     public void removeLine( Object id )
     {
         lock.lock( );
@@ -245,7 +250,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         {
             int index = getIndex( id, false );
             if ( index == -1 ) return; // nothing to remove, the point does not exist
-            delete( index );
+            deletePosition( index );
         }
         finally
         {
@@ -283,114 +288,161 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
-    
+
     protected int getSize( )
     {
         return this.idMap.size( );
     }
-    
+
     protected int getCapacity( )
     {
         // divide by 2 in order to count lines, not vertices
         return this.pointBuffer.getMaxVertices( ) / 2;
     }
-    
-    protected void delete( final int index )
+
+    protected void shift( FloatBuffer data, int length, int size, Set<Integer> indices )
     {
-        final int size = this.getSize( );
-        final int shift = size - index - 1;
-     
-        // remove the object from the index and id maps
-        Object id = this.indexMap.remove( index );
-        this.idMap.remove( id );
-        
-        //XXX this is a very slow 
-        // shift everything down in the index map
-        for ( int i = index + 1 ; i < size ; i++ )
+        int lastDelete = -1;
+        int nextDelete = -1;
+        int deleteCount = 0;
+        for ( Integer index : indices )
         {
-            id = this.indexMap.remove( i );
-            this.indexMap.put( i-1, id );
-            this.idMap.put( id, i-1 );
+            lastDelete = nextDelete;
+            nextDelete = index;
+            deleteCount += 1;
+
+            if ( lastDelete == -1 ) continue;
+
+            for ( int i = lastDelete + 1; i < nextDelete; i++ )
+            {
+                shift( data, index, -deleteCount, length );
+            }
         }
-        
-        // special case when we are deleting the last vertex (no data must be shifted)
-        // this is equivalent to shift == 0
-        if ( index == size - 1 )
+
+        shift( data, size, nextDelete - deleteCount + 1, nextDelete + 1, length );
+    }
+
+    protected void shiftMaps( int lastDelete, int nextDelete, int deleteCount )
+    {
+        for ( int i = lastDelete + 1; i < nextDelete; i++ )
         {
-            this.colorBuffer.mutate( new Mutator( )
-            {
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    data.limit( index * length * 2 );
-                }
-            } );
-            
-            this.pointBuffer.mutateIndexed( new IndexedMutator( )
-            {
-                @Override
-                public int getUpdateIndex( )
-                {
-                    return index * 2;
-                }
-
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    data.limit( index * length * 2 );
-                }
-            } );
-        }
-        else
-        {            
-            this.colorBuffer.mutate( new Mutator( )
-            {
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    shift( data, size, index, shift, length * 2 );
-                }
-            } );
-            
-            this.pointBuffer.mutateIndexed( new IndexedMutator( )
-            {
-                @Override
-                public int getUpdateIndex( )
-                {
-                    return index * 2;
-                }
-
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    shift( data, size, index, shift, length * 2 );
-                }
-            } );
+            Object id = this.indexMap.remove( i );
+            this.indexMap.put( i - deleteCount, id );
+            this.idMap.put( id, i - deleteCount );
         }
     }
 
-    protected void shift( FloatBuffer data, int size, int index, int shift, int length )
+    protected void shift( FloatBuffer data, int index, int offset, int length )
     {
-        // lazy load tempBuffer (only needed if removePoint is called)
-        if ( tempBuffer == null || tempBuffer.capacity( ) < shift * length )
+        for ( int i = 0; i < length; i++ )
         {
-            tempBuffer = FloatBuffer.allocate( shift * length );
+            float value = data.get( index * length + i );
+            data.put( ( index + offset ) * length + i, value );
         }
-        
+    }
+
+    protected void shift( FloatBuffer data, int dataSize, int endIndex, int startIndex, int length )
+    {
+        int shiftCount = dataSize - startIndex;
+        int shiftSize = endIndex - startIndex;
+
+        // lazy load tempBuffer (only needed if removePoint is called)
+        if ( tempBuffer == null || tempBuffer.capacity( ) < shiftCount * length )
+        {
+            tempBuffer = FloatBuffer.allocate( shiftCount * length );
+        }
+
         // copy the data to shift into tempBuffer
         tempBuffer.position( 0 );
-        tempBuffer.limit( shift * length );
-        data.position( ( index + 1 ) * length );
-        data.limit( size * length );
+        tempBuffer.limit( shiftCount * length );
+        data.position( startIndex * length );
+        data.limit( dataSize * length );
         tempBuffer.put( data );
-        
+
         // copy the data back, shifted left by one, to data buffer
         tempBuffer.rewind( );
-        data.position( index * length );
-        data.limit( ( size - 1 ) * length );
+        data.position( endIndex * length );
+        data.limit( ( dataSize - shiftSize ) * length );
         data.put( tempBuffer );
     }
-    
+
+    protected void deletePositions( final Set<Integer> indices )
+    {
+        if ( indices.isEmpty( ) ) return;
+
+        final int size = this.getSize( );
+        final int first = indices.iterator( ).next( );
+
+        for ( Integer index : indices )
+        {
+            Object id = this.indexMap.remove( index );
+            this.idMap.remove( id );
+        }
+
+        //XXX this is inefficient for low index values
+        // shift everything down in the index map
+        int lastDelete = -1;
+        int nextDelete = -1;
+        int deleteCount = 0;
+        for ( Integer index : indices )
+        {
+            lastDelete = nextDelete;
+            nextDelete = index;
+            deleteCount += 1;
+
+            if ( lastDelete == -1 ) continue;
+
+            shiftMaps( lastDelete, nextDelete, deleteCount - 1 );
+        }
+
+        shiftMaps( nextDelete, size, deleteCount );
+
+        this.colorBuffer.mutate( new Mutator( )
+        {
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                shift( data, length * 2, size, indices );
+            }
+        } );
+
+        this.pointBuffer.mutateIndexed( new IndexedMutator( )
+        {
+            @Override
+            public int getUpdateIndex( )
+            {
+                return first * 2;
+            }
+
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                shift( data, length * 2, size, indices );
+            }
+        } );
+    }
+
+    protected void deletePositions( BulkLineAccumulator accum )
+    {
+        Set<Integer> indices = Sets.newTreeSet( );
+
+        for ( Object id : accum.getRemovedIds( ) )
+        {
+            Integer index = this.idMap.get( id );
+            if ( index != null )
+            {
+                indices.add( index );
+            }
+        }
+
+        deletePositions( indices );
+    }
+
+    protected void deletePosition( int index )
+    {
+        deletePositions( Collections.singleton( index ) );
+    }
+
     protected void mutateColor( final int index, final float[] color )
     {
         this.colorBuffer.mutate( new Mutator( )
@@ -450,10 +502,10 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     protected void mutatePositions( BulkLineAccumulator accumulator )
     {
-        final List<Object> ids = accumulator.getIds( );
+        final List<Object> ids = accumulator.getAddedIds( );
         final float[] v = accumulator.getVertices( );
         final int stride = accumulator.getStride( );
-        final int size = accumulator.getSize( );
+        final int size = accumulator.getAddedSize( );
 
         final int[] indexList = new int[size];
         final int minIndex = getIndexArray( ids, indexList );
@@ -553,13 +605,15 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     public static class BulkLineAccumulator
     {
-        List<Object> ids;
-        FloatsArray v;
+        List<Object> removedIds;
+        List<Object> addedIds;
+        FloatsArray addedVertices;
 
         public BulkLineAccumulator( )
         {
-            ids = new ArrayList<Object>( );
-            v = new FloatsArray( );
+            removedIds = new ArrayList<Object>( );
+            addedIds = new ArrayList<Object>( );
+            addedVertices = new FloatsArray( );
         }
 
         public void add( Object id, float x1, float y1, float x2, float y2, float[] color )
@@ -570,24 +624,30 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             }
 
             // grow the FloatsArray if necessary (4 for x/y and 4 for color)
-            if ( v.n == v.a.length )
+            if ( addedVertices.n == addedVertices.a.length )
             {
-                v.ensureCapacity( ( int ) Math.max( v.n + getStride( ), v.n * GROWTH_FACTOR ) );
+                addedVertices.ensureCapacity( ( int ) Math.max( addedVertices.n + getStride( ), addedVertices.n * GROWTH_FACTOR ) );
             }
 
-            ids.add( id );
+            addedIds.add( id );
 
-            v.append( x1 );
-            v.append( y1 );
-            v.append( x2 );
-            v.append( y2 );
-            v.append( color );
-            if ( color.length == 3 ) v.append( 1.0f );
+            addedVertices.append( x1 );
+            addedVertices.append( y1 );
+            addedVertices.append( x2 );
+            addedVertices.append( y2 );
+            addedVertices.append( color );
+
+            if ( color.length == 3 ) addedVertices.append( 1.0f );
         }
 
         public void add( Object id, float x1, float y1, float x2, float y2 )
         {
             add( id, x1, y1, x2, y2, DEFAULT_COLOR );
+        }
+        
+        public void remove( Object id )
+        {
+            removedIds.add( id );
         }
 
         int getStride( )
@@ -595,19 +655,24 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             return 8;
         }
 
-        List<Object> getIds( )
+        List<Object> getRemovedIds( )
         {
-            return ids;
+            return removedIds;
+        }
+
+        List<Object> getAddedIds( )
+        {
+            return addedIds;
         }
 
         float[] getVertices( )
         {
-            return v.a;
+            return addedVertices.a;
         }
 
-        int getSize( )
+        int getAddedSize( )
         {
-            return ids.size( );
+            return addedIds.size( );
         }
     }
 }
