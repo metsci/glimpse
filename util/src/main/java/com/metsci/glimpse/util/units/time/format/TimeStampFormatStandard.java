@@ -70,6 +70,9 @@ import com.metsci.glimpse.util.GeneralUtils;
  *         <td><code>d</code>
  *         <td>Day of month (1-31)
  *     <tr>
+ *         <td><code>j</code>
+ *         <td>Day of year (1-366)
+ *     <tr>
  *         <td><code>H</code>
  *         <td>Hour in day (0-23)
  *     <tr>
@@ -301,6 +304,7 @@ public class TimeStampFormatStandard implements TimeStampFormat
             case 'M': return new NumericMonthField(flags);
             case 'N': return new TextMonthField(flags);
             case 'd': return new DayOfMonthField(flags);
+            case 'j': return new DayOfYearField(flags);
             case 'H': return new Hour24Field(flags);
             case 'm': return new MinuteField(flags);
             case 's': return new FloorSecondField(flags);
@@ -467,6 +471,14 @@ public class TimeStampFormatStandard implements TimeStampFormat
         public DayOfMonthField(String flags)
         {
             super(Calendar.DAY_OF_MONTH, 2, getPadding(flags));
+        }
+    }
+
+    private static class DayOfYearField extends CalendarField
+    {
+        public DayOfYearField(String flags)
+        {
+            super(Calendar.DAY_OF_YEAR, 3, getPadding(flags));
         }
     }
 
