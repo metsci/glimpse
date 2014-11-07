@@ -299,84 +299,13 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         // divide by 2 in order to count lines, not vertices
         return this.pointBuffer.getMaxVertices( ) / 2;
     }
-
-    protected void shift( FloatBuffer data, int length, int size, Set<Integer> indices )
+    
+    protected static void shiftMaps( Map<Object, Integer> idMap, Map<Integer, Object> indexMap, Set<Integer> indices, int size )
     {
-        int lastDelete = -1;
-        int nextDelete = -1;
-        int deleteCount = 0;
         for ( Integer index : indices )
         {
-            lastDelete = nextDelete;
-            nextDelete = index;
-            deleteCount += 1;
-
-            if ( lastDelete == -1 ) continue;
-
-            for ( int i = lastDelete + 1; i < nextDelete; i++ )
-            {
-                shift( data, index, -deleteCount, length );
-            }
-        }
-
-        shift( data, size, nextDelete - deleteCount + 1, nextDelete + 1, length );
-    }
-
-    protected void shiftMaps( int lastDelete, int nextDelete, int deleteCount )
-    {
-        for ( int i = lastDelete + 1; i < nextDelete; i++ )
-        {
-            Object id = this.indexMap.remove( i );
-            this.indexMap.put( i - deleteCount, id );
-            this.idMap.put( id, i - deleteCount );
-        }
-    }
-
-    protected void shift( FloatBuffer data, int index, int offset, int length )
-    {
-        for ( int i = 0; i < length; i++ )
-        {
-            float value = data.get( index * length + i );
-            data.put( ( index + offset ) * length + i, value );
-        }
-    }
-
-    protected void shift( FloatBuffer data, int dataSize, int endIndex, int startIndex, int length )
-    {
-        int shiftCount = dataSize - startIndex;
-        int shiftSize = endIndex - startIndex;
-
-        // lazy load tempBuffer (only needed if removePoint is called)
-        if ( tempBuffer == null || tempBuffer.capacity( ) < shiftCount * length )
-        {
-            tempBuffer = FloatBuffer.allocate( shiftCount * length );
-        }
-
-        // copy the data to shift into tempBuffer
-        tempBuffer.position( 0 );
-        tempBuffer.limit( shiftCount * length );
-        data.position( startIndex * length );
-        data.limit( dataSize * length );
-        tempBuffer.put( data );
-
-        // copy the data back, shifted left by one, to data buffer
-        tempBuffer.rewind( );
-        data.position( endIndex * length );
-        data.limit( ( dataSize - shiftSize ) * length );
-        data.put( tempBuffer );
-    }
-
-    protected void deletePositions( final Set<Integer> indices )
-    {
-        if ( indices.isEmpty( ) ) return;
-
-        final int size = this.getSize( );
-        final int first = indices.iterator( ).next( );
-
-        for ( Integer index : indices )
-        {
-            Object id = this.indexMap.remove( index );
-            this.idMap.remove( id );
+            Object id = indexMap.remove( index );
+            idMap.remove( id );
         }
 
         //XXX this is inefficient for low index values
@@ -392,17 +321,91 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
             if ( lastDelete == -1 ) continue;
 
-            shiftMaps( lastDelete, nextDelete, deleteCount - 1 );
+            shiftMaps( idMap, indexMap, lastDelete, nextDelete, deleteCount - 1 );
         }
 
-        shiftMaps( nextDelete, size, deleteCount );
+        shiftMaps( idMap, indexMap, nextDelete, size, deleteCount );
+    }
+
+    protected static void shiftMaps( Map<Object, Integer> idMap, Map<Integer, Object> indexMap, int lastDelete, int nextDelete, int deleteCount )
+    {
+        for ( int i = lastDelete + 1; i < nextDelete; i++ )
+        {
+            Object id = indexMap.remove( i );
+            indexMap.put( i - deleteCount, id );
+            idMap.put( id, i - deleteCount );
+        }
+    }
+    
+    protected static void shift( FloatBuffer data, FloatBuffer tempBuffer, int length, int size, Set<Integer> indices )
+    {
+        int lastDelete = -1;
+        int nextDelete = -1;
+        int deleteCount = 0;
+        for ( Integer index : indices )
+        {
+            lastDelete = nextDelete;
+            nextDelete = index;
+
+            if ( lastDelete != -1 )
+            {
+                shift( data, tempBuffer, nextDelete-lastDelete-1, lastDelete-deleteCount+1, lastDelete+1, length );
+            }
+            
+            deleteCount += 1;
+        }
+        
+        nextDelete += 1;
+
+        shift( data, tempBuffer, size - nextDelete, nextDelete - deleteCount, nextDelete, length );
+    }
+    
+    /**
+     * @param data buffer to shift
+     * @param shiftCount number of logical indices to shift (each index represents 'length' buffer entries)
+     * @param toIndex the logical index to start copying data to
+     * @param fromIndex the logical index to start copying data from
+     * @param length the number of buffer entries per logical index
+     */
+    protected static void shift( FloatBuffer data, FloatBuffer tempBuffer, int shiftCount, int toIndex, int fromIndex, int length )
+    {
+        if ( shiftCount == 0 || toIndex == fromIndex ) return;
+        
+        // lazy load tempBuffer (only needed if removePoint is called)
+        if ( tempBuffer == null || tempBuffer.capacity( ) < shiftCount * length )
+        {
+            tempBuffer = FloatBuffer.allocate( shiftCount * length );
+        }
+
+        // copy the data to shift into tempBuffer
+        tempBuffer.limit( shiftCount * length );
+        tempBuffer.position( 0 );
+        data.limit( ( fromIndex + shiftCount ) * length );
+        data.position( fromIndex * length );
+        tempBuffer.put( data );
+
+        // copy the data back, shifted left by one, to data buffer
+        tempBuffer.rewind( );
+        data.limit( ( toIndex + shiftCount ) * length );
+        data.position( toIndex * length );
+        data.put( tempBuffer );
+    }
+
+    protected void deletePositions( final Set<Integer> indices )
+    {
+        if ( indices.isEmpty( ) ) return;
+
+        final int size = this.getSize( );
+        final int first = indices.iterator( ).next( );
+
+        shiftMaps( idMap, indexMap, indices, size );
 
         this.colorBuffer.mutate( new Mutator( )
         {
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                shift( data, length * 2, size, indices );
+                shift( data, tempBuffer, length * 2, size, indices );
             }
         } );
 
@@ -417,7 +420,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                shift( data, length * 2, size, indices );
+                shift( data, tempBuffer, length * 2, size, indices );
             }
         } );
     }

@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.painter.shape;
 
+import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.*;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -288,112 +289,24 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         return this.pointBuffer.getMaxVertices( );
     }
     
-    protected void shift( FloatBuffer data, int length, int size, Set<Integer> indices )
-    {
-        int lastDelete = -1;
-        int nextDelete = -1;
-        int deleteCount = 0;
-        for ( Integer index : indices )
-        {
-            lastDelete = nextDelete;
-            nextDelete = index;
-            deleteCount += 1;
-            
-            if ( lastDelete == -1 ) continue;
-            
-            for ( int i = lastDelete + 1 ; i < nextDelete; i++ )
-            {
-                shift( data, index, -deleteCount, length );
-            }
-        }
-        
-        shift( data, size, nextDelete-deleteCount+1, nextDelete+1, length );
-    }
-    
-    protected void shiftMaps( int lastDelete, int nextDelete, int deleteCount )
-    {
-        for ( int i = lastDelete + 1 ; i < nextDelete; i++ )
-        {
-            Object id = this.indexMap.remove( i );
-            this.indexMap.put( i-deleteCount, id );
-            this.idMap.put( id, i-deleteCount );   
-        }
-    }
-    
-    protected void shift( FloatBuffer data, int index, int offset, int length )
-    {
-        for ( int i = 0 ; i < length ; i++ )
-        {
-            float value = data.get( index * length + i );
-            data.put( ( index + offset ) * length + i, value );   
-        }
-    }
-    
-    protected void shift( FloatBuffer data, int dataSize, int endIndex, int startIndex, int length )
-    {
-        int shiftCount = dataSize - startIndex;
-        int shiftSize = endIndex - startIndex;
-        
-        // lazy load tempBuffer (only needed if removePoint is called)
-        if ( tempBuffer == null || tempBuffer.capacity( ) < shiftCount * length )
-        {
-            tempBuffer = FloatBuffer.allocate( shiftCount * length );
-        }
-        
-        // copy the data to shift into tempBuffer
-        tempBuffer.position( 0 );
-        tempBuffer.limit( shiftCount * length );
-        data.position( startIndex * length );
-        data.limit( dataSize * length );
-        tempBuffer.put( data );
-        
-        // copy the data back, shifted left by one, to data buffer
-        tempBuffer.rewind( );
-        data.position( endIndex * length );
-        data.limit( ( dataSize - shiftSize ) * length );
-        data.put( tempBuffer );
-    }
-    
     protected void deletePositions( final Set<Integer> indices )
     {
         if ( indices.isEmpty( ) ) return;
-        
+
         final int size = this.getSize( );
         final int first = indices.iterator( ).next( );
-        
-        for ( Integer index : indices )
-        {
-            Object id = this.indexMap.remove( index );
-            this.idMap.remove( id );
-        }
-        
-        //XXX this is inefficient for low index values
-        // shift everything down in the index map
-        int lastDelete = -1;
-        int nextDelete = -1;
-        int deleteCount = 0;
-        for ( Integer index : indices )
-        {
-            lastDelete = nextDelete;
-            nextDelete = index;
-            deleteCount += 1;
-            
-            if ( lastDelete == -1 ) continue;
-            
-            shiftMaps( lastDelete, nextDelete, deleteCount-1 );
-        }
-        
-        shiftMaps( nextDelete, size, deleteCount );
-    
+
+        shiftMaps( idMap, indexMap, indices, size );
+
         this.colorBuffer.mutate( new Mutator( )
         {
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                shift( data, length, size, indices );
+                shift( data, tempBuffer, length, size, indices );
             }
         } );
-        
+
         this.pointBuffer.mutateIndexed( new IndexedMutator( )
         {
             @Override
@@ -405,7 +318,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                shift( data, length, size, indices );
+                shift( data, tempBuffer, length, size, indices );
             }
         } );
     }
