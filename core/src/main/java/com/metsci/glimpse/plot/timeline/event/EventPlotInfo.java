@@ -107,6 +107,8 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected int defaultIconSize = 0;
     protected boolean useDefaultIconSize = false;
 
+    protected boolean allowDeselectSingleEvent = true;
+
     public EventPlotInfo( TimePlotInfo delegate )
     {
         this( delegate, new TextureAtlas( ) );
@@ -324,7 +326,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     
     protected boolean isDeselectSingleEvent( Event event )
     {
-        if ( selectionHandler.getSelectedEvents( ).size( ) == 1 )
+        if ( allowDeselectSingleEvent && selectionHandler.getSelectedEvents( ).size( ) == 1 )
         {
             Event currentSelection = selectionHandler.getSelectedEvents( ).iterator( ).next( );
             return currentSelection.equals( event );
@@ -627,6 +629,16 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public void setFont( Font font, boolean antialias )
     {
         this.eventPainterManager.setFont( font, antialias );
+    }
+
+    public boolean isAllowDeselectSingleEvent()
+    {
+        return allowDeselectSingleEvent;
+    }
+
+    public void setAllowDeselectSingleEvent(boolean allowDeselectSingleEvent)
+    {
+        this.allowDeselectSingleEvent = allowDeselectSingleEvent;
     }
 
     public Set<Event> getEvents( )
