@@ -59,7 +59,7 @@ public class IntensityMapPainter extends ShadedTexturePainter
         }
         catch ( IOException e )
         {
-            logger.warning( "Unable to load HeatMapPainter shader." );
+            logger.warning( "Unable to load IntensityMapPainter shader." );
         }
     }
 
@@ -103,9 +103,9 @@ public class IntensityMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            this.removeNonDrawableTexture( colorMap );
+            this.removeDrawableTexture( colorMap );
             this.colorMap = texture;
-            this.addNonDrawableTexture( colorMap, 1 );
+            this.addDrawableTexture( colorMap, 1 );
         }
         finally
         {
