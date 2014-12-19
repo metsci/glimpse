@@ -310,8 +310,6 @@ public abstract class TextureProjected2D implements DrawableTexture
                     
                     gl.glEnable( type );
                 }
-
-                GLErrorUtils.logGLError( logger, Level.WARNING, gl, "HERE " + i + " " + multiTextureList );
                 
                 int type = getTextureType( );
                 
