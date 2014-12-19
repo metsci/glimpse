@@ -103,9 +103,9 @@ public class IntensityMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            this.removeDrawableTexture( colorMap );
+            this.removeNonDrawableTexture( colorMap );
             this.colorMap = texture;
-            this.addDrawableTexture( colorMap, 1 );
+            this.addNonDrawableTexture( colorMap, 1 );
         }
         finally
         {

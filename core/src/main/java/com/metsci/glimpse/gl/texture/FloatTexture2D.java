@@ -29,12 +29,14 @@ package com.metsci.glimpse.gl.texture;
 import static java.util.logging.Level.WARNING;
 
 import java.nio.FloatBuffer;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
+import com.metsci.glimpse.painter.texture.TextureUnit;
 
 /**
  * A two dimensional texture storing float values.
@@ -62,7 +64,9 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     }
 
     @Override
-    public void draw( GL2 gl, int texUnit )
+    // multiTextureList is ignored because this type of texture does not currently support
+    // multitexturing (but it would be easy to add)
+    public void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
         boolean ready = prepare( gl, texUnit );
 

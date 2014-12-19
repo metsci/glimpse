@@ -26,7 +26,11 @@
  */
 package com.metsci.glimpse.gl.texture;
 
+import java.util.Collection;
+
 import javax.media.opengl.GL2;
+
+import com.metsci.glimpse.painter.texture.TextureUnit;
 
 /**
  * A marker interface indicating that the {@link Texture} is able
@@ -36,5 +40,10 @@ import javax.media.opengl.GL2;
  */
 public interface DrawableTexture extends Texture
 {
-    public abstract void draw( GL2 gl, int texUnit );
+    /**
+     * @param gl OpenGL context for drawing
+     * @param texUnit Texture unit to use while drawing
+     * @param multiTextureList Other textures to activate (and their texture units) for multitexturing purposes
+     */
+    public abstract void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList );
 }

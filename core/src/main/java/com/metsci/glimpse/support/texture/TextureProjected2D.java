@@ -31,7 +31,10 @@ import static java.util.logging.Level.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -40,6 +43,9 @@ import javax.media.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.gl.texture.Texture;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.painter.texture.TextureUnit;
 import com.metsci.glimpse.support.projection.InvertibleProjection;
 import com.metsci.glimpse.support.projection.Projection;
 
@@ -171,6 +177,12 @@ public abstract class TextureProjected2D implements DrawableTexture
     }
 
     @Override
+    public int[] getHandles( )
+    {
+        return textureHandles;
+    }
+
+    @Override
     public void makeDirty( )
     {
         this.dirty = true;
@@ -216,8 +228,6 @@ public abstract class TextureProjected2D implements DrawableTexture
                 allocate_genBuffers( gl );
             }
 
-            gl.glActiveTexture( getGLTextureUnit( texUnit ) );
-
             prepare_glState( gl );
 
             if ( glAllocated && dirty )
@@ -241,35 +251,80 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
     }
 
-    @Override
     public void draw( GL2 gl, int texUnit )
     {
-        boolean ready = prepare( gl, texUnit );
+        draw( gl, texUnit, Collections.<TextureUnit<Texture>> emptyList( ) );
+    }
 
+    @Override
+    public void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    {
+        // prepare our texture
+        boolean ready = prepare( gl, texUnit );
         if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
             return;
         }
 
+        // prepare all the multitextures
+        for ( TextureUnit<Texture> texture : multiTextureList )
+        {
+            ready = texture.prepare( gl );
+
+            if ( !ready )
+            {
+                logger.log( WARNING, "Unable to make ready." );
+                return;
+            }
+        }
+        
         gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
         gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
 
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
         gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
-
+        
         try
         {
             for ( int i = 0; i < numTextures; i++ )
             {
-                gl.glBindTexture( getTextureType( ), textureHandles[i] );
+                // this TexturProjected2D defines the quad bounds to draw, but when
+                // multitexturing we also need to bind the others textures which
+                // the shader will access
+                for ( TextureUnit<Texture> multiTexture : multiTextureList )
+                {
+                    Texture texture = multiTexture.getTexture( );
+                    int[] handles = texture.getHandles( );
+                    int multiTextureUnit = multiTexture.getTextureUnit( );
+                    int type = getGLTextureDim( texture.getNumDimension( ) );
+                    
+                    gl.glActiveTexture( getGLTextureUnit( multiTextureUnit ) );
+                    
+                    // there are two common cases which this is intended to handle:
+                    // 1) the multitexture is a small texture like a colormap which should be the same for each part of the 2D grid texture
+                    // 2) the multitexture is a second 2D grid with the same structure as the first
+                    //
+                    // this doesn't attempt to catch cases where the two 2D grids don't line up -- undefined behavior will result in this case
+                    gl.glBindTexture( type, texture.getHandles( )[ i >= handles.length ? 0 : i ] );
+                    
+                    gl.glEnable( type );
+                }
 
+                GLErrorUtils.logGLError( logger, Level.WARNING, gl, "HERE " + i + " " + multiTextureList );
+                
+                int type = getTextureType( );
+                
+                gl.glActiveTexture( getGLTextureUnit( texUnit ) );
+                gl.glBindTexture( type, textureHandles[i] );                
+                gl.glEnable( type );
+                
                 gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
                 gl.glVertexPointer( floatsPerVertex, GL2.GL_FLOAT, 0, 0 );
-
+                
                 gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, texCoordHandles[i] );
                 gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, 0 );
-
+                
                 int vertexCount = VERTICES_PER_QUAD * texQuadCounts[i];
                 gl.glDrawArrays( GL2.GL_QUADS, 0, vertexCount );
             }
