@@ -26,11 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
@@ -42,23 +42,22 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
  */
 public class EventSelectionHandler
 {
-    protected List<EventSelectionListener> eventListeners;
-    
+    protected Collection<EventSelectionListener> eventListeners;
     protected Set<Event> selectedEvents;
-    protected float[] selectedBorderColor;
-    protected float[] selectedBackgroundColor;
-    protected float selectedBorderThickness = 1.8f;
-    protected boolean highlightSelectedEvents = false;
-    protected boolean clearSelectionOnClick = false;
-    protected boolean allowMouseEventSelection = true;
-    protected boolean allowMultipleEventSelection = true;
-    
+
+    protected volatile float[] selectedBorderColor;
+    protected volatile float[] selectedBackgroundColor;
+    protected volatile float selectedBorderThickness = 1.8f;
+    protected volatile boolean highlightSelectedEvents = false;
+    protected volatile boolean clearSelectionOnClick = false;
+    protected volatile boolean allowMouseEventSelection = true;
+    protected volatile boolean allowMultipleEventSelection = true;
+
     public EventSelectionHandler( )
     {
         this.eventListeners = new CopyOnWriteArrayList<EventSelectionListener>( );
-        this.selectedEvents = new LinkedHashSet<Event>( );
+        this.selectedEvents = new CopyOnWriteArraySet<Event>( );
     }
-    
 
     public void addEventSelectionListener( EventSelectionListener listener )
     {
@@ -69,7 +68,7 @@ public class EventSelectionHandler
     {
         this.eventListeners.remove( listener );
     }
-    
+
     /**
      * If true, multiple events may be selected by holding down the ctrl key while
      * clicking them. Does not restrict programmatic selection in any way.
@@ -78,12 +77,12 @@ public class EventSelectionHandler
     {
         this.allowMultipleEventSelection = allowMultiple;
     }
-    
+
     public boolean isAllowMultipleEventSelection( )
     {
         return this.allowMultipleEventSelection;
     }
-    
+
     /**
      * If true, the set of selected events is cleared when the user clicks
      * on an area of the timeline which contains no events. Otherwise, such
@@ -96,7 +95,7 @@ public class EventSelectionHandler
     {
         this.clearSelectionOnClick = clear;
     }
-    
+
     /**
      * @see EventPlotInfo#setClearSelectionOnClick(boolean)
      */
@@ -104,7 +103,7 @@ public class EventSelectionHandler
     {
         return this.clearSelectionOnClick;
     }
-    
+
     /**
      * <p>If true, Events are automatically selected when users click inside or near
      * them with the mouse (unless they are set as unselectable via
@@ -124,7 +123,7 @@ public class EventSelectionHandler
     {
         this.allowMouseEventSelection = allowSelection;
     }
-    
+
     public boolean isAllowMouseEventSelection( )
     {
         return this.allowMouseEventSelection;
@@ -135,19 +134,23 @@ public class EventSelectionHandler
         return Collections.unmodifiableSet( Sets.newHashSet( selectedEvents ) );
     }
 
-    public void setSelectedEvents( Set<Event> events )
+    public void setSelectedEvents( Set<Event> newEvents )
     {
-        if ( events.equals( selectedEvents ) ) return;
+        Set<Event> oldEvents = Sets.newHashSet( selectedEvents );
         
+        if ( newEvents.equals( oldEvents ) ) return;
+
         // set of deselected events
-        Set<Event> deselectedEvents = Sets.difference( selectedEvents, events ).immutableCopy( );
+        Set<Event> deselectedEvents = Sets.difference( oldEvents, newEvents ).immutableCopy( );
         // set of newly selected events
-        Set<Event> newSelectedEvents = Sets.difference( events, selectedEvents ).immutableCopy( );
-        
-        selectedEvents.clear( );
-        selectedEvents.addAll( events );
-        
-        notifyEventsSelected( newSelectedEvents, deselectedEvents );
+        Set<Event> newlySelectedEvents = Sets.difference( newEvents, oldEvents ).immutableCopy( );
+
+        //XXX these two operations should really happen atomically
+        // (we want the end result to be that selectedEvents contains everything in newEvents)
+        selectedEvents.retainAll( newEvents );
+        selectedEvents.addAll( newEvents );
+
+        notifyEventsSelected( newlySelectedEvents, deselectedEvents );
     }
 
     public void clearSelectedEvents( )
@@ -155,22 +158,22 @@ public class EventSelectionHandler
         Set<Event> tempDeselectedEvents = Collections.unmodifiableSet( Sets.newHashSet( selectedEvents ) );
 
         selectedEvents.clear( );
-        
-        notifyEventsSelected( Collections.<Event>emptySet( ), tempDeselectedEvents );
+
+        notifyEventsSelected( Collections.<Event> emptySet( ), tempDeselectedEvents );
     }
 
     public void addSelectedEvent( Event event )
     {
         selectedEvents.add( event );
-        
-        notifyEventsSelected( Collections.singleton( event ), Collections.<Event>emptySet( ) );
+
+        notifyEventsSelected( Collections.singleton( event ), Collections.<Event> emptySet( ) );
     }
 
     public void removeSelectedEvent( Event event )
     {
         selectedEvents.remove( event );
-        
-        notifyEventsSelected( Collections.<Event>emptySet( ), Collections.singleton( event ) );
+
+        notifyEventsSelected( Collections.<Event> emptySet( ), Collections.singleton( event ) );
     }
 
     public boolean isEventSelected( Event event )
@@ -220,7 +223,6 @@ public class EventSelectionHandler
     {
         highlightSelectedEvents = highlight;
     }
-    
 
     protected void notifyEventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents )
     {
