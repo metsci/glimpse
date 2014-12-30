@@ -170,6 +170,7 @@
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
+                <version>1.10.b1</version>
                 <configuration>
                     <basedir>${basedir}</basedir>
                     <header>${basedir}/LICENSE</header>
@@ -219,6 +220,7 @@
                 <!-- explicitly define maven-deploy-plugin after other to 
                     force exec order -->
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
                 <executions>
                     <execution>
                         <id>deploy</id>
@@ -234,6 +236,7 @@
                 <!-- explicitly define maven-install-plugin after other to 
                     force exec order -->
                 <artifactId>maven-install-plugin</artifactId>
+                <version>2.3.1</version>
                 <executions>
                     <execution>
                         <id>install</id>
