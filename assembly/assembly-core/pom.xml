@@ -9,20 +9,20 @@
     </parent>
 
     <artifactId>glimpse-core-assembly</artifactId>
-    <version>${parent.version}</version>
+    <version>${project.parent.version}</version>
     <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 
