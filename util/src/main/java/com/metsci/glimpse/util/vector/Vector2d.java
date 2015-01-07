@@ -145,6 +145,16 @@ public final class Vector2d implements Serializable
         return (x * v.x) + (y * v.y);
     }
 
+    public double crossProduct(Vector2d v)
+    {
+        return (x * v.y) - (y * v.x);
+    }
+
+    public boolean isToRightOf(Vector2d v)
+    {
+        return crossProduct(v) > 0.0;
+    }
+
     public double azimuthAngle()
     {
         return Azimuth.fromMathRad(Math.atan2(y, x));
