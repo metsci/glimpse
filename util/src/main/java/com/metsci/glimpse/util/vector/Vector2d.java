@@ -125,6 +125,10 @@ public final class Vector2d implements Serializable
         return new Vector2d(x - v.x, y - v.y);
     }
 
+    /**
+     * @deprecated use {@link #scaledBy(double)}
+     */
+    @Deprecated
     public Vector2d scalarProduct(double alpha)
     {
         return scaledBy(alpha);
@@ -192,7 +196,7 @@ public final class Vector2d implements Serializable
                        StackTraceUtils.getCallers(5));
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     /**
@@ -210,7 +214,7 @@ public final class Vector2d implements Serializable
             return new Vector2d(1, 0);
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     public double distanceSquared(Vector2d v)
