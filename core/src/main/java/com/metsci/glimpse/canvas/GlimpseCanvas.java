@@ -28,16 +28,14 @@ package com.metsci.glimpse.canvas;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.GLRunnable;
 
-import jogamp.opengl.GLDrawableImpl;
-
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 
 /**
@@ -53,9 +51,9 @@ import com.metsci.glimpse.painter.base.GlimpsePainter;
 public interface GlimpseCanvas extends GlimpseTarget
 {
     public GLProfile getGLProfile( );
-    
+
     public GLAutoDrawable getGLDrawable( );
-    
+
     public GLContext getGLContext( );
 
     public GlimpseContext getGlimpseContext( );
@@ -78,7 +76,7 @@ public interface GlimpseCanvas extends GlimpseTarget
      * @see #disposeAttached()
      */
     public void destroy( );
-    
+
     /**
      * Disposes native resources of GlimpseLayouts and GlimpsePainters associated with the GlimpseCanvas.
      * 
@@ -95,7 +93,7 @@ public interface GlimpseCanvas extends GlimpseTarget
      * </code>
      */
     public void dispose( );
-    
+
     /**
      * <p>Calls {@link GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
      * this GlimpseCanvas is active. Generally this call is equivalent to:</p>
@@ -117,12 +115,12 @@ public interface GlimpseCanvas extends GlimpseTarget
      * is disposed, it will no longer be valid for drawing on any GlimpseCanvas.</p>
      */
     public void disposePainter( GlimpsePainter painter );
-    
+
     /**
      * @return whether or not {@code #dispose()} has been successfully called. Once true, this GlimpseCanvas is no longer valid for rendering.
      */
     public boolean isDestroyed( );
-    
+
     /**
      * Called when {@link GLEventListener#dispose(GLAutoDrawable)} event is fired by the {@link GLAutoDrawable} associated with the
      * GlimpseCanvas. This can happen for reasons other than the window containing the GlimpseCanvas being closed (for example, moving

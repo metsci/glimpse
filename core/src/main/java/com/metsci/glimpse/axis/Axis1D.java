@@ -59,12 +59,13 @@ public class Axis1D
 {
     public static Logger logger = Logger.getLogger( Axis1D.class.getName( ) );
 
-    // fields are prefixed with either 'value' or 'pixel'
+    // fields are postfixed with either 'value' or 'pixel'
     // referring to whether they hold a value in screen pixels
     // or axis data units
 
     //// axis linkable state fields ////
     // these values are shared between linked axis
+    
     protected double selectionCenterValue;
     protected double selectionSizeValue;
     protected boolean selectionLocked;
@@ -1054,12 +1055,12 @@ public class Axis1D
         maxValue = centerValue + axisSizeValue / 2.0;
     }
 
-    private void recalculateMinMaxValue0( )
+    protected void recalculateMinMaxValue0( )
     {
         recalculateMinMaxValue0( getCenterValue( ) );
     }
 
-    private double getCenterValue( )
+    protected double getCenterValue( )
     {
         return ( maxValue - minValue ) / 2.0 + minValue;
     }

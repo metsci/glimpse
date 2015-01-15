@@ -29,6 +29,7 @@ package com.metsci.glimpse.examples;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
@@ -107,7 +108,7 @@ public class Example
         // attach an animator which repaints the canvas in a loop
         // usually only one FPSAnimator is necessary (multiple GlimpseCanvas
         // can be repainted from the same FPSAnimator)
-        FPSAnimator animator = new FPSAnimator( 120 );
+        GLAnimatorControl animator = new FPSAnimator( 120 );
         animator.add( canvas.getGLDrawable( ) );
         animator.start( );
 
@@ -192,10 +193,10 @@ public class Example
                 rightPanel.destroy( );
             }
         };
-        
+
         final JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
         rightFrame.addWindowListener( disposeListener );
-        
+
         final JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
         leftFrame.addWindowListener( disposeListener );
 
@@ -208,7 +209,7 @@ public class Example
         leftFrame.setLocation( 0, 0 );
         leftFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         leftFrame.setVisible( true );
-        
+
         SwingUtilities.invokeAndWait( new Runnable( )
         {
             @Override
