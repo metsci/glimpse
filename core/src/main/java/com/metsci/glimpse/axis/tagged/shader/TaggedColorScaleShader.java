@@ -27,85 +27,53 @@
 package com.metsci.glimpse.axis.tagged.shader;
 
 import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static com.metsci.glimpse.gl.shader.ShaderType.*;
 
 import java.io.IOException;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.gl.shader.Shader;
-import com.metsci.glimpse.gl.shader.ShaderArg;
-import com.metsci.glimpse.gl.shader.ShaderSource;
-import com.metsci.glimpse.util.io.StreamOpener;
+import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 
-public class TaggedColorScaleShader extends Shader implements AxisListener1D
+public class TaggedColorScaleShader extends GlimpseShaderProgram implements AxisListener1D
 {
-    public static final String DEFAULT_SHADER_SOURCE = "shaders/colormap/tagged_colorscale_shader.fs";
+    private GLUniformData dataTexUnit;
+    private GLUniformData colorTexUnit;
 
-    private ShaderArg dataTexUnit;
-    private ShaderArg colorTexUnit;
+    private GLUniformData vertexCoordTexUnit;
+    private GLUniformData textureCoordTexUnit;
 
-    private ShaderArg vertexCoordTexUnit;
-    private ShaderArg textureCoordTexUnit;
+    private GLUniformData sizeArg;
+    private GLUniformData alphaArg;
 
-    private ShaderArg sizeArg;
-    private ShaderArg alphaArg;
-
-    private ShaderArg discardNaN;
-    private ShaderArg discardAbove;
-    private ShaderArg discardBelow;
+    private GLUniformData discardNaN;
+    private GLUniformData discardAbove;
+    private GLUniformData discardBelow;
 
     private TaggedAxis1D taggedAxis;
 
-    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit, String source ) throws IOException
+    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
     {
-        super( "tagged_colorscale_shader", fragment, readSource( source ) );
+        this.addFragmentShader( "shaders/colormap/tagged_colorscale_shader.fs" );
 
         this.taggedAxis = axis;
 
-        this.dataTexUnit = getArg( "datatex" );
-        this.dataTexUnit.setValue( dataTexUnit );
-
-        this.colorTexUnit = getArg( "colortex" );
-        this.colorTexUnit.setValue( colorTexUnit );
-
-        this.vertexCoordTexUnit = getArg( "vcoordtex" );
-        this.vertexCoordTexUnit.setValue( vertexTexUnit );
-
-        this.textureCoordTexUnit = getArg( "tcoordtex" );
-        this.textureCoordTexUnit.setValue( textureTexUnit );
-
-        this.alphaArg = getArg( "alpha" );
-        this.alphaArg.setValue( 1.0f );
-
-        this.sizeArg = getArg( "size" );
+        this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", dataTexUnit ) );
+        this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
+        this.vertexCoordTexUnit = this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
+        this.textureCoordTexUnit = this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
+        this.alphaArg = this.addUniformData( new GLUniformData( "alpha", 1.0f ) );
+        this.sizeArg = this.addUniformData( new GLUniformData( "size", 0 ) );
         this.setSizeArgValue( );
-
-        this.discardNaN = getArg( "discardNaN" );
-        discardNaN.setValue( false );
-
-        this.discardAbove = getArg( "discardAbove" );
-        discardAbove.setValue( false );
-
-        this.discardBelow = getArg( "discardBelow" );
-        discardBelow.setValue( false );
+        this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
+        this.discardAbove = this.addUniformData( new GLUniformData( "discardAbove", 0 ) );
+        this.discardBelow = this.addUniformData( new GLUniformData( "discardBelow", 0 ) );
 
         this.taggedAxis.addAxisListener( this );
-    }
-
-    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
-    {
-        this( axis, dataTexUnit, colorTexUnit, vertexTexUnit, textureTexUnit, DEFAULT_SHADER_SOURCE );
-    }
-
-    private final static ShaderSource readSource( String source ) throws IOException
-    {
-        return new ShaderSource( source, StreamOpener.fileThenResource );
     }
 
     @Override
@@ -127,43 +95,26 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
             if ( tag.hasAttribute( TEX_COORD_ATTR ) ) count++;
         }
 
-        this.sizeArg.setValue( count );
+        this.sizeArg.setData( count );
     }
 
     public void setAlpha( float alpha )
     {
-        this.alphaArg.setValue( alpha );
+        this.alphaArg.setData( alpha );
     }
 
     public void setDiscardNaN( boolean discard )
     {
-        discardNaN.setValue( discard );
+        discardNaN.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardAbove( boolean discard )
     {
-        discardAbove.setValue( discard );
+        discardAbove.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardBelow( boolean discard )
     {
-        discardBelow.setValue( discard );
+        discardBelow.setData( discard ? 1 : 0 );
     }
-
-    @Override
-    public boolean preLink( GL gl, int glProgramHandle )
-    {
-        return true;
-    }
-
-    @Override
-    public void preDisplay( GL gl )
-    {
-    }
-
-    @Override
-    public void postDisplay( GL gl )
-    {
-    }
-
 }

@@ -27,168 +27,123 @@
 package com.metsci.glimpse.support.shader;
 
 import java.io.IOException;
+import java.nio.Buffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GLUniformData;
 
+import com.jogamp.opengl.util.GLArrayDataClient;
+import com.jogamp.opengl.util.GLArrayDataServer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.gl.shader.Shader;
-import com.metsci.glimpse.gl.shader.ShaderArg;
-import com.metsci.glimpse.gl.shader.ShaderSource;
-import com.metsci.glimpse.gl.shader.ShaderType;
-import com.metsci.glimpse.util.io.StreamOpener;
+import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 
-public class SimplePointShader extends Shader
+public class SimplePointShader extends GlimpseShaderProgram
 {
-    protected ShaderArg colorTexUnit;
-    protected ShaderArg colorMin;
-    protected ShaderArg colorMax;
+    protected GLUniformData colorTexUnit;
+    protected GLUniformData colorMin;
+    protected GLUniformData colorMax;
 
-    protected ShaderArg sizeTexUnit;
-    protected ShaderArg sizeMin;
-    protected ShaderArg sizeMax;
+    protected GLUniformData sizeTexUnit;
+    protected GLUniformData sizeMin;
+    protected GLUniformData sizeMax;
 
-    protected ShaderArg discardBelowColor;
-    protected ShaderArg discardAboveColor;
+    protected GLUniformData discardBelowColor;
+    protected GLUniformData discardAboveColor;
 
-    protected ShaderArg discardBelowSize;
-    protected ShaderArg discardAboveSize;
+    protected GLUniformData discardBelowSize;
+    protected GLUniformData discardAboveSize;
 
-    protected ShaderArg constantSize;
-    protected ShaderArg constantColor;
+    protected GLUniformData constantSize;
+    protected GLUniformData constantColor;
 
-    protected int colorAttributeIndex;
-    protected int sizeAttributeIndex;
+    protected GLArrayDataClient colorAttribute;
+    protected GLArrayDataClient sizeAttribute;
 
-    public SimplePointShader( int colorTextureUnit, int sizeTextureUnit, int colorAttributeIndex, int sizeAttributeIndex, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    public SimplePointShader( int colorTextureUnit, int sizeTextureUnit, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        this( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, readSource( ) );
-    }
+        this.addVertexShader( "shaders/point/point_shader.vs" );
 
-    protected SimplePointShader( int colorTextureUnit, int sizeTextureUnit, int colorAttributeIndex, int sizeAttributeIndex, Axis1D colorAxis, Axis1D sizeAxis, ShaderSource... source ) throws IOException
-    {
-        super( "point_shader", ShaderType.vertex, source );
-        this.initializeShaderArgs( );
-        this.initializeShaderValues( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis );
-    }
+        this.colorTexUnit = this.addUniformData( new GLUniformData( "valTexture_color", colorTextureUnit ) );
+        this.colorMin = this.addUniformData( new GLUniformData( "valMin_color", ( float ) colorAxis.getMin( ) ) );
+        this.colorMax = this.addUniformData( new GLUniformData( "valMax_color", ( float ) colorAxis.getMax( ) ) );
 
-    protected void initializeShaderArgs( )
-    {
-        this.colorTexUnit = getArg( "valTexture_color" );
-        this.colorMin = getArg( "valMin_color" );
-        this.colorMax = getArg( "valMax_color" );
+        this.sizeTexUnit = this.addUniformData( new GLUniformData( "valTexture_size", sizeTextureUnit ) );
+        this.sizeMin = this.addUniformData( new GLUniformData( "valMin_size", ( float ) sizeAxis.getMin( ) ) );
+        this.sizeMax = this.addUniformData( new GLUniformData( "valMax_size", ( float ) sizeAxis.getMax( ) ) );
 
-        this.sizeTexUnit = getArg( "valTexture_size" );
-        this.sizeMin = getArg( "valMin_size" );
-        this.sizeMax = getArg( "valMax_size" );
+        this.discardBelowColor = this.addUniformData( new GLUniformData( "discardAbove_color", 0 ) );
+        this.discardAboveColor = this.addUniformData( new GLUniformData( "discardBelow_color", 0 ) );
 
-        this.discardAboveColor = getArg( "discardAbove_color" );
-        this.discardBelowColor = getArg( "discardBelow_color" );
-        this.discardAboveSize = getArg( "discardAbove_size" );
-        this.discardBelowSize = getArg( "discardBelow_size" );
+        this.discardBelowSize = this.addUniformData( new GLUniformData( "discardAbove_size", 0 ) );
+        this.discardAboveSize = this.addUniformData( new GLUniformData( "discardBelow_size", 0 ) );
 
-        this.constantColor = getArg( "constant_color" );
-        this.constantSize = getArg( "constant_size" );
-    }
+        this.constantSize = this.addUniformData( new GLUniformData( "constant_color", 1 ) );
+        this.constantColor = this.addUniformData( new GLUniformData( "constant_size", 1 ) );
 
-    protected void initializeShaderValues( int colorTextureUnit, int sizeTextureUnit, int colorAttributeIndex, int sizeAttributeIndex, Axis1D colorAxis, Axis1D sizeAxis )
-    {
-        this.colorAttributeIndex = colorAttributeIndex;
-        this.sizeAttributeIndex = sizeAttributeIndex;
-
-        this.colorTexUnit.setValue( colorTextureUnit );
-        this.colorMin.setValue( colorAxis.getMin( ) );
-        this.colorMax.setValue( colorAxis.getMax( ) );
+        this.colorAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valColor", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
+        this.sizeAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valSize", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
 
         colorAxis.addAxisListener( new AxisListener1D( )
         {
             @Override
             public void axisUpdated( Axis1D handler )
             {
-                colorMin.setValue( handler.getMin( ) );
-                colorMax.setValue( handler.getMax( ) );
+                colorMin.setData( ( float ) handler.getMin( ) );
+                colorMax.setData( ( float ) handler.getMax( ) );
             }
         } );
-
-        this.sizeTexUnit.setValue( sizeTextureUnit );
-        this.sizeMin.setValue( sizeAxis.getMin( ) );
-        this.sizeMax.setValue( sizeAxis.getMax( ) );
 
         sizeAxis.addAxisListener( new AxisListener1D( )
         {
             @Override
             public void axisUpdated( Axis1D handler )
             {
-                sizeMin.setValue( handler.getMin( ) );
-                sizeMax.setValue( handler.getMax( ) );
+                sizeMin.setData( ( float ) handler.getMin( ) );
+                sizeMax.setData( ( float ) handler.getMax( ) );
             }
         } );
-
-        this.discardAboveColor.setValue( false );
-        this.discardBelowColor.setValue( false );
-        this.discardAboveSize.setValue( false );
-        this.discardBelowSize.setValue( false );
-
-        this.constantColor.setValue( true );
-        this.constantSize.setValue( true );
     }
 
-    private final static ShaderSource readSource( ) throws IOException
+    public void setSizeData( Buffer b )
     {
-        return new ShaderSource( "shaders/point/point_shader.vs", StreamOpener.fileThenResource );
+        this.sizeAttribute.reset( );
+        this.sizeAttribute.put( b );
     }
 
-    @Override
-    public boolean preLink( GL gl, int glProgramHandle )
+    public void setColorData( Buffer b )
     {
-        GL2 gl2 = gl.getGL2( );
-        
-        gl2.glBindAttribLocation( glProgramHandle, colorAttributeIndex, "valColor" );
-        gl2.glBindAttribLocation( glProgramHandle, sizeAttributeIndex, "valSize" );
-        
-        return true;
-    }
-
-    @Override
-    public void preDisplay( GL gl )
-    {
-        // empty
-    }
-
-    @Override
-    public void postDisplay( GL gl )
-    {
-        // empty
+        this.colorAttribute.reset( );
+        this.colorAttribute.put( b );
     }
 
     public void setConstantColor( boolean constant )
     {
-        constantColor.setValue( constant );
+        constantColor.setData( constant ? 1 : 0 );
     }
 
     public void setConstantSize( boolean constant )
     {
-        constantSize.setValue( constant );
+        constantSize.setData( constant ? 1 : 0 );
     }
 
     public void setDiscardAboveSize( boolean discard )
     {
-        discardAboveSize.setValue( discard );
+        discardAboveSize.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardBelowSize( boolean discard )
     {
-        discardBelowSize.setValue( discard );
+        discardBelowSize.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardAboveColor( boolean discard )
     {
-        discardAboveColor.setValue( discard );
+        discardAboveColor.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardBelowColor( boolean discard )
     {
-        discardBelowColor.setValue( discard );
+        discardBelowColor.setData( discard ? 1 : 0 );
     }
 }

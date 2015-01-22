@@ -5,10 +5,12 @@ import java.util.Collection;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLArrayData;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLUniformData;
 
 import com.google.common.collect.Lists;
+import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.glsl.ShaderState;
@@ -17,6 +19,7 @@ public class GlimpseShaderProgram
 {
     protected Collection<ShaderCode> codes;
     protected Collection<GLUniformData> uniforms;
+    protected Collection<GLArrayDataClient> arrays;
     
     protected ShaderProgram program;
     protected ShaderState state;
@@ -27,6 +30,7 @@ public class GlimpseShaderProgram
     {
         this.codes = Lists.newArrayList( );
         this.uniforms = Lists.newArrayList( );
+        this.arrays = Lists.newArrayList( );
     }
     
     public void useProgram( GL gl, boolean on )
@@ -36,6 +40,11 @@ public class GlimpseShaderProgram
         this.state.useProgram( gl.getGL2ES2( ), on );
     
         if ( on ) this.updateUniformData( gl );
+
+        for ( GLArrayDataClient array : arrays )
+        {
+            array.enableBuffer( gl, on );
+        }
     }
     
     public ShaderCode addFragmentShader( String path )
@@ -51,6 +60,12 @@ public class GlimpseShaderProgram
     public ShaderCode addGeometryShader( String path )
     {
         return addShader( GL3.GL_GEOMETRY_SHADER, path );
+    }
+    
+    public GLArrayDataClient addArrayData( GLArrayDataClient array )
+    {
+        this.arrays.add( array );
+        return array;
     }
     
     public GLUniformData addUniformData( GLUniformData uniform )
@@ -106,6 +121,11 @@ public class GlimpseShaderProgram
         
         this.state.attachShaderProgram( gl2es2, this.program, true );
    
+        for ( GLArrayData array : arrays )
+        {
+            this.state.ownsAttribute( array );
+        }
+        
         for ( GLUniformData uniform : uniforms )
         {
             this.state.ownUniform( uniform );

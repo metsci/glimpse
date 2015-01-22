@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.shader.SampledIntensityScaleShader;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
@@ -46,13 +45,13 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 public class IntensityMapPainter extends ShadedTexturePainter
 {
     public static final Logger logger = Logger.getLogger( IntensityMapPainter.class.getName( ) );
-    
+
     protected FloatTextureProjected2D heatMap, colorMap;
 
-    protected SampledIntensityScaleShader fragShader;
+    protected SampledIntensityScaleShader program;
 
     public IntensityMapPainter( Axis1D axis )
-    {        
+    {
         try
         {
             this.loadDefaultPipeline( axis );
@@ -65,8 +64,8 @@ public class IntensityMapPainter extends ShadedTexturePainter
 
     protected void loadDefaultPipeline( Axis1D axis ) throws IOException
     {
-        this.fragShader = new SampledIntensityScaleShader( axis, 0, 1 );
-        this.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
+        this.program = new SampledIntensityScaleShader( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+        this.setShaderProgram( this.program );
     }
 
     public void setAlpha( float alpha )
@@ -74,7 +73,7 @@ public class IntensityMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            this.fragShader.setAlpha( alpha );
+            this.program.setAlpha( alpha );
         }
         finally
         {

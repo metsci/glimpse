@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.shape;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
@@ -39,7 +40,6 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
@@ -65,11 +65,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     protected GLFloatBuffer colorAttributeBuffer;
     protected GLFloatBuffer sizeAttributeBuffer;
 
-    protected Pipeline pipeline;
-    protected int colorAttributeIndex = 6;
-    protected int sizeAttributeIndex = 7;
-
-    protected SimplePointShader vertShader;
+    protected SimplePointShader program;
 
     protected boolean constantSize = true;
     protected boolean constantColor = true;
@@ -77,25 +73,10 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     protected float constantPointSize = 5.0f;
     protected float[] constantPointColor = GlimpseColor.getBlack( );
 
-    protected boolean userPipeline = false;
-
-    public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis, Pipeline pipeline ) throws IOException
-    {
-        this.lock = new ReentrantLock( );
-        this.pipeline = pipeline;
-        this.userPipeline = true;
-    }
-
     public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
         this.lock = new ReentrantLock( );
-        this.initShaderPipeline( colorAxis, sizeAxis );
-    }
-
-    protected void initShaderPipeline( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
-    {
-        vertShader = new SimplePointShader( 0, 1, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis );
-        pipeline = new Pipeline( "pointshader", null, vertShader, null );
+        this.program = new SimplePointShader( 0, 1, colorAxis, sizeAxis );
     }
 
     public void useVertexPositionData( GLFloatBuffer2D positionBuffer )
@@ -111,6 +92,38 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         }
     }
 
+    public void useColorAttribData( FloatBuffer attributeBuffer )
+    {
+        lock.lock( );
+        try
+        {
+            this.program.setColorData( attributeBuffer );
+            this.setVariablePointColor0( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void useSizeAttribData( FloatBuffer attributeBuffer )
+    {
+        lock.lock( );
+        try
+        {
+            this.program.setSizeData( attributeBuffer );
+            this.setVariablePointColor0( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    /**
+     * @deprecated see {@link #useColorAttribData(FloatBuffer)}
+     */
+    @Deprecated
     public void useColorAttribData( GLFloatBuffer attributeBuffer )
     {
         lock.lock( );
@@ -125,6 +138,9 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         }
     }
 
+    /**
+     * @deprecated see {@link #useSizeAttribData(FloatBuffer)}
+     */
     public void useSizeAttribData( GLFloatBuffer attributeBuffer )
     {
         lock.lock( );
@@ -172,7 +188,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.vertShader.setDiscardAboveSize( discard );
+            this.program.setDiscardAboveSize( discard );
         }
         finally
         {
@@ -185,7 +201,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.vertShader.setDiscardBelowSize( discard );
+            this.program.setDiscardBelowSize( discard );
         }
         finally
         {
@@ -198,7 +214,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.vertShader.setDiscardAboveColor( discard );
+            this.program.setDiscardAboveColor( discard );
         }
         finally
         {
@@ -211,7 +227,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.vertShader.setDiscardBelowColor( discard );
+            this.program.setDiscardBelowColor( discard );
         }
         finally
         {
@@ -302,13 +318,13 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     protected void setConstantPointColor0( )
     {
         this.constantColor = true;
-        this.vertShader.setConstantColor( true );
+        this.program.setConstantColor( true );
     }
 
     protected void setConstantPointSize0( )
     {
         this.constantSize = true;
-        this.vertShader.setConstantSize( true );
+        this.program.setConstantSize( true );
     }
 
     protected void setVariablePointColor0( )
@@ -316,7 +332,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         if ( this.colorTexture != null && this.colorAttributeBuffer != null )
         {
             this.constantColor = false;
-            this.vertShader.setConstantColor( false );
+            this.program.setConstantColor( false );
         }
     }
 
@@ -325,7 +341,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         if ( this.sizeTexture != null && this.sizeAttributeBuffer != null )
         {
             this.constantSize = false;
-            this.vertShader.setConstantSize( false );
+            this.program.setConstantSize( false );
         }
     }
 
@@ -348,7 +364,6 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             else
             {
                 sizeTexture.prepare( gl, 1 );
-                sizeAttributeBuffer.bind( sizeAttributeIndex, gl );
 
                 gl.glEnable( GL2.GL_VERTEX_PROGRAM_POINT_SIZE );
             }
@@ -360,11 +375,10 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             else
             {
                 colorTexture.prepare( gl, 0 );
-                colorAttributeBuffer.bind( colorAttributeIndex, gl );
             }
 
             positionBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
-            pipeline.beginUse( gl );
+            program.useProgram( gl, true );
 
             gl.glEnable( GL2.GL_POINT_SMOOTH );
             gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
@@ -376,10 +390,10 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         {
             try
             {
-                if ( pipeline != null ) pipeline.endUse( gl );
+                if ( program != null ) program.useProgram( gl, false );
                 if ( positionBuffer != null ) positionBuffer.unbind( gl );
                 if ( !constantColor && colorAttributeBuffer != null ) colorAttributeBuffer.unbind( gl );
-                if ( !constantSize  && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
+                if ( !constantSize && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
             }
             finally
             {
@@ -387,7 +401,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             }
         }
     }
-    
+
     protected void drawArrays( GL gl )
     {
         gl.glDrawArrays( GL2.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
@@ -396,10 +410,9 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     @Override
     public void dispose( GLContext context )
     {
-        // if the user passed in a pipeline it is their responsibility to dispose of it
-        if ( !userPipeline && pipeline != null )
+        if ( program != null )
         {
-            pipeline.dispose( context );
+            program.dispose( context );
         }
     }
 }
