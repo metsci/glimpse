@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingGroup.pruneEmptyTileAndFrame;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
@@ -71,6 +70,7 @@ public class TileFactories
             final DockingTheme theme = dockingGroup.theme;
 
             final Tile[] tileRef = { null };
+
             final JButton maximizeButton = new JButton( theme.maximizeIcon )
             {
                 public void paintComponent( Graphics g )
@@ -82,6 +82,7 @@ public class TileFactories
                     super.paintComponent( g );
                 }
             };
+            maximizeButton.setFocusable( false );
 
             TabComponentFactory tabCornerComponentFactory = new TabComponentFactory( )
             {
@@ -90,6 +91,7 @@ public class TileFactories
                     if ( view.closeable )
                     {
                         JButton closeButton = new JButton( );
+                        closeButton.setFocusable( false );
                         closeButton.setOpaque( false );
                         closeButton.setBorder( createEmptyBorder( 2, 0, 0, theme.lineThickness + theme.labelPadding ) );
 
@@ -101,8 +103,7 @@ public class TileFactories
                         {
                             public void actionPerformed( ActionEvent ev )
                             {
-                                tile.removeView( view );
-                                pruneEmptyTileAndFrame( dockingGroup, tile );
+                                dockingGroup.closeView( view );
                             }
                         } );
 

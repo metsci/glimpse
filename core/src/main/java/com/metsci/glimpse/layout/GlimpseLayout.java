@@ -28,9 +28,9 @@ package com.metsci.glimpse.layout;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.metsci.glimpse.canvas.LayoutManager;
@@ -115,9 +115,9 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
 
         this.lock = new ReentrantLock( );
 
-        this.mouseListeners = new HashSet<GlimpseMouseListener>( );
-        this.mouseMotionListeners = new HashSet<GlimpseMouseMotionListener>( );
-        this.mouseWheelListeners = new HashSet<GlimpseMouseWheelListener>( );
+        this.mouseListeners = new CopyOnWriteArraySet<GlimpseMouseListener>( );
+        this.mouseMotionListeners = new CopyOnWriteArraySet<GlimpseMouseMotionListener>( );
+        this.mouseWheelListeners = new CopyOnWriteArraySet<GlimpseMouseWheelListener>( );
 
         this.mouseListenersUnmodifiable = Collections.unmodifiableCollection( this.mouseListeners );
         this.mouseMotionListenersUnmodifiable = Collections.unmodifiableCollection( this.mouseMotionListeners );
@@ -220,7 +220,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             lock.unlock( );
         }
     }
-    
+
     /**
      * Removes all GlimpseLayouts added via {@code #addLayout(GlimpseLayout)}.
      */
@@ -541,85 +541,43 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     @Override
     public Collection<GlimpseMouseListener> getGlimpseMouseListeners( )
     {
-        lock.lock( );
-        try
-        {
-            return this.mouseListenersUnmodifiable;
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        return this.mouseListenersUnmodifiable;
+
     }
 
     @Override
     public Collection<GlimpseMouseMotionListener> getGlimpseMouseMotionListeners( )
     {
-        lock.lock( );
-        try
-        {
-            return this.mouseMotionListenersUnmodifiable;
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        return this.mouseMotionListenersUnmodifiable;
+
     }
 
     @Override
     public Collection<GlimpseMouseWheelListener> getGlimpseMouseWheelListeners( )
     {
-        lock.lock( );
-        try
-        {
-            return this.mouseWheelListenersUnmodifiable;
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        return this.mouseWheelListenersUnmodifiable;
+
     }
 
     @Override
     public void addGlimpseMouseListener( GlimpseMouseListener listener )
     {
-        lock.lock( );
-        try
-        {
-            this.mouseListeners.add( listener );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        this.mouseListeners.add( listener );
+
     }
 
     @Override
     public void addGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
     {
-        lock.lock( );
-        try
-        {
-            this.mouseMotionListeners.add( listener );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        this.mouseMotionListeners.add( listener );
+
     }
 
     @Override
     public void addGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
-        lock.lock( );
-        try
-        {
-            this.mouseWheelListeners.add( listener );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        this.mouseWheelListeners.add( listener );
+
     }
 
     @Override
@@ -641,43 +599,22 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     @Override
     public void removeGlimpseMouseListener( GlimpseMouseListener listener )
     {
-        lock.lock( );
-        try
-        {
-            this.mouseListeners.remove( listener );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        this.mouseListeners.remove( listener );
+
     }
 
     @Override
     public void removeGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
     {
-        lock.lock( );
-        try
-        {
-            this.mouseMotionListeners.remove( listener );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        this.mouseMotionListeners.remove( listener );
+
     }
 
     @Override
     public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
-        lock.lock( );
-        try
-        {
-            this.mouseWheelListeners.remove( listener );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
+        this.mouseWheelListeners.remove( listener );
+
     }
 
     @Override

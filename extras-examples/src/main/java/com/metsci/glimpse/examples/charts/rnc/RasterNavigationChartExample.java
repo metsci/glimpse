@@ -34,6 +34,7 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.projection.Projection;
@@ -119,7 +120,12 @@ public class RasterNavigationChartExample implements GlimpseLayoutProvider
 
         plot.setMinZ( 0.0 );
         plot.setMaxZ( colorTexture.getDimensionSize( 0 ) );
-
+        
+        CursorTextZPainter z = new CursorTextZPainter( );
+        z.setOffsetBySelectionSize( false );
+        z.setTexture( dataTexture );
+        plot.addPainter( z );
+        
         float[] xy00 = new float[2];
         float[] xy11 = new float[2];
         textureProjection.getVertexXY( 0, 0, xy00 );

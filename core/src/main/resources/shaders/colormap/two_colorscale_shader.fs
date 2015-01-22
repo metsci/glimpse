@@ -16,7 +16,7 @@ void main()
     if ( dataVal > dataZero )
     {
         float normalizedVal = ( dataVal - dataZero ) / ( dataMax - dataZero );
-    	clamp( normalizedVal, 0.0, 1.0 );
+    	normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
     	
     	vec4 color = texture1D( colortex_high, normalizedVal );
         gl_FragColor = color;
@@ -25,7 +25,7 @@ void main()
     else
     {
         float normalizedVal = ( dataZero - dataVal ) / ( dataZero - dataMin );
-    	clamp( normalizedVal, 0.0, 1.0 );
+    	normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
     	
     	vec4 color = texture1D( colortex_low, normalizedVal );
         gl_FragColor = color;

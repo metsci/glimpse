@@ -73,7 +73,7 @@ void main()
  	
  	float normalizedVal = ( ( dataVal - dataMin ) / ( dataMax - dataMin ) );
  	normalizedVal = normalizedVal * ( tvalMax - tvalMin ) + tvalMin;
-    clamp( normalizedVal, 0.0, 1.0 );
+    normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
     vec4 color = texture1D( colortex, normalizedVal );
     gl_FragColor = color;

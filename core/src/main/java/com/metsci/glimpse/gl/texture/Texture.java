@@ -39,6 +39,14 @@ import javax.media.opengl.GLContext;
 public interface Texture
 {
     /**
+     * Returns the OpenGL handle to the texture data. Most implementations will
+     * return an array with a single value. However, some implementations may split
+     * up very large data into multiple OpenGL textures. This method is necessary
+     * to support proper handling of multitexturing shaders.
+     */
+    public int[] getHandles( );
+    
+    /**
      * Most Texture implementations are backed by a buffer on the
      * heap which acts as a staging area for data changes to the
      * texture. Calling {@code makeDirty()} indicates that the

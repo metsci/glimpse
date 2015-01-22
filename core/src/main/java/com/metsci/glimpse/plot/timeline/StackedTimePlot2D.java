@@ -101,32 +101,16 @@ public class StackedTimePlot2D extends StackedPlot2D
     // tag representing the currently selected time
     protected Tag currentTag;
 
-    // epoch encapsulating the absolute time which maps to value 0 on the timeline
-    protected Epoch epoch;
-
     // timeline painters and listeners
     protected AxisMouseListener1D timelineMouseListener;
     protected TooltipPainter tooltipPainter;
-
-    protected PlotInfo selectedLayout;
+    
+    // painter which highlights selected time region in blue
     protected SelectedTimeRegionPainter selectedTimePainter;
 
     // default tick/label handler
     protected TimeAxisLabelHandler timeTickHandler;
     protected TimelineInfo defaultTimelineInfo;
-
-    // default settings for TimelineMouseListeners of new plots
-    protected boolean allowPanX = true;
-    protected boolean allowPanY = true;
-    protected boolean allowZoomX = true;
-    protected boolean allowZoomY = true;
-    protected boolean allowSelectionLock = true;
-    protected boolean currentTimeLock;
-
-    // the size of the label layout area in pixels
-    protected int labelLayoutSize = 30;
-    protected boolean showLabelLayout = false;
-    protected boolean showTimeline = true;
 
     protected TextureAtlas defaultTextureAtlas;
 
@@ -138,6 +122,26 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     protected List<PlotMouseListener> plotMouseListeners;
 
+    
+    // default settings for TimelineMouseListeners of new plots
+    protected volatile boolean allowPanX = true;
+    protected volatile boolean allowPanY = true;
+    protected volatile boolean allowZoomX = true;
+    protected volatile boolean allowZoomY = true;
+    protected volatile boolean allowSelectionLock = true;
+    protected volatile boolean currentTimeLock;
+    
+    // the size of the label layout area in pixels
+    protected volatile int labelLayoutSize = 30;
+    protected volatile boolean showLabelLayout = false;
+    protected volatile boolean showTimeline = true;
+    
+    // epoch encapsulating the absolute time which maps to value 0 on the timeline
+    protected volatile Epoch epoch;
+    
+    // the selected plot row
+    protected volatile PlotInfo selectedLayout;
+    
     public StackedTimePlot2D( )
     {
         this( Orientation.VERTICAL, Epoch.posixEpoch( ) );
@@ -681,16 +685,24 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     public void setEpoch( Epoch epoch )
     {
-        this.epoch = epoch;
-
-        this.timeTickHandler.setEpoch( epoch );
-
-        for ( PlotInfo info : getAllPlots( ) )
+        this.lock.lock( );
+        try
         {
-            if ( info instanceof TimelineInfo )
+            this.epoch = epoch;
+
+            this.timeTickHandler.setEpoch( epoch );
+
+            for ( PlotInfo info : getAllPlots( ) )
             {
-                ( ( TimelineInfo ) info ).setEpoch( epoch );
+                if ( info instanceof TimelineInfo )
+                {
+                    ( ( TimelineInfo ) info ).setEpoch( epoch );
+                }
             }
+        }
+        finally
+        {
+            this.lock.unlock( );
         }
     }
 

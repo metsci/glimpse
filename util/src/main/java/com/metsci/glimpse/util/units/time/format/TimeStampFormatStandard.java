@@ -43,81 +43,182 @@ import com.metsci.glimpse.util.GeneralUtils;
 
 /**
  * Formats and parses TimeStamps according to a specified format string, in the spirit of trusty
- * old printf. This is similar to java.text.SimpleDateFormat, but with a few improvements:
+ * old printf. This is similar to {@link java.text.SimpleDateFormat}, but with a few improvements:
  * <ul>
  *     <li>Instances are thread-safe
- *     <li>Fractional seconds are handled intelligently
+ *     <li>Fractional seconds are handled more intuitively
  *     <li>Time-zone is associated with the format, not with the date/time object
- *     <li>Formatting options are specified printf-style (e.g. "%3S" instead of "SSS")
+ *     <li>Formatting options are specified printf-style (e.g. <code>%3S</code> instead of <code>SSS</code>)
  * </ul>
  *
- * A good basic example is TimeStampFormat.iso8601:
- * <ul>
- *     <li>format: %y-%M-%dT%H:%m:%SZ
- *     <li>output: 2008-06-11T13:40:12.5439231Z
- * </ul>
+ * The following format terms are defined:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Letter
+ *         <th align=left>Description
+ *     <tr>
+ *         <td><code>y</code>
+ *         <td>Year
+ *     <tr>
+ *         <td><code>M</code>
+ *         <td>Month number (1-12)
+ *     <tr>
+ *         <td><code>N</code>
+ *         <td>Month name
+ *     <tr>
+ *         <td><code>d</code>
+ *         <td>Day of month (1-31)
+ *     <tr>
+ *         <td><code>j</code>
+ *         <td>Day of year (1-366)
+ *     <tr>
+ *         <td><code>H</code>
+ *         <td>Hour in day (0-23)
+ *     <tr>
+ *         <td><code>m</code>
+ *         <td>Minute in hour (0-59)
+ *     <tr>
+ *         <td><code>S</code>
+ *         <td>Second in minute (includes fractional part)
+ *     <tr>
+ *         <td><code>s</code>
+ *         <td>Whole second in minute (floored toward zero)
+ *     <tr>
+ *         <td><code>z</code>
+ *         <td>Timezone name
+ * </table>
+ * </blockquote>
+ *
+ * A good basic example is {@link TimeStampFormat.iso8601}:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%y-%M-%dT%H:%m:%SZ</code>
+ *         <td><code>2008-06-11T13:40:12.5439231Z</code>
+ * </table>
+ * </blockquote>
+ *
  * Any characters not inside a format term -- such as the "T", "Z", dashes, and colons in the
  * above example -- will simply show up in as literals in the output string. Just like printf.
  * So if you want date and time separated by a space, and "UTC" instead of "Z":
- * <ul>
- *     <li>format: %y-%M-%d %H:%m:%S UTC
- *     <li>output: 2008-06-11 13:40:12.5439231 UTC
- * </ul>
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%y-%M-%d %H:%m:%S UTC</code>
+ *         <td><code>2008-06-11 13:40:12.5439231 UTC</code>
+ * </table>
+ * </blockquote>
  *
- * To make text fields all uppercase or all lowercase, use ^ or /:
- * <ul>
- *     <li>%N   -->  January
- *     <li>%^N  -->  JANUARY
- *     <li>%/N  -->  january
- * </ul>
+ * To make text fields all uppercase or all lowercase, use <code>^</code> or <code>/</code>:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%N</code>
+ *         <td><code>January</code>
+ *     <tr>
+ *         <td><code>%^N</code>
+ *         <td><code>JANUARY</code>
+ *     <tr>
+ *         <td><code>%/N</code>
+ *         <td><code>january</code>
+ * </table>
+ * </blockquote>
  *
- * To abbreviate the text month, use 3:
- * <ul>
- *     <li>%N   --> January
- *     <li>%3N  --> Jan
- * </ul>
+ * To abbreviate the text month, use <code>3</code>:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%N</code>
+ *         <td><code>January</code>
+ *     <tr>
+ *         <td><code>%3N</code>
+ *         <td><code>Jan</code>
+ * </table>
+ * </blockquote>
  *
- * To change padding of numeric fields, use <, >, or !:
- * <ul>
- *     <li>%H:%m   -->  04:10
- *     <li>%&lt;H:%m  -->  4 :10
- *     <li>%>H:%m  -->   4:10
- *     <li>%!H:%m  -->  4:10
- * </ul>
+ * To change padding of numeric fields, use <code>&lt;</code>, <code>&gt;</code>, or <code>!</code>:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%H:%m</code>
+ *         <td><code>04:10</code>
+ *     <tr>
+ *         <td><code>%&lt;H:%m</code>
+ *         <td><code>4 :10</code>
+ *     <tr>
+ *         <td><code>%&gt;H:%m</code>
+ *         <td><code>&nbsp;4:10</code>
+ *     <tr>
+ *         <td><code>%!H:%m</code>
+ *         <td><code>4:10</code>
+ * </table>
+ * </blockquote>
  *
- * Specify the number of decimal places used by %S with a digit:
- * <ul>
- *     <li>%S   -->  12.5439231
- *     <li>%3S  -->  12.544
- * </ul>
+ * Specify the number of decimal places used by <code>%S</code> with a digit:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%S</code>
+ *         <td><code>12.5439231</code>
+ *     <tr>
+ *         <td><code>%3S</code>
+ *         <td><code>12.544</code>
+ * </table>
+ * </blockquote>
  *
  *
  * Other features that would be nice:
  * <ul>
- *     <li>text day of week (%E --> Tuesday, %3E --> Tue)
- *     <li>2-digit year (%2y)
- *     <li>hour in am/pm (1-12)
+ *     <li>text day of week (<code>%E</code> --> <code>Tuesday</code>, <code>%3E</code> --> <code>Tue</code>)
+ *     <li>2-digit year (<code>%2y</code>)
+ *     <li>hour in am/pm (<code>1-12</code>)
  *     <li>am/pm
  * </ul>
  *
  *
  * <h4>Rollover and the %S Field</h4>
  * <p>
- * The %S field is special: its precision affects when other fields (potentially all of them)
- * roll over to the next value. For instance, if a time formatted with a %S gives the string
- * "1999/12/31 23:59:59.999", then it will give "2000/01/01 00:00:00" when formatted with %0S.
- * Note that the value of every field changed, solely because of a change in the precision of
- * the %S field.
+ * The <code>%S</code> field is special: its precision affects when other fields (potentially all
+ * of them) roll over to the next value. For instance, for the time <code>1999/12/31 23:59:59.999</code>,
+ * note how every field can change, solely because of a change in the precision of the <code>%S</code>
+ * field.
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%y-%M-%d %H:%m:%S</code>
+ *         <td><code>1999/12/31 23:59:59.999</code>
+ *     <tr>
+ *         <td><code>%y-%M-%d %H:%m:%0S</code>
+ *         <td><code>2000/01/01 00:00:00</code>
+ * </table>
+ * </blockquote>
+ * If a format string does not contain a <code>%S</code> field, other fields will behave as though
+ * there were a full-precision <code>%S</code>.
  * <p>
- * If a format string does not contain a %S field, other fields will behave as though there
- * were a full-precision %S. For instance:
- * <ul>
- *     <li>time:   1999/12/31 23:59:59.999
- *     <li>format: %y-%M-%d
- *     <li>output: 1999/12/31
- * </ul>
- * If, for some strange reason, a format string contains multiple %S fields, the precision of
- * the rightmost one is used for figuring rollover.
+ * If (for some strange reason) a format string contains multiple <code>%S</code> fields, the
+ * precision of the rightmost one is used for figuring rollover.
  */
 public class TimeStampFormatStandard implements TimeStampFormat
 {
@@ -203,6 +304,7 @@ public class TimeStampFormatStandard implements TimeStampFormat
             case 'M': return new NumericMonthField(flags);
             case 'N': return new TextMonthField(flags);
             case 'd': return new DayOfMonthField(flags);
+            case 'j': return new DayOfYearField(flags);
             case 'H': return new Hour24Field(flags);
             case 'm': return new MinuteField(flags);
             case 's': return new FloorSecondField(flags);
@@ -369,6 +471,14 @@ public class TimeStampFormatStandard implements TimeStampFormat
         public DayOfMonthField(String flags)
         {
             super(Calendar.DAY_OF_MONTH, 2, getPadding(flags));
+        }
+    }
+
+    private static class DayOfYearField extends CalendarField
+    {
+        public DayOfYearField(String flags)
+        {
+            super(Calendar.DAY_OF_YEAR, 3, getPadding(flags));
         }
     }
 

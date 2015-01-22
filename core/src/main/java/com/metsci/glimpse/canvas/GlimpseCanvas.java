@@ -35,6 +35,7 @@ import javax.media.opengl.GLRunnable;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 
 /**
@@ -50,9 +51,9 @@ import com.metsci.glimpse.painter.base.GlimpsePainter;
 public interface GlimpseCanvas extends GlimpseTarget
 {
     public GLProfile getGLProfile( );
-    
+
     public GLAutoDrawable getGLDrawable( );
-    
+
     public GLContext getGLContext( );
 
     public GlimpseContext getGlimpseContext( );
@@ -75,7 +76,7 @@ public interface GlimpseCanvas extends GlimpseTarget
      * @see #disposeAttached()
      */
     public void destroy( );
-    
+
     /**
      * Disposes native resources of GlimpseLayouts and GlimpsePainters associated with the GlimpseCanvas.
      * 
@@ -92,23 +93,34 @@ public interface GlimpseCanvas extends GlimpseTarget
      * </code>
      */
     public void dispose( );
-    
+
     /**
-     * <p>Calls {@code GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
-     * this GlimpseCanvas is active.</p>
+     * <p>Calls {@link GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
+     * this GlimpseCanvas is active. Generally this call is equivalent to:</p>
      * 
-     * <p>The GlimpsePainter should not be currently attached to a GlimpseLayout attached to any GlimpseCanvas
-     * (as it will no longer be valid for drawing). However, it should have been attached, at some point, to a
-     * GlimpseLayout attached to this GlimpseCanvas (so that it allocated OpenGL resources on the GLContext
-     * associated with this GlimpseCanvas).</p>
+     * <code>
+     *  this.getGLDrawable( ).invoke( false, new GLRunnable( )
+     *  {
+     *      @Override
+     *      public boolean run( GLAutoDrawable drawable )
+     *      {
+     *          painter.dispose( getGlimpseContext( ) );
+     *          return true;
+     *      }
+     *  } );
+     * </code>
+     * 
+     * <p>The GlimpsePainter should be removed from all GlimpseLayouts via
+     * {@link GlimpseLayout#removePainter(GlimpsePainter)} before disposePainter is called. After the GlimpsePainter
+     * is disposed, it will no longer be valid for drawing on any GlimpseCanvas.</p>
      */
     public void disposePainter( GlimpsePainter painter );
-    
+
     /**
      * @return whether or not {@code #dispose()} has been successfully called. Once true, this GlimpseCanvas is no longer valid for rendering.
      */
     public boolean isDestroyed( );
-    
+
     /**
      * Called when {@link GLEventListener#dispose(GLAutoDrawable)} event is fired by the {@link GLAutoDrawable} associated with the
      * GlimpseCanvas. This can happen for reasons other than the window containing the GlimpseCanvas being closed (for example, moving

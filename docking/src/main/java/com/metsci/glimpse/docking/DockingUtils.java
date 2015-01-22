@@ -253,9 +253,9 @@ public class DockingUtils
         return largestTile;
     }
 
-    public static Set<View> findUncloseableViews( MultiSplitPane docker )
+    public static Set<View> findViews( MultiSplitPane docker )
     {
-        Set<View> uncloseableViews = new HashSet<>( );
+        Set<View> views = new HashSet<>( );
         for ( Component c : docker.leaves( ) )
         {
             if ( c instanceof Tile )
@@ -263,15 +263,23 @@ public class DockingUtils
                 Tile tile = ( Tile ) c;
                 for ( int i = 0; i < tile.numViews( ); i++ )
                 {
-                    View view = tile.view( i );
-                    if ( !view.closeable )
-                    {
-                        uncloseableViews.add( view );
-                    }
+                    views.add( tile.view( i ) );
                 }
             }
         }
-        return uncloseableViews;
+        return views;
+    }
+
+    public static boolean allViewsAreCloseable( Iterable<View> views )
+    {
+        for ( View view : views )
+        {
+            if ( !view.closeable )
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void appendViewsToTile( Tile tile, Collection<View> views )

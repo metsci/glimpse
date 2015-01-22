@@ -183,11 +183,6 @@ public class ShadedTexturePainter extends GlimpsePainter2D
             if ( program != null ) program.useProgram( gl, true );
             try
             {
-                for ( TextureUnit<Texture> textureUnit : nonDrawableTextures )
-                {
-                    prepare( textureUnit, gl );
-                }
-
                 for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures )
                 {
                     draw( textureUnit, gl );
@@ -206,56 +201,12 @@ public class ShadedTexturePainter extends GlimpsePainter2D
 
     protected void draw( TextureUnit<DrawableTexture> textureUnit, GL2 gl )
     {
-        textureUnit.texture.draw( gl, textureUnit.textureUnit );
+        textureUnit.texture.draw( gl, textureUnit.textureUnit, nonDrawableTextures );
     }
 
     protected void prepare( TextureUnit<Texture> textureUnit, GL2 gl )
     {
         textureUnit.texture.prepare( gl, textureUnit.textureUnit );
-    }
-
-    static class TextureUnit<D extends Texture>
-    {
-        protected int textureUnit;
-        protected D texture;
-
-        public TextureUnit( D texture )
-        {
-            this( 0, texture );
-        }
-
-        public TextureUnit( int textureUnit, D texture )
-        {
-            this.textureUnit = textureUnit;
-            this.texture = texture;
-        }
-
-        public int getTextureUnit( )
-        {
-            return textureUnit;
-        }
-
-        public D getTexture( )
-        {
-            return texture;
-        }
-
-        @Override
-        public int hashCode( )
-        {
-            return 31 + ( ( texture == null ) ? 0 : texture.hashCode( ) );
-        }
-
-        @Override
-        public boolean equals( Object obj )
-        {
-            if ( this == obj ) return true;
-            if ( obj == null ) return false;
-            if ( getClass( ) != obj.getClass( ) ) return false;
-            TextureUnit<?> other = ( TextureUnit<?> ) obj;
-            if ( texture == null ) return other.texture == null;
-            return texture.equals( other.texture );
-        }
     }
 
     @Override

@@ -183,6 +183,10 @@ public final class Vector3d implements Serializable
         return new Vector3d(x - v.x, y - v.y, z - v.z);
     }
 
+    /**
+     * @deprecated use {@link #scaledBy(double)}
+     */
+    @Deprecated
     public Vector3d scalarProduct(double alpha)
     {
         return scaledBy(alpha);
@@ -297,7 +301,7 @@ public final class Vector3d implements Serializable
                        StackTraceUtils.getCallers(5));
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     /**
@@ -315,7 +319,7 @@ public final class Vector3d implements Serializable
             return new Vector3d(1, 0, 0);
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     /**

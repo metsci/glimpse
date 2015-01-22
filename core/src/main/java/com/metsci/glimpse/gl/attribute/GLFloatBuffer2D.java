@@ -234,12 +234,12 @@ public class GLFloatBuffer2D extends GLFloatBuffer
 
             mutator.mutate( floatData, elementSize );
 
-            updateIndex( mutator.getUpdateIndex( ) );
-
             // the limit/position of floatData and data are independent
             // update data.limit() to reflect changes made to floatData
             data.position( 0 );
             data.limit( floatData.limit( ) * getBytesPerElement( ) );
+            
+            updateIndex( mutator.getUpdateIndex( ) );
 
             makeDirty();
         }

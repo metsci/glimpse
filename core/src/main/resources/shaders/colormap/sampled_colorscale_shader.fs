@@ -11,7 +11,7 @@ void main()
 {
     float dataVal = texture2D( datatex, gl_TexCoord[0].st ).r;
     float normalizedVal = ( dataVal - dataMin ) / ( dataMax - dataMin );
-    clamp( normalizedVal, 0.0, 1.0 );
+    normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
     vec4 color = texture1D( colortex, normalizedVal );
     gl_FragColor = color;

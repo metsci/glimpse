@@ -125,6 +125,10 @@ public final class Vector2d implements Serializable
         return new Vector2d(x - v.x, y - v.y);
     }
 
+    /**
+     * @deprecated use {@link #scaledBy(double)}
+     */
+    @Deprecated
     public Vector2d scalarProduct(double alpha)
     {
         return scaledBy(alpha);
@@ -143,6 +147,16 @@ public final class Vector2d implements Serializable
     public double dotProduct(Vector2d v)
     {
         return (x * v.x) + (y * v.y);
+    }
+
+    public double crossProduct(Vector2d v)
+    {
+        return (x * v.y) - (y * v.x);
+    }
+
+    public boolean isToRightOf(Vector2d v)
+    {
+        return crossProduct(v) > 0.0;
     }
 
     public double azimuthAngle()
@@ -182,7 +196,7 @@ public final class Vector2d implements Serializable
                        StackTraceUtils.getCallers(5));
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     /**
@@ -200,7 +214,7 @@ public final class Vector2d implements Serializable
             return new Vector2d(1, 0);
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     public double distanceSquared(Vector2d v)
