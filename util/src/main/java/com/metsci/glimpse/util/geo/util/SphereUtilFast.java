@@ -1,0 +1,123 @@
+/*
+ * Copyright (c) 2012, Metron, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Metron, Inc. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.metsci.glimpse.util.geo.util;
+
+import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.math.fast.FastAsin;
+import com.metsci.glimpse.util.math.fast.FastAtan;
+import com.metsci.glimpse.util.units.Azimuth;
+
+/**
+ * @author moskowitz
+ */
+public class SphereUtilFast
+{
+    private static FastAtan fastAtan = new FastAtan( 100000 );
+    private static FastAsin fastAsin = new FastAsin( -1.0f, 1.0f, 100000 );
+
+    /**
+     * Computes the initial azimuth along the shortest great circle path
+     * connecting the two specified points.
+     *
+     * @param from origin
+     * @param to destination
+     */
+    public static double greatCircleAzimuth( LatLonGeo from, LatLonGeo to )
+    {
+        final double lat1   = from.getLatRad( );
+        final double s1     = Math.sin(lat1);
+        final double c1     = Math.cos(lat1);
+
+        final double lat2   = to.getLatRad( );
+        final double s2     = Math.sin(lat2);
+        final double c2     = Math.cos(lat2);
+
+        final double lon1   = from.getLonRad();
+        final double lon2   = to.getLonRad( );
+        final double dLon   = lon2 - lon1;
+        final double sdLon  = Math.sin( dLon );
+        final double cdLon  = Math.cos( dLon );
+
+        final double theta  = fastAtan.atan2( sdLon*c2, c1*s2 - s1*c2*cdLon );
+
+        return Azimuth.fromNavRad( theta );
+    }
+
+    /**
+     * Transformation from ECEF-r to ECEF-g coordinates.
+     */
+    public static LatLonGeo toLatLonGeo( double x, double y, double z, double radius )
+    {
+        final double lat  = fastAtan.atan2( z, Math.sqrt( x*x + y*y ) );
+        final double lon  = fastAtan.atan2( y, x );
+        final double h    = Math.sqrt( x*x + y*y + z*z ) - radius;
+
+        return LatLonGeo.fromRad( lat, lon, h );
+    }
+
+    /**
+     * Shifts a point along a great circle path.
+     *
+     * @param from starting point
+     * @param radius radius of Earth
+     * @param dist distance to shift point
+     * @param azimuth initial azimuth of great circle
+     */
+    public static LatLonGeo greatCircleShift( LatLonGeo from, double radius,
+                                              double dist, double azimuth )
+    {
+        final double lat      = from.getLatRad( );
+        final double cosLat1  = Math.cos(lat);
+        final double sinLat1  = Math.sin(lat);
+
+        final double r        = dist / radius;
+        final double cosR     = Math.cos(r);
+        final double sinR     = Math.sin(r);
+
+        final double b        = Azimuth.toNavRad( azimuth );
+        final double cosB     = Math.cos(b);
+        final double sinB     = Math.sin(b);
+
+        // guard against roundoff
+        double sinLat = sinLat1 * cosR + cosLat1 * sinR * cosB;
+        if (sinLat > 1d)
+        {
+            sinLat = 1d;
+        }
+        else if (sinLat < -1d)
+        {
+            sinLat = -1d;
+        }
+
+        final double newLat  = fastAsin.evaluate(sinLat);
+
+        final double dLon    = fastAtan.atan2( sinB*sinR*cosLat1, cosR-sinLat1*Math.sin(newLat) );
+        final double newLon  = from.getLonRad( ) + dLon;
+
+        return LatLonGeo.fromRad( newLat, newLon, from.getAltitude( ) );
+    }
+}
