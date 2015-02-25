@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.StackTraceUtils;
+import com.metsci.glimpse.util.math.fast.FastAtan;
 import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.units.AngleRelative;
 import com.metsci.glimpse.util.units.Azimuth;
@@ -162,6 +163,11 @@ public final class Vector2d implements Serializable
     public double azimuthAngle()
     {
         return Azimuth.fromMathRad(Math.atan2(y, x));
+    }
+
+    public double azimuthAngleFast()
+    {
+        return Azimuth.fromMathRad(FastAtan.getInstance().atan2(this.getY(), this.getX()));
     }
 
     public double normSquared()
