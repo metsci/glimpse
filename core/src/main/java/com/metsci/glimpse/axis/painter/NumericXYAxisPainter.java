@@ -324,7 +324,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
                 for ( int i = 0; i < positionsX.length; i++ )
                 {
                     String label = labelsX[i];
-                    double valueX = positionsX[i];
+                    double valueX = convX.fromAxisUnits( positionsX[i] );
 
                     if ( valueX == 0.0 && !showZero ) continue;
 
@@ -344,7 +344,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
                     String label = labelsY[i];
                     Rectangle2D textBounds = textRenderer.getBounds( label );
 
-                    double valueY = positionsY[i];
+                    double valueY = convY.fromAxisUnits( positionsY[i] );
 
                     if ( valueY == 0.0 && !showZero ) continue;
 
