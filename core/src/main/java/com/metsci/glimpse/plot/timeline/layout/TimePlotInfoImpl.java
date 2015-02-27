@@ -110,9 +110,12 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
             @Override
             public void setToolTip( GlimpseMouseEvent e, TooltipPainter toolTipPainter )
             {
-                double value = parent.isTimeAxisHorizontal( ) ? e.getAxisCoordinatesY( ) : e.getAxisCoordinatesX( );
+                double value = parent.isTimeAxisHorizontal( ) ? axisPainter.getLabelHandlerY( ).getAxisUnitConverter( ).toAxisUnits( e.getAxisCoordinatesY( ) )
+                                                              : axisPainter.getLabelHandlerX( ).getAxisUnitConverter( ).toAxisUnits( e.getAxisCoordinatesX( ) );
+
                 double time = parent.isTimeAxisHorizontal( ) ? e.getAxisCoordinatesX( ) : e.getAxisCoordinatesY( );
                 TimeStamp timestamp = parent.getEpoch( ).toTimeStamp( time );
+
                 toolTipPainter.setIcon( null );
                 toolTipPainter.setText( String.format( "%s\nTime: %s\nData: %.3f", labelPainter.getText( ), timestamp.toString( format ), value ) );
             }
