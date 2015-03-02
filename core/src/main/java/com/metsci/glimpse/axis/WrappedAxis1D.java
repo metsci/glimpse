@@ -52,21 +52,21 @@ public class WrappedAxis1D extends Axis1D
         return getWrapMax( ) - getWrapMin( );
     }
     
-    public double getWrapValue( double value )
+    public double getWrappedValue( double value )
     {
         double span = getWrapSpan( );
         double v = value - minWrapVal; // shift minWrapVal to 0
         double mod = v % span;
-        return minWrapVal + mod;
+        return minWrapVal + mod + ( mod > 0 ? 0 : span );
     }
     
     public static void main( String[] args )
     {
         WrappedAxis1D axis = new WrappedAxis1D( -10, 10 );
         
-        for ( int i = 200 ; i < 221 ; i++ )
+        for ( int i = -11 ; i < 0 ; i++ )
         {
-            System.out.println( i + " " + axis.getWrapValue( i ) );
+            System.out.println( i + " " + axis.getWrappedValue( i ) );
         }
     }
 }

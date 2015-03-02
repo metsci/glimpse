@@ -59,7 +59,7 @@ public class HeatMapExample implements GlimpseLayoutProvider
     public ColorAxisPlot2D getLayout( )
     {
         // create a premade heat map window
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
+        ColorAxisPlot2D plot = newPlot( );
 
         // set axis labels and chart title
         plot.setTitle( "Heat Map Example" );
@@ -112,6 +112,11 @@ public class HeatMapExample implements GlimpseLayoutProvider
         cursorPainter.setTexture( heatmapPainter.getData( ) );
 
         return plot;
+    }
+    
+    protected ColorAxisPlot2D newPlot( )
+    {
+        return new ColorAxisPlot2D( );
     }
 
     public CursorTextZPainter getCursorPainter( )
