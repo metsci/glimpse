@@ -16,6 +16,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 
@@ -38,7 +39,6 @@ public class WrappedPainter extends GlimpsePainter2D
     public WrappedPainter( )
     {
         this.painters = new CopyOnWriteArrayList<GlimpsePainter2D>( );
-        this.texturePainter = new ShadedTexturePainter( );
     }
 
     public void addPainter( GlimpsePainter2D painter )
@@ -84,6 +84,8 @@ public class WrappedPainter extends GlimpsePainter2D
         }
         else
         {
+            if ( !axisX.isInitialized( ) || !axisY.isInitialized( ) || bounds.getHeight( ) == 0 || bounds.getWidth( ) == 0 ) return;
+            
             // calculate wrapped axis bounds
             //
 
@@ -92,6 +94,7 @@ public class WrappedPainter extends GlimpsePainter2D
             double minY = axisY.getMin( );
             double maxY = axisY.getMax( );
 
+            /*
             if ( axisX instanceof WrappedAxis1D )
             {
                 WrappedAxis1D wrappedX = ( WrappedAxis1D ) axisX;
@@ -105,6 +108,7 @@ public class WrappedPainter extends GlimpsePainter2D
                 minY = wrappedY.getWrappedValue( minY );
                 maxY = wrappedY.getWrappedValue( maxY );
             }
+            */
 
             // lazily allocate offscreen buffer if necessary
             //
@@ -113,6 +117,8 @@ public class WrappedPainter extends GlimpsePainter2D
             {
                 this.offscreen = new FBOGlimpseCanvas( context.getGLContext( ), bounds.getWidth( ), bounds.getHeight( ) );
                 this.texture = this.offscreen.getProjectedTexture( );
+                this.texturePainter = new ShadedTexturePainter( );
+                this.texturePainter.addDrawableTexture( this.texture );
             }
 
             // create a new axis and layout to place the painters in
@@ -137,20 +143,33 @@ public class WrappedPainter extends GlimpsePainter2D
             this.offscreen.removeAllLayouts( );
             this.offscreen.addLayout( dummyLayout );
 
-            // draw the dummy layout onto the offscreen canvas
-            GLContext glContext = this.offscreen.getGLDrawable( ).getContext( );
-            glContext.makeCurrent( );
+            // release the onscreen context and make the offscreen context current
+            context.getGLContext( ).release( );
             try
             {
-                this.offscreen.paint( );
+                GLContext glContext = this.offscreen.getGLDrawable( ).getContext( );
+                glContext.makeCurrent( );
+                try
+                {
+                    // draw the dummy layout onto the offscreen canvas
+                    this.offscreen.paint( );
+                }
+                finally
+                {
+                    glContext.release( );
+                }
             }
             finally
             {
-                glContext.release( );
+                context.getGLContext( ).makeCurrent( );
             }
             
-            //TODO paint the offscreen image
-
+            // use a projection to position the texture
+            FlatProjection proj = new FlatProjection( dummyAxis );
+            this.texture.setProjection( proj );
+            
+            // paint the texture from the offscreen buffer onto the screen
+            this.texturePainter.paintTo( context, bounds, dummyAxis );
         }
     }
 

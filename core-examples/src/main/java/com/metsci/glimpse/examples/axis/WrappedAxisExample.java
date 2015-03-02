@@ -8,6 +8,8 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.group.WrappedPainter;
+import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 
 public class WrappedAxisExample implements GlimpseLayoutProvider
@@ -75,6 +77,14 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
         // since this will cause the scene to be painted many times)
         plot.getAxis( ).getAxisX( ).setMaxSpan( 2000 );
         plot.getAxis( ).getAxisY( ).setMaxSpan( 2000 );
+        
+        // remove the heat map painter from the plot and instead add it to a WrappedPainter
+        // which is then added to the plot
+        HeatMapPainter heatMapPainter = example.getPainter( );
+        plot.removePainter( heatMapPainter );
+        WrappedPainter wrappedPainter = new WrappedPainter( );
+        wrappedPainter.addPainter( heatMapPainter );
+        plot.addPainter( wrappedPainter );
         
         return plot;
     }
