@@ -122,10 +122,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     // see: http://forum.jogamp.org/querying-textures-bound-to-default-draw-read-framebuffers-td4026564.html
     public int getTextureUnit( )
     {
-        int unit = drawable.getColorbuffer( GL.GL_FRONT ).getName( );
-        System.out.println( unit );
-
-        return unit;
+        return drawable.getColorbuffer( GL.GL_FRONT ).getName( );
     }
 
     public TextureProjected2D getProjectedTexture( )

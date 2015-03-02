@@ -34,7 +34,6 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -44,7 +43,6 @@ import javax.media.opengl.GLContext;
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.gl.texture.Texture;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 import com.metsci.glimpse.support.projection.InvertibleProjection;
 import com.metsci.glimpse.support.projection.Projection;
@@ -278,13 +276,13 @@ public abstract class TextureProjected2D implements DrawableTexture
                 return;
             }
         }
-        
+
         gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
         gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
 
         gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
         gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
-        
+
         try
         {
             for ( int i = 0; i < numTextures; i++ )
@@ -298,31 +296,31 @@ public abstract class TextureProjected2D implements DrawableTexture
                     int[] handles = texture.getHandles( );
                     int multiTextureUnit = multiTexture.getTextureUnit( );
                     int type = getGLTextureDim( texture.getNumDimension( ) );
-                    
+
                     gl.glActiveTexture( getGLTextureUnit( multiTextureUnit ) );
-                    
+
                     // there are two common cases which this is intended to handle:
                     // 1) the multitexture is a small texture like a colormap which should be the same for each part of the 2D grid texture
                     // 2) the multitexture is a second 2D grid with the same structure as the first
                     //
                     // this doesn't attempt to catch cases where the two 2D grids don't line up -- undefined behavior will result in this case
-                    gl.glBindTexture( type, texture.getHandles( )[ i >= handles.length ? 0 : i ] );
-                    
+                    gl.glBindTexture( type, texture.getHandles( )[i >= handles.length ? 0 : i] );
+
                     gl.glEnable( type );
                 }
-                
+
                 int type = getTextureType( );
-                
+
                 gl.glActiveTexture( getGLTextureUnit( texUnit ) );
-                gl.glBindTexture( type, textureHandles[i] );                
+                gl.glBindTexture( type, textureHandles[i] );
                 gl.glEnable( type );
-                
+
                 gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
                 gl.glVertexPointer( floatsPerVertex, GL2.GL_FLOAT, 0, 0 );
-                
+
                 gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, texCoordHandles[i] );
                 gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, 0 );
-                
+
                 int vertexCount = VERTICES_PER_QUAD * texQuadCounts[i];
                 gl.glDrawArrays( GL2.GL_QUADS, 0, vertexCount );
             }
