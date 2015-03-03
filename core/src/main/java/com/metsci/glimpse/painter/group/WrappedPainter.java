@@ -1,10 +1,12 @@
 package com.metsci.glimpse.painter.group;
 
+import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
@@ -16,14 +18,14 @@ import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
+import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
+import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.metsci.glimpse.support.texture.TextureProjected2D;
 
 /**
  * @see WrappedAxis1D
@@ -38,8 +40,11 @@ public class WrappedPainter extends GlimpsePainter2D
     private boolean isDisposed = false;
 
     private FBOGlimpseCanvas offscreen;
-    private TextureProjected2D texture;
-    private ShadedTexturePainter texturePainter;
+    private GLFloatBuffer2D vertCoordBuffer;
+    private GLFloatBuffer2D texCoordBuffer;
+
+    private int offscreenWidth;
+    private int offscreenHeight;
 
     private Axis2D dummyAxis;
     private GlimpseAxisLayout2D dummyLayout;
@@ -86,6 +91,14 @@ public class WrappedPainter extends GlimpsePainter2D
         gl2.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
         gl2.glEnable( GL2.GL_BLEND );
 
+        gl2.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
+        gl2.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+
+        gl2.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+        gl2.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
+
+        gl2.glEnable( GL.GL_TEXTURE_2D );
+
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
 
@@ -110,11 +123,13 @@ public class WrappedPainter extends GlimpsePainter2D
             if ( this.offscreen == null )
             {
                 this.offscreen = new FBOGlimpseCanvas( context.getGLContext( ), 0, 0, false );
-                this.texture = this.offscreen.getProjectedTexture( );
                 this.offscreen.addLayout( dummyLayout );
 
-                this.texturePainter = new ShadedTexturePainter( );
-                this.texturePainter.addDrawableTexture( this.texture );
+                this.texCoordBuffer = new GLFloatBuffer2D( 4 );
+                this.vertCoordBuffer = new GLFloatBuffer2D( 4 );
+
+                this.offscreenHeight = 0;
+                this.offscreenWidth = 0;
             }
 
             this.dummyLayout.removeAllLayouts( );
@@ -134,18 +149,25 @@ public class WrappedPainter extends GlimpsePainter2D
             {
                 for ( WrappedTextureBounds boundY : boundsY )
                 {
-                    drawTile( context, bounds, axis, boundX, boundY, forceRedraw );
+                    drawTile( context, axis, boundX, boundY, forceRedraw );
                     forceRedraw = false;
                 }
             }
         }
     }
 
-    protected void drawTile( GlimpseContext context, GlimpseBounds bounds, Axis2D axis, WrappedTextureBounds boundsX, WrappedTextureBounds boundsY, boolean forceRedraw )
+    protected void drawTile( GlimpseContext context, Axis2D axis, WrappedTextureBounds boundsX, WrappedTextureBounds boundsY, boolean forceRedraw )
     {
         if ( boundsX.isRedraw( ) || boundsY.isRedraw( ) || forceRedraw )
         {
-            this.offscreen.resize( boundsX.getTextureSize( ), boundsY.getTextureSize( ) );
+            System.out.println( boundsX.getTextureSize( ) + " " + boundsY.getTextureSize( ) );
+            
+            if ( this.offscreenWidth < boundsX.getTextureSize( ) || this.offscreenHeight < boundsY.getTextureSize( ) )
+            {
+                this.offscreenWidth = boundsX.getTextureSize( );
+                this.offscreenHeight = boundsY.getTextureSize( );
+                this.offscreen.resize( this.offscreenWidth, this.offscreenHeight );
+            }
 
             // when we draw offscreen, do so in "wrapped coordinates" (if the wrapped axis is
             // bounded from 0 to 10, it should be because that is the domain that the painters
@@ -160,6 +182,9 @@ public class WrappedPainter extends GlimpsePainter2D
                 glContext.makeCurrent( );
                 try
                 {
+                    // the offscreen canvas may be larger than we need, only draw on the portion that we need
+                    glContext.getGL( ).glViewport( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) );
+
                     // draw the dummy layout onto the offscreen canvas
                     this.offscreen.paint( );
                 }
@@ -174,13 +199,88 @@ public class WrappedPainter extends GlimpsePainter2D
             }
         }
 
-        // use a projection to position the texture in non-wrapped coordinates (since we've
-        // split up the image such that we don't have to worry about seams)
-        FlatProjection proj = new FlatProjection( boundsX.getStartValue( ), boundsX.getEndValue( ), boundsY.getStartValue( ), boundsY.getEndValue( ) );
-        this.texture.setProjection( proj );
+        drawTexture( context, axis, boundsX, boundsY );
+    }
 
-        // paint the texture from the offscreen buffer onto the screen
-        this.texturePainter.paintTo( context, bounds, axis );
+    protected void drawTexture( final GlimpseContext context, final Axis2D axis, final WrappedTextureBounds boundsX, final WrappedTextureBounds boundsY )
+    {
+        GL2 gl2 = context.getGL( ).getGL2( );
+
+        // position the drawn data in non-wrapped coordinates
+        // (since we've split up the image such that we don't have to worry about seams)
+        vertCoordBuffer.mutate( new Mutator( )
+        {
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                data.rewind( );
+                data.put( ( float ) boundsX.getStartValue( ) );
+                data.put( ( float ) boundsY.getStartValue( ) );
+
+                data.put( ( float ) boundsX.getStartValue( ) );
+                data.put( ( float ) boundsY.getEndValue( ) );
+
+                data.put( ( float ) boundsX.getEndValue( ) );
+                data.put( ( float ) boundsY.getEndValue( ) );
+
+                data.put( ( float ) boundsX.getEndValue( ) );
+                data.put( ( float ) boundsY.getStartValue( ) );
+            }
+        } );
+
+        // we don't necessarily use the whole texture, so only texture with the part we drew onto
+        texCoordBuffer.mutate( new Mutator( )
+        {
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                //TODO I'm not sure why 1.0 works here in the ZoomedIn case. We don't draw onto the whole
+                //     offscreen buffer, so we should need to use the tex coords to not use those areas
+                //     of the texture that we didn't draw into
+                float texEndX = 1.0f;//boundsX.getTextureSize( ) / ( float ) offscreenWidth;
+                float texEndY = 1.0f;//boundsY.getTextureSize( ) / ( float ) offscreenHeight;
+
+                System.out.println( texEndX + " " + texEndY );
+                
+                data.rewind( );
+                data.put( 0 );
+                data.put( 0 );
+
+                data.put( 0 );
+                data.put( texEndY );
+
+                data.put( texEndX );
+                data.put( texEndY );
+
+                data.put( texEndX );
+                data.put( 0 );
+            }
+        } );
+
+        texCoordBuffer.bind( GLVertexAttribute.ATTRIB_TEXCOORD_2D, gl2 );
+        vertCoordBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl2 );
+        gl2.glBindTexture( GL.GL_TEXTURE_2D, offscreen.getTextureUnit( ) );
+        try
+        {
+            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
+            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+
+            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
+            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
+
+            gl2.glMatrixMode( GL2.GL_PROJECTION );
+            gl2.glLoadIdentity( );
+            gl2.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
+
+            gl2.glDrawArrays( GL2.GL_QUADS, 0, 4 );
+
+        }
+        finally
+        {
+            gl2.glBindTexture( GL.GL_TEXTURE_2D, 0 );
+            vertCoordBuffer.unbind( gl2 );
+            texCoordBuffer.unbind( gl2 );
+        }
     }
 
     // Heuristic to determine how we will draw the offscreen image.
