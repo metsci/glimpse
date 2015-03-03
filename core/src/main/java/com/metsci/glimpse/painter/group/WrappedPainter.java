@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.media.opengl.GLContext;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
@@ -115,60 +116,20 @@ public class WrappedPainter extends GlimpsePainter2D
                 this.dummyLayout.addPainter( painter );
             }
 
-            Iterator<WrappedTextureBounds> iterX = iterator( axisX, bounds.getWidth( ) );
-            Iterator<WrappedTextureBounds> iterY = iterator( axisY, bounds.getHeight( ) );
+            List<WrappedTextureBounds> boundsX = Lists.newArrayList( iterator( axisX, bounds.getWidth( ) ) );
+            List<WrappedTextureBounds> boundsY = Lists.newArrayList( iterator( axisY, bounds.getHeight( ) ) );
 
             // always require a redraw for the first image
             boolean forceRedraw = true;
 
-            while ( iterX.hasNext( ) )
+            for ( WrappedTextureBounds boundX : boundsX )
             {
-                WrappedTextureBounds boundsX = iterX.next( );
-
-                while ( iterY.hasNext( ) )
+                for ( WrappedTextureBounds boundY : boundsY )
                 {
-                    WrappedTextureBounds boundsY = iterY.next( );
-
-                    drawTile( context, bounds, axis, boundsX, boundsY, forceRedraw );
+                    drawTile( context, bounds, axis, boundX, boundY, forceRedraw );
                     forceRedraw = false;
                 }
             }
-
-            // prepare the offscreen canvas by resizing it and adding the dummy layout with
-            // all the painters to paint
-            //
-
-            this.offscreen.resize( bounds.getWidth( ), bounds.getHeight( ) );
-            this.offscreen.removeAllLayouts( );
-            this.offscreen.addLayout( dummyLayout );
-
-            // release the onscreen context and make the offscreen context current
-            context.getGLContext( ).release( );
-            try
-            {
-                GLContext glContext = this.offscreen.getGLDrawable( ).getContext( );
-                glContext.makeCurrent( );
-                try
-                {
-                    // draw the dummy layout onto the offscreen canvas
-                    this.offscreen.paint( );
-                }
-                finally
-                {
-                    glContext.release( );
-                }
-            }
-            finally
-            {
-                context.getGLContext( ).makeCurrent( );
-            }
-
-            // use a projection to position the texture
-            FlatProjection proj = new FlatProjection( dummyAxis );
-            this.texture.setProjection( proj );
-
-            // paint the texture from the offscreen buffer onto the screen
-            this.texturePainter.paintTo( context, bounds, dummyAxis );
         }
     }
 
@@ -178,6 +139,11 @@ public class WrappedPainter extends GlimpsePainter2D
         {
             this.offscreen.resize( boundsX.getTextureSize( ), boundsY.getTextureSize( ) );
 
+            // when we draw offscreen, do so in "wrapped coordinates" (if the wrapped axis is
+            // bounded from 0 to 10, it should be because that is the domain that the painters
+            // are set up to draw in)
+            this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
+            
             // release the onscreen context and make the offscreen context current
             context.getGLContext( ).release( );
             try
@@ -198,11 +164,10 @@ public class WrappedPainter extends GlimpsePainter2D
             {
                 context.getGLContext( ).makeCurrent( );
             }
-
-            this.dummyAxis.set( boundsX.getStartValue( ), boundsX.getEndValue( ), boundsY.getStartValue( ), boundsY.getEndValue( ) );
-
-            // use a projection to position the texture
-            FlatProjection proj = new FlatProjection( dummyAxis );
+            
+            // use a projection to position the texture in non-wrapped coordinates (since we've
+            // split up the image such that we don't have to worry about seams)
+            FlatProjection proj = new FlatProjection( boundsX.getStartValue( ), boundsX.getEndValue( ), boundsY.getStartValue( ), boundsY.getEndValue( ) );
             this.texture.setProjection( proj );
 
             // paint the texture from the offscreen buffer onto the screen
@@ -286,17 +251,33 @@ public class WrappedPainter extends GlimpsePainter2D
     {
         private double startValue;
         private double endValue;
+        
+        private double startValueWrapped;
+        private double endValueWrapped;
+        
         private int textureSize;
 
         // whether the contents of the offscreen buffer can be reused
         private boolean redraw;
 
-        public WrappedTextureBounds( double startValue, double endValue, int textureSize, boolean redraw )
+        public WrappedTextureBounds( double startValue, double endValue, double startValueWrapped, double endValueWrapped, int textureSize, boolean redraw )
         {
             this.startValue = startValue;
             this.endValue = endValue;
+            this.startValueWrapped = startValueWrapped;
+            this.endValueWrapped = endValueWrapped;
             this.textureSize = textureSize;
             this.redraw = redraw;
+            
+            if ( textureSize <= 0 )
+            {
+                System.out.println( "Warning Texture Size: " + textureSize );
+            }
+            
+            if ( startValueWrapped > endValueWrapped )
+            {
+                System.out.println( "Warning: " + startValueWrapped + " " + endValueWrapped );
+            }
         }
 
         public double getStartValue( )
@@ -307,6 +288,16 @@ public class WrappedPainter extends GlimpsePainter2D
         public double getEndValue( )
         {
             return endValue;
+        }
+        
+        public double getStartValueWrapped( )
+        {
+            return startValueWrapped;
+        }
+
+        public double getEndValueWrapped( )
+        {
+            return endValueWrapped;
         }
 
         public int getTextureSize( )
@@ -342,10 +333,12 @@ public class WrappedPainter extends GlimpsePainter2D
         @Override
         public WrappedTextureBounds next( )
         {
+            System.out.println( "No Wrap");
+            
             if ( hasNext( ) )
             {
                 used = true;
-                return new WrappedTextureBounds( axis.getMin( ), axis.getMax( ), boundsSize, false );
+                return new WrappedTextureBounds( axis.getMin( ), axis.getMin( ), axis.getMax( ), axis.getMax( ), boundsSize, false );
             }
             else
             {
@@ -388,36 +381,48 @@ public class WrappedPainter extends GlimpsePainter2D
             {
                 if ( step == 0 )
                 {
+                    System.out.println( "ZoomedInIterator 1");
+                    
                     double start = axis.getMin( );
                     double distanceToSeam = axis.getWrapSpan( ) - axis.getWrappedMod( axis.getMin( ) );
-                    double distanceToEnd = axis.getMax( );
+                    double distanceToEnd = axis.getMax( ) - axis.getMin( );
                     double distance;
+                    
+                    double wrappedStart, wrappedEnd;
 
                     // only one image needed in this case (the seam is not visible)
-                    if ( distanceToEnd <= distanceToSeam )
+                    if ( distanceToEnd <= distanceToSeam || distanceToSeam <= 0 )
                     {
                         distance = distanceToEnd;
+                        wrappedStart = axis.getWrappedValue( start );
+                        wrappedEnd = axis.getWrappedValue( start + distance );
                         step = 2;
                     }
                     // we crossed over a seam, so two images will be needed
                     else
                     {
                         distance = distanceToSeam;
+                        wrappedStart = axis.getWrappedValue( start );
+                        wrappedEnd = axis.getWrapMax( );
                         step = 1;
                     }
 
-                    return new WrappedTextureBounds( start, start + distance, getTextureSize( distance ), true );
+                    return new WrappedTextureBounds( start, start + distance, wrappedStart, wrappedEnd, getTextureSize( distance ), true );
                 }
                 else if ( step == 1 )
                 {
+                    System.out.println( "ZoomedInIterator 2");
+                    
                     double start = axis.getMin( );
                     double distanceToSeam = axis.getWrapSpan( ) - axis.getWrappedMod( axis.getMin( ) );
                     double end = axis.getMax( );
                     double distance = end - ( start + distanceToSeam );
-
+                    double wrappedStart = axis.getWrapMin( );
+                    double wrappedEnd = axis.getWrappedValue( end );
+                    
                     step = 2;
 
-                    return new WrappedTextureBounds( start + distanceToSeam, end, getTextureSize( distance ), true );
+                    return new WrappedTextureBounds( start + distanceToSeam, end, wrappedStart, wrappedEnd, getTextureSize( distance ), true );
                 }
             }
 
@@ -446,11 +451,13 @@ public class WrappedPainter extends GlimpsePainter2D
         private WrappedAxis1D axis;
         private int boundsSize;
         private double current;
+        private int counter;
 
         public ZoomedOutIterator( WrappedAxis1D axis, int boundsSize )
         {
             this.axis = axis;
             this.boundsSize = boundsSize;
+            this.counter = 0;
 
             double wrappedModX = axis.getWrappedMod( axis.getMin( ) );
 
@@ -481,9 +488,12 @@ public class WrappedPainter extends GlimpsePainter2D
                 double start = this.current;
                 double end = start + axis.getWrapSpan( );
                 this.current = end;
+                this.counter++;
+                
+                System.out.println( "ZoomedOutIterator " + counter);
 
                 //TODO the texture bounds could be made smaller here -- the image is zoomed out and doesn't take up the whole screen
-                return new WrappedTextureBounds( start, end, boundsSize, false );
+                return new WrappedTextureBounds( start, end, axis.getWrapMin( ), axis.getWrapMax( ), boundsSize, false );
             }
             else
             {
