@@ -160,8 +160,6 @@ public class WrappedPainter extends GlimpsePainter2D
     {
         if ( boundsX.isRedraw( ) || boundsY.isRedraw( ) || forceRedraw )
         {
-            System.out.println( boundsX.getTextureSize( ) + " " + boundsY.getTextureSize( ) );
-            
             if ( this.offscreenWidth < boundsX.getTextureSize( ) || this.offscreenHeight < boundsY.getTextureSize( ) )
             {
                 this.offscreenWidth = boundsX.getTextureSize( );
@@ -240,8 +238,6 @@ public class WrappedPainter extends GlimpsePainter2D
                 float texEndX = 1.0f;//boundsX.getTextureSize( ) / ( float ) offscreenWidth;
                 float texEndY = 1.0f;//boundsY.getTextureSize( ) / ( float ) offscreenHeight;
 
-                System.out.println( texEndX + " " + texEndY );
-                
                 data.rewind( );
                 data.put( 0 );
                 data.put( 0 );
