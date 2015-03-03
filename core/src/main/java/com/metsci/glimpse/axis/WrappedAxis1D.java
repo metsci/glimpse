@@ -62,7 +62,7 @@ public class WrappedAxis1D extends Axis1D
         double span = getWrapSpan( );
         double v = value - minWrapVal; // shift minWrapVal to 0
         double mod = v % span;
-        return mod + ( mod > 0 ? 0 : span );
+        return mod + ( mod >= 0 ? 0 : span );
     }
     
     public static void main( String[] args )
