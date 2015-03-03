@@ -54,15 +54,35 @@ public class WrappedAxis1D extends Axis1D
     
     public double getWrappedValue( double value )
     {
-        return minWrapVal + getWrappedMod( value );
+        return getWrappedValue( value, false );
+    }
+
+    /**
+     * @param value the linear axis value to convert
+     * @param roundUp if true, values on the seam will return getWrapMax( ) instead of getWrapMin( )
+     * @return the value converted to wrapped coordinates
+     */
+    public double getWrappedValue( double value, boolean roundUp )
+    {
+        return minWrapVal + getWrappedMod( value, roundUp );
     }
     
     public double getWrappedMod( double value )
     {
+        return getWrappedMod( value, false );
+    }
+    
+    /**
+     * @param value the linear axis value to convert
+     * @param roundUp if true, values on the seam will return getWrapMax( ) instead of getWrapMin( )
+     * @return the distance between this value and the left seam
+     */
+    public double getWrappedMod( double value, boolean roundUp )
+    {
         double span = getWrapSpan( );
         double v = value - minWrapVal; // shift minWrapVal to 0
         double mod = v % span;
-        return mod + ( mod >= 0 ? 0 : span );
+        return mod + ( ( mod == 0 && roundUp ) || mod < 0 ? span : 0 );
     }
     
     public static void main( String[] args )

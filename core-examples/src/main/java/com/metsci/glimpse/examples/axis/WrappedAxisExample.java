@@ -44,11 +44,11 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
                     }
                     */
 
-                    @Override
-                    protected GridAxisLabelHandler createLabelHandlerX( )
-                    {
-                        return new WrappedLabelHandler( );
-                    }
+//                    @Override
+//                    protected GridAxisLabelHandler createLabelHandlerX( )
+//                    {
+//                        return new WrappedLabelHandler( );
+//                    }
 
                     @Override
                     protected GridAxisLabelHandler createLabelHandlerY( )
@@ -56,11 +56,11 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
                         return new WrappedLabelHandler( );
                     }
 
-                    @Override
-                    protected Axis1D createAxisX( )
-                    {
-                        return new WrappedAxis1D( 0, 1000 );
-                    }
+//                    @Override
+//                    protected Axis1D createAxisX( )
+//                    {
+//                        return new WrappedAxis1D( 0, 1000 );
+//                    }
 
                     @Override
                     protected Axis1D createAxisY( )
@@ -75,8 +75,8 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
 
         // don't let the user zoom out too far (especially important with wrapped axes
         // since this will cause the scene to be painted many times)
-        plot.getAxis( ).getAxisX( ).setMaxSpan( 2000 );
-        plot.getAxis( ).getAxisY( ).setMaxSpan( 2000 );
+        plot.getAxis( ).getAxisX( ).setMaxSpan( 4000 );
+        plot.getAxis( ).getAxisY( ).setMaxSpan( 4000 );
         
         // remove the heat map painter from the plot and instead add it to a WrappedPainter
         // which is then added to the plot
