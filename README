@@ -1,6 +1,6 @@
-=== Installing Jekyll on Ubuntu 10.04
+=== Installing Jekyll on Ubuntu 14.04
 
-http://help.rubygems.org/discussions/problems/350-installing-rubygems-137-and-jekyll-on-ubuntu-1004
+http://michaelchelen.net/81fa/install-jekyll-2-ubuntu-14-04/
 
 === To Test Locally
 
@@ -8,5 +8,5 @@ sudo jekyll serve --baseurl '/glimpse'
 
 === Browse
 
-http://0.0.0.0:4000/glimpse/
+http://127.0.0.1:4000/glimpse/
 
