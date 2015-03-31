@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -293,12 +293,12 @@ public class MultiAxisPlot2D extends GlimpseLayout
 
     protected void initializeArrays( )
     {
-        this.axesTopX = new HashMap<String, AxisInfo>( );
-        this.axesBottomX = new HashMap<String, AxisInfo>( );
-        this.axesRightY = new HashMap<String, AxisInfo>( );
-        this.axesLeftY = new HashMap<String, AxisInfo>( );
+        this.axesTopX = new LinkedHashMap<String, AxisInfo>( );
+        this.axesBottomX = new LinkedHashMap<String, AxisInfo>( );
+        this.axesRightY = new LinkedHashMap<String, AxisInfo>( );
+        this.axesLeftY = new LinkedHashMap<String, AxisInfo>( );
 
-        this.axesAll = new HashMap<String, AxisInfo>( );
+        this.axesAll = new LinkedHashMap<String, AxisInfo>( );
 
         this.centerAxisX = new Axis1D( );
         this.centerAxisY = new Axis1D( );
