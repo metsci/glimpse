@@ -63,6 +63,8 @@ public class LandingIndicator
 
     protected ReprType recentReprType;
 
+    protected Rectangle displayBounds;
+
 
     public LandingIndicator( DockingTheme theme )
     {
@@ -77,6 +79,21 @@ public class LandingIndicator
         frame.setContentPane( frameContent );
 
         this.recentReprType = null;
+
+        this.displayBounds = findDisplayBounds( );
+    }
+
+    protected static Rectangle findDisplayBounds( )
+    {
+        Rectangle bounds = new Rectangle( );
+        for ( GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
+        {
+            for ( GraphicsConfiguration config : screen.getConfigurations( ) )
+            {
+                bounds = bounds.union( config.getBounds( ) );
+            }
+        }
+        return bounds;
     }
 
     public void setBounds( Rectangle bounds )
@@ -107,15 +124,6 @@ public class LandingIndicator
             // heavyweight content.
             //
 
-            Rectangle displayBounds = new Rectangle( );
-            GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment( );
-            for ( GraphicsDevice screen : env.getScreenDevices( ) )
-            {
-                for ( GraphicsConfiguration config : screen.getConfigurations( ) )
-                {
-                    displayBounds = displayBounds.union( config.getBounds( ) );
-                }
-            }
             Rectangle visibleBounds = bounds.intersection( displayBounds );
             frame.setBounds( visibleBounds );
 
