@@ -31,9 +31,13 @@ import static com.metsci.glimpse.docking.LandingIndicator.ReprType.SHAPED_WINDOW
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.TRANSLUCENT_WINDOW;
 import static java.awt.GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT;
 import static java.awt.GraphicsDevice.WindowTranslucency.TRANSLUCENT;
-import static javax.swing.BorderFactory.createLineBorder;
+import static java.lang.Math.max;
+import static javax.swing.BorderFactory.createMatteBorder;
 
+import java.awt.Color;
+import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 
@@ -83,7 +87,44 @@ public class LandingIndicator
         }
         else
         {
-            frame.setBounds( bounds );
+            // On some platforms, Swing refuses to programmatically move a window beyond the edge of the screen.
+            // Instead, Swing translates the window so that it is entirely on the screen. When our landing-region
+            // is an existing docker that is partly offscreen, we have a problem: Swing won't allow us to move the
+            // indicator partly offscreen, so it ends up in the wrong place.
+            //
+            // So here we size the indicator so that it will NOT go beyond the edge of the screen, and adjust the
+            // border thickness on each side appropriately. The part of the indicator that would be offscreen is
+            // simply not drawn.
+            //
+            // I'm not sure whether this will behave properly for non-rectangular multi-head setups -- it depends
+            // on the details of the translation behavior (which varies by platform, and doesn't seem to be documented).
+            //
+            // There is an alternative approach, using this JFrame indicator for new-window landing-regions, but
+            // switching to a GlassPane overlay when the destination is an existing docker. Such an approach would
+            // be robust to non-rectangular multi-head setups, although the implementation would be more complicated.
+            // The main downside is that it would be difficult (or impossible) to make sure the overlay indicator
+            // looked the same as the window indicator, for all combinations of translucency support and lightweight/
+            // heavyweight content.
+            //
+
+            Rectangle displayBounds = new Rectangle( );
+            GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment( );
+            for ( GraphicsDevice screen : env.getScreenDevices( ) )
+            {
+                for ( GraphicsConfiguration config : screen.getConfigurations( ) )
+                {
+                    displayBounds = displayBounds.union( config.getBounds( ) );
+                }
+            }
+            Rectangle visibleBounds = bounds.intersection( displayBounds );
+            frame.setBounds( visibleBounds );
+
+            Color color = theme.landingIndicatorColor;
+            int border = theme.landingIndicatorThickness;
+            int topBorder = max( 0, border - ( visibleBounds.y - bounds.y ) );
+            int leftBorder = max( 0, border - ( visibleBounds.x - bounds.x ) );
+            int bottomBorder = max( 0, border - ( ( bounds.y + bounds.height ) - ( visibleBounds.y + visibleBounds.height ) ) );
+            int rightBorder = max( 0, border - ( ( bounds.x + bounds.width ) - ( visibleBounds.x + visibleBounds.width ) ) );
 
             GraphicsDevice device = frame.getGraphicsConfiguration( ).getDevice( );
             if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
@@ -92,7 +133,7 @@ public class LandingIndicator
                 {
                     frame.setShape( null );
                     frameContent.setBackground( null );
-                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
+                    frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
                     frame.setOpacity( 0.5f );
                     this.recentReprType = TRANSLUCENT_WINDOW;
                 }
@@ -102,14 +143,13 @@ public class LandingIndicator
                 if ( recentReprType != SHAPED_WINDOW )
                 {
                     // Set the whole pane to the bg color, to minimize flicker
-                    frameContent.setBackground( theme.landingIndicatorColor );
+                    frameContent.setBackground( color );
                     frameContent.setBorder( null );
                     this.recentReprType = SHAPED_WINDOW;
                 }
 
-                int thickness = theme.landingIndicatorThickness;
-                Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
-                shape.subtract( new Area( new Rectangle( thickness, thickness, bounds.width - 2*thickness, bounds.height - 2*thickness ) ) );
+                Area shape = new Area( new Rectangle( 0, 0, visibleBounds.width, visibleBounds.height ) );
+                shape.subtract( new Area( new Rectangle( leftBorder, topBorder, visibleBounds.width - ( leftBorder + rightBorder ), visibleBounds.height - ( topBorder + bottomBorder ) ) ) );
                 frame.setShape( shape );
             }
             else
@@ -118,7 +158,7 @@ public class LandingIndicator
                 {
                     frame.setShape( null );
                     frameContent.setBackground( null );
-                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
+                    frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
                     this.recentReprType = OPAQUE_WINDOW;
                 }
             }
