@@ -32,13 +32,16 @@ import static com.metsci.glimpse.docking.LandingIndicator.ReprType.TRANSLUCENT_W
 import static java.awt.GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT;
 import static java.awt.GraphicsDevice.WindowTranslucency.TRANSLUCENT;
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static javax.swing.BorderFactory.createMatteBorder;
 
 import java.awt.Color;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.geom.Area;
 
 import javax.swing.JFrame;
@@ -85,15 +88,88 @@ public class LandingIndicator
 
     protected static Rectangle findDisplayBounds( )
     {
-        Rectangle bounds = new Rectangle( );
+        int x0 = Integer.MAX_VALUE;
+        int y0 = Integer.MAX_VALUE;
+        int x1 = Integer.MIN_VALUE;
+        int y1 = Integer.MIN_VALUE;
+
+        Toolkit toolkit = Toolkit.getDefaultToolkit( );
         for ( GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
         {
             for ( GraphicsConfiguration config : screen.getConfigurations( ) )
             {
-                bounds = bounds.union( config.getBounds( ) );
+                Rectangle bounds = config.getBounds( );
+                Insets insets = toolkit.getScreenInsets( config );
+
+                x0 = min( x0, bounds.x + insets.left );
+                y0 = min( y0, bounds.y + insets.top );
+                x1 = max( x1, bounds.x + bounds.width - insets.right );
+                y1 = max( y1, bounds.y + bounds.height - insets.bottom );
             }
         }
-        return bounds;
+
+        return new Rectangle( x0, y0, x1 - x0, y1 - y0 );
+
+
+        /*
+        Set<GraphicsConfiguration> configs = new HashSet<>( );
+        for ( GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
+        {
+            addAll( configs, screen.getConfigurations( ) );
+        }
+
+        Toolkit toolkit = Toolkit.getDefaultToolkit( );
+        for ( GraphicsConfiguration a : configs )
+        {
+            Rectangle aBounds = a.getBounds( );
+            int ax0 = aBounds.x;
+            int ax1 = aBounds.x + aBounds.width;
+            int ay0 = aBounds.y;
+            int ay1 = aBounds.y + aBounds.height;
+
+            boolean hasNorthNeighbor = false;
+            boolean hasSouthNeighbor = false;
+            boolean hasWestNeighbor  = false;
+            boolean hasEastNeighbor  = false;
+
+            for ( GraphicsConfiguration b : configs )
+            {
+                Rectangle bBounds = b.getBounds( );
+                int bx0 = bBounds.x;
+                int bx1 = bBounds.x + bBounds.width;
+                int by0 = bBounds.y;
+                int by1 = bBounds.y + bBounds.height;
+
+                boolean xOverlap = ( ax0 < bx1 && bx0 < ax1 );
+                boolean yOverlap = ( ay0 < by1 && by0 < ay1 );
+
+                hasNorthNeighbor |= ( xOverlap && by0 < ay0 );
+                hasSouthNeighbor |= ( xOverlap && by1 > ay1 );
+                hasWestNeighbor  |= ( yOverlap && bx0 < ax0 );
+                hasEastNeighbor  |= ( yOverlap && bx1 > ax1 );
+            }
+
+            Insets insets = toolkit.getScreenInsets( a );
+            if ( !hasNorthNeighbor )
+            {
+                ay0 += insets.top;
+            }
+            if ( !hasSouthNeighbor )
+            {
+                ay1 -= insets.bottom;
+            }
+            if ( !hasWestNeighbor )
+            {
+                ax0 += insets.left;
+            }
+            if ( !hasEastNeighbor )
+            {
+                ax1 -= insets.right;
+            }
+
+            new Rectangle( ax0, ay0, ax1 - ax0, ay1 - ay0 );
+        }
+        */
     }
 
     public void setBounds( Rectangle bounds )
