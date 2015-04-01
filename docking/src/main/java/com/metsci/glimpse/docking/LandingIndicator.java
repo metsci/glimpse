@@ -43,6 +43,7 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
+import java.util.Objects;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -66,7 +67,8 @@ public class LandingIndicator
 
     protected ReprType recentReprType;
 
-    protected Rectangle displayBounds;
+    protected final boolean clipToDisplayBounds;
+    protected final Rectangle displayBounds;
 
 
     public LandingIndicator( DockingTheme theme )
@@ -83,7 +85,13 @@ public class LandingIndicator
 
         this.recentReprType = null;
 
-        this.displayBounds = findDisplayBounds( );
+        this.clipToDisplayBounds = !canMoveWindowsOffscreen( );
+        this.displayBounds = ( clipToDisplayBounds ? findDisplayBounds( ) : null );
+    }
+
+    protected static boolean canMoveWindowsOffscreen( )
+    {
+        return Objects.equals( System.getProperty( "java.awt.graphicsenv" ), "sun.awt.Win32GraphicsEnvironment" );
     }
 
     protected static Rectangle findDisplayBounds( )
@@ -200,15 +208,35 @@ public class LandingIndicator
             // heavyweight content.
             //
 
-            Rectangle visibleBounds = bounds.intersection( displayBounds );
-            frame.setBounds( visibleBounds );
-
             Color color = theme.landingIndicatorColor;
             int border = theme.landingIndicatorThickness;
-            int topBorder = max( 0, border - ( visibleBounds.y - bounds.y ) );
-            int leftBorder = max( 0, border - ( visibleBounds.x - bounds.x ) );
-            int bottomBorder = max( 0, border - ( ( bounds.y + bounds.height ) - ( visibleBounds.y + visibleBounds.height ) ) );
-            int rightBorder = max( 0, border - ( ( bounds.x + bounds.width ) - ( visibleBounds.x + visibleBounds.width ) ) );
+
+            int topBorder;
+            int leftBorder;
+            int bottomBorder;
+            int rightBorder;
+
+            if ( clipToDisplayBounds )
+            {
+                Rectangle visible = bounds.intersection( displayBounds );
+
+                topBorder = max( 0, border - ( visible.y - bounds.y ) );
+                leftBorder = max( 0, border - ( visible.x - bounds.x ) );
+                bottomBorder = max( 0, border - ( ( bounds.y + bounds.height ) - ( visible.y + visible.height ) ) );
+                rightBorder = max( 0, border - ( ( bounds.x + bounds.width ) - ( visible.x + visible.width ) ) );
+
+                bounds = visible;
+            }
+            else
+            {
+                topBorder = border;
+                leftBorder = border;
+                bottomBorder = border;
+                rightBorder = border;
+            }
+
+            frame.setBounds( bounds );
+
 
             GraphicsDevice device = frame.getGraphicsConfiguration( ).getDevice( );
             if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
@@ -234,8 +262,8 @@ public class LandingIndicator
                     this.recentReprType = SHAPED_WINDOW;
                 }
 
-                Area shape = new Area( new Rectangle( 0, 0, visibleBounds.width, visibleBounds.height ) );
-                shape.subtract( new Area( new Rectangle( leftBorder, topBorder, visibleBounds.width - ( leftBorder + rightBorder ), visibleBounds.height - ( topBorder + bottomBorder ) ) ) );
+                Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
+                shape.subtract( new Area( new Rectangle( leftBorder, topBorder, bounds.width - ( leftBorder + rightBorder ), bounds.height - ( topBorder + bottomBorder ) ) ) );
                 frame.setShape( shape );
             }
             else
