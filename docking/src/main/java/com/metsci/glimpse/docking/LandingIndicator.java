@@ -133,10 +133,12 @@ public class LandingIndicator
                 {
                     frame.setShape( null );
                     frameContent.setBackground( null );
-                    frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
                     frame.setOpacity( 0.5f );
                     this.recentReprType = TRANSLUCENT_WINDOW;
                 }
+
+                // Borders may change, so do this outside the if
+                frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
             }
             else if ( device.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT ) )
             {
@@ -158,9 +160,11 @@ public class LandingIndicator
                 {
                     frame.setShape( null );
                     frameContent.setBackground( null );
-                    frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
                     this.recentReprType = OPAQUE_WINDOW;
                 }
+
+                // Borders may change, so do this outside the if
+                frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
             }
 
             frame.setVisible( true );
