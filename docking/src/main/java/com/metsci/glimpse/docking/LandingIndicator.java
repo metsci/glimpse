@@ -29,13 +29,14 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.OPAQUE_WINDOW;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.SHAPED_WINDOW;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.TRANSLUCENT_WINDOW;
+import static java.awt.GraphicsDevice.TYPE_RASTER_SCREEN;
 import static java.awt.GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT;
 import static java.awt.GraphicsDevice.WindowTranslucency.TRANSLUCENT;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.Collections.unmodifiableCollection;
 import static javax.swing.BorderFactory.createMatteBorder;
 
-import java.awt.Color;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -43,7 +44,8 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.geom.Area;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -61,231 +63,183 @@ public class LandingIndicator
     }
 
 
+    protected static class ScreenEntry
+    {
+        public final int xScreen;
+        public final int yScreen;
+        public final int wScreen;
+        public final int hScreen;
+
+        public final JFrame frame;
+        public final JPanel content;
+
+        public ScreenEntry( int xScreen, int yScreen, int wScreen, int hScreen, JFrame frame, JPanel content )
+        {
+            this.xScreen = xScreen;
+            this.yScreen = yScreen;
+            this.wScreen = wScreen;
+            this.hScreen = hScreen;
+
+            this.frame = frame;
+            this.content = content;
+        }
+    }
+
+
     protected final DockingTheme theme;
-    protected final JFrame frame;
-    protected final JPanel frameContent;
-
-    protected ReprType recentReprType;
-
-    protected final boolean clipToDisplayBounds;
-    protected final Rectangle displayBounds;
+    protected final ReprType reprType;
+    protected final Collection<ScreenEntry> screenEntries;
 
 
     public LandingIndicator( DockingTheme theme )
     {
         this.theme = theme;
 
-        this.frame = new JFrame( );
-        frame.setAlwaysOnTop( true );
-        frame.setFocusable( false );
-        frame.setUndecorated( true );
+        boolean haveTranslucentWindows = true;
+        boolean haveTransparentPixels = true;
+        Collection<ScreenEntry> screenEntries = new ArrayList<>( );
 
-        this.frameContent = new JPanel( );
-        frame.setContentPane( frameContent );
-
-        this.recentReprType = null;
-
-        this.clipToDisplayBounds = !canMoveWindowsOffscreen( );
-        this.displayBounds = ( clipToDisplayBounds ? findDisplayBounds( ) : null );
-    }
-
-    protected static boolean canMoveWindowsOffscreen( )
-    {
-        return Objects.equals( System.getProperty( "java.awt.graphicsenv" ), "sun.awt.Win32GraphicsEnvironment" );
-    }
-
-    protected static Rectangle findDisplayBounds( )
-    {
-        int x0 = Integer.MAX_VALUE;
-        int y0 = Integer.MAX_VALUE;
-        int x1 = Integer.MIN_VALUE;
-        int y1 = Integer.MIN_VALUE;
+        // On some platforms, Swing refuses to programmatically move a window beyond the edge of the screen.
+        // Instead, Swing silently translates the window so that it is entirely on the screen. When our landing-
+        // region is an existing docker that is partly offscreen, we have a problem: Swing won't allow us to
+        // move the indicator partly offscreen, so it ends up in the wrong place.
+        //
+        // To deal with this, we create one frame for each screen. Each frame always stays entirely on its screen:
+        // any part of it that would spill over to another screen is clipped. The part of the indicator for that
+        // other screen is drawn by another frame -- the frame for that other screen.
+        //
+        // There are a couple of alternative approaches, but this one is the best option: it behaves properly for
+        // arbitrary multi-head geometries, while also staying decoupled from the rest of the code. Its primary
+        // downside is that it can cause multiple windows to appear in the system window list.
+        //
 
         Toolkit toolkit = Toolkit.getDefaultToolkit( );
         for ( GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
         {
-            for ( GraphicsConfiguration config : screen.getConfigurations( ) )
+            if ( screen.getType( ) == TYPE_RASTER_SCREEN )
             {
+                haveTranslucentWindows &= screen.isWindowTranslucencySupported( TRANSLUCENT );
+                haveTransparentPixels &= screen.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT );
+
+                GraphicsConfiguration config = screen.getDefaultConfiguration( );
                 Rectangle bounds = config.getBounds( );
                 Insets insets = toolkit.getScreenInsets( config );
+                int x = bounds.x + insets.left;
+                int y = bounds.y + insets.top;
+                int w = bounds.width - ( insets.left + insets.right );
+                int h = bounds.height - ( insets.top + insets.bottom );
 
-                x0 = min( x0, bounds.x + insets.left );
-                y0 = min( y0, bounds.y + insets.top );
-                x1 = max( x1, bounds.x + bounds.width - insets.right );
-                y1 = max( y1, bounds.y + bounds.height - insets.bottom );
+                JFrame frame = new JFrame( ".", config );
+                JPanel content = new JPanel( );
+                frame.setAutoRequestFocus( false );
+                frame.setFocusable( false );
+                frame.setFocusableWindowState( false );
+                frame.setAlwaysOnTop( true );
+                frame.setFocusable( false );
+                frame.setUndecorated( true );
+                frame.setContentPane( content );
+
+                screenEntries.add( new ScreenEntry( x, y, w, h, frame, content ) );
             }
         }
 
-        return new Rectangle( x0, y0, x1 - x0, y1 - y0 );
+        if ( haveTranslucentWindows ) this.reprType = TRANSLUCENT_WINDOW;
+        else if ( haveTransparentPixels ) this.reprType = SHAPED_WINDOW;
+        else this.reprType = OPAQUE_WINDOW;
 
+        this.screenEntries = unmodifiableCollection( screenEntries );
 
-        /*
-        Set<GraphicsConfiguration> configs = new HashSet<>( );
-        for ( GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
+        for ( ScreenEntry en : screenEntries )
         {
-            addAll( configs, screen.getConfigurations( ) );
+            JFrame frame = en.frame;
+            JPanel content = en.content;
+            switch ( reprType )
+            {
+                case TRANSLUCENT_WINDOW:
+                    frame.setOpacity( 0.5f );
+                    content.setBackground( null );
+                    break;
+
+                case SHAPED_WINDOW:
+                    content.setBorder( null );
+                    content.setBackground( theme.landingIndicatorColor );
+                    break;
+
+                default:
+                    content.setBackground( null );
+                    break;
+            }
         }
-
-        Toolkit toolkit = Toolkit.getDefaultToolkit( );
-        for ( GraphicsConfiguration a : configs )
-        {
-            Rectangle aBounds = a.getBounds( );
-            int ax0 = aBounds.x;
-            int ax1 = aBounds.x + aBounds.width;
-            int ay0 = aBounds.y;
-            int ay1 = aBounds.y + aBounds.height;
-
-            boolean hasNorthNeighbor = false;
-            boolean hasSouthNeighbor = false;
-            boolean hasWestNeighbor  = false;
-            boolean hasEastNeighbor  = false;
-
-            for ( GraphicsConfiguration b : configs )
-            {
-                Rectangle bBounds = b.getBounds( );
-                int bx0 = bBounds.x;
-                int bx1 = bBounds.x + bBounds.width;
-                int by0 = bBounds.y;
-                int by1 = bBounds.y + bBounds.height;
-
-                boolean xOverlap = ( ax0 < bx1 && bx0 < ax1 );
-                boolean yOverlap = ( ay0 < by1 && by0 < ay1 );
-
-                hasNorthNeighbor |= ( xOverlap && by0 < ay0 );
-                hasSouthNeighbor |= ( xOverlap && by1 > ay1 );
-                hasWestNeighbor  |= ( yOverlap && bx0 < ax0 );
-                hasEastNeighbor  |= ( yOverlap && bx1 > ax1 );
-            }
-
-            Insets insets = toolkit.getScreenInsets( a );
-            if ( !hasNorthNeighbor )
-            {
-                ay0 += insets.top;
-            }
-            if ( !hasSouthNeighbor )
-            {
-                ay1 -= insets.bottom;
-            }
-            if ( !hasWestNeighbor )
-            {
-                ax0 += insets.left;
-            }
-            if ( !hasEastNeighbor )
-            {
-                ax1 -= insets.right;
-            }
-
-            new Rectangle( ax0, ay0, ax1 - ax0, ay1 - ay0 );
-        }
-        */
     }
 
     public void setBounds( Rectangle bounds )
     {
         if ( bounds == null )
         {
-            frame.setVisible( false );
+            for ( ScreenEntry en : screenEntries )
+            {
+                JFrame frame = en.frame;
+                frame.setVisible( false );
+            }
         }
         else
         {
-            // On some platforms, Swing refuses to programmatically move a window beyond the edge of the screen.
-            // Instead, Swing translates the window so that it is entirely on the screen. When our landing-region
-            // is an existing docker that is partly offscreen, we have a problem: Swing won't allow us to move the
-            // indicator partly offscreen, so it ends up in the wrong place.
-            //
-            // So here we size the indicator so that it will NOT go beyond the edge of the screen, and adjust the
-            // border thickness on each side appropriately. The part of the indicator that would be offscreen is
-            // simply not drawn.
-            //
-            // I'm not sure whether this will behave properly for non-rectangular multi-head setups -- it depends
-            // on the details of the translation behavior (which varies by platform, and doesn't seem to be documented).
-            //
-            // There is an alternative approach, using this JFrame indicator for new-window landing-regions, but
-            // switching to a GlassPane overlay when the destination is an existing docker. Such an approach would
-            // be robust to non-rectangular multi-head setups, although the implementation would be more complicated.
-            // The main downside is that it would be difficult (or impossible) to make sure the overlay indicator
-            // looked the same as the window indicator, for all combinations of translucency support and lightweight/
-            // heavyweight content.
-            //
-
-            Color color = theme.landingIndicatorColor;
-            int border = theme.landingIndicatorThickness;
-
-            int topBorder;
-            int leftBorder;
-            int bottomBorder;
-            int rightBorder;
-
-            if ( clipToDisplayBounds )
+            for ( ScreenEntry en : screenEntries )
             {
-                Rectangle visible = bounds.intersection( displayBounds );
+                JFrame frame = en.frame;
+                JPanel content = en.content;
 
-                topBorder = max( 0, border - ( visible.y - bounds.y ) );
-                leftBorder = max( 0, border - ( visible.x - bounds.x ) );
-                bottomBorder = max( 0, border - ( ( bounds.y + bounds.height ) - ( visible.y + visible.height ) ) );
-                rightBorder = max( 0, border - ( ( bounds.x + bounds.width ) - ( visible.x + visible.width ) ) );
+                int x = max( en.xScreen, bounds.x );
+                int y = max( en.yScreen, bounds.y );
+                int xEnd = min( en.xScreen + en.wScreen, bounds.x + bounds.width );
+                int yEnd = min( en.yScreen + en.hScreen, bounds.y + bounds.height );
+                int w = xEnd - x;
+                int h = yEnd - y;
 
-                bounds = visible;
-            }
-            else
-            {
-                topBorder = border;
-                leftBorder = border;
-                bottomBorder = border;
-                rightBorder = border;
-            }
-
-            frame.setBounds( bounds );
-
-
-            GraphicsDevice device = frame.getGraphicsConfiguration( ).getDevice( );
-            if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
-            {
-                if ( recentReprType != TRANSLUCENT_WINDOW )
+                if ( w > 0 && h > 0 )
                 {
-                    frame.setShape( null );
-                    frameContent.setBackground( null );
-                    frame.setOpacity( 0.5f );
-                    this.recentReprType = TRANSLUCENT_WINDOW;
-                }
+                    frame.setBounds( x, y, w, h );
 
-                // Borders may change, so do this outside the if
-                frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
-            }
-            else if ( device.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT ) )
-            {
-                if ( recentReprType != SHAPED_WINDOW )
+                    int border = theme.landingIndicatorThickness;
+                    int topBorder = max( 0, border - ( y - bounds.y ) );
+                    int leftBorder = max( 0, border - ( x - bounds.x ) );
+                    int bottomBorder = max( 0, border - ( ( bounds.y + bounds.height ) - yEnd ) );
+                    int rightBorder = max( 0, border - ( ( bounds.x + bounds.width ) - xEnd ) );
+
+                    switch ( reprType )
+                    {
+                        case TRANSLUCENT_WINDOW:
+                            content.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, theme.landingIndicatorColor ) );
+                            break;
+
+                        case SHAPED_WINDOW:
+                            Area shape = new Area( new Rectangle( 0, 0, w, h ) );
+                            shape.subtract( new Area( new Rectangle( leftBorder, topBorder, w - ( leftBorder + rightBorder ), h - ( topBorder + bottomBorder ) ) ) );
+                            frame.setShape( shape );
+                            break;
+
+                        default:
+                            content.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, theme.landingIndicatorColor ) );
+                            break;
+                    }
+
+                    frame.setVisible( true );
+                }
+                else
                 {
-                    // Set the whole pane to the bg color, to minimize flicker
-                    frameContent.setBackground( color );
-                    frameContent.setBorder( null );
-                    this.recentReprType = SHAPED_WINDOW;
+                    frame.setVisible( false );
                 }
-
-                Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
-                shape.subtract( new Area( new Rectangle( leftBorder, topBorder, bounds.width - ( leftBorder + rightBorder ), bounds.height - ( topBorder + bottomBorder ) ) ) );
-                frame.setShape( shape );
             }
-            else
-            {
-                if ( recentReprType != OPAQUE_WINDOW )
-                {
-                    frame.setShape( null );
-                    frameContent.setBackground( null );
-                    this.recentReprType = OPAQUE_WINDOW;
-                }
-
-                // Borders may change, so do this outside the if
-                frameContent.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, color ) );
-            }
-
-            frame.setVisible( true );
         }
     }
 
     public void dispose( )
     {
-        frame.dispose( );
+        for ( ScreenEntry en : screenEntries )
+        {
+            JFrame frame = en.frame;
+            frame.dispose( );
+        }
     }
 
 }
