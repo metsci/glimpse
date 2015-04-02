@@ -37,6 +37,7 @@ import static java.lang.Math.min;
 import static java.util.Collections.unmodifiableCollection;
 import static javax.swing.BorderFactory.createMatteBorder;
 
+import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -130,7 +131,17 @@ public class LandingIndicator
                 int h = bounds.height - ( insets.top + insets.bottom );
 
                 JFrame frame = new JFrame( ".", config );
-                JPanel content = new JPanel( );
+
+                JPanel content = new JPanel( )
+                {
+                    // Custom paint seems to reduce flickering
+                    public void paintComponent( Graphics g )
+                    {
+                        g.setColor( getBackground( ) );
+                        g.fillRect( 0, 0, getWidth( ), getHeight( ) );
+                    }
+                };
+
                 frame.setAutoRequestFocus( false );
                 frame.setFocusable( false );
                 frame.setFocusableWindowState( false );
