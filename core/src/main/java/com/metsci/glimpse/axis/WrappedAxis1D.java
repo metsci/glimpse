@@ -84,14 +84,4 @@ public class WrappedAxis1D extends Axis1D
         double mod = v % span;
         return mod + ( ( mod == 0 && roundUp ) || mod < 0 ? span : 0 );
     }
-    
-    public static void main( String[] args )
-    {
-        WrappedAxis1D axis = new WrappedAxis1D( -10, 10 );
-        
-        for ( int i = -11 ; i < 0 ; i++ )
-        {
-            System.out.println( i + " " + axis.getWrappedValue( i ) );
-        }
-    }
 }
