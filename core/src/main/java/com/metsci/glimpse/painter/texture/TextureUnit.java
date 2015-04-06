@@ -24,29 +24,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.math.fast;
+package com.metsci.glimpse.painter.texture;
 
-/**
- * @author ellis
- */
-public class FastAsin extends FastFunc
+import javax.media.opengl.GL2;
+
+import com.metsci.glimpse.gl.texture.Texture;
+
+public class TextureUnit<D extends Texture>
 {
-    private static final FastAsin _instance = new FastAsin( ( float ) -1.0, ( float ) 1.0, 100 );
+    protected int textureUnit;
+    protected D texture;
 
-    public static FastAsin getInstance()
+    public TextureUnit( D texture )
     {
-        return _instance;
+        this( 0, texture );
     }
 
-    public FastAsin( float min, float max, int samples )
+    public TextureUnit( int textureUnit, D texture )
     {
-        super( min, max, samples );
+        this.textureUnit = textureUnit;
+        this.texture = texture;
+    }
+    
+    public boolean prepare( GL2 gl )
+    {
+        return texture.prepare( gl, textureUnit );
+    }
+
+    public int getTextureUnit( )
+    {
+        return textureUnit;
+    }
+
+    public D getTexture( )
+    {
+        return texture;
     }
 
     @Override
-    protected double f( double x )
+    public int hashCode( )
     {
-        return Math.asin( x );
+        return 31 + ( ( texture == null ) ? 0 : texture.hashCode( ) );
     }
 
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( getClass( ) != obj.getClass( ) ) return false;
+        TextureUnit<?> other = ( TextureUnit<?> ) obj;
+        if ( texture == null ) return other.texture == null;
+        return texture.equals( other.texture );
+    }
 }

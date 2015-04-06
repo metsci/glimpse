@@ -24,29 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.math.fast;
+package com.metsci.glimpse.util.geo.datum;
+
+import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.geo.util.SphereUtilFast;
 
 /**
- * @author ellis
+ * @author moskowitz
  */
-public class FastAsin extends FastFunc
+public class DatumSphereWgs84Fast extends DatumSphereWgs84
 {
-    private static final FastAsin _instance = new FastAsin( ( float ) -1.0, ( float ) 1.0, 100 );
-
-    public static FastAsin getInstance()
+    public DatumSphereWgs84Fast( )
     {
-        return _instance;
-    }
-
-    public FastAsin( float min, float max, int samples )
-    {
-        super( min, max, samples );
+        super( );
     }
 
     @Override
-    protected double f( double x )
+    public LatLonGeo toLatLonGeo( double x, double y, double z )
     {
-        return Math.asin( x );
+        return SphereUtilFast.toLatLonGeo(x, y, z, getRadius());
     }
 
+    @Override
+    public LatLonGeo displace( LatLonGeo from, double dist, double azimuth )
+    {
+        return SphereUtilFast.greatCircleShift( from, getRadius( ), dist, azimuth );
+    }
+
+    @Override
+    public double getAzimuth( LatLonGeo from, LatLonGeo to )
+    {
+        return SphereUtilFast.greatCircleAzimuth( from, to );
+    }
 }

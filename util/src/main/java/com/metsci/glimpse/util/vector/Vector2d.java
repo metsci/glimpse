@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.StackTraceUtils;
+import com.metsci.glimpse.util.math.fast.FastAtan;
 import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.units.AngleRelative;
 import com.metsci.glimpse.util.units.Azimuth;
@@ -125,6 +126,10 @@ public final class Vector2d implements Serializable
         return new Vector2d(x - v.x, y - v.y);
     }
 
+    /**
+     * @deprecated use {@link #scaledBy(double)}
+     */
+    @Deprecated
     public Vector2d scalarProduct(double alpha)
     {
         return scaledBy(alpha);
@@ -145,9 +150,24 @@ public final class Vector2d implements Serializable
         return (x * v.x) + (y * v.y);
     }
 
+    public double crossProduct(Vector2d v)
+    {
+        return (x * v.y) - (y * v.x);
+    }
+
+    public boolean isToRightOf(Vector2d v)
+    {
+        return crossProduct(v) > 0.0;
+    }
+
     public double azimuthAngle()
     {
         return Azimuth.fromMathRad(Math.atan2(y, x));
+    }
+
+    public double azimuthAngleFast()
+    {
+        return Azimuth.fromMathRad(FastAtan.getInstance().atan2(this.getY(), this.getX()));
     }
 
     public double normSquared()
@@ -182,7 +202,7 @@ public final class Vector2d implements Serializable
                        StackTraceUtils.getCallers(5));
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     /**
@@ -200,7 +220,7 @@ public final class Vector2d implements Serializable
             return new Vector2d(1, 0);
         }
 
-        return scalarProduct(1.0 / alpha);
+        return scaledBy(1.0 / alpha);
     }
 
     public double distanceSquared(Vector2d v)

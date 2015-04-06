@@ -26,17 +26,21 @@
  */
 package com.metsci.glimpse.painter.shape;
 
+import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.*;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL2;
 
+import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
@@ -67,11 +71,10 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected float pointSize;
 
-    // number of floats in pointBuffer
-    protected int bufferSize;
-
     protected GLFloatBuffer colorBuffer;
     protected GLFloatBuffer2D pointBuffer;
+    
+    protected FloatBuffer tempBuffer;
 
     // point id (which can be any object) -> index into pointBuffer
     // good place for Guava BiMap here...
@@ -81,6 +84,8 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     protected ReentrantLock lock;
 
     protected IntsArray searchResults;
+    
+    protected int initialSize;
 
     public DynamicPointSetPainter( )
     {
@@ -89,8 +94,9 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     public DynamicPointSetPainter( int initialSize )
     {
+        this.initialSize = initialSize;
         this.pointSize = DEFAULT_POINT_SIZE;
-        this.bufferSize = initialSize;
+        
         this.lock = new ReentrantLock( );
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
@@ -147,12 +153,14 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            int newPoints = accumulator.getSize( );
-            int currentSize = idMap.size( );
-            if ( bufferSize < currentSize + newPoints )
+            int newPoints = accumulator.getAddedSize( );
+            int currentSize = getSize( );
+            if ( getCapacity( ) < currentSize + newPoints )
             {
                 growBuffers( currentSize + newPoints );
             }
+            
+            deletePositions( accumulator );
 
             mutatePositions( accumulator );
         }
@@ -185,8 +193,8 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            int currentSize = idMap.size( );
-            if ( bufferSize < currentSize + 1 )
+            int currentSize = getSize( );
+            if ( getCapacity( ) < currentSize + 1 )
             {
                 growBuffers( currentSize + 1 );
             }
@@ -214,10 +222,36 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
+    
+    public void removeAll( )
+    {
+        lock.lock( );
+        try
+        {
+            this.idMap.clear( );
+            this.indexMap.clear( );
+            this.pointBuffer = new GLFloatBuffer2D( initialSize, true );
+            this.colorBuffer = new GLFloatBuffer( initialSize, 4 );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
 
     public void removePoint( Object id )
     {
-        throw new UnsupportedOperationException( "removePoint() is not yet supported" );
+        lock.lock( );
+        try
+        {
+            int index = getIndex( id, false );
+            if ( index == -1 ) return; // nothing to remove, the point does not exist
+            deletePosition( index );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     @Override
@@ -231,7 +265,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             try
             {
                 gl.glPointSize( pointSize );
-                gl.glDrawArrays( GL2.GL_POINTS, 0, idMap.size( ) );
+                gl.glDrawArrays( GL2.GL_POINTS, 0, getSize( ) );
             }
             finally
             {
@@ -244,7 +278,72 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
+    
+    protected int getSize( )
+    {
+        return this.idMap.size( );
+    }
+    
+    protected int getCapacity( )
+    {
+        return this.pointBuffer.getMaxVertices( );
+    }
+    
+    protected void deletePositions( final Set<Integer> indices )
+    {
+        if ( indices.isEmpty( ) ) return;
 
+        final int size = this.getSize( );
+        final int first = indices.iterator( ).next( );
+
+        shiftMaps( idMap, indexMap, indices, size );
+
+        this.colorBuffer.mutate( new Mutator( )
+        {
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                shift( data, tempBuffer, length, size, indices );
+            }
+        } );
+
+        this.pointBuffer.mutateIndexed( new IndexedMutator( )
+        {
+            @Override
+            public int getUpdateIndex( )
+            {
+                return first;
+            }
+
+            @Override
+            public void mutate( FloatBuffer data, int length )
+            {
+                shift( data, tempBuffer, length, size, indices );
+            }
+        } );
+    }
+    
+    protected void deletePositions( BulkPointAccumulator accum )
+    {
+        Set<Integer> indices = Sets.newTreeSet( );
+        
+        for ( Object id :  accum.getRemovedIds( ) )
+        {
+            Integer index = this.idMap.get( id );
+            if ( index != null )
+            {
+                indices.add( index );
+            }
+        }
+        
+        deletePositions( indices );
+    }
+    
+    protected void deletePosition( int index )
+    {
+        deletePositions( Collections.singleton( index ) );
+    }
+    
     protected void mutateColor( final int index, final float[] color )
     {
         this.colorBuffer.mutate( new Mutator( )
@@ -298,10 +397,10 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected void mutatePositions( BulkPointAccumulator accumulator )
     {
-        final List<Object> ids = accumulator.getIds( );
-        final float[] v = accumulator.getVertices( );
+        final List<Object> ids = accumulator.getAddedIds( );
+        final float[] v = accumulator.getAddedVertices( );
         final int stride = accumulator.getStride( );
-        final int size = accumulator.getSize( );
+        final int size = accumulator.getAddedSize( );
 
         final int[] indexList = new int[size];
         final int minIndex = getIndexArray( ids, true, indexList );
@@ -376,7 +475,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
             else
             {
-                throw new IllegalArgumentException( String.format( "Id %s does not exist.", id ) );
+                return -1;
             }
         }
 
@@ -385,10 +484,10 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected void growBuffers( int minSize )
     {
-        this.bufferSize = Math.max( ( int ) ( this.bufferSize * GROWTH_FACTOR ), minSize );
+        minSize = Math.max( ( int ) ( getCapacity( ) * GROWTH_FACTOR ), minSize );
 
-        this.pointBuffer.ensureCapacity( bufferSize );
-        this.colorBuffer.ensureCapacity( bufferSize );
+        this.pointBuffer.ensureCapacity( minSize );
+        this.colorBuffer.ensureCapacity( minSize );
     }
 
     public static class BulkColorAccumulator
@@ -443,13 +542,15 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     public static class BulkPointAccumulator
     {
-        List<Object> ids;
-        FloatsArray v;
+        List<Object> removedIds; 
+        List<Object> addedIds;
+        FloatsArray addedVertices;
 
         public BulkPointAccumulator( )
         {
-            ids = new ArrayList<Object>( );
-            v = new FloatsArray( );
+            removedIds = new ArrayList<Object>( );
+            addedIds = new ArrayList<Object>( );
+            addedVertices = new FloatsArray( );
         }
 
         public void add( Object id, float x, float y, float[] color )
@@ -460,41 +561,51 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
 
             // grow the FloatsArray if necessary (2 for x/y and 4 for color)
-            if ( v.n == v.a.length )
+            if ( addedVertices.n == addedVertices.a.length )
             {
-                v.ensureCapacity( ( int ) Math.max( v.n + getStride( ), v.n * GROWTH_FACTOR ) );
+                addedVertices.ensureCapacity( ( int ) Math.max( addedVertices.n + getStride( ), addedVertices.n * GROWTH_FACTOR ) );
             }
 
-            ids.add( id );
-            v.append( x );
-            v.append( y );
-            v.append( color );
-            if ( color.length == 3 ) v.append( 1.0f );
+            addedIds.add( id );
+            addedVertices.append( x );
+            addedVertices.append( y );
+            addedVertices.append( color );
+            if ( color.length == 3 ) addedVertices.append( 1.0f );
         }
 
         public void add( Object id, float x, float y )
         {
             add( id, x, y, DEFAULT_COLOR );
         }
+        
+        public void remove( Object id )
+        {
+            removedIds.add( id );
+        }
 
         int getStride( )
         {
             return 6;
         }
-
-        List<Object> getIds( )
+        
+        List<Object> getRemovedIds( )
         {
-            return ids;
+            return removedIds;
         }
 
-        float[] getVertices( )
+        List<Object> getAddedIds( )
         {
-            return v.a;
+            return addedIds;
         }
 
-        int getSize( )
+        float[] getAddedVertices( )
         {
-            return ids.size( );
+            return addedVertices.a;
+        }
+
+        int getAddedSize( )
+        {
+            return addedIds.size( );
         }
     }
 }

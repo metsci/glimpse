@@ -116,7 +116,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         String[] tickLabels = new String[tickPositions.length];
         for ( int i = 0; i < tickPositions.length; i++ )
         {
-            tickLabels[i] = tickString( tickPositions[i], orderAxis );
+            tickLabels[i] = tickString( axis, tickPositions[i], orderAxis );
         }
 
         return tickLabels;
@@ -254,7 +254,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         return tickInterval( axis, approxNumTicks );
     }
 
-    protected String tickString( double number, int orderAxis )
+    protected String tickString( Axis1D axis, double number, int orderAxis )
     {
         double axisFactor = Math.pow( 10, -orderAxis );
         return tickNumberFormatter.format( number * axisFactor );

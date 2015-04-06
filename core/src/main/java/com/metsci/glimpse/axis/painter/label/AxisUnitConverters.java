@@ -34,11 +34,24 @@ import com.metsci.glimpse.util.units.time.Time;
 public class AxisUnitConverters
 {
 
+    // General
+
     public static final AxisUnitConverter identity = new AxisUnitConverter()
     {
         public double fromAxisUnits(double value) { return value; }
         public double toAxisUnits(double value) { return value; }
     };
+
+    public static AxisUnitConverter negated(final AxisUnitConverter c)
+    {
+        return new AxisUnitConverter()
+        {
+            public double fromAxisUnits(double value) { return c.fromAxisUnits(-value); }
+            public double toAxisUnits(double value) { return -c.toAxisUnits(value); }
+        };
+    }
+
+
 
     // Length
 
@@ -134,8 +147,8 @@ public class AxisUnitConverters
         public double toAxisUnits(double value) { return Time.toWeeks(value); }
     };
 
-    
-    
+
+
     // Angle
 
     public static final AxisUnitConverter suShownAsDegrees = new AxisUnitConverter()

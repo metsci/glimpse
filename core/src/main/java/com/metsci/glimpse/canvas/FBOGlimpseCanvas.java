@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLOffscreenAutoDrawable;
@@ -64,12 +65,17 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
 
     public FBOGlimpseCanvas( GLProfile glProfile, int width, int height )
     {
-        init( glProfile, null, width, height );
+        init( glProfile, null, width, height, true );
     }
 
     public FBOGlimpseCanvas( GLContext glContext, int width, int height )
     {
-        init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height );
+        init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height, true );
+    }
+    
+    public FBOGlimpseCanvas( GLContext glContext, int width, int height, boolean isBackgroundOpaque )
+    {
+        init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height, isBackgroundOpaque );
     }
 
     /**
@@ -85,13 +91,15 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
      */
     public FBOGlimpseCanvas( GLProfile glProfile, GLContext glContext, int width, int height )
     {
-        init( glProfile, glContext, width, height );
+        init( glProfile, glContext, width, height, true );
     }
 
-    private void init( GLProfile glProfile, GLContext glContext, int width, int height )
+    private void init( GLProfile glProfile, GLContext glContext, int width, int height, boolean isbackgroundOpaque )
     {
         this.glProfile = glProfile;
-        this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( glContext );
+        GLCapabilities caps = new GLCapabilities( glProfile );
+        caps.setBackgroundOpaque( isbackgroundOpaque );
+        this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( caps, glProfile, glContext );
         this.drawable.addGLEventListener( createGLEventListener( ) );
         this.drawable.setSurfaceSize( width, height );
         this.drawable.setTextureUnit( DEFAULT_TEXTURE_UNIT );
@@ -122,10 +130,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     // see: http://forum.jogamp.org/querying-textures-bound-to-default-draw-read-framebuffers-td4026564.html
     public int getTextureUnit( )
     {
-        int unit = drawable.getColorbuffer( GL.GL_FRONT ).getName( );
-        System.out.println( unit );
-
-        return unit;
+        return drawable.getColorbuffer( GL.GL_FRONT ).getName( );
     }
 
     public TextureProjected2D getProjectedTexture( )

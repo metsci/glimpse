@@ -28,11 +28,15 @@ package com.metsci.glimpse.util.math.stat;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
+import java.lang.reflect.Array;
 import java.util.logging.Logger;
 
 /**
- * @author moskowitz
+ * @author moskowitz, sherman
  */
+
+// See http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+
 public class StatCollectorNDim
 {
     private static Logger logger = Logger.getLogger(StatCollectorNDim.class.getName());
@@ -42,8 +46,9 @@ public class StatCollectorNDim
     private final int dim;
     private int nsamples;
     private double count;
-    private final double[] sum;
-    private final double[][] products;
+    private final double[] mean;
+    private final double[][] M2;
+    private final double[] deltas;
 
 
     public StatCollectorNDim(int dim)
@@ -51,12 +56,13 @@ public class StatCollectorNDim
         this.dim = dim;
         this.count = 0.0;
         this.nsamples = 0;
-        this.sum = new double[dim];
-        this.products = new double[dim][];
+        this.deltas = new double[dim];
+        this.mean = new double[dim];
+        this.M2 = new double[dim][];
 
         for (int i = 0; i < dim; i++)
         {
-            this.products[i] = new double[i + 1];
+            this.M2[i] = new double[i + 1];
         }
     }
 
@@ -69,26 +75,24 @@ public class StatCollectorNDim
 
     public void addElement(double[] x, double weight)
     {
-
-        nsamples++;
-
+    	
         if (x.length != dim)
         {
             throw new RuntimeException(SIZE_MESSAGE);
         }
 
+        nsamples++;
+
         count += weight;
 
         for (int i = 0; i < dim; i++)
         {
-            sum[i] += x[i] * weight;
-        }
-
-        for (int i = 0; i < dim; i++)
-        {
+            deltas[i] = x[i] - mean[i];
+            mean[i] += deltas[i] * weight / count;
+            
             for (int j = 0; j <= i; j++)
             {
-                products[i][j] += x[i] * x[j] * weight;
+                M2[i][j] += deltas[i] * (x[j] - mean[j]) * weight;
             }
         }
 
@@ -109,26 +113,21 @@ public class StatCollectorNDim
 
     public double[] getMean()
     {
-        double[] mean = new double[dim];
-        for (int i = 0; i < dim; i++)
-        {
-            mean[i] = sum[i] / count;
-        }
-
-        return mean;
+    	double[] retMean = new double[dim];
+    	System.arraycopy(mean, 0, retMean, 0, dim);
+        return retMean;
     }
 
 
     public double[][] getCovariance()
     {
         double[][] covariance = new double[dim][dim];
-        double[] mean = getMean();
 
         for (int i = 0; i < dim; i++)
         {
             for (int j = 0; j <= i; j++)
             {
-                double cov = ((products[i][j]) / count) - (mean[i] * mean[j]);
+                double cov = M2[i][j] / count;
                 if (i == j)
                 {
                     if (cov < 0)

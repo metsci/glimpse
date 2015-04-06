@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.axis.painter.label;
 
+import com.metsci.glimpse.axis.Axis1D;
+
 /**
  * Displays the order or magnitude of each axis tick in-line as part
  * of the tick label instead of once as part of the axis label.
@@ -41,7 +43,7 @@ public class GridAxisExponentLabelHandler extends GridAxisLabelHandler
     }
 
     @Override
-    protected String tickString( double number, int orderAxis )
+    protected String tickString( Axis1D axis, double number, int orderAxis )
     {
         double axisFactor = Math.pow( 10, -orderAxis );
         return tickNumberFormatter.format( number * axisFactor ) + ( orderAxis == 0 ? "" : "x10^" + orderAxis );

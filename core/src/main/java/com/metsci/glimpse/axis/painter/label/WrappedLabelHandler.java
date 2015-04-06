@@ -24,29 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.math.fast;
+package com.metsci.glimpse.axis.painter.label;
 
-/**
- * @author ellis
- */
-public class FastAsin extends FastFunc
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.WrappedAxis1D;
+
+public class WrappedLabelHandler extends GridAxisLabelHandler
 {
-    private static final FastAsin _instance = new FastAsin( ( float ) -1.0, ( float ) 1.0, 100 );
-
-    public static FastAsin getInstance()
-    {
-        return _instance;
-    }
-
-    public FastAsin( float min, float max, int samples )
-    {
-        super( min, max, samples );
-    }
-
     @Override
-    protected double f( double x )
+    protected String tickString( Axis1D axis, double number, int orderAxis )
     {
-        return Math.asin( x );
+        if ( axis instanceof WrappedAxis1D )
+        {
+            WrappedAxis1D wrappedAxis = ( WrappedAxis1D ) axis;
+            number = wrappedAxis.getWrappedValue( number );
+        }
+        
+        return super.tickString( axis, number, orderAxis );
     }
-
 }

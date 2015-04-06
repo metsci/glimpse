@@ -34,16 +34,16 @@ package com.metsci.glimpse.util.math.fast;
  */
 public class FastLog extends FastFunc
 {
-    private static final FastLog instance = new FastLog( 100000 );
+    public static final double LN_2 = Math.log( 2.0 );
+    public static final double LN_2_INV = 1.0 / LN_2;
+    public static final double LOG10_2 = Math.log10( 2.0 );
 
+    // Note: This must follow the static final variables above, which are used indirectly by the constructor call.
+    private static final FastLog instance = new FastLog( 100000 );
     public static FastLog getInstance()
     {
         return instance;
     }
-
-    public static final double LN_2 = Math.log( 2.0 );
-    public static final double LN_2_INV = 1.0 / LN_2;
-    public static final double LOG10_2 = Math.log10( 2.0 );
 
     public FastLog( int samples )
     {

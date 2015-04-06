@@ -73,27 +73,38 @@ public abstract class AbstractTexture implements Texture
         this.glAllocated = false;
         makeDirty();
     }
+    
+    @Override
+    public int[] getHandles( )
+    {
+        return new int[] { glHandle };
+    }
 
+    @Override
     public void makeDirty( )
     {
         dirty = true;
     }
 
+    @Override
     public boolean isDirty( )
     {
         return dirty;
     }
 
+    @Override
     public int getNumDimension( )
     {
         return dim.length;
     }
 
+    @Override
     public int getDimensionSize( int n )
     {
         return dim[n];
     }
 
+    @Override
     // TODO: Figure out if this is expensive to call.
     public boolean isResident( GL2 gl )
     {
@@ -115,6 +126,7 @@ public abstract class AbstractTexture implements Texture
         }
     }
 
+    @Override
     public boolean prepare( GL2 gl, int texUnit )
     {
         // should we check for dirtiness and allocation before lock to speed up?
@@ -156,6 +168,7 @@ public abstract class AbstractTexture implements Texture
         makeDirty();
     }
 
+    @Override
     public void dispose( GLContext context )
     {
         if( glAllocated )

@@ -56,12 +56,14 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-// Jogamp / NEWT Links:
-//      https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/acore/TestSharedContextVBOES2NEWT.java
-//      http://forum.jogamp.org/Advantages-of-using-NEWT-vs-GLCanvas-td3703674.html
-//      http://jogamp.org/jogl/doc/NEWT-Overview.html
-//      http://jogamp.org/git/?p=jogl.git;a=blob;f=src/test/com/jogamp/opengl/test/junit/newt/parenting/TestParenting01cAWT.java;hb=HEAD
-//      http://jogamp.org/deployment/jogamp-next/javadoc/jogl/javadoc/com/jogamp/newt/event/awt/AWTAdapter.html
+/**
+ * A GlimpseCanvas backed by the JOGL {@link NewtCanvasAWT}. This is the default GlimpseCanvas
+ * which should be used for most Swing applications. The underlying {@link NewtCanvasAWT} is
+ * being actively developed, whereas the underlying canvas for {@link SwingGlimpseCanvas} is
+ * no longer supported and has fewer features.
+ * 
+ * @author ulman
+ */
 public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 {
     private static final Logger logger = Logger.getLogger( NewtSwingGlimpseCanvas.class.getName( ) );
@@ -113,7 +115,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         init( GLUtils.getDefaultGLProfile( ), null );
     }
 
-    private void init( GLProfile glProfile, GLContext context )
+    protected void init( GLProfile glProfile, GLContext context )
     {
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
@@ -122,7 +124,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         if ( context != null ) this.glWindow.setSharedContext( context );
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
-        this.mouseHelper = new MouseWrapperNewt( this );
+        this.mouseHelper = createMouseWrapper( );
         this.glWindow.addMouseListener( this.mouseHelper );
 
         this.glCanvas = new NewtCanvasAWT( glWindow );
@@ -139,8 +141,13 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
+    
+    protected MouseWrapperNewt createMouseWrapper( )
+    {
+        return new MouseWrapperNewt( this );
+    }
 
-    private GLEventListener createGLEventListener( )
+    protected GLEventListener createGLEventListener( )
     {
         return new GLEventListener( )
         {

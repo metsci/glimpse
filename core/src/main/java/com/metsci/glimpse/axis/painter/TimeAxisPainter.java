@@ -35,7 +35,6 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -50,7 +49,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  *
  * @author ulman
  */
-public abstract class TimeAxisPainter extends GlimpsePainter1D
+public abstract class TimeAxisPainter extends NumericAxisPainter
 {
     protected float[] tickColor;
     protected float[] textColor;
@@ -76,6 +75,7 @@ public abstract class TimeAxisPainter extends GlimpsePainter1D
 
     public TimeAxisPainter( TimeAxisLabelHandler handler )
     {
+        super(handler);
         this.handler = handler;
 
         this.newFont = FontUtils.getBitstreamVeraSansPlain( 12.0f );
