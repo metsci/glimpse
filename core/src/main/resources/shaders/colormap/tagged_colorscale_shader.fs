@@ -30,8 +30,13 @@ void main()
 	// retrieve the data value for this texel
     float dataVal = texture2D( datatex, gl_TexCoord[0].st ).r;
     if( discardNaN )
-       if( isnan( dataVal ) )
+    {
+       // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
+       // NaN semantics in GLSL are mostly unspecified, but "x != x" seems to work.
+       //if( isnan( dataVal ) )
+       if( dataVal != dataVal )
           discard;
+    }
  
  	float fsize = float(size);
     float numer = fsize - 0.5;
