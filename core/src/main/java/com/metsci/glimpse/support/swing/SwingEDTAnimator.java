@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import javax.swing.SwingUtilities;
 
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.FPSAnimator;
+import com.metsci.glimpse.util.concurrent.ConcurrencyUtils;
 
 /**
  * An FPSAnimator-like class which performs rendering on the Swing EDT.
@@ -83,7 +85,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
         // do nothing if the animator is already running
         if ( this.future != null ) return;
         
-        ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( );
+        ThreadFactory threadFactory = ConcurrencyUtils.newDaemonThreadFactory( Executors.defaultThreadFactory( ) );
+        ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( threadFactory );
+        
         this.future = exectuor.scheduleAtFixedRate( new Runnable( )
         {
             @Override
