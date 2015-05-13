@@ -63,4 +63,10 @@ public class TimeSpan
     {
         this.endTime = endTime;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("[%s, %s]", startTime, endTime);
+    }
 }
