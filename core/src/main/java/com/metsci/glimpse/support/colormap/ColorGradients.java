@@ -26,7 +26,15 @@
  */
 package com.metsci.glimpse.support.colormap;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.logging.Logger;
+
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.io.StreamOpener;
+import com.metsci.glimpse.util.primitives.FloatsArray;
 
 /**
  * A collection of common color gradients.
@@ -35,6 +43,8 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  */
 public class ColorGradients
 {
+
+    private static final Logger logger = Logger.getLogger( ColorGradients.class.getName( ) );
 
     public static final ColorGradient clearToBlack = new ColorGradient( )
     {
@@ -261,7 +271,16 @@ public class ColorGradients
             rgba[3] = 1;
         }
     };
+    
+    public static ColorGradient parula = fromCSV( "colormap/parula.csv" );
 
+    // see: https://mycarta.wordpress.com/2013/02/21/perceptual-rainbow-palette-the-method/
+    public static ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
+    
+    // see: http://www.cs.utah.edu/~gk/papers/vis02/FaceLumin.pdf
+    // see: https://mycarta.wordpress.com/2012/12/06/the-rainbow-is-deadlong-live-the-rainbow-part-5-cie-lab-linear-l-rainbow/
+    public static ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
+    
     public static ColorGradient reverse( final ColorGradient gradient )
     {
         return new ColorGradient( )
@@ -271,6 +290,31 @@ public class ColorGradients
                 gradient.toColor( 1 - fraction, rgba );
             }
         };
+    }
+
+    protected static ColorGradient fromCSV( String file )
+    {
+        FloatsArray f = new FloatsArray( );
+        String line = null;
+        try (BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ))
+        {
+            while ( ( line = reader.readLine( ) ) != null )
+            {
+                String[] tokens = line.split( "," );
+                f.append( Float.parseFloat( tokens[0] ) );
+                f.append( Float.parseFloat( tokens[1] ) );
+                f.append( Float.parseFloat( tokens[2] ) );
+            }
+
+            f.compact( );
+
+            return new ColorGradientArray( f.a );
+        }
+        catch ( Exception e )
+        {
+            logWarning( logger, "Unable to load ColorGradient: %s", e, file );
+            return new ColorGradientArray( new float[] { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f } );
+        }
     }
 
     private ColorGradients( )
