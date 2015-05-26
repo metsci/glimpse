@@ -272,14 +272,14 @@ public class ColorGradients
         }
     };
     
-    public static ColorGradient parula = fromCSV( "colormap/parula.csv" );
+    public static final ColorGradient parula = fromCSV( "colormap/parula.csv" );
 
     // see: https://mycarta.wordpress.com/2013/02/21/perceptual-rainbow-palette-the-method/
-    public static ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
+    public static final ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
     
     // see: http://www.cs.utah.edu/~gk/papers/vis02/FaceLumin.pdf
     // see: https://mycarta.wordpress.com/2012/12/06/the-rainbow-is-deadlong-live-the-rainbow-part-5-cie-lab-linear-l-rainbow/
-    public static ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
+    public static final ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
     
     public static ColorGradient reverse( final ColorGradient gradient )
     {
