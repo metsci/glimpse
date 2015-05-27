@@ -27,6 +27,7 @@
 package com.metsci.glimpse.util.geo.datum;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.geo.util.SphereUtil;
 import com.metsci.glimpse.util.geo.util.SphereUtilFast;
 
 /**
@@ -49,6 +50,12 @@ public class DatumSphereWgs84Fast extends DatumSphereWgs84
     public LatLonGeo displace( LatLonGeo from, double dist, double azimuth )
     {
         return SphereUtilFast.greatCircleShift( from, getRadius( ), dist, azimuth );
+    }
+
+    @Override
+    public double getDistance( LatLonGeo from, LatLonGeo to )
+    {
+        return SphereUtilFast.greatCircleDistance(from, to, getRadius());
     }
 
     @Override

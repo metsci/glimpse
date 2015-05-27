@@ -120,4 +120,40 @@ public class SphereUtilFast
 
         return LatLonGeo.fromRad( newLat, newLon, from.getAltitude( ) );
     }
+
+    /**
+     * Computes the great circle distance between the specified points using the
+     * Haversine formula.
+     */
+    public static double greatCircleDistance( LatLonGeo from, LatLonGeo to, double radius )
+    {
+        return greatCircleDistance( from.getLatRad( ), from.getLonRad( ),
+                                    to.getLatRad( ), to.getLonRad(), radius );
+    }
+
+    /**
+     * Computes the great circle distance between the specified points using the
+     * Haversine formula.
+     */
+    public static double greatCircleDistance( double fromLat, double fromLon,
+                                              double toLat, double toLon,
+                                              double radius )
+    {
+        double dLat = fromLat - toLat;
+        double dLon = LatLonGeo.normalizeAnglePi( fromLon - toLon );
+
+        double c1 = Math.cos( fromLat );
+        double c2 = Math.cos( toLat );
+        double s1 = Math.sin( 0.5d * dLat );
+        double s2 = Math.sin( 0.5d * dLon );
+
+        // guard against roundoff-related problems
+        double sinA = Math.sqrt(s1 * s1 + c1 * c2 * s2 * s2);
+        if (sinA > 1d)
+        {
+            sinA = 1d;
+        }
+
+        return 2d * radius * fastAsin.evaluate(sinA);
+    }
 }
