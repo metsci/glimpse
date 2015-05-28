@@ -62,7 +62,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 /**
  * A Swing GlimpseCanvas implementation which draws to a {@link javax.media.opengl.awt.GLCanvas}. This
  * Canvas implementation is not as well supported as the newer JOGL {@link com.jogamp.newt.awt.NewtCanvasAWT}.
- * For this reason, {@link NewtSwingGlimpseCanvas} should generally be prefered over this class.
+ * For this reason, {@link NewtSwingGlimpseCanvas} should generally be preferred over this class.
  * 
  * @author ulman
  * @deprecated see {@link NewtSwingGlimpseCanvas}

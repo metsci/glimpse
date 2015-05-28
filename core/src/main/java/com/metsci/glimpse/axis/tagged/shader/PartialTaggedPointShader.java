@@ -31,6 +31,8 @@ import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import java.io.IOException;
 import java.util.List;
 
+import javax.media.opengl.GLContext;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
@@ -58,7 +60,7 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
             this.textureCoordTexUnit.setValue( textureTexUnit );
             this.setSizeArgValue( );
 
-            colorAxis.addAxisListener( this );
+            sizeAxis.addAxisListener( this );
     }
 
     public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
@@ -106,5 +108,12 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
         }
 
         this.sizeArg.setValue( count );
+    }
+    
+    @Override
+    public void dispose( GLContext context )
+    {
+        super.dispose( context );
+        this.taggedSizeAxis.removeAxisListener( this );
     }
 }
