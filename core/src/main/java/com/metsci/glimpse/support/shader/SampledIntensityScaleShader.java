@@ -31,6 +31,7 @@ import static com.metsci.glimpse.gl.shader.ShaderType.fragment;
 import java.io.IOException;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -55,6 +56,8 @@ public class SampledIntensityScaleShader extends Shader implements AxisListener1
     private ShaderArg dataTexUnit;
     private ShaderArg hueTexUnit;
 
+    private Axis1D colorAxis;
+    
     /**
      * @param colorAxis color axis producing events
      * @param targetTexUnit 2D texture unit which is the target of color-mapping
@@ -75,7 +78,9 @@ public class SampledIntensityScaleShader extends Shader implements AxisListener1
 
     protected void initialize( Axis1D colorAxis, int DataTexUnit, int HueTexUnit )
     {
-        colorAxis.addAxisListener( this );
+        this.colorAxis = colorAxis;
+        
+        this.colorAxis.addAxisListener( this );
 
         this.dataMin = getArg( "dataMin" );
         this.dataMin.setValue( getMin( colorAxis ) );
@@ -147,5 +152,12 @@ public class SampledIntensityScaleShader extends Shader implements AxisListener1
     protected double getMax( Axis1D axis )
     {
         return axis.getMax( );
+    }
+    
+    @Override
+    public void dispose( GLContext context )
+    {
+        super.dispose( context );
+        this.colorAxis.removeAxisListener( this );
     }
 }
