@@ -85,7 +85,17 @@ public class SwingEDTAnimator implements GLAnimatorControl
         // do nothing if the animator is already running
         if ( this.future != null ) return;
         
-        ThreadFactory threadFactory = ConcurrencyUtils.newDaemonThreadFactory( Executors.defaultThreadFactory( ) );
+        ThreadFactory threadFactory = ConcurrencyUtils.newDaemonThreadFactory( new ThreadFactory( )
+        {
+            @Override
+            public Thread newThread( Runnable r )
+            {
+                Thread thread = new Thread( r );
+                thread.setName( SwingEDTAnimator.class.getSimpleName( ) );
+                return thread;
+            }
+        } );
+        
         ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( threadFactory );
         
         this.future = exectuor.scheduleAtFixedRate( new Runnable( )
