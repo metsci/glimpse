@@ -147,9 +147,12 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
         return new GlimpseBounds( minX, minY, maxX - minX, maxY - minY );
     }
-
+    
     public void paintTo( GlimpseContext context )
     {
+        final int[] scale = context.getSurfaceScale();
+        final int scaleX = scale[0];
+        final int scaleY = scale[1];
         GL gl = context.getGL( );
 
         GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
@@ -168,9 +171,9 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
                 if ( !(m.painter instanceof GlimpseLayout) && !layout.isVisible ) continue;
                 
                 gl.glEnable( GL2.GL_SCISSOR_TEST );
-
-                gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
-                gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
+                
+                gl.glViewport( bounds.getX( )*scaleX, bounds.getY( )*scaleY, bounds.getWidth( )*scaleX, bounds.getHeight( )*scaleY );
+                gl.glScissor( clippedBounds.getX( )*scaleX, clippedBounds.getY( )*scaleY, clippedBounds.getWidth( )*scaleX, clippedBounds.getHeight( )*scaleY );
 
                 if ( m.callback != null ) m.callback.prePaint( m.painter, context );
                 m.painter.paintTo( context );

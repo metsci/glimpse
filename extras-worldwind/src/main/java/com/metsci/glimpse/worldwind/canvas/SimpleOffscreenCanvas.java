@@ -293,4 +293,11 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
             }
         } );
     }
+
+    @Override
+    public int[] getSurfaceScale()
+    {
+        //TODO offscreen canvases are always 1-1, right?
+        return new int[]{ 1, 1 };
+    }
 }

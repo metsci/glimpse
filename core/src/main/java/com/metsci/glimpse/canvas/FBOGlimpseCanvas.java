@@ -246,4 +246,11 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         return this.isDestroyed;
     }
+    
+
+    @Override
+    public int[] getSurfaceScale()
+    {
+        throw new UnsupportedOperationException();
+    }
 }

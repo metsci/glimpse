@@ -39,19 +39,22 @@ public class GlimpseContextImpl implements GlimpseContext
     private GLContext glContext;
     private GlimpseTargetStack targetStack;
     private int dpi;
+    private final int[] scale;
 
-    public GlimpseContextImpl( GLContext context )
-    {
-        this.glContext = context;
-        this.targetStack = new GlimpseTargetStackImpl( );
-        this.dpi = defaultDpiValue; //TODO fix this
-    }
+    //TODO if this isn't used anywhere can we get rid of it? Or what should the scale be?
+//    public GlimpseContextImpl( GLContext context )
+//    {
+//        this.glContext = context;
+//        this.targetStack = new GlimpseTargetStackImpl( );
+//        this.dpi = defaultDpiValue; //TODO fix this
+//    }
 
     public GlimpseContextImpl( GlimpseCanvas canvas )
     {
         this.glContext = canvas.getGLContext( );
         this.targetStack = new GlimpseTargetStackImpl( canvas );
         this.dpi = defaultDpiValue; //TODO fix this
+        this.scale = canvas.getSurfaceScale();
     }
 
     @Override
@@ -82,5 +85,11 @@ public class GlimpseContextImpl implements GlimpseContext
     public String toString( )
     {
         return String.format( "[stack: %s dpi: %d]", targetStack, dpi );
+    }
+    
+    @Override
+    public int[] getSurfaceScale()
+    {
+        return scale;
     }
 }

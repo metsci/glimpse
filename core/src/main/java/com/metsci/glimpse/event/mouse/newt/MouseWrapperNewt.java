@@ -39,18 +39,23 @@ import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements MouseListener
 {
     protected GLWindow glWindow;
+    protected final int scaleX;
+    protected final int scaleY;
 
     public MouseWrapperNewt( NewtGlimpseCanvas canvas )
     {
         super( canvas );
 
         this.glWindow = canvas.getGLWindow( );
+        int[] scale = canvas.getSurfaceScale();
+        this.scaleX = scale[0];
+        this.scaleY = scale[1];
     }
 
     @Override
     protected boolean isInterior( MouseEvent e, GlimpseBounds bounds )
     {
-        return bounds.contains( e.getX( ), glWindow.getHeight( ) - e.getY( ) );
+        return bounds.contains( e.getX( ) / scaleX, (glWindow.getSurfaceHeight( ) - e.getY( ))/scaleY );
     }
 
     @Override
@@ -73,7 +78,7 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
 
         if ( bounds == null ) return null;
 
-        int parentHeight = glWindow.getHeight( );
+        int parentHeight = glWindow.getSurfaceHeight( );
 
         short eventType = e.getEventType( );
         Object source = e.getSource( );
@@ -102,7 +107,7 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
         int[] newX = new int[allX.length];
         for ( int i = 0 ; i < allX.length ; i++ )
         {
-            newX[i] = allX[i] - bounds.getX( );
+            newX[i] = (allX[i]/scaleX) - bounds.getX( );
         }
         return newX;
     }
@@ -113,7 +118,7 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
         int[] newY = new int[allY.length];
         for ( int i = 0 ; i < allY.length ; i++ )
         {
-            newY[i] = e.getY( ) - ( parentHeight - ( bounds.getY( ) + bounds.getHeight( ) ) ); 
+            newY[i] = e.getY( )/scaleY - ( parentHeight/scaleY - ( bounds.getY( ) + bounds.getHeight( ) ) ); 
         }
         return newY;
     }
