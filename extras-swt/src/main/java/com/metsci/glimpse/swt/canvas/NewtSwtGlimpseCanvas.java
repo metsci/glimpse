@@ -417,6 +417,6 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     @Override
     public int[] getSurfaceScale()
     {
-        return this.glWindow.getNativeSurfaceScale(new int[2]);
+        return new int[] {1,1};
     }
 }
