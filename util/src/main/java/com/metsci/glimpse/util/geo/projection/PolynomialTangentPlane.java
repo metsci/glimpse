@@ -23,26 +23,25 @@
 package com.metsci.glimpse.util.geo.projection;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.math.fast.FastAtan;
+import com.metsci.glimpse.util.math.fast.PolynomialApprox;
 
 /**
  * Implementation of GeoProjection via a plane which is tangent to the Earth and maps x, y
  * coordinates on the plane to/from lat/lon pairs.  Class instances are immutable.
  *
- * Fast version uses FastAtan2 instead of Math.atan2 for unproject for improved performance at some cost to accuracy.
+ * This version uses a polynomial approximation to arctangent instead of Math.atan2 for
+ * improved performance at some cost to accuracy.
  *
- * Created by B. Moskowitz on 5/27/2015.
+ * Created by B. Moskowitz on 6/17/2015.
  */
-public class FastTangentPlane extends TangentPlane
+public class PolynomialTangentPlane extends TangentPlane
 {
-    private static FastAtan fastAtan = new FastAtan( 100000 );
-
-    public FastTangentPlane(LatLonGeo latLon)
+    public PolynomialTangentPlane(LatLonGeo latLon)
     {
         super(latLon);
     }
 
-    public FastTangentPlane(LatLonGeo latLon, double tangentPointOnPlaneX, double tangentPointOnPlaneY)
+    public PolynomialTangentPlane(LatLonGeo latLon, double tangentPointOnPlaneX, double tangentPointOnPlaneY)
     {
         super(latLon, tangentPointOnPlaneX, tangentPointOnPlaneY);
     }
@@ -50,6 +49,16 @@ public class FastTangentPlane extends TangentPlane
     @Override
     protected double calcAtan2(double y, double x)
     {
-        return fastAtan.atan2(y, x);
+        double polyValue = PolynomialApprox.atan2(y, x);
+
+//        double slowValue = Math.atan2(y, x);
+//        double deltaPoly = polyValue - slowValue;
+
+//        if (Math.abs(deltaPoly) > 1.0e-6)
+//        {
+//            logWarning(logger, "deltaPoly %4g at y %.4f, x %.4f, slow %.8f", deltaPoly, y, x, slowValue);
+//        }
+
+        return polyValue;
     }
 }
