@@ -246,4 +246,10 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         return this.isDestroyed;
     }
+
+    @Override
+    public boolean isVisible( )
+    {
+        return true;
+    }
 }

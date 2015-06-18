@@ -161,21 +161,29 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         {
             try
             {
-                // don't paint non-GlimpseLayout painters when isVisible is false
-                // this implementation is somewhat ugly, but stems from the fact that GlimpseLayout implements GlimpsePainter
-                // (which it probably shouldn't) and even if isVisible is false, GlimpseLayout still needs to layout its
-                // children or odd behavior may result if the GlimpseLayout is resized while not visible
-                if ( !(m.painter instanceof GlimpseLayout) && !layout.isVisible ) continue;
+                // if a GlimpsePainter is visible, paint it
+                // if it is not visible, but is a GlimpseLayout (GlimpseLayout implements GlimpsePainter, which it
+                // arguably should not) then GlimpseLayout still needs to layout its children or odd behavior may
+                // result if the GlimpseLayout is resized while not visible (but nothing further should be painted)
                 
-                gl.glEnable( GL2.GL_SCISSOR_TEST );
-
-                gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
-                gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
-
-                if ( m.callback != null ) m.callback.prePaint( m.painter, context );
-                m.painter.paintTo( context );
-                if ( m.callback != null ) m.callback.postPaint( m.painter, context );
-
+                boolean isLayout = m.painter instanceof GlimpseLayout;
+                boolean isVisible = layout.isVisible;
+                
+                if ( isVisible )
+                {
+                    gl.glEnable( GL2.GL_SCISSOR_TEST );
+    
+                    gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
+                    gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
+    
+                    if ( m.callback != null ) m.callback.prePaint( m.painter, context );
+                    m.painter.paintTo( context );
+                    if ( m.callback != null ) m.callback.postPaint( m.painter, context );
+                }
+                else if ( isLayout )
+                {
+                    ((GlimpseLayout)m.painter).layoutTo( context );
+                }
             }
             finally
             {

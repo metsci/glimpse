@@ -89,16 +89,19 @@ public abstract class MouseWrapper<I>
         for ( int i = size - 1; i >= 0; i-- )
         {
             GlimpseTarget childLayout = list.get( i );
-
-            GlimpseBounds childBounds = childLayout.getTargetBounds( context.getTargetStack( ) );
-
-            stack.push( childLayout, childBounds );
-
-            boolean consumeEvent = getContainingTargets( e, context, accumulator );
-
-            if ( consumeEvent ) return true;
-
-            stack.pop( );
+            
+            if ( childLayout.isVisible( ) )
+            {
+                GlimpseBounds childBounds = childLayout.getTargetBounds( context.getTargetStack( ) );
+    
+                stack.push( childLayout, childBounds );
+    
+                boolean consumeEvent = getContainingTargets( e, context, accumulator );
+    
+                if ( consumeEvent ) return true;
+    
+                stack.pop( );
+            }
         }
 
         // if the layout neither consumes nor responds to events, we don't need

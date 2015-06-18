@@ -293,4 +293,10 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
             }
         } );
     }
+
+    @Override
+    public boolean isVisible( )
+    {
+        return true;
+    }
 }
