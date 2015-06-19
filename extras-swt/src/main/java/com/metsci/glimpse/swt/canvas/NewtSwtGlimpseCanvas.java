@@ -192,7 +192,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                dimension = new Dimension( width, height );
+                int[] scale = getSurfaceScale();
+                dimension = new Dimension( width/scale[0], height/scale[1] );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -417,6 +418,6 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     @Override
     public int[] getSurfaceScale()
     {
-        return new int[] {1,1};
+        return glWindow.getNativeSurfaceScale(new int[2]);
     }
 }
