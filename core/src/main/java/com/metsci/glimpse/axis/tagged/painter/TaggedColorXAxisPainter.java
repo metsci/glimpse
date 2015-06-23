@@ -126,6 +126,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
             gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
             
             paintTicks( gl, taggedAxis, width, height );
+            paintAxisLabel( gl, axis, width, height );
             paintSelectionLine( gl, taggedAxis, width, height );
 
             gl.glMatrixMode( GL2.GL_PROJECTION );
