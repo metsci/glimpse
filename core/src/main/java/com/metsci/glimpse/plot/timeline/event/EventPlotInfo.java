@@ -318,7 +318,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                 listener.eventsHovered( e, newHoveredEvents, time );
             }
 
-            hoveredEvents = Sets.newHashSet( newHoveredEvents );
+            hoveredEvents = newHoveredEvents;
         }
     }
     
