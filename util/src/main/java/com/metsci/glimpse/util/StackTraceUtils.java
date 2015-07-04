@@ -77,7 +77,7 @@ public class StackTraceUtils
         int index = 3;
         if (trace.length < (index + 1))
         {
-            return "n/a";
+            return "callers unidentified";
         }
 
         StringBuilder sb = new StringBuilder("called by...");
@@ -91,6 +91,45 @@ public class StackTraceUtils
             {
                 break;
             }
+
+            index++;
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Names of callers for debug/trace/logging purposes.
+     *
+     * @param   nBack  how far up the stack to go (should be >=1)
+     * @return  Information String about callers (up the stack) suitable for logging.
+     */
+    public static String getCallersCompact(int nBack)
+    {
+        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+
+        // skip past getCaller call, getStackTrace, and caller of this method to reach trace
+        // element of interest
+        int index = 3;
+        if (trace.length < (index + 1))
+        {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (index < trace.length)
+        {
+            StackTraceElement elem = trace[index];
+            String className = elem.getClassName();
+            sb.append(String.format("%s.%s:%s", className.substring(className.lastIndexOf(".") + 1),
+                                    elem.getMethodName(), elem.getLineNumber()));
+            nBack--;
+            if (nBack <= 0)
+            {
+                break;
+            }
+
+            sb.append(" <- ");
 
             index++;
         }
