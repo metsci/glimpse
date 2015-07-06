@@ -37,7 +37,6 @@ import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
-
 /**
  * A vertical (y) axis with labeled ticks along the left hand side. Ticks labels are
  * oriented vertically, taking up less horizontal room and allowing the axis to be more
@@ -118,42 +117,45 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
             gl.glEnd( );
         }
 
-        // Tick labels
-        GlimpseColor.setColor( textRenderer, tickLabelColor );
-        for ( int i = min + 1; i < max; i++ )
+        if ( showTickLabels )
         {
-            double yTick = yTicks[i];
-            String yLabel = yLabels[i];
-            Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
-
-            int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getHeight( ) );
-            int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) + tickTextBounds.getWidth( ) / 2 );
-
-            if ( keepLabelsForExtremaFullyVisible )
+            // Tick labels
+            GlimpseColor.setColor( textRenderer, tickLabelColor );
+            for ( int i = min + 1; i < max; i++ )
             {
-                if ( jTickText < tickTextBounds.getWidth( ) )
+                double yTick = yTicks[i];
+                String yLabel = yLabels[i];
+                Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
+
+                int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getHeight( ) );
+                int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) + tickTextBounds.getWidth( ) / 2 );
+
+                if ( keepLabelsForExtremaFullyVisible )
                 {
-                    jTickText = ( int ) tickTextBounds.getWidth( );
+                    if ( jTickText < tickTextBounds.getWidth( ) )
+                    {
+                        jTickText = ( int ) tickTextBounds.getWidth( );
+                    }
+
+                    if ( jTickText > height )
+                    {
+                        jTickText = height;
+                    }
                 }
 
-                if ( jTickText > height )
+                textRenderer.beginRendering( width, height );
+                try
                 {
-                    jTickText = height;
+                    gl.glMatrixMode( GL2.GL_PROJECTION );
+                    gl.glTranslatef( iTickText, jTickText, 0 );
+                    gl.glRotatef( -90, 0, 0, 1.0f );
+
+                    textRenderer.draw( yLabel, 0, 0 );
                 }
-            }
-
-            textRenderer.beginRendering( width, height );
-            try
-            {
-                gl.glMatrixMode( GL2.GL_PROJECTION );
-                gl.glTranslatef( iTickText, jTickText, 0 );
-                gl.glRotatef( -90, 0, 0, 1.0f );
-
-                textRenderer.draw( yLabel, 0, 0 );
-            }
-            finally
-            {
-                textRenderer.endRendering( );
+                finally
+                {
+                    textRenderer.endRendering( );
+                }
             }
         }
     }

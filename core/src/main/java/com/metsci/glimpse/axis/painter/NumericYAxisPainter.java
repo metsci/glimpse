@@ -131,38 +131,41 @@ public class NumericYAxisPainter extends NumericAxisPainter
             gl.glEnd( );
         }
 
-        // Tick labels
-        GlimpseColor.setColor( textRenderer, tickLabelColor );
-        textRenderer.beginRendering( width, height );
-        try
+        if ( showTickLabels )
         {
-            for ( int i = min + 1; i < max; i++ )
+            // Tick labels
+            GlimpseColor.setColor( textRenderer, tickLabelColor );
+            textRenderer.beginRendering( width, height );
+            try
             {
-                double yTick = yTicks[i];
-                String yLabel = yLabels[i];
-                Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
-                int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getWidth( ) );
-                int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) - 0.35 * tickTextBounds.getHeight( ) );
-
-                if ( keepLabelsForExtremaFullyVisible )
+                for ( int i = min + 1; i < max; i++ )
                 {
-                    if ( jTickText < 0 )
+                    double yTick = yTicks[i];
+                    String yLabel = yLabels[i];
+                    Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
+                    int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getWidth( ) );
+                    int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) - 0.35 * tickTextBounds.getHeight( ) );
+    
+                    if ( keepLabelsForExtremaFullyVisible )
                     {
-                        jTickText = 0;
+                        if ( jTickText < 0 )
+                        {
+                            jTickText = 0;
+                        }
+    
+                        if ( jTickText + tickTextBounds.getHeight( ) > height )
+                        {
+                            jTickText = height - ( int ) tickTextBounds.getHeight( );
+                        }
                     }
-
-                    if ( jTickText + tickTextBounds.getHeight( ) > height )
-                    {
-                        jTickText = height - ( int ) tickTextBounds.getHeight( );
-                    }
+    
+                    textRenderer.draw( yLabel, iTickText, jTickText );
                 }
-
-                textRenderer.draw( yLabel, iTickText, jTickText );
             }
-        }
-        finally
-        {
-            textRenderer.endRendering( );
+            finally
+            {
+                textRenderer.endRendering( );
+            }
         }
     }
 

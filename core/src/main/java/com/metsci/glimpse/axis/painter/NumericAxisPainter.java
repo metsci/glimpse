@@ -60,6 +60,7 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected boolean showSelectionLine = false;
     protected boolean showLabel = true;
     protected boolean showMinorTicks = false;
+    protected boolean showTickLabels = true;
 
     protected TextRenderer textRenderer;
     protected volatile Font newFont = null;
@@ -96,6 +97,11 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     public void setKeepLabelsForExtremaFullyVisible( boolean keepFullyVisible )
     {
         this.keepLabelsForExtremaFullyVisible = keepFullyVisible;
+    }
+    
+    public void setShowTickLabels( boolean show )
+    {
+        this.showTickLabels = show;
     }
 
     public void setShowLabel( boolean show )

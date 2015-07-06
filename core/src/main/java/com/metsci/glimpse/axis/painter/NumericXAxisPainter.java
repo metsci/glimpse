@@ -130,44 +130,47 @@ public class NumericXAxisPainter extends NumericAxisPainter
             gl.glEnd( );
         }
 
-        // Tick labels
-        GlimpseColor.setColor( textRenderer, tickLabelColor );
-        textRenderer.beginRendering( width, height );
-        try
+        if ( showTickLabels )
         {
             // Tick labels
-            for ( int i = min + 1; i < max; i++ )
+            GlimpseColor.setColor( textRenderer, tickLabelColor );
+            textRenderer.beginRendering( width, height );
+            try
             {
-                double xTick = xTicks[i];
-                String xLabel = xLabels[i];
-                Rectangle2D tickTextBounds = textRenderer.getBounds( xLabel );
-                Rectangle2D dashTextBounds = textRenderer.getBounds( "-" );
-                double dashTextWidth = xTick < 0 ? dashTextBounds.getWidth( ) : 0;
-                double absTextWidth = tickTextBounds.getWidth( ) - dashTextWidth;
-
-                int jTickText = getTickTextPositionY( height, ( int ) tickTextBounds.getHeight( ) );
-                int iTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( xTick ) ) - 0.5f * absTextWidth - dashTextWidth );
-
-                if ( keepLabelsForExtremaFullyVisible )
+                // Tick labels
+                for ( int i = min + 1; i < max; i++ )
                 {
-                    if ( iTickText < 0 )
+                    double xTick = xTicks[i];
+                    String xLabel = xLabels[i];
+                    Rectangle2D tickTextBounds = textRenderer.getBounds( xLabel );
+                    Rectangle2D dashTextBounds = textRenderer.getBounds( "-" );
+                    double dashTextWidth = xTick < 0 ? dashTextBounds.getWidth( ) : 0;
+                    double absTextWidth = tickTextBounds.getWidth( ) - dashTextWidth;
+    
+                    int jTickText = getTickTextPositionY( height, ( int ) tickTextBounds.getHeight( ) );
+                    int iTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( xTick ) ) - 0.5f * absTextWidth - dashTextWidth );
+    
+                    if ( keepLabelsForExtremaFullyVisible )
                     {
-                        iTickText = 0;
+                        if ( iTickText < 0 )
+                        {
+                            iTickText = 0;
+                        }
+    
+                        if ( iTickText + tickTextBounds.getWidth( ) > width )
+                        {
+                            iTickText = width - ( int ) tickTextBounds.getWidth( );
+                        }
                     }
-
-                    if ( iTickText + tickTextBounds.getWidth( ) > width )
-                    {
-                        iTickText = width - ( int ) tickTextBounds.getWidth( );
-                    }
+    
+                    textRenderer.draw( xLabel, iTickText, jTickText );
                 }
-
-                textRenderer.draw( xLabel, iTickText, jTickText );
+    
             }
-
-        }
-        finally
-        {
-            textRenderer.endRendering( );
+            finally
+            {
+                textRenderer.endRendering( );
+            }
         }
     }
 
