@@ -64,6 +64,11 @@ public class TimeSpan
         this.endTime = endTime;
     }
 
+    public boolean contains( TimeStamp time )
+    {
+        return time.isAfterOrEquals(startTime) && time.isBeforeOrEquals(endTime);
+    }
+
     @Override
     public String toString()
     {
