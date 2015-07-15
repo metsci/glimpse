@@ -35,6 +35,7 @@ import java.util.List;
 import javax.media.opengl.GL2;
 
 import com.google.common.collect.Lists;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -77,8 +78,10 @@ public class TooltipPainter extends SimpleTextPainter
 
     protected boolean wrapTextAroundIcon = false;
 
-    protected int x;
-    protected int y;
+    protected double x;
+    protected double y;
+    
+    protected boolean drawInPixelCoords = true;
 
     public TooltipPainter( TextureAtlas atlas )
     {
@@ -146,9 +149,26 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
+        
+        this.drawInPixelCoords = true;
 
         return this;
     }
+    
+    /**
+     * Sets the location of the upper left corner of the tooltip box
+     * in axis coordinates.
+     */
+    public synchronized TooltipPainter setLocationAxisCoords( double x, double y )
+    {
+        this.x = x;
+        this.y = y;
+        
+        this.drawInPixelCoords = false;
+
+        return this;
+    }
+    
 
     public synchronized TooltipPainter setOffset( int x, int y )
     {
@@ -334,7 +354,7 @@ public class TooltipPainter extends SimpleTextPainter
     }
 
     @Override
-    protected synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
         if ( icons == null )
         {
