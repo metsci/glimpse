@@ -36,6 +36,7 @@ import javax.media.opengl.GL2;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -356,6 +357,11 @@ public class TooltipPainter extends SimpleTextPainter
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
+        if ( axis == null && !drawInPixelCoords )
+        {
+            throw new AxisNotSetException( this, context );
+        }
+        
         if ( icons == null )
         {
             loadIcons( );
