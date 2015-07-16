@@ -67,20 +67,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.orderNumberFormatter = NumberFormat.getNumberInstance( );
         this.orderNumberFormatter.setGroupingUsed( true );
 
-        this.converter = new AxisUnitConverter( )
-        {
-            @Override
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-
-            @Override
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-        };
+        this.converter = AxisUnitConverters.identity;
 
         this.tickSpacing = 100;
         this.minorTickCount = 4;
@@ -262,7 +249,6 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     protected double tickInterval( Axis1D axis, double approxNumTicks )
     {
-
         double calculatedMin = converter.toAxisUnits( axis.getMin( ) );
         double calculatedMax = converter.toAxisUnits( axis.getMax( ) );
         double min = Math.min( calculatedMin, calculatedMax );
@@ -311,7 +297,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
                 ticks[size - i - 1] = temp;
             }
         }
-        
+
         return ticks;
     }
 
