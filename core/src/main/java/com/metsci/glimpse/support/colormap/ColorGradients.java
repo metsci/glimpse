@@ -30,6 +30,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -274,12 +275,128 @@ public class ColorGradients
     
     public static final ColorGradient parula = fromCSV( "colormap/parula.csv" );
 
+    public static final ColorGradient hsv = fromCSV("colormap/hsv.csv");
+
+    public static final ColorGradient hot = fromCSV("colormap/hot.csv"); 
+    
+    public static final ColorGradient cool = fromCSV("colormap/cool.csv");
+
+    public static final ColorGradient spring = fromCSV("colormap/spring.csv");
+
+    public static final ColorGradient summer = fromCSV("colormap/summer.csv");
+    
+    public static final ColorGradient autumn = fromCSV("colormap/autumn.csv");
+    
+    public static final ColorGradient winter = fromCSV("colormap/winter.csv"); 
+    
+    public static final ColorGradient bone = fromCSV("colormap/bone.csv"); 
+    
+    public static final ColorGradient copper = fromCSV("colormap/copper.csv"); 
+    
+    public static final ColorGradient pink = fromCSV("colormap/pink.csv"); 
+    
+    public static final ColorGradient lines = fromCSV("colormap/lines.csv"); //diff color??
+    
+    public static final ColorGradient colorcube = fromCSV("colormap/colorcube.csv"); 
+    
+    public static final ColorGradient prism = fromCSV("colormap/prism.csv"); 
+    
+    public static final ColorGradient flag = fromCSV("colormap/flag.csv"); //diff color??
+    
+    public static final ColorGradient white = fromCSV("colormap/white.csv"); 
+    
     // see: https://mycarta.wordpress.com/2013/02/21/perceptual-rainbow-palette-the-method/
     public static final ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
     
     // see: http://www.cs.utah.edu/~gk/papers/vis02/FaceLumin.pdf
     // see: https://mycarta.wordpress.com/2012/12/06/the-rainbow-is-deadlong-live-the-rainbow-part-5-cie-lab-linear-l-rainbow/
     public static final ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
+   
+    
+    public static ColorGradient nColorFade( List<float[]> colors )
+    {
+    	//fades from one color to the next
+    	//is there a set number of faded colors wanted in between each?
+    	
+    	float[] colorArray = new float[(colors.size()-1)*24+3];
+    	for(int k = 0; k < colors.size(); k++)
+    	{
+    		colorArray[k*24] = colors.get(k)[0];
+    		colorArray[k*24+1] = colors.get(k)[1];
+    		colorArray[k*24+2] = colors.get(k)[2]; 
+    	}
+    	for(int k = 0; k < colorArray.length; k+=3)
+    	{
+    		//treat these as clumps of 3 (every 3 indices is one rgb color)
+    		if(k%24 != 0)
+    		{
+    			//use k/24 as left side, and k/24+1 as right side to merge values
+    			colorArray[k] = (colorArray[(k/24)*24]+colorArray[(k/24+1)*24])/2;
+    			colorArray[k+1] = (colorArray[(k/24)*24+1]+colorArray[(k/24+1)*24+1])/2;
+    			colorArray[k+2] = (colorArray[(k/24)*24+2]+colorArray[(k/24+1)*24+2])/2;
+    		}
+    	}
+    	
+    	return new ColorGradientArray(colorArray);
+    	
+//        return new ColorGradient( )
+//        {
+//            public void toColor( float fraction, float[] rgba )
+//            {
+//            	
+//            }
+//        };
+    }
+    
+    public static ColorGradient customMap(/* vars? */) 
+    {
+    	 /*
+    	 how is this different from nColorFade, what arguments are passed in? 
+    	 */
+    	return null;
+    }
+    
+    public static ColorGradient brighten( final ColorGradient gradient, final double beta )
+    {
+    	//if 0 < beta < 1, brightens with scale gamma = 1 - beta
+    	//if -1 < beta < 0, darkens with scale gamma = 1/(1+beta)
+//    	float[] original = ((ColorGradientArray)gradient).f;
+    	
+//    	float[] brightened = new float[original.length];
+//    	if(beta >= 1 || beta <= -1)
+//    		return gradient;
+//    	if(beta > 0)
+//	       	for(int k = 0; k < brightened.length; k++)
+//	       	{
+//	       		brightened[k] = (float)Math.pow(original[k], 1-beta);
+//	       	}
+//    	else
+//    		for(int k = 0; k < brightened.length; k++)
+//	       	{
+//	       		brightened[k] = (float)Math.pow(original[k], 1/(1+beta));
+//	       	}
+//   
+//    	return new ColorGradientArray(brightened);
+    	
+    	 return new ColorGradient( )
+         {
+             public void toColor( float fraction, float[] rgba )
+             {
+                gradient.toColor( fraction, rgba );
+                 
+             	if(beta > 0)
+     	       	for(int k = 0; k < rgba.length; k++)
+     	       	{
+     	       		rgba[k] = (float)Math.pow(rgba[k], 1-beta);
+     	       	}
+         	else
+         		for(int k = 0; k < rgba.length; k++)
+     	       	{
+         			rgba[k] = (float)Math.pow(rgba[k], 1/(1+beta));
+     	       	}
+             }
+         };
+    }
     
     public static ColorGradient reverse( final ColorGradient gradient )
     {

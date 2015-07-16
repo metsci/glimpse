@@ -17,11 +17,11 @@ public class ColorGradientArray implements ColorGradient
     {
         int index = (int) Math.floor( fraction * size );
         if ( index < 0 ) index = 0;
-        if ( index >= size-1 ) index = size-2;
+        if ( index >= size ) index = size-1;
         
-        rgba[0] = ( f[3*index+0] + f[3*index+3] ) / 2.0f;
-        rgba[1] = ( f[3*index+1] + f[3*index+4] ) / 2.0f;
-        rgba[2] = ( f[3*index+2] + f[3*index+5] ) / 2.0f;
+        rgba[0] = f[3*index+0];
+        rgba[1] = f[3*index+1];
+        rgba[2] = f[3*index+2];
         rgba[3] = 1.0f;
     }
 }
