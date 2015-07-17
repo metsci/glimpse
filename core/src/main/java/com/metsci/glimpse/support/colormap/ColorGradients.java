@@ -315,7 +315,6 @@ public class ColorGradients
     
     public static ColorGradient nColorFade(final List<float[]> colors)
     {
-    		colorArray[k*24] = colors.get(k)[0];
         return new ColorGradient( )
         {
             public void toColor( float fraction, float[] rgba )
