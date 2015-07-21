@@ -319,12 +319,16 @@ public class ColorGradients
         {
             public void toColor( float fraction, float[] rgba )
             {
-            	double val = fraction*colors.size();
-            	int index = (int)val;
+            	double val = fraction*(colors.size()-1);
+            	int index;
+            	if(fraction != 1)
+            		index = (int)val;
+            	else
+            		index = colors.size() - 2;
             	rgba[0] = (float)(colors.get(index)[0]*(1-val+index)+colors.get(index+1)[0]*(val-index));
             	rgba[1] = (float)(colors.get(index)[1]*(1-val+index)+colors.get(index+1)[1]*(val-index));
             	rgba[2] = (float)(colors.get(index)[2]*(1-val+index)+colors.get(index+1)[2]*(val-index));
-            	rgba[3] = (float)(colors.get(index)[3]*(1-val+index)+colors.get(index+1)[3]*(val-index)); //1.0f;
+            	rgba[3] = (float)(colors.get(index)[3]*(1-val+index)+colors.get(index+1)[3]*(val-index));
             }
         };
     }
@@ -335,11 +339,15 @@ public class ColorGradients
         {
             public void toColor( float fraction, float[] rgba )
             {
-            	int index = (int)fraction*colors.size();
+            	int index;
+            	if(fraction != 1)
+            		index = (int)(fraction*(colors.size()));
+            	else 
+            		index = colors.size() - 1;
             	rgba[0] = colors.get(index)[0];
             	rgba[1] = colors.get(index)[1];
             	rgba[2] = colors.get(index)[2];
-            	rgba[3] = colors.get(index)[3]; //1.0f;
+            	rgba[3] = colors.get(index)[3];
             }
         };
     }
@@ -368,6 +376,8 @@ public class ColorGradients
         {
             public void toColor( float fraction, float[] rgba )
             {
+            	gradient.toColor(fraction, rgba);
+            	
             	//convert rgb to hsl
             	float xMax = Math.max(Math.max(rgba[0], rgba[1]), rgba[2]);
             	float xMin = Math.min(Math.min(rgba[0], rgba[1]), rgba[2]);
@@ -377,19 +387,24 @@ public class ColorGradients
             	else if(light < .5)
             		sat = (xMax-xMin)/(xMax+xMin);
             	else
-            		sat = (xMax-xMin)/(2-xMax - xMin);
+            		sat = (xMax-xMin)/(2-xMax-xMin);
             	if(rgba[0] == xMax)
             		hue = (rgba[1]-rgba[2])/(xMax-xMin);
-            	else if(rgba[1] == xMax)
+            	if(rgba[1] == xMax)
+            		hue = 2+(rgba[2]-rgba[0])/(xMax-xMin);
+            	if(rgba[2] == xMax)
             		hue = 4+(rgba[0]-rgba[1])/(xMax-xMin);
             	if(hue < 0)
             		hue = hue + 6;
+            	System.out.println(light+" "+sat+" "+hue);
+            	
             	//increase light
             	if(light < 1-beta)
             		light = (float) (light+beta);
             	else if(light < beta && beta < 1)
             		light = (float)beta;
-            	//convert back to rgb from hsl
+            	
+            	//convert back to rgba from hsl
             	if(sat == 0)
             		rgba[0] = rgba[1] = rgba[2] = light;
             	else if(light < .5)
@@ -400,7 +415,7 @@ public class ColorGradients
             	hue = hue/6;
             	for(int k = 0; k < 3; k++)
             	{
-            		float temp3 = 0;
+            		float temp3;
             		if(k == 0)
             		{
 		            	temp3 = (float)(hue+1.0/3); 
@@ -428,12 +443,13 @@ public class ColorGradients
         };
     }
     
-    public static ColorGradient changeAlpha(final float alpha)
+    public static ColorGradient changeAlpha(final ColorGradient gradient, final float alpha)
     {
     	return new ColorGradient( )
     	{
             public void toColor( float fraction, float[] rgba )
             {
+            	gradient.toColor(fraction, rgba);
             	rgba[3] = alpha; 
             }
         };
