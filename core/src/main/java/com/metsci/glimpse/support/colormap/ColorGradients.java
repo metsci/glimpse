@@ -396,15 +396,11 @@ public class ColorGradients
             		hue = 4+(rgba[0]-rgba[1])/(xMax-xMin);
             	if(hue < 0)
             		hue = hue + 6;
-            	System.out.println(light+" "+sat+" "+hue);
             	
-            	//increase light
-            	if(light < 1-beta)
-            		light = (float) (light+beta);
-            	else if(light < beta && beta < 1)
-            		light = (float)beta;
+            	//increase light value
+            	light = (float)(light + beta);
             	
-            	//convert back to rgba from hsl
+            	//convert back to rgb from hsl
             	if(sat == 0)
             		rgba[0] = rgba[1] = rgba[2] = light;
             	else if(light < .5)
