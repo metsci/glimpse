@@ -91,7 +91,7 @@ public class TaggedAxis1D extends Axis1D
     }
 
     @Override
-    public Axis1D clone( )
+    public TaggedAxis1D clone( )
     {
         TaggedAxis1D axis = new TaggedAxis1D( this );
 

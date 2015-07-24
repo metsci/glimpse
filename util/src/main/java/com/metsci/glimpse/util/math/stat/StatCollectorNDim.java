@@ -28,7 +28,6 @@ package com.metsci.glimpse.util.math.stat;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
-import java.lang.reflect.Array;
 import java.util.logging.Logger;
 
 /**

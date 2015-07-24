@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.axis.tagged;
 
+import java.util.Collections;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
+
 /**
  * Simple {@link Constraint} implementation which provides
  * a constructor for specifying the constraint name.
@@ -35,10 +40,12 @@ package com.metsci.glimpse.axis.tagged;
 public abstract class NamedConstraint implements Constraint
 {
     protected String name;
+    protected Map<String,Tag> previousTags;
 
     public NamedConstraint( String name )
     {
         this.name = name;
+        this.previousTags = Collections.emptyMap( );
     }
 
     @Override
@@ -46,5 +53,27 @@ public abstract class NamedConstraint implements Constraint
     {
         return this.name;
     }
+    
+    public void applyConstraint( TaggedAxis1D axis )
+    {
+    	if(previousTags.isEmpty())
+    	{
+    		previousTags = Maps.newHashMap( );
+    		for ( Tag tag : axis.getSortedTags( ) )
+        	{
+        		previousTags.put( tag.getName( ), new Tag( tag ) );
+        	}
+    	}
+    	applyConstraint( axis, previousTags );
+    	
+    	previousTags = Maps.newHashMap( );
+    	
+    	for ( Tag tag : axis.getSortedTags( ) )
+    	{
+    		previousTags.put( tag.getName( ), new Tag( tag ) );
+    	}
+    }
+    
+    public abstract void applyConstraint( TaggedAxis1D currentAxis, Map<String,Tag> previousTags );
 
 }

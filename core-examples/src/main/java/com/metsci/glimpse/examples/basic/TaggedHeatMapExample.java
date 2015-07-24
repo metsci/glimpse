@@ -28,7 +28,10 @@ package com.metsci.glimpse.examples.basic;
 
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
-import com.metsci.glimpse.axis.tagged.NamedConstraint;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.examples.Example;
@@ -74,29 +77,16 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         // add some named tags at specific points along the axis
         // also add a custom "attribute" to each tag which specifies the relative (0 to 1)
         // point along the color scale which the tag is attached to
-        final Tag t1 = axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
-        final Tag t2 = axisZ.addTag( "T2", 300.0 ).setAttribute( TEX_COORD_ATTR, 0.3f );
-        final Tag t3 = axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f );
-        final Tag t4 = axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
-        final Tag t5 = axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
-
+        axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
+        axisZ.addTag( "T2", 300.0 ).setAttribute( TEX_COORD_ATTR, 0.3f );
+        axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f );
+        axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
+        axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        List<String> constraints = new ArrayList<String>();
+        for(Tag tag: axisZ.getSortedTags())
+        	constraints.add(tag.getName());
         // add a constraint which prevents dragging the tags past one another
-        axisZ.addConstraint( new NamedConstraint( "C1" )
-        {
-            final static double buffer = 1.0;
-
-            @Override
-            public void applyConstraint( TaggedAxis1D axis )
-            {
-                if ( t4.getValue( ) > t5.getValue( ) - buffer ) t4.setValue( t5.getValue( ) - buffer );
-
-                if ( t3.getValue( ) > t4.getValue( ) - buffer ) t3.setValue( t4.getValue( ) - buffer );
-
-                if ( t2.getValue( ) > t3.getValue( ) - buffer ) t2.setValue( t3.getValue( ) - buffer );
-
-                if ( t1.getValue( ) > t2.getValue( ) - buffer ) t1.setValue( t2.getValue( ) - buffer );
-            }
-        } );
+        axisZ.addConstraint( new OrderedConstraint( "C1" , constraints) ); 
 
         // set border and offset sizes in pixels
         plot.setBorderSize( 15 );
@@ -165,6 +155,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
         // tell the cursor painter what texture to report data values from
         cursorPainter.setTexture( texture );
+//            	System.out.println(rgba[0]+" "+rgba[1]+" "+rgba[2]);
 
         return plot;
     }
@@ -172,7 +163,10 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
     @Override
     public ColorAxisPlot2D getLayout( )
     {
-        return getLayout( ColorGradients.purpleBone );
+    	//return getLayout(ColorGradients.autumn);
+    	return getLayout(ColorGradients.lighten(ColorGradients.winter, .25));
+    	//return getLayout(ColorGradients.nColorFade( Lists.newArrayList( GlimpseColor.getBlue(), GlimpseColor.getGreen(), GlimpseColor.getCyan())));
+    	//return getLayout(ColorGradients.customMap( Lists.newArrayList( GlimpseColor.getBlue(), GlimpseColor.getGreen(), GlimpseColor.getCyan(), GlimpseColor.getMagenta())));
     }
 
     public GlimpsePainter getPainter( )

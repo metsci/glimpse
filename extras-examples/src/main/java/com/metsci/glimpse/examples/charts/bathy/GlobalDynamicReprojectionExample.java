@@ -33,6 +33,8 @@ import static java.lang.Math.PI;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
@@ -40,6 +42,7 @@ import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.NamedConstraint;
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
@@ -137,22 +140,16 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
         colorMapTexture.mutate( new ColorGradientConcatenator( ColorGradients.bathymetry, ColorGradients.topography ) );
         colorTagPainter.setColorScale( colorMapTexture );
 
-        final Tag maxTag = colorAxis.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
-        final Tag seaLevelTag = colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
-        final Tag minTag = colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
+        colorAxis.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
+        colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
-        colorAxis.addConstraint( new NamedConstraint( "OrderingConstraint" )
-        {
-            protected double buffer = 200;
-
-            @Override
-            public void applyConstraint( TaggedAxis1D axis )
-            {
-                if ( seaLevelTag.getValue( ) > maxTag.getValue( ) - buffer ) seaLevelTag.setValue( maxTag.getValue( ) - buffer );
-                if ( minTag.getValue( ) > seaLevelTag.getValue( ) - buffer ) minTag.setValue( seaLevelTag.getValue( ) - buffer );
-            }
-        } );
-
+        List<String> constraints = new ArrayList<String>();
+        for(Tag tag: colorAxis.getSortedTags())
+        	constraints.add(tag.getName());
+        
+        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint" , 200, constraints) );
+        
         colorAxis.setMin( -10000 );
         colorAxis.setMax( 12000 );
 

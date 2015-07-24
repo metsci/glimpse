@@ -27,7 +27,6 @@
 package com.metsci.glimpse.util.geo.datum;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.geo.util.SphereUtil;
 import com.metsci.glimpse.util.geo.util.SphereUtilFast;
 
 /**

@@ -27,7 +27,6 @@
 package com.metsci.glimpse.painter.info;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 
 /**
