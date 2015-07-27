@@ -1,40 +1,55 @@
 package com.metsci.glimpse.painter.info;
 
-public class FpsHelper {
-	private float lastFpsEstimate = -1;
+/**
+ * Helper data structure for FpsPainter.
+ * 
+ * @see FpsPainter
+ * @author sindhwani
+ */
+public class FpsHelper
+{
+    private float lastFpsEstimate = -1;
     private long timeOfLastCounterReset = -1;
     private float frameCount = 0;
-    public FpsHelper()
+
+    public FpsHelper( )
     {
     }
-    public FpsHelper(float lastEstimate, long timeOfLastCounterReset, float frameCount)
+
+    public FpsHelper( float lastEstimate, long timeOfLastCounterReset, float frameCount )
     {
-    	lastFpsEstimate = lastEstimate;
-    	this.timeOfLastCounterReset = timeOfLastCounterReset;
-    	this.frameCount = frameCount;
+        lastFpsEstimate = lastEstimate;
+        this.timeOfLastCounterReset = timeOfLastCounterReset;
+        this.frameCount = frameCount;
     }
-    public float getLastFpsEstimate()
+
+    public float getLastFpsEstimate( )
     {
-    	return lastFpsEstimate;
+        return lastFpsEstimate;
     }
-    public long getTimeOfLastCounterReset()
+
+    public long getTimeOfLastCounterReset( )
     {
-    	return timeOfLastCounterReset;
+        return timeOfLastCounterReset;
     }
-    public float getFrameCount()
+
+    public float getFrameCount( )
     {
-    	return frameCount;
+        return frameCount;
     }
-    public void setFpsEstimate(float estimate)
+
+    public void setFpsEstimate( float estimate )
     {
-    	lastFpsEstimate = estimate;
+        lastFpsEstimate = estimate;
     }
-    public void setTimeOfCounterReset(long timeOfReset)
+
+    public void setTimeOfCounterReset( long timeOfReset )
     {
-    	timeOfLastCounterReset = timeOfReset;
+        timeOfLastCounterReset = timeOfReset;
     }
-    public void setFrameCount(float frameCount)
+
+    public void setFrameCount( float frameCount )
     {
-    	this.frameCount = frameCount;
+        this.frameCount = frameCount;
     }
 }
