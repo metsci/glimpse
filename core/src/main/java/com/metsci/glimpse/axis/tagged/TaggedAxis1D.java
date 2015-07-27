@@ -220,4 +220,10 @@ public class TaggedAxis1D extends Axis1D
             this.applyTagConstraints( );
         }
     }
+    
+    @Override
+    public String toString( )
+    {
+        return String.format( "[%.3f %.3f %d %s]", minValue, maxValue, axisSizePixels, getSortedTags( ) );
+    }
 }

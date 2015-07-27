@@ -26,24 +26,21 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
-import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static java.lang.Math.PI;
+import static com.metsci.glimpse.axis.UpdateMode.*;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static java.lang.Math.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.NamedConstraint;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
-import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
@@ -144,12 +141,9 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
         colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
         colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
-        List<String> constraints = new ArrayList<String>();
-        for(Tag tag: colorAxis.getSortedTags())
-        	constraints.add(tag.getName());
-        
-        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint" , 200, constraints) );
-        
+        // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
+        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
+
         colorAxis.setMin( -10000 );
         colorAxis.setMax( 12000 );
 

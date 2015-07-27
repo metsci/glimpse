@@ -163,4 +163,10 @@ public class Tag
         if ( name == null ) return other.name == null;
         return name.equals( other.name );
     }
+    
+    @Override
+    public String toString( )
+    {
+        return String.format( "%s=%.2f", name, value );
+    }
 }
