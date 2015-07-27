@@ -375,6 +375,9 @@ public class TooltipPainter extends SimpleTextPainter
             throw new AxisNotSetException( this, context );
         }
 
+        double x = drawInPixelCoords ? this.x : axis.getAxisX( ).valueToScreenPixelUnits( this.x );
+        double y = drawInPixelCoords ? this.y : axis.getAxisY( ).getSizePixels( ) - axis.getAxisY( ).valueToScreenPixelUnits( this.y );
+
         if ( icons == null )
         {
             loadIcons( );
@@ -435,14 +438,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_QUADS );
                 try
                 {
-                    if ( drawInPixelCoords )
-                    {
-                        borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
-                    }
-                    else
-                    {
-                        borderVerticesAxisCoords( gl, x, y, axis );
-                    }
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
                 }
                 finally
                 {
@@ -459,14 +455,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
-                    if ( drawInPixelCoords )
-                    {
-                        borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
-                    }
-                    else
-                    {
-                        borderVerticesAxisCoords( gl, x, y, axis );
-                    }
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
                 }
                 finally
                 {
@@ -490,15 +479,7 @@ public class TooltipPainter extends SimpleTextPainter
 
                 int posX = ( int ) ( x + line.leftX + iconSize + clampX + offsetX );
                 int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY );
-                
-                if ( drawInPixelCoords )
-                {
-                    textRenderer.draw( line.text, posX, posY );
-                }
-                else
-                {
-                    textRenderer.draw( line.text, ( int ) ( ( x - axis.getMinX( ) ) * axis.getAxisX( ).getPixelsPerValue( ) ), ( int ) ( ( y - axis.getMinY( ) ) * axis.getAxisY( ).getPixelsPerValue( ) ) );
-                }
+                textRenderer.draw( line.text, posX, posY );
             }
         }
         finally
@@ -538,14 +519,8 @@ public class TooltipPainter extends SimpleTextPainter
                         }
 
                         GlimpseColor.glColor( gl, color );
-                        if ( drawInPixelCoords )
-                        {
-                            atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
-                        }
-                        else
-                        {
-                            atlas.drawImage( gl, iconId, ( int ) ( ( x - axis.getMinX( ) ) * axis.getAxisX( ).getPixelsPerValue( ) ), ( int ) ( ( y - axis.getMinY( ) ) * axis.getAxisY( ).getPixelsPerValue( ) ), iconScale, iconScale, 0, iconData.getHeight( ) );
-                        }
+
+                        atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
                     }
                 }
             }
@@ -556,7 +531,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY )
+    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY, double x, double y )
     {
         double posX = x + linesBounds.minX + offsetX;
         double posY = height - y + linesBounds.minY + offsetY;
@@ -573,22 +548,6 @@ public class TooltipPainter extends SimpleTextPainter
         posX = x + linesBounds.minX + offsetX;
         posY = height - y + linesBounds.maxY + offsetY;
         gl.glVertex2d( posX, posY );
-    }
-
-    protected void borderVerticesAxisCoords( GL2 gl, double xPos, double yPos, Axis2D axis )
-    {
-        xPos = ( xPos - axis.getMinX( ) ) * axis.getAxisX( ).getPixelsPerValue( ) - linesBounds.minX - offsetX;
-        yPos = ( yPos - axis.getMinY( ) ) * axis.getAxisY( ).getPixelsPerValue( ) + offsetY;
-        gl.glVertex2d( xPos, yPos );
-
-        yPos = yPos + linesBounds.minY - offsetY;
-        gl.glVertex2d( xPos, yPos );
-
-        xPos = xPos + linesBounds.maxX + offsetX;
-        gl.glVertex2d( xPos, yPos );
-
-        yPos = ( y - axis.getMinY( ) ) * axis.getAxisY( ).getPixelsPerValue( ) + offsetY;
-        gl.glVertex2d( xPos, yPos );
     }
 
     protected static class Bounds

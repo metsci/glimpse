@@ -156,15 +156,16 @@ public class IconPainterExample implements GlimpseLayoutProvider
         TooltipPainter tooltipPainter = new TooltipPainter( atlas );
         tooltipPainter.setText( "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam" );
         tooltipPainter.setFixedWidth( 100 );
+        tooltipPainter.setClampToScreenEdges( false );
+        tooltipPainter.setOffset( 0, 0 );
         
         //XXX if there are more icons than lines of text TooltipPainter:519 fails because the for loop uses
         //XXX iconIds.size( ) but indexes into the smaller lines array
-        //tooltipPainter.setIcons( Arrays.<Object>asList( "glimpse", "image7", "image1" ) );
-        tooltipPainter.setIcons( Arrays.<Object>asList( "glimpse" ) );
+        //XXX to see error comment out setFixedWidth( 100 )
+        tooltipPainter.setIcons( Arrays.<Object>asList( "glimpse", "image7", "image1" ) );
+        //tooltipPainter.setIcons( Arrays.<Object>asList( "glimpse" ) );
         
-        //XXX the following example works with setLocation, but not setLocationAxisCoords
-        //tooltipPainter.setLocationAxisCoords( 0, 0 );
-        tooltipPainter.setLocation( 0, 0 );
+        tooltipPainter.setLocationAxisCoords( 0, 0 );
 
         // add painters to the layout
         layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getGray( ) ) );
