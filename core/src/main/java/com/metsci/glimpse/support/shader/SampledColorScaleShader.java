@@ -29,6 +29,8 @@ package com.metsci.glimpse.support.shader;
 import java.io.IOException;
 
 import javax.media.opengl.GLUniformData;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -49,6 +51,8 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
     private GLUniformData alpha;
     private GLUniformData dataTexUnit;
     private GLUniformData colorTexUnit;
+
+    private Axis1D colorAxis;
 
     /**
      * @param colorAxis color axis producing events
@@ -76,7 +80,8 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
         this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", targetTexUnit ) );
         this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
 
-        colorAxis.addAxisListener( this );
+        this.colorAxis = colorAxis;
+        this.colorAxis.addAxisListener( this );
     }
 
     public void setAlpha( float alpha )
@@ -109,5 +114,12 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
     protected float getMax( Axis1D axis )
     {
         return ( float ) axis.getMax( );
+    }
+    
+    @Override
+    public void dispose( GLContext context )
+    {
+        super.dispose( context );
+        this.colorAxis.removeAxisListener( this );
     }
 }

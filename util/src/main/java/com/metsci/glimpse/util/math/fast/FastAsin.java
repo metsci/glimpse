@@ -46,8 +46,7 @@ public class FastAsin extends FastFunc
     @Override
     protected double f( double x )
     {
-        Math.asin( x );
-        return 0;
+        return Math.asin( x );
     }
 
 }

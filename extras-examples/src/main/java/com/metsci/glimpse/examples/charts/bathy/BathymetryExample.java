@@ -26,7 +26,11 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
+import static com.metsci.glimpse.axis.tagged.Tag.*;
+
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -34,6 +38,7 @@ import com.metsci.glimpse.axis.painter.ColorYAxisPainter;
 import com.metsci.glimpse.axis.painter.NumericAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.NamedConstraint;
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
@@ -61,8 +66,6 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-
 /**
  * Data displayed was downloaded from the NOAA/NGDC Bathymetry
  * tool at http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html</p>
@@ -75,32 +78,32 @@ public class BathymetryExample implements GlimpseLayoutProvider
     {
         Example.showWithSwing( new BathymetryExample( ) );
     }
-    
+
     TaggedHeatMapPainter bathymetryPainter;
     ContourPainter contourPainter;
     AnnotationPainter annotationPainter;
-    
+
     public TaggedHeatMapPainter getBathymetryPainter( )
     {
         return this.bathymetryPainter;
     }
-    
+
     public ContourPainter getContourPainter( )
     {
         return this.contourPainter;
     }
-    
+
     public AnnotationPainter getAnnotationPainter( )
     {
         return this.annotationPainter;
     }
-    
+
     @Override
     public MapPlot2D getLayout( )
     {
         return getLayout( new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) ) );
     }
-    
+
     public MapPlot2D getLayout( GeoProjection projection )
     {
         // create a premade heat map window
@@ -124,26 +127,32 @@ public class BathymetryExample implements GlimpseLayoutProvider
                 return new TaggedPartialColorYAxisPainter( tickHandler );
             }
         };
-        
+
+        // add tags for setting the "sea level" which controls how the data is colored
         TaggedAxis1D axisZ = ( TaggedAxis1D ) plot.getAxisZ( );
+        axisZ.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        axisZ.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
+        axisZ.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
-        final Tag maxTag = axisZ.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
-        final Tag seaLevelTag = axisZ.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
-        final Tag minTag = axisZ.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
-
-        axisZ.addConstraint( new NamedConstraint( "OrderingConstraint" )
+        // add a constraint which disallows moving the max tag above 15000
+        axisZ.addConstraint( new NamedConstraint( "MaxConstraint" )
         {
-            protected double buffer = 200;
-
             @Override
-            public void applyConstraint( TaggedAxis1D axis )
+            public void applyConstraint( TaggedAxis1D currentAxis, Map<String, Tag> previousTags )
             {
-                if ( seaLevelTag.getValue( ) > maxTag.getValue( ) - buffer ) seaLevelTag.setValue( maxTag.getValue( ) - buffer );
-
-                if ( minTag.getValue( ) > seaLevelTag.getValue( ) - buffer ) minTag.setValue( seaLevelTag.getValue( ) - buffer );
+                Tag t = currentAxis.getTag( "Max" );
+                
+                // if attempting to set a tag value above 15000, disallow the tag update
+                if ( t.getValue( ) > 15000.0 )
+                {
+                    resetTags( );
+                }
             }
         } );
-
+        
+        // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
+        axisZ.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
+        
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
         BathymetryData bathymetryData;

@@ -179,6 +179,7 @@ public class GlimpseLayoutManagerMig implements GlimpseLayoutManager
 
         if ( changed )
         {
+            childConstraintCache.clear( );
             childDataCache.clear( );
             for ( int i = 0; i < comps.length; i++ )
             {

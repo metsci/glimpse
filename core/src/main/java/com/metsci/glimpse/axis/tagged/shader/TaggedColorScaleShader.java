@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.media.opengl.GLUniformData;
+import javax.media.opengl.GL;
+import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -116,5 +118,22 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
     public void setDiscardBelow( boolean discard )
     {
         discardBelow.setData( discard ? 1 : 0 );
+    }
+
+    @Override
+    public void preDisplay( GL gl )
+    {
+    }
+
+    @Override
+    public void postDisplay( GL gl )
+    {
+    }
+    
+    @Override
+    public void dispose( GLContext context )
+    {
+        super.dispose( context );
+        this.taggedAxis.removeAxisListener( this );
     }
 }

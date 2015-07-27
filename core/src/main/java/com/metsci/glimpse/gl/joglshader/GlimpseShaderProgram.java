@@ -43,6 +43,7 @@ public class GlimpseShaderProgram
 
         for ( GLArrayDataClient array : arrays )
         {
+            array.seal( on );
             array.enableBuffer( gl, on );
         }
     }
@@ -123,7 +124,7 @@ public class GlimpseShaderProgram
    
         for ( GLArrayData array : arrays )
         {
-            this.state.ownsAttribute( array );
+            this.state.ownAttribute( array, true );
         }
         
         for ( GLUniformData uniform : uniforms )

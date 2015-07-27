@@ -47,6 +47,13 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 public interface GlimpseTarget
 {
     /**
+     * If true, the GlimpseTarget should be drawn on the screen and mouse events
+     * should be dispatched for it. Otherwise it is invisible and mouse events should not
+     * fire for the GlimpseTarget or its children.
+     */
+    public boolean isVisible( );
+    
+    /**
      * Sets whether this GlimpseTarget hides events from GlimpseTargets under it. This
      * value does not determine whether or not the GlimpseTarget will generate
      * GlimpseMouseEvents (see {@link #isEventGenerator()).

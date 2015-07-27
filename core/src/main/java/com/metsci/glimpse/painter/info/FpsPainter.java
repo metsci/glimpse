@@ -28,6 +28,7 @@ package com.metsci.glimpse.painter.info;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.layout.GlimpseLayoutCache;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -43,50 +44,56 @@ public class FpsPainter extends SimpleTextPainter
     private static float[] normColor = new float[] { 0.5f, 1.0f, 0.5f, 1.0f };
     private static float[] warnColor = new float[] { 1.0f, 0.5f, 0.5f, 1.0f };
 
-    private float lastFpsEstimate = -1;
-    private long timeOfLastCounterReset = -1;
-    private float frameCount = 0;
+    private GlimpseLayoutCache<FpsHelper> cache;
 
     public FpsPainter( )
     {
         super( );
+
+        cache = new GlimpseLayoutCache<FpsHelper>( );
 
         setFont( 12, true, false );
         setBackgroundColor( GlimpseColor.getGray( 0.5f ) );
         setPaintBackground( true );
     }
 
-    private final void tickTock( )
+    private final void tickTock( GlimpseContext context )
     {
-        frameCount++;
+        if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
+        
+        FpsHelper temp = cache.getValue( context );
+        temp.setFrameCount( temp.getFrameCount( ) + 1 );
         long currentTime = System.currentTimeMillis( );
 
-        if ( timeOfLastCounterReset < 0 )
+        if ( temp.getTimeOfLastCounterReset( ) < 0 )
         {
-            timeOfLastCounterReset = System.currentTimeMillis( );
-            frameCount = 0;
+            temp.setTimeOfCounterReset( System.currentTimeMillis( ) );
+            temp.setFrameCount( 0 );
         }
-        else if ( currentTime - timeOfLastCounterReset >= 1000 || frameCount >= 10 )
+        else if ( currentTime - temp.getTimeOfLastCounterReset( ) >= 1000 || temp.getFrameCount( ) >= 10 )
         {
-            lastFpsEstimate = frameCount / ( currentTime - timeOfLastCounterReset ) * 1000f;
-            timeOfLastCounterReset = currentTime;
-            frameCount = 0;
+            temp.setFpsEstimate( temp.getFrameCount( ) / ( currentTime - temp.getTimeOfLastCounterReset( ) ) * 1000f );
+            temp.setTimeOfCounterReset( currentTime );
+            temp.setFrameCount( 0 );
         }
     }
 
     @Override
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
-        tickTock( );
+        if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
+        
+        FpsHelper temp = cache.getValue( context );
+        tickTock( context );
 
         String text = "FPS: Measuring...";
         setColor( GlimpseColor.getBlack( ) );
 
-        if ( lastFpsEstimate > 0 )
+        if ( temp.getLastFpsEstimate( ) > 0 )
         {
-            text = String.format( "FPS:%4.0f", lastFpsEstimate );
+            text = String.format( "FPS:%4.0f", temp.getLastFpsEstimate( ) );
 
-            if ( lastFpsEstimate > 30 )
+            if ( temp.getLastFpsEstimate( ) > 30 )
             {
                 setColor( normColor );
             }

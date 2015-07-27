@@ -67,6 +67,10 @@ public class FastAtan extends FastFuncUnboundedDomain
         {
             return -0.5 * Math.PI;
         }
+        else if ( x == 0 && y == 0)  // match convention for Math.atan2(0,0)
+        {
+            return 0.0;
+        }
         else
         {
             return Double.NaN;

@@ -108,42 +108,43 @@ public class SimplePointShader extends GlimpseShaderProgram
     public void setSizeData( Buffer b )
     {
         this.sizeAttribute.reset( );
-        this.sizeAttribute.put( b );
+        this.sizeAttribute.put( b.rewind( ) );
     }
 
     public void setColorData( Buffer b )
     {
         this.colorAttribute.reset( );
-        this.colorAttribute.put( b );
+        this.colorAttribute.put( b.rewind( ) );
+
     }
 
     public void setConstantColor( boolean constant )
     {
-        constantColor.setData( constant ? 1 : 0 );
+        this.constantColor.setData( constant ? 1 : 0 );
     }
 
     public void setConstantSize( boolean constant )
     {
-        constantSize.setData( constant ? 1 : 0 );
+        this.constantSize.setData( constant ? 1 : 0 );
     }
 
     public void setDiscardAboveSize( boolean discard )
     {
-        discardAboveSize.setData( discard ? 1 : 0 );
+        this.discardAboveSize.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardBelowSize( boolean discard )
     {
-        discardBelowSize.setData( discard ? 1 : 0 );
+        this.discardBelowSize.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardAboveColor( boolean discard )
     {
-        discardAboveColor.setData( discard ? 1 : 0 );
+        this.discardAboveColor.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardBelowColor( boolean discard )
     {
-        discardBelowColor.setData( discard ? 1 : 0 );
+        this.discardBelowColor.setData( discard ? 1 : 0 );
     }
 }

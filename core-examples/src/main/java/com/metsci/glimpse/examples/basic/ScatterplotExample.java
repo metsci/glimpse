@@ -26,21 +26,18 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.axis.tagged.shader.TaggedPointShader;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -50,7 +47,7 @@ import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.painter.shape.ShadedPointPainter;
+import com.metsci.glimpse.painter.shape.TaggedShadedPointPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.colormap.ColorGradient;
@@ -78,10 +75,10 @@ public class ScatterplotExample implements GlimpseLayoutProvider
     protected ColorTexture1D sizeTexture;
     protected FloatTexture1D sizeMapTexture;
     protected GLFloatBuffer2D xyValues;
-    protected GLFloatBuffer colorValues;
+    protected FloatBuffer colorValues;
 
     @Override
-    public MultiAxisPlot2D getLayout( )
+    public MultiAxisPlot2D getLayout( ) throws IOException
     {
         MultiAxisPlot2D plot = new MultiAxisPlot2D( );
 
@@ -218,28 +215,9 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // create a grid painter and have the grid lines follow the "x_axis" and "y_axis" axes
         plot.addPainter( new GridPainter( plot.getAxisInfo( "x_axis" ).getTickHandler( ), plot.getAxisInfo( "y_axis" ).getTickHandler( ) ) );
 
-        // add a painter to display the scatterplot data
-        // because the MultiAxisPlot2D can have many axes we must
-        // be explicit about which axes should be used for
-        // x, y, size, and color by the ShadedPointPainter
-        ShadedPointPainter painter;
-        try
-        {
-            painter = new ShadedPointPainter( plot.getAxis( "color_axis" ), plot.getAxis( "size_axis" ) )
-            {
-                @Override
-                protected void initShaderPipeline( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
-                {
-                    vertShader = new TaggedPointShader( 0, 1, colorAttributeIndex, sizeAttributeIndex, ( TaggedAxis1D ) colorAxis, ( TaggedAxis1D ) sizeAxis );
-                    pipeline = new Pipeline( "pointshader", null, vertShader, null );
-                }
-            };
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
+        // add a painter to display the scatterplot data because the MultiAxisPlot2D can have many axes we must
+        // be explicit about which axes should be used for size, and color by the ShadedPointPainter
+        TaggedShadedPointPainter painter = new TaggedShadedPointPainter( colorAxis, sizeAxis );
 
         // add the painter to the plot
         plot.addPainter( painter );
@@ -270,37 +248,23 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         } );
 
         // setup the color value data for the points
-        colorValues = new GLFloatBuffer( NUM_POINTS, 1 );
-        colorValues.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NUM_POINTS; i++ )
-                {
-                    float x = 6.0f * i / ( float ) NUM_POINTS;
-                    float y = ( float ) ( Math.exp( x ) * 10.0 + r.nextDouble( ) * 500 );
+        colorValues = FloatBuffer.allocate( NUM_POINTS );
 
-                    data.put( ( float ) ( x * ( y + r.nextDouble( ) * 500 ) ) );
-                }
-            }
-        } );
+        for ( int i = 0; i < NUM_POINTS; i++ )
+        {
+            float x = 6.0f * i / ( float ) NUM_POINTS;
+            float y = ( float ) ( Math.exp( x ) * 10.0 + r.nextDouble( ) * 500 );
+
+            colorValues.put( ( float ) ( x * ( y + r.nextDouble( ) * 500 ) ) );
+        }
 
         // setup the size value data for the points
-        GLFloatBuffer sizeValues = new GLFloatBuffer( NUM_POINTS, 1 );
-        sizeValues.mutate( new Mutator( )
+        FloatBuffer sizeValues = FloatBuffer.allocate( NUM_POINTS );
+
+        for ( int i = 0; i < NUM_POINTS; i++ )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NUM_POINTS; i++ )
-                {
-                    data.put( r.nextFloat( ) );
-                }
-            }
-        } );
+            sizeValues.put( r.nextFloat( ) );
+        }
 
         // add the data arrays for xy position, color, and size attributes to the painter
         painter.useVertexPositionData( xyValues );

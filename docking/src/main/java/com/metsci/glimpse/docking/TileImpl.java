@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -95,10 +94,6 @@ public class TileImpl extends Tile
         protected final Color highlightColor = theme.highlightColor;
         protected final Color selectedTextColor = theme.selectedTextColor;
         protected final Color unselectedTextColor = theme.unselectedTextColor;
-
-        public final ImageIcon closeIcon = theme.closeViewIcon;
-        public final ImageIcon closeHoveredIcon = theme.closeViewHoveredIcon;
-        public final ImageIcon closePressedIcon = theme.closeViewPressedIcon;
 
         protected final View view;
         protected boolean selected;

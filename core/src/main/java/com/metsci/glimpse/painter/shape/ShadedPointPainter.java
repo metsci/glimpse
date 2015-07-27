@@ -37,7 +37,6 @@ import javax.media.opengl.GLContext;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -45,6 +44,11 @@ import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.SimplePointShader;
+
+//XXX see: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/demos/es2/RedSquareES2.java
+//XXX see: https://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/com/jogamp/opengl/util/GLArrayDataClient.html
+//XXX allowing multithreaded set of attribute data at the same time rendering is occurring on another thread needs to be worked out
+//XXX GLBuffer handled this, but GLArrayDataClient requires stateful seal( boolean ) to be called
 
 /**
  * A painter, similar to {@link PointSetPainter}, which allows visualization
@@ -62,8 +66,6 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     protected ColorTexture1D colorTexture;
 
     protected GLFloatBuffer2D positionBuffer;
-    protected GLFloatBuffer colorAttributeBuffer;
-    protected GLFloatBuffer sizeAttributeBuffer;
 
     protected SimplePointShader program;
 
@@ -76,7 +78,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
         this.lock = new ReentrantLock( );
-        this.program = new SimplePointShader( 0, 1, colorAxis, sizeAxis );
+        this.program = newShader( colorAxis, sizeAxis );
     }
 
     public void useVertexPositionData( GLFloatBuffer2D positionBuffer )
@@ -113,41 +115,6 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         {
             this.program.setSizeData( attributeBuffer );
             this.setVariablePointColor0( );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-
-    /**
-     * @deprecated see {@link #useColorAttribData(FloatBuffer)}
-     */
-    @Deprecated
-    public void useColorAttribData( GLFloatBuffer attributeBuffer )
-    {
-        lock.lock( );
-        try
-        {
-            this.colorAttributeBuffer = attributeBuffer;
-            this.setVariablePointColor0( );
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-
-    /**
-     * @deprecated see {@link #useSizeAttribData(FloatBuffer)}
-     */
-    public void useSizeAttribData( GLFloatBuffer attributeBuffer )
-    {
-        lock.lock( );
-        try
-        {
-            this.sizeAttributeBuffer = attributeBuffer;
-            this.setVariablePointSize0( );
         }
         finally
         {
@@ -329,7 +296,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
 
     protected void setVariablePointColor0( )
     {
-        if ( this.colorTexture != null && this.colorAttributeBuffer != null )
+        if ( this.colorTexture != null )
         {
             this.constantColor = false;
             this.program.setConstantColor( false );
@@ -338,11 +305,16 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
 
     protected void setVariablePointSize0( )
     {
-        if ( this.sizeTexture != null && this.sizeAttributeBuffer != null )
+        if ( this.sizeTexture != null )
         {
             this.constantSize = false;
             this.program.setConstantSize( false );
         }
+    }
+    
+    protected SimplePointShader newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    {
+        return new SimplePointShader( 0, 1, colorAxis, sizeAxis );
     }
 
     @Override
@@ -353,9 +325,9 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         {
             if ( positionBuffer == null ) return;
 
-            if ( !constantSize && ( sizeTexture == null || sizeAttributeBuffer == null ) ) return;
+            if ( !constantSize && ( sizeTexture == null ) ) return;
 
-            if ( !constantColor && ( colorTexture == null || colorAttributeBuffer == null ) ) return;
+            if ( !constantColor && ( colorTexture == null ) ) return;
 
             if ( constantSize )
             {
@@ -392,8 +364,6 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             {
                 if ( program != null ) program.useProgram( gl, false );
                 if ( positionBuffer != null ) positionBuffer.unbind( gl );
-                if ( !constantColor && colorAttributeBuffer != null ) colorAttributeBuffer.unbind( gl );
-                if ( !constantSize && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
             }
             finally
             {

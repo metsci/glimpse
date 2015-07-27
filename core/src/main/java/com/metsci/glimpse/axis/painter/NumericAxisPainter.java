@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 
@@ -35,7 +36,6 @@ import javax.media.opengl.GLContext;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.painter.base.GlimpsePainter1D;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -60,14 +60,15 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected boolean showSelectionLine = false;
     protected boolean showLabel = true;
     protected boolean showMinorTicks = false;
+    protected boolean showTickLabels = true;
 
     protected TextRenderer textRenderer;
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
-    protected float[] tickColor = GlimpseColor.getBlack( );
-    protected float[] tickLabelColor = GlimpseColor.getBlack( );
-    protected float[] axisLabelColor = GlimpseColor.getBlack( );
+    protected float[] tickColor;
+    protected float[] tickLabelColor;
+    protected float[] axisLabelColor;
 
     protected AxisLabelHandler ticks;
 
@@ -78,7 +79,9 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     public NumericAxisPainter( AxisLabelHandler ticks )
     {
         this.ticks = ticks;
-        this.setFont( getDefaultPlain( 12 ), false );
+        resetFont( );
+        resetLabelColors( );
+        resetTickColor( );
     }
 
     public void setAxisLabel( String label )
@@ -94,6 +97,11 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     public void setKeepLabelsForExtremaFullyVisible( boolean keepFullyVisible )
     {
         this.keepLabelsForExtremaFullyVisible = keepFullyVisible;
+    }
+    
+    public void setShowTickLabels( boolean show )
+    {
+        this.showTickLabels = show;
     }
 
     public void setShowLabel( boolean show )
@@ -111,6 +119,12 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
         this.newFont = font;
         this.antialias = antialias;
         this.fontSet = true;
+    }
+
+    public void resetFont( )
+    {
+        setFont( getDefaultPlain( 12 ), false );
+        this.fontSet = false;
     }
 
     public void setTickSize( int size )
@@ -149,6 +163,12 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
         this.tickColorSet = true;
     }
 
+    public void resetTickColor( )
+    {
+        setTickColor( getBlack( ) );
+        this.tickColorSet = false;
+    }
+
     public void setTickLabelColor( float[] color )
     {
         this.tickLabelColor = color;
@@ -159,6 +179,13 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     {
         this.axisLabelColor = color;
         this.labelColorSet = true;
+    }
+
+    public void resetLabelColors( )
+    {
+        setTickLabelColor( getBlack( ) );
+        setAxisLabelColor( getBlack( ) );
+        this.labelColorSet = false;
     }
 
     public void setShowMinorTicks( boolean show )

@@ -35,6 +35,8 @@ import java.util.List;
 import javax.media.opengl.GL2;
 
 import com.google.common.collect.Lists;
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -77,8 +79,10 @@ public class TooltipPainter extends SimpleTextPainter
 
     protected boolean wrapTextAroundIcon = false;
 
-    protected int x;
-    protected int y;
+    protected double x;
+    protected double y;
+
+    protected boolean drawInPixelCoords = true;
 
     public TooltipPainter( TextureAtlas atlas )
     {
@@ -146,6 +150,22 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
+
+        this.drawInPixelCoords = true;
+
+        return this;
+    }
+
+    /**
+     * Sets the location of the upper left corner of the tooltip box
+     * in axis coordinates.
+     */
+    public synchronized TooltipPainter setLocationAxisCoords( double x, double y )
+    {
+        this.x = x;
+        this.y = y;
+
+        this.drawInPixelCoords = false;
 
         return this;
     }
@@ -274,13 +294,21 @@ public class TooltipPainter extends SimpleTextPainter
         float indent = ( float ) ( textLayout.getAscent( ) + borderSize );
 
         if ( noIcons )
+        {
             return 0;
+        }
         else if ( iconId != null )
+        {
             return indent;
+        }
         else if ( iconId == null && !wrapTextAroundIcon )
+        {
             return indent;
+        }
         else
+        {
             return 0;
+        }
     }
 
     protected void updateLayout( )
@@ -319,6 +347,12 @@ public class TooltipPainter extends SimpleTextPainter
 
     protected void loadIcons( )
     {
+        // looks strange, but causes atlas to load pending icons
+        // this is necessary to do here because calls to atlas.getImageData( )
+        // will fail if we do not
+        atlas.beginRendering( );
+        atlas.endRendering( );
+
         int size = iconIds == null ? 0 : iconIds.size( );
 
         this.icons = Lists.newArrayListWithCapacity( size );
@@ -334,8 +368,16 @@ public class TooltipPainter extends SimpleTextPainter
     }
 
     @Override
-    protected synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
+        if ( axis == null && !drawInPixelCoords )
+        {
+            throw new AxisNotSetException( this, context );
+        }
+
+        double x = drawInPixelCoords ? this.x : axis.getAxisX( ).valueToScreenPixelUnits( this.x );
+        double y = drawInPixelCoords ? this.y : axis.getAxisY( ).getSizePixels( ) - axis.getAxisY( ).valueToScreenPixelUnits( this.y );
+
         if ( icons == null )
         {
             loadIcons( );
@@ -396,7 +438,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_QUADS );
                 try
                 {
-                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
                 }
                 finally
                 {
@@ -413,7 +455,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
-                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
                 }
                 finally
                 {
@@ -489,7 +531,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY )
+    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY, double x, double y )
     {
         double posX = x + linesBounds.minX + offsetX;
         double posY = height - y + linesBounds.minY + offsetY;

@@ -67,20 +67,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.orderNumberFormatter = NumberFormat.getNumberInstance( );
         this.orderNumberFormatter.setGroupingUsed( true );
 
-        this.converter = new AxisUnitConverter( )
-        {
-            @Override
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-
-            @Override
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-        };
+        this.converter = AxisUnitConverters.identity;
 
         this.tickSpacing = 100;
         this.minorTickCount = 4;
@@ -116,7 +103,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         String[] tickLabels = new String[tickPositions.length];
         for ( int i = 0; i < tickPositions.length; i++ )
         {
-            tickLabels[i] = tickString( tickPositions[i], orderAxis );
+            tickLabels[i] = tickString( axis, tickPositions[i], orderAxis );
         }
 
         return tickLabels;
@@ -254,7 +241,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         return tickInterval( axis, approxNumTicks );
     }
 
-    protected String tickString( double number, int orderAxis )
+    protected String tickString( Axis1D axis, double number, int orderAxis )
     {
         double axisFactor = Math.pow( 10, -orderAxis );
         return tickNumberFormatter.format( number * axisFactor );
@@ -262,7 +249,6 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     protected double tickInterval( Axis1D axis, double approxNumTicks )
     {
-
         double calculatedMin = converter.toAxisUnits( axis.getMin( ) );
         double calculatedMax = converter.toAxisUnits( axis.getMax( ) );
         double min = Math.min( calculatedMin, calculatedMax );
@@ -311,7 +297,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
                 ticks[size - i - 1] = temp;
             }
         }
-        
+
         return ticks;
     }
 

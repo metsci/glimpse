@@ -41,7 +41,7 @@ import com.metsci.glimpse.util.vector.Vector3d;
  *
  * @author moskowitz
  */
-public final class TangentPlane implements GeoProjection, Serializable
+public class TangentPlane implements GeoProjection, Serializable
 {
     public static final long serialVersionUID = -6802219476339525122L;
     private static final Vector2d defaultTangentPointOnPlane = new Vector2d( 0.0, 0.0 );
@@ -117,6 +117,12 @@ public final class TangentPlane implements GeoProjection, Serializable
         return ns;
     }
 
+    // This is defined here as a member function so it can be overriden by subclasses to improve runtime.
+    protected double calcAtan2(double y, double x)
+    {
+        return Math.atan2(y, x);
+    }
+
     /**
      * Converts from LatLon to a point on the unit sphere (ECEF-r).
      */
@@ -132,9 +138,9 @@ public final class TangentPlane implements GeoProjection, Serializable
     /**
      * Converts a point on the unit sphere (ECEF-r) to LatLon.
      */
-    private static LatLonGeo pointOnUnitSphereToLatLon( Vector3d pointOnUnitSphere )
+    private LatLonGeo pointOnUnitSphereToLatLon( Vector3d pointOnUnitSphere )
     {
-        double lonRad = Math.atan2( pointOnUnitSphere.getY( ), pointOnUnitSphere.getX( ) );
+        double lonRad = calcAtan2(pointOnUnitSphere.getY(), pointOnUnitSphere.getX());
         double latRad = PolynomialApprox.asin( pointOnUnitSphere.getZ( ) );
 
         LatLonGeo latLon = new LatLonGeo( Angle.radiansToDegrees( latRad ), Angle.radiansToDegrees( lonRad ) );

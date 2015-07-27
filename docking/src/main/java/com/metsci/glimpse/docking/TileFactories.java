@@ -30,6 +30,7 @@ import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
+import static java.lang.Math.ceil;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.Box.createVerticalGlue;
 
@@ -41,6 +42,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelEvent;
 
+import javax.swing.Box;
+import javax.swing.Icon;
 import javax.swing.JButton;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
@@ -90,10 +93,30 @@ public class TileFactories
                 {
                     if ( view.closeable )
                     {
-                        JButton closeButton = new JButton( );
-                        closeButton.setFocusable( false );
+                        JButton closeButton = new JButton( )
+                        {
+                            public void paintComponent( Graphics g )
+                            {
+                                Icon icon;
+                                if ( model.isPressed( ) )
+                                {
+                                    icon = getPressedIcon( );
+                                }
+                                else if ( model.isRollover( ) )
+                                {
+                                    icon = getRolloverIcon( );
+                                }
+                                else
+                                {
+                                    icon = getIcon( );
+                                }
+
+                                int y = ( int ) ceil( 0.5 * ( getHeight( ) - icon.getIconHeight( ) ) );
+                                icon.paintIcon( this, g, 0, y );
+                            }
+                        };
                         closeButton.setOpaque( false );
-                        closeButton.setBorder( createEmptyBorder( 2, 0, 0, theme.lineThickness + theme.labelPadding ) );
+                        closeButton.setBorder( null );
 
                         closeButton.setIcon( theme.closeViewIcon );
                         closeButton.setRolloverIcon( theme.closeViewHoveredIcon );
@@ -107,7 +130,9 @@ public class TileFactories
                             }
                         } );
 
-                        return createVerticalBox( createVerticalGlue( ), closeButton, createVerticalGlue( ) );
+                        Box closeBox = createVerticalBox( createVerticalGlue( ), closeButton, createVerticalGlue( ) );
+                        closeBox.setBorder( createEmptyBorder( 2, 0, 0, theme.lineThickness + theme.labelPadding ) );
+                        return closeBox;
                     }
                     else
                     {

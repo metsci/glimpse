@@ -1145,7 +1145,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         GridAxisLabelHandler labelHandler = new GridAxisLabelHandler( )
         {
             @Override
-            protected String tickString( double number, int orderAxis )
+            protected String tickString( Axis1D axis, double number, int orderAxis )
             {
                 return tickNumberFormatter.format( number );
             }

@@ -29,11 +29,12 @@ package com.metsci.glimpse.axis.tagged.shader;
 import java.io.IOException;
 import java.util.List;
 
+import javax.media.opengl.GLContext;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.gl.shader.ShaderSource;
 import com.metsci.glimpse.support.shader.SimplePointShader;
 
 public class TaggedPointShader extends SimplePointShader
@@ -41,67 +42,53 @@ public class TaggedPointShader extends SimplePointShader
     protected TaggedAxis1D taggedColorAxis;
     protected TaggedAxis1D taggedSizeAxis;
 
-    public TaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
-                              int colorAttributeIndex, int sizeAttributeIndex,
-                              TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
-    {
-        super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis );
-    }
+    protected AxisListener1D colorAxisListener;
+    protected AxisListener1D sizeAxisListener;
 
-    protected TaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
-                                 int colorAttributeIndex, int sizeAttributeIndex,
-                                 TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis,
-                                 ShaderSource... source ) throws IOException
+    public TaggedPointShader( int colorTextureUnit, int sizeTextureUnit, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
-        super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, source );
-    }
+        super( colorTextureUnit, sizeTextureUnit, colorAxis, sizeAxis );
 
-    @Override
-    protected void initializeShaderValues( int colorTextureUnit, int sizeTextureUnit,
-                                           int colorAttributeIndex, int sizeAttributeIndex,
-                                           Axis1D colorAxis, Axis1D sizeAxis )
-    {
         this.taggedColorAxis = ( TaggedAxis1D ) colorAxis;
         this.taggedSizeAxis = ( TaggedAxis1D ) sizeAxis;
 
-        this.colorAttributeIndex = colorAttributeIndex;
-        this.sizeAttributeIndex = sizeAttributeIndex;
+        this.colorMin.setData( ( float ) getMinTag( taggedColorAxis ) );
+        this.colorMax.setData( ( float ) getMaxTag( taggedColorAxis ) );
 
-        this.colorTexUnit.setValue( colorTextureUnit );
-        this.colorMin.setValue( getMinTag( taggedColorAxis ) );
-        this.colorMax.setValue( getMaxTag( taggedColorAxis ) );
-
-        colorAxis.addAxisListener( new AxisListener1D( )
+        this.colorAxisListener = new AxisListener1D( )
         {
             @Override
             public void axisUpdated( Axis1D handler )
             {
-                colorMin.setValue( getMinTag( taggedColorAxis ) );
-                colorMax.setValue( getMaxTag( taggedColorAxis ) );
+                colorMin.setData( ( float ) getMinTag( taggedColorAxis ) );
+                colorMax.setData( ( float ) getMaxTag( taggedColorAxis ) );
             }
-        } );
+        };
 
-        this.sizeTexUnit.setValue( sizeTextureUnit );
-        this.sizeMin.setValue( getMinTag( taggedSizeAxis ) );
-        this.sizeMax.setValue( getMaxTag( taggedSizeAxis ) );
+        this.taggedColorAxis.addAxisListener( colorAxisListener );
 
-        sizeAxis.addAxisListener( new AxisListener1D( )
+        this.sizeMin.setData( ( float ) getMinTag( taggedSizeAxis ) );
+        this.sizeMax.setData( ( float ) getMaxTag( taggedSizeAxis ) );
+
+        this.sizeAxisListener = new AxisListener1D( )
         {
             @Override
             public void axisUpdated( Axis1D handler )
             {
-                sizeMin.setValue( getMinTag( taggedSizeAxis ) );
-                sizeMax.setValue( getMaxTag( taggedSizeAxis ) );
+                sizeMin.setData( ( float ) getMinTag( taggedSizeAxis ) );
+                sizeMax.setData( ( float ) getMaxTag( taggedSizeAxis ) );
             }
-        } );
+        };
 
-        this.discardAboveColor.setValue( false );
-        this.discardBelowColor.setValue( false );
-        this.discardAboveSize.setValue( false );
-        this.discardBelowSize.setValue( false );
+        this.taggedSizeAxis.addAxisListener( sizeAxisListener );
 
-        this.constantColor.setValue( true );
-        this.constantSize.setValue( true );
+        this.discardAboveColor.setData( 0 );
+        this.discardBelowColor.setData( 0 );
+        this.discardAboveSize.setData( 0 );
+        this.discardBelowSize.setData( 0 );
+
+        this.constantColor.setData( 1 );
+        this.constantSize.setData( 1 );
     }
 
     protected double getMinTag( TaggedAxis1D axis )
@@ -114,5 +101,13 @@ public class TaggedPointShader extends SimplePointShader
     {
         List<Tag> tags = axis.getSortedTags( );
         return tags.get( tags.size( ) - 1 ).getValue( );
+    }
+
+    @Override
+    public void dispose( GLContext context )
+    {
+        super.dispose( context );
+        this.taggedColorAxis.removeAxisListener( this.colorAxisListener );
+        this.taggedSizeAxis.removeAxisListener( this.sizeAxisListener );
     }
 }

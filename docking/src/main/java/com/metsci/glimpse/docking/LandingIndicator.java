@@ -29,13 +29,24 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.OPAQUE_WINDOW;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.SHAPED_WINDOW;
 import static com.metsci.glimpse.docking.LandingIndicator.ReprType.TRANSLUCENT_WINDOW;
+import static java.awt.GraphicsDevice.TYPE_RASTER_SCREEN;
 import static java.awt.GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT;
 import static java.awt.GraphicsDevice.WindowTranslucency.TRANSLUCENT;
-import static javax.swing.BorderFactory.createLineBorder;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Collections.unmodifiableCollection;
+import static javax.swing.BorderFactory.createMatteBorder;
 
+import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.geom.Area;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -53,83 +64,193 @@ public class LandingIndicator
     }
 
 
-    protected final DockingTheme theme;
-    protected final JFrame frame;
-    protected final JPanel frameContent;
+    protected static class ScreenEntry
+    {
+        public final int xScreen;
+        public final int yScreen;
+        public final int wScreen;
+        public final int hScreen;
 
-    protected ReprType recentReprType;
+        public final JFrame frame;
+        public final JPanel content;
+
+        public ScreenEntry( int xScreen, int yScreen, int wScreen, int hScreen, JFrame frame, JPanel content )
+        {
+            this.xScreen = xScreen;
+            this.yScreen = yScreen;
+            this.wScreen = wScreen;
+            this.hScreen = hScreen;
+
+            this.frame = frame;
+            this.content = content;
+        }
+    }
+
+
+    protected final DockingTheme theme;
+    protected final ReprType reprType;
+    protected final Collection<ScreenEntry> screenEntries;
 
 
     public LandingIndicator( DockingTheme theme )
     {
         this.theme = theme;
 
-        this.frame = new JFrame( );
-        frame.setAlwaysOnTop( true );
-        frame.setFocusable( false );
-        frame.setUndecorated( true );
+        boolean haveTranslucentWindows = true;
+        boolean haveTransparentPixels = true;
+        Collection<ScreenEntry> screenEntries = new ArrayList<>( );
 
-        this.frameContent = new JPanel( );
-        frame.setContentPane( frameContent );
+        // On some platforms, Swing refuses to programmatically move a window beyond the edge of the screen.
+        // Instead, Swing silently translates the window so that it is entirely on the screen. When our landing-
+        // region is an existing docker that is partly offscreen, we have a problem: Swing won't allow us to
+        // move the indicator partly offscreen, so it ends up in the wrong place.
+        //
+        // To deal with this, we create one frame for each screen. Each frame always stays entirely on its screen:
+        // any part of it that would spill over to another screen is clipped. The part of the indicator for that
+        // other screen is drawn by another frame -- the frame for that other screen.
+        //
+        // There are a couple of alternative approaches, but this one is the best option: it behaves properly for
+        // arbitrary multi-head geometries, while also staying decoupled from the rest of the code. Its primary
+        // downside is that it can cause multiple windows to appear in the system window list.
+        //
 
-        this.recentReprType = null;
+        Toolkit toolkit = Toolkit.getDefaultToolkit( );
+        for ( GraphicsDevice screen : GraphicsEnvironment.getLocalGraphicsEnvironment( ).getScreenDevices( ) )
+        {
+            if ( screen.getType( ) == TYPE_RASTER_SCREEN )
+            {
+                haveTranslucentWindows &= screen.isWindowTranslucencySupported( TRANSLUCENT );
+                haveTransparentPixels &= screen.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT );
+
+                GraphicsConfiguration config = screen.getDefaultConfiguration( );
+                Rectangle bounds = config.getBounds( );
+                Insets insets = toolkit.getScreenInsets( config );
+                int x = bounds.x + insets.left;
+                int y = bounds.y + insets.top;
+                int w = bounds.width - ( insets.left + insets.right );
+                int h = bounds.height - ( insets.top + insets.bottom );
+
+                JFrame frame = new JFrame( ".", config );
+
+                JPanel content = new JPanel( )
+                {
+                    // Custom paint seems to reduce flickering
+                    public void paintComponent( Graphics g )
+                    {
+                        g.setColor( getBackground( ) );
+                        g.fillRect( 0, 0, getWidth( ), getHeight( ) );
+                    }
+                };
+
+                frame.setAutoRequestFocus( false );
+                frame.setFocusable( false );
+                frame.setFocusableWindowState( false );
+                frame.setAlwaysOnTop( true );
+                frame.setFocusable( false );
+                frame.setUndecorated( true );
+                frame.setContentPane( content );
+
+                screenEntries.add( new ScreenEntry( x, y, w, h, frame, content ) );
+            }
+        }
+
+        if ( haveTranslucentWindows ) this.reprType = TRANSLUCENT_WINDOW;
+        else if ( haveTransparentPixels ) this.reprType = SHAPED_WINDOW;
+        else this.reprType = OPAQUE_WINDOW;
+
+        this.screenEntries = unmodifiableCollection( screenEntries );
+
+        for ( ScreenEntry en : screenEntries )
+        {
+            JFrame frame = en.frame;
+            JPanel content = en.content;
+            switch ( reprType )
+            {
+                case TRANSLUCENT_WINDOW:
+                    frame.setOpacity( 0.5f );
+                    content.setBackground( null );
+                    break;
+
+                case SHAPED_WINDOW:
+                    content.setBorder( null );
+                    content.setBackground( theme.landingIndicatorColor );
+                    break;
+
+                default:
+                    content.setBackground( null );
+                    break;
+            }
+        }
     }
 
     public void setBounds( Rectangle bounds )
     {
         if ( bounds == null )
         {
-            frame.setVisible( false );
+            for ( ScreenEntry en : screenEntries )
+            {
+                JFrame frame = en.frame;
+                frame.setVisible( false );
+            }
         }
         else
         {
-            frame.setBounds( bounds );
-
-            GraphicsDevice device = frame.getGraphicsConfiguration( ).getDevice( );
-            if ( device.isWindowTranslucencySupported( TRANSLUCENT ) )
+            for ( ScreenEntry en : screenEntries )
             {
-                if ( recentReprType != TRANSLUCENT_WINDOW )
+                JFrame frame = en.frame;
+                JPanel content = en.content;
+
+                int x = max( en.xScreen, bounds.x );
+                int y = max( en.yScreen, bounds.y );
+                int xEnd = min( en.xScreen + en.wScreen, bounds.x + bounds.width );
+                int yEnd = min( en.yScreen + en.hScreen, bounds.y + bounds.height );
+                int w = xEnd - x;
+                int h = yEnd - y;
+
+                if ( w > 0 && h > 0 )
                 {
-                    frame.setShape( null );
-                    frameContent.setBackground( null );
-                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
-                    frame.setOpacity( 0.5f );
-                    this.recentReprType = TRANSLUCENT_WINDOW;
+                    frame.setBounds( x, y, w, h );
+
+                    int border = theme.landingIndicatorThickness;
+                    int topBorder = max( 0, border - ( y - bounds.y ) );
+                    int leftBorder = max( 0, border - ( x - bounds.x ) );
+                    int bottomBorder = max( 0, border - ( ( bounds.y + bounds.height ) - yEnd ) );
+                    int rightBorder = max( 0, border - ( ( bounds.x + bounds.width ) - xEnd ) );
+
+                    switch ( reprType )
+                    {
+                        case TRANSLUCENT_WINDOW:
+                            content.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, theme.landingIndicatorColor ) );
+                            break;
+
+                        case SHAPED_WINDOW:
+                            Area shape = new Area( new Rectangle( 0, 0, w, h ) );
+                            shape.subtract( new Area( new Rectangle( leftBorder, topBorder, w - ( leftBorder + rightBorder ), h - ( topBorder + bottomBorder ) ) ) );
+                            frame.setShape( shape );
+                            break;
+
+                        default:
+                            content.setBorder( createMatteBorder( topBorder, leftBorder, bottomBorder, rightBorder, theme.landingIndicatorColor ) );
+                            break;
+                    }
+
+                    frame.setVisible( true );
+                }
+                else
+                {
+                    frame.setVisible( false );
                 }
             }
-            else if ( device.isWindowTranslucencySupported( PERPIXEL_TRANSPARENT ) )
-            {
-                if ( recentReprType != SHAPED_WINDOW )
-                {
-                    // Set the whole pane to the bg color, to minimize flicker
-                    frameContent.setBackground( theme.landingIndicatorColor );
-                    frameContent.setBorder( null );
-                    this.recentReprType = SHAPED_WINDOW;
-                }
-
-                int thickness = theme.landingIndicatorThickness;
-                Area shape = new Area( new Rectangle( 0, 0, bounds.width, bounds.height ) );
-                shape.subtract( new Area( new Rectangle( thickness, thickness, bounds.width - 2*thickness, bounds.height - 2*thickness ) ) );
-                frame.setShape( shape );
-            }
-            else
-            {
-                if ( recentReprType != OPAQUE_WINDOW )
-                {
-                    frame.setShape( null );
-                    frameContent.setBackground( null );
-                    frameContent.setBorder( createLineBorder( theme.landingIndicatorColor, theme.landingIndicatorThickness ) );
-                    this.recentReprType = OPAQUE_WINDOW;
-                }
-            }
-
-            frame.setVisible( true );
         }
     }
 
     public void dispose( )
     {
-        frame.dispose( );
+        for ( ScreenEntry en : screenEntries )
+        {
+            JFrame frame = en.frame;
+            frame.dispose( );
+        }
     }
 
 }
