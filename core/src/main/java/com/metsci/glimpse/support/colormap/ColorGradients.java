@@ -272,185 +272,207 @@ public class ColorGradients
             rgba[3] = 1;
         }
     };
-    
+
     public static final ColorGradient parula = fromCSV( "colormap/parula.csv" );
 
-    public static final ColorGradient hsv = fromCSV("colormap/hsv.csv");
+    public static final ColorGradient hsv = fromCSV( "colormap/hsv.csv" );
 
-    public static final ColorGradient hot = fromCSV("colormap/hot.csv"); 
-    
-    public static final ColorGradient cool = fromCSV("colormap/cool.csv");
+    public static final ColorGradient hot = fromCSV( "colormap/hot.csv" );
 
-    public static final ColorGradient spring = fromCSV("colormap/spring.csv");
+    public static final ColorGradient cool = fromCSV( "colormap/cool.csv" );
 
-    public static final ColorGradient summer = fromCSV("colormap/summer.csv");
-    
-    public static final ColorGradient autumn = fromCSV("colormap/autumn.csv");
-    
-    public static final ColorGradient winter = fromCSV("colormap/winter.csv"); 
-    
-    public static final ColorGradient bone = fromCSV("colormap/bone.csv"); 
-    
-    public static final ColorGradient copper = fromCSV("colormap/copper.csv"); 
-    
-    public static final ColorGradient pink = fromCSV("colormap/pink.csv"); 
-    
-    public static final ColorGradient lines = fromCSV("colormap/lines.csv"); //diff color??
-    
-    public static final ColorGradient colorcube = fromCSV("colormap/colorcube.csv"); 
-    
-    public static final ColorGradient prism = fromCSV("colormap/prism.csv"); 
-    
-    public static final ColorGradient flag = fromCSV("colormap/flag.csv"); //diff color??
-    
-    public static final ColorGradient white = fromCSV("colormap/white.csv"); 
-    
+    public static final ColorGradient spring = fromCSV( "colormap/spring.csv" );
+
+    public static final ColorGradient summer = fromCSV( "colormap/summer.csv" );
+
+    public static final ColorGradient autumn = fromCSV( "colormap/autumn.csv" );
+
+    public static final ColorGradient winter = fromCSV( "colormap/winter.csv" );
+
+    public static final ColorGradient bone = fromCSV( "colormap/bone.csv" );
+
+    public static final ColorGradient copper = fromCSV( "colormap/copper.csv" );
+
+    public static final ColorGradient pink = fromCSV( "colormap/pink.csv" );
+
+    public static final ColorGradient lines = fromCSV( "colormap/lines.csv" ); //diff color??
+
+    public static final ColorGradient colorcube = fromCSV( "colormap/colorcube.csv" );
+
+    public static final ColorGradient prism = fromCSV( "colormap/prism.csv" );
+
+    public static final ColorGradient flag = fromCSV( "colormap/flag.csv" ); //diff color??
+
+    public static final ColorGradient white = fromCSV( "colormap/white.csv" );
+
     // see: https://mycarta.wordpress.com/2013/02/21/perceptual-rainbow-palette-the-method/
     public static final ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
-    
+
     // see: http://www.cs.utah.edu/~gk/papers/vis02/FaceLumin.pdf
     // see: https://mycarta.wordpress.com/2012/12/06/the-rainbow-is-deadlong-live-the-rainbow-part-5-cie-lab-linear-l-rainbow/
     public static final ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
-   
-    
-    public static ColorGradient nColorFade(final List<float[]> colors)
+
+    public static ColorGradient nColorFade( final List<float[]> colors )
     {
         return new ColorGradient( )
         {
             public void toColor( float fraction, float[] rgba )
             {
-            	double val = fraction*(colors.size()-1);
-            	int index;
-            	if(fraction != 1)
-            		index = (int)val;
-            	else
-            		index = colors.size() - 2;
-            	rgba[0] = (float)(colors.get(index)[0]*(1-val+index)+colors.get(index+1)[0]*(val-index));
-            	rgba[1] = (float)(colors.get(index)[1]*(1-val+index)+colors.get(index+1)[1]*(val-index));
-            	rgba[2] = (float)(colors.get(index)[2]*(1-val+index)+colors.get(index+1)[2]*(val-index));
-            	rgba[3] = (float)(colors.get(index)[3]*(1-val+index)+colors.get(index+1)[3]*(val-index));
+                double val = fraction * ( colors.size( ) - 1 );
+                int index = fraction != 1 ? ( int ) val : colors.size( ) - 2;
+
+                rgba[0] = ( float ) ( colors.get( index )[0] * ( 1 - val + index ) + colors.get( index + 1 )[0] * ( val - index ) );
+                rgba[1] = ( float ) ( colors.get( index )[1] * ( 1 - val + index ) + colors.get( index + 1 )[1] * ( val - index ) );
+                rgba[2] = ( float ) ( colors.get( index )[2] * ( 1 - val + index ) + colors.get( index + 1 )[2] * ( val - index ) );
+                rgba[3] = ( float ) ( colors.get( index )[3] * ( 1 - val + index ) + colors.get( index + 1 )[3] * ( val - index ) );
             }
         };
     }
-    
-    public static ColorGradient customMap(final List<float[]> colors) 
+
+    public static ColorGradient customMap( final List<float[]> colors )
     {
-    	return new ColorGradient( )
+        return new ColorGradient( )
         {
             public void toColor( float fraction, float[] rgba )
             {
-            	int index;
-            	if(fraction != 1)
-            		index = (int)(fraction*(colors.size()));
-            	else 
-            		index = colors.size() - 1;
-            	rgba[0] = colors.get(index)[0];
-            	rgba[1] = colors.get(index)[1];
-            	rgba[2] = colors.get(index)[2];
-            	rgba[3] = colors.get(index)[3];
+                int index = fraction != 1 ? ( int ) ( fraction * ( colors.size( ) ) ) : colors.size( ) - 1;
+
+                rgba[0] = colors.get( index )[0];
+                rgba[1] = colors.get( index )[1];
+                rgba[2] = colors.get( index )[2];
+                rgba[3] = colors.get( index )[3];
             }
         };
     }
-    
+
     public static ColorGradient brighten( final ColorGradient gradient, final double beta )
     {
-    	 return new ColorGradient( )
-         {
-             public void toColor( float fraction, float[] rgba )
-             {
-                gradient.toColor( fraction, rgba );
-                 
-                if(beta > 0)
-	     	       	for(int k = 0; k < rgba.length; k++)
-	     	       		rgba[k] = (float)Math.pow(rgba[k], 1-beta);
-                else
-	         		for(int k = 0; k < rgba.length; k++)
-	         			rgba[k] = (float)Math.pow(rgba[k], 1/(1+beta));
-             }
-         };
-    }
-    
-    public static ColorGradient lighten(final ColorGradient gradient, final double beta)
-    {
-    	 return new ColorGradient( )
+        return new ColorGradient( )
         {
             public void toColor( float fraction, float[] rgba )
             {
-            	gradient.toColor(fraction, rgba);
-            	
-            	//convert rgb to hsl
-            	float xMax = Math.max(Math.max(rgba[0], rgba[1]), rgba[2]);
-            	float xMin = Math.min(Math.min(rgba[0], rgba[1]), rgba[2]);
-            	float light = (xMax+xMin)/2, sat = 0, hue = 0, temp2 = 0;
-            	if(xMin == xMax)
-	            	sat = hue = 0;
-            	else if(light < .5)
-            		sat = (xMax-xMin)/(xMax+xMin);
-            	else
-            		sat = (xMax-xMin)/(2-xMax-xMin);
-            	if(rgba[0] == xMax)
-            		hue = (rgba[1]-rgba[2])/(xMax-xMin);
-            	if(rgba[1] == xMax)
-            		hue = 2+(rgba[2]-rgba[0])/(xMax-xMin);
-            	if(rgba[2] == xMax)
-            		hue = 4+(rgba[0]-rgba[1])/(xMax-xMin);
-            	if(hue < 0)
-            		hue = hue + 6;
-            	
-            	//increase light value
-            	light = (float)(light + beta);
-            	
-            	//convert back to rgb from hsl
-            	if(sat == 0)
-            		rgba[0] = rgba[1] = rgba[2] = light;
-            	else if(light < .5)
-            		temp2 = light*(1+sat);
-            	else 
-            		temp2 = light+sat - light*sat;
-            	float temp1 = 2*light - temp2;
-            	hue = hue/6;
-            	for(int k = 0; k < 3; k++)
-            	{
-            		float temp3;
-            		if(k == 0)
-            		{
-		            	temp3 = (float)(hue+1.0/3); 
-		            	if(temp3 > 1)
-		            		temp3 = temp3 - 1;
-	            	}
-            		else if(k == 1)
-            			temp3 = hue;
-            		else
-            		{
-            			temp3 = (float) (hue - 1.0/3);
-            			if(temp3 < 0)
-            				temp3 = temp3 + 1;
-            		}
-            		if(temp3 < 1.0/6)
-            			rgba[k] = temp1 + (temp2-temp1)*6*temp3;
-            		else if(temp3 < .5)
-            			rgba[k] = temp2;
-            		else if(temp3 < 2.0/3)
-            			rgba[k] = (float) (temp1 + (temp2-temp1)*(2.0/3-temp3)*6);
-            		else
-            			rgba[k] = temp1;
-            	}
+                gradient.toColor( fraction, rgba );
+
+                if ( beta > 0 )
+                {
+                    for ( int k = 0; k < rgba.length; k++ )
+                    {
+                        rgba[k] = ( float ) Math.pow( rgba[k], 1 - beta );
+                    }
+                }
+                else
+                {
+                    for ( int k = 0; k < rgba.length; k++ )
+                    {
+                        rgba[k] = ( float ) Math.pow( rgba[k], 1 / ( 1 + beta ) );
+                    }
+                }
             }
         };
     }
-    
-    public static ColorGradient changeAlpha(final ColorGradient gradient, final float alpha)
+
+    public static ColorGradient lighten( final ColorGradient gradient, final double beta )
     {
-    	return new ColorGradient( )
-    	{
+        return new ColorGradient( )
+        {
             public void toColor( float fraction, float[] rgba )
             {
-            	gradient.toColor(fraction, rgba);
-            	rgba[3] = alpha; 
+                gradient.toColor( fraction, rgba );
+
+                //convert rgb to hsl
+                float xMax = Math.max( Math.max( rgba[0], rgba[1] ), rgba[2] );
+                float xMin = Math.min( Math.min( rgba[0], rgba[1] ), rgba[2] );
+                float light = ( xMax + xMin ) / 2, sat = 0, hue = 0, temp2 = 0;
+                
+                if ( xMin == xMax )
+                {
+                    sat = hue = 0;
+                }
+                else if ( light < .5 )
+                {
+                    sat = ( xMax - xMin ) / ( xMax + xMin );
+                }
+                else
+                {
+                    sat = ( xMax - xMin ) / ( 2 - xMax - xMin );
+                }
+                
+                if ( rgba[0] == xMax ) hue = ( rgba[1] - rgba[2] ) / ( xMax - xMin );
+                if ( rgba[1] == xMax ) hue = 2 + ( rgba[2] - rgba[0] ) / ( xMax - xMin );
+                if ( rgba[2] == xMax ) hue = 4 + ( rgba[0] - rgba[1] ) / ( xMax - xMin );
+                if ( hue < 0 ) hue = hue + 6;
+
+                //increase light value
+                light = ( float ) ( light + beta );
+
+                //convert back to rgb from hsl
+                if ( sat == 0 )
+                {
+                    rgba[0] = rgba[1] = rgba[2] = light;
+                }
+                else if ( light < .5 )
+                {
+                    temp2 = light * ( 1 + sat );
+                }
+                else
+                {
+                    temp2 = light + sat - light * sat;
+                }
+                
+                float temp1 = 2 * light - temp2;
+                hue = hue / 6;
+                
+                for ( int k = 0; k < 3; k++ )
+                {
+                    float temp3;
+                    if ( k == 0 )
+                    {
+                        temp3 = ( float ) ( hue + 1.0 / 3 );
+                        if ( temp3 > 1 ) temp3 = temp3 - 1;
+                    }
+                    else if ( k == 1 )
+                    {
+                        temp3 = hue;
+                    }
+                    else
+                    {
+                        temp3 = ( float ) ( hue - 1.0 / 3 );
+                        if ( temp3 < 0 ) temp3 = temp3 + 1;
+                    }
+                    
+                    if ( temp3 < 1.0 / 6 )
+                    {
+                        rgba[k] = temp1 + ( temp2 - temp1 ) * 6 * temp3;
+                    }
+                    else if ( temp3 < .5 )
+                    {
+                        rgba[k] = temp2;
+                    }
+                    else if ( temp3 < 2.0 / 3 )
+                    {
+                        rgba[k] = ( float ) ( temp1 + ( temp2 - temp1 ) * ( 2.0 / 3 - temp3 ) * 6 );
+                    }
+                    else
+                    {
+                        rgba[k] = temp1;
+                    }
+                }
             }
         };
     }
-    
+
+    public static ColorGradient changeAlpha( final ColorGradient gradient, final float alpha )
+    {
+        return new ColorGradient( )
+        {
+            public void toColor( float fraction, float[] rgba )
+            {
+                gradient.toColor( fraction, rgba );
+                rgba[3] = alpha;
+            }
+        };
+    }
+
     public static ColorGradient reverse( final ColorGradient gradient )
     {
         return new ColorGradient( )
