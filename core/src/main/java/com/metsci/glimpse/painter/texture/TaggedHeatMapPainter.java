@@ -57,7 +57,6 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     protected FloatTexture1D vertexCoordTex;
     protected FloatTexture1D textureCoordTex;
 
-    protected TaggedColorScaleShader fragShader;
     protected TaggedAxis1D taggedAxis;
 
     public TaggedHeatMapPainter( TaggedAxis1D taggedAxis )
@@ -77,13 +76,19 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
 
         this.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
     }
+    
+    public TaggedColorScaleShader getShader( )
+    {
+        return ( TaggedColorScaleShader ) this.fragShader;
+    }
 
+    @Override
     public void setAlpha( float alpha )
     {
         lock.lock( );
         try
         {
-            this.fragShader.setAlpha( alpha );
+            getShader( ).setAlpha( alpha );
         }
         finally
         {
@@ -96,7 +101,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         lock.lock( );
         try
         {
-            fragShader.setDiscardNaN( discard );
+            getShader( ).setDiscardNaN( discard );
         }
         finally
         {
@@ -109,7 +114,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         lock.lock( );
         try
         {
-            fragShader.setDiscardAbove( discard );
+            getShader( ).setDiscardAbove( discard );
         }
         finally
         {
@@ -122,7 +127,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         lock.lock( );
         try
         {
-            fragShader.setDiscardBelow( discard );
+            getShader( ).setDiscardBelow( discard );
         }
         finally
         {
