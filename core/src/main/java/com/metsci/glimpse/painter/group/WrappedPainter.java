@@ -211,6 +211,10 @@ public class WrappedPainter extends GlimpsePainter2D
                 this.dummyLayout.addPainter( painter );
             }
 
+            // before figuring out which tiles need to be rendered, make sure constraints are applied, etc.
+            // XXX: not sure why this doesn't get called automatically somewhere else
+            axis.validate( );
+
             List<WrappedTextureBounds> boundsX = Lists.newArrayList( iterator( axisX, bounds.getWidth( ) ) );
             List<WrappedTextureBounds> boundsY = Lists.newArrayList( iterator( axisY, bounds.getHeight( ) ) );
 
