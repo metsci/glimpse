@@ -89,8 +89,8 @@ public class WrappedPainter extends GlimpsePainter2D
         {
             if ( effectiveWidth > canvasWidth || effectiveHeight > canvasHeight )
             {
-                this.canvasWidth = effectiveWidth;
-                this.canvasHeight = effectiveHeight;
+                this.canvasWidth = Math.max( canvasWidth, effectiveWidth );
+                this.canvasHeight = Math.max( canvasHeight, effectiveHeight );
                 this.resize( this.canvasWidth, this.canvasHeight );
             }
 
