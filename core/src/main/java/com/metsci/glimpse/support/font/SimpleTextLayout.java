@@ -125,9 +125,14 @@ public class SimpleTextLayout
         return descent;
     }
 
-    public double getAscent( )
+    public synchronized double getAscent( )
     {
         return ascent;
+    }
+
+    public synchronized void setAscent( float ascent )
+    {
+        this.ascent = ascent;
     }
 
     public void setBreakOnEol( boolean breakOnEol )
