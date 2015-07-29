@@ -26,14 +26,18 @@
  */
 package com.metsci.glimpse.painter.texture;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+
 import java.io.IOException;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.gl.shader.Pipeline;
+import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.shader.SampledColorScaleShader;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+
 import java.util.logging.Logger;
 
 /**
@@ -51,7 +55,7 @@ public class HeatMapPainter extends ShadedTexturePainter
     protected FloatTextureProjected2D heatMap;
     protected ColorTexture1D colorScale;
 
-    protected SampledColorScaleShader fragShader;
+    protected Shader fragShader;
 
     public HeatMapPainter( Axis1D axis )
     {
@@ -61,7 +65,7 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         catch ( IOException e )
         {
-            logger.warning( "Unable to load HeatMapPainter shader." );
+            logWarning( logger, "Unable to load HeatMapPainter shader.", e );
         }
     }
 
@@ -76,7 +80,7 @@ public class HeatMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            this.fragShader.setAlpha( alpha );
+            ((SampledColorScaleShader)this.fragShader).setAlpha( alpha );
         }
         finally
         {

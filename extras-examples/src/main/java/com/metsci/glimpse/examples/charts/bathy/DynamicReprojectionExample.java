@@ -26,21 +26,18 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
-import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.UpdateMode.*;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.NamedConstraint;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
-import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
@@ -58,8 +55,8 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.projection.LatLonProjection;
+import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -130,17 +127,13 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
         colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
-        List<String> constraints = new ArrayList<String>();
-        for(Tag tag: colorAxis.getSortedTags())
-        	constraints.add(tag.getName());
-        
-        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint" , 200, constraints) );
+        // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
+        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
 
         colorAxis.setMin( -10000 );
         colorAxis.setMax( 12000 );
 
         // miscellaneous painters
-
         plot.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getBlack( ) ) );
 
         GridPainter grid = new GridPainter( xTicks, yTicks );

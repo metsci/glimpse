@@ -26,13 +26,12 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
-import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -42,6 +41,7 @@ import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.plot.TaggedColorAxisPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.FlatProjection;
@@ -82,11 +82,9 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f );
         axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
         axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
-        List<String> constraints = new ArrayList<String>();
-        for(Tag tag: axisZ.getSortedTags())
-        	constraints.add(tag.getName());
+
         // add a constraint which prevents dragging the tags past one another
-        axisZ.addConstraint( new OrderedConstraint( "C1" , constraints) ); 
+        axisZ.addConstraint( new OrderedConstraint( "C1", 20.0, Arrays.asList( "T1", "T2", "T3", "T4", "T5" ) ) );
 
         // set border and offset sizes in pixels
         plot.setBorderSize( 15 );
@@ -155,18 +153,17 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
         // tell the cursor painter what texture to report data values from
         cursorPainter.setTexture( texture );
-//            	System.out.println(rgba[0]+" "+rgba[1]+" "+rgba[2]);
 
         return plot;
     }
-    
+
     @Override
     public ColorAxisPlot2D getLayout( )
     {
-    	//return getLayout(ColorGradients.autumn);
-    	return getLayout(ColorGradients.lighten(ColorGradients.winter, .25));
-    	//return getLayout(ColorGradients.nColorFade( Lists.newArrayList( GlimpseColor.getBlue(), GlimpseColor.getGreen(), GlimpseColor.getCyan())));
-    	//return getLayout(ColorGradients.customMap( Lists.newArrayList( GlimpseColor.getBlue(), GlimpseColor.getGreen(), GlimpseColor.getCyan(), GlimpseColor.getMagenta())));
+        // demonstrates three possible color maps, see ColorGradients for others
+        return getLayout( ColorGradients.customMap( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ), GlimpseColor.getMagenta( ) ) ) );
+        //return getLayout( ColorGradients.lighten( ColorGradients.winter, .25 ) );
+        //return getLayout( ColorGradients.nColorFade( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ) ) ) );
     }
 
     public GlimpsePainter getPainter( )

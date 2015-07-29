@@ -26,17 +26,24 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.painter.group.WrappedPainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class WrappedAxisExample implements GlimpseLayoutProvider
 {
@@ -96,6 +103,28 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
         plot.removePainter( heatMapPainter );
         WrappedPainter wrappedPainter = new WrappedPainter( );
         wrappedPainter.addPainter( heatMapPainter );
+
+        // add a painter that paints things in pixel-space (round dots should stay round
+        // regardless of zooming, wrapping, and canvas-resizing)
+        wrappedPainter.addPainter( new GlimpseDataPainter2D( )
+        {
+            public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+            {
+                gl.glColor4fv( GlimpseColor.getWhite( ), 0 );
+                gl.glPointSize( 20f );
+
+                gl.glBegin( GL.GL_POINTS );
+                for ( int x = 0; x < 5; x++ )
+                {
+                    for ( int y = 0; y < 5; y++ )
+                    {
+                        gl.glVertex2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
+                    }
+                }
+                gl.glEnd( );
+            }
+        } );
+
         plot.addPainter( wrappedPainter );
 
         return plot;
