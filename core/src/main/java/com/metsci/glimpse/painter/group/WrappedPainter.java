@@ -556,7 +556,9 @@ public class WrappedPainter extends GlimpsePainter2D
                         step = 1;
                     }
 
-                    return new WrappedTextureBounds( start, start + distance, wrappedStart, wrappedEnd, getTextureSize( distance ), true );
+                    int textureSize = getTextureSize( boundsSize, axis, distance );
+
+                    return new WrappedTextureBounds( start, start + distance, wrappedStart, wrappedEnd, textureSize, true );
                 }
                 else if ( step == 1 )
                 {
@@ -567,9 +569,11 @@ public class WrappedPainter extends GlimpsePainter2D
                     double wrappedStart = axis.getWrapMin( );
                     double wrappedEnd = axis.getWrappedValue( end, true );
 
+                    int textureSize = getTextureSize( boundsSize, axis, distance );
+
                     step = 2;
 
-                    return new WrappedTextureBounds( start + distanceToSeam, end, wrappedStart, wrappedEnd, getTextureSize( distance ), true );
+                    return new WrappedTextureBounds( start + distanceToSeam, end, wrappedStart, wrappedEnd, textureSize, true );
                 }
             }
 
@@ -580,12 +584,6 @@ public class WrappedPainter extends GlimpsePainter2D
         public void remove( )
         {
             throw new UnsupportedOperationException( );
-        }
-
-        protected int getTextureSize( double distance )
-        {
-            double percent = distance / ( axis.getMax( ) - axis.getMin( ) );
-            return ( int ) Math.ceil( percent * boundsSize );
         }
 
     }
@@ -621,8 +619,9 @@ public class WrappedPainter extends GlimpsePainter2D
                 double end = start + axis.getWrapSpan( );
                 this.current = end;
 
-                //TODO the texture bounds could be made smaller here -- the image is zoomed out and doesn't take up the whole screen
-                return new WrappedTextureBounds( start, end, axis.getWrapMin( ), axis.getWrapMax( ), boundsSize, false );
+                int textureSize = getTextureSize( boundsSize, axis, axis.getWrapSpan( ) );
+
+                return new WrappedTextureBounds( start, end, axis.getWrapMin( ), axis.getWrapMax( ), textureSize, true );
             }
             else
             {
@@ -636,5 +635,11 @@ public class WrappedPainter extends GlimpsePainter2D
             throw new UnsupportedOperationException( );
         }
 
+    }
+
+    protected static int getTextureSize( int boundsSize, Axis1D axis, double distanceAlongAxis )
+    {
+        double fractionOfAxis = distanceAlongAxis / ( axis.getMax( ) - axis.getMin( ) );
+        return ( int ) Math.ceil( fractionOfAxis * boundsSize );
     }
 }
