@@ -358,8 +358,11 @@ public class TooltipPainter extends SimpleTextPainter
         // looks strange, but causes atlas to load pending icons
         // this is necessary to do here because calls to atlas.getImageData( )
         // will fail if we do not
-        atlas.beginRendering( );
-        atlas.endRendering( );
+        if ( iconIds != null )
+        {
+            atlas.beginRendering( );
+            atlas.endRendering( );
+        }
 
         int size = iconIds == null ? 0 : iconIds.size( );
 
