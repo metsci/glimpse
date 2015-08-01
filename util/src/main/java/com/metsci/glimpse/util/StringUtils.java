@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.util;
 
+import static java.lang.Math.log;
+import static java.lang.Math.pow;
+import static java.lang.String.format;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -208,4 +212,20 @@ public final class StringUtils
     {
         return String.format( "%." + Integer.toString( numDecimalPlaces ) + "f", d );
     }
+
+    public static String formatByteCount( long numBytes )
+    {
+        int groupSize = 1024;
+        if ( numBytes < groupSize )
+        {
+            return ( numBytes + " B" );
+        }
+        else
+        {
+            int exp = ( int ) ( log( numBytes ) / log( groupSize ) );
+            String prefix = "KMGTPE".charAt( exp - 1 ) + "B";
+            return format( "%.1f %s", ( numBytes / pow( groupSize, exp ) ), prefix );
+        }
+    }
+
 }
