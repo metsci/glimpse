@@ -76,12 +76,13 @@ public class TooltipPainter extends SimpleTextPainter
     protected List<ImageData> icons;
     protected List<float[]> iconColors;
     protected boolean noIcons = false;
+    protected float iconSize;
 
     protected boolean wrapTextAroundIcon = false;
 
     protected double x;
     protected double y;
-    
+
     protected boolean drawInPixelCoords = true;
 
     public TooltipPainter( TextureAtlas atlas )
@@ -150,12 +151,12 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
-        
+
         this.drawInPixelCoords = true;
 
         return this;
     }
-    
+
     /**
      * Sets the location of the upper left corner of the tooltip box
      * in axis coordinates.
@@ -164,12 +165,11 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
-        
+
         this.drawInPixelCoords = false;
 
         return this;
     }
-    
 
     public synchronized TooltipPainter setOffset( int x, int y )
     {
@@ -279,12 +279,19 @@ public class TooltipPainter extends SimpleTextPainter
         textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
+        if ( ( Float ) iconSize != null && iconSize != 0 && !noIcons ) textLayout.setAscent( iconSize );
+        iconSize = getIconSize( );
     }
 
     protected float getIconSize( )
     {
         //XXX another spacing heuristic which it would be nice to eliminate
         return ( float ) textLayout.getAscent( );
+    }
+
+    public void setIconSize( float size )
+    {
+        iconSize = size;
     }
 
     protected float getIconSpacing( int i )
@@ -295,13 +302,21 @@ public class TooltipPainter extends SimpleTextPainter
         float indent = ( float ) ( textLayout.getAscent( ) + borderSize );
 
         if ( noIcons )
+        {
             return 0;
+        }
         else if ( iconId != null )
+        {
             return indent;
+        }
         else if ( iconId == null && !wrapTextAroundIcon )
+        {
             return indent;
+        }
         else
+        {
             return 0;
+        }
     }
 
     protected void updateLayout( )
@@ -320,11 +335,11 @@ public class TooltipPainter extends SimpleTextPainter
             {
                 TextBoundingBox line = lines.get( i );
 
-                float iconSize = getIconSpacing( i );
+                float iconsize = getIconSpacing( i );
 
                 minX = Math.min( minX, line.getMinX( ) );
                 minY = Math.min( minY, line.getMinY( ) );
-                maxX = Math.max( maxX, line.getMaxX( ) + iconSize );
+                maxX = Math.max( maxX, line.getMaxX( ) + iconsize );
                 maxY = Math.max( maxY, line.getMaxY( ) );
             }
         }
@@ -340,6 +355,15 @@ public class TooltipPainter extends SimpleTextPainter
 
     protected void loadIcons( )
     {
+        // looks strange, but causes atlas to load pending icons
+        // this is necessary to do here because calls to atlas.getImageData( )
+        // will fail if we do not
+        if ( iconIds != null )
+        {
+            atlas.beginRendering( );
+            atlas.endRendering( );
+        }
+
         int size = iconIds == null ? 0 : iconIds.size( );
 
         this.icons = Lists.newArrayListWithCapacity( size );
@@ -361,7 +385,10 @@ public class TooltipPainter extends SimpleTextPainter
         {
             throw new AxisNotSetException( this, context );
         }
-        
+
+        double x = drawInPixelCoords ? this.x : axis.getAxisX( ).valueToScreenPixelUnits( this.x );
+        double y = drawInPixelCoords ? this.y : axis.getAxisY( ).getSizePixels( ) - axis.getAxisY( ).valueToScreenPixelUnits( this.y );
+
         if ( icons == null )
         {
             loadIcons( );
@@ -374,6 +401,7 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( textLayout == null && textRenderer != null )
         {
+            if ( text == null ) setText( " " );
             updateTextLayout( );
         }
 
@@ -422,7 +450,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_QUADS );
                 try
                 {
-                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
                 }
                 finally
                 {
@@ -439,7 +467,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
-                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY );
+                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
                 }
                 finally
                 {
@@ -459,10 +487,11 @@ public class TooltipPainter extends SimpleTextPainter
             {
                 TextBoundingBox line = lines.get( i );
 
-                float iconSize = getIconSpacing( i );
+                float iconsize = getIconSpacing( i );
 
-                int posX = ( int ) ( x + line.leftX + iconSize + clampX + offsetX );
+                int posX = ( int ) ( x + line.leftX + iconsize + clampX + offsetX );
                 int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY );
+
                 textRenderer.draw( line.text, posX, posY );
             }
         }
@@ -485,7 +514,6 @@ public class TooltipPainter extends SimpleTextPainter
 
                     if ( iconId != null && iconData != null && line != null )
                     {
-                        float iconSize = getIconSize( );
                         double iconScale = iconSize / ( double ) iconData.getWidth( );
 
                         int posX = ( int ) ( x + line.leftX + clampX + offsetX );
@@ -515,7 +543,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY )
+    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY, double x, double y )
     {
         double posX = x + linesBounds.minX + offsetX;
         double posY = height - y + linesBounds.minY + offsetY;
