@@ -37,6 +37,7 @@ import java.util.Set;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
+import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.examples.Example;
@@ -164,6 +165,8 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
                 }
             }
         } );
+        
+        plot.addPainter( new NumericXYAxisPainter( ) );
 
         return plot;
     }

@@ -29,7 +29,6 @@ package com.metsci.glimpse.plot.stacked;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -133,7 +132,7 @@ public interface PlotInfo
      * Further, {@code #getBaseLayout()} will be a direct child of the {@link StackedPlot2D}
      * that this {@code PlotInfo} is part of.
      */
-    public GlimpseLayout getBaseLayout( );
+    public GlimpseAxisLayout2D getBaseLayout( );
 
     /**
      * Returns the common axis associated with the given GlimpseTargetStack.
@@ -189,7 +188,7 @@ public interface PlotInfo
      * @see #setIndentLevel(int)
      */
     public int getIndentLevel( );
-    
+
     /**
      * <p>Sets the MIG Layout constraints which position this PlotInfo within the
      * StackedPlot2D. Normally, calling this method is not necessary because
@@ -208,7 +207,7 @@ public interface PlotInfo
      * @see #setLayoutData(String)
      */
     public String getLayoutData( );
-    
+
     public void setLookAndFeel( LookAndFeel laf );
 
     public void updateLayout( int index );

@@ -241,7 +241,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
     protected void setBounds( TimePlotInfo chart )
     {
-        Axis1D axis = chart.getLayout( ).getAxis( ).getAxisY( );
+        Axis1D axis = chart.getBaseLayout( ).getAxis( ).getAxisY( );
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
     }

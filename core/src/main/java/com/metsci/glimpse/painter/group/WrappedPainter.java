@@ -240,7 +240,8 @@ public class WrappedPainter extends GlimpsePainter2D
             // bounded from 0 to 10, it should be because that is the domain that the painters
             // are set up to draw in)
             this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
-
+            this.dummyAxis.validate( );
+            
             // release the onscreen context and make the offscreen context current
             context.getGLContext( ).release( );
             try

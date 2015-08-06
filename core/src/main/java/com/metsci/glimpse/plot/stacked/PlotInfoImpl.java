@@ -26,15 +26,13 @@
  */
 package com.metsci.glimpse.plot.stacked;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
 
 import java.util.Comparator;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -50,7 +48,7 @@ public class PlotInfoImpl implements PlotInfo
     protected String layoutData;
     protected GlimpseAxisLayout2D layout;
     protected StackedPlot2D parent;
-    
+
     public PlotInfoImpl( StackedPlot2D parent, Object id, int order, int size, int spacing, GlimpseAxisLayout2D layout )
     {
         this.parent = parent;
@@ -62,25 +60,25 @@ public class PlotInfoImpl implements PlotInfo
         this.grow = size < 0;
         this.visible = true;
     }
-    
+
     @Override
     public String getLayoutData( )
     {
         return this.layoutData;
     }
-    
+
     @Override
     public void setLayoutData( String layoutData )
     {
         this.layoutData = layoutData;
     }
-    
+
     @Override
     public void setIndentLevel( int level )
     {
         this.indentLevel = Math.max( 0, level );
     }
-    
+
     @Override
     public int getIndentLevel( )
     {
@@ -127,7 +125,7 @@ public class PlotInfoImpl implements PlotInfo
     public void setOrder( int order )
     {
         this.order = order;
-        
+
         if ( this.parent.isAutoValidate( ) ) this.parent.validate( );
     }
 
@@ -136,8 +134,8 @@ public class PlotInfoImpl implements PlotInfo
     {
         this.size = size;
         this.grow = size < 0;
-        
-        if ( this.parent.isAutoValidate( ) )  this.parent.validate( );
+
+        if ( this.parent.isAutoValidate( ) ) this.parent.validate( );
     }
 
     @Override
@@ -157,9 +155,9 @@ public class PlotInfoImpl implements PlotInfo
     {
         return this.layout;
     }
-    
+
     @Override
-    public GlimpseLayout getBaseLayout( )
+    public GlimpseAxisLayout2D getBaseLayout( )
     {
         return this.layout;
     }
@@ -206,7 +204,7 @@ public class PlotInfoImpl implements PlotInfo
     {
         this.layout.setLookAndFeel( laf );
     }
-    
+
     @Override
     public void setVisible( boolean visible )
     {
@@ -219,7 +217,7 @@ public class PlotInfoImpl implements PlotInfo
     {
         return visible;
     }
-    
+
     @Override
     public void deletePlot( )
     {
@@ -227,31 +225,32 @@ public class PlotInfoImpl implements PlotInfo
         {
             StackedPlot2D oldParent = this.parent;
             this.parent = null;
-            
+
             oldParent.removeLayout( layout );
             oldParent.deletePlot( id );
         }
     }
-    
+
     @Override
     public void updateLayout( int index )
     {
         Orientation orient = getStackedPlot( ).getOrientation( );
 
         int plotCount = getStackedPlot( ).getAllPlots( ).size( );
-        
+
         int plotSpacing = getPlotSpacing( );
         int plotSize = getSize( );
-        
+
         if ( !isVisible( ) )
         {
             plotSpacing = 0;
             plotSize = 0;
         }
-        
+
         // no spacing for the last plot (there's no plot beyond it and spacing between
         // it and the edge of the stacked plot is controlled by setBorderSize(int)
-        if ( index == plotCount - 1 && orient == HORIZONTAL ) plotSpacing = 0;
+        if ( index == plotCount - 1 && orient == HORIZONTAL )
+            plotSpacing = 0;
         else if ( index == 0 && orient == VERTICAL ) plotSpacing = 0;
 
         String layoutData = null;

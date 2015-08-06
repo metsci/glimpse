@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.layout;
 
+import java.util.Collection;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
@@ -35,6 +37,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.layout.GlimpseLayoutCache.GlimpseLayoutPredicate;
 
 /**
  * A GlimpseLayout which can provide two axes (an x or
@@ -48,7 +51,6 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
 {
     protected GlimpseLayoutCache<Axis2D> cache;
     protected Axis2D axis;
-    protected boolean defaultSet = false;
     protected AxisFactory2D factory;
 
     public GlimpseAxisLayout2D( GlimpseLayout parent, String name, Axis2D axis )
@@ -141,7 +143,6 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
     {
         // set the axis for all contexts, reset the cache
         this.clearCache( );
-        this.defaultSet = false;
         this.axis = axis;
     }
 
@@ -205,6 +206,11 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
 
         return null;
     }
+    
+    public Collection<Axis2D> getAxis( GlimpseLayoutPredicate predicate )
+    {
+        return this.cache.getMatching( predicate );
+    }
 
     protected AxisFactory2D getAxisFactory0( GlimpseTargetStack stack )
     {
@@ -227,32 +233,13 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
     // otherwise, create an axis using the given parent_axis and factory and store it in the cache
     protected Axis2D getCachedAxis0( Axis2D parent_axis, AxisFactory2D factory, GlimpseTargetStack stack )
     {
-        Axis2D newAxis = null;
+        Axis2D newAxis = cache.getValueNoBoundsCheck( stack );
 
-        if ( !defaultSet )
+        if ( newAxis == null )
         {
-            defaultSet = true;
-            newAxis = parent_axis;
+            newAxis = getNewAxis0( parent_axis, factory, stack );
+            newAxis.setSizePixels( stack.getBounds( ) );
             cache.setValue( stack, newAxis );
-        }
-        else
-        {
-            newAxis = cache.getValueNoBoundsCheck( stack );
-
-            if ( newAxis == null )
-            {
-                if ( factory != null )
-                {
-                    newAxis = factory.newAxis( stack, parent_axis );
-                }
-                else
-                {
-                    newAxis = DefaultAxisFactory2D.newAxis( parent_axis );
-                }
-
-                newAxis.setSizePixels( stack.getBounds( ) );
-                cache.setValue( stack, newAxis );
-            }
         }
 
         return newAxis;
@@ -261,5 +248,17 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
     protected Axis2D getCachedAxis0( Axis2D parent_axis, AxisFactory2D factory, GlimpseContext context )
     {
         return getCachedAxis0( parent_axis, factory, context.getTargetStack( ) );
+    }
+    
+    protected Axis2D getNewAxis0( Axis2D parent_axis, AxisFactory2D factory, GlimpseTargetStack stack )
+    {
+        if ( factory != null )
+        {
+            return factory.newAxis( stack, parent_axis );
+        }
+        else
+        {
+            return DefaultAxisFactory2D.newAxis( parent_axis );
+        }
     }
 }

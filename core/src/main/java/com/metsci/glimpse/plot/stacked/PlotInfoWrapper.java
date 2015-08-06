@@ -123,7 +123,7 @@ public class PlotInfoWrapper implements PlotInfo
     }
     
     @Override
-    public GlimpseLayout getBaseLayout( )
+    public GlimpseAxisLayout2D getBaseLayout( )
     {
         return info.getBaseLayout( );
     }

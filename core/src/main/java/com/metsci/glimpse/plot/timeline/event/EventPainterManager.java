@@ -216,7 +216,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 {
                     if ( prev != null )
                     {
-                        prev.paint( defaultPainter, gl, next, plot, bounds, posMin, posMax );
+                        prev.paint( defaultPainter, gl, next, plot, bounds, axis, posMin, posMax );
                     }
 
                     prev = next;
@@ -225,7 +225,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 // paint last event
                 if ( prev != null )
                 {
-                    prev.paint( defaultPainter, gl, null, plot, bounds, posMin, posMax );
+                    prev.paint( defaultPainter, gl, null, plot, bounds, axis, posMin, posMax );
                 }
 
                 posMin = posMax + buffer;

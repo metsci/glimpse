@@ -54,7 +54,6 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
 {
     protected GlimpseLayoutCache<Axis1D> cache;
     protected Axis1D axis;
-    protected boolean defaultSet = false;
     protected AxisFactory1D factory;
 
     public GlimpseAxisLayout1D( GlimpseLayout parent, String name, Axis1D axis )
@@ -135,7 +134,6 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     {
         // set the axis for all contexts, reset the cache
         this.clearCache( );
-        this.defaultSet = false;
         this.axis = axis;
     }
 
@@ -238,32 +236,14 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     // otherwise, create an axis using the given parent_axis and factory and store it in the cache
     protected Axis1D getCachedAxis0( Axis1D parent_axis, AxisFactory1D factory, GlimpseTargetStack stack )
     {
-        Axis1D newAxis = null;
+        Axis1D newAxis = cache.getValueNoBoundsCheck( stack );
 
-        if ( !defaultSet )
+        if ( newAxis == null )
         {
-            defaultSet = true;
-            newAxis = parent_axis;
+            newAxis = getNewAxis0( parent_axis, factory, stack );
+
+            newAxis.setSizePixels( getSize( stack.getBounds( ) ) );
             cache.setValue( stack, newAxis );
-        }
-        else
-        {
-            newAxis = cache.getValueNoBoundsCheck( stack );
-
-            if ( newAxis == null )
-            {
-                if ( factory != null )
-                {
-                    newAxis = factory.newAxis( stack, parent_axis );
-                }
-                else
-                {
-                    newAxis = DefaultAxisFactory1D.newAxis( parent_axis );
-                }
-
-                newAxis.setSizePixels( getSize( stack.getBounds( ) ) );
-                cache.setValue( stack, newAxis );
-            }
         }
 
         return newAxis;
@@ -272,5 +252,17 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
     protected Axis1D getCachedAxis0( Axis1D parent_axis, AxisFactory1D factory, GlimpseContext context )
     {
         return getCachedAxis0( parent_axis, factory, context.getTargetStack( ) );
+    }
+
+    protected Axis1D getNewAxis0( Axis1D parent_axis, AxisFactory1D factory, GlimpseTargetStack stack )
+    {
+        if ( factory != null )
+        {
+            return factory.newAxis( stack, parent_axis );
+        }
+        else
+        {
+            return DefaultAxisFactory1D.newAxis( parent_axis );
+        }
     }
 }

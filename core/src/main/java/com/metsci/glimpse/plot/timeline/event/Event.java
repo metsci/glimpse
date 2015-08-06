@@ -40,6 +40,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
@@ -234,13 +235,13 @@ public class Event implements Iterable<Event>
     }
 
     /**
-     * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, int, int)
+     * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, Axis1D, int, int)
      */
-    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
+    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, int posMin, int posMax )
     {
         EventPainter eventPainter = painter != null ? painter : defaultPainter;
 
-        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
+        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, timeAxis, posMin, posMax );
     }
 
     /**

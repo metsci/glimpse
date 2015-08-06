@@ -27,12 +27,14 @@
 package com.metsci.glimpse.layout;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
@@ -138,5 +140,28 @@ public class GlimpseLayoutCache<D>
         }
 
         return true;
+    }
+
+    public static interface GlimpseLayoutPredicate
+    {
+        public boolean matches( List<GlimpseTarget> stack );
+    }
+
+    /**
+     * @return all keys in the cache which match the provided predicate
+     */
+    public Collection<D> getMatching( GlimpseLayoutPredicate predicate )
+    {
+        ArrayList<D> acum = Lists.newArrayList( );
+
+        for ( List<GlimpseTarget> key : map.keySet( ) )
+        {
+            if ( predicate.matches( key ) )
+            {
+                acum.add( map.get( key ).second( ) );
+            }
+        }
+
+        return acum;
     }
 }

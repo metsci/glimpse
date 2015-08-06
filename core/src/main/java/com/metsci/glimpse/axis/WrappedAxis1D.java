@@ -42,12 +42,19 @@ public class WrappedAxis1D extends Axis1D
 {
     private double minWrapVal;
     private double maxWrapVal;
-    
-    public WrappedAxis1D( double minWrapVal, double maxWrapVal ) {
+
+    public WrappedAxis1D( WrappedAxis1D axis )
+    {
+        this( axis, axis.minWrapVal, axis.maxWrapVal );
+    }
+
+    public WrappedAxis1D( double minWrapVal, double maxWrapVal )
+    {
         this( null, minWrapVal, maxWrapVal );
     }
-    
-    public WrappedAxis1D( Axis1D parent, double minWrapVal, double maxWrapVal ) {
+
+    public WrappedAxis1D( Axis1D parent, double minWrapVal, double maxWrapVal )
+    {
         super( parent );
         this.minWrapVal = minWrapVal;
         this.maxWrapVal = maxWrapVal;
@@ -62,22 +69,22 @@ public class WrappedAxis1D extends Axis1D
     {
         return maxWrapVal;
     }
-    
+
     public void setWrapMin( double min )
     {
         this.minWrapVal = min;
     }
-    
+
     public void setWrapMax( double max )
     {
         this.maxWrapVal = max;
     }
-    
+
     public double getWrapSpan( )
     {
         return getWrapMax( ) - getWrapMin( );
     }
-    
+
     public double getWrappedValue( double value )
     {
         return getWrappedValue( value, false );
@@ -92,12 +99,12 @@ public class WrappedAxis1D extends Axis1D
     {
         return minWrapVal + getWrappedMod( value, roundUp );
     }
-    
+
     public double getWrappedMod( double value )
     {
         return getWrappedMod( value, false );
     }
-    
+
     /**
      * @param value the linear axis value to convert
      * @param roundUp if true, values on the seam will return getWrapMax( ) instead of getWrapMin( )
@@ -109,5 +116,11 @@ public class WrappedAxis1D extends Axis1D
         double v = value - minWrapVal; // shift minWrapVal to 0
         double mod = v % span;
         return mod + ( ( mod == 0 && roundUp ) || mod < 0 ? span : 0 );
+    }
+
+    @Override
+    public Axis1D clone( )
+    {
+        return new WrappedAxis1D( this );
     }
 }

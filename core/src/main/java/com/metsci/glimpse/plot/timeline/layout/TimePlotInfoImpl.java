@@ -243,7 +243,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
     }
 
     @Override
-    public GlimpseLayout getBaseLayout( )
+    public GlimpseAxisLayout2D getBaseLayout( )
     {
         return info.getBaseLayout( );
     }

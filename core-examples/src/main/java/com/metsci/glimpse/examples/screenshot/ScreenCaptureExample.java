@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.screenshot;
 
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.context.TargetStackUtil.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -34,7 +34,8 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
-import com.metsci.glimpse.axis.factory.ConditionalAxisFactory2D;
+import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
+import com.metsci.glimpse.axis.factory.ConditionalStartsWithAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
@@ -100,7 +101,7 @@ public class ScreenCaptureExample implements GlimpseLayoutProvider
         // axes would then be linked with the onscreen axes.
         GlimpseTargetStack stack = newTargetStack( offscreenCanvas );
         AxisFactory2D factory = new FixedAxisFactory2D( 0, 1000, 0, 1000 );
-        plot.setAxisFactory( new ConditionalAxisFactory2D( stack, factory ) );
+        plot.setAxisFactory( new ConditionalEndsWithAxisFactory2D( stack, factory ) );
 
         // add a mouse listener which takes a screenshot whenever the mouse wheel button is pressed
         plot.addGlimpseMouseListener( new GlimpseMouseAdapter( )

@@ -94,8 +94,8 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
 
         // don't let the user zoom out too far (especially important with wrapped axes
         // since this will cause the scene to be painted many times)
-        plot.getAxis( ).getAxisX( ).setMaxSpan( 4000 );
-        plot.getAxis( ).getAxisY( ).setMaxSpan( 4000 );
+        plot.getAxis( ).getAxisX( ).setMaxSpan( 3000 );
+        plot.getAxis( ).getAxisY( ).setMaxSpan( 3000 );
 
         // remove the heat map painter from the plot and instead add it to a WrappedPainter
         // which is then added to the plot
@@ -129,5 +129,4 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
 
         return plot;
     }
-
 }

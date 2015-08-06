@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.examples.animated;
 
+import static java.lang.Math.*;
+
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.texture.FloatTexture2D;
-import com.metsci.glimpse.gl.texture.FloatTexture2D.MutatorFloat2D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
@@ -41,9 +41,10 @@ import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.shader.SampledColorScaleShader;
-
-import static java.lang.Math.*;
+import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D;
 
 /**
  * Demonstrates dynamically updating the data stored in a texture.
@@ -132,7 +133,7 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
             public void run( )
             {
                 // allocate a texture
-                FloatTexture2D data = setupTexture( );
+                FloatTextureProjected2D data = setupTexture( );
 
                 // create a mutator which will periodically modify the data stored in the texture
                 MutatorFloat2D mutator = setupMutator( data );
@@ -169,18 +170,17 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
         return plot;
     }
 
-    static FloatTexture2D setupTexture( )
+    static FloatTextureProjected2D setupTexture( )
     {
         int n = 200;
-        double[] min = new double[] { -1, -1 };
-        double[] max = new double[] { 1, 1 };
 
-        FloatTexture2D data = new FloatTexture2D( min, max, n, n, false );
+        FloatTextureProjected2D data = new FloatTextureProjected2D( n, n, false );
+        data.setProjection( new FlatProjection( -1, 1, -1, 1 ) );
 
         return data;
     }
 
-    static MutatorFloat2D setupMutator( FloatTexture2D data )
+    static MutatorFloat2D setupMutator( FloatTextureProjected2D data )
     {
         MutatorFloat2D editor = new MutatorFloat2D( )
         {
@@ -188,14 +188,14 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
             int fr = 0;
 
             @Override
-            public void mutate( FloatBuffer data, double[] min, double[] max, int[] dim )
+            public void mutate( FloatBuffer data, int dataSizeX, int dataSizeY )
             {
                 data.clear( );
-                for ( int i = 0; i < dim[0]; i++ )
-                    for ( int j = 0; j < dim[1]; j++ )
+                for ( int i = 0; i < dataSizeX; i++ )
+                    for ( int j = 0; j < dataSizeY; j++ )
                     {
-                        double x0 = 2 * PI * i / dim[0];
-                        double x1 = 2 * PI * j / dim[1];
+                        double x0 = 2 * PI * i / dataSizeX;
+                        double x1 = 2 * PI * j / dataSizeY;
                         data.put( ( float ) ( 1000 * ( abs( sin( x0 + w * fr ) ) * ( sin( x0 - w * fr ) * sin( 8 * x0 + w * fr ) * cos( -8 * x1 - w * fr ) + abs( sin( 24 * x1 ) ) / 3 ) ) ) );
                     }
                 fr++;

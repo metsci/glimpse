@@ -54,6 +54,18 @@ public class TargetStackUtil
     {
         return newTargetStack( ).push( stack );
     }
+    
+    /**
+     * Creates a new GlimpseTargetStack which is an exact copy of the given stack
+     * and is unmodifiable.
+     *
+     * @param stack the stack to copy
+     * @return a deep copy of the provided stack
+     */
+    public static GlimpseTargetStack newUnmodifiableTargetStack( GlimpseTargetStack stack )
+    {
+        return new UnmodifiableTargetStack( newTargetStack( ).push( stack ) );
+    }
 
     /**
      * Creates a new target stack which is the concatenation of the provided GlimpseTargets.
@@ -97,6 +109,44 @@ public class TargetStackUtil
         }
 
         return true;
+    }
+    
+    /**
+     * Returns true if the query target stack contains the provided target.
+     * 
+     * @param query the GlimpseTargetStack to investigate
+     * @param target the GlimpseTarget to look for in the query stack
+     * @return true if the query stack contains the target
+     */
+    public static boolean contains( GlimpseTargetStack query, GlimpseTarget target )
+    {
+        Iterator<GlimpseTarget> queryIter = query.getTargetList( ).iterator( );
+
+        while ( queryIter.hasNext( ) )
+        {
+            GlimpseTarget queryTarget = queryIter.next( );
+
+            if ( queryTarget.equals( target ) ) return true;
+        }
+
+        return false;
+    }
+    
+    /**
+     * 
+     * @return true if either target stack contain a GlimpseTarget in common
+     */
+    public static boolean intersects( GlimpseTargetStack query1, GlimpseTargetStack query2 )
+    {
+        for ( GlimpseTarget target1 : query1.getTargetList( ) )
+        {
+            for ( GlimpseTarget target2 : query2.getTargetList( ) )
+            {
+                if ( target1.equals( target2 ) ) return true;
+            }
+        }
+        
+        return false;
     }
 
     /**

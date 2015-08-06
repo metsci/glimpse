@@ -27,9 +27,8 @@
 package com.metsci.glimpse.axis;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -101,8 +100,8 @@ public class Axis1D
     protected double absoluteMin;
     protected double absoluteMax;
 
-    protected List<AxisListener1D> listeners;
-    protected List<Axis1D> children;
+    protected Set<AxisListener1D> listeners;
+    protected Set<Axis1D> children;
     protected Axis1D parentAxis;
 
     protected Axis1D orthogonalAxis;
@@ -122,8 +121,8 @@ public class Axis1D
 
     protected void initialize( Axis1D parent )
     {
-        this.children = new CopyOnWriteArrayList<Axis1D>( );
-        this.listeners = new CopyOnWriteArrayList<AxisListener1D>( );
+        this.children = new CopyOnWriteArraySet<Axis1D>( );
+        this.listeners = new CopyOnWriteArraySet<AxisListener1D>( );
 
         this.setDefaults( );
         this.setParent( parent );
@@ -168,9 +167,8 @@ public class Axis1D
 
     public void setParent( Axis1D newParent, boolean duplicateChild )
     {
-        // in the special case that we are unlinking from our parent
-        // remove ourselves from the parent's list of axis listeners
-        if ( this.parentAxis != null && newParent == null )
+        // unlink from our current parent
+        if ( this.parentAxis != null )
         {
             this.parentAxis.removeChildAxis( this );
         }
@@ -513,7 +511,7 @@ public class Axis1D
         if ( !this.initialized && this.axisSizePixels > 0 )
         {
             this.initialized = true;
-            this.requestAxisUpdateUp( );
+            this.broadcastAxisUpdateUp( );
         }
     }
 
@@ -890,14 +888,14 @@ public class Axis1D
      */
     protected void updateAspectRatio( Axis1D updated, double aspectRatio, Set<Axis1D> visited )
     {
+        if ( !isInitialized( ) ) return;
+        
         this.updateAspectRatio( updated, aspectRatio );
         this.broadcastAxisUpdateUp( this, visited );
     }
 
     protected void updateAspectRatio( Axis1D updated, double aspectRatio )
     {
-        if ( !isInitialized( ) ) return;
-
         double oldPixelsPerValue = getPixelsPerValue( );
         double newPixelsPerValue = updated.getPixelsPerValue( ) * aspectRatio;
 
@@ -958,6 +956,12 @@ public class Axis1D
     {
         this.updateMode = axis.getUpdateMode( );
 
+        this.minDiff = axis.getMinSpan( );
+        this.maxDiff = axis.getMaxSpan( );
+        
+        this.constrainMinDiff = axis.isMinSpanConstrained( );
+        this.constrainMaxDiff = axis.isMaxSpanConstrained( );
+        
         this.lockMin = axis.isLockMin( );
         this.lockMax = axis.isLockMax( );
 
@@ -1064,17 +1068,10 @@ public class Axis1D
     {
         return ( maxValue - minValue ) / 2.0 + minValue;
     }
-
-    protected void requestAxisUpdateUp( )
+    
+    protected void broadcastAxisUpdateUp( )
     {
-        if ( this.parentAxis != null )
-        {
-            parentAxis.requestAxisUpdateUp( );
-        }
-        else
-        {
-            axisUpdated( this, new HashSet<Axis1D>( ) );
-        }
+        broadcastAxisUpdateUp( this, new HashSet<Axis1D>( ) );
     }
 
     // walk up the chain of parents until we reach the top level

@@ -1160,7 +1160,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         GlimpseAxisLayout2D layout2D = plotInfo.getLayout( );
         layout2D.setEventConsumer( false );
 
-        GlimpseAxisLayout2D plotLayout = new GlimpseAxisLayout2D( layout2D, String.format( "%s-plot", plotInfo.getId( ) ), layout2D.getAxis( ) );
+        GlimpseAxisLayout2D plotLayout = new GlimpseAxisLayout2D( layout2D, String.format( "%s-plot", plotInfo.getId( ) ) );
         plotLayout.setEventConsumer( false );
 
         BackgroundPainter backgroundPainter = new BackgroundPainter( false );
