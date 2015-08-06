@@ -295,7 +295,7 @@ public class GenericSorting extends Object
 
     public static abstract class Swapper
     {
-        abstract void swap( int a, int b );
+        public abstract void swap( int a, int b );
 
         protected void vecswap( int a, int b, int n )
         {
