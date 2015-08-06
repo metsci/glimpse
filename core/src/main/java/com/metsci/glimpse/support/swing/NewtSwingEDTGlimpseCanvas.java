@@ -149,10 +149,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                         // (the canvas can report incorrect/transient sizes during this time)
                         if ( !glCanvas.isShowing( ) ) return;
 
-                        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                        {
-                            layout.layoutTo( getGlimpseContext( ) );
-                        }
+                        layoutTo( );
                     }
                 } );
             }
@@ -206,5 +203,15 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 return true;
             }
         } );
+    }
+    
+    public void layoutTo( )
+    {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+        
+        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+        {
+            layout.layoutTo( getGlimpseContext( ) );
+        }
     }
 }
