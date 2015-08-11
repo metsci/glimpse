@@ -37,7 +37,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.layout.GlimpseLayoutCache.GlimpseLayoutPredicate;
+import com.metsci.glimpse.layout.matcher.TargetStackMatcher;
 
 /**
  * A GlimpseLayout which can provide two axes (an x or
@@ -206,10 +206,10 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
 
         return null;
     }
-    
-    public Collection<Axis2D> getAxis( GlimpseLayoutPredicate predicate )
+
+    public Collection<Axis2D> getAxis( TargetStackMatcher matcher )
     {
-        return this.cache.getMatching( predicate );
+        return this.cache.getMatching( matcher );
     }
 
     protected AxisFactory2D getAxisFactory0( GlimpseTargetStack stack )
@@ -249,7 +249,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
     {
         return getCachedAxis0( parent_axis, factory, context.getTargetStack( ) );
     }
-    
+
     protected Axis2D getNewAxis0( Axis2D parent_axis, AxisFactory2D factory, GlimpseTargetStack stack )
     {
         if ( factory != null )

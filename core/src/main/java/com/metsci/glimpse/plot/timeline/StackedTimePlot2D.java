@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +44,7 @@ import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.Constraint;
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
@@ -104,7 +104,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     // timeline painters and listeners
     protected AxisMouseListener1D timelineMouseListener;
     protected TooltipPainter tooltipPainter;
-    
+
     // painter which highlights selected time region in blue
     protected SelectedTimeRegionPainter selectedTimePainter;
 
@@ -122,7 +122,6 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     protected List<PlotMouseListener> plotMouseListeners;
 
-    
     // default settings for TimelineMouseListeners of new plots
     protected volatile boolean allowPanX = true;
     protected volatile boolean allowPanY = true;
@@ -130,18 +129,18 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected volatile boolean allowZoomY = true;
     protected volatile boolean allowSelectionLock = true;
     protected volatile boolean currentTimeLock;
-    
+
     // the size of the label layout area in pixels
     protected volatile int labelLayoutSize = 30;
     protected volatile boolean showLabelLayout = false;
     protected volatile boolean showTimeline = true;
-    
+
     // epoch encapsulating the absolute time which maps to value 0 on the timeline
     protected volatile Epoch epoch;
-    
+
     // the selected plot row
     protected volatile PlotInfo selectedLayout;
-    
+
     public StackedTimePlot2D( )
     {
         this( Orientation.VERTICAL, Epoch.posixEpoch( ) );
@@ -199,17 +198,17 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.defaultTimelineInfo = this.createTimeline( );
         this.initializeOverlayPainters( );
     }
-    
+
     public void setTimeAxisLabelHandler( TimeAxisLabelHandler handler )
     {
         this.timeTickHandler = handler;
     }
-    
+
     public TimeAxisLabelHandler getTimeAxisLabelHandler( )
     {
         return this.timeTickHandler;
     }
-    
+
     public TimelineInfo getDefaultTimeline( )
     {
         return this.defaultTimelineInfo;
@@ -362,8 +361,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.lock.unlock( );
         }
     }
-    
-    
+
     /**
      * Returns the time plot handle for the plot identified via its unique string identifier.
      * 
@@ -823,7 +821,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             this.lock.unlock( );
         }
     }
-    
+
     /**
      * Creates a labeled timeline (with tick marks and date/time labels). This method may
      * be called multiple times with different time zones if multiple timezone labels are
@@ -833,7 +831,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         return createTimeline( UUID.randomUUID( ), TimeZone.getTimeZone( "GMT-0:00" ) );
     }
-    
+
     public TimelineInfo createTimeline( Object id, TimeZone timeZone )
     {
         this.lock.lock( );
@@ -841,9 +839,9 @@ public class StackedTimePlot2D extends StackedPlot2D
         {
             PlotInfo info = createPlot( id );
             TimelineInfo timelineInfo = new TimelineInfo( this, info );
-        
+
             timelineInfo.setTimeZone( timeZone );
-            
+
             this.stackedPlots.put( timelineInfo.getId( ), timelineInfo );
             if ( isAutoValidate( ) ) this.validate( );
 
@@ -1041,40 +1039,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         axis.addTag( MAX_TIME, 10 );
         axis.addTag( CURRENT_TIME, 10 );
 
-        axis.addConstraint( new Constraint( )
-        {
-            @Override
-            public void applyConstraint( TaggedAxis1D axis )
-            {
-                Tag minTag = axis.getTag( MIN_TIME );
-                Tag maxTag = axis.getTag( MAX_TIME );
-                Tag currentTag = axis.getTag( CURRENT_TIME );
-
-                double minValue = minTag.getValue( );
-                double maxValue = maxTag.getValue( );
-                double currentValue = currentTag.getValue( );
-
-                if ( minValue > maxValue )
-                {
-                    minTag.setValue( maxValue );
-                }
-
-                if ( currentValue < minValue )
-                {
-                    currentTag.setValue( minValue );
-                }
-                else if ( currentValue > maxValue )
-                {
-                    currentTag.setValue( maxValue );
-                }
-            }
-
-            @Override
-            public String getName( )
-            {
-                return "order";
-            }
-        } );
+        axis.addConstraint( new OrderedConstraint( "order", Arrays.asList( MIN_TIME, CURRENT_TIME, MAX_TIME ) ) );
     }
 
     @Override
@@ -1122,7 +1087,7 @@ public class StackedTimePlot2D extends StackedPlot2D
             timePlot.getLabelPainter( ).setVerticalPosition( VerticalPosition.Center );
             timePlot.getLabelPainter( ).setHorizontalPosition( HorizontalPosition.Center );
         }
-        
+
         // the TimeAxisMouseListener1D for all plots is attached to the underlay layout
         // thus we need to let events fall through if they are not handled
         timePlot.getLayout( ).setEventConsumer( false );

@@ -284,7 +284,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
                 if ( s != null && m != null && s.getValue( ) != m.getValue( ) )
                 {
                     s.setValue( m.getValue( ) );
-                    axis.validateTags( );
+                    plot.getTimeAxis( ).validateTags( );
                 }
             }
         } );

@@ -39,6 +39,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.layout.matcher.TargetStackMatcher;
 import com.metsci.glimpse.util.Pair;
 
 /**
@@ -142,21 +143,16 @@ public class GlimpseLayoutCache<D>
         return true;
     }
 
-    public static interface GlimpseLayoutPredicate
-    {
-        public boolean matches( List<GlimpseTarget> stack );
-    }
-
     /**
      * @return all keys in the cache which match the provided predicate
      */
-    public Collection<D> getMatching( GlimpseLayoutPredicate predicate )
+    public Collection<D> getMatching( TargetStackMatcher matcher )
     {
         ArrayList<D> acum = Lists.newArrayList( );
 
         for ( List<GlimpseTarget> key : map.keySet( ) )
         {
-            if ( predicate.matches( key ) )
+            if ( matcher.matches( key ) )
             {
                 acum.add( map.get( key ).second( ) );
             }

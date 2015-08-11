@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.layout;
 
+import java.util.Collection;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
@@ -36,6 +38,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.layout.matcher.TargetStackMatcher;
 
 /**
  * A GlimpseLayout which can provide axes to its child
@@ -206,6 +209,11 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         return null;
     }
 
+    public Collection<Axis1D> getAxis( TargetStackMatcher matcher )
+    {
+        return this.cache.getMatching( matcher );
+    }
+
     protected AxisFactory1D getAxisFactory0( GlimpseTargetStack stack )
     {
         for ( GlimpseTarget target : stack.getTargetList( ) )
@@ -241,7 +249,6 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         if ( newAxis == null )
         {
             newAxis = getNewAxis0( parent_axis, factory, stack );
-
             newAxis.setSizePixels( getSize( stack.getBounds( ) ) );
             cache.setValue( stack, newAxis );
         }

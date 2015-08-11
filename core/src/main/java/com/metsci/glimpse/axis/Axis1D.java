@@ -68,18 +68,7 @@ public class Axis1D
     protected double selectionCenterValue;
     protected double selectionSizeValue;
     protected boolean selectionLocked;
-
-    protected double mousePosValue;
-
-    protected double minValue;
-    protected double maxValue;
-    protected double pixelsPerValue;
-
-    protected double minValue_lastValid;
-    protected double maxValue_lastValid;
-
-    protected UpdateMode updateMode;
-
+    
     protected boolean lockMin;
     protected double lockMinValue;
     protected boolean lockMax;
@@ -89,16 +78,28 @@ public class Axis1D
     protected double minDiff;
     protected boolean constrainMaxDiff;
     protected double maxDiff;
+    
+    protected double absoluteMin;
+    protected double absoluteMax;
 
+    protected double minValue;
+    protected double maxValue;
+    protected double pixelsPerValue;
+    
+    protected double mousePosValue;
+    
+    protected UpdateMode updateMode;
+    
     //// axis internal state fields ////
 
     // these values store information about the
     // configuration or state of the axis
 
+    protected double minValue_lastValid;
+    protected double maxValue_lastValid;
+
     protected int axisSizePixels;
     protected boolean initialized;
-    protected double absoluteMin;
-    protected double absoluteMax;
 
     protected Set<AxisListener1D> listeners;
     protected Set<Axis1D> children;
@@ -955,16 +956,16 @@ public class Axis1D
     protected void axisUpdated0( Axis1D axis )
     {
         this.updateMode = axis.getUpdateMode( );
+        
+        this.mousePosValue = axis.getMouseValue( );
 
         this.minDiff = axis.getMinSpan( );
         this.maxDiff = axis.getMaxSpan( );
-        
         this.constrainMinDiff = axis.isMinSpanConstrained( );
         this.constrainMaxDiff = axis.isMaxSpanConstrained( );
         
         this.lockMin = axis.isLockMin( );
         this.lockMax = axis.isLockMax( );
-
         this.lockMinValue = axis.getLockMin( );
         this.lockMaxValue = axis.getLockMax( );
 
