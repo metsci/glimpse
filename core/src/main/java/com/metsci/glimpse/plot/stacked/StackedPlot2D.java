@@ -469,6 +469,16 @@ public class StackedPlot2D extends GlimpseLayout
             this.lock.unlock( );
         }
     }
+    
+    public Axis1D getCommonAxis( Axis2D axis )
+    {
+        return orient == HORIZONTAL ? axis.getAxisY( ) : axis.getAxisX( );
+    }
+
+    public Axis1D getOrthogonalAxis( Axis2D axis )
+    {
+        return orient == HORIZONTAL ? axis.getAxisX( ) : axis.getAxisY( );
+    }
 
     @Override
     public String toString( )
@@ -494,16 +504,6 @@ public class StackedPlot2D extends GlimpseLayout
         Collections.sort( sortedList, PlotInfoImpl.getComparator( ) );
 
         return sortedList;
-    }
-
-    protected Axis1D getCommonAxis( Axis2D axis )
-    {
-        return orient == HORIZONTAL ? axis.getAxisY( ) : axis.getAxisX( );
-    }
-
-    protected Axis1D getOrthogonalAxis( Axis2D axis )
-    {
-        return orient == HORIZONTAL ? axis.getAxisX( ) : axis.getAxisY( );
     }
 
     // must be called while holding lock

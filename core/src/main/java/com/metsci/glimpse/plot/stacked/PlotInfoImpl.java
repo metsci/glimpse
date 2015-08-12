@@ -165,25 +165,25 @@ public class PlotInfoImpl implements PlotInfo
     @Override
     public Axis1D getCommonAxis( GlimpseTargetStack stack )
     {
-        return parent.getCommonAxis( layout.getAxis( stack ) );
+        return parent.getCommonAxis( getLayout( ).getAxis( stack ) );
     }
 
     @Override
     public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
     {
-        return parent.getOrthogonalAxis( layout.getAxis( stack ) );
+        return parent.getOrthogonalAxis( getLayout( ).getAxis( stack ) );
     }
 
     @Override
     public Axis1D getCommonAxis( )
     {
-        return parent.getCommonAxis( layout.getAxis( ) );
+        return parent.getCommonAxis( this.layout.getAxis( ) );
     }
 
     @Override
     public Axis1D getOrthogonalAxis( )
     {
-        return parent.getOrthogonalAxis( layout.getAxis( ) );
+        return parent.getOrthogonalAxis( this.layout.getAxis( ) );
     }
 
     @Override

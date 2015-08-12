@@ -317,7 +317,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
     @Override
     public TaggedAxis1D getCommonAxis( GlimpseTargetStack stack )
     {
-        return ( TaggedAxis1D ) super.getCommonAxis( stack );
+        return ( TaggedAxis1D ) parent.getCommonAxis( getLayout( ).getAxis( stack ) );
     }
 
     @Override
