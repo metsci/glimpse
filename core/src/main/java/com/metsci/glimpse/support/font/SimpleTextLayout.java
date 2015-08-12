@@ -280,7 +280,7 @@ public class SimpleTextLayout
             firstIdx = trimLeft( text, firstIdx );
             lastIdx = trimRight( text, lastIdx );
 
-            if ( lastIdx <= firstIdx )
+            if ( lastIdx < firstIdx )
             {
                 continue;
             }

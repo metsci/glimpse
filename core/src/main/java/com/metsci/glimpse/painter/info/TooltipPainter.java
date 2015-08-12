@@ -60,22 +60,22 @@ public class TooltipPainter extends SimpleTextPainter
     protected boolean isFixedWidth = false;
     protected int fixedWidth = 50;
     protected int borderSize = 4;
-    protected float lineSpacing = 2;
+    protected int lineSpacing = 2;
     protected boolean breakOnEol = true;
     protected int offsetX = 14;
     protected int offsetY = -10;
     protected boolean clampToScreenEdges = true;
+    protected int iconSpacing = 2;
+    protected int textIconSpacing = 4;
 
     protected SimpleTextLayout textLayout;
     protected BreakIterator breakIterator;
     protected List<TextBoundingBox> lines;
-    protected Bounds linesBounds;
 
     protected TextureAtlas atlas;
     protected List<Object> iconIds;
     protected List<ImageData> icons;
     protected List<float[]> iconColors;
-    protected boolean noIcons = false;
     protected float iconSize;
 
     protected boolean wrapTextAroundIcon = false;
@@ -87,7 +87,7 @@ public class TooltipPainter extends SimpleTextPainter
 
     public TooltipPainter( TextureAtlas atlas )
     {
-        this.breakIterator = BreakIterator.getWordInstance( );
+        this.breakIterator = BreakIterator.getCharacterInstance( );
         this.paintBackground = true;
         this.paintBorder = true;
         this.atlas = atlas;
@@ -107,7 +107,6 @@ public class TooltipPainter extends SimpleTextPainter
         this.iconIds = Collections.singletonList( iconId );
         this.iconColors = null;
         this.icons = null; // signal that the icons should be recalculated
-        this.lines = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -120,7 +119,6 @@ public class TooltipPainter extends SimpleTextPainter
         this.iconIds = Lists.newArrayList( iconIds );
         this.iconColors = null;
         this.icons = null; // signal that the icons should be recalculated
-        this.lines = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -213,7 +211,7 @@ public class TooltipPainter extends SimpleTextPainter
         return this;
     }
 
-    public synchronized TooltipPainter setLineSpacing( float lineSpacing )
+    public synchronized TooltipPainter setLineSpacing( int lineSpacing )
     {
         this.lineSpacing = lineSpacing;
         this.textLayout = null; // signal that textLayout should be recreated
@@ -232,6 +230,12 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.text = text;
         this.lines = null; // signal that layout should be recalculated
+        return this;
+    }
+
+    public synchronized TooltipPainter setTextIconSpacing( int textIconSpacing )
+    {
+        this.textIconSpacing = textIconSpacing;
         return this;
     }
 
@@ -255,6 +259,11 @@ public class TooltipPainter extends SimpleTextPainter
         return this.isFixedWidth;
     }
 
+    public synchronized int getTextIconSpacing( )
+    {
+        return this.textIconSpacing;
+    }
+
     /**
      * Whether to force a break on the end of line characters (\r \f \n).
      */
@@ -267,7 +276,7 @@ public class TooltipPainter extends SimpleTextPainter
      * The spacing between the bottom (descent) of one line of text to the top
      * (ascent) of the next line.
      */
-    public synchronized float getLineSpacing( )
+    public synchronized int getLineSpacing( )
     {
         return lineSpacing;
     }
@@ -279,14 +288,14 @@ public class TooltipPainter extends SimpleTextPainter
         textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
-        if ( ( Float ) iconSize != null && iconSize != 0 && !noIcons ) textLayout.setAscent( iconSize );
-        iconSize = getIconSize( );
+        if ( iconSize == 0 ) iconSize = ( float ) textLayout.getAscent( );
+        textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
+        lines = textLayout.getLines( );
     }
 
     protected float getIconSize( )
     {
-        //XXX another spacing heuristic which it would be nice to eliminate
-        return ( float ) textLayout.getAscent( );
+        return iconSize;
     }
 
     public void setIconSize( float size )
@@ -294,63 +303,14 @@ public class TooltipPainter extends SimpleTextPainter
         iconSize = size;
     }
 
-    protected float getIconSpacing( int i )
+    protected float getIconSpacing( )
     {
-        //XXX another spacing heuristic which it would be nice to eliminate
-        Object iconId = iconIds != null && i < iconIds.size( ) ? iconIds.get( i ) : null;
-
-        float indent = ( float ) ( textLayout.getAscent( ) + borderSize );
-
-        if ( noIcons )
-        {
-            return 0;
-        }
-        else if ( iconId != null )
-        {
-            return indent;
-        }
-        else if ( iconId == null && !wrapTextAroundIcon )
-        {
-            return indent;
-        }
-        else
-        {
-            return 0;
-        }
+        return iconSpacing;
     }
 
-    protected void updateLayout( )
+    public void setIconSpacing( int i )
     {
-        textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
-        lines = textLayout.getLines( );
-
-        float minX = Float.POSITIVE_INFINITY;
-        float minY = Float.POSITIVE_INFINITY;
-        float maxX = Float.NEGATIVE_INFINITY;
-        float maxY = Float.NEGATIVE_INFINITY;
-
-        if ( !lines.isEmpty( ) )
-        {
-            for ( int i = 0; i < lines.size( ); i++ )
-            {
-                TextBoundingBox line = lines.get( i );
-
-                float iconsize = getIconSpacing( i );
-
-                minX = Math.min( minX, line.getMinX( ) );
-                minY = Math.min( minY, line.getMinY( ) );
-                maxX = Math.max( maxX, line.getMaxX( ) + iconsize );
-                maxY = Math.max( maxY, line.getMaxY( ) );
-            }
-        }
-
-        double overallMinX = minX - borderSize;
-        double overallMaxX = maxX + borderSize;
-        //XXX subtracting .5 of the descent is just a heuristic to make the spacing
-        //XXX at the top and bottom of the bounding box look more uniform
-        double overallMinY = minY - textLayout.getDescent( ) * 0.5 - borderSize;
-        double overallMaxY = maxY + borderSize;
-        linesBounds = new Bounds( overallMinX, overallMaxX, overallMinY, overallMaxY );
+        iconSpacing = i;
     }
 
     protected void loadIcons( )
@@ -368,12 +328,10 @@ public class TooltipPainter extends SimpleTextPainter
 
         this.icons = Lists.newArrayListWithCapacity( size );
 
-        this.noIcons = true;
         for ( int i = 0; i < size; i++ )
         {
             Object iconId = this.iconIds.get( i );
             ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
-            if ( icon != null ) noIcons = false;
             this.icons.add( icon );
         }
     }
@@ -387,7 +345,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         double x = drawInPixelCoords ? this.x : axis.getAxisX( ).valueToScreenPixelUnits( this.x );
-        double y = drawInPixelCoords ? this.y : axis.getAxisY( ).getSizePixels( ) - axis.getAxisY( ).valueToScreenPixelUnits( this.y );
+        double y = drawInPixelCoords ? this.y : axis.getAxisY( ).valueToScreenPixelUnits( this.y );
 
         if ( icons == null )
         {
@@ -399,37 +357,14 @@ public class TooltipPainter extends SimpleTextPainter
             updateTextRenderer( );
         }
 
-        if ( textLayout == null && textRenderer != null )
+        if ( text != null && textLayout == null && textRenderer != null )
         {
-            if ( text == null ) setText( " " );
             updateTextLayout( );
         }
-
-        if ( lines == null && textLayout != null && text != null )
-        {
-            updateLayout( );
-        }
-
-        if ( textRenderer == null || lines == null ) return;
 
         GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-
-        double clampX = 0;
-        double clampY = 0;
-        if ( clampToScreenEdges )
-        {
-            double maxX = x + linesBounds.maxX + offsetX;
-            if ( maxX > width ) clampX = width - maxX;
-            double minX = x + linesBounds.minX + offsetX;
-            if ( minX < 0 ) clampX = -minX;
-
-            double maxY = height - y + linesBounds.maxY + offsetY;
-            if ( maxY > height ) clampY = height - maxY;
-            double minY = height - y + linesBounds.minY + offsetY;
-            if ( minY < 0 ) clampY = -minY;
-        }
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
@@ -440,8 +375,33 @@ public class TooltipPainter extends SimpleTextPainter
         gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL2.GL_BLEND );
 
+        //calculate largest height of box
+        double iconHeight = 0;
+        if ( icons != null ) iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
+        double textHeight = 0;
+        if ( lines != null ) textHeight = ( textLayout.getAscent( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
+        int boundingHeight = ( int ) ( borderSize * 2 + Math.max( iconHeight, textHeight ) );
+
+        //calculate largest width of box
+        float textLength = 0;
+        if ( lines != null ) for ( int k = 0; k < lines.size( ); k++ )
+            textLength = Math.max( textLength, lines.get( 0 ).width );
+        int boundingWidth = ( int ) ( borderSize * 2 + iconSize + textLength );
+        if ( iconIds != null && !iconIds.isEmpty( ) && lines != null ) boundingWidth += textIconSpacing;
+
+        double clampX = offsetX, clampY = offsetY;
+        if ( clampToScreenEdges )
+        {
+            if ( x + boundingWidth + offsetX > bounds.getWidth( ) ) clampX = bounds.getWidth( ) - boundingWidth - x;
+            if ( x + offsetX < 0 ) clampX = -x;
+            if ( y + offsetY > bounds.getHeight( ) ) clampY = bounds.getHeight( ) - y;
+            if ( boundingHeight > y + offsetY ) clampY = boundingHeight - y;
+        }
+
+        //paint background and border 
         if ( this.paintBackground || this.paintBorder )
         {
+
             if ( this.paintBackground )
             {
                 // Draw Text Background
@@ -450,7 +410,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_QUADS );
                 try
                 {
-                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
+                    borderVertices( gl, boundingHeight, boundingWidth, x + clampX, y + clampY );
                 }
                 finally
                 {
@@ -467,7 +427,7 @@ public class TooltipPainter extends SimpleTextPainter
                 gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
-                    borderVertices( gl, height, clampX + offsetX, clampY + offsetY, x, y );
+                    borderVertices( gl, boundingHeight, boundingWidth, x + clampX, y + clampY );
                 }
                 finally
                 {
@@ -475,64 +435,58 @@ public class TooltipPainter extends SimpleTextPainter
                 }
             }
         }
-
         gl.glDisable( GL2.GL_BLEND );
 
         // draw text
-        GlimpseColor.setColor( textRenderer, textColor );
-        textRenderer.beginRendering( width, height );
-        try
+        if ( lines != null && textRenderer != null )
         {
-            for ( int i = 0; i < lines.size( ); i++ )
+            GlimpseColor.setColor( textRenderer, textColor );
+            textRenderer.beginRendering( width, height );
+            try
             {
-                TextBoundingBox line = lines.get( i );
-
-                float iconsize = getIconSpacing( i );
-
-                int posX = ( int ) ( x + line.leftX + iconsize + clampX + offsetX );
-                int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY );
-
-                textRenderer.draw( line.text, posX, posY );
+                double posX = x + iconSize + borderSize;
+                if ( iconIds != null && !iconIds.isEmpty( ) ) posX += textIconSpacing;
+                double posY = y - borderSize - textLayout.getAscent( );
+                double iconPosY = Float.NEGATIVE_INFINITY;
+                if ( wrapTextAroundIcon && icons != null ) iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
+                for ( int i = 0; i < lines.size( ); i++ )
+                {
+                    if ( posY + textLayout.getAscent( ) < iconPosY ) posX = x + borderSize;
+                    textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
+                    posY = posY - lineSpacing - ( textLayout.getAscent( ) );
+                }
             }
-        }
-        finally
-        {
-            textRenderer.endRendering( );
+            finally
+            {
+                textRenderer.endRendering( );
+            }
         }
 
         // draw icon
-        if ( !lines.isEmpty( ) && iconIds != null && !iconIds.isEmpty( ) )
+        if ( iconIds != null && !iconIds.isEmpty( ) )
         {
             atlas.beginRendering( );
             try
             {
+                double posY = y - borderSize - iconSize;
                 for ( int i = 0; i < iconIds.size( ); i++ )
                 {
                     Object iconId = iconIds.get( i );
                     ImageData iconData = icons.get( i );
-                    TextBoundingBox line = lines.get( i );
 
-                    if ( iconId != null && iconData != null && line != null )
+                    if ( iconId != null && iconData != null )
                     {
                         double iconScale = iconSize / ( double ) iconData.getWidth( );
-
-                        int posX = ( int ) ( x + line.leftX + clampX + offsetX );
-                        //XXX another spacing heuristic which it would be nice to eliminate
-                        int posY = ( int ) ( height - y + line.getMinY( ) + clampY + offsetY - textLayout.getDescent( ) * 0.25 );
 
                         float[] color = defaultIconColor;
                         if ( iconColors != null && i < iconColors.size( ) )
                         {
                             float[] iconColor = iconColors.get( i );
-                            if ( iconColor != null )
-                            {
-                                color = iconColor;
-                            }
+                            if ( iconColor != null ) color = iconColor;
                         }
-
                         GlimpseColor.glColor( gl, color );
-
-                        atlas.drawImage( gl, iconId, posX, posY, iconScale, iconScale, 0, iconData.getHeight( ) );
+                        atlas.drawImage( gl, iconId, ( int ) ( x + borderSize + clampX ), ( int ) ( posY + clampY ), iconScale, iconScale, 0, iconData.getHeight( ) );
+                        posY = posY - iconSize - iconSpacing;
                     }
                 }
             }
@@ -543,41 +497,12 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-    protected void borderVertices( GL2 gl, int height, double offsetX, double offsetY, double x, double y )
+    //( x, y ) are the coordinates of the top-left corner of the box 
+    protected void borderVertices( GL2 gl, int height, int width, double x, double y )
     {
-        double posX = x + linesBounds.minX + offsetX;
-        double posY = height - y + linesBounds.minY + offsetY;
-        gl.glVertex2d( posX, posY );
-
-        posX = x + linesBounds.maxX + offsetX;
-        posY = height - y + linesBounds.minY + offsetY;
-        gl.glVertex2d( posX, posY );
-
-        posX = x + linesBounds.maxX + offsetX;
-        posY = height - y + linesBounds.maxY + offsetY;
-        gl.glVertex2d( posX, posY );
-
-        posX = x + linesBounds.minX + offsetX;
-        posY = height - y + linesBounds.maxY + offsetY;
-        gl.glVertex2d( posX, posY );
-    }
-
-    protected static class Bounds
-    {
-        public double minX, maxX, minY, maxY;
-
-        public Bounds( double minX, double maxX, double minY, double maxY )
-        {
-            this.minX = minX;
-            this.maxX = maxX;
-            this.minY = minY;
-            this.maxY = maxY;
-        }
-
-        @Override
-        public String toString( )
-        {
-            return String.format( "%f %f %f %f", minX, maxX, minY, maxY );
-        }
+        gl.glVertex2d( x, y );
+        gl.glVertex2d( x, y - height );
+        gl.glVertex2d( x + width, y - height );
+        gl.glVertex2d( x + width, y );
     }
 }
