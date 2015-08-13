@@ -190,6 +190,11 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
     // then retrieve or create a version of that axis for the current stack and return it
     public Axis2D getAxis( GlimpseTargetStack stack )
     {
+        if ( !stack.getTarget( ).equals( this ) )
+        {
+            throw new AxisNotSetException( String.format( "GlimpseAxisLayout2D %s is not on top of GlimpseTargetStack %s. Cannot provide Axis2D", getName( ), stack ) );
+        }
+        
         AxisFactory2D factory = getAxisFactory0( stack );
 
         for ( GlimpseTarget target : stack.getTargetList( ) )
