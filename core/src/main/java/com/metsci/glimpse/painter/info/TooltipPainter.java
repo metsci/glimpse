@@ -340,6 +340,10 @@ public class TooltipPainter extends SimpleTextPainter
 
     protected void loadIcons( )
     {
+        // needed to force icons to load before getImageData() call
+        atlas.beginRendering( );
+        atlas.endRendering( );
+        
         int size = iconIds == null ? 0 : iconIds.size( );
 
         this.icons = Lists.newArrayListWithCapacity( size );
