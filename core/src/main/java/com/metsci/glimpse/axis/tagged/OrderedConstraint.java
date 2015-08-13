@@ -31,40 +31,68 @@ public class OrderedConstraint extends NamedConstraint
     @Override
     public void applyConstraint( TaggedAxis1D currentAxis, Map<String, Tag> previousTags )
     {
-        String tagIndex = constraintIds.get( 0 );
+        // find a tag (if any) whose value changed from the last time constraints were applied
+        String id = getChangedTagId( currentAxis, previousTags );
 
-        for ( int k = constraintIds.size( ) - 2; k >= 0; k-- )
+        if ( id != null )
         {
-            String temp = constraintIds.get( k );
-            if ( previousTags.get( temp ).getValue( ) < currentAxis.getTag( temp ).getValue( ) ) tagIndex = temp;
-        }
-
-        for ( int k = 1; k < constraintIds.size( ); k++ )
-        {
-            String temp = constraintIds.get( k );
-            if ( previousTags.get( temp ).getValue( ) > currentAxis.getTag( temp ).getValue( ) ) tagIndex = temp;
-        }
-
-        double newVal = currentAxis.getTag( tagIndex ).getValue( );
-        if ( newVal > previousTags.get( tagIndex ).getValue( ) )
-        {
-            for ( int k = 0; k < constraintIds.size( ) - 1; k++ )
+            double currentValue = currentAxis.getTag( id ).getValue( );
+            double previousValue = previousTags.get( id ).getValue( );   
+            boolean valueIncreased = currentValue > previousValue;
+            
+            // if the tag which changed increased in value, bump other tags up
+            // if the tag which changed decreased in value, bump other tags down
+            // (if multiple tags changed, the last changed tag is used to determine the direction)
+            if ( valueIncreased )
             {
-                if ( currentAxis.getTag( constraintIds.get( k ) ).getValue( ) > currentAxis.getTag( constraintIds.get( k + 1 ) ).getValue( ) - buffer )
+                for ( int k = 0; k < constraintIds.size( ) - 1; k++ )
                 {
-                    currentAxis.getTag( constraintIds.get( k + 1 ) ).setValue( currentAxis.getTag( constraintIds.get( k ) ).getValue( ) + buffer );
+                    compareAndSet( currentAxis, k+1, k, buffer );
+                }
+            }
+            else
+            {
+                for ( int k = constraintIds.size( ) - 1; k > 0; k-- )
+                {
+                    compareAndSet( currentAxis, k-1, k, buffer );
                 }
             }
         }
-        else if ( newVal < previousTags.get( tagIndex ).getValue( ) )
+    }
+    
+    protected String getChangedTagId( TaggedAxis1D currentAxis, Map<String, Tag> previousTags )
+    {
+        for ( String id : constraintIds )
         {
-            for ( int k = constraintIds.size( ) - 1; k > 0; k-- )
+            Tag previousTag = previousTags.get( id );
+            Tag currentTag = currentAxis.getTag( id );
+            
+            if ( previousTag != null && currentTag != null && previousTag.getValue( ) != currentTag.getValue( ) )
             {
-                if ( currentAxis.getTag( constraintIds.get( k - 1 ) ).getValue( ) > currentAxis.getTag( constraintIds.get( k ) ).getValue( ) - buffer )
-                {
-                    currentAxis.getTag( constraintIds.get( k - 1 ) ).setValue( currentAxis.getTag( constraintIds.get( k ) ).getValue( ) - buffer );
-                }
+                return id;
             }
+        }
+        
+        return null;
+    }
+    
+    protected void compareAndSet( TaggedAxis1D currentAxis, int firstIndex, int secondIndex, double buffer )
+    {
+        Tag firstTag = currentAxis.getTag( constraintIds.get( firstIndex ) );
+        Tag secondTag = currentAxis.getTag( constraintIds.get( secondIndex ) );
+
+        if ( firstTag == null || secondTag == null ) return;
+        
+        double firstValue = firstTag.getValue( );
+        double secondValue = secondTag.getValue( );
+
+        if ( firstIndex > secondIndex && firstValue < secondValue + buffer )
+        {
+            firstTag.setValue( secondValue + buffer );
+        }
+        else if ( firstIndex < secondIndex && firstValue > secondValue - buffer )
+        {
+            firstTag.setValue( secondValue - buffer );
         }
     }
 }
