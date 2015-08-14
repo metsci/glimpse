@@ -66,6 +66,7 @@ public class SimpleTextLayout
     protected Font font;
     protected FontRenderContext frc;
     protected BreakIterator breaker;
+    protected double lineHeight;
 
     /**
      * The maximum ascent of any character in the font.
@@ -115,11 +116,17 @@ public class SimpleTextLayout
         Rectangle2D rect = font.getMaxCharBounds( frc );
         ascent = ( float ) ( rect.getMaxY( ) - rect.getY( ) );
         descent = ( float ) -rect.getY( );
+        lineHeight = font.getSize( );
 
         setLineSpacing( 0 );
         setBreakOnEol( true );
     }
-
+    
+    public double getLineHeight()
+    {
+        return lineHeight;
+    }
+    
     public double getDescent( )
     {
         return descent;

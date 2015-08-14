@@ -137,7 +137,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setWrapTextAroundIcon( boolean wrap )
     {
         this.wrapTextAroundIcon = wrap;
-        this.lines = null; // signal that layout should be recalculated
+        this.textLayout = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -185,7 +185,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setBorderSize( int size )
     {
         this.borderSize = size;
-        this.lines = null; // signal that layout should be recalculated
+        this.textLayout = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -193,14 +193,14 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.fixedWidth = fixedWidth;
         this.isFixedWidth = true;
-        this.lines = null; // signal that layout should be recalculated
+        this.textLayout = null; // signal that layout should be recalculated
         return this;
     }
 
     public synchronized TooltipPainter setUnlimitedWidth( )
     {
         this.isFixedWidth = false;
-        this.lines = null; // signal that layout should be recalculated
+        this.textLayout = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -229,7 +229,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setText( String text )
     {
         this.text = text;
-        this.lines = null; // signal that layout should be recalculated
+        this.textLayout = null; // signal that layout should be recalculated
         return this;
     }
 
@@ -288,7 +288,7 @@ public class TooltipPainter extends SimpleTextPainter
         textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
-        if ( iconSize == 0 ) iconSize = ( float ) textLayout.getAscent( );
+        if ( iconSize == 0 ) iconSize = ( float ) textLayout.getLineHeight( );
         textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
         lines = textLayout.getLines( );
     }
@@ -362,6 +362,8 @@ public class TooltipPainter extends SimpleTextPainter
             updateTextLayout( );
         }
 
+        if ( iconIds == null || iconIds.isEmpty( ) ) iconSize = 0;
+
         GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -379,7 +381,7 @@ public class TooltipPainter extends SimpleTextPainter
         double iconHeight = 0;
         if ( icons != null ) iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
         double textHeight = 0;
-        if ( lines != null ) textHeight = ( textLayout.getAscent( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
+        if ( lines != null ) textHeight = ( textLayout.getLineHeight( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
         int boundingHeight = ( int ) ( borderSize * 2 + Math.max( iconHeight, textHeight ) );
 
         //calculate largest width of box
@@ -446,14 +448,14 @@ public class TooltipPainter extends SimpleTextPainter
             {
                 double posX = x + iconSize + borderSize;
                 if ( iconIds != null && !iconIds.isEmpty( ) ) posX += textIconSpacing;
-                double posY = y - borderSize - textLayout.getAscent( );
+                double posY = y - borderSize - textLayout.getLineHeight( );
                 double iconPosY = Float.NEGATIVE_INFINITY;
                 if ( wrapTextAroundIcon && icons != null ) iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
                 for ( int i = 0; i < lines.size( ); i++ )
                 {
-                    if ( posY + textLayout.getAscent( ) < iconPosY ) posX = x + borderSize;
+                    if ( posY + textLayout.getLineHeight( ) < iconPosY ) posX = x + borderSize;
                     textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
-                    posY = posY - lineSpacing - ( textLayout.getAscent( ) );
+                    posY = posY - lineSpacing - ( textLayout.getLineHeight( ) );
                 }
             }
             finally
