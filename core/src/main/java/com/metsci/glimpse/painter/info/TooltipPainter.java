@@ -95,7 +95,7 @@ public class TooltipPainter extends SimpleTextPainter
 
     public TooltipPainter( )
     {
-        this( null );
+        this( new TextureAtlas( ) );
     }
 
     /**
