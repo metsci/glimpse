@@ -104,7 +104,7 @@ public class TooltipPainter extends SimpleTextPainter
      */
     public synchronized TooltipPainter setIcon( Object iconId )
     {
-        this.iconIds = Collections.singletonList( iconId );
+        this.iconIds = iconId != null ? Collections.singletonList( iconId ) : null;
         this.iconColors = null;
         this.icons = null; // signal that the icons should be recalculated
         return this;
@@ -137,7 +137,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setWrapTextAroundIcon( boolean wrap )
     {
         this.wrapTextAroundIcon = wrap;
-        this.textLayout = null; // signal that layout should be recalculated
+        this.resetTextLayout( );
         return this;
     }
 
@@ -185,7 +185,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setBorderSize( int size )
     {
         this.borderSize = size;
-        this.textLayout = null; // signal that layout should be recalculated
+        this.resetTextLayout( ); 
         return this;
     }
 
@@ -193,35 +193,35 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.fixedWidth = fixedWidth;
         this.isFixedWidth = true;
-        this.textLayout = null; // signal that layout should be recalculated
+        this.resetTextLayout( ); 
         return this;
     }
 
     public synchronized TooltipPainter setUnlimitedWidth( )
     {
         this.isFixedWidth = false;
-        this.textLayout = null; // signal that layout should be recalculated
+        this.resetTextLayout( ); 
         return this;
     }
 
     public synchronized TooltipPainter setBreakOnEol( boolean breakOnEol )
     {
         this.breakOnEol = breakOnEol;
-        this.textLayout = null; // signal that textLayout should be recreated
+        this.resetTextLayout( ); 
         return this;
     }
 
     public synchronized TooltipPainter setLineSpacing( int lineSpacing )
     {
         this.lineSpacing = lineSpacing;
-        this.textLayout = null; // signal that textLayout should be recreated
+        this.resetTextLayout( ); 
         return this;
     }
 
     public synchronized TooltipPainter setBreakIterator( BreakIterator breakIterator )
     {
         this.breakIterator = breakIterator;
-        this.textLayout = null; // signal that textLayout should be recreated
+        this.resetTextLayout( ); 
         return this;
     }
 
@@ -229,8 +229,14 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setText( String text )
     {
         this.text = text;
-        this.textLayout = null; // signal that layout should be recalculated
+        this.resetTextLayout( ); 
         return this;
+    }
+    
+    protected void resetTextLayout( )
+    {
+        this.textLayout = null;
+        this.lines = null;
     }
 
     public synchronized TooltipPainter setTextIconSpacing( int textIconSpacing )
@@ -345,7 +351,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         double x = drawInPixelCoords ? this.x : axis.getAxisX( ).valueToScreenPixelUnits( this.x );
-        double y = drawInPixelCoords ? this.y : axis.getAxisY( ).valueToScreenPixelUnits( this.y );
+        double y = drawInPixelCoords ? bounds.getHeight( ) - this.y : axis.getAxisY( ).valueToScreenPixelUnits( this.y );
 
         if ( icons == null )
         {
@@ -364,6 +370,8 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( iconIds == null || iconIds.isEmpty( ) ) iconSize = 0;
 
+        if ( iconIds == null && lines == null ) return;
+        
         GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -387,7 +395,7 @@ public class TooltipPainter extends SimpleTextPainter
         //calculate largest width of box
         float textLength = 0;
         if ( lines != null ) for ( int k = 0; k < lines.size( ); k++ )
-            textLength = Math.max( textLength, lines.get( 0 ).width );
+            textLength = Math.max( textLength, lines.get( k ).width );
         int boundingWidth = ( int ) ( borderSize * 2 + iconSize + textLength );
         if ( iconIds != null && !iconIds.isEmpty( ) && lines != null ) boundingWidth += textIconSpacing;
 
