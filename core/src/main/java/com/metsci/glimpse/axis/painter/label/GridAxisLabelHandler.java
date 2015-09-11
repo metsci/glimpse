@@ -158,6 +158,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.minorTickCount = count;
     }
 
+    @Override
     public void setAxisLabel( String label )
     {
         this.axisLabel = label;
@@ -303,6 +304,11 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     protected int getOrderTick( double d )
     {
+        if ( d == 0 )
+        {
+            return 0;
+        }
+
         double log10 = Math.log10( d );
         int order = ( int ) Math.floor( log10 );
         if ( ( log10 - order ) > ( 1.0 - 1e-12 ) ) order++;
