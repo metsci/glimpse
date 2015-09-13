@@ -280,7 +280,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
             cacheMax = min;
         }
 
-        int minTickNumber = ( int ) floor( cacheMin / tickInterval );
+        double minTickNumber = floor( cacheMin / tickInterval );
         int tickCount = ( int ) ceil( ( cacheMax - cacheMin ) / tickInterval );
 
         double[] ticks = new double[tickCount + 1];
