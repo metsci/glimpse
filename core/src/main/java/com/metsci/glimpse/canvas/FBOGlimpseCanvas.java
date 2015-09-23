@@ -99,6 +99,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
         this.glProfile = glProfile;
         GLCapabilities caps = new GLCapabilities( glProfile );
         caps.setBackgroundOpaque( isbackgroundOpaque );
+        caps.setDoubleBuffered( false );
         this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( caps, glProfile, glContext );
         this.drawable.addGLEventListener( createGLEventListener( ) );
         this.drawable.setSurfaceSize( width, height );
