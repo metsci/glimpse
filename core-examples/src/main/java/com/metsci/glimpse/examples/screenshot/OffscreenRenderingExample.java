@@ -28,21 +28,20 @@ package com.metsci.glimpse.examples.screenshot;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.axis.WrappedAxisExample;
 import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 public class OffscreenRenderingExample
 {
-    public static void main( String[] args ) throws IOException
+    public static void main( String[] args ) throws Exception
     {
         GLProfile glProfile = GLUtils.getDefaultGLProfile( );
         
@@ -57,7 +56,7 @@ public class OffscreenRenderingExample
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
         
         // use one of the previous examples to build a simple plot to draw
-        ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
+        GlimpseLayout layout = new WrappedAxisExample( ).getLayout( );
 
         // add the layout to the offscreen canvas
         canvas.addLayout( layout );
