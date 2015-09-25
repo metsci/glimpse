@@ -77,11 +77,12 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         // add some named tags at specific points along the axis
         // also add a custom "attribute" to each tag which specifies the relative (0 to 1)
         // point along the color scale which the tag is attached to
-        axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
+        // also add a custom "attribute" which defines the display color of the tag
+        axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
         axisZ.addTag( "T2", 300.0 ).setAttribute( TEX_COORD_ATTR, 0.3f );
-        axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f );
+        axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getBlue( ) );
         axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
-        axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
 
         // add a constraint which prevents dragging the tags past one another
         axisZ.addConstraint( new OrderedConstraint( "C1", 20.0, Arrays.asList( "T1", "T2", "T3", "T4", "T5" ) ) );

@@ -151,7 +151,14 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         int xMid = getTagPointerMaxX( width );
         int xMax = getTagMaxX( width );
 
-        GlimpseColor.glColor( gl, tagColor );
+        float[] color = tagColor;
+        Object colorValue = tag.getAttribute( Tag.TAG_COLOR_ATTR );
+        if ( colorValue != null && colorValue instanceof float[] )
+        {
+            color = (float[]) colorValue;
+        }
+        
+        GlimpseColor.glColor( gl, color, 0.2f );
         gl.glBegin( GL2.GL_TRIANGLES );
         try
         {
@@ -177,7 +184,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
             gl.glEnd( );
         }
 
-        GlimpseColor.glColor( gl, tagColor, 1f );
+        GlimpseColor.glColor( gl, color, 1f );
         gl.glLineWidth( tagPointerOutlineWidth );
         gl.glEnable( GL2.GL_LINE_SMOOTH );
         gl.glBegin( GL2.GL_LINE_LOOP );

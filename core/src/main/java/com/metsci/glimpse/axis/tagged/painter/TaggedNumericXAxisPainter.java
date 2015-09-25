@@ -137,8 +137,15 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
         int x = taggedAxis.valueToScreenPixel( tag.getValue( ) );
         int y1 = height - 1 - tickBufferSize - tagHeight;
         int y2 = y1 + tagHeight;
+        
+        float[] color = tagColor;
+        Object colorValue = tag.getAttribute( Tag.TAG_COLOR_ATTR );
+        if ( colorValue != null && colorValue instanceof float[] )
+        {
+            color = (float[]) colorValue;
+        }
 
-        GlimpseColor.glColor( gl, tagColor );
+        GlimpseColor.glColor( gl, color, 0.2f );
         gl.glBegin( GL2.GL_TRIANGLES );
         try
         {

@@ -30,6 +30,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.metsci.glimpse.axis.tagged.shader.TaggedColorScaleShader;
+import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
+import com.metsci.glimpse.support.colormap.ColorGradient;
+
 /**
  * A labeled marker on a {@link TaggedAxis1D}. Tags have a name and a
  * position along their axis. Tags may also have a number of optional
@@ -46,8 +50,20 @@ import java.util.Map;
  */
 public class Tag
 {
+    /**
+     * Special tag value used by TaggedHeatMapPainter to indicate which part
+     * of a {@link ColorGradient} a Tag should be associated with.
+     * 
+     * @see TaggedHeatMapPainter
+     * @see TaggedColorScaleShader
+     */
     public static final String TEX_COORD_ATTR = "TexCoord";
 
+    /**
+     * Special tag value for setting the display color of a Tag.
+     */
+    public static final String TAG_COLOR_ATTR = "TagColor";
+    
     public static final Comparator<Tag> tagValueComparator =
         new Comparator<Tag>( )
         {
