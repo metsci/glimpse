@@ -105,7 +105,7 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler {
             }
 
             String s = format("%,.3f", value);
-            if (tickPositions[i] < 0) {
+            if (value < 0) {
                 s = s.substring(0, 6);
             } else {
                 s = s.substring(0, 5);
