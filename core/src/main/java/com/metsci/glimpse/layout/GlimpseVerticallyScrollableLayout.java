@@ -64,16 +64,17 @@ public class GlimpseVerticallyScrollableLayout extends GlimpseLayout
         {
             public void layout( GlimpseLayoutDelegate parent )
             {
+                int left = parent.getX( );
                 int contentWidth = parent.getWidth( );
 
                 int minContentHeight = GlimpseVerticallyScrollableLayout.this.minContentHeight;
                 int contentHeight = max( minContentHeight, parent.getHeight( ) + verticalOffset );
-                int top = parent.getHeight( ) + verticalOffset;
+                int top = parent.getY( ) + parent.getHeight( ) + verticalOffset;
                 int bottom = top - contentHeight;
 
                 for ( ComponentWrapper child : parent.getComponents( ) )
                 {
-                    child.setBounds( 0, bottom, contentWidth, contentHeight );
+                    child.setBounds( left, bottom, contentWidth, contentHeight );
                 }
             }
         } );
