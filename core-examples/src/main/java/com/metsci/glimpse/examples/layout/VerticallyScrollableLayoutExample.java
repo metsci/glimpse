@@ -26,15 +26,10 @@
  */
 package com.metsci.glimpse.examples.layout;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -45,6 +40,8 @@ import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;
 
+import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.examples.stacked.CollapsibleTimelinePlotExample;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout;
@@ -77,34 +74,20 @@ public class VerticallyScrollableLayoutExample
         GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( GLUtils.getDefaultGLProfile( ) );
         GLContext context = glDrawable.getContext( );
         final NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( context );
-        canvas.setPreferredSize( new Dimension( 800, minContentHeight ) );
+        canvas.setPreferredSize( new Dimension( 800, 600 ) );
         canvas.addLayout( scroller );
         canvas.setLookAndFeel( new OceanLookAndFeel( ) );
 
         // Swing scrollbar, for interactively controlling the scroller's vertical offset
-        final JScrollBar scrollbar = new JScrollBar( JScrollBar.VERTICAL, 0, minContentHeight, 0, minContentHeight );
+        final JScrollBar scrollbar = new JScrollBar( );
 
-        // When canvas height changes, update scrollbar's extent
-        canvas.addComponentListener( new ComponentAdapter( )
-        {
-            public void componentResized( ComponentEvent ev )
-            {
-                int extent = canvas.getHeight( );
-                int min = 0;
-                int max = max( scroller.getMinContentHeight( ), canvas.getHeight( ) );
-                int value = min( scroller.getVerticalOffset( ), max - extent );
-                scrollbar.setValues( value, extent, min, max );
-            }
-        } );
-
-        // When user drags the scrollbar, update the scroller's offset
-        scrollbar.addAdjustmentListener( new AdjustmentListener( )
-        {
-            public void adjustmentValueChanged( AdjustmentEvent ev )
-            {
-                scroller.setVerticalOffset( scrollbar.getValue( ) );
-            }
-        } );
+        // Attach the scrollable-layout and the scrollbar
+        //
+        // Really the scrollbar is attached not to the layout, but to a particular (layout,stack)
+        // tuple -- so the stack must be specified as well
+        //
+        GlimpseTargetStack scrollerStack = TargetStackUtil.newTargetStack( canvas );
+        attachScrollableToScrollbar( scroller, scrollerStack, scrollbar );
 
         // Create a frame to house the canvas and the scrollbar (see com.metsci.glimpse.examples.Example for explanatory comments)
         final JFrame frame = new JFrame( "Glimpse Example" );
@@ -132,6 +115,7 @@ public class VerticallyScrollableLayoutExample
                 frame.add( scrollbar, BorderLayout.EAST );
 
                 frame.pack( );
+                frame.setLocationRelativeTo( null );
                 frame.setVisible( true );
 
                 GLAnimatorControl animator = new SwingEDTAnimator( 60 );

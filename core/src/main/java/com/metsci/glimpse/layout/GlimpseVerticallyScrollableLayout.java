@@ -27,6 +27,16 @@
 package com.metsci.glimpse.layout;
 
 import static java.lang.Math.max;
+import static java.lang.Math.min;
+
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.swing.JScrollBar;
+
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseTargetStack;
 
 import net.miginfocom.layout.ComponentWrapper;
 
@@ -51,14 +61,87 @@ import net.miginfocom.layout.ComponentWrapper;
 public class GlimpseVerticallyScrollableLayout extends GlimpseLayout
 {
 
+    /**
+     * Returns a Runnable that, if called, will detach the layout from the scrollbar,
+     * removing all of the listeners put in place by the attach call.
+     *
+     * If you are doing all Glimpse stuff on the Swing thread, then this function causes
+     * no threading concerns.
+     *
+     * If you have multiple UI threads, you can generally rule out either deadlock or race
+     * conditions, but not both. This function rules out deadlock, so it must leave the door
+     * open to race conditions -- use at your own risk.
+     *
+     */
+    public static Runnable attachScrollableToScrollbar( final GlimpseVerticallyScrollableLayout layout, final GlimpseTargetStack stack, final JScrollBar scrollbar )
+    {
+        final Runnable layoutListener = new Runnable( )
+        {
+            public void run( )
+            {
+                int layoutHeight;
+                int minContentHeight;
+                int verticalOffset;
+
+                layout.getLock( ).lock( );
+                try
+                {
+                    layoutHeight = layout.getCurrentBounds( stack ).getHeight( );
+                    minContentHeight = layout.getMinContentHeight( );
+                    verticalOffset = layout.getVerticalOffset( );
+                }
+                finally
+                {
+                    layout.getLock( ).unlock( );
+                }
+
+                int extent = layoutHeight;
+                int min = 0;
+                int max = max( minContentHeight, extent );
+                int value = min( verticalOffset, max - extent );
+
+                scrollbar.setValues( value, extent, min, max );
+                scrollbar.repaint( );
+            }
+        };
+
+        final AdjustmentListener scrollbarListener = new AdjustmentListener( )
+        {
+            public void adjustmentValueChanged( AdjustmentEvent ev )
+            {
+                layout.setVerticalOffset( scrollbar.getValue( ) );
+            }
+        };
+
+        // Attach listeners
+        layout.addListener( true, layoutListener );
+        scrollbar.addAdjustmentListener( scrollbarListener );
+
+        // Return a way to detach listeners later
+        return new Runnable( )
+        {
+            public void run( )
+            {
+                layout.removeListener( layoutListener );
+                scrollbar.removeAdjustmentListener( scrollbarListener );
+            }
+        };
+    }
+
+
+
     protected int minContentHeight;
     protected int verticalOffset;
+
+    // We rely on copy-on-write iteration semantics, so don't just declare as List
+    protected final CopyOnWriteArrayList<Runnable> listeners;
 
 
     public GlimpseVerticallyScrollableLayout( int minContentHeight )
     {
         this.minContentHeight = minContentHeight;
         this.verticalOffset = 0;
+        this.listeners = new CopyOnWriteArrayList<>( );
 
         setLayoutManager( new GlimpseLayoutManager( )
         {
@@ -80,31 +163,131 @@ public class GlimpseVerticallyScrollableLayout extends GlimpseLayout
         } );
     }
 
+    public void addListener( boolean runImmediately, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        listeners.add( listener );
+    }
+
+    public void removeListener( Runnable listener )
+    {
+        listeners.remove( listener );
+    }
+
+    protected void notifyListeners( )
+    {
+        for ( Runnable listener : listeners )
+        {
+            listener.run( );
+        }
+    }
+
+    @Override
+    public GlimpseBounds layoutTo( GlimpseTargetStack stack )
+    {
+        lock.lock( );
+        try
+        {
+            boolean wasDirty = isDirty( stack );
+
+            GlimpseBounds result = super.layoutTo( stack );
+
+            if ( wasDirty )
+            {
+                notifyListeners( );
+            }
+
+            return result;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
     public int getVerticalOffset( )
     {
-        return verticalOffset;
+        lock.lock( );
+        try
+        {
+            return verticalOffset;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     public void setVerticalOffset( int verticalOffset )
     {
-        if ( verticalOffset != this.verticalOffset )
+        lock.lock( );
+        try
         {
-            this.verticalOffset = verticalOffset;
-            invalidateLayout( );
+            if ( verticalOffset != this.verticalOffset )
+            {
+                this.verticalOffset = verticalOffset;
+                invalidateLayout( );
+            }
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
 
     public int getMinContentHeight( )
     {
-        return minContentHeight;
+        lock.lock( );
+        try
+        {
+            return minContentHeight;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     public void setMinContentHeight( int minContentHeight )
     {
-        if ( minContentHeight != this.minContentHeight )
+        lock.lock( );
+        try
         {
-            this.minContentHeight = minContentHeight;
-            invalidateLayout( );
+            if ( minContentHeight != this.minContentHeight )
+            {
+                this.minContentHeight = minContentHeight;
+                invalidateLayout( );
+            }
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public GlimpseBounds getCurrentBounds( GlimpseTargetStack stack )
+    {
+        lock.lock( );
+        try
+        {
+            GlimpseBounds bounds = layoutCache.getValueNoBoundsCheck( stack );
+
+            if ( bounds == null )
+            {
+                return layoutTo( stack );
+            }
+            else
+            {
+                return bounds;
+            }
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
 
