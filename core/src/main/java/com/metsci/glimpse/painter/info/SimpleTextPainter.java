@@ -52,12 +52,12 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class SimpleTextPainter extends GlimpsePainterImpl
 {
-    public enum HorizontalPosition
+    public static enum HorizontalPosition
     {
         Left, Center, Right;
     }
 
-    public enum VerticalPosition
+    public static enum VerticalPosition
     {
         Bottom, Center, Top;
     }

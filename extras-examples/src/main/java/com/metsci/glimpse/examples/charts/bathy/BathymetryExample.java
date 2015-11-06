@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.ColorYAxisPainter;
@@ -52,12 +53,14 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.geo.LatLonTrackPainter;
 import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.painter.info.AnnotationPainter;
-import com.metsci.glimpse.painter.info.AnnotationPainter.AnnotationFont;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -107,7 +110,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
     public MapPlot2D getLayout( GeoProjection projection )
     {
         // create a premade heat map window
-        MapPlot2D plot = new MapPlot2D( projection )
+        MapPlot2D plot = new MapPlot2D( projection)
         {
             @Override
             protected Axis1D createAxisZ( )
@@ -135,13 +138,13 @@ public class BathymetryExample implements GlimpseLayoutProvider
         axisZ.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
         // add a constraint which disallows moving the max tag above 15000
-        axisZ.addConstraint( new NamedConstraint( "MaxConstraint" )
+        axisZ.addConstraint( new NamedConstraint( "MaxConstraint")
         {
             @Override
             public void applyConstraint( TaggedAxis1D currentAxis, Map<String, Tag> previousTags )
             {
                 Tag t = currentAxis.getTag( "Max" );
-                
+
                 // if attempting to set a tag value above 15000, disallow the tag update
                 if ( t.getValue( ) > 15000.0 )
                 {
@@ -149,10 +152,10 @@ public class BathymetryExample implements GlimpseLayoutProvider
                 }
             }
         } );
-        
+
         // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
         axisZ.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
-        
+
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
         BathymetryData bathymetryData;
@@ -223,7 +226,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         cursorPainter.setTexture( texture );
 
         // create a painter to display text annotations
-        annotationPainter = new AnnotationPainter( );
+        annotationPainter = new AnnotationPainter( new TextRenderer( FontUtils.getDefaultPlain( 12 ) ) );
         plot.addPainter( annotationPainter );
 
         // create a painter to display "buoy" positions
@@ -234,19 +237,19 @@ public class BathymetryExample implements GlimpseLayoutProvider
         dotPainter.setPointColor( 1, GlimpseColor.getBlack( ) );
 
         Vector2d pos = projection.project( LatLonGeo.fromDeg( 19.14, -80.23 ) );
-        annotationPainter.addAnnotation( "buoy 125A-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
+        annotationPainter.addAnnotation( "buoy 125A-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 19.14, -80.23, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 18.88, -80.83 ) );
-        annotationPainter.addAnnotation( "buoy 126A-2", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
+        annotationPainter.addAnnotation( "buoy 126A-2", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 18.88, -80.83, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 19.64, -79.50 ) );
-        annotationPainter.addAnnotation( "buoy 126A-1", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getRed( ) );
+        annotationPainter.addAnnotation( "buoy 126A-1", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getRed( ) );
         dotPainter.addPointGeo( 1, 1, 19.64, -79.50, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 19.80, -79.08 ) );
-        annotationPainter.addAnnotation( "buoy 125B-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 0, false, true, AnnotationFont.Helvetical_12, GlimpseColor.getGreen( ) );
+        annotationPainter.addAnnotation( "buoy 125B-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
         dotPainter.addPointGeo( 1, 1, 19.80, -79.08, 0 );
 
         ScalePainter scale = new ScalePainter( );
