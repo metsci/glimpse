@@ -51,6 +51,12 @@ public class AxisUnitConverters
         };
     }
 
+    public static final AxisUnitConverter fractionShownAsPercentage = new AxisUnitConverter( )
+    {
+        public double toAxisUnits( double value ) { return ( 100 * value ); }
+        public double fromAxisUnits( double value ) { return ( 0.01 * value ); }
+    };
+
 
 
     // Length
