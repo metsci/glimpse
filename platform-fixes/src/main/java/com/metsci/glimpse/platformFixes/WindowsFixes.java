@@ -44,7 +44,7 @@ public class WindowsFixes
     {
         if ( onPlatform( "win", "amd64"  ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
         if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86"    ) ) return new LibraryList( "platformFixes/windows32", "libgcc_s_dw2-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
+        if ( onPlatform( "win", "x86"    ) ) return new LibraryList( "platformFixes/windows32", "libwinpthread-1.dll", "libgcc_s_dw2-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
         return null;
     }
 

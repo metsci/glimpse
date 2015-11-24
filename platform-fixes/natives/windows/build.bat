@@ -27,6 +27,10 @@ i686-w64-mingw32-g++ -std=c++11 -I".\build" -I"%JAVA_HOME%\include" -I"%JAVA_HOM
 i686-w64-mingw32-g++ -shared build\32bit\windowsFixes.o -o build\32bit\windowsFixes.dll
 copy /y build\32bit\windowsFixes.dll ..\..\src\main\resources\platformFixes\windows32
 
+i686-w64-mingw32-g++ -print-file-name=libwinpthread-1.dll > build\32bit\tmp
+set /p LIBPTHREAD_32=<build\32bit\tmp
+copy /y "%LIBPTHREAD_32:/=\%" ..\..\src\main\resources\platformFixes\windows32
+
 i686-w64-mingw32-g++ -print-file-name=libstdc++-6.dll > build\32bit\tmp
 set /p LIBSTDCXX_32=<build\32bit\tmp
 copy /y "%LIBSTDCXX_32:/=\%" ..\..\src\main\resources\platformFixes\windows32
