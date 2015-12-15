@@ -28,6 +28,9 @@ package com.metsci.glimpse.plot.timeline.animate;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D;
+import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
+import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 
 public class DragInfo
 {
@@ -35,12 +38,14 @@ public class DragInfo
     public GlimpseBounds bounds;
     public double size;
     public boolean top;
+    public int indent;
 
     public DragInfo( PlotInfo info, GlimpseBounds bounds, double size )
     {
         this.info = info;
         this.bounds = bounds;
         this.size = size;
+        this.setIndent( info );
     }
 
     public DragInfo( DragInfo drag, double size )
@@ -48,6 +53,7 @@ public class DragInfo
         this.info = drag.info;
         this.bounds = drag.bounds;
         this.top = drag.top;
+        this.indent = drag.indent;
         this.size = size;
     }
 
@@ -56,6 +62,38 @@ public class DragInfo
         this.info = info;
         this.size = size;
         this.top = top;
+        this.setIndent( info );
+    }
+    
+    protected void setIndent( PlotInfo info )
+    {
+        this.indent = 0;
+        
+        StackedPlot2D plot = info.getStackedPlot( );
+    
+        if ( plot instanceof CollapsibleTimePlot2D )
+        {
+            CollapsibleTimePlot2D collapsiblePlot = (CollapsibleTimePlot2D) plot;
+            
+            if ( collapsiblePlot.isIndentSubplots( ) && collapsiblePlot.getIndentSize( ) > 0 )
+            {
+                this.indent = collapsiblePlot.getIndentSize( ) * getDepth( info );
+            }
+        }
+    }
+    
+    protected int getDepth( PlotInfo info )
+    {
+        int depth = 0;
+        PlotInfo parent = info.getParent( );
+            
+        while ( parent != null )
+        {
+            parent = parent.getParent( );
+            depth++;
+        }
+        
+        return info instanceof GroupInfo ? depth : Math.max( 0, depth-1 );
     }
 
     @Override

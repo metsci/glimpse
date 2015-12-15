@@ -299,6 +299,8 @@ public class DragManager
 
     protected void applyDrag( GlimpseMouseEvent event )
     {
+        normalizeOrder( );
+        
         DragInfo topDrag = dragging.get( 0 );
 
         // adjust the dragged plot's ordering constant
@@ -486,11 +488,11 @@ public class DragManager
 
             if ( plot.getOrientation( ) == Orientation.VERTICAL )
             {
-                drag.info.setLayoutData( String.format( "pos container.x+%3$d %d container.x2-%3$d %d", bottom, top, border ) );
+                drag.info.setLayoutData( String.format( "pos container.x+%d %d container.x2-%d %d", drag.indent + border, bottom, border, top ) );
             }
             else
             {
-                drag.info.setLayoutData( String.format( "pos %d container.y+%3$d %d container.y2-%3$d", bottom, top, border ) );
+                drag.info.setLayoutData( String.format( "pos %d container.y+%d %d container.y2-%d", bottom, drag.indent + border, top, border ) );
             }
 
             pos -= drag.size + drag.info.getPlotSpacing( );

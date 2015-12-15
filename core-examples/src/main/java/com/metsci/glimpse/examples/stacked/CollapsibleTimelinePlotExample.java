@@ -90,6 +90,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
+        plot.setIndentSize( 140 );
+        plot.setIndentSubplots( true );
+        
         for ( TimePlotInfo row : plot.getAllTimePlots( ) )
         {
             // create a collapsible/expandable group for each row

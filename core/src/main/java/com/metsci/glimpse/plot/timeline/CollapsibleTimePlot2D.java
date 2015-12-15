@@ -78,6 +78,11 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         this.validate( );
     }
     
+    public int getIndentSize( )
+    {
+        return indentSize < 0 ? getLabelSize( ) : this.indentSize;
+    }
+    
     /**
      * Create a collapsible/expandable group of plots.
      */
@@ -174,9 +179,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     @Override
     protected void setRowColumnConstraints( )
     {
-        int tempIndentSize = indentSize;
-        
-        if ( indentSize < 0 ) tempIndentSize = getLabelSize( );
+        int tempIndentSize = getIndentSize( );
         
         if ( indentSubplots )
         {
