@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
@@ -507,14 +508,14 @@ public class DragManager
 
     protected void chooseNewGrowing( GlimpseMouseEvent event )
     {
-        if ( shouldChooseUnnested( ) )
-        {
-            chooseNewGrowingUnnested( event );
-        }
-        else
-        {
+//        if ( shouldChooseUnnested( ) )
+//        {
+//            chooseNewGrowingUnnested( event );
+//        }
+//        else
+//        {
             chooseNewGrowingNested( event );
-        }
+//        }
     }
 
     protected void chooseNewGrowingNested( GlimpseMouseEvent event )
@@ -524,7 +525,20 @@ public class DragManager
         // check each PlotInfo, find the one we're currently dragging over
         for ( PlotInfo info : getAllPlots( ) )
         {
-            if ( chooseNewGrowing( stack, info, info ) ) return;
+            if ( info instanceof GroupInfo )
+            {
+                GroupInfo groupInfo = ( GroupInfo ) info;
+                List<PlotInfo> groupList = getSortedDescendants( groupInfo );
+    
+                PlotInfo bottomPlot = groupList.get( groupList.size( ) - 1 );
+                PlotInfo topPlot = groupList.get( 0 );
+    
+                if ( chooseNewGrowing( stack, bottomPlot, topPlot ) ) return;
+            }
+            else
+            {
+                if ( chooseNewGrowing( stack, info, info ) ) return;
+            }
         }
     }
 
@@ -532,15 +546,30 @@ public class DragManager
     {
         DragInfo topDrag = dragging.get( 0 );
 
-        if ( topDrag instanceof GroupInfo )
+        if ( topDrag.info.getParent( ) == null )
         {
-            return plot.getAllPlots( );
+            return getTopPlots( );
         }
         else
         {
             GroupInfo group = ( GroupInfo ) topDrag.info.getParent( );
             return group.getChildPlots( );
         }
+    }
+    
+    protected Collection<PlotInfo> getTopPlots( )
+    {
+        List<PlotInfo> plots = Lists.newArrayList( );
+        
+        for ( PlotInfo plot : plot.getAllPlots( ) )
+        {
+            if ( plot.getParent( ) == null )
+            {
+                plots.add( plot );
+            }
+        }
+        
+        return plots;
     }
 
     protected boolean shouldChooseUnnested( )
