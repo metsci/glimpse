@@ -222,7 +222,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         {
             for ( PlotInfo plot : Lists.newArrayList( group.getChildPlots( ) ) )
             {
-                if ( plot.getStackedPlot( ) == null )
+                if ( getPlot( plot.getId( ) ) == null )
                 {
                     group.removeChildPlot( plot );
                 }

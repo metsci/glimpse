@@ -29,26 +29,23 @@ package com.metsci.glimpse.plot.stacked;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.metsci.glimpse.plot.stacked.PlotInfo;
-
 
 public class PlotInfoWrapper implements PlotInfo
 {
     public PlotInfo info;
-    
+
     public PlotInfoWrapper( PlotInfo info )
     {
         this.info = info;
     }
-    
+
     @Override
     public String getLayoutData( )
     {
         return info.getLayoutData( );
     }
-    
+
     @Override
     public void setLayoutData( String layoutData )
     {
@@ -78,7 +75,7 @@ public class PlotInfoWrapper implements PlotInfo
     {
         return info.getSize( );
     }
-    
+
     @Override
     public void setOrder( int order )
     {
@@ -90,19 +87,18 @@ public class PlotInfoWrapper implements PlotInfo
     {
         info.setSize( size );
     }
-    
+
     @Override
     public boolean isGrow( )
     {
         return info.isGrow( );
     }
-    
+
     @Override
     public void setGrow( boolean grow )
     {
         info.setGrow( grow );
     }
-    
 
     @Override
     public void setPlotSpacing( int spacing )
@@ -121,7 +117,7 @@ public class PlotInfoWrapper implements PlotInfo
     {
         return info.getLayout( );
     }
-    
+
     @Override
     public GlimpseAxisLayout2D getBaseLayout( )
     {
@@ -183,9 +179,36 @@ public class PlotInfoWrapper implements PlotInfo
     }
 
     @Override
+    public boolean isExpanded( )
+    {
+        return info.isExpanded( );
+    }
+
+    @Override
+    public void setParent( PlotInfo parent )
+    {
+        info.setParent( parent );
+    }
+
+    @Override
+    public PlotInfo getParent( )
+    {
+        return info.getParent( );
+    }
+    
+    /**
+     * @deprecated {@link #removePlot()}
+     */
+    @Override
     public void deletePlot( )
     {
-        info.deletePlot( );
+        removePlot( );
+    }
+
+    @Override
+    public void removePlot( )
+    {
+        info.removePlot( );
     }
 
     @Override

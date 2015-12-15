@@ -40,7 +40,7 @@ public interface GroupInfo extends PlotInfo
     public void addChildPlot( PlotInfo plot );
 
     public void removeChildPlot( PlotInfo plot );
-
+    
     public Collection<PlotInfo> getChildPlots( );
 
     public void setExpanded( boolean expanded );
