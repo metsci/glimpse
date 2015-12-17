@@ -58,6 +58,9 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
 import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
+import com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter;
+import com.metsci.glimpse.plot.timeline.event.paint.EventPainter;
+import com.metsci.glimpse.plot.timeline.event.paint.EventPainterManager;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -185,7 +188,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                         if ( iconId == null )
                         {
                             iconId = defaultIconId;
-                            iconColor = child.getBackgroundColor( child.getEventPlotInfo( ), selectionHandler.isEventSelected( child ) );
+                            iconColor = DefaultEventPainter.getBackgroundColor( child, child.getEventPlotInfo( ), selectionHandler.isEventSelected( child ) );
                         }
                         
                         icons.add( iconId );
@@ -637,6 +640,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public Event getEvent( Object id )
     {
         return this.eventManager.getEvent( id );
+    }
+    
+    public EventBounds getEventBounds( Object id )
+    {
+        return this.eventManager.getOrCreateEventBounds( id );
     }
 
     public Event addEvent( String label, TimeStamp time )
