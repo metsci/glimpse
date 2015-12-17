@@ -27,13 +27,14 @@
 package com.metsci.glimpse.examples.stacked;
 
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 
-public class NestedTimelinePlotExample extends HorizontalTimelinePlotExample
+public class NestedTimelinePlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
@@ -44,58 +45,68 @@ public class NestedTimelinePlotExample extends HorizontalTimelinePlotExample
     }
 
     @Override
-    protected StackedTimePlot2D createPlot( )
-    {
-        return new CollapsibleTimePlot2D( );
-    }
-
-    @Override
     public StackedTimePlot2D getLayout( )
     {
-        final CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
+        final CollapsibleTimePlot2D plot = new CollapsibleTimePlot2D( );
 
-        TimePlotInfo speedPlot = plot.getTimePlot( "speed-plot-1-id" );
-        speedPlot.setLabelText( "G2-1-2" );
+        plot.setShowLabels( true );
+        plot.setLabelSize( 30 );
+        
+        plot.setIndentSubplots( true );
+        plot.setIndentSize( 30 );
+        
+        GroupInfo topGroup1 = plot.createGroup( );
+        topGroup1.setLabelText( "Top Group 1" );
+        topGroup1.setShowDivider( false );
+        
+        GroupInfo topGroup2 = plot.createGroup( );
+        topGroup2.setLabelText( "Top Group 1" );
+        topGroup2.setShowDivider( false );
 
-        TimePlotInfo viscPlot = plot.getTimePlot( "viscosity-plot-2-id" );
-        viscPlot.setLabelText( "G2-3" );
+        GroupInfo midGroup1 = plot.createGroup( );
+        midGroup1.setLabelText( "Mid Group 1" );
+        midGroup1.setShowDivider( false );
+        topGroup1.addChildPlot( midGroup1 );
+        
+        TimePlotInfo plot1 = plot.createTimePlot( );
+        plot1.setLabelText( "Bottom Plot 1" );
+        midGroup1.addChildPlot( plot1 );
+
+        TimePlotInfo plot2 = plot.createTimePlot( );
+        plot2.setLabelText( "Bottom Plot 2" );
+        midGroup1.addChildPlot( plot2 );
+        
+        GroupInfo midGroup2 = plot.createGroup( );
+        midGroup2.setLabelText( "Mid Group 2" );
+        midGroup2.setShowDivider( false );
+        topGroup1.addChildPlot( midGroup2 );
 
         TimePlotInfo plot3 = plot.createTimePlot( );
-        plot3.setLabelText( "G1-1" );
+        plot3.setLabelText( "Bottom Plot 3" );
+        midGroup2.addChildPlot( plot3 );
+        
+        GroupInfo midGroup3 = plot.createGroup( );
+        midGroup3.setLabelText( "Mid Group 3" );
+        midGroup3.setShowDivider( false );
+        topGroup1.addChildPlot( midGroup3 );
 
         TimePlotInfo plot4 = plot.createTimePlot( );
-        plot4.setLabelText( "G2-1-1-1" );
-
-        TimePlotInfo plot5 = plot.createTimePlot( );
-        plot5.setLabelText( "G2-2-1" );
-
-        GroupInfo group5 = plot.createGroup( plot4 );
-        group5.setLabelText( "G2-1-1" );
-
-        GroupInfo group1 = plot.createGroup( );
-        group1.setLabelText( "G2-1" );
-        group1.addChildPlot( speedPlot );
-        group1.addChildPlot( group5 );
-
-        GroupInfo group4 = plot.createGroup( plot5 );
-        group4.setLabelText( "G2-2" );
-
-        GroupInfo group2 = plot.createGroup( );
-        group2.setLabelText( "G2" );
-        group2.addChildPlot( group1 );
-        group2.addChildPlot( viscPlot );
-        group2.addChildPlot( group4 );
-
-        GroupInfo group3 = plot.createGroup( plot3 );
-        group3.setLabelText( "G1" );
-
-        plot.setIndentSubplots( true );
-
-        GroupInfo g = plot.createGroup( );
-        g.setLabelText( "G2-1-1-1" );
+        plot4.setLabelText( "Bottom Plot 4" );
+        midGroup3.addChildPlot( plot4 );
         
-        group5.addChildPlot( g );
-
+        TimePlotInfo plot5 = plot.createTimePlot( );
+        plot5.setLabelText( "Bottom Plot 5" );
+        midGroup3.addChildPlot( plot5 );
+        
+        GroupInfo midGroup4 = plot.createGroup( );
+        midGroup4.setLabelText( "Mid Group 4" );
+        midGroup4.setShowDivider( false );
+        topGroup2.addChildPlot( midGroup4 );
+        
+        TimePlotInfo plot6 = plot.createTimePlot( );
+        plot6.setLabelText( "Bottom Plot 6" );
+        midGroup4.addChildPlot( plot6 );
+        
         return plot;
     }
 }

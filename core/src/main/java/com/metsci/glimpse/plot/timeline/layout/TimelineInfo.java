@@ -231,11 +231,11 @@ public class TimelineInfo extends PlotInfoWrapper
         // push the timeline plot over so that it lines up with the plot labels
         if ( plot.isTimeAxisHorizontal( ) )
         {
-            timeLayout.setLayoutData( String.format( "push x, grow x, gapleft %d!", plot.getLabelSize( ) ) );
+            timeLayout.setLayoutData( String.format( "push x, grow x, gapleft %d!", plot.getOverlayLayoutOffsetX( ) ) );
         }
         else
         {
-            timeLayout.setLayoutData( String.format( "push y, grow y, gaptop %d!", plot.getLabelSize( ) ) );
+            timeLayout.setLayoutData( String.format( "push y, grow y, gaptop %d!", plot.getOverlayLayoutOffsetY2( ) ) );
         }
     }
 }

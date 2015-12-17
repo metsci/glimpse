@@ -251,13 +251,13 @@ public class StackedTimePlot2D extends StackedPlot2D
     }
 
     @Override
-    protected int getOverlayLayoutOffsetX( )
+    public int getOverlayLayoutOffsetX( )
     {
         return orient == VERTICAL ? getLabelSize( ) : 0;
     }
 
     @Override
-    protected int getOverlayLayoutOffsetY2( )
+    public int getOverlayLayoutOffsetY2( )
     {
         return orient == VERTICAL ? 0 : getLabelSize( );
     }
@@ -730,10 +730,19 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.validateLayout( );
     }
 
-    public void showLabels( boolean show )
+    public void setShowLabels( boolean show )
     {
         this.showLabelLayout = show;
         this.validateLayout( );
+    }
+    
+    /**
+     * Method name changed to be more consistent with other setters.
+     * @deprecated {@link #setShowLabels(boolean)}
+     */
+    public void showLabels( boolean show )
+    {
+        this.setShowLabels( show );
     }
 
     public int getLabelSize( )

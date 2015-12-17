@@ -175,6 +175,9 @@ public class GroupLabelPainter extends GlimpsePainterImpl
 
         if ( showArrow )
         {
+            gl.glLineWidth( 1.0f );
+            GlimpseColor.glColor( gl, lineColor );
+            
             float halfSize = buttonSize / 2.0f;
             float centerX = halfSize + padding;
             float centerY = height / 2.0f;

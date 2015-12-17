@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -45,6 +47,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 {
     protected boolean indentSubplots = false;
     protected int indentSize = -1;
+    protected int maxLevel = 0;
     
     public CollapsibleTimePlot2D( )
     {
@@ -167,6 +170,19 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.lock.unlock( );
         }
     }
+    
+    public int getMaxLevel( )
+    {
+        this.lock.lock( );
+        try
+        {
+            return this.maxLevel;
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
 
     @Override
     public void validateLayout( )
@@ -181,13 +197,14 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     {
         int tempIndentSize = getIndentSize( );
         
-        if ( indentSubplots )
+        if ( this.indentSubplots )
         {
-            int maxLevel = setIndentLevel0( );
+            this.maxLevel = setIndentLevel0( ) + 1;
             setRowColumnConstraints( maxLevel, tempIndentSize );
         }
         else
         {
+            this.maxLevel = 1;
             resetIndentLevel0( 0 );
             setRowColumnConstraints( 0, tempIndentSize );
         }
@@ -201,6 +218,18 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         GroupUtilities.getSortedPlots( ungroupedPlots, accumulator );
 
         return accumulator;
+    }
+    
+    @Override
+    public int getOverlayLayoutOffsetX( )
+    {
+        return orient == VERTICAL ? getMaxLevel( ) * getIndentSize( ) : 0;
+    }
+
+    @Override
+    public int getOverlayLayoutOffsetY2( )
+    {
+        return orient == VERTICAL ? 0 : getMaxLevel( ) * getIndentSize( );
     }
 
     protected List<PlotInfo> getUngroupedPlots( Collection<PlotInfo> unsorted )

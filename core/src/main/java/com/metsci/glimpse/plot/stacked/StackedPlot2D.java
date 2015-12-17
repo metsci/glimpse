@@ -243,22 +243,22 @@ public class StackedPlot2D extends GlimpseLayout
         }
     }
 
-    protected int getOverlayLayoutOffsetX( )
+    public int getOverlayLayoutOffsetX( )
     {
         return 0;
     }
 
-    protected int getOverlayLayoutOffsetX2( )
+    public int getOverlayLayoutOffsetX2( )
     {
         return 0;
     }
 
-    protected int getOverlayLayoutOffsetY( )
+    public int getOverlayLayoutOffsetY( )
     {
         return 0;
     }
 
-    protected int getOverlayLayoutOffsetY2( )
+    public int getOverlayLayoutOffsetY2( )
     {
         return 0;
     }
