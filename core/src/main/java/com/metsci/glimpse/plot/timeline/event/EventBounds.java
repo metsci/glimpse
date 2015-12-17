@@ -1,5 +1,6 @@
 package com.metsci.glimpse.plot.timeline.event;
 
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**

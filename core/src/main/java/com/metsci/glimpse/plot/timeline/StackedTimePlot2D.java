@@ -68,7 +68,7 @@ import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.EventSelectionHandler;
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl;
 import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;

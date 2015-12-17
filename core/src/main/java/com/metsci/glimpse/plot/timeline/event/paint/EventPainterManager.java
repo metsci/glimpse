@@ -27,10 +27,12 @@
 package com.metsci.glimpse.plot.timeline.event.paint;
 
 import java.awt.Font;
+import java.util.Collection;
 import java.util.List;
 
 import javax.media.opengl.GL2;
 
+import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -74,7 +76,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
 
     protected boolean isHorizontal = true;
 
-    protected EventPainter defaultPainter;
+    protected GroupedEventPainter defaultPainter;
 
     public EventPainterManager( EventPlotInfo plot, EventManager manager, Epoch epoch, TextureAtlas atlas )
     {
@@ -85,15 +87,15 @@ public class EventPainterManager extends GlimpseDataPainter1D
         this.newFont = FontUtils.getDefaultPlain( 12 );
         this.isHorizontal = plot.getStackedTimePlot( ).isTimeAxisHorizontal( );
 
-        this.defaultPainter = new DefaultEventPainter( );
+        this.defaultPainter = new GroupedEventPainterAdapter( new DefaultEventPainter( ) );
     }
 
-    public void setEventPainter( EventPainter painter )
+    public void setEventPainter( GroupedEventPainter painter )
     {
         this.defaultPainter = painter;
     }
 
-    public EventPainter getEventPainter( )
+    public GroupedEventPainter getEventPainter( )
     {
         return this.defaultPainter;
     }
@@ -208,6 +210,8 @@ public class EventPainterManager extends GlimpseDataPainter1D
             int posMax = buffer + rowSize;
 
             List<Row> rows = manager.getRows( );
+            
+            Collection<EventDrawInfo> events = Lists.newLinkedList( );
 
             int size = rows.size( );
             for ( int i = 0; i < size; i++ )
@@ -219,7 +223,14 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 {
                     if ( prev != null )
                     {
-                        prev.paint( defaultPainter, gl, next, plot, bounds, axis, posMin, posMax );
+                        if ( prev.getEventPainter( ) == null )
+                        {
+                            events.add( new EventDrawInfo( prev, next, posMin, posMax ) );
+                        }
+                        else
+                        {
+                            prev.getEventPainter( ).paint( gl, prev, next, plot, bounds, axis, posMin, posMax );
+                        }
                     }
 
                     prev = next;
@@ -228,12 +239,22 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 // paint last event
                 if ( prev != null )
                 {
-                    prev.paint( defaultPainter, gl, null, plot, bounds, axis, posMin, posMax );
+                    if ( prev.getEventPainter( ) == null )
+                    {
+                        events.add( new EventDrawInfo( prev, null, posMin, posMax ) );
+                    }
+                    else
+                    {
+                        prev.getEventPainter( ).paint( gl, prev, null, plot, bounds, axis, posMin, posMax );
+                    }
                 }
 
                 posMin = posMax + buffer;
                 posMax = posMax + buffer + rowSize;
             }
+            
+            // paint all the events which did not have a custom painter
+            defaultPainter.paint( gl, plot, bounds, axis, events );
         }
         finally
         {

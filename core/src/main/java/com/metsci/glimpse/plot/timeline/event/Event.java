@@ -43,6 +43,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
 import com.metsci.glimpse.plot.timeline.event.paint.EventPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
