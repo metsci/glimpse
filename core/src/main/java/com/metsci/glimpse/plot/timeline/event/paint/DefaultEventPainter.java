@@ -24,12 +24,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.plot.timeline.event.paint;
+
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
-import java.util.UUID;
 
 import javax.media.opengl.GL2;
 
@@ -39,7 +40,12 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.event.Event;
+import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
 import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
+import com.metsci.glimpse.plot.timeline.event.EventBounds;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -57,7 +63,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  */
 public class DefaultEventPainter implements EventPainter
 {
-    public static final Object DEFAULT_ICON = UUID.randomUUID( );
     public static final int DEFAULT_ICON_SIZE = 64;
     public static final Color DEFAULT_ICON_COLOR = Color.BLACK;
     public static final int DEFAULT_NUM_ICONS_ROWS = 3;
@@ -66,23 +71,7 @@ public class DefaultEventPainter implements EventPainter
     public static final int ARROW_SIZE = 10;
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
 
-    protected Object defaultIconId = DEFAULT_ICON;
     protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
-
-    /**
-     * Sets the default icon which is used when no icon is set for an aggregate event.
-     * 
-     * @param id
-     */
-    public void setDefaultIconId( Object id )
-    {
-        this.defaultIconId = id;
-    }
-
-    public Object getDefaultIconId( )
-    {
-        return this.defaultIconId;
-    }
 
     /**
      * Sets the maximum number of rows used to display icons in aggregate groups.
@@ -158,11 +147,13 @@ public class DefaultEventPainter implements EventPainter
 
         boolean horiz = plot.isTimeAxisHorizontal( );
 
+        EventBounds eventBounds = info.getEventBounds( event.getId( ) );
+        
         if ( !offEdgeMin && !offEdgeMax )
         {
             if ( event.isShowBackground( ) )
             {
-                GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
+                GlimpseColor.glColor( gl, getBackgroundColor( event, info, isSelected ) );
                 gl.glBegin( GL2.GL_QUADS );
                 try
                 {
@@ -189,8 +180,8 @@ public class DefaultEventPainter implements EventPainter
 
             if ( event.isShowBorder( ) )
             {
-                GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
-                gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
+                GlimpseColor.glColor( gl, getBorderColor( event, info, isSelected ) );
+                gl.glLineWidth( getBorderThickness( event, info, isSelected ) );
                 gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
@@ -219,7 +210,7 @@ public class DefaultEventPainter implements EventPainter
         {
             if ( event.isShowBackground( ) )
             {
-                GlimpseColor.glColor( gl, event.getBackgroundColor( info, isSelected ) );
+                GlimpseColor.glColor( gl, getBackgroundColor( event, info, isSelected ) );
                 gl.glBegin( GL2.GL_POLYGON );
                 try
                 {
@@ -250,8 +241,8 @@ public class DefaultEventPainter implements EventPainter
 
             if ( event.isShowBorder( ) )
             {
-                GlimpseColor.glColor( gl, event.getBorderColor( info, isSelected ) );
-                gl.glLineWidth( event.getBorderThickness( info, isSelected ) );
+                GlimpseColor.glColor( gl, getBorderColor( event, info, isSelected ) );
+                gl.glLineWidth( getBorderThickness( event, info, isSelected ) );
                 gl.glBegin( GL2.GL_LINE_LOOP );
                 try
                 {
@@ -280,6 +271,8 @@ public class DefaultEventPainter implements EventPainter
                 }
             }
         }
+        
+        Object defaultIconId = info.getDefaultIconId( );
 
         int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
 
@@ -298,12 +291,12 @@ public class DefaultEventPainter implements EventPainter
             double iconSizePerpValue = iconSizePerpPixels / timeAxis.getPixelsPerValue( );
             int totalIconWidthPixels = iconSizePerpPixels * numColumns;
 
-            event.isIconVisible = event.isShowIcon( ) && !event.isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel );
-            if ( event.isIconVisible )
+            eventBounds.setIconVisible( event.isShowIcon( ) && !isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) ) );
+            if ( eventBounds.isIconVisible( ) )
             {
                 double value = timeAxis.screenPixelToValue( pixel );
-                event.iconStartTime = epoch.toTimeStamp( value );
-                event.iconEndTime = event.iconStartTime.add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) );
+                eventBounds.setIconStartTime( epoch.toTimeStamp( value ) );
+                eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
 
                 TextureAtlas atlas = info.getTextureAtlas( );
                 atlas.beginRendering( );
@@ -321,7 +314,7 @@ public class DefaultEventPainter implements EventPainter
                                 Object icon = child.getIconId( );
                                 if ( icon == null || !atlas.isImageLoaded( icon ) )
                                 {
-                                    GlimpseColor.glColor( gl, child.getBackgroundColor( info, isSelected ), 0.5f );
+                                    GlimpseColor.glColor( gl, getBackgroundColor( child, info, isSelected ), 0.5f );
                                     icon = defaultIconId;
                                 }
                                 else
@@ -367,12 +360,10 @@ public class DefaultEventPainter implements EventPainter
         }
         else
         {
-            //XXX there is currently no way for custom subclasses of EventPainter to properly
-            //    set isIconVisible and isTextVisible. This isn't a huge problem, but will cause
-            //    EventSelection callbacks to incorrectly indicate the visibility of icons or text
-            event.isIconVisible = event.isShowIcon( ) && event.getIconId( ) != null && !event.isIconOverlapping( totalIconSizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel );
+            boolean isOverlapping = isIconOverlapping( totalIconSizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
+            eventBounds.setIconVisible( event.isShowIcon( ) && event.getIconId( ) != null && !isOverlapping );
 
-            if ( event.isIconVisible )
+            if ( eventBounds.isIconVisible( ) )
             {
                 TextureAtlas atlas = info.getTextureAtlas( );
                 atlas.beginRendering( );
@@ -399,10 +390,10 @@ public class DefaultEventPainter implements EventPainter
 
                     // the axis value corresponding to the left side of the icon
                     double posTime = timeAxis.screenPixelToValue( pixel );
-                    event.iconStartTime = epoch.toTimeStamp( posTime );
+                    eventBounds.setIconStartTime( epoch.toTimeStamp( posTime ) );
                     // the size of the icon (parallel to the time axis) in axis units
                     double iconSizeTimeAxis = iconSizeTime / timeAxis.getPixelsPerValue( );
-                    event.iconEndTime = event.iconStartTime.add( iconSizeTimeAxis );
+                    eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( iconSizeTimeAxis ) );
 
                     // the scaled size of the icon parallel to the time axis in pixels
                     int iconSizeTimeScaledPixels = ( int ) ( iconSizeTime * iconScale );
@@ -434,27 +425,27 @@ public class DefaultEventPainter implements EventPainter
             TextRenderer textRenderer = info.getTextRenderer( );
             Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
 
-            boolean isTextOverfull = event.isTextOverfull( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
-            boolean isTextIntersecting = event.isTextIntersecting( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds );
+            boolean isTextOverfull = isTextOverfull( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
+            boolean isTextIntersecting = isTextIntersecting( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
             boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == TextRenderingMode.HideAll );
-            double availableSpace = event.getTextAvailableSpace( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel );
+            double availableSpace = getTextAvailableSpace( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
 
-            event.isTextVisible = !isTextOverlappingAndHidden;
+            eventBounds.setTextVisible( !isTextOverlappingAndHidden );
 
-            if ( event.isTextVisible )
+            if ( eventBounds.isTextVisible( ) )
             {
                 Rectangle2D displayBounds = labelBounds;
                 String displayText = event.getLabel( );
 
                 if ( labelBounds.getWidth( ) > availableSpace && event.getTextRenderingMode( ) != TextRenderingMode.ShowAll )
                 {
-                    displayText = event.calculateDisplayText( textRenderer, displayText, availableSpace );
+                    displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
                     displayBounds = textRenderer.getBounds( displayText );
                 }
 
                 double value = timeAxis.screenPixelToValue( pixel );
-                event.textStartTime = epoch.toTimeStamp( value );
-                event.textEndTime = event.textStartTime.add( displayBounds.getWidth( ) / timeAxis.getPixelsPerValue( ) );
+                eventBounds.setTextStartTime( epoch.toTimeStamp( value ) );
+                eventBounds.setTextEndTime( eventBounds.getTextStartTime( ).add( displayBounds.getWidth( ) / timeAxis.getPixelsPerValue( ) ) );
 
                 // use this event's text color if it has been set
                 if ( event.getLabelColor( ) != null )
@@ -522,11 +513,11 @@ public class DefaultEventPainter implements EventPainter
         }
         else
         {
-            event.isTextVisible = false;
+            eventBounds.setTextVisible( false );
         }
     }
 
-    protected int getIconSizePerpPixels( Event event, EventPlotInfo info, int sizePerpPixels )
+    public static int getIconSizePerpPixels( Event event, EventPlotInfo info, int sizePerpPixels )
     {
         int iconSizePerpPixels;
         if ( !event.isUseDefaultIconSize( ) )
@@ -543,5 +534,111 @@ public class DefaultEventPainter implements EventPainter
         }
 
         return iconSizePerpPixels;
+    }
+    
+    public static boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds, OverlapRenderingMode mode )
+    {
+        return bounds.getWidth( ) + buffer > remainingSpaceX && mode == Overfull;
+    }
+
+    public static boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds, OverlapRenderingMode mode )
+    {
+        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && mode == Intersecting;
+    }
+
+    public static boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, OverlapRenderingMode mode )
+    {
+        return ( size + buffer > remainingSpaceX && mode== Overfull ) || ( pixelX + size + buffer > nextStartPixel && mode == Intersecting );
+    }
+    
+    public static double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, OverlapRenderingMode mode )
+    {
+        double insideBoxSpace = remainingSpaceX - buffer;
+        double outsideBoxSpace = nextStartPixel - pixelX - buffer;
+
+        switch ( mode )
+        {
+            case Overfull:
+                return insideBoxSpace;
+            case Intersecting:
+                return outsideBoxSpace;
+            case None:
+            default:
+                return Double.MAX_VALUE;
+        }
+    }
+    
+    public static String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
+    {
+        for ( int endIndex = fullText.length( ); endIndex >= 0; endIndex-- )
+        {
+            String subText = fullText.substring( 0, endIndex ) + "...";
+            Rectangle2D bounds = textRenderer.getBounds( subText );
+            if ( bounds.getWidth( ) < availableSpace ) return subText;
+        }
+
+        return "";
+    }
+    
+    public static float[] getBackgroundColor( Event event, EventPlotInfo info, boolean isSelected )
+    {
+        float[] backgroundColor = event.getBackgroundColor( );
+        float[] defaultColor = info.getDefaultEventBackgroundColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
+
+        if ( isSelected )
+        {
+            if ( selectedColor != null )
+                return selectedColor;
+            else if ( backgroundColor != null )
+                return backgroundColor;
+            else
+                return defaultColor;
+        }
+        else
+        {
+            if ( backgroundColor != null )
+                return backgroundColor;
+            else
+                return defaultColor;
+        }
+    }
+
+    public static float[] getBorderColor( Event event, EventPlotInfo info, boolean isSelected )
+    {
+        float[] borderColor = event.getBorderColor( );
+        float[] defaultColor = info.getDefaultEventBorderColor( );
+        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
+
+        if ( isSelected )
+        {
+            if ( selectedColor != null )
+                return selectedColor;
+            else if ( borderColor != null )
+                return borderColor;
+            else
+                return defaultColor;
+        }
+        else
+        {
+            if ( borderColor != null )
+                return borderColor;
+            else
+                return defaultColor;
+        }
+    }
+
+    public static float getBorderThickness( Event event, EventPlotInfo info, boolean isSelected )
+    {
+        float borderThickness = event.getBorderThickness( );
+        
+        if ( isSelected )
+        {
+            return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
+        }
+        else
+        {
+            return borderThickness;
+        }
     }
 }

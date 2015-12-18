@@ -101,9 +101,22 @@ public interface PlotInfo
      */
     public boolean isGrow( );
 
+    /**
+     * If true, the PlotInfo will be drawn as a row on the timeline, if false the
+     * PlotInfo will be hidden.
+     */
     public void setVisible( boolean visible );
 
+    /**
+     * @see #setVisible(boolean)
+     */
     public boolean isVisible( );
+
+    public boolean isExpanded( );
+
+    public void setParent( PlotInfo parent );
+
+    public PlotInfo getParent( );
 
     /**
      * Sets the spacing between this plot and those above and below it. This value
@@ -172,10 +185,15 @@ public interface PlotInfo
     public void addLayout( GlimpseAxisLayout2D childLayout );
 
     /**
-     * Removes this plot from its StackedPlot2D. This has the same effect
-     * as calling StackedPlot2D.deletePlot( this.getId( ) )
+     * @deprecated {@link #removePlot()}
      */
     public void deletePlot( );
+
+    /**
+     * Removes this plot from its StackedPlot2D. This has the same effect
+     * as calling StackedPlot2D.removePlot( this.getId( ) )
+     */
+    public void removePlot( );
 
     /**
      * Sets the indentation level of this plot. This can be

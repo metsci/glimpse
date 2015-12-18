@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.examples.stacked;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.io.IOException;
 import java.util.Set;
@@ -50,8 +49,8 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
-import com.metsci.glimpse.plot.timeline.event.EventSelectionListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -89,6 +88,11 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
+
+        plot.setIndentSize( 140 );
+        plot.setIndentSubplots( true );
+
+        plot.setShowLabels( true );
 
         for ( TimePlotInfo row : plot.getAllTimePlots( ) )
         {

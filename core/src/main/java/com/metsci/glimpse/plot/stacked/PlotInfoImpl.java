@@ -38,6 +38,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class PlotInfoImpl implements PlotInfo
 {
+    protected boolean expanded;
     protected boolean visible;
     protected boolean grow;
     protected Object id;
@@ -47,11 +48,12 @@ public class PlotInfoImpl implements PlotInfo
     protected int indentLevel;
     protected String layoutData;
     protected GlimpseAxisLayout2D layout;
-    protected StackedPlot2D parent;
+    protected StackedPlot2D parentPlot;
+    protected PlotInfo parentInfo;
 
-    public PlotInfoImpl( StackedPlot2D parent, Object id, int order, int size, int spacing, GlimpseAxisLayout2D layout )
+    public PlotInfoImpl( StackedPlot2D parentPlot, Object id, int order, int size, int spacing, GlimpseAxisLayout2D layout )
     {
-        this.parent = parent;
+        this.parentPlot = parentPlot;
         this.id = id;
         this.order = order;
         this.size = size;
@@ -59,6 +61,7 @@ public class PlotInfoImpl implements PlotInfo
         this.layout = layout;
         this.grow = size < 0;
         this.visible = true;
+        this.expanded = true;
     }
 
     @Override
@@ -88,7 +91,7 @@ public class PlotInfoImpl implements PlotInfo
     @Override
     public StackedPlot2D getStackedPlot( )
     {
-        return parent;
+        return parentPlot;
     }
 
     @Override
@@ -118,7 +121,7 @@ public class PlotInfoImpl implements PlotInfo
     @Override
     public boolean isGrow( )
     {
-        return grow && isVisible( );
+        return grow && isVisible( ) && isExpanded( );
     }
 
     @Override
@@ -126,7 +129,7 @@ public class PlotInfoImpl implements PlotInfo
     {
         this.order = order;
 
-        if ( this.parent.isAutoValidate( ) ) this.parent.validate( );
+        if ( this.parentPlot.isAutoValidate( ) ) this.parentPlot.validate( );
     }
 
     @Override
@@ -135,7 +138,7 @@ public class PlotInfoImpl implements PlotInfo
         this.size = size;
         this.grow = size < 0;
 
-        if ( this.parent.isAutoValidate( ) ) this.parent.validate( );
+        if ( this.parentPlot.isAutoValidate( ) ) this.parentPlot.validate( );
     }
 
     @Override
@@ -165,25 +168,25 @@ public class PlotInfoImpl implements PlotInfo
     @Override
     public Axis1D getCommonAxis( GlimpseTargetStack stack )
     {
-        return parent.getCommonAxis( getLayout( ).getAxis( stack ) );
+        return parentPlot.getCommonAxis( getLayout( ).getAxis( stack ) );
     }
 
     @Override
     public Axis1D getOrthogonalAxis( GlimpseTargetStack stack )
     {
-        return parent.getOrthogonalAxis( getLayout( ).getAxis( stack ) );
+        return parentPlot.getOrthogonalAxis( getLayout( ).getAxis( stack ) );
     }
 
     @Override
     public Axis1D getCommonAxis( )
     {
-        return parent.getCommonAxis( this.layout.getAxis( ) );
+        return parentPlot.getCommonAxis( this.layout.getAxis( ) );
     }
 
     @Override
     public Axis1D getOrthogonalAxis( )
     {
-        return parent.getOrthogonalAxis( this.layout.getAxis( ) );
+        return parentPlot.getOrthogonalAxis( this.layout.getAxis( ) );
     }
 
     @Override
@@ -191,8 +194,8 @@ public class PlotInfoImpl implements PlotInfo
     {
         if ( childLayout.getAxis( ) != null )
         {
-            Axis1D childCommonAxis = this.parent.getCommonAxis( childLayout.getAxis( ) );
-            Axis1D parentCommonAxis = this.parent.getCommonAxis( this.layout.getAxis( ) );
+            Axis1D childCommonAxis = this.parentPlot.getCommonAxis( childLayout.getAxis( ) );
+            Axis1D parentCommonAxis = this.parentPlot.getCommonAxis( this.layout.getAxis( ) );
             childCommonAxis.setParent( parentCommonAxis );
         }
 
@@ -215,20 +218,50 @@ public class PlotInfoImpl implements PlotInfo
     @Override
     public boolean isVisible( )
     {
-        return visible;
+        return this.visible;
     }
 
     @Override
+    public boolean isExpanded( )
+    {
+        PlotInfo parent = this.parentInfo;
+        
+        while ( parent != null )
+        {
+            if ( !parent.isExpanded( ) ) return false;
+            
+            parent = parent.getParent( );
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public void setParent( PlotInfo parent )
+    {
+        this.parentInfo = parent;
+    }
+
+    @Override
+    public PlotInfo getParent( )
+    {
+        return this.parentInfo;
+    }
+
+    @Override
+    public void removePlot( )
+    {
+        this.parentPlot.removeLayout( layout );
+        this.parentPlot.removePlot( id );
+    }
+    
+    /**
+     * @deprecated {@link #removePlot()}
+     */
+    @Override
     public void deletePlot( )
     {
-        if ( this.parent != null )
-        {
-            StackedPlot2D oldParent = this.parent;
-            this.parent = null;
-
-            oldParent.removeLayout( layout );
-            oldParent.deletePlot( id );
-        }
+        removePlot( );
     }
 
     @Override
@@ -241,7 +274,7 @@ public class PlotInfoImpl implements PlotInfo
         int plotSpacing = getPlotSpacing( );
         int plotSize = getSize( );
 
-        if ( !isVisible( ) )
+        if ( !isVisible( ) || !isExpanded( ) )
         {
             plotSpacing = 0;
             plotSize = 0;
@@ -250,8 +283,13 @@ public class PlotInfoImpl implements PlotInfo
         // no spacing for the last plot (there's no plot beyond it and spacing between
         // it and the edge of the stacked plot is controlled by setBorderSize(int)
         if ( index == plotCount - 1 && orient == HORIZONTAL )
+        {
             plotSpacing = 0;
-        else if ( index == 0 && orient == VERTICAL ) plotSpacing = 0;
+        }
+        else if ( index == 0 && orient == VERTICAL )
+        {
+            plotSpacing = 0;
+        }
 
         String layoutData = null;
         if ( orient == VERTICAL )

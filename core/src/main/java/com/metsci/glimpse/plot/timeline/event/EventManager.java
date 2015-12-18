@@ -65,6 +65,7 @@ public class EventManager
     protected EventPlotInfo info;
     protected ReentrantLock lock;
 
+    protected Map<Object, EventBounds> eventBoundsMap;
     protected Map<Object, Event> eventMap;
     protected Map<Object, Row> rowMap;
     protected List<Row> rows;
@@ -80,21 +81,21 @@ public class EventManager
     protected double prevMin;
     protected double prevMax;
 
-    protected class Row
+    public class Row
     {
-        int index;
+        public int index;
 
         // all Events in the Row
-        EventIntervalQuadTree events;
+        public EventIntervalQuadTree events;
 
         // all visible Events in the Row (some Events may be aggregated)
         // will not be filled in if aggregation is not turned on (in that
         // case it is unneeded because the events map can be queried instead)
-        EventIntervalQuadTree visibleAggregateEvents;
+        public EventIntervalQuadTree visibleAggregateEvents;
 
         // all visible Events (including aggregated events, if turned on)
         // sorted by starting timestamp
-        List<Event> visibleEvents;
+        public List<Event> visibleEvents;
 
         public Row( int index )
         {
@@ -106,18 +107,18 @@ public class EventManager
         public void addEvent( Event event )
         {
             this.events.add( event );
-            rowMap.put( event.getId( ), this );
+            EventManager.this.rowMap.put( event.getId( ), this );
         }
 
         public void removeEvent( Event event )
         {
             this.events.remove( event );
-            rowMap.remove( event.getId( ) );
+            EventManager.this.rowMap.remove( event.getId( ) );
         }
 
         public void calculateVisibleEvents( Axis1D axis, TimeStamp min, TimeStamp max )
         {
-            if ( aggregateNearbyEvents )
+            if ( EventManager.this.aggregateNearbyEvents )
             {
                 calculateVisibleEventsAggregated( axis, min, max );
             }
@@ -131,8 +132,8 @@ public class EventManager
         {
             // calculate size of bin in system (time) units
             double ppv = axis.getPixelsPerValue( );
-            double maxDuration = maxAggregateSize / ppv;
-            double maxGap = maxAggregateGap / ppv;
+            double maxDuration = EventManager.this.maxAggregateSize / ppv;
+            double maxGap = EventManager.this.maxAggregateGap / ppv;
 
             // expand the visible window slightly
             // since we only aggregate visible Events, we don't want weird
@@ -237,7 +238,7 @@ public class EventManager
 
         public Collection<Event> getNearestVisibleEvents( TimeStamp timeStart, TimeStamp timeEnd )
         {
-            if ( aggregateNearbyEvents )
+            if ( EventManager.this.aggregateNearbyEvents )
             {
                 return this.visibleAggregateEvents.get( timeStart, timeEnd );
             }
@@ -274,9 +275,10 @@ public class EventManager
 
         this.lock = info.getStackedPlot( ).getLock( );
 
-        this.rows = new ArrayList<Row>( );
-        this.eventMap = new HashMap<Object, Event>( );
-        this.rowMap = new HashMap<Object, Row>( );
+        this.rows = new ArrayList<>( );
+        this.eventMap = new HashMap<>( );
+        this.eventBoundsMap = new HashMap<>( );
+        this.rowMap = new HashMap<>( );
 
         this.isHorizontal = info.getStackedTimePlot( ).isTimeAxisHorizontal( );
     }
@@ -475,7 +477,8 @@ public class EventManager
         try
         {
             Event event = this.eventMap.remove( id );
-
+            this.eventBoundsMap.remove( id );
+            
             if ( event != null )
             {
                 this.removeEvent0( event );
@@ -502,6 +505,7 @@ public class EventManager
             }
 
             this.eventMap.clear( );
+            this.eventBoundsMap.clear( );
             this.rowMap.clear( );
             this.rows.clear( );
 
@@ -583,6 +587,53 @@ public class EventManager
         try
         {
             return this.eventMap.get( id );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public EventBounds getOrCreateEventBounds( Object id )
+    {
+        lock.lock( );
+        try
+        {
+           EventBounds bounds = this.eventBoundsMap.get( id );
+        
+           if ( bounds == null )
+           {
+               bounds = new EventBounds( );
+               this.eventBoundsMap.put( id, bounds );
+           }
+           
+           return bounds;
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public EventBounds getEventBounds( Object id )
+    {
+        lock.lock( );
+        try
+        {
+            return this.eventBoundsMap.get( id );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public EventBounds setEventBounds( Object id, EventBounds bounds )
+    {
+        lock.lock( );
+        try
+        {
+            return this.eventBoundsMap.put( id, bounds );
         }
         finally
         {
@@ -737,19 +788,16 @@ public class EventManager
 
         EnumSet<Location> locations = EnumSet.noneOf( Location.class );
 
+        EventBounds bounds = getEventBounds( event.getId( ) );
+        if ( bounds != null )
+        {
+            if ( bounds.containsText( t ) ) locations.add( Label );
+            if ( bounds.containsIcon( t ) ) locations.add( Icon );
+        }
+        
         boolean start = t2.isAfterOrEquals( e1 ) && t1.isBeforeOrEquals( e1 );
         boolean end = t2.isAfterOrEquals( e2 ) && t1.isBeforeOrEquals( e2 );
 
-        TimeStamp i1 = event.getIconStartTime( );
-        TimeStamp i2 = event.getIconEndTime( );
-        boolean icon = event.isIconVisible( ) && i1 != null && i2 != null && t.isAfterOrEquals( i1 ) && t.isBeforeOrEquals( i2 );
-
-        TimeStamp l1 = event.getLabelStartTime( );
-        TimeStamp l2 = event.getLabelEndTime( );
-        boolean text = event.isLabelVisible( ) && l1 != null && l2 != null && t.isAfterOrEquals( l1 ) && t.isBeforeOrEquals( l2 );
-
-        if ( text ) locations.add( Label );
-        if ( icon ) locations.add( Icon );
         if ( start ) locations.add( Start );
         if ( end ) locations.add( End );
         if ( ( !start && !end ) || ( start && end ) ) locations.add( Center );

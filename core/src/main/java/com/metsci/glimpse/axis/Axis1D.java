@@ -769,11 +769,25 @@ public class Axis1D
         {
             minValue = center - minDiff / 2;
             maxValue = center + minDiff / 2;
+
+            // rounding error can cause ( diff < minDiff ) to still be true, in which case the axis becomes un-pannable
+            double newDiff = maxValue - minValue;
+            if ( newDiff < minDiff )
+            {
+                maxValue += Math.max( Math.ulp( maxValue ), minDiff - newDiff );
+            }
         }
         else if ( constrainMaxDiff && diff > maxDiff )
         {
             minValue = center - maxDiff / 2;
             maxValue = center + maxDiff / 2;
+
+            // rounding error can cause ( diff > maxDiff ) to still be true, in which case the axis becomes un-pannable
+            double newDiff = maxValue - minValue;
+            if ( newDiff > maxDiff )
+            {
+                minValue += Math.max( Math.ulp( minValue ), newDiff - maxDiff );
+            }
         }
 
         // if we have an orthogonal (aspect ratio locked) axis then its diff constraints must apply to us as well

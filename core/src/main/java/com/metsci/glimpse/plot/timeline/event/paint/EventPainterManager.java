@@ -24,18 +24,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.plot.timeline.event.paint;
 
 import java.awt.Font;
+import java.util.Collection;
 import java.util.List;
 
 import javax.media.opengl.GL2;
 
+import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.event.Event;
+import com.metsci.glimpse.plot.timeline.event.EventManager;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.EventManager.Row;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -60,18 +65,21 @@ public class EventPainterManager extends GlimpseDataPainter1D
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
+    protected float borderThickness = 1.0f;
+    
     protected float[] backgroundColor = GlimpseColor.getGray( 0.2f );
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
     protected float[] textColor = GlimpseColor.getBlack( );
     protected float[] textColorNoBackground = GlimpseColor.getBlack( );
 
+    protected boolean borderThicknessSet = false;
     protected boolean textColorSet = false;
     protected boolean backgroundColorSet = false;
     protected boolean borderColorSet = false;
 
     protected boolean isHorizontal = true;
 
-    protected EventPainter defaultPainter;
+    protected GroupedEventPainter defaultPainter;
 
     public EventPainterManager( EventPlotInfo plot, EventManager manager, Epoch epoch, TextureAtlas atlas )
     {
@@ -82,17 +90,22 @@ public class EventPainterManager extends GlimpseDataPainter1D
         this.newFont = FontUtils.getDefaultPlain( 12 );
         this.isHorizontal = plot.getStackedTimePlot( ).isTimeAxisHorizontal( );
 
-        this.defaultPainter = new DefaultEventPainter( );
+        this.defaultPainter = new DefaultGroupedEventPainter( );
     }
 
-    public void setEventPainter( EventPainter painter )
+    public void setEventPainter( GroupedEventPainter painter )
     {
         this.defaultPainter = painter;
     }
 
-    public EventPainter getEventPainter( )
+    public GroupedEventPainter getEventPainter( )
     {
         return this.defaultPainter;
+    }
+    
+    public boolean isBorderThicknessSet( )
+    {
+        return borderThicknessSet;
     }
 
     public boolean isTextColorSet( )
@@ -108,6 +121,17 @@ public class EventPainterManager extends GlimpseDataPainter1D
     public boolean isBorderColorSet( )
     {
         return borderColorSet;
+    }
+    
+    public float getBorderThickness( )
+    {
+        return borderThickness;
+    }
+    
+    public void setBorderThickness( float thickness )
+    {
+        this.borderThickness = thickness;
+        this.borderThicknessSet = true;
     }
 
     public float[] getBackgroundColor( )
@@ -205,6 +229,8 @@ public class EventPainterManager extends GlimpseDataPainter1D
             int posMax = buffer + rowSize;
 
             List<Row> rows = manager.getRows( );
+            
+            Collection<EventDrawInfo> events = Lists.newLinkedList( );
 
             int size = rows.size( );
             for ( int i = 0; i < size; i++ )
@@ -216,7 +242,14 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 {
                     if ( prev != null )
                     {
-                        prev.paint( defaultPainter, gl, next, plot, bounds, axis, posMin, posMax );
+                        if ( prev.getEventPainter( ) == null )
+                        {
+                            events.add( new EventDrawInfo( prev, next, posMin, posMax ) );
+                        }
+                        else
+                        {
+                            prev.getEventPainter( ).paint( gl, prev, next, plot, bounds, axis, posMin, posMax );
+                        }
                     }
 
                     prev = next;
@@ -225,12 +258,22 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 // paint last event
                 if ( prev != null )
                 {
-                    prev.paint( defaultPainter, gl, null, plot, bounds, axis, posMin, posMax );
+                    if ( prev.getEventPainter( ) == null )
+                    {
+                        events.add( new EventDrawInfo( prev, null, posMin, posMax ) );
+                    }
+                    else
+                    {
+                        prev.getEventPainter( ).paint( gl, prev, null, plot, bounds, axis, posMin, posMax );
+                    }
                 }
 
                 posMin = posMax + buffer;
                 posMax = posMax + buffer + rowSize;
             }
+            
+            // paint all the events which did not have a custom painter
+            defaultPainter.paint( gl, plot, bounds, axis, events );
         }
         finally
         {

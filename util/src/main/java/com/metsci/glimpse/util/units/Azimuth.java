@@ -93,4 +93,24 @@ public final class Azimuth
     {
         return radiansToDegrees * ( piOverTwo - su );
     }
+
+    public static double navDegToMathRad( double navDeg )
+    {
+        return toMathRad( fromNavDeg( navDeg ) );
+    }
+
+    public static double navRadToMathRad( double navRad )
+    {
+        return toMathRad( fromNavRad( navRad ) );
+    }
+
+    public static double navDegToMathDeg( double navDeg )
+    {
+        return toMathDeg( fromNavDeg( navDeg ) );
+    }
+
+    public static double navRadToMathDeg( double navRad )
+    {
+        return toMathDeg( fromNavRad( navRad ) );
+    }
 }

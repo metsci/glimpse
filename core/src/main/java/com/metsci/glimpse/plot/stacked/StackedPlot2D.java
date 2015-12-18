@@ -243,22 +243,22 @@ public class StackedPlot2D extends GlimpseLayout
         }
     }
 
-    protected int getOverlayLayoutOffsetX( )
+    public int getOverlayLayoutOffsetX( )
     {
         return 0;
     }
 
-    protected int getOverlayLayoutOffsetX2( )
+    public int getOverlayLayoutOffsetX2( )
     {
         return 0;
     }
 
-    protected int getOverlayLayoutOffsetY( )
+    public int getOverlayLayoutOffsetY( )
     {
         return 0;
     }
 
-    protected int getOverlayLayoutOffsetY2( )
+    public int getOverlayLayoutOffsetY2( )
     {
         return 0;
     }
@@ -424,7 +424,16 @@ public class StackedPlot2D extends GlimpseLayout
         updatePainterLayout( );
     }
 
+    /**
+     * @deprecated {@link #removePlot(Object)}
+     * @param id
+     */
     public void deletePlot( Object id )
+    {
+        removePlot( id );
+    }
+    
+    public void removePlot( Object id )
     {
         this.lock.lock( );
         try
@@ -432,8 +441,29 @@ public class StackedPlot2D extends GlimpseLayout
             PlotInfo info = stackedPlots.remove( id );
             if ( info == null ) return;
 
-            info.deletePlot( );
+            info.removePlot( );
 
+            if ( isAutoValidate( ) ) validate( );
+        }
+        finally
+        {
+            this.lock.unlock( );
+        }
+    }
+    
+    public void addPlot( PlotInfo info )
+    {
+        if ( info.getStackedPlot( ) != this )
+        {
+            throw new IllegalArgumentException( "Only PlotInfo created by this StackedPlot2D may be added." );
+        }
+        
+        this.lock.lock( );
+        try
+        {
+            stackedPlots.put( info.getId( ), info );
+            addLayout( info.getBaseLayout( ) );
+            
             if ( isAutoValidate( ) ) validate( );
         }
         finally

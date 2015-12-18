@@ -44,6 +44,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.TooltipPainter;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
+import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -340,7 +341,17 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
 
         StackedTimePlot2D parent = getStackedTimePlot( );
 
-        int labelSize = parent.isShowLabels( ) ? parent.getLabelSize( ) : 0;
+        int labelSize;
+        
+        if ( parent instanceof CollapsibleTimePlot2D )
+        {
+            CollapsibleTimePlot2D collapsible = ( ( CollapsibleTimePlot2D ) parent );
+            labelSize = ( collapsible.getMaxLevel( ) - getIndentLevel( ) ) * collapsible.getIndentSize( );
+        }
+        else
+        {
+            labelSize = parent.isShowLabels( ) ? parent.getLabelSize( ) : 0;
+        }
 
         if ( parent.isTimeAxisHorizontal( ) )
         {

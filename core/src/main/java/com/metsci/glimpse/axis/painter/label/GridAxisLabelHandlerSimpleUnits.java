@@ -33,35 +33,37 @@ package com.metsci.glimpse.axis.painter.label;
  */
 public class GridAxisLabelHandlerSimpleUnits extends GridAxisLabelHandler
 {
-    public GridAxisLabelHandlerSimpleUnits( )
-    {
-        super( );
-    }
 
     @Override
     protected String axisLabel( int order )
     {
-        String pad = axisLabel.length( ) > 0 ? " " : "";
+        return axisLabelWithSimpleUnits( axisLabel, axisUnits, order );
+    }
 
-        if ( axisUnits.length( ) == 0 )
+    public static String axisLabelWithSimpleUnits( String label, String units, int order )
+    {
+        String pad = label.length( ) > 0 ? " " : "";
+
+        if ( units.length( ) == 0 )
         {
             switch ( order )
             {
-                case 0: return axisLabel;
-                case 3: return axisLabel + pad + "(x 1,000)";
-                case -3: return axisLabel + pad + "(x 0.001)";
-                default: return axisLabel + pad + "(x 10^" + order + ")";
+                case 0:  return label;
+                case 3:  return ( label + pad + "(x 1,000)" );
+                case -3: return ( label + pad + "(x 0.001)" );
+                default: return ( label + pad + "(x 10^" + order + ")" );
             }
         }
         else
         {
             switch ( order )
             {
-                case 0: return axisLabel + pad + "(" + axisUnits + ")";
-                case 3: return axisLabel + pad + "(x 1,000 " + axisUnits + ")";
-                case -3: return axisLabel + pad + "(x 0.001 " + axisUnits + ")";
-                default: return axisLabel + pad + "(x 10^" + order + " " + axisUnits + ")";
+                case 0:  return ( label + pad + "(" + units + ")" );
+                case 3:  return ( label + pad + "(x 1,000 " + units + ")" );
+                case -3: return ( label + pad + "(x 0.001 " + units + ")" );
+                default: return ( label + pad + "(x 10^" + order + " " + units + ")" );
             }
         }
     }
+
 }
