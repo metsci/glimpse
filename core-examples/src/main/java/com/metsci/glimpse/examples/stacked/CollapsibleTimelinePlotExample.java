@@ -49,8 +49,8 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
-import com.metsci.glimpse.plot.timeline.event.EventSelectionListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -91,9 +91,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         plot.setIndentSize( 140 );
         plot.setIndentSubplots( true );
-        
+
         plot.setShowLabels( true );
-        
+
         for ( TimePlotInfo row : plot.getAllTimePlots( ) )
         {
             // create a collapsible/expandable group for each row
