@@ -396,7 +396,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
             gl.glVertexPointer( 2, GL.GL_FLOAT, 0, fillBuffer );
             gl.glColorPointer( 4, GL.GL_FLOAT, 0, fillColorBuffer );
-            gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, fillIndices, fillCounts, fillCount );
+            gl.glMultiDrawArrays( GL2.GL_POLYGON, fillIndices, fillCounts, fillCount );
             
             gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
             gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
@@ -414,7 +414,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
             gl.glVertexPointer( 2, GL.GL_FLOAT, 0, borderBuffer );
             gl.glColorPointer( 4, GL.GL_FLOAT, 0, borderColorBuffer );
-            gl.glMultiDrawArrays( GL2.GL_POLYGON, borderIndices, borderCounts, borderCount );
+            gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, borderIndices, borderCounts, borderCount );
             
             gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
             gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
