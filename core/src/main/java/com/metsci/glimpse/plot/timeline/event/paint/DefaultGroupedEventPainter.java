@@ -32,6 +32,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 public class DefaultGroupedEventPainter implements GroupedEventPainter
 {
     protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
+    protected int minimumTextDisplayWidth = 20;
 
     public DefaultGroupedEventPainter( )
     {
@@ -51,6 +52,21 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
     public int getMaxIconRows( )
     {
         return this.maxIconRows;
+    }
+    
+    /**
+     * If the width of an event is less than this value, text is never displayed.
+     * This provides an optimization when lots of events are on screen since it
+     * is expensive to calculate the width of a text string.
+     */
+    public void setMinimumTextDisplayWidth( int pixels )
+    {
+        this.minimumTextDisplayWidth = pixels;
+    }
+
+    public int getMinimumTextDisplayWidth( )
+    {
+        return this.minimumTextDisplayWidth;
     }
 
     @Override
@@ -90,384 +106,399 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         TextRenderer textRenderer = info.getTextRenderer( );
         boolean horiz = plot.isTimeAxisHorizontal( );
 
-        for ( EventDrawInfo eventInfo : events )
+        info.getEventManager( ).lock( );
+        try
         {
-            int posMax = eventInfo.posMax;
-            int posMin = eventInfo.posMin;
-            Event event = eventInfo.event;
-            Event nextEvent = eventInfo.nextEvent;
-
-            // the size of the event in pixels perpendicular to the time axis
-            int sizePerpPixels = posMax - posMin;
-            // the location of the event center perpendicular to the time axis
-            double sizePerpCenter = posMin + sizePerpPixels / 2.0;
-            int arrowSize = Math.min( sizePerpPixels, ARROW_SIZE );
-
-            Epoch epoch = plot.getEpoch( );
-            double timeMin = epoch.fromTimeStamp( event.getStartTime( ) );
-            double timeMax = epoch.fromTimeStamp( event.getEndTime( ) );
-
-            double arrowBaseMin = timeMin;
-            boolean offEdgeMin = false;
-            if ( timeAxis.getMin( ) > timeMin )
+            for ( EventDrawInfo eventInfo : events )
             {
-                offEdgeMin = true;
-                timeMin = timeAxis.getMin( ) + ARROW_TIP_BUFFER / timeAxis.getPixelsPerValue( );
-                arrowBaseMin = timeMin + arrowSize / timeAxis.getPixelsPerValue( );
-            }
-
-            double arrowBaseMax = timeMax;
-            boolean offEdgeMax = false;
-            if ( timeAxis.getMax( ) < timeMax )
-            {
-                offEdgeMax = true;
-                timeMax = timeAxis.getMax( ) - ARROW_TIP_BUFFER / timeAxis.getPixelsPerValue( );
-                arrowBaseMax = timeMax - arrowSize / timeAxis.getPixelsPerValue( );
-            }
-
-            arrowBaseMax = Math.max( timeMin, arrowBaseMax );
-            arrowBaseMin = Math.min( timeMax, arrowBaseMin );
-
-            double timeSpan = arrowBaseMax - arrowBaseMin;
-            double remainingSpace = timeAxis.getPixelsPerValue( ) * timeSpan - buffer * 2;
-
-            int pixel = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, timeAxis.valueToScreenPixel( timeMin ) );
-
-            // start positions of the next event in this row
-            double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : timeAxis.getMax( );
-            int nextStartPixel = nextEvent != null ? timeAxis.valueToScreenPixel( nextStartValue ) : size;
-
-            EventSelectionHandler selectionHandler = info.getEventSelectionHandler( );
-            boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
-            boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( event ) : false;
-
-            EventBounds eventBounds = info.getEventBounds( event.getId( ) );
-
-            if ( !offEdgeMin && !offEdgeMax )
-            {
-                if ( event.isShowBackground( ) )
+                int posMax = eventInfo.posMax;
+                int posMin = eventInfo.posMin;
+                Event event = eventInfo.event;
+                Event nextEvent = eventInfo.nextEvent;
+    
+                // the size of the event in pixels perpendicular to the time axis
+                int sizePerpPixels = posMax - posMin;
+                // the location of the event center perpendicular to the time axis
+                double sizePerpCenter = posMin + sizePerpPixels / 2.0;
+                int arrowSize = Math.min( sizePerpPixels, ARROW_SIZE );
+    
+                Epoch epoch = plot.getEpoch( );
+                double timeMin = epoch.fromTimeStamp( event.getStartTime( ) );
+                double timeMax = epoch.fromTimeStamp( event.getEndTime( ) );
+    
+                double arrowBaseMin = timeMin;
+                boolean offEdgeMin = false;
+                if ( timeAxis.getMin( ) > timeMin )
                 {
-                    float[] color = getBackgroundColor( event, info, isSelected );
-                    fillIndex = addVerticesBox( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
-                    fillCount++;
+                    offEdgeMin = true;
+                    timeMin = timeAxis.getMin( ) + ARROW_TIP_BUFFER / timeAxis.getPixelsPerValue( );
+                    arrowBaseMin = timeMin + arrowSize / timeAxis.getPixelsPerValue( );
                 }
-
-                if ( event.isShowBorder( ) )
+    
+                double arrowBaseMax = timeMax;
+                boolean offEdgeMax = false;
+                if ( timeAxis.getMax( ) < timeMax )
                 {
-                    float[] color = getBorderColor( event, info, isSelected );
-                    borderIndex = addVerticesBox( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
-                    borderCount++;
+                    offEdgeMax = true;
+                    timeMax = timeAxis.getMax( ) - ARROW_TIP_BUFFER / timeAxis.getPixelsPerValue( );
+                    arrowBaseMax = timeMax - arrowSize / timeAxis.getPixelsPerValue( );
                 }
-            }
-            else
-            {
-                if ( event.isShowBackground( ) )
+    
+                arrowBaseMax = Math.max( timeMin, arrowBaseMax );
+                arrowBaseMin = Math.min( timeMax, arrowBaseMin );
+    
+                double timeSpan = arrowBaseMax - arrowBaseMin;
+                double remainingSpace = timeAxis.getPixelsPerValue( ) * timeSpan - buffer * 2;
+    
+                int pixel = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, timeAxis.valueToScreenPixel( timeMin ) );
+    
+                // start positions of the next event in this row
+                double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : timeAxis.getMax( );
+                int nextStartPixel = nextEvent != null ? timeAxis.valueToScreenPixel( nextStartValue ) : size;
+    
+                EventSelectionHandler selectionHandler = info.getEventSelectionHandler( );
+                boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
+                boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( event ) : false;
+    
+                EventBounds eventBounds = info.getEventBounds( event.getId( ) );
+    
+                if ( !offEdgeMin && !offEdgeMax )
                 {
-                    float[] color = getBackgroundColor( event, info, isSelected );
-                    fillIndex = addVerticesArrow( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
-                    fillCount++;
-                }
-
-                if ( event.isShowBorder( ) )
-                {
-                    float[] color = getBorderColor( event, info, isSelected );
-                    borderIndex = addVerticesArrow( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
-                    borderCount++;
-                }
-            }
-
-            int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
-
-            if ( event.hasChildren( ) )
-            {
-                final int numChildren = event.getEventCount( );
-                final int numRows = maxIconRows;
-
-                // the requested size of the icon in the direction perpendicular to the time axis
-                int iconSizePerpPixels = totalIconSizePerpPixels / numRows;
-
-                int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePerpPixels );
-                int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
-                int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
-
-                double iconSizePerpValue = iconSizePerpPixels / timeAxis.getPixelsPerValue( );
-                int totalIconWidthPixels = iconSizePerpPixels * numColumns;
-
-                eventBounds.setIconVisible( event.isShowIcon( ) && !isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) ) );
-                if ( eventBounds.isIconVisible( ) )
-                {
-                    double value = timeAxis.screenPixelToValue( pixel );
-                    eventBounds.setIconStartTime( epoch.toTimeStamp( value ) );
-                    eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
-
-                    Iterator<Event> iter = event.iterator( );
-
-                    outer: for ( int c = 0; c < numColumns; c++ )
+                    if ( event.isShowBackground( ) )
                     {
-                        for ( int r = numRows - 1; r >= 0; r-- )
+                        float[] color = getBackgroundColor( event, info, isSelected );
+                        fillIndex = addVerticesBox( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
+                        fillCount++;
+                    }
+    
+                    if ( event.isShowBorder( ) )
+                    {
+                        float[] color = getBorderColor( event, info, isSelected );
+                        borderIndex = addVerticesBox( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
+                        borderCount++;
+                    }
+                }
+                else
+                {
+                    if ( event.isShowBackground( ) )
+                    {
+                        float[] color = getBackgroundColor( event, info, isSelected );
+                        fillIndex = addVerticesArrow( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
+                        fillCount++;
+                    }
+    
+                    if ( event.isShowBorder( ) )
+                    {
+                        float[] color = getBorderColor( event, info, isSelected );
+                        borderIndex = addVerticesArrow( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
+                        borderCount++;
+                    }
+                }
+    
+                int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
+    
+                if ( event.hasChildren( ) )
+                {
+                    final int numChildren = event.getEventCount( );
+                    final int numRows = maxIconRows;
+    
+                    // the requested size of the icon in the direction perpendicular to the time axis
+                    int iconSizePerpPixels = totalIconSizePerpPixels / numRows;
+    
+                    int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePerpPixels );
+                    int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
+                    int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
+    
+                    double iconSizePerpValue = iconSizePerpPixels / timeAxis.getPixelsPerValue( );
+                    int totalIconWidthPixels = iconSizePerpPixels * numColumns;
+    
+                    eventBounds.setIconVisible( event.isShowIcon( ) && !isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) ) );
+                    if ( eventBounds.isIconVisible( ) )
+                    {
+                        double value = timeAxis.screenPixelToValue( pixel );
+                        eventBounds.setIconStartTime( epoch.toTimeStamp( value ) );
+                        eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
+    
+                        Iterator<Event> iter = event.iterator( );
+    
+                        outer: for ( int c = 0; c < numColumns; c++ )
                         {
-                            if ( iter.hasNext( ) )
+                            for ( int r = numRows - 1; r >= 0; r-- )
                             {
-                                Event child = iter.next( );
-                                Object icon = child.getIconId( );
-                                if ( icon == null || !atlas.isImageLoaded( icon ) )
+                                if ( iter.hasNext( ) )
                                 {
-                                    GlimpseColor.glColor( gl, getBackgroundColor( child, info, isSelected ), 0.5f );
-                                    icon = defaultIconId;
-                                }
-                                else
-                                {
-                                    GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
-                                }
-
-                                if ( atlas.isImageLoaded( icon ) )
-                                {
-                                    ImageData iconData = atlas.getImageData( icon );
-
-                                    // the size of the icon in the direction perpendicular to the time axis
-                                    int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
-
-                                    double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
-
-                                    double x = value + c * iconSizePerpValue;
-                                    double startY = sizePerpCenter - totalIconSizePerpPixels / 2.0;
-                                    double y = startY + r * iconSizePerpPixels;
-
-                                    if ( horiz )
+                                    Event child = iter.next( );
+                                    Object icon = child.getIconId( );
+                                    if ( icon == null || !atlas.isImageLoaded( icon ) )
                                     {
-                                        iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, true ) );
+                                        GlimpseColor.glColor( gl, getBackgroundColor( child, info, isSelected ), 0.5f );
+                                        icon = defaultIconId;
                                     }
                                     else
                                     {
-                                        iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, false ) );
+                                        GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
+                                    }
+    
+                                    if ( atlas.isImageLoaded( icon ) )
+                                    {
+                                        ImageData iconData = atlas.getImageData( icon );
+    
+                                        // the size of the icon in the direction perpendicular to the time axis
+                                        int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
+    
+                                        double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
+    
+                                        double x = value + c * iconSizePerpValue;
+                                        double startY = sizePerpCenter - totalIconSizePerpPixels / 2.0;
+                                        double y = startY + r * iconSizePerpPixels;
+    
+                                        if ( horiz )
+                                        {
+                                            iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, true ) );
+                                        }
+                                        else
+                                        {
+                                            iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, false ) );
+                                        }
                                     }
                                 }
+                                else
+                                {
+                                    break outer;
+                                }
+                            }
+                        }
+    
+                        remainingSpace -= totalIconWidthPixels + buffer;
+                        pixel += totalIconWidthPixels + buffer;
+                    }
+                }
+                else
+                {
+                    boolean isOverlapping = isIconOverlapping( totalIconSizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
+                    eventBounds.setIconVisible( event.isShowIcon( ) && event.getIconId( ) != null && !isOverlapping );
+    
+                    if ( eventBounds.isIconVisible( ) )
+                    {
+                        Object icon = event.getIconId( );
+                        if ( icon == null || !atlas.isImageLoaded( icon ) )
+                        {
+                            icon = defaultIconId;
+                        }
+    
+                        if ( atlas.isImageLoaded( icon ) )
+                        {
+                            ImageData iconData = atlas.getImageData( icon );
+    
+                            // the size of the icon in the direction perpendicular to the time axis
+                            int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
+    
+                            // the size of the icon in the direction parallel to the time axis
+                            int iconSizeTime = horiz ? iconData.getWidth( ) : iconData.getHeight( );
+    
+                            // the requested size of the icon in the direction perpendicular to the time axis
+                            int iconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
+    
+                            double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
+    
+                            // the axis value corresponding to the left side of the icon
+                            double posTime = timeAxis.screenPixelToValue( pixel );
+                            eventBounds.setIconStartTime( epoch.toTimeStamp( posTime ) );
+                            // the size of the icon (parallel to the time axis) in axis units
+                            double iconSizeTimeAxis = iconSizeTime / timeAxis.getPixelsPerValue( );
+                            eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( iconSizeTimeAxis ) );
+    
+                            // the scaled size of the icon parallel to the time axis in pixels
+                            int iconSizeTimeScaledPixels = ( int ) ( iconSizeTime * iconScale );
+    
+                            // the position of the bottom of the icon in pixels perpendicular to the time axis
+                            double posPerp = sizePerpCenter - iconSizePerpPixels / 2.0;
+    
+                            if ( horiz )
+                            {
+                                iconDrawList.add( new IconDrawInfo( icon, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp, true ) );
                             }
                             else
                             {
-                                break outer;
+                                iconDrawList.add( new IconDrawInfo( icon, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp, false ) );
                             }
+    
+                            remainingSpace -= iconSizeTimeScaledPixels + buffer;
+                            pixel += iconSizeTimeScaledPixels + buffer;
                         }
                     }
-
-                    remainingSpace -= totalIconWidthPixels + buffer;
-                    pixel += totalIconWidthPixels + buffer;
                 }
-            }
-            else
-            {
-                boolean isOverlapping = isIconOverlapping( totalIconSizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
-                eventBounds.setIconVisible( event.isShowIcon( ) && event.getIconId( ) != null && !isOverlapping );
-
-                if ( eventBounds.isIconVisible( ) )
+    
+                boolean isBoxTooSmallForText = remainingSpace < this.minimumTextDisplayWidth;
+                
+                if ( event.isShowLabel( ) && event.getLabel( ) != null && !isBoxTooSmallForText )
                 {
-                    Object icon = event.getIconId( );
-                    if ( icon == null || !atlas.isImageLoaded( icon ) )
+                    Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
+    
+                    boolean isTextOverfull = isTextOverfull( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
+                    boolean isTextIntersecting = isTextIntersecting( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
+                    boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == TextRenderingMode.HideAll );
+                    double availableSpace = getTextAvailableSpace( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
+    
+                    eventBounds.setTextVisible( !isTextOverlappingAndHidden );
+    
+                    if ( eventBounds.isTextVisible( ) )
                     {
-                        icon = defaultIconId;
-                    }
-
-                    if ( atlas.isImageLoaded( icon ) )
-                    {
-                        ImageData iconData = atlas.getImageData( icon );
-
-                        // the size of the icon in the direction perpendicular to the time axis
-                        int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
-
-                        // the size of the icon in the direction parallel to the time axis
-                        int iconSizeTime = horiz ? iconData.getWidth( ) : iconData.getHeight( );
-
-                        // the requested size of the icon in the direction perpendicular to the time axis
-                        int iconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
-
-                        double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
-
-                        // the axis value corresponding to the left side of the icon
-                        double posTime = timeAxis.screenPixelToValue( pixel );
-                        eventBounds.setIconStartTime( epoch.toTimeStamp( posTime ) );
-                        // the size of the icon (parallel to the time axis) in axis units
-                        double iconSizeTimeAxis = iconSizeTime / timeAxis.getPixelsPerValue( );
-                        eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( iconSizeTimeAxis ) );
-
-                        // the scaled size of the icon parallel to the time axis in pixels
-                        int iconSizeTimeScaledPixels = ( int ) ( iconSizeTime * iconScale );
-
-                        // the position of the bottom of the icon in pixels perpendicular to the time axis
-                        double posPerp = sizePerpCenter - iconSizePerpPixels / 2.0;
-
+                        Rectangle2D displayBounds = labelBounds;
+                        String displayText = event.getLabel( );
+    
+                        if ( labelBounds.getWidth( ) > availableSpace && event.getTextRenderingMode( ) != TextRenderingMode.ShowAll )
+                        {
+                            displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
+                            displayBounds = textRenderer.getBounds( displayText );
+                        }
+    
+                        double value = timeAxis.screenPixelToValue( pixel );
+                        eventBounds.setTextStartTime( epoch.toTimeStamp( value ) );
+                        eventBounds.setTextEndTime( eventBounds.getTextStartTime( ).add( displayBounds.getWidth( ) / timeAxis.getPixelsPerValue( ) ) );
+    
+                        float[] color;
+                        
+                        // use this event's text color if it has been set
+                        if ( event.getLabelColor( ) != null )
+                        {
+                            color = event.getLabelColor( );
+                        }
+                        // otherwise, use the default no background color if the background is not showing
+                        // and if a color has not been explicitly set for the EventPainter
+                        else if ( !info.isTextColorSet( ) && !event.isShowBackground( ) )
+                        {
+                            color = info.getTextColorNoBackground( );
+                        }
+                        // otherwise use the EventPainter's default text color
+                        else
+                        {
+                            color = info.getTextColor( );
+                        }
+    
                         if ( horiz )
                         {
-                            iconDrawList.add( new IconDrawInfo( icon, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp, true ) );
+    
+                            // use the labelBounds for the height (if the text shortening removed a character which
+                            // hangs below the line, we don't want the text position to move)
+                            int pixelY = ( int ) ( sizePerpPixels / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
+                            textDrawList.add( new TextDrawInfo( displayText, color, pixel, pixelY, 0, 0 ) );
+    
+                            remainingSpace -= displayBounds.getWidth( ) + buffer;
+                            pixel += displayBounds.getWidth( ) + buffer;
                         }
                         else
                         {
-                            iconDrawList.add( new IconDrawInfo( icon, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp, false ) );
+                            double shiftX = sizePerpPixels / 2.0 + posMin;
+                            int pixelX = ( int ) shiftX;
+    
+                            double shiftY = pixel;
+                            int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
+    
+                            textDrawList.add( new TextDrawInfo( displayText, color, pixelX, pixelY, shiftX, shiftY ) );
+    
+                            remainingSpace -= displayBounds.getWidth( ) + buffer;
+                            pixel += displayBounds.getWidth( ) + buffer;
                         }
-
-                        remainingSpace -= iconSizeTimeScaledPixels + buffer;
-                        pixel += iconSizeTimeScaledPixels + buffer;
                     }
                 }
-            }
-
-            if ( event.isShowLabel( ) && event.getLabel( ) != null )
-            {
-
-                Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
-
-                boolean isTextOverfull = isTextOverfull( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
-                boolean isTextIntersecting = isTextIntersecting( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
-                boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == TextRenderingMode.HideAll );
-                double availableSpace = getTextAvailableSpace( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
-
-                eventBounds.setTextVisible( !isTextOverlappingAndHidden );
-
-                if ( eventBounds.isTextVisible( ) )
+                else
                 {
-                    Rectangle2D displayBounds = labelBounds;
-                    String displayText = event.getLabel( );
-
-                    if ( labelBounds.getWidth( ) > availableSpace && event.getTextRenderingMode( ) != TextRenderingMode.ShowAll )
-                    {
-                        displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
-                        displayBounds = textRenderer.getBounds( displayText );
-                    }
-
-                    double value = timeAxis.screenPixelToValue( pixel );
-                    eventBounds.setTextStartTime( epoch.toTimeStamp( value ) );
-                    eventBounds.setTextEndTime( eventBounds.getTextStartTime( ).add( displayBounds.getWidth( ) / timeAxis.getPixelsPerValue( ) ) );
-
-                    float[] color;
-                    
-                    // use this event's text color if it has been set
-                    if ( event.getLabelColor( ) != null )
-                    {
-                        color = event.getLabelColor( );
-                    }
-                    // otherwise, use the default no background color if the background is not showing
-                    // and if a color has not been explicitly set for the EventPainter
-                    else if ( !info.isTextColorSet( ) && !event.isShowBackground( ) )
-                    {
-                        color = info.getTextColorNoBackground( );
-                    }
-                    // otherwise use the EventPainter's default text color
-                    else
-                    {
-                        color = info.getTextColor( );
-                    }
-
-                    if ( horiz )
-                    {
-
-                        // use the labelBounds for the height (if the text shortening removed a character which
-                        // hangs below the line, we don't want the text position to move)
-                        int pixelY = ( int ) ( sizePerpPixels / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
-                        textDrawList.add( new TextDrawInfo( displayText, color, pixel, pixelY, 0, 0 ) );
-
-                        remainingSpace -= displayBounds.getWidth( ) + buffer;
-                        pixel += displayBounds.getWidth( ) + buffer;
-                    }
-                    else
-                    {
-                        double shiftX = sizePerpPixels / 2.0 + posMin;
-                        int pixelX = ( int ) shiftX;
-
-                        double shiftY = pixel;
-                        int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
-
-                        textDrawList.add( new TextDrawInfo( displayText, color, pixelX, pixelY, shiftX, shiftY ) );
-
-                        remainingSpace -= displayBounds.getWidth( ) + buffer;
-                        pixel += displayBounds.getWidth( ) + buffer;
-                    }
+                    eventBounds.setTextVisible( false );
                 }
             }
-        }
-
-        if ( fillCount > 0 )
-        {
-            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-            
-            fillBuffer.flip( );
-            fillColorBuffer.flip( );
-            fillIndices.flip( );
-            fillCounts.flip( );
-
-            gl.glVertexPointer( 2, GL.GL_FLOAT, 0, fillBuffer );
-            gl.glColorPointer( 4, GL.GL_FLOAT, 0, fillColorBuffer );
-            gl.glMultiDrawArrays( GL2.GL_POLYGON, fillIndices, fillCounts, fillCount );
-            
-            gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
-            gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
-        }
-
-        if ( borderCount > 0 )
-        {
-            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-            
-            borderBuffer.flip( );
-            borderColorBuffer.flip( );
-            borderIndices.flip( );
-            borderCounts.flip( );
-
-            gl.glVertexPointer( 2, GL.GL_FLOAT, 0, borderBuffer );
-            gl.glColorPointer( 4, GL.GL_FLOAT, 0, borderColorBuffer );
-            gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, borderIndices, borderCounts, borderCount );
-            
-            gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
-            gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
-        }
-
-        if ( !iconDrawList.isEmpty( ) )
-        {
-            atlas.beginRendering( );
-            try
+    
+            if ( fillCount > 0 )
             {
-                for ( IconDrawInfo iconInfo : iconDrawList )
+                gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
+                gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+                
+                fillBuffer.flip( );
+                fillColorBuffer.flip( );
+                fillIndices.flip( );
+                fillCounts.flip( );
+    
+                gl.glVertexPointer( 2, GL.GL_FLOAT, 0, fillBuffer );
+                gl.glColorPointer( 4, GL.GL_FLOAT, 0, fillColorBuffer );
+                gl.glMultiDrawArrays( GL2.GL_POLYGON, fillIndices, fillCounts, fillCount );
+                
+                gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
+                gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+            }
+    
+            if ( borderCount > 0 )
+            {
+                gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
+                gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+                
+                gl.glLineWidth( info.getDefaultEventBorderThickness( ) );
+                
+                borderBuffer.flip( );
+                borderColorBuffer.flip( );
+                borderIndices.flip( );
+                borderCounts.flip( );
+    
+                gl.glVertexPointer( 2, GL.GL_FLOAT, 0, borderBuffer );
+                gl.glColorPointer( 4, GL.GL_FLOAT, 0, borderColorBuffer );
+                gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, borderIndices, borderCounts, borderCount );
+                
+                gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
+                gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+            }
+    
+            if ( !iconDrawList.isEmpty( ) )
+            {
+                atlas.beginRendering( );
+                try
                 {
-                    if ( iconInfo.isX( ) )
+                    for ( IconDrawInfo iconInfo : iconDrawList )
                     {
-                        atlas.drawImageAxisX( gl, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY );
-                    }
-                    else
-                    {
-                        atlas.drawImageAxisY( gl, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY );
+                        if ( iconInfo.isX( ) )
+                        {
+                            atlas.drawImageAxisX( gl, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY );
+                        }
+                        else
+                        {
+                            atlas.drawImageAxisY( gl, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY );
+                        }
                     }
                 }
+                finally
+                {
+                    atlas.endRendering( );
+                }
             }
-            finally
+    
+            if ( !textDrawList.isEmpty( ) )
             {
-                atlas.endRendering( );
+                textRenderer.beginRendering( width, height );
+                try
+                {
+                    for ( TextDrawInfo textInfo : textDrawList )
+                    {
+    
+                        if ( !horiz )
+                        {
+                            gl.glMatrixMode( GL2.GL_PROJECTION );
+    
+                            gl.glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
+                            gl.glRotated( 90, 0, 0, 1.0f );
+                            gl.glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
+                        }
+    
+                        GlimpseColor.setColor( textRenderer, textInfo.getColor( ) );
+                        textRenderer.draw( textInfo.getText( ), textInfo.getX( ), textInfo.getY( ) );
+                    }
+                }
+                finally
+                {
+                    textRenderer.endRendering( );
+                }
             }
         }
-
-        if ( !textDrawList.isEmpty( ) )
+        finally
         {
-            textRenderer.beginRendering( width, height );
-            try
-            {
-                for ( TextDrawInfo textInfo : textDrawList )
-                {
-
-                    if ( !horiz )
-                    {
-                        gl.glMatrixMode( GL2.GL_PROJECTION );
-
-                        gl.glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
-                        gl.glRotated( 90, 0, 0, 1.0f );
-                        gl.glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
-                    }
-
-                    GlimpseColor.setColor( textRenderer, textInfo.getColor( ) );
-                    textRenderer.draw( textInfo.getText( ), textInfo.getX( ), textInfo.getY( ) );
-                }
-            }
-            finally
-            {
-                textRenderer.endRendering( );
-            }
+            info.getEventManager( ).unlock( );
         }
     }
 

@@ -110,7 +110,6 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected EventSelectionHandler selectionHandler;
 
     protected Object defaultIconId;
-
     protected int defaultIconSize = 0;
     protected boolean useDefaultIconSize = false;
 
@@ -598,6 +597,16 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.eventPainterManager.getTextureAtlas( );
     }
+    
+    public void setDefaultEventBorderThickness( float thickness )
+    {
+        this.eventPainterManager.setBorderThickness( thickness );
+    }
+    
+    public float getDefaultEventBorderThickness( )
+    {
+        return this.eventPainterManager.getBorderThickness( );
+    }
 
     public void setDefaultEventBackgroundColor( float[] backgroundColor )
     {
@@ -652,6 +661,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public EventBounds getEventBounds( Object id )
     {
         return this.eventManager.getOrCreateEventBounds( id );
+    }
+    
+    public EventManager getEventManager( )
+    {
+        return this.eventManager;
     }
 
     public Event addEvent( String label, TimeStamp time )

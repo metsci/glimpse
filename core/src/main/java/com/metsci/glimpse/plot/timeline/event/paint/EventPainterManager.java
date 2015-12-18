@@ -65,11 +65,14 @@ public class EventPainterManager extends GlimpseDataPainter1D
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
+    protected float borderThickness = 1.0f;
+    
     protected float[] backgroundColor = GlimpseColor.getGray( 0.2f );
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
     protected float[] textColor = GlimpseColor.getBlack( );
     protected float[] textColorNoBackground = GlimpseColor.getBlack( );
 
+    protected boolean borderThicknessSet = false;
     protected boolean textColorSet = false;
     protected boolean backgroundColorSet = false;
     protected boolean borderColorSet = false;
@@ -87,7 +90,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
         this.newFont = FontUtils.getDefaultPlain( 12 );
         this.isHorizontal = plot.getStackedTimePlot( ).isTimeAxisHorizontal( );
 
-        this.defaultPainter = new GroupedEventPainterAdapter( new DefaultEventPainter( ) );
+        this.defaultPainter = new DefaultGroupedEventPainter( );
     }
 
     public void setEventPainter( GroupedEventPainter painter )
@@ -98,6 +101,11 @@ public class EventPainterManager extends GlimpseDataPainter1D
     public GroupedEventPainter getEventPainter( )
     {
         return this.defaultPainter;
+    }
+    
+    public boolean isBorderThicknessSet( )
+    {
+        return borderThicknessSet;
     }
 
     public boolean isTextColorSet( )
@@ -113,6 +121,17 @@ public class EventPainterManager extends GlimpseDataPainter1D
     public boolean isBorderColorSet( )
     {
         return borderColorSet;
+    }
+    
+    public float getBorderThickness( )
+    {
+        return borderThickness;
+    }
+    
+    public void setBorderThickness( float thickness )
+    {
+        this.borderThickness = thickness;
+        this.borderThicknessSet = true;
     }
 
     public float[] getBackgroundColor( )

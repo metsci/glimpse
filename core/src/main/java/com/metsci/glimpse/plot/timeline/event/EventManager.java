@@ -789,12 +789,15 @@ public class EventManager
         EnumSet<Location> locations = EnumSet.noneOf( Location.class );
 
         EventBounds bounds = getEventBounds( event.getId( ) );
+        if ( bounds != null )
+        {
+            if ( bounds.containsText( t ) ) locations.add( Label );
+            if ( bounds.containsIcon( t ) ) locations.add( Icon );
+        }
         
         boolean start = t2.isAfterOrEquals( e1 ) && t1.isBeforeOrEquals( e1 );
         boolean end = t2.isAfterOrEquals( e2 ) && t1.isBeforeOrEquals( e2 );
 
-        if ( bounds.containsText( t ) ) locations.add( Label );
-        if ( bounds.containsIcon( t ) ) locations.add( Icon );
         if ( start ) locations.add( Start );
         if ( end ) locations.add( End );
         if ( ( !start && !end ) || ( start && end ) ) locations.add( Center );
