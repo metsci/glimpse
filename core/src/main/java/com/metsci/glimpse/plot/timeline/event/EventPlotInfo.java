@@ -152,9 +152,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.layout1D.setEventConsumer( false );
         this.eventManager = new EventManager( this );
         this.eventPainterManager = new EventPainterManager( this, eventManager, epoch, atlas );
-        DefaultEventPainter defaultPainter = new DefaultEventPainter( );
-        defaultPainter.setDefaultIconId( defaultIconId );
-        this.eventPainterManager.setEventPainter( new GroupedEventPainterAdapter( defaultPainter ) );
+        this.eventPainterManager.setEventPainter( new GroupedEventPainterAdapter( new DefaultEventPainter( ) ) );
         this.layout1D.addPainter( this.eventPainterManager );
 
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
@@ -591,6 +589,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         return this.eventPainterManager.getTextRenderer( );
     }
 
+    public Object getDefaultIconId( )
+    {
+        return this.defaultIconId;
+    }
+    
     public TextureAtlas getTextureAtlas( )
     {
         return this.eventPainterManager.getTextureAtlas( );

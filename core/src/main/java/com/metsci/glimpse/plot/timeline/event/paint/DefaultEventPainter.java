@@ -31,7 +31,6 @@ import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
-import java.util.UUID;
 
 import javax.media.opengl.GL2;
 
@@ -42,10 +41,10 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.Event;
-import com.metsci.glimpse.plot.timeline.event.EventBounds;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
 import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
+import com.metsci.glimpse.plot.timeline.event.EventBounds;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
@@ -64,7 +63,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  */
 public class DefaultEventPainter implements EventPainter
 {
-    public static final Object DEFAULT_ICON = UUID.randomUUID( );
     public static final int DEFAULT_ICON_SIZE = 64;
     public static final Color DEFAULT_ICON_COLOR = Color.BLACK;
     public static final int DEFAULT_NUM_ICONS_ROWS = 3;
@@ -73,23 +71,7 @@ public class DefaultEventPainter implements EventPainter
     public static final int ARROW_SIZE = 10;
     public static final float[] DEFAULT_COLOR = GlimpseColor.getGray( );
 
-    protected Object defaultIconId = DEFAULT_ICON;
     protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
-
-    /**
-     * Sets the default icon which is used when no icon is set for an aggregate event.
-     * 
-     * @param id
-     */
-    public void setDefaultIconId( Object id )
-    {
-        this.defaultIconId = id;
-    }
-
-    public Object getDefaultIconId( )
-    {
-        return this.defaultIconId;
-    }
 
     /**
      * Sets the maximum number of rows used to display icons in aggregate groups.
@@ -289,6 +271,8 @@ public class DefaultEventPainter implements EventPainter
                 }
             }
         }
+        
+        Object defaultIconId = info.getDefaultIconId( );
 
         int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
 
@@ -533,7 +517,7 @@ public class DefaultEventPainter implements EventPainter
         }
     }
 
-    protected int getIconSizePerpPixels( Event event, EventPlotInfo info, int sizePerpPixels )
+    public static int getIconSizePerpPixels( Event event, EventPlotInfo info, int sizePerpPixels )
     {
         int iconSizePerpPixels;
         if ( !event.isUseDefaultIconSize( ) )
