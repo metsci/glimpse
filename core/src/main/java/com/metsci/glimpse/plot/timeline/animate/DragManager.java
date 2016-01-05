@@ -561,7 +561,7 @@ public class DragManager
     {
         List<PlotInfo> plots = Lists.newArrayList( );
         
-        for ( PlotInfo plot : plot.getAllPlots( ) )
+        for ( PlotInfo plot : this.plot.getAllPlots( ) )
         {
             if ( plot.getParent( ) == null )
             {
