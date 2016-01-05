@@ -115,6 +115,15 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.setLabelText( "Snail Schedule" );
         events2.setLabelText( "Holidays" );
         events3.setLabelText( "Weather" );
+        
+        // set the event1 row to contain fixed height events (15 pixels tall)
+        events1.setGrow( false );
+        events1.setRowSize( 35 );
+
+        // set the event2 row to contain variable size events which grow with available space
+        events2.setGrow( true );
+        
+        events3.setGrow( false );
 
         // set additional display options on each plot
         setPlotLookAndFeel( events1 );

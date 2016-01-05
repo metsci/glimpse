@@ -26,11 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Icon;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Label;
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
@@ -478,7 +475,7 @@ public class EventManager
         {
             Event event = this.eventMap.remove( id );
             this.eventBoundsMap.remove( id );
-            
+
             if ( event != null )
             {
                 this.removeEvent0( event );
@@ -593,28 +590,28 @@ public class EventManager
             lock.unlock( );
         }
     }
-    
+
     public EventBounds getOrCreateEventBounds( Object id )
     {
         lock.lock( );
         try
         {
-           EventBounds bounds = this.eventBoundsMap.get( id );
-        
-           if ( bounds == null )
-           {
-               bounds = new EventBounds( );
-               this.eventBoundsMap.put( id, bounds );
-           }
-           
-           return bounds;
+            EventBounds bounds = this.eventBoundsMap.get( id );
+
+            if ( bounds == null )
+            {
+                bounds = new EventBounds( );
+                this.eventBoundsMap.put( id, bounds );
+            }
+
+            return bounds;
         }
         finally
         {
             lock.unlock( );
         }
     }
-    
+
     public EventBounds getEventBounds( Object id )
     {
         lock.lock( );
@@ -627,7 +624,7 @@ public class EventManager
             lock.unlock( );
         }
     }
-    
+
     public EventBounds setEventBounds( Object id, EventBounds bounds )
     {
         lock.lock( );
@@ -733,9 +730,13 @@ public class EventManager
     // must be called while holding lock
     protected Row getNearestRow( GlimpseMouseEvent e )
     {
+        GlimpseBounds bounds = e.getTargetStack( ).getBounds( );
+
         int value = isHorizontal ? e.getY( ) : e.getTargetStack( ).getBounds( ).getWidth( ) - e.getX( );
 
-        int rowIndex = ( int ) Math.floor( value / ( double ) ( info.getRowSize( ) + info.getEventPadding( ) ) );
+        int rowIndex = ( int ) Math.floor( value / ( double ) ( info.getRowSize( bounds ) + info.getEventPadding( ) ) );
+
+        // flip rowIndex (due to GlimpseMouseEvent coordinate system)
         rowIndex = info.getRowCount( ) - 1 - rowIndex;
 
         if ( rowIndex >= 0 && rowIndex < rows.size( ) )
@@ -794,7 +795,7 @@ public class EventManager
             if ( bounds.containsText( t ) ) locations.add( Label );
             if ( bounds.containsIcon( t ) ) locations.add( Icon );
         }
-        
+
         boolean start = t2.isAfterOrEquals( e1 ) && t1.isBeforeOrEquals( e1 );
         boolean end = t2.isAfterOrEquals( e2 ) && t1.isBeforeOrEquals( e2 );
 
