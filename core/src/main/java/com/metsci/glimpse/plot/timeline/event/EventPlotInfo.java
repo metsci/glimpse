@@ -46,6 +46,7 @@ import javax.imageio.ImageIO;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
@@ -53,6 +54,7 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.painter.info.TooltipPainter;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
@@ -522,6 +524,38 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.rowSize;
     }
+    
+    
+    public double getRowSize( GlimpseBounds bounds )
+    {
+        if ( isGrow( ) )
+        {
+            int rowCount = getRowCount( );
+            Orientation orient = getStackedPlot( ).getOrientation( );
+            int size = orient == Orientation.HORIZONTAL ? bounds.getWidth( ) : bounds.getHeight( );
+            int sizeMinusBuffer = size - ( rowCount + 1 ) * getEventPadding( );
+            
+            return (double) sizeMinusBuffer / (double) rowCount;
+        }
+        else
+        {
+            return getRowSize( );
+        }
+    }
+    
+    @Override
+    public void setGrow( boolean grow )
+    {
+        super.setGrow( grow );
+        this.updateSize( );
+    }
+    
+    @Override
+    public void setSize( int size )
+    {
+        this.rowSize = size;
+        this.updateSize( );
+    }
 
     public void setEventPadding( int size )
     {
@@ -563,9 +597,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public void updateSize( )
     {
-        int rowCount = getRowCount( );
-
-        this.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.eventPadding );
+        if ( !isGrow( ) )
+        {
+            int rowCount = getRowCount( );
+            super.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.eventPadding );
+        }
     }
 
     public boolean isTextColorSet( )

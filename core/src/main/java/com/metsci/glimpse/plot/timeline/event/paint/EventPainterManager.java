@@ -40,8 +40,8 @@ import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventManager;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.EventManager.Row;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -66,7 +66,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
     protected volatile boolean antialias = false;
 
     protected float borderThickness = 1.0f;
-    
+
     protected float[] backgroundColor = GlimpseColor.getGray( 0.2f );
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
     protected float[] textColor = GlimpseColor.getBlack( );
@@ -102,7 +102,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
     {
         return this.defaultPainter;
     }
-    
+
     public boolean isBorderThicknessSet( )
     {
         return borderThicknessSet;
@@ -122,12 +122,12 @@ public class EventPainterManager extends GlimpseDataPainter1D
     {
         return borderColorSet;
     }
-    
+
     public float getBorderThickness( )
     {
         return borderThickness;
     }
-    
+
     public void setBorderThickness( float thickness )
     {
         this.borderThickness = thickness;
@@ -223,17 +223,17 @@ public class EventPainterManager extends GlimpseDataPainter1D
             manager.calculateVisibleEvents( axis );
 
             int buffer = plot.getEventPadding( );
-            int rowSize = plot.getRowSize( );
+            double rowSize = plot.getRowSize( bounds );
 
-            int posMin = buffer;
-            int posMax = buffer + rowSize;
+            double posMin = buffer;
+            double posMax = buffer + rowSize;
 
             List<Row> rows = manager.getRows( );
-            
+
             Collection<EventDrawInfo> events = Lists.newLinkedList( );
 
-            int size = rows.size( );
-            for ( int i = 0; i < size; i++ )
+            int count = rows.size( );
+            for ( int i = 0; i < count; i++ )
             {
                 Row row = rows.get( i );
 
@@ -244,11 +244,11 @@ public class EventPainterManager extends GlimpseDataPainter1D
                     {
                         if ( prev.getEventPainter( ) == null )
                         {
-                            events.add( new EventDrawInfo( prev, next, posMin, posMax ) );
+                            events.add( new EventDrawInfo( prev, next, ( int ) posMin, ( int ) posMax ) );
                         }
                         else
                         {
-                            prev.getEventPainter( ).paint( gl, prev, next, plot, bounds, axis, posMin, posMax );
+                            prev.getEventPainter( ).paint( gl, prev, next, plot, bounds, axis, ( int ) posMin, ( int ) posMax );
                         }
                     }
 
@@ -260,18 +260,18 @@ public class EventPainterManager extends GlimpseDataPainter1D
                 {
                     if ( prev.getEventPainter( ) == null )
                     {
-                        events.add( new EventDrawInfo( prev, null, posMin, posMax ) );
+                        events.add( new EventDrawInfo( prev, null, ( int ) posMin, ( int ) posMax ) );
                     }
                     else
                     {
-                        prev.getEventPainter( ).paint( gl, prev, null, plot, bounds, axis, posMin, posMax );
+                        prev.getEventPainter( ).paint( gl, prev, null, plot, bounds, axis, ( int ) posMin, ( int ) posMax );
                     }
                 }
 
                 posMin = posMax + buffer;
                 posMax = posMax + buffer + rowSize;
             }
-            
+
             // paint all the events which did not have a custom painter
             defaultPainter.paint( gl, plot, bounds, axis, events );
         }
