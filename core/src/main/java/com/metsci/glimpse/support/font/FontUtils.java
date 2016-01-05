@@ -26,16 +26,16 @@
  */
 package com.metsci.glimpse.support.font;
 
-import static java.awt.Font.createFont;
+import com.metsci.glimpse.util.io.StreamOpener;
 
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.util.io.StreamOpener;
+import static java.awt.Font.createFont;
 
 /**
  * Utilities for loading default Glimpse fonts. Most applications should use the
@@ -55,6 +55,7 @@ public class FontUtils
     private static final Logger logger = Logger.getLogger( FontUtils.class.getName( ) );
 
     private static final boolean foundVerdana;
+    private static final Map<String, Font> loadedFonts = new HashMap<>();
 
     static
     {
@@ -172,13 +173,28 @@ public class FontUtils
 
     public static Font loadTrueTypeFont( String filename, float size, int style )
     {
+        synchronized ( loadedFonts )
+        {
+            Font font = loadedFonts.get( filename );
+            if ( font == null )
+            {
+                font = readFont( filename );
+                loadedFonts.put( filename, font );
+            }
+
+            return font.deriveFont( style, size );
+        }
+    }
+
+    private static Font readFont( String filename )
+    {
         try
         {
             InputStream stream = null;
             try
             {
                 stream = StreamOpener.fileThenResource.openForRead( filename );
-                return createFont( Font.TRUETYPE_FONT, stream ).deriveFont( style, size );
+                return createFont( Font.TRUETYPE_FONT, stream );
             }
             finally
             {
