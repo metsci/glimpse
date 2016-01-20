@@ -134,6 +134,21 @@ import com.metsci.glimpse.util.GeneralUtils;
  * </table>
  * </blockquote>
  *
+ * For a two-digit year (see note below), use <code>2</code>:
+ * <blockquote>
+ * <table border=0 cellspacing=3 cellpadding=0>
+ *     <tr bgcolor="#ccccff">
+ *         <th align=left>Format
+ *         <th align=left>Output
+ *     <tr>
+ *         <td><code>%y</code>
+ *         <td><code>2008</code>
+ *     <tr>
+ *         <td><code>%2y</code>
+ *         <td><code>08</code>
+ * </table>
+ * </blockquote>
+ *
  * To abbreviate the text month, use <code>3</code>:
  * <blockquote>
  * <table border=0 cellspacing=3 cellpadding=0>
@@ -189,10 +204,16 @@ import com.metsci.glimpse.util.GeneralUtils;
  * Other features that would be nice:
  * <ul>
  *     <li>text day of week (<code>%E</code> --> <code>Tuesday</code>, <code>%3E</code> --> <code>Tue</code>)
- *     <li>2-digit year (<code>%2y</code>)
  *     <li>hour in am/pm (<code>1-12</code>)
  *     <li>am/pm
  * </ul>
+ *
+ *
+ * <h4>Two-Digit Years</h4>
+ * <p>
+ * When parsing a two-digit year, the result is shifted to fall between <code>baseYear</code> and
+ * <code>baseYear+99</code>. The default base year is 1970. To explicitly specify a base year, use
+ * one of the constructors that take a base-year argument.
  *
  *
  * <h4>Rollover and the %S Field</h4>
@@ -224,6 +245,8 @@ public class TimeStampFormatStandard implements TimeStampFormat
 {
     private final ThreadLocal<Calendar> calendars;
 
+    private final int baseForTwoDigitYears;
+
     private final Field[] fields;
     private final Pattern parsePattern;
     private final String formatString;
@@ -235,9 +258,21 @@ public class TimeStampFormatStandard implements TimeStampFormat
         this(format, TimeZone.getTimeZone(timeZoneName));
     }
 
+    public TimeStampFormatStandard(String format, String timeZoneName, int baseForTwoDigitYears)
+    {
+        this(format, TimeZone.getTimeZone(timeZoneName), baseForTwoDigitYears);
+    }
+
     public TimeStampFormatStandard(String format, final TimeZone timeZone)
     {
+        this(format, timeZone, 1970);
+    }
+
+    public TimeStampFormatStandard(String format, final TimeZone timeZone, int baseForTwoDigitYears)
+    {
         calendars = new ThreadLocal<Calendar>() { public Calendar initialValue() { return Calendar.getInstance(timeZone); } };
+
+        this.baseForTwoDigitYears = baseForTwoDigitYears;
 
         List<Field> fieldsList = new LinkedList<Field>();
         StringBuilder patternBuilder = new StringBuilder();
@@ -300,7 +335,7 @@ public class TimeStampFormatStandard implements TimeStampFormat
     {
         switch (code)
         {
-            case 'y': return new YearField(flags);
+            case 'y': return new YearField(flags, baseForTwoDigitYears);
             case 'M': return new NumericMonthField(flags);
             case 'N': return new TextMonthField(flags);
             case 'd': return new DayOfMonthField(flags);
@@ -439,9 +474,42 @@ public class TimeStampFormatStandard implements TimeStampFormat
 
     private static class YearField extends CalendarField
     {
-        public YearField(String flags)
+        private final boolean twoDigit;
+        private final int baseForTwoDigitYears;
+
+        public YearField(String flags, int baseForTwoDigitYears)
         {
-            super(Calendar.YEAR, 4, getPadding(flags));
+            this(flags.contains("2"), baseForTwoDigitYears, getPadding(flags));
+        }
+
+        public YearField(boolean twoDigit, int baseForTwoDigitYears, Padding padding)
+        {
+            super(Calendar.YEAR, (twoDigit ? 2 : 4), padding);
+            this.twoDigit = twoDigit;
+            this.baseForTwoDigitYears = baseForTwoDigitYears;
+        }
+
+        public Integer getValue(BigDecimal posixSeconds, Calendar calendar)
+        {
+            Integer fourDigit = super.getValue(posixSeconds, calendar);
+            return (twoDigit ? fourDigit % 100 : fourDigit);
+        }
+
+        public BigDecimal putValue(String valueString, Calendar calendar)
+        {
+            String fourDigit = (twoDigit ? twoDigitYearToFour(valueString) : valueString);
+            return super.putValue(fourDigit, calendar);
+        }
+
+        private String twoDigitYearToFour(String s2)
+        {
+            int n2 = Integer.parseInt(s2);
+            int n4 = ((baseForTwoDigitYears / 100) * 100) + n2;
+            if (n4 < baseForTwoDigitYears)
+            {
+                n4 += 100;
+            }
+            return Integer.toString(n4);
         }
     }
 
