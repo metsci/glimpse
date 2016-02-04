@@ -32,11 +32,14 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLRunnable;
 import javax.swing.SwingUtilities;
 
+import com.jogamp.newt.NewtFactory;
+import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -84,6 +87,21 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     public NewtSwingEDTGlimpseCanvas( )
     {
         super( );
+    }
+
+    @Override
+    protected GLWindow createGLWindow( GLCapabilities glCapabilities )
+    {
+        return new GLWindow( NewtFactory.createWindow( glCapabilities ) )
+        {
+            public void display( )
+            {
+                if ( SwingUtilities.isEventDispatchThread( ) )
+                {
+                    super.display( );
+                }
+            }
+        };
     }
 
     @Override

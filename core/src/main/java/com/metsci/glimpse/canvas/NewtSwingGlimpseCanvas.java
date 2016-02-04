@@ -120,7 +120,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
-        this.glWindow = GLWindow.create( glCapabilities );
+        this.glWindow = createGLWindow( glCapabilities );
         if ( context != null ) this.glWindow.setSharedContext( context );
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
@@ -141,7 +141,12 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
-    
+
+    protected GLWindow createGLWindow( GLCapabilities glCapabilities )
+    {
+        return GLWindow.create( glCapabilities );
+    }
+
     protected MouseWrapperNewt createMouseWrapper( )
     {
         return new MouseWrapperNewt( this );
