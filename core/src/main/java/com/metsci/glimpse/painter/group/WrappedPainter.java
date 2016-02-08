@@ -51,7 +51,6 @@ import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -205,7 +204,6 @@ public class WrappedPainter extends GlimpsePainter2D
             }
 
             this.dummyLayout.removeAllLayouts( );
-            this.dummyLayout.addPainter( new BackgroundPainter( ).setColor( 0, 0, 0, 0 ) );
             for ( GlimpsePainter2D painter : this.painters )
             {
                 this.dummyLayout.addPainter( painter );
@@ -241,7 +239,7 @@ public class WrappedPainter extends GlimpsePainter2D
             // are set up to draw in)
             this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
             this.dummyAxis.validate( );
-            
+
             // release the onscreen context and make the offscreen context current
             context.getGLContext( ).release( );
             try
