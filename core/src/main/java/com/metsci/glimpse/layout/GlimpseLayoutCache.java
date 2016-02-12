@@ -59,6 +59,25 @@ public class GlimpseLayoutCache<D>
     {
         this.map = new HashMap<List<GlimpseTarget>, Pair<List<GlimpseBounds>, D>>( );
     }
+    
+    public int size( )
+    {
+        return map.size( );
+    }
+    
+    public List<D> getValues( )
+    {
+        Collection<Pair<List<GlimpseBounds>, D>> pairs = map.values( );
+        
+        List<D> values = Lists.newArrayList( );
+        
+        for ( Pair<List<GlimpseBounds>, D> pair : pairs )
+        {
+            values.add( pair.second( ) );
+        }
+        
+        return values;
+    }
 
     public D getValue( GlimpseContext context )
     {
