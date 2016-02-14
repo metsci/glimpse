@@ -164,6 +164,11 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.axisLabel = label;
     }
 
+    public String getAxisLabel( )
+    {
+        return this.axisLabel;
+    }
+
     public void setAxisUnits( String units, boolean abbreviated )
     {
         if ( abbreviated )
@@ -181,6 +186,11 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.axisMilliUnits = milliUnits;
         this.axisUnits = units;
         this.axisKiloUnits = kiloUnits;
+    }
+
+    public String getAxisUnits( )
+    {
+        return this.axisUnits;
     }
 
     protected String axisLabel( int orderX )
