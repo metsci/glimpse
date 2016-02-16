@@ -37,14 +37,14 @@ import com.metsci.glimpse.axis.Axis1D;
 public interface AxisLabelHandler
 {
     /**
-    * @return an array containing positions of tick marks in axis coordinates (transformed by any AxisUnitConverter).
-    */
+     * @return an array containing positions of tick marks in axis coordinates (transformed by any AxisUnitConverter).
+     */
     public double[] getTickPositions( Axis1D axis );
 
     /**
-    * @param tickPositions the output from getTickPositions( ).
-    * @return an array of string labels for the tick marks provided by getTickPositions( ).
-    */
+     * @param tickPositions the output from getTickPositions( ).
+     * @return an array of string labels for the tick marks provided by getTickPositions( ).
+     */
     public String[] getTickLabels( Axis1D axis, double[] tickPositions );
 
     /**
@@ -58,22 +58,22 @@ public interface AxisLabelHandler
     public double[] getMinorTickPositions( double[] tickPositions );
 
     /**
-    * @return a text label describing the axis (the type of data displayed, the units, etc...)
-    */
+     * @return a text label describing the axis (the type of data displayed, the units, etc...)
+     */
     public String getAxisLabel( Axis1D axis );
 
     /**
-    * @param label provides a hint regarding what label information to display
-    */
+     * @param label provides a hint regarding what label information to display
+     */
     public void setAxisLabel( String label );
 
     /**
-    * @return the current AxisUnitConverter (used to determine values returned by getTickPositions() and getTickLabels()
-    */
+     * @return the current AxisUnitConverter (used to determine values returned by getTickPositions() and getTickLabels()
+     */
     public AxisUnitConverter getAxisUnitConverter( );
 
     /**
-    * @param converter sets a new AxisUnitConverter
-    */
+     * @param converter sets a new AxisUnitConverter
+     */
     public void setAxisUnitConverter( AxisUnitConverter converter );
 }

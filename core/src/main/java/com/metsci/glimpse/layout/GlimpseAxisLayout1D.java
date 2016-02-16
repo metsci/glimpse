@@ -113,8 +113,13 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
 
     protected abstract int getSize( GlimpseBounds bounds );
 
-    public void clearCache( )
+    public synchronized void clearCache( )
     {
+        // remove parent links for all the cached axes then clear the cache
+        for ( Axis1D axis : this.cache.getValues( ) )
+        {
+            axis.setParent( null );
+        }
         this.cache.clear( );
 
         // descend recursively clearing caches
@@ -140,14 +145,14 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         this.axis = axis;
     }
 
-    public void setAxis( GlimpseTargetStack stack, Axis1D axis )
+    public synchronized void setAxis( GlimpseTargetStack stack, Axis1D axis )
     {
-        cache.setValue( stack, axis );
+        this.cache.setValue( stack, axis );
     }
 
-    public void setAxis( GlimpseContext context, Axis1D axis )
+    public synchronized void setAxis( GlimpseContext context, Axis1D axis )
     {
-        cache.setValue( context, axis );
+        this.cache.setValue( context, axis );
     }
 
     public AxisFactory1D getAxisFactory( )
@@ -182,7 +187,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
 
     // search up through the stack until a layout with an axis is found
     // then retrieve or create a version of that axis for the current stack and return it
-    public Axis1D getAxis( GlimpseTargetStack stack )
+    public synchronized Axis1D getAxis( GlimpseTargetStack stack )
     {
         if ( !stack.getTarget( ).equals( this ) )
         {
@@ -214,7 +219,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         return null;
     }
 
-    public Collection<Axis1D> getAxis( TargetStackMatcher matcher )
+    public synchronized Collection<Axis1D> getAxis( TargetStackMatcher matcher )
     {
         return this.cache.getMatching( matcher );
     }
@@ -257,7 +262,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
             newAxis.setSizePixels( getSize( stack.getBounds( ) ) );
             cache.setValue( stack, newAxis );
         }
-
+        
         return newAxis;
     }
 

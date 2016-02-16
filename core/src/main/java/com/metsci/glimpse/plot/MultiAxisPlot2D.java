@@ -502,6 +502,11 @@ public class MultiAxisPlot2D extends GlimpseLayout
         this.titlePainter.setFont( font, antialias );
     }
 
+    public String getTitle( )
+    {
+        return this.title;
+    }
+
     public void setTitle( String title )
     {
         this.title = title;
