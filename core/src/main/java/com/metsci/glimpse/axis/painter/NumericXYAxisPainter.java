@@ -251,10 +251,6 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         AxisUnitConverter convY = ticksY.getAxisUnitConverter( );
         convY = convY == null ? AxisUnitConverters.identity : convY;
 
-        // a small half pixel fudge-factor to make things look good
-        double onePixelX = 0.5 / axisX.getPixelsPerValue( );
-        double onePixelY = 0.5 / axisY.getPixelsPerValue( );
-
         int originY = axisY.valueToScreenPixel( 0.0 );
         if ( originY < 0 || lockBottom ) originY = 0;
         if ( originY > height || lockTop ) originY = height;
@@ -268,30 +264,56 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         boolean topCornerY = false;
         boolean bottomCornerY = false;
 
-        double doriginX = 0.0;
-        if ( doriginX <= axisX.getMin( ) || lockLeft )
+        double doriginX;
+        if ( lockLeft )
         {
-            doriginX = axisX.getMin( ) + onePixelX;
+            doriginX = 0;
             leftCornerX = true;
         }
-
-        if ( doriginX > axisX.getMax( ) || lockRight )
+        else if ( lockRight )
         {
-            doriginX = axisX.getMax( );
+            doriginX = 1.0;
             rightCornerX = true;
         }
-
-        double doriginY = 0.0;
-        if ( doriginY <= axisY.getMin( ) || lockBottom )
+        else if ( 0.0 <= axisX.getMin( ) )
         {
-            doriginY = axisY.getMin( ) + onePixelY;
+            doriginX = 0;
+            leftCornerX = true;
+        }
+        else if ( 0.0 > axisX.getMax( ) )
+        {
+            doriginX = 1.0;
+            rightCornerX = true;
+        }
+        else
+        {
+            doriginX = axisX.valueToScreenPixelUnits( 0.0 ) / (double)  width;
+        }
+        
+        double doriginY;
+        if ( lockBottom )
+        {
+            doriginY = 0;
             topCornerY = true;
         }
-
-        if ( doriginY > axisY.getMax( ) || lockTop )
+        else if ( lockTop )
         {
-            doriginY = axisY.getMax( );
+            doriginY = 1.0;
             bottomCornerY = true;
+        }
+        else if ( 0.0 <= axisY.getMin( ) )
+        {
+            doriginY = 0;
+            topCornerY = true;
+        }
+        else if ( 0.0 > axisY.getMax( ) )
+        {
+            doriginY = 1.0;
+            bottomCornerY = true;
+        }
+        else
+        {
+            doriginY = axisY.valueToScreenPixelUnits( 0.0 ) / (double) height;
         }
 
         boolean labelRight = width - originX > rightBuffer;
@@ -374,25 +396,25 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
+        gl.glOrtho( 0, 1, 0, 1, -1, 1 );
         
         GlimpseColor.glColor( gl, lineColor );
         
-        double labelBufferX = labelBuffer / axisX.getPixelsPerValue( );
-        double labelBufferY = labelBuffer / axisY.getPixelsPerValue( );
+        double labelBufferX = labelBuffer / (double) width;
+        double labelBufferY = labelBuffer / (double) height;
         
         gl.glBegin( GL2.GL_LINES );
         try
         {
             if ( showHorizontal )
             {
-                double tickWidthY = tickWidth / axisY.getPixelsPerValue( );
+                double tickWidthY = tickWidth / (double) height;
 
                 for ( int i = 0; i < positionsX.length; i++ )
                 {
                     if ( paintLabelsX[i] )
                     {
-                        double valueX = convX.fromAxisUnits( positionsX[i] );
+                        double valueX = axis.getAxisX( ).valueToScreenPixelUnits( convX.fromAxisUnits( positionsX[i] ) ) / (double) width;
     
                         gl.glVertex2d( valueX, doriginY - tickWidthY );
                         gl.glVertex2d( valueX, doriginY + tickWidthY );
@@ -413,13 +435,13 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
             if ( showVertical )
             {
-                double tickWidthX = tickWidth / axisX.getPixelsPerValue( );
+                double tickWidthX = tickWidth / (double) width;
 
                 for ( int i = 0; i < positionsY.length; i++ )
                 {
                     if ( paintLabelsY[i] )
                     {
-                        double valueY = convY.fromAxisUnits( positionsY[i] );
+                        double valueY = axis.getAxisY( ).valueToScreenPixelUnits( convY.fromAxisUnits( positionsY[i] ) ) / (double) height;
     
                         gl.glVertex2d( doriginX - tickWidthX, valueY );
                         gl.glVertex2d( doriginX + tickWidthX, valueY );
@@ -440,14 +462,14 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
             
             if ( showHorizontal && showOrigin )
             {
-                gl.glVertex2d( convX.fromAxisUnits( axis.getMinX( ) ), convY.fromAxisUnits( doriginY ) );
-                gl.glVertex2d( convX.fromAxisUnits( axis.getMaxX( ) ), convY.fromAxisUnits( doriginY ) );
+                gl.glVertex2d( 0, doriginY );
+                gl.glVertex2d( 1, doriginY );
             }
     
             if ( showVertical && showOrigin )
             {
-                gl.glVertex2d( convX.fromAxisUnits( doriginX ), convY.fromAxisUnits( axis.getMinY( ) ) );
-                gl.glVertex2d( convX.fromAxisUnits( doriginX ), convY.fromAxisUnits( axis.getMaxY( ) ) );
+                gl.glVertex2d( doriginX, 0 );
+                gl.glVertex2d( doriginX, 1 );
             }
         }
         finally
