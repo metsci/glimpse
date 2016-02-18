@@ -92,7 +92,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     @Override
     protected void setBounds( TimePlotInfo chart )
     {
-        Axis1D axis = chart.getLayout( ).getAxis( ).getAxisX( );
+        Axis1D axis = chart.getOrthogonalAxis( );
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
     }
