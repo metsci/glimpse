@@ -105,7 +105,7 @@ public class WrappedPainter extends GlimpsePainter2D
         @Override
         public GlimpseContext getGlimpseContext( )
         {
-            GlimpseContext glimpseContext = new GlimpseContextImpl( getGLContext( ) );
+            GlimpseContext glimpseContext = new GlimpseContextImpl( getGLContext( ), getSurfaceScale( ) );
             glimpseContext.getTargetStack( ).push( this, effectiveGlimpseBounds );
             return glimpseContext;
         }

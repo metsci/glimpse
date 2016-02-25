@@ -41,13 +41,13 @@ public class GlimpseContextImpl implements GlimpseContext
     private int dpi;
     private final int[] scale;
 
-    //TODO if this isn't used anywhere can we get rid of it? Or what should the scale be?
-//    public GlimpseContextImpl( GLContext context )
-//    {
-//        this.glContext = context;
-//        this.targetStack = new GlimpseTargetStackImpl( );
-//        this.dpi = defaultDpiValue; //TODO fix this
-//    }
+    public GlimpseContextImpl( GLContext context, int[] scale )
+    {
+        this.glContext = context;
+        this.targetStack = new GlimpseTargetStackImpl( );
+        this.dpi = defaultDpiValue; //TODO fix this
+        this.scale = scale;
+    }
 
     public GlimpseContextImpl( GlimpseCanvas canvas )
     {
