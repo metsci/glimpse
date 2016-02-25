@@ -411,4 +411,10 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             }
         } );
     }
+    
+    @Override
+    public int[] getSurfaceScale()
+    {
+        return this.glWindow.getNativeSurfaceScale(new int[2]);
+    }
 }

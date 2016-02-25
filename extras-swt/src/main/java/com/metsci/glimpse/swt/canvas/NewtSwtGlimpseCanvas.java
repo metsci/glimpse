@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.swt.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.util.List;
@@ -200,7 +200,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                dimension = new Dimension( width, height );
+                int[] scale = getSurfaceScale( );
+                dimension = new Dimension( width / scale[0], height / scale[1] );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -420,5 +421,11 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return glWindow.getNativeSurfaceScale( new int[2] );
     }
 }
