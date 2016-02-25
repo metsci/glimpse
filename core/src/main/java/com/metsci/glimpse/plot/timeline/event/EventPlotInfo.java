@@ -146,7 +146,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         {
             this.layout1D = new GlimpseAxisLayoutY( getLayout( ), "EventLayout1D" );
         }
-
+        
         // layout1D should completely cover its parent layout
         this.layout1D.setLayoutData( "pos container.x container.y container.x2 container.y2" );
         // un-handled events should be passed on to the parent layout
@@ -215,6 +215,9 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             }
         };
 
+        // by default don't grow event plots
+        this.setGrow( false );
+        
         this.rowSize = DEFAULT_ROW_SIZE;
         this.eventPadding = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
