@@ -198,7 +198,7 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     @Override
     public void paint( )
     {
-     // not a fully featured GlimpseCanvas
+        // not a fully featured GlimpseCanvas
     }
 
     @Override
@@ -266,20 +266,20 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         // not a fully featured GlimpseCanvas
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
         // not a fully featured GlimpseCanvas
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -295,9 +295,8 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     }
 
     @Override
-    public int[] getSurfaceScale()
+    public int[] getSurfaceScale( )
     {
-        //TODO offscreen canvases are always 1-1, right?
-        return new int[]{ 1, 1 };
+        return new int[] { 1, 1 };
     }
 }

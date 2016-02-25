@@ -36,15 +36,15 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import net.miginfocom.layout.ComponentWrapper;
-import net.miginfocom.layout.ContainerWrapper;
-
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+
+import net.miginfocom.layout.ComponentWrapper;
+import net.miginfocom.layout.ContainerWrapper;
 
 public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 {
@@ -147,10 +147,10 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
         return new GlimpseBounds( minX, minY, maxX - minX, maxY - minY );
     }
-    
+
     public void paintTo( GlimpseContext context )
     {
-        final int[] scale = context.getSurfaceScale();
+        final int[] scale = context.getSurfaceScale( );
         final int scaleX = scale[0];
         final int scaleY = scale[1];
         GL gl = context.getGL( );
@@ -168,12 +168,12 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
                 // this implementation is somewhat ugly, but stems from the fact that GlimpseLayout implements GlimpsePainter
                 // (which it probably shouldn't) and even if isVisible is false, GlimpseLayout still needs to layout its
                 // children or odd behavior may result if the GlimpseLayout is resized while not visible
-                if ( !(m.painter instanceof GlimpseLayout) && !layout.isVisible ) continue;
-                
+                if ( ! ( m.painter instanceof GlimpseLayout ) && !layout.isVisible ) continue;
+
                 gl.glEnable( GL2.GL_SCISSOR_TEST );
-                
-                gl.glViewport( bounds.getX( )*scaleX, bounds.getY( )*scaleY, bounds.getWidth( )*scaleX, bounds.getHeight( )*scaleY );
-                gl.glScissor( clippedBounds.getX( )*scaleX, clippedBounds.getY( )*scaleY, clippedBounds.getWidth( )*scaleX, clippedBounds.getHeight( )*scaleY );
+
+                gl.glViewport( bounds.getX( ) * scaleX, bounds.getY( ) * scaleY, bounds.getWidth( ) * scaleX, bounds.getHeight( ) * scaleY );
+                gl.glScissor( clippedBounds.getX( ) * scaleX, clippedBounds.getY( ) * scaleY, clippedBounds.getWidth( ) * scaleX, clippedBounds.getHeight( ) * scaleY );
 
                 if ( m.callback != null ) m.callback.prePaint( m.painter, context );
                 m.painter.paintTo( context );

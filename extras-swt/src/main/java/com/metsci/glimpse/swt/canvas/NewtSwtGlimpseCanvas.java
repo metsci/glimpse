@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.swt.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.util.List;
@@ -87,13 +87,13 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         super( parent, options );
         init( parent, profile, null, options );
     }
-    
+
     public NewtSwtGlimpseCanvas( Composite parent, GLContext context, int options )
     {
         super( parent, options );
         init( parent, context.getGLDrawable( ).getGLProfile( ), context, options );
     }
-    
+
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
@@ -103,7 +103,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         super( parent, options );
         init( parent, glProfile, context, options );
     }
-    
+
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
@@ -112,7 +112,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         this( parent, GLProfile.get( profile ), context, options );
     }
-    
+
     public void init( Composite parent, GLProfile glProfile, GLContext context, int options )
     {
         this.glProfile = glProfile;
@@ -192,8 +192,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                int[] scale = getSurfaceScale();
-                dimension = new Dimension( width/scale[0], height/scale[1] );
+                int[] scale = getSurfaceScale( );
+                dimension = new Dimension( width / scale[0], height / scale[1] );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -216,7 +216,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         return glCanvas;
     }
-    
+
     @Override
     public GLProfile getGLProfile( )
     {
@@ -371,14 +371,14 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -391,16 +391,16 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -416,8 +416,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     }
 
     @Override
-    public int[] getSurfaceScale()
+    public int[] getSurfaceScale( )
     {
-        return glWindow.getNativeSurfaceScale(new int[2]);
+        return glWindow.getNativeSurfaceScale( new int[2] );
     }
 }
