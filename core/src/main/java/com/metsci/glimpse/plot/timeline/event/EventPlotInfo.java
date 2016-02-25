@@ -217,7 +217,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
         // by default don't grow event plots
         this.setGrow( false );
-        
+
         this.rowSize = DEFAULT_ROW_SIZE;
         this.eventPadding = DEFAULT_BUFFER_SIZE;
         this.updateSize( );
@@ -527,8 +527,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.rowSize;
     }
-    
-    
+
     public double getRowSize( GlimpseBounds bounds )
     {
         if ( isGrow( ) )
@@ -537,22 +536,22 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             Orientation orient = getStackedPlot( ).getOrientation( );
             int size = orient == Orientation.HORIZONTAL ? bounds.getWidth( ) : bounds.getHeight( );
             int sizeMinusBuffer = size - ( rowCount + 1 ) * getEventPadding( );
-            
-            return (double) sizeMinusBuffer / (double) rowCount;
+
+            return ( double ) sizeMinusBuffer / ( double ) rowCount;
         }
         else
         {
             return getRowSize( );
         }
     }
-    
+
     @Override
     public void setGrow( boolean grow )
     {
         super.setGrow( grow );
         this.updateSize( );
     }
-    
+
     @Override
     public void setSize( int size )
     {
@@ -631,17 +630,17 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.defaultIconId;
     }
-    
+
     public TextureAtlas getTextureAtlas( )
     {
         return this.eventPainterManager.getTextureAtlas( );
     }
-    
+
     public void setDefaultEventBorderThickness( float thickness )
     {
         this.eventPainterManager.setBorderThickness( thickness );
     }
-    
+
     public float getDefaultEventBorderThickness( )
     {
         return this.eventPainterManager.getBorderThickness( );
@@ -701,7 +700,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.eventManager.getOrCreateEventBounds( id );
     }
-    
+
     public EventManager getEventManager( )
     {
         return this.eventManager;
