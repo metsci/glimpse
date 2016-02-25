@@ -82,6 +82,9 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     public static final Comparator<Point> comparator = Point.getTimeComparator( );
 
+    public static final Font textFont = FontUtils.getDefaultBold( 12 );
+
+    
     protected int dataBufferSize = 0;
     protected FloatBuffer dataBuffer = null;
     protected ReentrantLock trackUpdateLock = null;
@@ -105,7 +108,6 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     protected Collection<TemporalSelectionListener<Point>> temporalSelectionListeners;
 
-    private static final Font textFont = FontUtils.getDefaultBold( 12 );
     protected TextRenderer fontRenderer;
 
     public TrackPainter( )
@@ -1247,7 +1249,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     // A Track modified only on the gl display() thread
     // (so no locking is required when calling its methods
     // and accessing its data)
-    private static class LoadedTrack
+    protected static class LoadedTrack
     {
         // the unique identifier of the track
         Object trackId;
@@ -1385,7 +1387,7 @@ public class TrackPainter extends GlimpseDataPainter2D
     // A Track modified in the gl display() thread as well as
     // by the user, all methods should be called while holding
     // trackUpdateLock
-    private class Track
+    protected class Track
     {
         // the unique identifier of the track
         Object trackId;

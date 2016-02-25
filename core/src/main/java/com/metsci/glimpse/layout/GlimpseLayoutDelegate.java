@@ -36,15 +36,15 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import net.miginfocom.layout.ComponentWrapper;
-import net.miginfocom.layout.ContainerWrapper;
-
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+
+import net.miginfocom.layout.ComponentWrapper;
+import net.miginfocom.layout.ContainerWrapper;
 
 public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 {
@@ -150,6 +150,9 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void paintTo( GlimpseContext context )
     {
+        final int[] scale = context.getSurfaceScale( );
+        final int scaleX = scale[0];
+        final int scaleY = scale[1];
         GL gl = context.getGL( );
 
         GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
@@ -173,8 +176,8 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
                 {
                     gl.glEnable( GL2.GL_SCISSOR_TEST );
     
-                    gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
-                    gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
+                    gl.glViewport( bounds.getX( ) * scaleX, bounds.getY( ) * scaleY, bounds.getWidth( ) * scaleX, bounds.getHeight( ) * scaleY );
+                    gl.glScissor( clippedBounds.getX( ) * scaleX, clippedBounds.getY( ) * scaleY, clippedBounds.getWidth( ) * scaleX, clippedBounds.getHeight( ) * scaleY );
     
                     if ( m.callback != null ) m.callback.prePaint( m.painter, context );
                     m.painter.paintTo( context );

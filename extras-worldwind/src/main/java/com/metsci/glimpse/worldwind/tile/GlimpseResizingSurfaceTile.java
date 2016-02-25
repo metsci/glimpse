@@ -88,6 +88,13 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         this.maxHeight = maxHeight;
         this.preferredPixelCount = width * height;
     }
+    
+    public void setPreferredDimensions( int width, int height )
+    {
+        this.width = width;
+        this.height = height;
+        this.preferredPixelCount = width * height;
+    }
 
     // modify the pixel dimensions of the canvas so that they approximately match the
     // dimensions of the tile which the texture will be drawn onto

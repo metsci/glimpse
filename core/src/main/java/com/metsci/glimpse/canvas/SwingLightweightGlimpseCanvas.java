@@ -476,4 +476,10 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
             }
         } );
     }
+
+    @Override
+    public int[] getSurfaceScale()
+    {
+        return this.glCanvas.getCurrentSurfaceScale(new int[2]);
+    }
 }

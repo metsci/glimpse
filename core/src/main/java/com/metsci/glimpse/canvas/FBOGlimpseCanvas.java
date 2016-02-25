@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -72,7 +72,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height, true );
     }
-    
+
     public FBOGlimpseCanvas( GLContext glContext, int width, int height, boolean isBackgroundOpaque )
     {
         init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height, isBackgroundOpaque );
@@ -252,5 +252,11 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     public boolean isVisible( )
     {
         return true;
+    }
+    
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return new int[] { 1, 1 };
     }
 }
