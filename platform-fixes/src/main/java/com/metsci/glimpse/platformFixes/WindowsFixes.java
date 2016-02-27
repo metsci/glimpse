@@ -36,6 +36,8 @@ import java.util.TimerTask;
 
 import javax.swing.SwingUtilities;
 
+import com.metsci.glimpse.util.jnlu.LibraryList;
+
 public class WindowsFixes
 {
 

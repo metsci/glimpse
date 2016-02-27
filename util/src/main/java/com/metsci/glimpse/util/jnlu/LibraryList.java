@@ -24,9 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.platformFixes;
+package com.metsci.glimpse.util.jnlu;
 
-import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 import static com.metsci.glimpse.util.jnlu.FileUtils.copy;
 import static com.metsci.glimpse.util.jnlu.FileUtils.createTempDir;
 import static java.util.Arrays.asList;
@@ -34,6 +33,7 @@ import static java.util.Collections.unmodifiableList;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LibraryList
@@ -51,7 +51,7 @@ public class LibraryList
     public LibraryList( String resourceDir, List<String> filenames )
     {
         this.resourceDir = resourceDir;
-        this.filenames = unmodifiableList( newArrayList( filenames ) );
+        this.filenames = unmodifiableList( new ArrayList<>( filenames ) );
     }
 
     public void extractAndLoad( ClassLoader resourceLoader, String tempDirName )
