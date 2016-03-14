@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.FloatBuffer;
+
 /**
  * @author hogye
  */
@@ -42,16 +44,17 @@ public interface Floats
      */
     int n();
 
-    void copyTo(int i, float[] dest, int iDest, int c);
-
-
-    // Convenience Methods
-
     boolean isEmpty();
 
     float first();
 
     float last();
+
+    void copyTo(int i, float[] dest, int iDest, int c);
+
+    void copyTo(int i, FloatBuffer dest, int c);
+
+    void copyTo(FloatBuffer dest);
 
     float[] copyOf(int i, int c);
 
