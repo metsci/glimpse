@@ -369,7 +369,10 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             StackedTimePlot2D plot = getStackedTimePlot( );
             TooltipPainter tooltipPainter = plot.getTooltipPainter( );
 
-            if ( eventToolTipHandler != null ) eventToolTipHandler.setToolTip( selection, tooltipPainter );
+            if ( eventToolTipHandler != null )
+            {
+                eventToolTipHandler.setToolTip( selection, tooltipPainter );
+            }
         }
 
         @Override
@@ -379,8 +382,8 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             {
                 StackedTimePlot2D plot = getStackedTimePlot( );
                 TooltipPainter tooltipPainter = plot.getTooltipPainter( );
-                tooltipPainter.setText( null );
-
+                tooltipPainter.clear( );
+                
                 selection = null;
             }
         }

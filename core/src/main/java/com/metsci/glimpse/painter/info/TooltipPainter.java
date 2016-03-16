@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.info;
 
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.font.FontRenderContext;
 import java.text.BreakIterator;
 import java.util.Collections;
@@ -56,7 +57,6 @@ public class TooltipPainter extends SimpleTextPainter
 {
     protected static final float[] defaultIconColor = GlimpseColor.getWhite( );
 
-    // if true, tooltip text will be wrapped if it extends past the edge of the box
     protected boolean isFixedWidth = false;
     protected int fixedWidth = 50;
     protected int borderSize = 4;
@@ -67,7 +67,8 @@ public class TooltipPainter extends SimpleTextPainter
     protected boolean clampToScreenEdges = true;
     protected int iconSpacing = 2;
     protected int textIconSpacing = 4;
-
+    protected Insets insets = new Insets( 0, 2, 4, 0 );
+    
     protected SimpleTextLayout textLayout;
     protected BreakIterator breakIterator;
     protected List<TextBoundingBox> lines;
@@ -79,6 +80,7 @@ public class TooltipPainter extends SimpleTextPainter
     protected float iconSize;
 
     protected boolean wrapTextAroundIcon = false;
+    protected boolean iconSizeFixedToText = true;
 
     protected double x;
     protected double y;
@@ -106,7 +108,7 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.iconIds = iconId != null ? Collections.singletonList( iconId ) : null;
         this.iconColors = null;
-        this.icons = null; // signal that the icons should be recalculated
+        this.resetIconLayout( );
         return this;
     }
 
@@ -116,9 +118,9 @@ public class TooltipPainter extends SimpleTextPainter
      */
     public synchronized TooltipPainter setIcons( List<Object> iconIds )
     {
-        this.iconIds = Lists.newArrayList( iconIds );
+        this.iconIds = iconIds != null ? Lists.newArrayList( iconIds ) : null;
         this.iconColors = null;
-        this.icons = null; // signal that the icons should be recalculated
+        this.resetIconLayout( );
         return this;
     }
 
@@ -129,8 +131,9 @@ public class TooltipPainter extends SimpleTextPainter
      */
     public synchronized TooltipPainter setIcons( List<Object> iconIds, List<float[]> colors )
     {
-        setIcons( iconIds );
+        this.iconIds = Lists.newArrayList( iconIds );
         this.iconColors = Lists.newArrayList( colors );
+        this.resetIconLayout( );
         return this;
     }
 
@@ -141,6 +144,12 @@ public class TooltipPainter extends SimpleTextPainter
         return this;
     }
 
+    public synchronized TooltipPainter setInsets( Insets insets )
+    {
+        this.insets = insets;
+        return this;
+    }
+    
     /**
      * Sets the location of the upper left corner of the tooltip box
      * in screen/pixel coordinates.
@@ -149,9 +158,7 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
-
         this.drawInPixelCoords = true;
-
         return this;
     }
 
@@ -163,9 +170,7 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.x = x;
         this.y = y;
-
         this.drawInPixelCoords = false;
-
         return this;
     }
 
@@ -173,7 +178,6 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.offsetX = x;
         this.offsetY = y;
-
         return this;
     }
 
@@ -232,17 +236,45 @@ public class TooltipPainter extends SimpleTextPainter
         this.resetTextLayout( ); 
         return this;
     }
-    
-    protected void resetTextLayout( )
-    {
-        this.textLayout = null;
-        this.lines = null;
-    }
 
     public synchronized TooltipPainter setTextIconSpacing( int textIconSpacing )
     {
         this.textIconSpacing = textIconSpacing;
         return this;
+    }
+    
+    public synchronized TooltipPainter setIconSize( float size )
+    {
+        this.iconSize = size;
+        this.iconSizeFixedToText = false;
+        return this;
+    }
+    
+    /**
+     * If true, the height of each icon will be set to the height of each line of text.
+     */
+    public synchronized TooltipPainter setIconSizeFixedToTextHeight( boolean iconSizeFixedToText )
+    {
+        this.iconSizeFixedToText = iconSizeFixedToText;
+        return this;
+    }
+
+    public synchronized TooltipPainter setIconSpacing( int i )
+    {
+        iconSpacing = i;
+        return this;
+    }
+    
+    public synchronized TooltipPainter clear( )
+    {
+        this.setText( null );
+        this.setIcon( null );
+        return this;
+    }
+    
+    public synchronized Insets getInsets( )
+    {
+        return this.insets;
     }
 
     public synchronized int getBorderSize( )
@@ -263,6 +295,11 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized boolean isFixedWidth( )
     {
         return this.isFixedWidth;
+    }
+    
+    public synchronized boolean isIconSizeFixedToTextHeight( )
+    {
+        return this.iconSizeFixedToText;
     }
 
     public synchronized int getTextIconSpacing( )
@@ -286,64 +323,30 @@ public class TooltipPainter extends SimpleTextPainter
     {
         return lineSpacing;
     }
-
-    protected void updateTextLayout( )
-    {
-        Font font = textRenderer.getFont( );
-        FontRenderContext frc = textRenderer.getFontRenderContext( );
-        textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
-        textLayout.setBreakOnEol( breakOnEol );
-        textLayout.setLineSpacing( lineSpacing );
-        if ( iconSize == 0 ) iconSize = ( float ) textLayout.getLineHeight( );
-        textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
-        lines = textLayout.getLines( );
-    }
-
-    protected float getIconSize( )
+    
+    public synchronized float getIconSize( )
     {
         return iconSize;
     }
 
-    public void setIconSize( float size )
-    {
-        iconSize = size;
-    }
-
-    protected float getIconSpacing( )
+    public synchronized float getIconSpacing( )
     {
         return iconSpacing;
     }
-
-    public void setIconSpacing( int i )
+    
+    protected void resetTextLayout( )
     {
-        iconSpacing = i;
+        this.textLayout = null;
+        this.lines = null;
     }
-
-    protected void loadIcons( )
+    
+    protected void resetIconLayout( )
     {
-        // looks strange, but causes atlas to load pending icons
-        // this is necessary to do here because calls to atlas.getImageData( )
-        // will fail if we do not
-        if ( iconIds != null )
-        {
-            atlas.beginRendering( );
-            atlas.endRendering( );
-        }
-
-        int size = iconIds == null ? 0 : iconIds.size( );
-
-        this.icons = Lists.newArrayListWithCapacity( size );
-
-        for ( int i = 0; i < size; i++ )
-        {
-            Object iconId = this.iconIds.get( i );
-            ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
-            this.icons.add( icon );
-        }
+        this.icons = null;
     }
-
+    
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    protected synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
         if ( axis == null && !drawInPixelCoords )
         {
@@ -368,8 +371,6 @@ public class TooltipPainter extends SimpleTextPainter
             updateTextLayout( );
         }
 
-        if ( iconIds == null || iconIds.isEmpty( ) ) iconSize = 0;
-
         if ( iconIds == null && lines == null ) return;
         
         GL2 gl = context.getGL( ).getGL2( );
@@ -385,20 +386,57 @@ public class TooltipPainter extends SimpleTextPainter
         gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL2.GL_BLEND );
 
-        //calculate largest height of box
-        double iconHeight = 0;
-        if ( icons != null ) iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
         double textHeight = 0;
-        if ( lines != null ) textHeight = ( textLayout.getLineHeight( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
+        if ( lines != null )
+        {
+            textHeight = ( textLayout.getLineHeight( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
+        }
+        
+        float iconSize;
+        if ( iconIds == null || iconIds.isEmpty( ) )
+        {            
+            iconSize = 0;
+        }
+        else if ( iconSizeFixedToText && textHeight != 0 )
+        {
+            iconSize = (float) textLayout.getLineHeight( );
+        }
+        else
+        {
+            iconSize = this.iconSize;
+        }
+        
+        // calculate largest height of box
+        double iconHeight = 0;
+        if ( icons != null )
+        {
+            iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
+        }
+      
+        
         int boundingHeight = ( int ) ( borderSize * 2 + Math.max( iconHeight, textHeight ) );
 
-        //calculate largest width of box
+        // calculate largest width of box
         float textLength = 0;
-        if ( lines != null ) for ( int k = 0; k < lines.size( ); k++ )
-            textLength = Math.max( textLength, lines.get( k ).width );
-        int boundingWidth = ( int ) ( borderSize * 2 + iconSize + textLength );
-        if ( iconIds != null && !iconIds.isEmpty( ) && lines != null ) boundingWidth += textIconSpacing;
+        if ( lines != null )
+        {
+            for ( int k = 0; k < lines.size( ); k++ )
+            {
+                textLength = Math.max( textLength, lines.get( k ).width );
+            }
+        }
 
+        int boundingWidth = ( int ) ( borderSize * 2 + iconSize + textLength );
+        if ( iconIds != null && !iconIds.isEmpty( ) && lines != null )
+        {
+            boundingWidth += textIconSpacing;
+        }
+
+        // fold the insets and the offset together
+        int offsetX = this.offsetX + this.insets.left;
+        int offsetY = this.offsetY - this.insets.top;
+
+        // adjust bounds to clamp the text box to the edge of the screen
         double clampX = offsetX, clampY = offsetY;
         if ( clampToScreenEdges )
         {
@@ -408,7 +446,7 @@ public class TooltipPainter extends SimpleTextPainter
             if ( boundingHeight > y + offsetY ) clampY = boundingHeight - y;
         }
 
-        //paint background and border 
+        // paint background and border 
         if ( this.paintBackground || this.paintBorder )
         {
 
@@ -455,12 +493,24 @@ public class TooltipPainter extends SimpleTextPainter
             try
             {
                 double posX = x + iconSize + borderSize;
-                if ( iconIds != null && !iconIds.isEmpty( ) ) posX += textIconSpacing;
+
+                if ( iconIds != null && !iconIds.isEmpty( ) )
+                {
+                    posX += textIconSpacing;
+                }
+                
                 double posY = y - borderSize - textLayout.getLineHeight( );
                 double iconPosY = Float.NEGATIVE_INFINITY;
-                if ( wrapTextAroundIcon && icons != null ) iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
+                
+                if ( wrapTextAroundIcon && icons != null )
+                {
+                    iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
+                }
+                
                 for ( int i = 0; i < lines.size( ); i++ )
                 {
+                    System.out.println( "|" + lines.get( i ).text + "|" );
+                    
                     if ( posY + textLayout.getLineHeight( ) < iconPosY ) posX = x + borderSize;
                     textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
                     posY = posY - lineSpacing - ( textLayout.getLineHeight( ) );
@@ -472,7 +522,7 @@ public class TooltipPainter extends SimpleTextPainter
             }
         }
 
-        // draw icon
+        // draw icons
         if ( iconIds != null && !iconIds.isEmpty( ) )
         {
             atlas.beginRendering( );
@@ -489,11 +539,13 @@ public class TooltipPainter extends SimpleTextPainter
                         double iconScale = iconSize / ( double ) iconData.getWidth( );
 
                         float[] color = defaultIconColor;
+                        
                         if ( iconColors != null && i < iconColors.size( ) )
                         {
                             float[] iconColor = iconColors.get( i );
                             if ( iconColor != null ) color = iconColor;
                         }
+                        
                         GlimpseColor.glColor( gl, color );
                         atlas.drawImage( gl, iconId, ( int ) ( x + borderSize + clampX ), ( int ) ( posY + clampY ), iconScale, iconScale, 0, iconData.getHeight( ) );
                         posY = posY - iconSize - iconSpacing;
@@ -507,12 +559,52 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-    //( x, y ) are the coordinates of the top-left corner of the box 
+
+    protected void updateTextLayout( )
+    {
+        Font font = textRenderer.getFont( );
+        FontRenderContext frc = textRenderer.getFontRenderContext( );
+        
+        textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
+        textLayout.setBreakOnEol( breakOnEol );
+        textLayout.setLineSpacing( lineSpacing );
+        
+        if ( iconSize == 0 ) iconSize = ( float ) textLayout.getLineHeight( );
+        
+        textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
+        lines = textLayout.getLines( );
+    }
+
+    protected void loadIcons( )
+    {
+        // looks strange, but causes atlas to load pending icons
+        // this is necessary to do here because calls to atlas.getImageData( )
+        // will fail if we do not
+        if ( iconIds != null )
+        {
+            atlas.beginRendering( );
+            atlas.endRendering( );
+        }
+
+        int size = iconIds == null ? 0 : iconIds.size( );
+
+        this.icons = Lists.newArrayListWithCapacity( size );
+
+        for ( int i = 0; i < size; i++ )
+        {
+            Object iconId = this.iconIds.get( i );
+            ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
+            this.icons.add( icon );
+        }
+    }
+
+    // draw the edges of the tooltip bounding box
     protected void borderVertices( GL2 gl, int height, int width, double x, double y )
     {
-        gl.glVertex2d( x, y );
-        gl.glVertex2d( x, y - height );
-        gl.glVertex2d( x + width, y - height );
-        gl.glVertex2d( x + width, y );
+        //(  x, y ) are the coordinates of the top-left corner of the box 
+        gl.glVertex2d( x - insets.left, y + insets.top );
+        gl.glVertex2d( x - insets.left, y - height - insets.bottom );
+        gl.glVertex2d( x + width + insets.right, y - height - insets.bottom );
+        gl.glVertex2d( x + width + insets.right, y + insets.top );
     }
 }
