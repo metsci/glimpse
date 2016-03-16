@@ -108,6 +108,18 @@ public class FloatsArray implements FloatsModifiable
     }
 
     @Override
+    public void copyTo(int i, FloatBuffer dest, int c)
+    {
+        dest.put(a, i, c);
+    }
+
+    @Override
+    public void copyTo(FloatBuffer dest)
+    {
+        dest.put(a, 0, n);
+    }
+
+    @Override
     public float[] copyOf(int i, int c)
     {
         float[] copy = new float[c];

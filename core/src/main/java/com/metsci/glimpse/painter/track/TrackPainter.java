@@ -1252,48 +1252,49 @@ public class TrackPainter extends GlimpseDataPainter2D
     protected static class LoadedTrack
     {
         // the unique identifier of the track
-        Object trackId;
+        public Object trackId;
 
         // track display attributes
-        float[] lineColor = new float[4];
-        float lineWidth;
-        boolean linesOn;
+        public float[] lineColor = new float[4];
+        public float lineWidth;
+        public boolean linesOn;
 
-        float[] pointColor = new float[4];
-        float pointSize;
-        boolean pointsOn;
+        public float[] pointColor = new float[4];
+        public float pointSize;
+        public boolean pointsOn;
 
-        int stippleFactor;
-        short stipplePattern;
-        boolean stippleOn;
+        public int stippleFactor;
+        public short stipplePattern;
+        public boolean stippleOn;
 
-        String label;
-        boolean labelOn;
-        double headPosX;
-        double headPosY;
-        Color labelColor;
+        public String label;
+        public boolean labelOn;
+        public double headPosX;
+        public double headPosY;
+        public Color labelColor;
 
-        float[] labelLineColor = new float[4];
-        boolean labelLineOn;
+        public float[] labelLineColor = new float[4];
+        public boolean labelLineOn;
 
-        float headPointSize;
-        float[] headPointColor = new float[4];
-        boolean headPointOn;
+        public float headPointSize;
+        public float[] headPointColor = new float[4];
+        public boolean headPointOn;
 
-        boolean glBufferInitialized = false;
+        public boolean glBufferInitialized = false;
         // a reference to the device buffer for this track
-        int glBufferHandle;
+        public int glBufferHandle;
         // the maximum allocated size of the device buffer for this track
-        int glBufferMaxSize;
+        public int glBufferMaxSize;
         // the currently used size of the device buffer for this track
-        int glBufferCurrentSize;
+        public int glBufferCurrentSize;
 
         // the offset into the device buffer to begin displaying track vertices
-        int glSelectedOffset;
+        public int glSelectedOffset;
         // the number of bytes from the device buffer to display
-        int glSelectedSize;
+        public int glSelectedSize;
 
-        public LoadedTrack( Track track )
+        // LoadedTrack isn't intended to be used outside of TrackPainter
+        protected LoadedTrack( Track track )
         {
             this.trackId = track.trackId;
             this.loadSettings( track );
@@ -1390,56 +1391,57 @@ public class TrackPainter extends GlimpseDataPainter2D
     protected class Track
     {
         // the unique identifier of the track
-        Object trackId;
+        protected Object trackId;
         // the points making up the track
-        List<Point> points;
+        protected List<Point> points;
         // the lowest index of the last change made to the track
         // when the track data is copied to a device buffer, all
         // data from here to the end of the track must be copied
-        int insertIndex;
+        protected int insertIndex;
         // if true, insert index is valid
-        boolean dataInserted = false;
+        protected boolean dataInserted = false;
         // if true, this track is waiting to be deleted
-        boolean deletePending = false;
+        protected boolean deletePending = false;
         // if true, this track is waiting to be cleared
-        boolean clearPending = false;
+        protected boolean clearPending = false;
 
         // the offset into the points list of the first point to display
-        int selectedOffset;
+        protected int selectedOffset;
         // the number of points in the points list to display
-        int selectedSize;
+        protected int selectedSize;
 
-        Point selectionStart;
-        Point selectionEnd;
-        Point selectionCurrent;
+        protected Point selectionStart;
+        protected Point selectionEnd;
+        protected Point selectionCurrent;
 
-        Point trackHead;
+        protected Point trackHead;
 
         // track display attributes
-        float[] lineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
-        float lineWidth = 2;
-        boolean linesOn = true;
-        float[] pointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
-        float pointSize = 4;
-        boolean pointsOn = true;
-        int stippleFactor = 1;
-        short stipplePattern = ( short ) 0x00FF;
-        boolean stippleOn = false;
+        protected float[] lineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
+        protected float lineWidth = 2;
+        protected boolean linesOn = true;
+        protected float[] pointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
+        protected float pointSize = 4;
+        protected boolean pointsOn = true;
+        protected int stippleFactor = 1;
+        protected short stipplePattern = ( short ) 0x00FF;
+        protected boolean stippleOn = false;
 
-        String label = null;
-        boolean labelOn = false;
-        double headPosX;
-        double headPosY;
-        Color labelColor = new Color( 1.0f, 1.0f, 0.0f, 1.0f );
+        protected String label = null;
+        protected boolean labelOn = false;
+        protected double headPosX;
+        protected double headPosY;
+        protected Color labelColor = new Color( 1.0f, 1.0f, 0.0f, 1.0f );
 
-        boolean labelLineOn = true;
-        float[] labelLineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
+        protected boolean labelLineOn = true;
+        protected float[] labelLineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
 
-        float headPointSize = 7;
-        float[] headPointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
-        boolean headPointOn = false;
+        protected float headPointSize = 7;
+        protected float[] headPointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
+        protected boolean headPointOn = false;
 
-        public Track( Object trackId )
+        // Track isn't intended to be used outside of TrackPainter
+        protected Track( Object trackId )
         {
             this.trackId = trackId;
             this.points = new ArrayList<Point>( TRACK_SIZE_ESTIMATE );
@@ -1729,6 +1731,11 @@ public class TrackPainter extends GlimpseDataPainter2D
             {
                 points.get( i ).loadIntoBuffer( buffer );
             }
+        }
+        
+        public Object getTrackId( )
+        {
+            return trackId;
         }
 
         @Override
