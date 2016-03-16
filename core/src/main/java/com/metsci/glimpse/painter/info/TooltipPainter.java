@@ -509,8 +509,6 @@ public class TooltipPainter extends SimpleTextPainter
                 
                 for ( int i = 0; i < lines.size( ); i++ )
                 {
-                    System.out.println( "|" + lines.get( i ).text + "|" );
-                    
                     if ( posY + textLayout.getLineHeight( ) < iconPosY ) posX = x + borderSize;
                     textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
                     posY = posY - lineSpacing - ( textLayout.getLineHeight( ) );
