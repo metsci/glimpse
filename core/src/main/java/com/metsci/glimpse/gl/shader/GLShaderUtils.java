@@ -33,21 +33,20 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL2;
 
-
 public class GLShaderUtils
 {
     public static void logShaderArgs( Logger logger, Level level, ShaderArg[] args, String prefix )
     {
-        if( args == null || args.length == 0 )
+        if ( args == null || args.length == 0 )
         {
             logger.log( level, "%sNo shader args.", prefix );
             return;
         }
 
         log( logger, level, "%s%d shader args found.", prefix, args.length );
-        for( ShaderArg arg : args )
+        for ( ShaderArg arg : args )
         {
-            log( logger, level, "%sShader args found: %s", prefix, arg.toString() );
+            log( logger, level, "%sShader args found: %s", prefix, arg.toString( ) );
         }
     }
 
@@ -56,15 +55,14 @@ public class GLShaderUtils
         int[] status = new int[1];
         gl.glGetProgramiv( glProgramHandle, GL2.GL_LINK_STATUS, status, 0 );
 
-        if( status[0] != GL2.GL_TRUE )
+        if ( status[0] != GL2.GL_TRUE )
         {
             logger.warning( "LINKING FAILED: " + name + " did not link properly." );
             logger.warning( getGLProgramInfoLog( gl, glProgramHandle ) );
             return false;
         }
 
-        logger.info( name + " linked." );
-        // logger.info( glGetProgramInfoLog( gl, glProgramHandle ) );
+        logger.fine( name + " linked." );
         return true;
     }
 
@@ -73,7 +71,7 @@ public class GLShaderUtils
         int[] status = new int[1];
         gl.glGetShaderiv( glShaderHandle, GL2.GL_COMPILE_STATUS, status, 0 );
 
-        if( status[0] != GL2.GL_TRUE )
+        if ( status[0] != GL2.GL_TRUE )
         {
             logger.warning( "COMPILATION FAILED: " + name + " did not compile." );
             logger.warning( logGLShaderInfoLog( gl, glShaderHandle ) );
@@ -89,7 +87,8 @@ public class GLShaderUtils
         int[] logLength = new int[1];
         gl.glGetShaderiv( glShaderHandle, GL2.GL_INFO_LOG_LENGTH, logLength, 0 );
 
-        if ( logLength[0] == 0 ) {
+        if ( logLength[0] == 0 )
+        {
             return "No message found!";
         }
 
@@ -99,8 +98,8 @@ public class GLShaderUtils
         gl.glGetShaderInfoLog( glShaderHandle, logLength[0], log1, 0, log2, 0 );
 
         char[] msg = new char[log2.length];
-        for( int i = 0; i < log2.length; i++ )
-            msg[i] = (char) log2[i];
+        for ( int i = 0; i < log2.length; i++ )
+            msg[i] = ( char ) log2[i];
 
         return String.valueOf( msg );
     }
@@ -110,7 +109,8 @@ public class GLShaderUtils
         int[] logLength = new int[1];
         gl.glGetProgramiv( glProgramHandle, GL2.GL_INFO_LOG_LENGTH, logLength, 0 );
 
-        if ( logLength[0] == 0 ) {
+        if ( logLength[0] == 0 )
+        {
             return "No message found!";
         }
 
@@ -120,8 +120,8 @@ public class GLShaderUtils
         gl.glGetProgramInfoLog( glProgramHandle, logLength[0], log1, 0, log2, 0 );
 
         char[] msg = new char[log2.length];
-        for( int i = 0; i < log2.length; i++ )
-            msg[i] = (char) log2[i];
+        for ( int i = 0; i < log2.length; i++ )
+            msg[i] = ( char ) log2[i];
 
         return String.valueOf( msg );
     }
