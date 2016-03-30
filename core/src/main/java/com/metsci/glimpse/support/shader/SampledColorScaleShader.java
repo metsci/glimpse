@@ -57,6 +57,8 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
     private ShaderArg colorTexUnit;
     
     private Axis1D colorAxis;
+    
+    private ShaderArg discardNaN;
 
     /**
      * @param colorAxis color axis producing events
@@ -96,13 +98,21 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
 
         this.colorTexUnit = getArg( "colortex" );
         this.colorTexUnit.setValue( colorTexUnit );
+        
+        this.discardNaN = getArg( "discardNaN" );
+        this.discardNaN.setValue( false );
     }
 
     private final static ShaderSource readSource( String source ) throws IOException
     {
         return new ShaderSource( source, StreamOpener.fileThenResource );
     }
-
+    
+    public void setDiscardNaN( boolean discard )
+    {
+        discardNaN.setValue( discard );
+    }
+    
     public void setAlpha( float alpha )
     {
         this.alpha.setValue( alpha );

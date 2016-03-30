@@ -75,6 +75,19 @@ public class HeatMapPainter extends ShadedTexturePainter
         this.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
     }
 
+    public void setDiscardNaN( boolean discard )
+    {
+        lock.lock( );
+        try
+        {
+            ((SampledColorScaleShader)this.fragShader).setDiscardNaN( discard );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
     public void setAlpha( float alpha )
     {
         lock.lock( );
