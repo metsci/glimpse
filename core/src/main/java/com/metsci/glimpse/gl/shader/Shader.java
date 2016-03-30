@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.shader.ShaderArgInOut.*;
-import static com.metsci.glimpse.gl.shader.ShaderArgQualifier.*;
-import static java.util.logging.Level.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.logGLShaderInfoLog;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.logShaderArgs;
+import static com.metsci.glimpse.gl.shader.ShaderArgInOut.IN;
+import static com.metsci.glimpse.gl.shader.ShaderArgQualifier.UNIFORM;
+import static java.util.logging.Level.FINE;
 
 import java.io.IOException;
 import java.util.List;
@@ -55,7 +56,7 @@ import com.metsci.glimpse.util.io.StreamOpener;
  */
 public abstract class Shader
 {
-    private static final Logger logger = Logger.getLogger( Shader.class.getName() );
+    private static final Logger logger = Logger.getLogger( Shader.class.getName( ) );
 
     private final String name;
     private final ShaderType type;
@@ -69,14 +70,14 @@ public abstract class Shader
     public static ShaderSource[] getSource( String... shaderFile )
     {
         ShaderSource[] list = new ShaderSource[shaderFile.length];
-        
+
         try
         {
-            for ( int i = 0 ; i < shaderFile.length ; i++ )
+            for ( int i = 0; i < shaderFile.length; i++ )
             {
                 list[i] = new ShaderSource( shaderFile[i], StreamOpener.fileThenResource );
             }
-            
+
             return list;
         }
         catch ( IOException ioe )
@@ -84,22 +85,22 @@ public abstract class Shader
             throw new RuntimeException( ioe );
         }
     }
-    
+
     public Shader( String name, ShaderType type, String... source )
     {
         this( name, type, false, getSource( source ) );
     }
-    
+
     public Shader( String name, ShaderType type, ShaderSource... source )
     {
         this( name, type, false, source );
     }
-    
+
     public Shader( String name, ShaderType type, boolean noParse, String... source )
     {
         this( name, type, noParse, getSource( source ) );
     }
-    
+
     // our parser is intended for OpenGL ES, so it doesn't parse full GLSL
     // the noParse argument is provided as a temporary solution for situations
     // where the parser does not yet understand the shader
@@ -113,33 +114,30 @@ public abstract class Shader
         {
             this.args = verify( type, source );
         }
-            
+
         this.name = name;
         this.type = type;
         this.sources = source;
 
-        logShaderArgs( logger, INFO, args, toString() + ": " );
+        logShaderArgs( logger, FINE, args, toString( ) + ": " );
     }
 
     private static ShaderArg[] verify( ShaderType type, ShaderSource... source )
     {
-        if( type == null )
-            throw new GLException( "Shader type not specified." );
+        if ( type == null ) throw new GLException( "Shader type not specified." );
 
-        if( source == null || source.length == 0 )
-            throw new GLException( "Shader source code not present." );
+        if ( source == null || source.length == 0 ) throw new GLException( "Shader source code not present." );
 
         // TODO: Make this work with multiple source files
-        List<ShaderArg> args = source[0].extractArgs();
+        List<ShaderArg> args = source[0].extractArgs( );
         return args.toArray( new ShaderArg[0] );
     }
 
     protected ShaderArg getArg( String name )
     {
         // TODO: Hello, Map!
-        for( int i = 0; i < args.length; i++ )
-            if( args[i].getName().contentEquals( name ) )
-                return args[i];
+        for ( int i = 0; i < args.length; i++ )
+            if ( args[i].getName( ).contentEquals( name ) ) return args[i];
 
         return null;
     }
@@ -179,7 +177,7 @@ public abstract class Shader
     @Override
     public String toString( )
     {
-        return "'" + getType().toString().toUpperCase() + " SHADER " + getName() + "'";
+        return "'" + getType( ).toString( ).toUpperCase( ) + " SHADER " + getName( ) + "'";
     }
 
     /**
@@ -190,27 +188,26 @@ public abstract class Shader
     protected boolean compileAndAttach( GL gl, int glProgramHandle )
     {
         GL2 gl2 = gl.getGL2( );
-        
+
         int segmentIndex = 0;
         glShaderHandles = new int[sources.length];
-        for( ShaderSource segment: sources )
+        for ( ShaderSource segment : sources )
         {
-            int handle = gl2.glCreateShader( type.glTypeCode() );
+            int handle = gl2.glCreateShader( type.glTypeCode( ) );
             glShaderHandles[segmentIndex++] = handle;
 
-            gl2.glShaderSource( handle, 1, segment.getSourceLines(), null );
+            gl2.glShaderSource( handle, 1, segment.getSourceLines( ), null );
             gl2.glCompileShader( handle );
 
-            boolean success = logGLShaderInfoLog( logger, gl2, handle, toString() );
+            boolean success = logGLShaderInfoLog( logger, gl2, handle, toString( ) );
 
             // TODO: Clean up if compilation fails.
-            if( !success )
-                return false;
+            if ( !success ) return false;
         }
 
-        for( int i = 0; i < glShaderHandles.length; i++ )
+        for ( int i = 0; i < glShaderHandles.length; i++ )
         {
-            logger.info( "Attached " + toString() + " to GL program handle " + glProgramHandle + "." );
+            logger.fine( "Attached " + toString( ) + " to GL program handle " + glProgramHandle + "." );
             gl2.glAttachShader( glProgramHandle, glShaderHandles[i] );
         }
 
@@ -226,19 +223,19 @@ public abstract class Shader
     protected boolean getShaderArgHandles( GL gl, int glProgramHandle )
     {
         GL2 gl2 = gl.getGL2( );
-        
+
         glArgHandles = new int[args.length];
 
-        for( int i = 0; i < args.length; i++ )
+        for ( int i = 0; i < args.length; i++ )
         {
             ShaderArg arg = args[i];
-            if( arg.getQual() == UNIFORM )
+            if ( arg.getQual( ) == UNIFORM )
             {
-                glArgHandles[i] = gl2.glGetUniformLocation( glProgramHandle, arg.getName() );
+                glArgHandles[i] = gl2.glGetUniformLocation( glProgramHandle, arg.getName( ) );
             }
-            else if( arg.getInOut() == IN )
+            else if ( arg.getInOut( ) == IN )
             {
-                glArgHandles[i] = gl2.glGetAttribLocation( glProgramHandle, arg.getName() );
+                glArgHandles[i] = gl2.glGetAttribLocation( glProgramHandle, arg.getName( ) );
             }
         }
 
@@ -251,11 +248,11 @@ public abstract class Shader
     protected void updateArgValues( GL gl )
     {
         GL2 gl2 = gl.getGL2( );
-        
-        for( int i = 0; i < args.length; i++ )
+
+        for ( int i = 0; i < args.length; i++ )
         {
             ShaderArg arg = args[i];
-            if( arg.getQual() == UNIFORM )
+            if ( arg.getQual( ) == UNIFORM )
             {
                 arg.update( gl2, glArgHandles[i] );
             }
@@ -264,7 +261,7 @@ public abstract class Shader
 
     public void dispose( GLContext context )
     {
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         if ( glShaderHandles != null )
         {

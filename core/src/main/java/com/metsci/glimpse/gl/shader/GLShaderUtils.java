@@ -80,8 +80,7 @@ public class GLShaderUtils
             return false;
         }
 
-        logger.info( "Shader " + name + " compiled." );
-        // logger.info( glGetShaderInfoLog( gl, glShaderHandle ) );
+        logger.fine( "Shader " + name + " compiled." );
         return true;
     }
 

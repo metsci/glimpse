@@ -172,7 +172,7 @@ public class Pipeline
             return true;
 
         isLinked = false;
-        logger.info( "Compiling " + toString() + "..." );
+        logger.fine( "Compiling " + toString() + "..." );
 
         glProgramHandle = gl.glCreateProgram();
 
@@ -194,7 +194,7 @@ public class Pipeline
                 return false;
         }
 
-        logger.info( "Linking " + toString() + "..." );
+        logger.fine( "Linking " + toString() + "..." );
         gl.glLinkProgram( glProgramHandle );
 
         boolean success = logGLProgramInfoLog( logger, gl, glProgramHandle, toString() );
