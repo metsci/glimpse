@@ -48,6 +48,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.texture.TextureCoords;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -72,8 +74,6 @@ import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderVertex;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.atlas.support.TextureAtlasUpdateListener;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
-import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.util.texture.TextureCoords;
 
 /**
  * A painter for efficiently painting large numbers of fixed pixel size icons at
@@ -406,15 +406,15 @@ public class IconPainter extends GlimpseDataPainter2D
         }
     }
 
-//    /**
-//     * A bulk load method for adding many of the same type of icon at different locations simultaneously.
-//     *
-//     * @see addIcon( Object, Object, float, float, float )
-//     */
-//    public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY, float[] rotations )
-//    {
-//        addIcons( iconGroupId, iconId, 1.0f, positionX, positionY, rotations );
-//    }
+    //    /**
+    //     * A bulk load method for adding many of the same type of icon at different locations simultaneously.
+    //     *
+    //     * @see addIcon( Object, Object, float, float, float )
+    //     */
+    //    public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY, float[] rotations )
+    //    {
+    //        addIcons( iconGroupId, iconId, 1.0f, positionX, positionY, rotations );
+    //    }
 
     /**
      * @see #addIcon( Object, Object, float[], float[], float[] )
@@ -566,7 +566,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            GL2 gl = context.getGL( ).getGL2();
+            GL2 gl = context.getGL( ).getGL2( );
 
             if ( !this.pipeline.isLinked( gl ) )
             {
@@ -596,28 +596,28 @@ public class IconPainter extends GlimpseDataPainter2D
             if ( this.pickFrameBuffer != null && this.pickFrameBuffer.isInitialized( ) )
             {
                 com.jogamp.opengl.util.texture.Texture tex = this.pickFrameBuffer.getOpenGLTexture( );
-    
+
                 gl.glEnable( GL2.GL_TEXTURE_2D );
                 gl.glBindTexture( GL2.GL_TEXTURE_2D, tex.getTarget( ) );
-    
+
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
 
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
-                
+
                 gl.glBegin( GL2.GL_TRIANGLE_STRIP );
                 try
                 {
                     gl.glTexCoord2d( 0.0, 0.0 );
                     gl.glVertex2d( 0.0, 0.0 );
-    
+
                     gl.glTexCoord2d( 0.0, 1.0 );
                     gl.glVertex2d( 0.0, 5.0 );
-    
+
                     gl.glTexCoord2d( 1.0, 0.0 );
                     gl.glVertex2d( 5.0, 0.0 );
-    
+
                     gl.glTexCoord2d( 1.0, 1.0 );
                     gl.glVertex2d( 5.0, 5.0 );
                 }
@@ -651,7 +651,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.pipeline.beginUse( gl );
         try
         {
-            for ( Map.Entry<TextureAtlas,Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
+            for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
             {
                 Set<IconGroup> groups = entry.getValue( );
                 if ( groups.isEmpty( ) ) continue;
@@ -698,7 +698,7 @@ public class IconPainter extends GlimpseDataPainter2D
         Set<PickResult> pickedIcons = new HashSet<PickResult>( );
 
         GLContext glContext = context.getGLContext( );
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         this.setPickOrthoProjection( gl, bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
@@ -712,7 +712,7 @@ public class IconPainter extends GlimpseDataPainter2D
         this.pipeline.beginUse( gl );
         try
         {
-            for ( Map.Entry<TextureAtlas,Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
+            for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
             {
                 Set<IconGroup> groups = entry.getValue( );
                 if ( groups.isEmpty( ) ) continue;
@@ -1307,7 +1307,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void addIcon( Object iconId, final float positionX, final float positionY, final float rotation, float scale )
         {
-            addIcons( iconId, new float[] { positionX }, new float[] { positionY }, new float[] { rotation }, new float[]{ scale } );
+            addIcons( iconId, new float[] { positionX }, new float[] { positionY }, new float[] { rotation }, new float[] { scale } );
         }
 
         public void addQueuedIcons( )

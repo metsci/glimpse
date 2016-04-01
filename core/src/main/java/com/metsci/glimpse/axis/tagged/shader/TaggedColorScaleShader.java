@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.axis.tagged.shader;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static com.metsci.glimpse.gl.shader.ShaderType.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.gl.shader.ShaderType.fragment;
 
 import java.io.IOException;
 import java.util.List;
@@ -166,7 +166,7 @@ public class TaggedColorScaleShader extends Shader implements AxisListener1D
     public void postDisplay( GL gl )
     {
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

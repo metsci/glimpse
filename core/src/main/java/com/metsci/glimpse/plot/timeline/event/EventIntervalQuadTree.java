@@ -43,7 +43,7 @@ public class EventIntervalQuadTree extends IntervalQuadTree<Event>
     {
         this( 100 );
     }
-    
+
     public EventIntervalQuadTree( int maxBucketSize )
     {
         super( maxBucketSize );

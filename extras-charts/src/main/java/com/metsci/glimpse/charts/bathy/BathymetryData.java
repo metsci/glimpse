@@ -187,7 +187,7 @@ public class BathymetryData
 
             data[x][y] = row.depth;
         }
-        
+
         startLon = Angle.normalizeAngle180( startLon );
     }
 

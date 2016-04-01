@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.event.touch;
 
-
 public interface GlimpseTouchListener
 {
     public void touchesBegan( GlimpseTouchEvent event );
+
     public void touchesMoved( GlimpseTouchEvent event );
+
     public void touchesEnded( GlimpseTouchEvent event );
 }

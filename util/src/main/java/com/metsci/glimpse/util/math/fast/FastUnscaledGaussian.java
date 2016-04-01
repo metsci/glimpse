@@ -30,8 +30,6 @@ import static java.lang.Math.exp;
 import static java.lang.Math.log;
 import static java.lang.Math.sqrt;
 
-import com.metsci.glimpse.util.math.fast.FastFunc;
-
 /**
  * @author ellis
  */

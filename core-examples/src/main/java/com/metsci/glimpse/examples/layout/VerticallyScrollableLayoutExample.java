@@ -60,7 +60,6 @@ public class VerticallyScrollableLayoutExample
         // com.metsci.glimpse.examples.Example, with modifications that allow
         // the canvas and the scrollbar to live in the same JFrame
 
-
         // Don't attempt to shrink content to any smaller than this height -- if canvas height is
         // less than this, make it scrollable instead of shrinking it further
         final int minContentHeight = 800;

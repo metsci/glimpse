@@ -299,7 +299,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         // divide by 2 in order to count lines, not vertices
         return this.pointBuffer.getMaxVertices( ) / 2;
     }
-    
+
     protected static void shiftMaps( Map<Object, Integer> idMap, Map<Integer, Object> indexMap, Set<Integer> indices, int size )
     {
         for ( Integer index : indices )
@@ -336,7 +336,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             idMap.put( id, i - deleteCount );
         }
     }
-    
+
     protected static void shift( FloatBuffer data, FloatBuffer tempBuffer, int length, int size, Set<Integer> indices )
     {
         int lastDelete = -1;
@@ -349,17 +349,17 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
             if ( lastDelete != -1 )
             {
-                shift( data, tempBuffer, nextDelete-lastDelete-1, lastDelete-deleteCount+1, lastDelete+1, length );
+                shift( data, tempBuffer, nextDelete - lastDelete - 1, lastDelete - deleteCount + 1, lastDelete + 1, length );
             }
-            
+
             deleteCount += 1;
         }
-        
+
         nextDelete += 1;
 
         shift( data, tempBuffer, size - nextDelete, nextDelete - deleteCount, nextDelete, length );
     }
-    
+
     /**
      * @param data buffer to shift
      * @param shiftCount number of logical indices to shift (each index represents 'length' buffer entries)
@@ -370,7 +370,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected static void shift( FloatBuffer data, FloatBuffer tempBuffer, int shiftCount, int toIndex, int fromIndex, int length )
     {
         if ( shiftCount == 0 || toIndex == fromIndex ) return;
-        
+
         // lazy load tempBuffer (only needed if removePoint is called)
         if ( tempBuffer == null || tempBuffer.capacity( ) < shiftCount * length )
         {
@@ -647,7 +647,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         {
             add( id, x1, y1, x2, y2, DEFAULT_COLOR );
         }
-        
+
         public void remove( Object id )
         {
             removedIds.add( id );

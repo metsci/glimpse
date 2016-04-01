@@ -46,7 +46,7 @@ import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 public class GroupedEventPainterAdapter implements GroupedEventPainter
 {
     protected EventPainter painter;
-    
+
     public GroupedEventPainterAdapter( EventPainter painter )
     {
         this.painter = painter;

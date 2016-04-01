@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static java.lang.Integer.*;
+import static java.lang.Integer.parseInt;
 
 import javax.media.opengl.GL2;
 

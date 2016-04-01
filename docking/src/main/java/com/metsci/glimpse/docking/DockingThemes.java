@@ -42,7 +42,6 @@ public class DockingThemes
 
     protected static final Logger logger = Logger.getLogger( DockingThemes.class.getName( ) );
 
-
     public static class DockingTheme
     {
 
@@ -72,29 +71,18 @@ public class DockingThemes
         public final ImageIcon closeViewHoveredIcon;
         public final ImageIcon closeViewPressedIcon;
 
-
         public DockingTheme( int dividerSize,
 
-                             int landingIndicatorThickness,
-                             Color landingIndicatorColor,
+                int landingIndicatorThickness, Color landingIndicatorColor,
 
-                             int lineThickness, // Even lineThickness values do NOT work well
-                             int cornerRadius,
-                             int cardPadding,
-                             int labelPadding,
+                int lineThickness, // Even lineThickness values do NOT work well
+                int cornerRadius, int cardPadding, int labelPadding,
 
-                             Color lineColor,
-                             Color highlightColor,
-                             Color selectedTextColor,
-                             Color unselectedTextColor,
+                Color lineColor, Color highlightColor, Color selectedTextColor, Color unselectedTextColor,
 
-                             ImageIcon maximizeIcon,
-                             ImageIcon unmaximizeIcon,
-                             ImageIcon optionsIcon,
+                ImageIcon maximizeIcon, ImageIcon unmaximizeIcon, ImageIcon optionsIcon,
 
-                             ImageIcon closeViewIcon,
-                             ImageIcon closeViewHoveredIcon,
-                             ImageIcon closeViewPressedIcon )
+                ImageIcon closeViewIcon, ImageIcon closeViewHoveredIcon, ImageIcon closeViewPressedIcon )
         {
             this.dividerSize = dividerSize;
 
@@ -122,57 +110,33 @@ public class DockingThemes
 
     }
 
-
     public static final DockingTheme defaultDockingTheme = new DockingTheme( 5,
 
-                                                                             2,
-                                                                             black,
+            2, black,
 
-                                                                             1, // Even lineThickness values do NOT work well
-                                                                             5,
-                                                                             2,
-                                                                             4,
+            1, // Even lineThickness values do NOT work well
+            5, 2, 4,
 
-                                                                             lightGray,
-                                                                             white,
-                                                                             darkGray,
-                                                                             darkGray,
+            lightGray, white, darkGray, darkGray,
 
-                                                                             requireIcon( "icons/maximize.gif" ),
-                                                                             requireIcon( "icons/unmaximize.gif" ),
-                                                                             requireIcon( "icons/options.gif" ),
+            requireIcon( "icons/maximize.gif" ), requireIcon( "icons/unmaximize.gif" ), requireIcon( "icons/options.gif" ),
 
-                                                                             requireIcon( "icons/chromium/close.png" ),
-                                                                             requireIcon( "icons/chromium/close_h.png" ),
-                                                                             requireIcon( "icons/chromium/close_p.png" ) );
-
+            requireIcon( "icons/chromium/close.png" ), requireIcon( "icons/chromium/close_h.png" ), requireIcon( "icons/chromium/close_p.png" ) );
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {
         return new DockingTheme( defaultDockingTheme.dividerSize,
 
-                                 defaultDockingTheme.landingIndicatorThickness,
-                                 defaultDockingTheme.landingIndicatorColor,
+                defaultDockingTheme.landingIndicatorThickness, defaultDockingTheme.landingIndicatorColor,
 
-                                 defaultDockingTheme.lineThickness,
-                                 defaultDockingTheme.cornerRadius,
-                                 defaultDockingTheme.cardPadding,
-                                 defaultDockingTheme.labelPadding,
+                defaultDockingTheme.lineThickness, defaultDockingTheme.cornerRadius, defaultDockingTheme.cardPadding, defaultDockingTheme.labelPadding,
 
-                                 lineColor,
-                                 defaultDockingTheme.highlightColor,
-                                 textColor,
-                                 textColor,
+                lineColor, defaultDockingTheme.highlightColor, textColor, textColor,
 
-                                 defaultDockingTheme.maximizeIcon,
-                                 defaultDockingTheme.unmaximizeIcon,
-                                 defaultDockingTheme.optionsIcon,
+                defaultDockingTheme.maximizeIcon, defaultDockingTheme.unmaximizeIcon, defaultDockingTheme.optionsIcon,
 
-                                 defaultDockingTheme.closeViewIcon,
-                                 defaultDockingTheme.closeViewHoveredIcon,
-                                 defaultDockingTheme.closeViewPressedIcon );
+                defaultDockingTheme.closeViewIcon, defaultDockingTheme.closeViewHoveredIcon, defaultDockingTheme.closeViewPressedIcon );
     }
-
 
     public static DockingTheme tinyLafDockingTheme( )
     {

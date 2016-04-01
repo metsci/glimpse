@@ -44,9 +44,9 @@ public abstract class GLBuffer
 
     protected int glHandle;
     protected boolean dirty;
-    
+
     protected ByteBuffer data;
-    
+
     protected GLVertexAttribute boundType;
     protected int boundGenericIndex;
 
@@ -58,7 +58,7 @@ public abstract class GLBuffer
         this.dirty = true;
 
         this.elementSize = elementSize;
-        
+
         this.data = createBuffer( length, elementSize );
 
         this.boundType = null;
@@ -66,7 +66,7 @@ public abstract class GLBuffer
     }
 
     public abstract int getGlType( );
-    
+
     public abstract int getBytesPerElement( );
 
     public void ensureCapacity( int length )
@@ -88,12 +88,12 @@ public abstract class GLBuffer
             lock.unlock( );
         }
     }
-    
+
     public ByteBuffer createBuffer( int length, int elementSize )
     {
         return Buffers.newDirectByteBuffer( length * elementSize * getBytesPerElement( ) );
     }
-    
+
     public boolean isDirty( )
     {
         return dirty;

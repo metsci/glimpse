@@ -64,211 +64,203 @@ public class TimeStampPosixSecondsFloat64 extends TimeStamp implements Serializa
 {
     private static final long serialVersionUID = 4906763034483788418L;
 
-    protected static final double secondsToMillis    = 1e3;
-    protected static final double secondsToMicros    = 1e6;
-    protected static final double secondsToNanos     = 1e9;
+    protected static final double secondsToMillis = 1e3;
+    protected static final double secondsToMicros = 1e6;
+    protected static final double secondsToNanos = 1e9;
 
-    protected static final double millisToSeconds    = 1e-3;
-    protected static final double microsToSeconds    = 1e-6;
-    protected static final double nanosToSeconds     = 1e-9;
+    protected static final double millisToSeconds = 1e-3;
+    protected static final double microsToSeconds = 1e-6;
+    protected static final double nanosToSeconds = 1e-9;
 
     // IODH idiom avoids cycles in class initialization
     private static class Instances
     {
-        public static final TimeStampPosixSecondsFloat64 posixEpoch = new TimeStampPosixSecondsFloat64(0);
+        public static final TimeStampPosixSecondsFloat64 posixEpoch = new TimeStampPosixSecondsFloat64( 0 );
     }
 
-    public static final TimeStampFactory<TimeStampPosixSecondsFloat64> factory = new TimeStampFactory<TimeStampPosixSecondsFloat64>()
+    public static final TimeStampFactory<TimeStampPosixSecondsFloat64> factory = new TimeStampFactory<TimeStampPosixSecondsFloat64>( )
     {
-        public TimeStampPosixSecondsFloat64 fromPosixSeconds(double posixSeconds)
+        public TimeStampPosixSecondsFloat64 fromPosixSeconds( double posixSeconds )
         {
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromPosixSeconds(BigDecimal posixSeconds)
+        public TimeStampPosixSecondsFloat64 fromPosixSeconds( BigDecimal posixSeconds )
         {
-            return new TimeStampPosixSecondsFloat64(posixSeconds.doubleValue());
+            return new TimeStampPosixSecondsFloat64( posixSeconds.doubleValue( ) );
         }
 
-        public TimeStampPosixSecondsFloat64 fromPosixMillis(long posixMillis)
+        public TimeStampPosixSecondsFloat64 fromPosixMillis( long posixMillis )
         {
             double posixSeconds = posixMillis * millisToSeconds;
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromPosixMicros(long posixMicros)
+        public TimeStampPosixSecondsFloat64 fromPosixMicros( long posixMicros )
         {
             double posixSeconds = posixMicros * microsToSeconds;
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromPosixNanos(long posixNanos)
+        public TimeStampPosixSecondsFloat64 fromPosixNanos( long posixNanos )
         {
             double posixSeconds = posixNanos * nanosToSeconds;
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromTimeStamp(TimeStamp timeStamp)
+        public TimeStampPosixSecondsFloat64 fromTimeStamp( TimeStamp timeStamp )
         {
-            double posixSeconds = timeStamp.toPosixSeconds();
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            double posixSeconds = timeStamp.toPosixSeconds( );
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromDate(Date date)
+        public TimeStampPosixSecondsFloat64 fromDate( Date date )
         {
-            double posixSeconds = date.getTime() * millisToSeconds;
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            double posixSeconds = date.getTime( ) * millisToSeconds;
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromCalendar(Calendar calendar)
+        public TimeStampPosixSecondsFloat64 fromCalendar( Calendar calendar )
         {
-            double posixSeconds = calendar.getTimeInMillis() * millisToSeconds;
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            double posixSeconds = calendar.getTimeInMillis( ) * millisToSeconds;
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 fromString(String string, TimeStampFormat format) throws TimeStampParseException
+        public TimeStampPosixSecondsFloat64 fromString( String string, TimeStampFormat format ) throws TimeStampParseException
         {
-            double posixSeconds = format.parse(string).doubleValue();
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            double posixSeconds = format.parse( string ).doubleValue( );
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 currentTime()
+        public TimeStampPosixSecondsFloat64 currentTime( )
         {
-            double posixSeconds = System.currentTimeMillis() * millisToSeconds;
-            return new TimeStampPosixSecondsFloat64(posixSeconds);
+            double posixSeconds = System.currentTimeMillis( ) * millisToSeconds;
+            return new TimeStampPosixSecondsFloat64( posixSeconds );
         }
 
-        public TimeStampPosixSecondsFloat64 posixEpoch()
+        public TimeStampPosixSecondsFloat64 posixEpoch( )
         {
             return Instances.posixEpoch;
         }
     };
 
-
     protected final double posixSeconds;
 
-    protected TimeStampPosixSecondsFloat64(double posixSeconds)
+    protected TimeStampPosixSecondsFloat64( double posixSeconds )
     {
         this.posixSeconds = posixSeconds;
     }
 
     @Override
-    public TimeStampPosixSecondsFloat64 add(double duration)
+    public TimeStampPosixSecondsFloat64 add( double duration )
     {
-        return new TimeStampPosixSecondsFloat64(posixSeconds + Time.toSeconds(duration));
+        return new TimeStampPosixSecondsFloat64( posixSeconds + Time.toSeconds( duration ) );
     }
 
     @Override
-    public TimeStampPosixSecondsFloat64 subtract(double duration)
+    public TimeStampPosixSecondsFloat64 subtract( double duration )
     {
-        return new TimeStampPosixSecondsFloat64(posixSeconds - Time.toSeconds(duration));
+        return new TimeStampPosixSecondsFloat64( posixSeconds - Time.toSeconds( duration ) );
     }
 
     @Override
-    public double durationBefore(TimeStamp o)
+    public double durationBefore( TimeStamp o )
     {
-        if (o instanceof TimeStampPosixSecondsFloat64)
-            return Time.fromSeconds(((TimeStampPosixSecondsFloat64) o).posixSeconds - posixSeconds);
+        if ( o instanceof TimeStampPosixSecondsFloat64 ) return Time.fromSeconds( ( ( TimeStampPosixSecondsFloat64 ) o ).posixSeconds - posixSeconds );
 
-        return super.durationBefore(o);
+        return super.durationBefore( o );
     }
 
     @Override
-    public double durationAfter(TimeStamp o)
+    public double durationAfter( TimeStamp o )
     {
-        if (o instanceof TimeStampPosixSecondsFloat64)
-            return Time.fromSeconds(posixSeconds - ((TimeStampPosixSecondsFloat64) o).posixSeconds);
+        if ( o instanceof TimeStampPosixSecondsFloat64 ) return Time.fromSeconds( posixSeconds - ( ( TimeStampPosixSecondsFloat64 ) o ).posixSeconds );
 
-        return super.durationAfter(o);
+        return super.durationAfter( o );
     }
 
     @Override
-    public double toPosixSeconds()
+    public double toPosixSeconds( )
     {
         return posixSeconds;
     }
 
     @Override
-    public long toPosixMillis()
+    public long toPosixMillis( )
     {
-        return Math.round(posixSeconds * secondsToMillis);
+        return Math.round( posixSeconds * secondsToMillis );
     }
 
     @Override
-    public long toPosixMicros()
+    public long toPosixMicros( )
     {
-        return Math.round(posixSeconds * secondsToMicros);
+        return Math.round( posixSeconds * secondsToMicros );
     }
 
     @Override
-    public long toPosixNanos()
+    public long toPosixNanos( )
     {
-        return Math.round(posixSeconds * secondsToNanos);
+        return Math.round( posixSeconds * secondsToNanos );
     }
 
     @Override
-    public Date toDate()
+    public Date toDate( )
     {
-        return new Date(toPosixMillis());
+        return new Date( toPosixMillis( ) );
     }
 
     @Override
-    public Calendar toCalendar()
+    public Calendar toCalendar( )
     {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(toPosixMillis());
+        Calendar calendar = Calendar.getInstance( );
+        calendar.setTimeInMillis( toPosixMillis( ) );
         return calendar;
     }
 
     @Override
-    public BigDecimal toPosixSecondsExact()
+    public BigDecimal toPosixSecondsExact( )
     {
-        return new BigDecimal(posixSeconds);
+        return new BigDecimal( posixSeconds );
     }
 
     @Override
-    public boolean isBefore(TimeStamp o)
+    public boolean isBefore( TimeStamp o )
     {
-        if (o instanceof TimeStampPosixSecondsFloat64)
-            return posixSeconds < ((TimeStampPosixSecondsFloat64) o).posixSeconds;
+        if ( o instanceof TimeStampPosixSecondsFloat64 ) return posixSeconds < ( ( TimeStampPosixSecondsFloat64 ) o ).posixSeconds;
 
-        return super.isBefore(o);
+        return super.isBefore( o );
     }
 
     @Override
-    public boolean isAfter(TimeStamp o)
+    public boolean isAfter( TimeStamp o )
     {
-        if (o instanceof TimeStampPosixSecondsFloat64)
-            return posixSeconds > ((TimeStampPosixSecondsFloat64) o).posixSeconds;
+        if ( o instanceof TimeStampPosixSecondsFloat64 ) return posixSeconds > ( ( TimeStampPosixSecondsFloat64 ) o ).posixSeconds;
 
-        return super.isAfter(o);
+        return super.isAfter( o );
     }
 
     @Override
-    public int compareTo(TimeStamp o)
+    public int compareTo( TimeStamp o )
     {
-        if (o instanceof TimeStampPosixSecondsFloat64)
-            return Double.compare(posixSeconds, ((TimeStampPosixSecondsFloat64) o).posixSeconds);
+        if ( o instanceof TimeStampPosixSecondsFloat64 ) return Double.compare( posixSeconds, ( ( TimeStampPosixSecondsFloat64 ) o ).posixSeconds );
 
-        return super.compareTo(o);
+        return super.compareTo( o );
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals( Object o )
     {
-        if (o == this)
-            return true;
+        if ( o == this ) return true;
 
-        if (o instanceof TimeStampPosixSecondsFloat64)
-            return (posixSeconds == ((TimeStampPosixSecondsFloat64) o).posixSeconds);
+        if ( o instanceof TimeStampPosixSecondsFloat64 ) return ( posixSeconds == ( ( TimeStampPosixSecondsFloat64 ) o ).posixSeconds );
 
-        return super.equals(o);
+        return super.equals( o );
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
-        return 211 + 337 * GeneralUtils.hashCode(posixSeconds);
+        return 211 + 337 * GeneralUtils.hashCode( posixSeconds );
     }
 
 }

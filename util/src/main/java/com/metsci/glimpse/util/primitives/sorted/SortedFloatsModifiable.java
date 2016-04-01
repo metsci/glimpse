@@ -37,6 +37,6 @@ public interface SortedFloatsModifiable extends SortedFloats, FloatsModifiable
     /**
      * @return The index at which v was inserted
      */
-    int add(float v);
+    int add( float v );
 
 }

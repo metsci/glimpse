@@ -26,11 +26,8 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import static java.lang.Math.*;
-import it.unimi.dsi.fastutil.floats.Float2FloatMap;
-import it.unimi.dsi.fastutil.floats.Float2FloatOpenHashMap;
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
-import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -44,6 +41,11 @@ import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+
+import it.unimi.dsi.fastutil.floats.Float2FloatMap;
+import it.unimi.dsi.fastutil.floats.Float2FloatOpenHashMap;
+import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
 
 /**
  * Plots a simple frequency histogram. Binning of data can be handled

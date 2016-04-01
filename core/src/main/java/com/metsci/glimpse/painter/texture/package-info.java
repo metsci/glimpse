@@ -10,4 +10,3 @@
  * @see com.metsci.glimpse.examples.basic.HeatMapExample
  */
 package com.metsci.glimpse.painter.texture;
-

@@ -26,22 +26,22 @@
  */
 package com.metsci.glimpse.util.units.time.format;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public class TimeStampParseException extends RuntimeException
 {
-    public TimeStampParseException(String timeStampString)
+    public TimeStampParseException( String timeStampString )
     {
-        super("Failed to parse timestamp: string = " + timeStampString);
+        super( "Failed to parse timestamp: string = " + timeStampString );
     }
 
-    public TimeStampParseException(String timeStampString, String message)
+    public TimeStampParseException( String timeStampString, String message )
     {
-        super("Failed to parse timestamp: string = " + timeStampString + ", message = " + message);
+        super( "Failed to parse timestamp: string = " + timeStampString + ", message = " + message );
     }
 
-    public TimeStampParseException(String timeStampString, Throwable thrown)
+    public TimeStampParseException( String timeStampString, Throwable thrown )
     {
-        super("Failed to parse timestamp: string = " + timeStampString, thrown);
+        super( "Failed to parse timestamp: string = " + timeStampString, thrown );
     }
 
 }

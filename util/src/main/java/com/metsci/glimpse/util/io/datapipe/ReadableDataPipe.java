@@ -36,29 +36,41 @@ import java.io.IOException;
  */
 public interface ReadableDataPipe
 {
-    boolean     readBoolean() throws IOException;
-    byte        readByte() throws IOException;
-    short       readShort() throws IOException;
-    int         readInt() throws IOException;
-    long        readLong() throws IOException;
-    float       readFloat() throws IOException;
-    double      readDouble() throws IOException;
+    boolean readBoolean( ) throws IOException;
+
+    byte readByte( ) throws IOException;
+
+    short readShort( ) throws IOException;
+
+    int readInt( ) throws IOException;
+
+    long readLong( ) throws IOException;
+
+    float readFloat( ) throws IOException;
+
+    double readDouble( ) throws IOException;
 
     /**
      * Reads a string encoded in true UTF-8 format (not Java's modified UTF).
      */
-    String      readString() throws IOException;
+    String readString( ) throws IOException;
 
-    boolean[]   readBooleanArray(boolean[] values) throws IOException;
-    byte[]      readByteArray(byte[] values) throws IOException;
-    short[]     readShortArray(short[] values) throws IOException;
-    int[]       readIntArray(int[] values) throws IOException;
-    long[]      readLongArray(long[] values) throws IOException;
-    float[]     readFloatArray(float[] values) throws IOException;
-    double[]    readDoubleArray(double[] values) throws IOException;
+    boolean[] readBooleanArray( boolean[] values ) throws IOException;
 
-    void        close() throws IOException;
+    byte[] readByteArray( byte[] values ) throws IOException;
 
-    DataInputStream getInputStream();
+    short[] readShortArray( short[] values ) throws IOException;
+
+    int[] readIntArray( int[] values ) throws IOException;
+
+    long[] readLongArray( long[] values ) throws IOException;
+
+    float[] readFloatArray( float[] values ) throws IOException;
+
+    double[] readDoubleArray( double[] values ) throws IOException;
+
+    void close( ) throws IOException;
+
+    DataInputStream getInputStream( );
 
 }

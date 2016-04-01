@@ -4,4 +4,3 @@
  * wraper around OpenGL and GLUT tesselation utilities.
  */
 package com.metsci.glimpse.support.polygon;
-

@@ -33,23 +33,20 @@ import java.io.Serializable;
  *
  * @author hogye
  */
-public class Pair<A,B> implements Serializable
+public class Pair<A, B> implements Serializable
 {
-
 
     private static final long serialVersionUID = -7315628434083418938L;
 
-
-    public static <A,B> Pair<A,B> newPair(A first, B second)
+    public static <A, B> Pair<A, B> newPair( A first, B second )
     {
-        return new Pair<A,B>(first, second);
+        return new Pair<A, B>( first, second );
     }
-
 
     private final A first;
     private final B second;
 
-    public Pair(A first, B second)
+    public Pair( A first, B second )
     {
         this.first = first;
         this.second = second;
@@ -58,7 +55,7 @@ public class Pair<A,B> implements Serializable
     /**
      * @return The first element of the pair
      */
-    public A first()
+    public A first( )
     {
         return first;
     }
@@ -66,41 +63,41 @@ public class Pair<A,B> implements Serializable
     /**
      * @return The second element of the pair
      */
-    public B second()
+    public B second( )
     {
         return second;
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
-        return getClass().getSimpleName() + "[" + first + "," + second + "]";
+        return getClass( ).getSimpleName( ) + "[" + first + "," + second + "]";
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
         final int prime = 967;
         int result = 1;
-        result = prime * result + (first == null ? 0 : first.hashCode());
-        result = prime * result + (second == null ? 0 : second.hashCode());
+        result = prime * result + ( first == null ? 0 : first.hashCode( ) );
+        result = prime * result + ( second == null ? 0 : second.hashCode( ) );
         return result;
     }
 
-    protected static boolean areEqual(Object a, Object b)
+    protected static boolean areEqual( Object a, Object b )
     {
-        return (a == null ? b == null : a.equals(b));
+        return ( a == null ? b == null : a.equals( b ) );
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals( Object o )
     {
-        if (o == this) return true;
-        if (o == null) return false;
-        if (o.getClass() != getClass()) return false;
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != getClass( ) ) return false;
 
-        Pair<?,?> other = (Pair<?,?>) o;
-        return areEqual(other.first, first) && areEqual(other.second, second);
+        Pair<?, ?> other = ( Pair<?, ?> ) o;
+        return areEqual( other.first, first ) && areEqual( other.second, second );
     }
 
 }

@@ -43,13 +43,13 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
     protected StackedTimePlot2D plot;
 
     protected boolean showLockedStatus = true;
-    
+
     public SelectedTimeRegionPainter( StackedTimePlot2D plot )
     {
         super( plot.getOrientation( ) );
         this.plot = plot;
     }
-    
+
     public void setShowLockedStatus( boolean show )
     {
         this.showLockedStatus = show;

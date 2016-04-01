@@ -299,7 +299,7 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         return true;
     }
-    
+
     @Override
     public int[] getSurfaceScale( )
     {

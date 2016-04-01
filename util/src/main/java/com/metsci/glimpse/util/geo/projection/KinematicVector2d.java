@@ -26,9 +26,7 @@
  */
 package com.metsci.glimpse.util.geo.projection;
 
-
 import com.metsci.glimpse.util.vector.Vector2d;
-
 
 /**
  * Represents kinematic state (position and velocity) within a two coordinate projection of the
@@ -42,18 +40,18 @@ public final class KinematicVector2d
     private final Vector2d _pos;
     private final Vector2d _vel;
 
-    public KinematicVector2d(Vector2d pos, Vector2d vel)
+    public KinematicVector2d( Vector2d pos, Vector2d vel )
     {
         _pos = pos;
         _vel = vel;
     }
 
-    public Vector2d getPosition()
+    public Vector2d getPosition( )
     {
         return _pos;
     }
 
-    public Vector2d getVelocity()
+    public Vector2d getVelocity( )
     {
         return _vel;
     }
@@ -65,37 +63,36 @@ public final class KinematicVector2d
      * @param   deltaT  amount of time forward
      * @return  new kinematic vector
      */
-    public KinematicVector2d timeUpdatedConstantVelocity(double deltaT)
+    public KinematicVector2d timeUpdatedConstantVelocity( double deltaT )
     {
-        Vector2d updatedPos = new Vector2d(_pos.getX() + (_vel.getX() * deltaT),
-                                           _pos.getY() + (_vel.getY() * deltaT));
+        Vector2d updatedPos = new Vector2d( _pos.getX( ) + ( _vel.getX( ) * deltaT ), _pos.getY( ) + ( _vel.getY( ) * deltaT ) );
 
-        return new KinematicVector2d(updatedPos, _vel);
+        return new KinematicVector2d( updatedPos, _vel );
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals( Object obj )
     {
-        if (obj == null)
+        if ( obj == null )
         {
             return false;
         }
-        else if (!(obj instanceof KinematicVector2d))
+        else if ( ! ( obj instanceof KinematicVector2d ) )
         {
             return false;
         }
         else
         {
-            KinematicVector2d other = (KinematicVector2d) obj;
+            KinematicVector2d other = ( KinematicVector2d ) obj;
 
-            return (_pos.equals(other._pos) && _vel.equals(other._vel));
+            return ( _pos.equals( other._pos ) && _vel.equals( other._vel ) );
         }
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
-        return _pos.hashCode() ^ _vel.hashCode();
+        return _pos.hashCode( ) ^ _vel.hashCode( );
     }
 
     /**
@@ -104,15 +101,14 @@ public final class KinematicVector2d
      * @param   coordFormat  format applied to each coordinate (as in String.format)
      * @return  formatted string with comma separated coordinates
      */
-    public String format(String coordFormat)
+    public String format( String coordFormat )
     {
-        return String.format("PositionVelocity2d[%s, %s]", _pos.format(coordFormat),
-                             _vel.format(coordFormat));
+        return String.format( "PositionVelocity2d[%s, %s]", _pos.format( coordFormat ), _vel.format( coordFormat ) );
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
-        return format("%.4f");
+        return format( "%.4f" );
     }
 }

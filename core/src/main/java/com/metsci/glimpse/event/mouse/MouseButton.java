@@ -28,7 +28,5 @@ package com.metsci.glimpse.event.mouse;
 
 public enum MouseButton
 {
-    Button1,
-    Button2,
-    Button3;
+    Button1, Button2, Button3;
 }

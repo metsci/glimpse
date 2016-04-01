@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.axis.painter.label;
 
-
 /**
  * Works identically to {@link GridAxisLabelHandler}, but does not attempt to use "milli" or
  * "kilo" prefixes in axis labels.
@@ -48,20 +47,28 @@ public class GridAxisLabelHandlerSimpleUnits extends GridAxisLabelHandler
         {
             switch ( order )
             {
-                case 0:  return label;
-                case 3:  return ( label + pad + "(x 1,000)" );
-                case -3: return ( label + pad + "(x 0.001)" );
-                default: return ( label + pad + "(x 10^" + order + ")" );
+                case 0:
+                    return label;
+                case 3:
+                    return ( label + pad + "(x 1,000)" );
+                case -3:
+                    return ( label + pad + "(x 0.001)" );
+                default:
+                    return ( label + pad + "(x 10^" + order + ")" );
             }
         }
         else
         {
             switch ( order )
             {
-                case 0:  return ( label + pad + "(" + units + ")" );
-                case 3:  return ( label + pad + "(x 1,000 " + units + ")" );
-                case -3: return ( label + pad + "(x 0.001 " + units + ")" );
-                default: return ( label + pad + "(x 10^" + order + " " + units + ")" );
+                case 0:
+                    return ( label + pad + "(" + units + ")" );
+                case 3:
+                    return ( label + pad + "(x 1,000 " + units + ")" );
+                case -3:
+                    return ( label + pad + "(x 0.001 " + units + ")" );
+                default:
+                    return ( label + pad + "(x 10^" + order + " " + units + ")" );
             }
         }
     }

@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static java.util.logging.Level.*;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static java.util.logging.Level.WARNING;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

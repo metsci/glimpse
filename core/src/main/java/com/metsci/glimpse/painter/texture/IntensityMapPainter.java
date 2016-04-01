@@ -46,13 +46,13 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 public class IntensityMapPainter extends ShadedTexturePainter
 {
     public static final Logger logger = Logger.getLogger( IntensityMapPainter.class.getName( ) );
-    
+
     protected FloatTextureProjected2D heatMap, colorMap;
 
     protected SampledIntensityScaleShader fragShader;
 
     public IntensityMapPainter( Axis1D axis )
-    {        
+    {
         try
         {
             this.loadDefaultPipeline( axis );

@@ -27,8 +27,6 @@
 package com.metsci.glimpse.axis.painter.label;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
-import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 
 public class EmptyLabelHandler implements AxisLabelHandler
 {

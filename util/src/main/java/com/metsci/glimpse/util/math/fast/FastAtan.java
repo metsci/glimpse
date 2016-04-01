@@ -33,7 +33,7 @@ public class FastAtan extends FastFuncUnboundedDomain
 {
     private static final FastAtan instance = new FastAtan( 100000 );
 
-    public static FastAtan getInstance()
+    public static FastAtan getInstance( )
     {
         return instance;
     }
@@ -67,7 +67,7 @@ public class FastAtan extends FastFuncUnboundedDomain
         {
             return -0.5 * Math.PI;
         }
-        else if ( x == 0 && y == 0)  // match convention for Math.atan2(0,0)
+        else if ( x == 0 && y == 0 ) // match convention for Math.atan2(0,0)
         {
             return 0.0;
         }
@@ -84,13 +84,13 @@ public class FastAtan extends FastFuncUnboundedDomain
     }
 
     @Override
-    protected double gNegativeInfinity()
+    protected double gNegativeInfinity( )
     {
         return -0.5 * Math.PI;
     }
 
     @Override
-    protected double gPositiveInfinity()
+    protected double gPositiveInfinity( )
     {
         return 0.5 * Math.PI;
     }

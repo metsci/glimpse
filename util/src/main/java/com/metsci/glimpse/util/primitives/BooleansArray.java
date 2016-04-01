@@ -38,33 +38,30 @@ public class BooleansArray implements BooleansModifiable
     public boolean[] a;
     public int n;
 
-
-
-
     // Instantiation
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public BooleansArray(boolean[] a)
+    public BooleansArray( boolean[] a )
     {
-        this(a, a.length);
+        this( a, a.length );
     }
 
-    public BooleansArray(int n)
+    public BooleansArray( int n )
     {
-        this(new boolean[n], 0);
+        this( new boolean[n], 0 );
     }
 
-    public BooleansArray()
+    public BooleansArray( )
     {
-        this(new boolean[0], 0);
+        this( new boolean[0], 0 );
     }
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public BooleansArray(boolean[] a, int n)
+    public BooleansArray( boolean[] a, int n )
     {
         this.a = a;
         this.n = n;
@@ -73,20 +70,17 @@ public class BooleansArray implements BooleansModifiable
     /**
      * Clones the sequence arg.
      */
-    public BooleansArray(Booleans xs)
+    public BooleansArray( Booleans xs )
     {
-        n = xs.n();
+        n = xs.n( );
         a = new boolean[n];
-        xs.copyTo(0, a, 0, n);
+        xs.copyTo( 0, a, 0, n );
     }
-
-
-
 
     // Accessors
 
     @Override
-    public boolean v(int i)
+    public boolean v( int i )
     {
         // Skip bounds check for speed
         //if (i >= n) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i + ", length = " + n);
@@ -95,70 +89,67 @@ public class BooleansArray implements BooleansModifiable
     }
 
     @Override
-    public int n()
+    public int n( )
     {
         return n;
     }
 
     @Override
-    public void copyTo(int i, boolean[] dest, int iDest, int c)
+    public void copyTo( int i, boolean[] dest, int iDest, int c )
     {
-        System.arraycopy(a, i, dest, iDest, c);
+        System.arraycopy( a, i, dest, iDest, c );
     }
 
     @Override
-    public boolean[] copyOf(int i, int c)
+    public boolean[] copyOf( int i, int c )
     {
         boolean[] copy = new boolean[c];
-        System.arraycopy(a, i, copy, 0, c);
+        System.arraycopy( a, i, copy, 0, c );
         return copy;
     }
 
     @Override
-    public boolean[] copyOf()
+    public boolean[] copyOf( )
     {
         boolean[] copy = new boolean[n];
-        System.arraycopy(a, 0, copy, 0, n);
+        System.arraycopy( a, 0, copy, 0, n );
         return copy;
     }
 
     @Override
-    public boolean isEmpty()
+    public boolean isEmpty( )
     {
-        return (n == 0);
+        return ( n == 0 );
     }
 
     @Override
-    public boolean first()
+    public boolean first( )
     {
         return a[0];
     }
 
     @Override
-    public boolean last()
+    public boolean last( )
     {
         return a[n - 1];
     }
 
-
-
-
     // Mutators
 
     @Override
-    public void set(int i, boolean v)
+    public void set( int i, boolean v )
     {
         a[i] = v;
     }
-    
+
     @Override
-    public void set(int i, boolean[] vs)
+    public void set( int i, boolean[] vs )
     {
         set( i, vs, 0, vs.length );
     }
-    
+
     @Override
-    public void set(int i, boolean[] vs, int from, int to)
+    public void set( int i, boolean[] vs, int from, int to )
     {
         int c = to - from;
         ensureCapacity( i + c );
@@ -167,38 +158,38 @@ public class BooleansArray implements BooleansModifiable
     }
 
     @Override
-    public void insert(int i, boolean v)
+    public void insert( int i, boolean v )
     {
-        prepForInsert(i, 1);
+        prepForInsert( i, 1 );
         a[i] = v;
     }
 
     @Override
-    public void insert(int i, Booleans vs)
+    public void insert( int i, Booleans vs )
     {
-        insert(i, vs, 0, vs.n());
+        insert( i, vs, 0, vs.n( ) );
     }
 
     @Override
-    public void insert(int i, Booleans vs, int from, int to)
+    public void insert( int i, Booleans vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        vs.copyTo(from, a, i, c);
+        prepForInsert( i, c );
+        vs.copyTo( from, a, i, c );
     }
 
     @Override
-    public void insert(int i, boolean[] vs)
+    public void insert( int i, boolean[] vs )
     {
-        insert(i, vs, 0, vs.length);
+        insert( i, vs, 0, vs.length );
     }
 
     @Override
-    public void insert(int i, boolean[] vs, int from, int to)
+    public void insert( int i, boolean[] vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        System.arraycopy(vs, from, a, i, c);
+        prepForInsert( i, c );
+        System.arraycopy( vs, from, a, i, c );
     }
 
     /**
@@ -211,77 +202,74 @@ public class BooleansArray implements BooleansModifiable
      * @param i The index at which new values will be inserted
      * @param c The count of new values that will be inserted
      */
-    public void prepForInsert(int i, int c)
+    public void prepForInsert( int i, int c )
     {
         boolean[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew;
-        if (i >= n)
+        if ( i >= n )
         {
             nNew = i + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                boolean[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, n);
+                boolean[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, n );
                 this.a = aNew;
             }
         }
         else
         {
             nNew = n + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                boolean[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, i);
-                System.arraycopy(a, i, aNew, i+c, n-i);
+                boolean[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, i );
+                System.arraycopy( a, i, aNew, i + c, n - i );
                 this.a = aNew;
             }
             else
             {
-                System.arraycopy(a, i, a, i+c, n-i);
+                System.arraycopy( a, i, a, i + c, n - i );
             }
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void prepend(boolean v)
+    public void prepend( boolean v )
     {
-        prepForPrepend(1);
+        prepForPrepend( 1 );
         a[0] = v;
     }
 
     @Override
-    public void prepend(Booleans vs)
+    public void prepend( Booleans vs )
     {
-        prepend(vs, 0, vs.n());
+        prepend( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void prepend(Booleans vs, int from, int to)
+    public void prepend( Booleans vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        vs.copyTo(from, a, 0, c);
+        prepForPrepend( c );
+        vs.copyTo( from, a, 0, c );
     }
 
     @Override
-    public void prepend(boolean[] vs)
+    public void prepend( boolean[] vs )
     {
-        prepend(vs, 0, vs.length);
+        prepend( vs, 0, vs.length );
     }
 
     @Override
-    public void prepend(boolean[] vs, int from, int to)
+    public void prepend( boolean[] vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        System.arraycopy(vs, from, a, 0, c);
+        prepForPrepend( c );
+        System.arraycopy( vs, from, a, 0, c );
     }
 
     /**
@@ -293,62 +281,59 @@ public class BooleansArray implements BooleansModifiable
      *
      * @param c The count of new values that will be inserted
      */
-    public void prepForPrepend(int c)
+    public void prepForPrepend( int c )
     {
         boolean[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            boolean[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, c, n);
+            boolean[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, c, n );
             this.a = aNew;
         }
         else
         {
-            System.arraycopy(a, 0, a, c, n);
+            System.arraycopy( a, 0, a, c, n );
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void append(boolean v)
+    public void append( boolean v )
     {
-        prepForAppend(1);
-        a[n-1] = v;
+        prepForAppend( 1 );
+        a[n - 1] = v;
     }
 
     @Override
-    public void append(Booleans vs)
+    public void append( Booleans vs )
     {
-        append(vs, 0, vs.n());
+        append( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void append(Booleans vs, int from, int to)
+    public void append( Booleans vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        vs.copyTo(from, a, n-c, c);
+        prepForAppend( c );
+        vs.copyTo( from, a, n - c, c );
     }
 
     @Override
-    public void append(boolean[] vs)
+    public void append( boolean[] vs )
     {
-        append(vs, 0, vs.length);
+        append( vs, 0, vs.length );
     }
 
     @Override
-    public void append(boolean[] vs, int from, int to)
+    public void append( boolean[] vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        System.arraycopy(vs, from, a, n-c, c);
+        prepForAppend( c );
+        System.arraycopy( vs, from, a, n - c, c );
     }
 
     /**
@@ -360,51 +345,48 @@ public class BooleansArray implements BooleansModifiable
      *
      * @param c The count of new values that will be appended
      */
-    public void prepForAppend(int c)
+    public void prepForAppend( int c )
     {
         boolean[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            boolean[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, 0, n);
+            boolean[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void remove(boolean v)
+    public void remove( boolean v )
     {
-        for (int i = 0; i < n; i++)
+        for ( int i = 0; i < n; i++ )
         {
-            if (a[i] == v)
+            if ( a[i] == v )
             {
-                System.arraycopy(a, i+1, a, i, n-(i+1));
+                System.arraycopy( a, i + 1, a, i, n - ( i + 1 ) );
                 n--;
                 return;
             }
         }
     }
-    
+
     @Override
     public void removeRange( int from, int to )
     {
-        int length = n-to;
+        int length = n - to;
         System.arraycopy( a, to, a, from, length );
-        n -= to-from;
+        n -= to - from;
     }
-    
+
     @Override
     public void removeIndex( int index )
     {
-        removeRange( index, index+1 );
+        removeRange( index, index + 1 );
     }
 
     @Override
@@ -413,38 +395,33 @@ public class BooleansArray implements BooleansModifiable
         n = 0;
     }
 
-
-
     @Override
-    public void ensureCapacity(int minCapacity)
+    public void ensureCapacity( int minCapacity )
     {
         int capacity = a.length;
-        if (minCapacity > capacity)
+        if ( minCapacity > capacity )
         {
-            boolean[] aNew = newArray(capacity, minCapacity);
-            System.arraycopy(a, 0, aNew, 0, n);
+            boolean[] aNew = newArray( capacity, minCapacity );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
     }
 
     @Override
-    public void compact()
+    public void compact( )
     {
         boolean[] compact = new boolean[n];
-        System.arraycopy(a, 0, compact, 0, n);
+        System.arraycopy( a, 0, compact, 0, n );
         a = compact;
     }
-
-
-
 
     /**
      * Creates a new array whose capacity is at least minNewCapacity, and at least
      * 1.618 * oldCapacity, up to Integer.MAX_VALUE.
      */
-    public static boolean[] newArray(int oldCapacity, int minNewCapacity)
+    public static boolean[] newArray( int oldCapacity, int minNewCapacity )
     {
-        int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
+        int newCapacity = ( int ) max( minNewCapacity, min( Integer.MAX_VALUE, ( 106039L * oldCapacity ) >>> 16 ) );
         return new boolean[newCapacity];
     }
 

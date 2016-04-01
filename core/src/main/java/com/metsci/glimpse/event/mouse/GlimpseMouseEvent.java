@@ -38,7 +38,6 @@ import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
-
 /**
  * A Glimpse-specific MouseEvent implementation which allows Glimpse axis handling
  * code to be written in a widget framework (SWT, Swing, etc...) independent manner.
@@ -62,7 +61,7 @@ public class GlimpseMouseEvent
         this( stack, x, y, 0 );
     }
 
-    public GlimpseMouseEvent( GlimpseTargetStack stack, int[] x, int[] y , int wheelIncrement )
+    public GlimpseMouseEvent( GlimpseTargetStack stack, int[] x, int[] y, int wheelIncrement )
     {
         this( stack, EnumSet.noneOf( ModifierKey.class ), EnumSet.noneOf( MouseButton.class ), x, y, wheelIncrement, 0, false );
     }
@@ -76,27 +75,27 @@ public class GlimpseMouseEvent
     {
         this( TargetStackUtil.newTargetStack( event.stack ), EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), event.x, event.y, event.wheelIncrement, event.clickCount, event.handled );
     }
-    
+
     public GlimpseMouseEvent( GlimpseMouseEvent event, GlimpseTargetStack stack, int[] x, int[] y )
     {
         this( stack, EnumSet.copyOf( event.modifiers ), EnumSet.copyOf( event.buttons ), x, y, event.wheelIncrement, event.clickCount, event.handled );
     }
-    
+
     public GlimpseMouseEvent( GlimpseMouseEvent event, GlimpseTargetStack stack, int x, int y )
     {
         this( stack, new int[] { x }, new int[] { y }, 0 );
     }
-    
+
     public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int[] x, int[] y, double wheelIncrement, int clickCount )
     {
         this( stack, modifiers, buttons, x, y, wheelIncrement, clickCount, false );
     }
-    
+
     public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int x, int y, double wheelIncrement, int clickCount )
     {
         this( stack, modifiers, buttons, new int[] { x }, new int[] { y }, wheelIncrement, clickCount, false );
     }
-    
+
     public GlimpseMouseEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, EnumSet<MouseButton> buttons, int[] x, int[] y, double wheelIncrement, int clickCount, boolean handled )
     {
         super( );
@@ -109,12 +108,12 @@ public class GlimpseMouseEvent
         this.clickCount = clickCount;
         this.handled = false;
     }
-    
+
     public boolean isHandled( )
     {
         return this.handled;
     }
-    
+
     public void setHandled( boolean handled )
     {
         this.handled = handled;
@@ -149,21 +148,21 @@ public class GlimpseMouseEvent
     {
         return x[0];
     }
-    
+
     public int[] getAllX( )
     {
         return x;
     }
-    
+
     public int getScreenPixelsX( )
     {
         return getX( );
     }
-    
+
     public double getAxisCoordinatesX( )
     {
         Axis1D axis = null;
-        
+
         Axis2D axis2D = getAxis2D( );
         if ( axis2D != null )
         {
@@ -176,7 +175,7 @@ public class GlimpseMouseEvent
 
         if ( axis != null )
         {
-            return axis.screenPixelToValue( getX( ) ); 
+            return axis.screenPixelToValue( getX( ) );
         }
         else
         {
@@ -188,16 +187,16 @@ public class GlimpseMouseEvent
     {
         return y[0];
     }
-    
+
     public int[] getAllY( )
     {
         return y;
     }
-    
+
     public double getAxisCoordinatesY( )
     {
         Axis1D axis = null;
-        
+
         Axis2D axis2D = getAxis2D( );
         if ( axis2D != null )
         {
@@ -211,14 +210,14 @@ public class GlimpseMouseEvent
         if ( axis != null )
         {
             int height = axis.getSizePixels( );
-            return axis.screenPixelToValue( height - getY( ) ); 
+            return axis.screenPixelToValue( height - getY( ) );
         }
         else
         {
             throw new AxisNotSetException( stack );
         }
     }
-    
+
     public int getScreenPixelsY( )
     {
         return getY( );
@@ -246,7 +245,7 @@ public class GlimpseMouseEvent
 
         if ( target instanceof GlimpseAxisLayout1D )
         {
-            GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+            GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
             return layout.getAxis( stack );
         }
         else
@@ -262,7 +261,7 @@ public class GlimpseMouseEvent
 
         if ( target instanceof GlimpseAxisLayout2D )
         {
-            GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+            GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
             return layout.getAxis( stack );
         }
         else
@@ -274,6 +273,6 @@ public class GlimpseMouseEvent
     @Override
     public String toString( )
     {
-        return String.format( "x: %s y: %s wheel: %f click: %d button: %s modifier: %s", Arrays.toString( x ), Arrays.toString( y ), wheelIncrement, clickCount, buttons, modifiers);
+        return String.format( "x: %s y: %s wheel: %f click: %d button: %s modifier: %s", Arrays.toString( x ), Arrays.toString( y ), wheelIncrement, clickCount, buttons, modifiers );
     }
 }

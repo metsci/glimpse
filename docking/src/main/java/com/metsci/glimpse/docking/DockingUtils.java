@@ -60,7 +60,6 @@ public class DockingUtils
 {
     private static final Logger logger = Logger.getLogger( DockingUtils.class.getName( ) );
 
-
     public static void requireSwingThread( )
     {
         if ( !SwingUtilities.isEventDispatchThread( ) )
@@ -147,8 +146,13 @@ public class DockingUtils
                 } );
             }
 
-            public void popupMenuWillBecomeVisible( PopupMenuEvent ev ) { }
-            public void popupMenuCanceled( PopupMenuEvent ev ) { }
+            public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
+            {
+            }
+
+            public void popupMenuCanceled( PopupMenuEvent ev )
+            {
+            }
         } );
 
         return popup;

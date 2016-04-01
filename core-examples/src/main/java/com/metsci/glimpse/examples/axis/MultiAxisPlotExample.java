@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -48,8 +50,6 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-
-import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 /**
  * MultiAxisPlot2D allows users to create multiple axes above, below, and to the right and left

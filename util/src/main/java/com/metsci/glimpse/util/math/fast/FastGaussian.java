@@ -81,7 +81,7 @@ public class FastGaussian extends FastFunc
         return Math.sqrt( logz - loglogz + loglogz / logz );
     }
 
-    public static FastGaussian getInstance()
+    public static FastGaussian getInstance( )
     {
         return _instance;
     }

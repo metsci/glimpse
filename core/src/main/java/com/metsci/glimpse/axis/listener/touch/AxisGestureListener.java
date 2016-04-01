@@ -85,7 +85,7 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
         double diff = scale - 1;
         double scaleAdjMult = horizontal ? Math.abs( Math.cos( angle ) ) : Math.abs( Math.sin( angle ) );
 
-        return ( float )( diff * scaleAdjMult + 1 );
+        return ( float ) ( diff * scaleAdjMult + 1 );
     }
 
     protected int getDim( boolean horizontal, int x, int y )
@@ -180,4 +180,3 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
         axis.setSelectionLock( !axis.isSelectionLocked( ) );
     }
 }
-

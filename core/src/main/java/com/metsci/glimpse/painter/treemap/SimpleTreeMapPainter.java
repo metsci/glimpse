@@ -282,8 +282,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         textPosY = max( textPosY, axis.getAxisY( ).valueToScreenPixel( nodeBounds.getMinY( ) ) );
 
         // don't draw if the area is too small
-        if ( nodeBounds.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) ||
-                nodeBounds.getHeight( ) - paddingTopPx < rect.getHeight( ) / axis.getAxisY( ).getPixelsPerValue( ) )
+        if ( nodeBounds.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) || nodeBounds.getHeight( ) - paddingTopPx < rect.getHeight( ) / axis.getAxisY( ).getPixelsPerValue( ) )
         {
             return;
         }

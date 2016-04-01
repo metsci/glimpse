@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking.xml;
 
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType( name="Split" )
+@XmlType( name = "Split" )
 public class DockerArrangementSplit extends DockerArrangementNode
 {
 

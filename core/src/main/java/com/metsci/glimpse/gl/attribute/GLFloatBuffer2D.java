@@ -32,7 +32,6 @@ import com.metsci.glimpse.util.primitives.IntsModifiable;
 import com.metsci.glimpse.util.quadtree.FilterInt;
 import com.metsci.glimpse.util.quadtree.QuadTreeInts;
 
-
 public class GLFloatBuffer2D extends GLFloatBuffer
 {
     protected static final int MAX_BUCKET_SIZE = 500;
@@ -53,10 +52,10 @@ public class GLFloatBuffer2D extends GLFloatBuffer
 
     protected void pruneIndex( int updateIndex )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( ! indexEnabled )
+            if ( !indexEnabled )
             {
                 xyIndex = null;
                 return;
@@ -68,7 +67,7 @@ public class GLFloatBuffer2D extends GLFloatBuffer
             }
             else
             {
-                for ( int i = updateIndex ; i < getNumVertices( ) ;i++ )
+                for ( int i = updateIndex; i < getNumVertices( ); i++ )
                 {
                     xyIndex.remove( i );
                 }
@@ -76,16 +75,16 @@ public class GLFloatBuffer2D extends GLFloatBuffer
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     protected void updateIndex( int updateIndex )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( ! indexEnabled )
+            if ( !indexEnabled )
             {
                 xyIndex = null;
                 return;
@@ -100,24 +99,24 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                     @Override
                     public final float x( int i )
                     {
-                        return data.asFloatBuffer( ).get( i*2 );
+                        return data.asFloatBuffer( ).get( i * 2 );
                     }
 
                     @Override
                     public final float y( int i )
                     {
-                        return data.asFloatBuffer( ).get( i*2+1 );
+                        return data.asFloatBuffer( ).get( i * 2 + 1 );
                     }
                 };
 
-                  for ( int i = 0 ; i < getNumVertices( ) ;i++ )
+                for ( int i = 0; i < getNumVertices( ); i++ )
                 {
                     xyIndex.add( i );
                 }
             }
             else
             {
-                  for ( int i = updateIndex ; i < getNumVertices( ) ;i++ )
+                for ( int i = updateIndex; i < getNumVertices( ); i++ )
                 {
                     xyIndex.add( i );
                 }
@@ -125,16 +124,16 @@ public class GLFloatBuffer2D extends GLFloatBuffer
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     protected void createIndex( )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( ! indexEnabled )
+            if ( !indexEnabled )
             {
                 xyIndex = null;
                 return;
@@ -147,84 +146,81 @@ public class GLFloatBuffer2D extends GLFloatBuffer
                 @Override
                 public final float x( int i )
                 {
-                    return data.asFloatBuffer( ).get( i*2 );
+                    return data.asFloatBuffer( ).get( i * 2 );
                 }
 
                 @Override
                 public final float y( int i )
                 {
-                    return data.asFloatBuffer( ).get( i*2+1 );
+                    return data.asFloatBuffer( ).get( i * 2 + 1 );
                 }
             };
 
-            for( int i = 0; i < getNumVertices( ); i++ )
+            for ( int i = 0; i < getNumVertices( ); i++ )
             {
                 xyIndex.add( i );
             }
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
-    public boolean isIndexEnabled()
+    public boolean isIndexEnabled( )
     {
         return indexEnabled;
     }
 
     public void setIndexEnabled( boolean enabled )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( enabled == indexEnabled )
-                return;
+            if ( enabled == indexEnabled ) return;
 
             indexEnabled = enabled;
-            createIndex();
+            createIndex( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     public int search( float xMin, float xMax, float yMin, float yMax, IntsModifiable result )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( xyIndex == null )
-                return 0;
+            if ( xyIndex == null ) return 0;
 
             return xyIndex.search( xMin, xMax, yMin, yMax, result );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     public int search( float xMin, float xMax, float yMin, float yMax, FilterInt filter, IntsModifiable result )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( xyIndex == null )
-                return 0;
+            if ( xyIndex == null ) return 0;
 
             return xyIndex.search( xMin, xMax, yMin, yMax, filter, result );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     public void mutateIndexed( IndexedMutator mutator )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
             pruneIndex( mutator.getUpdateIndex( ) );
@@ -238,20 +234,20 @@ public class GLFloatBuffer2D extends GLFloatBuffer
             // update data.limit() to reflect changes made to floatData
             data.position( 0 );
             data.limit( floatData.limit( ) * getBytesPerElement( ) );
-            
+
             updateIndex( mutator.getUpdateIndex( ) );
 
-            makeDirty();
+            makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     public void mutate( Mutator mutator )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
             data.clear( );
@@ -264,13 +260,13 @@ public class GLFloatBuffer2D extends GLFloatBuffer
             data.position( 0 );
             data.limit( floatData.limit( ) * getBytesPerElement( ) );
 
-            createIndex();
+            createIndex( );
 
-            makeDirty();
+            makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
@@ -282,6 +278,7 @@ public class GLFloatBuffer2D extends GLFloatBuffer
          * @return the lowest changed index in the buffer
          */
         public int getUpdateIndex( );
+
         public void mutate( FloatBuffer data, int elementSize );
     }
 }

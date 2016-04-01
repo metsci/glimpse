@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.charts.shoreline;
 
-
 public interface LandShapeCapable
 {
-	LandShape toShape();
+    LandShape toShape( );
 }

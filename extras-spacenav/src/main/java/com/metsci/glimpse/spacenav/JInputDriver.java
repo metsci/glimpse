@@ -26,13 +26,12 @@
  */
 package com.metsci.glimpse.spacenav;
 
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.loadLibs;
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 
 import java.io.File;
 
 import com.metsci.glimpse.util.jnlu.FileUtils;
-
-import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
-
 
 public class JInputDriver
 {

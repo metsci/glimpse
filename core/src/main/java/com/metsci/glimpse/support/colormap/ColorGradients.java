@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.colormap;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -383,7 +383,7 @@ public class ColorGradients
                 float xMax = Math.max( Math.max( rgba[0], rgba[1] ), rgba[2] );
                 float xMin = Math.min( Math.min( rgba[0], rgba[1] ), rgba[2] );
                 float light = ( xMax + xMin ) / 2, sat = 0, hue = 0, temp2 = 0;
-                
+
                 if ( xMin == xMax )
                 {
                     sat = hue = 0;
@@ -396,7 +396,7 @@ public class ColorGradients
                 {
                     sat = ( xMax - xMin ) / ( 2 - xMax - xMin );
                 }
-                
+
                 if ( rgba[0] == xMax ) hue = ( rgba[1] - rgba[2] ) / ( xMax - xMin );
                 if ( rgba[1] == xMax ) hue = 2 + ( rgba[2] - rgba[0] ) / ( xMax - xMin );
                 if ( rgba[2] == xMax ) hue = 4 + ( rgba[0] - rgba[1] ) / ( xMax - xMin );
@@ -418,10 +418,10 @@ public class ColorGradients
                 {
                     temp2 = light + sat - light * sat;
                 }
-                
+
                 float temp1 = 2 * light - temp2;
                 hue = hue / 6;
-                
+
                 for ( int k = 0; k < 3; k++ )
                 {
                     float temp3;
@@ -439,7 +439,7 @@ public class ColorGradients
                         temp3 = ( float ) ( hue - 1.0 / 3 );
                         if ( temp3 < 0 ) temp3 = temp3 + 1;
                     }
-                    
+
                     if ( temp3 < 1.0 / 6 )
                     {
                         rgba[k] = temp1 + ( temp2 - temp1 ) * 6 * temp3;
@@ -488,7 +488,7 @@ public class ColorGradients
     {
         FloatsArray f = new FloatsArray( );
         String line = null;
-        try (BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ))
+        try ( BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ) )
         {
             while ( ( line = reader.readLine( ) ) != null )
             {

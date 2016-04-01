@@ -26,9 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.util.OGLStackHandler;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
 import java.util.List;
@@ -50,6 +48,9 @@ import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
+
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 {

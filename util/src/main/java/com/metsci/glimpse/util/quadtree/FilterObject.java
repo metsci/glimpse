@@ -32,6 +32,6 @@ package com.metsci.glimpse.util.quadtree;
 public interface FilterObject<V>
 {
 
-    boolean include(V v);
+    boolean include( V v );
 
 }

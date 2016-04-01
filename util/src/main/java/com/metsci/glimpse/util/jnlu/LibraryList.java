@@ -42,7 +42,6 @@ public class LibraryList
     public final String resourceDir;
     public final List<String> filenames;
 
-
     public LibraryList( String resourceDir, String... filenames )
     {
         this( resourceDir, asList( filenames ) );

@@ -47,19 +47,19 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
     protected volatile boolean disposed = false;
     protected final ReentrantLock disposeLock;
-    
+
     protected volatile boolean displayOn = true;
     protected volatile boolean doErrorHandling = true;
-    
+
     protected final String errorPrefix = "GL ERROR: " + getClass( ).getName( );
-    
+
     protected abstract void paintTo( GlimpseContext context, GlimpseBounds bounds );
 
     public GlimpsePainterImpl( )
     {
         this.disposeLock = new ReentrantLock( );
     }
-    
+
     public void setErrorHandling( boolean doErrorHandling )
     {
         this.doErrorHandling = doErrorHandling;
@@ -97,14 +97,14 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
         if ( width <= 0 || height <= 0 ) return;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         gl.glPushClientAttrib( ( int ) GL2.GL_CLIENT_ALL_ATTRIB_BITS );
         gl.glPushAttrib( GL2.GL_ALL_ATTRIB_BITS );
-        
+
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glPushMatrix( );
-        
+
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glPushMatrix( );
 
@@ -117,10 +117,10 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         {
             gl.glMatrixMode( GL2.GL_MODELVIEW );
             gl.glPopMatrix( );
-            
+
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glPopMatrix( );
-            
+
             gl.glPopAttrib( );
             gl.glPopClientAttrib( );
         }

@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.plot.stacked;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
 
 import java.util.Comparator;
 
@@ -225,17 +226,17 @@ public class PlotInfoImpl implements PlotInfo
     public boolean isExpanded( )
     {
         PlotInfo parent = this.parentInfo;
-        
+
         while ( parent != null )
         {
             if ( !parent.isExpanded( ) ) return false;
-            
+
             parent = parent.getParent( );
         }
-        
+
         return true;
     }
-    
+
     @Override
     public void setParent( PlotInfo parent )
     {
@@ -254,7 +255,7 @@ public class PlotInfoImpl implements PlotInfo
         this.parentPlot.removeLayout( layout );
         this.parentPlot.removePlot( id );
     }
-    
+
     /**
      * @deprecated {@link #removePlot()}
      */

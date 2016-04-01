@@ -28,7 +28,5 @@ package com.metsci.glimpse.gl.shader;
 
 public enum ShaderArgInOut
 {
-    IN,
-    OUT,
-    INOUT,
+    IN, OUT, INOUT,
 }

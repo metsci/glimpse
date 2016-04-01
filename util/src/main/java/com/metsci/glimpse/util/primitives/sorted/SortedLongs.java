@@ -45,47 +45,47 @@ public interface SortedLongs extends Longs
      *
      * @see Arrays#binarySearch(long[], long)
      */
-    int indexOf(long x);
+    int indexOf( long x );
 
     /**
      * Index of the value closest to x. If the two closest values are x-C
      * and x+C, returns the index of x+C. If longs is empty, returns -1.
      */
-    int indexNearest(long x);
+    int indexNearest( long x );
 
     /**
      * Largest index whose value is less than x
      */
-    int indexBefore(long x);
+    int indexBefore( long x );
 
     /**
      * Smallest index whose value is greater than x
      */
-    int indexAfter(long x);
+    int indexAfter( long x );
 
     /**
      * Largest index whose value is less than or equal to x
      */
-    int indexAtOrBefore(long x);
+    int indexAtOrBefore( long x );
 
     /**
      * Smallest index whose value is greater than or equal to x
      */
-    int indexAtOrAfter(long x);
+    int indexAtOrAfter( long x );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    void continuousIndexOf(long x, ContinuousIndex result);
+    void continuousIndexOf( long x, ContinuousIndex result );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    ContinuousIndex continuousIndexOf(long x);
+    ContinuousIndex continuousIndexOf( long x );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -93,7 +93,7 @@ public interface SortedLongs extends Longs
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(Longs xs, ContinuousIndexArray result);
+    void continuousIndicesOf( Longs xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -101,7 +101,7 @@ public interface SortedLongs extends Longs
      *
      * @see com.metsci.tracks.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(Longs xs);
+    ContinuousIndexArray continuousIndicesOf( Longs xs );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -112,7 +112,7 @@ public interface SortedLongs extends Longs
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(SortedLongs xs, ContinuousIndexArray result);
+    void continuousIndicesOf( SortedLongs xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -123,6 +123,6 @@ public interface SortedLongs extends Longs
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(SortedLongs xs);
+    ContinuousIndexArray continuousIndicesOf( SortedLongs xs );
 
 }

@@ -8,4 +8,3 @@
  * @see com.metsci.glimpse.support.texture
  */
 package com.metsci.glimpse.support.projection;
-

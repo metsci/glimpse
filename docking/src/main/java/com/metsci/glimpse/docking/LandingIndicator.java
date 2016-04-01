@@ -58,11 +58,8 @@ public class LandingIndicator
 
     protected static enum ReprType
     {
-        OPAQUE_WINDOW,
-        TRANSLUCENT_WINDOW,
-        SHAPED_WINDOW
+        OPAQUE_WINDOW, TRANSLUCENT_WINDOW, SHAPED_WINDOW
     }
-
 
     protected static class ScreenEntry
     {
@@ -86,11 +83,9 @@ public class LandingIndicator
         }
     }
 
-
     protected final DockingTheme theme;
     protected final ReprType reprType;
     protected final Collection<ScreenEntry> screenEntries;
-
 
     public LandingIndicator( DockingTheme theme )
     {
@@ -154,9 +149,12 @@ public class LandingIndicator
             }
         }
 
-        if ( haveTranslucentWindows ) this.reprType = TRANSLUCENT_WINDOW;
-        else if ( haveTransparentPixels ) this.reprType = SHAPED_WINDOW;
-        else this.reprType = OPAQUE_WINDOW;
+        if ( haveTranslucentWindows )
+            this.reprType = TRANSLUCENT_WINDOW;
+        else if ( haveTransparentPixels )
+            this.reprType = SHAPED_WINDOW;
+        else
+            this.reprType = OPAQUE_WINDOW;
 
         this.screenEntries = unmodifiableCollection( screenEntries );
 

@@ -64,36 +64,36 @@ public class DragInfo
         this.top = top;
         this.setIndent( info );
     }
-    
+
     protected void setIndent( PlotInfo info )
     {
         this.indent = 0;
-        
+
         StackedPlot2D plot = info.getStackedPlot( );
-    
+
         if ( plot instanceof CollapsibleTimePlot2D )
         {
-            CollapsibleTimePlot2D collapsiblePlot = (CollapsibleTimePlot2D) plot;
-            
+            CollapsibleTimePlot2D collapsiblePlot = ( CollapsibleTimePlot2D ) plot;
+
             if ( collapsiblePlot.isIndentSubplots( ) && collapsiblePlot.getIndentSize( ) > 0 )
             {
                 this.indent = collapsiblePlot.getIndentSize( ) * getDepth( info );
             }
         }
     }
-    
+
     protected int getDepth( PlotInfo info )
     {
         int depth = 0;
         PlotInfo parent = info.getParent( );
-            
+
         while ( parent != null )
         {
             parent = parent.getParent( );
             depth++;
         }
-        
-        return info instanceof GroupInfo ? depth : Math.max( 0, depth-1 );
+
+        return info instanceof GroupInfo ? depth : Math.max( 0, depth - 1 );
     }
 
     @Override

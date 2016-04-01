@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
-
 /**
  * An implementation of {@link ReadableDataPipe} that uses nio.
  *
@@ -46,21 +45,21 @@ public class ReadableDataChannel extends AbstractChannel implements ReadableData
 
     protected final ReadableByteChannel _channel;
 
-    public ReadableDataChannel(ReadableByteChannel channel) throws IOException
+    public ReadableDataChannel( ReadableByteChannel channel ) throws IOException
     {
-        super(channel);
+        super( channel );
 
         _channel = channel;
 
-        _stream = new DataInputStream(new BufferedInputStream(Channels.newInputStream(channel)));
+        _stream = new DataInputStream( new BufferedInputStream( Channels.newInputStream( channel ) ) );
 
-        _byteBuffer.flip();
+        _byteBuffer.flip( );
     }
 
     /**
      * @return the total number of bytes read since this channel was created.
      */
-    public long getTotalBytesRead()
+    public long getTotalBytesRead( )
     {
         return _totalBytesRead;
     }
@@ -71,161 +70,170 @@ public class ReadableDataChannel extends AbstractChannel implements ReadableData
      * @return the number of bytes read from the channel.
      * @throws EOFException if end of stream is reached.
      */
-    protected int fillBuffer() throws IOException
+    protected int fillBuffer( ) throws IOException
     {
-        _byteBuffer.compact();
+        _byteBuffer.compact( );
 
-        if (!_byteBuffer.hasRemaining())
-            return 0;
+        if ( !_byteBuffer.hasRemaining( ) ) return 0;
 
-        int nBytesRead = _channel.read(_byteBuffer);
-        if (nBytesRead == -1)
-            throw new EOFException();
+        int nBytesRead = _channel.read( _byteBuffer );
+        if ( nBytesRead == -1 ) throw new EOFException( );
 
         _totalBytesRead += nBytesRead;
-        _byteBuffer.flip();
+        _byteBuffer.flip( );
 
         return nBytesRead;
     }
 
-    public boolean readBoolean() throws IOException
+    public boolean readBoolean( ) throws IOException
     {
-        return readByte() != 0;
+        return readByte( ) != 0;
     }
 
-    public byte readByte() throws IOException
+    public byte readByte( ) throws IOException
     {
-        while (_byteBuffer.remaining() < 1) fillBuffer();
+        while ( _byteBuffer.remaining( ) < 1 )
+            fillBuffer( );
 
-        return _byteBuffer.get();
+        return _byteBuffer.get( );
     }
 
-    public short readShort() throws IOException
+    public short readShort( ) throws IOException
     {
-        while (_byteBuffer.remaining() < 2) fillBuffer();
+        while ( _byteBuffer.remaining( ) < 2 )
+            fillBuffer( );
 
-        return _byteBuffer.getShort();
+        return _byteBuffer.getShort( );
     }
 
-    public int readInt() throws IOException
+    public int readInt( ) throws IOException
     {
-        while (_byteBuffer.remaining() < 4) fillBuffer();
+        while ( _byteBuffer.remaining( ) < 4 )
+            fillBuffer( );
 
-        return _byteBuffer.getInt();
+        return _byteBuffer.getInt( );
     }
 
-    public long readLong() throws IOException
+    public long readLong( ) throws IOException
     {
-        while (_byteBuffer.remaining() < 8) fillBuffer();
+        while ( _byteBuffer.remaining( ) < 8 )
+            fillBuffer( );
 
-        return _byteBuffer.getLong();
+        return _byteBuffer.getLong( );
     }
 
-    public float readFloat() throws IOException
+    public float readFloat( ) throws IOException
     {
-        while (_byteBuffer.remaining() < 4) fillBuffer();
+        while ( _byteBuffer.remaining( ) < 4 )
+            fillBuffer( );
 
-        return _byteBuffer.getFloat();
+        return _byteBuffer.getFloat( );
     }
 
-    public double readDouble() throws IOException
+    public double readDouble( ) throws IOException
     {
-        while (_byteBuffer.remaining() < 8) fillBuffer();
+        while ( _byteBuffer.remaining( ) < 8 )
+            fillBuffer( );
 
-        return _byteBuffer.getDouble();
+        return _byteBuffer.getDouble( );
     }
 
-    public boolean[] readBooleanArray(boolean[] values) throws IOException
+    public boolean[] readBooleanArray( boolean[] values ) throws IOException
     {
         byte[] values2 = new byte[values.length];
-        readByteArray(values2);
+        readByteArray( values2 );
 
-        for (int i = 0, ni = values.length; i < ni; i++) {
-            values[i] = (values2[i] != 0);
+        for ( int i = 0, ni = values.length; i < ni; i++ )
+        {
+            values[i] = ( values2[i] != 0 );
         }
 
         return values;
     }
 
-    public byte[] readByteArray(byte[] values) throws IOException
+    public byte[] readByteArray( byte[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; ) {
-            if (!_byteBuffer.hasRemaining()) fillBuffer();
+        for ( int i = 0, ni = values.length; i < ni; )
+        {
+            if ( !_byteBuffer.hasRemaining( ) ) fillBuffer( );
 
-            int length = Math.min(ni - i, _byteBuffer.remaining());
-            _byteBuffer.get(values, i, length);
+            int length = Math.min( ni - i, _byteBuffer.remaining( ) );
+            _byteBuffer.get( values, i, length );
             i += length;
         }
 
         return values;
     }
 
-    public short[] readShortArray(short[] values) throws IOException
+    public short[] readShortArray( short[] values ) throws IOException
     {
-        readArray(values, values.length, _shortBuffer);
+        readArray( values, values.length, _shortBuffer );
         return values;
     }
 
-    public int[] readIntArray(int[] values) throws IOException
+    public int[] readIntArray( int[] values ) throws IOException
     {
-        readArray(values, values.length, _intBuffer);
+        readArray( values, values.length, _intBuffer );
         return values;
     }
 
-    public long[] readLongArray(long[] values) throws IOException
+    public long[] readLongArray( long[] values ) throws IOException
     {
-        readArray(values, values.length, _longBuffer);
+        readArray( values, values.length, _longBuffer );
         return values;
     }
 
-    public float[] readFloatArray(float[] values) throws IOException
+    public float[] readFloatArray( float[] values ) throws IOException
     {
-        readArray(values, values.length, _floatBuffer);
+        readArray( values, values.length, _floatBuffer );
         return values;
     }
 
-    public double[] readDoubleArray(double[] values) throws IOException
+    public double[] readDoubleArray( double[] values ) throws IOException
     {
-        readArray(values, values.length, _doubleBuffer);
+        readArray( values, values.length, _doubleBuffer );
         return values;
     }
 
-    public void readArray(Object array, int arrayLength, BufferWrapper buffer) throws IOException
+    public void readArray( Object array, int arrayLength, BufferWrapper buffer ) throws IOException
     {
-        int shift = buffer.getShift();
-        int mask = (1 << shift) - 1;
+        int shift = buffer.getShift( );
+        int mask = ( 1 << shift ) - 1;
 
-        if ((_byteBuffer.position() & mask) != 0) {
-            _byteBuffer.compact().flip();
+        if ( ( _byteBuffer.position( ) & mask ) != 0 )
+        {
+            _byteBuffer.compact( ).flip( );
         }
 
-        buffer.positionAndLimit(_byteBuffer.position() >> shift, _byteBuffer.limit() >> shift);
+        buffer.positionAndLimit( _byteBuffer.position( ) >> shift, _byteBuffer.limit( ) >> shift );
 
-        for (int i = 0; i < arrayLength; ) {
-            if (!buffer.hasRemaining()) {
-                _byteBuffer.position(buffer.position() << shift);
-                fillBuffer();
-                buffer.positionAndLimit(0, _byteBuffer.limit() >> shift);
+        for ( int i = 0; i < arrayLength; )
+        {
+            if ( !buffer.hasRemaining( ) )
+            {
+                _byteBuffer.position( buffer.position( ) << shift );
+                fillBuffer( );
+                buffer.positionAndLimit( 0, _byteBuffer.limit( ) >> shift );
             }
 
-            int length = Math.min(arrayLength - i, buffer.remaining());
-            buffer.get(array, i, length);
+            int length = Math.min( arrayLength - i, buffer.remaining( ) );
+            buffer.get( array, i, length );
 
             i += length;
         }
 
-        _byteBuffer.position(buffer.position() << shift);
+        _byteBuffer.position( buffer.position( ) << shift );
     }
 
-    public String readString() throws IOException
+    public String readString( ) throws IOException
     {
-        byte[] bytes = new byte[readInt()];
-        readByteArray(bytes);
+        byte[] bytes = new byte[readInt( )];
+        readByteArray( bytes );
 
-        return new String(bytes, STRING_ENCODING);
+        return new String( bytes, STRING_ENCODING );
     }
 
-    public DataInputStream getInputStream()
+    public DataInputStream getInputStream( )
     {
         return _stream;
     }

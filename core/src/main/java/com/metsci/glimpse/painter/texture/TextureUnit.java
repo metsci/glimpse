@@ -45,7 +45,7 @@ public class TextureUnit<D extends Texture>
         this.textureUnit = textureUnit;
         this.texture = texture;
     }
-    
+
     public boolean prepare( GL2 gl )
     {
         return texture.prepare( gl, textureUnit );

@@ -32,13 +32,13 @@ public class TimeSpan
 {
     TimeStamp startTime;
     TimeStamp endTime;
-    
+
     public TimeSpan( TimeStamp startTime, TimeStamp endTime )
     {
         this.startTime = startTime;
         this.endTime = endTime;
     }
-    
+
     public double getDuration( )
     {
         return endTime.durationAfter( startTime );
@@ -66,12 +66,12 @@ public class TimeSpan
 
     public boolean contains( TimeStamp time )
     {
-        return time.isAfterOrEquals(startTime) && time.isBeforeOrEquals(endTime);
+        return time.isAfterOrEquals( startTime ) && time.isBeforeOrEquals( endTime );
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
-        return String.format("[%s, %s]", startTime, endTime);
+        return String.format( "[%s, %s]", startTime, endTime );
     }
 }

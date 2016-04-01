@@ -4,4 +4,3 @@
  * create dynamic graphical effects.
  */
 package com.metsci.glimpse.support.shader;
-

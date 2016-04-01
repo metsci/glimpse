@@ -113,7 +113,7 @@ public class HeatMapExample implements GlimpseLayoutProvider
 
         return plot;
     }
-    
+
     protected ColorAxisPlot2D newPlot( )
     {
         return new ColorAxisPlot2D( );

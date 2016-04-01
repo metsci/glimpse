@@ -10,4 +10,3 @@
  * multiple parents.
  */
 package com.metsci.glimpse.layout;
-

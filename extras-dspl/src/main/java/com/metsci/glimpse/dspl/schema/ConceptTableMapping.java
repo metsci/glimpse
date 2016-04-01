@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 
 /**
  *
@@ -88,17 +87,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ConceptTableMapping", propOrder = {
-    "mapConcept",
-    "mapProperty"
-})
-public class ConceptTableMapping {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "ConceptTableMapping", propOrder = { "mapConcept", "mapProperty" } )
+public class ConceptTableMapping
+{
 
     protected ConceptTableMapping.MapConcept mapConcept;
     protected List<ConceptTableMapping.MapProperty> mapProperty;
-    @XmlAttribute(name = "ref", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "ref", required = true )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     protected String ref;
 
     /**
@@ -109,7 +106,8 @@ public class ConceptTableMapping {
      *     {@link ConceptTableMapping.MapConcept }
      *
      */
-    public ConceptTableMapping.MapConcept getMapConcept() {
+    public ConceptTableMapping.MapConcept getMapConcept( )
+    {
         return mapConcept;
     }
 
@@ -121,7 +119,8 @@ public class ConceptTableMapping {
      *     {@link ConceptTableMapping.MapConcept }
      *
      */
-    public void setMapConcept(ConceptTableMapping.MapConcept value) {
+    public void setMapConcept( ConceptTableMapping.MapConcept value )
+    {
         this.mapConcept = value;
     }
 
@@ -147,9 +146,11 @@ public class ConceptTableMapping {
      *
      *
      */
-    public List<ConceptTableMapping.MapProperty> getMapProperty() {
-        if (mapProperty == null) {
-            mapProperty = new ArrayList<ConceptTableMapping.MapProperty>();
+    public List<ConceptTableMapping.MapProperty> getMapProperty( )
+    {
+        if ( mapProperty == null )
+        {
+            mapProperty = new ArrayList<ConceptTableMapping.MapProperty>( );
         }
         return this.mapProperty;
     }
@@ -162,7 +163,8 @@ public class ConceptTableMapping {
      *     {@link String }
      *
      */
-    public String getRef() {
+    public String getRef( )
+    {
         return ref;
     }
 
@@ -174,10 +176,10 @@ public class ConceptTableMapping {
      *     {@link String }
      *
      */
-    public void setRef(String value) {
+    public void setRef( String value )
+    {
         this.ref = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -196,12 +198,13 @@ public class ConceptTableMapping {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class MapConcept {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class MapConcept
+    {
 
-        @XmlAttribute(name = "toColumn", required = true)
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+        @XmlAttribute( name = "toColumn", required = true )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
         protected String toColumn;
 
         /**
@@ -212,7 +215,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public String getToColumn() {
+        public String getToColumn( )
+        {
             return toColumn;
         }
 
@@ -224,12 +228,12 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public void setToColumn(String value) {
+        public void setToColumn( String value )
+        {
             this.toColumn = value;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -250,19 +254,20 @@ public class ConceptTableMapping {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class MapProperty {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class MapProperty
+    {
 
-        @XmlAttribute(name = "ref", required = true)
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+        @XmlAttribute( name = "ref", required = true )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
         protected String ref;
-        @XmlAttribute(name = "toColumn", required = true)
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+        @XmlAttribute( name = "toColumn", required = true )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
         protected String toColumn;
-        @XmlAttribute(name = "lang", namespace = "http://www.w3.org/XML/1998/namespace")
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-        @XmlSchemaType(name = "language")
+        @XmlAttribute( name = "lang", namespace = "http://www.w3.org/XML/1998/namespace" )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
+        @XmlSchemaType( name = "language" )
         protected String lang;
 
         /**
@@ -273,7 +278,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public String getRef() {
+        public String getRef( )
+        {
             return ref;
         }
 
@@ -285,7 +291,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public void setRef(String value) {
+        public void setRef( String value )
+        {
             this.ref = value;
         }
 
@@ -297,7 +304,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public String getToColumn() {
+        public String getToColumn( )
+        {
             return toColumn;
         }
 
@@ -309,7 +317,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public void setToColumn(String value) {
+        public void setToColumn( String value )
+        {
             this.toColumn = value;
         }
 
@@ -325,7 +334,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public String getLang() {
+        public String getLang( )
+        {
             return lang;
         }
 
@@ -337,7 +347,8 @@ public class ConceptTableMapping {
          *     {@link String }
          *
          */
-        public void setLang(String value) {
+        public void setLang( String value )
+        {
             this.lang = value;
         }
 

@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.swt.event.mouse;
 
+import static com.metsci.glimpse.swt.event.mouse.GlimpseMouseWrapper.fromMouseEvent;
+
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
 
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-
-import static com.metsci.glimpse.swt.event.mouse.GlimpseMouseWrapper.*;
 
 public class GlimpseMouseListenerWrapper implements MouseListener, MouseTrackListener
 {

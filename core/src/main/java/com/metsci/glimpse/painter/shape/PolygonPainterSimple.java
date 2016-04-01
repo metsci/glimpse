@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.Serializable;
 import java.util.ArrayList;

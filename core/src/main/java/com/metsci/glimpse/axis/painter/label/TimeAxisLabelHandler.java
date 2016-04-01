@@ -67,7 +67,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
     protected TimeStampFormat monthFormat;
     protected TimeStampFormat monthYearFormat;
     protected TimeStampFormat yearFormat;
-    
+
     protected final String minuteSecondString;
     protected final String hourDayMonthString;
     protected final String hourMinuteString;
@@ -76,25 +76,25 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
     protected final String monthString;
     protected final String monthYearString;
     protected final String yearString;
-   
+
     protected Epoch epoch;
     protected TimeZone timeZone;
-   
+
     protected int pixelsBetweenTicks = 60;
     protected double yearOrderFactor = 6.0;
-    
+
     protected AxisUnitConverter converter;
 
     public TimeAxisLabelHandler( Epoch epoch )
     {
         this( defaultTimeZone, epoch );
     }
-    
+
     public TimeAxisLabelHandler( TimeZone timeZone, Epoch epoch )
     {
         this( defaultMinuteSecondFormat, defaultHourDayMonthFormat, defaultHourMinuteFormat, defaultDayMonthYearFormat, defaultDayFormat, defaultMonthFormat, defaultMonthYearFormat, defaultYearFormat, defaultTimeZone, epoch );
     }
-    
+
     //@formatter:off
     public TimeAxisLabelHandler(
             String minuteSecondString,
@@ -141,7 +141,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         };
     }
     //@formatter:on
-    
+
     protected void updateFormatters( )
     {
         this.minuteSecondFormat = new TimeStampFormatStandard( minuteSecondString, timeZone );
@@ -153,12 +153,12 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         this.monthYearFormat = new TimeStampFormatStandard( monthYearString, timeZone );
         this.yearFormat = new TimeStampFormatStandard( yearString, timeZone );
     }
-    
+
     public TimeZone getTimeZone( )
     {
         return timeZone;
     }
-    
+
     public void setTimeZone( TimeZone timeZone )
     {
         this.timeZone = timeZone;
@@ -169,67 +169,67 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
     {
         return hourStructFactory;
     }
-    
+
     public TimeStructFactory getDayStructFactory( )
     {
         return dayStructFactory;
     }
-    
+
     public TimeStructFactory getMonthStructFactory( )
     {
         return monthStructFactory;
     }
-    
+
     public TimeStructFactory getYearStructFactory( )
     {
         return yearStructFactory;
     }
-    
+
     public TimeStampFormat getYearFormat( )
     {
         return yearFormat;
     }
-    
+
     public TimeStampFormat getMonthYearFormat( )
     {
         return monthYearFormat;
     }
-    
+
     public TimeStampFormat getMonthFormat( )
     {
         return monthFormat;
     }
-    
+
     public TimeStampFormat getDayFormat( )
     {
         return dayFormat;
     }
-    
+
     public TimeStampFormat getDayMonthYearFormat( )
     {
         return dayMonthYearFormat;
     }
-    
+
     public TimeStampFormat getHourMinuteFormat( )
     {
         return hourMinuteFormat;
     }
-    
+
     public TimeStampFormat getHourDayMonthFormat( )
     {
         return hourDayMonthFormat;
     }
-    
+
     public TimeStampFormat getSecondMinuteFormat( )
     {
         return minuteSecondFormat;
     }
-    
+
     public void setPixelsBetweenTicks( int pixels )
     {
         this.pixelsBetweenTicks = pixels;
     }
-    
+
     public void setEpoch( Epoch epoch )
     {
         this.epoch = epoch;
@@ -395,10 +395,10 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
             // Put ticks on nice round numbers in _local_ time
             double zoneOffset_SU = Time.fromMilliseconds( timeZone.getOffset( t0.toPosixMillis( ) ) );
-            
+
             double ticksSinceEpoch = Math.floor( ( t0.toPosixSeconds( ) + zoneOffset_SU ) / tickInterval_SU );
             TimeStamp firstTick = TimeStamp.fromPosixSeconds( tickInterval_SU * ticksSinceEpoch - zoneOffset_SU );
-            int numTicks = (int) Math.ceil( 1 + ( t1.durationAfter( firstTick ) / tickInterval_SU ) );
+            int numTicks = ( int ) Math.ceil( 1 + ( t1.durationAfter( firstTick ) / tickInterval_SU ) );
 
             List<TimeStamp> times = new ArrayList<TimeStamp>( numTicks );
             for ( int i = 0; i < numTicks; i++ )
@@ -406,7 +406,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
             return times;
         }
     }
-    
+
     //@formatter:off
     public static int[] rungs_days_SU = { 2, 3, 4, 5, 8, 10 };
     //@formatter:on
@@ -444,7 +444,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         Time.fromHours( 12 ),
         Time.fromDays( 1 )};
     //@formatter:on
-    
+
     public static double tickInterval_SU( double approxTickInterval_SU )
     {
         for ( double r : rungs_SU )
@@ -609,7 +609,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         Calendar calendar = Calendar.getInstance( timeZone );
 
         TimeStamp previousStart = null;
-        
+
         for ( TimeStamp t : tickTimes )
         {
             TimeStruct day = factory.newTimeStruct( );
@@ -619,7 +619,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
             if ( previousStart != null && previousStart.equals( day.start ) ) continue;
             previousStart = day.start;
-            
+
             day.incrementCalendar( calendar );
             day.end = TimeStamp.fromPosixMillis( calendar.getTimeInMillis( ) );
 
@@ -627,7 +627,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
             day.viewEnd = min( day.end, max( day.start, viewEnd ) );
 
             maxDayViewDuration = Math.max( maxDayViewDuration, day.viewEnd.durationAfter( day.viewStart ) );
-        
+
             days.add( day );
         }
 
@@ -643,51 +643,51 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
         return days;
     }
-    
+
     @Override
     public double[] getTickPositions( Axis1D axis )
     {
         List<TimeStamp> tickList = tickTimes( axis, axis.getSizePixels( ) );
         double[] tickArray = new double[tickList.size( )];
-        
-        for ( int i = 0 ; i < tickList.size( ) ; i++ )
+
+        for ( int i = 0; i < tickList.size( ); i++ )
         {
             tickArray[i] = fromTimeStamp( tickList.get( i ) );
         }
-        
+
         return tickArray;
     }
-    
+
     @Override
     public String[] getTickLabels( Axis1D axis, double[] tickPositions )
     {
         throw new UnsupportedOperationException( );
     }
-    
+
     @Override
     public double[] getMinorTickPositions( double[] tickPositions )
     {
         throw new UnsupportedOperationException( );
     }
-    
+
     @Override
     public String getAxisLabel( Axis1D axis )
     {
         throw new UnsupportedOperationException( );
     }
-    
+
     @Override
     public void setAxisLabel( String label )
     {
         throw new UnsupportedOperationException( );
     }
-    
+
     @Override
     public AxisUnitConverter getAxisUnitConverter( )
     {
         return this.converter;
     }
-    
+
     @Override
     public void setAxisUnitConverter( AxisUnitConverter converter )
     {

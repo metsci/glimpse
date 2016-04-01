@@ -75,10 +75,10 @@ public abstract class FastFunc
         this.invdx = 1 / dx;
         this.b = -min * invdx + 0.5;
 
-        precompute();
+        precompute( );
     }
 
-    protected void precompute()
+    protected void precompute( )
     {
         f = new double[nSamples];
 

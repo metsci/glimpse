@@ -51,7 +51,7 @@ public abstract class GlimpsePainter1D extends GlimpsePainterImpl
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
         if ( target instanceof GlimpseAxisLayout1D )
         {
-            GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+            GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
             Axis1D axis = layout.getAxis( context );
 
             if ( axis == null )

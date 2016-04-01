@@ -51,7 +51,7 @@ public class EmptyPlot2D extends GlimpseAxisLayout2D
     {
         this.initialize( );
     }
-    
+
     protected void initialize( )
     {
         initializeAxes( );
@@ -97,8 +97,7 @@ public class EmptyPlot2D extends GlimpseAxisLayout2D
     {
         return new Axis1D( );
     }
-    
-    
+
     public BackgroundPainter getBackgroundPainter( )
     {
         return this.backgroundPainter;

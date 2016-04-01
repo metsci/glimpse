@@ -26,12 +26,7 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-
 public enum ShaderArgQualifier
 {
-    CONST,
-    ATTRIBUTE,
-    VARYING,
-    INVARIANT_VARYING,
-    UNIFORM;
+    CONST, ATTRIBUTE, VARYING, INVARIANT_VARYING, UNIFORM;
 }

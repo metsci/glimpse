@@ -37,31 +37,32 @@ import com.metsci.glimpse.util.primitives.IntsArray;
  */
 public class Partitioning
 {
-    private Partitioning(){}
-
-
-    /////////////
-    /////////////
-    /////////////
-
-    public static Map<Strings,IntsArray> partitionUnique( String[]... data )
+    private Partitioning( )
     {
-        Map<Strings,IntsArray> unique = new LinkedHashMap<Strings,IntsArray>();
+    }
+
+    /////////////
+    /////////////
+    /////////////
+
+    public static Map<Strings, IntsArray> partitionUnique( String[]... data )
+    {
+        Map<Strings, IntsArray> unique = new LinkedHashMap<Strings, IntsArray>( );
 
         int nfields = data.length;
         int size = data[0].length;
 
         Strings s = new Strings( nfields );
-        for( int i = 0; i < size; i++ )
+        for ( int i = 0; i < size; i++ )
         {
-            for( int j = 0; j < nfields; j++ )
+            for ( int j = 0; j < nfields; j++ )
                 s.strings[j] = data[j][i];
 
             IntsArray index = unique.get( s );
-            if( index == null )
+            if ( index == null )
             {
                 index = new IntsArray( );
-                unique.put( s.copy(), index );
+                unique.put( s.copy( ), index );
             }
 
             index.append( i );
@@ -81,30 +82,30 @@ public class Partitioning
             this.strings = new String[n];
         }
 
-        public Strings copy()
+        public Strings copy( )
         {
             Strings s = new Strings( n );
-            for( int i = 0; i < n; i++ )
+            for ( int i = 0; i < n; i++ )
                 s.strings[i] = this.strings[i];
 
             return s;
         }
 
         @Override
-        public int hashCode()
+        public int hashCode( )
         {
             return Arrays.hashCode( strings );
         }
 
         @Override
-        public boolean equals(Object obj)
+        public boolean equals( Object obj )
         {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            Strings other = (Strings) obj;
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            Strings other = ( Strings ) obj;
 
-            return Arrays.equals(strings, other.strings);
+            return Arrays.equals( strings, other.strings );
         }
     }
 
@@ -112,17 +113,17 @@ public class Partitioning
     /////////////
     /////////////
 
-    public static Map<String,IntsArray> partitionUnique( String[] data )
+    public static Map<String, IntsArray> partitionUnique( String[] data )
     {
-        Map<String,IntsArray> unique = new LinkedHashMap<String,IntsArray>();
+        Map<String, IntsArray> unique = new LinkedHashMap<String, IntsArray>( );
 
-        for( int i = 0; i < data.length; i++ )
+        for ( int i = 0; i < data.length; i++ )
         {
             String s = data[i];
-            if( s != null )
+            if ( s != null )
             {
                 IntsArray index = unique.get( s );
-                if( index == null )
+                if ( index == null )
                 {
                     index = new IntsArray( );
                     unique.put( s, index );
@@ -135,83 +136,81 @@ public class Partitioning
         return unique;
     }
 
-
     /////////////
     /////////////
     /////////////
 
     public static long[] extract( long[] src, int[] index, int len )
     {
-        long[] result = new long[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        long[] result = new long[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static float[] extract( float[] src, int[] index, int len )
     {
-        float[] result = new float[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        float[] result = new float[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static double[] extract( double[] src, int[] index, int len )
     {
-        double[] result = new double[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        double[] result = new double[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static int[] extract( int[] src, int[] index, int len )
     {
-        int[] result = new int[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        int[] result = new int[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static char[] extract( char[] src, int[] index, int len )
     {
-        char[] result = new char[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        char[] result = new char[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static boolean[] extract( boolean[] src, int[] index, int len )
     {
-        boolean[] result = new boolean[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        boolean[] result = new boolean[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static Object[] extract( Object[] src, int[] index, int len )
     {
-        Object[] result = new Object[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        Object[] result = new Object[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
 
     public static String[] extract( String[] src, int[] index, int len )
     {
-        String[] result = new String[ index.length ];
-        for( int i = 0; i < len; i++ )
-            result[i] = src[ index[i] ];
+        String[] result = new String[index.length];
+        for ( int i = 0; i < len; i++ )
+            result[i] = src[index[i]];
 
         return result;
     }
-
 
     /////////////
     /////////////
@@ -219,43 +218,43 @@ public class Partitioning
 
     public static void shuffle( double[] src, double[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 
     public static void shuffle( float[] src, float[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 
     public static void shuffle( long[] src, long[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 
     public static void shuffle( int[] src, int[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 
     public static void shuffle( char[] src, char[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 
     public static void shuffle( Object[] src, Object[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 
     public static void shuffle( String[] src, String[] dst, int[] index )
     {
-        for( int i = 0; i < index.length; i++ )
+        for ( int i = 0; i < index.length; i++ )
             dst[i] = src[index[i]];
     }
 

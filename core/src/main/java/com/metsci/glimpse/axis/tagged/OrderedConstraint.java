@@ -63,9 +63,9 @@ public class OrderedConstraint extends NamedConstraint
         if ( id != null )
         {
             double currentValue = currentAxis.getTag( id ).getValue( );
-            double previousValue = previousTags.get( id ).getValue( );   
+            double previousValue = previousTags.get( id ).getValue( );
             boolean valueIncreased = currentValue > previousValue;
-            
+
             // if the tag which changed increased in value, bump other tags up
             // if the tag which changed decreased in value, bump other tags down
             // (if multiple tags changed, the last changed tag is used to determine the direction)
@@ -73,42 +73,42 @@ public class OrderedConstraint extends NamedConstraint
             {
                 for ( int k = 0; k < constraintIds.size( ) - 1; k++ )
                 {
-                    compareAndSet( currentAxis, k+1, k, buffer );
+                    compareAndSet( currentAxis, k + 1, k, buffer );
                 }
             }
             else
             {
                 for ( int k = constraintIds.size( ) - 1; k > 0; k-- )
                 {
-                    compareAndSet( currentAxis, k-1, k, buffer );
+                    compareAndSet( currentAxis, k - 1, k, buffer );
                 }
             }
         }
     }
-    
+
     protected String getChangedTagId( TaggedAxis1D currentAxis, Map<String, Tag> previousTags )
     {
         for ( String id : constraintIds )
         {
             Tag previousTag = previousTags.get( id );
             Tag currentTag = currentAxis.getTag( id );
-            
+
             if ( previousTag != null && currentTag != null && previousTag.getValue( ) != currentTag.getValue( ) )
             {
                 return id;
             }
         }
-        
+
         return null;
     }
-    
+
     protected void compareAndSet( TaggedAxis1D currentAxis, int firstIndex, int secondIndex, double buffer )
     {
         Tag firstTag = currentAxis.getTag( constraintIds.get( firstIndex ) );
         Tag secondTag = currentAxis.getTag( constraintIds.get( secondIndex ) );
 
         if ( firstTag == null || secondTag == null ) return;
-        
+
         double firstValue = firstTag.getValue( );
         double secondValue = secondTag.getValue( );
 

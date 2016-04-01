@@ -4,4 +4,3 @@
  * point for developing applications using Glimpse.
  */
 package com.metsci.glimpse.examples;
-

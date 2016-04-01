@@ -55,6 +55,6 @@ public class GlimpseMouseAllAdapter implements GlimpseMouseAllListener
 
     @Override
     public void mouseWheelMoved( GlimpseMouseEvent e )
-    { 
+    {
     }
 }

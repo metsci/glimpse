@@ -46,11 +46,11 @@ public class LatLonGeo implements Serializable
     public final static LatLonFormat defaultFormat = new LatLonFormatDegreesMinutesSeconds( 2 );
     public final static DatumSphere defaultDatum = Datum.wgs84sphere;
 
-    protected static final double piOverTwo     = Math.PI / 2d;
-    protected static final double piOver180     = Math.PI / 180d;
-    protected static final double invPiOver180  = 1d / piOver180;
-    protected static final double twoPi         = Math.PI * 2d;
-    protected static final double pi            = Math.PI;
+    protected static final double piOverTwo = Math.PI / 2d;
+    protected static final double piOver180 = Math.PI / 180d;
+    protected static final double invPiOver180 = 1d / piOver180;
+    protected static final double twoPi = Math.PI * 2d;
+    protected static final double pi = Math.PI;
 
     /**
      * north latitude in radians
@@ -67,7 +67,6 @@ public class LatLonGeo implements Serializable
      */
     private final double altitude;
 
-
     /**
      * Constructs and initializes a <code>LatLonGeo</code> at the given coordinates.
      *
@@ -76,12 +75,11 @@ public class LatLonGeo implements Serializable
      * @param eastLonHours hours of east longitude (degrees) in new <code>LatLonGeo</code>
      * @param eastLonMinutes minutes of east longitude (degrees) in new <code>LatLonGeo</code>
      */
-    public static LatLonGeo fromDeg( int northLatHours, double northLatMinutes,
-                                     int eastLonHours, double eastLonMinutes )
+    public static LatLonGeo fromDeg( int northLatHours, double northLatMinutes, int eastLonHours, double eastLonMinutes )
     {
         final double northLatDeg = northLatHours + northLatMinutes / 60d;
         final double eastLonDeg = eastLonHours + eastLonMinutes / 60d;
-        return new LatLonGeo( northLatDeg*piOver180, eastLonDeg*piOver180, 0d, true );
+        return new LatLonGeo( northLatDeg * piOver180, eastLonDeg * piOver180, 0d, true );
     }
 
     /**
@@ -93,7 +91,7 @@ public class LatLonGeo implements Serializable
      */
     public static LatLonGeo fromDeg( double northLat, double eastLon, double altitude )
     {
-        return new LatLonGeo( northLat*piOver180, eastLon*piOver180, altitude, true );
+        return new LatLonGeo( northLat * piOver180, eastLon * piOver180, altitude, true );
     }
 
     /**
@@ -105,7 +103,7 @@ public class LatLonGeo implements Serializable
      */
     public static LatLonGeo fromDeg( double northLat, double eastLon )
     {
-        return new LatLonGeo( northLat*piOver180, eastLon*piOver180, 0d, true );
+        return new LatLonGeo( northLat * piOver180, eastLon * piOver180, 0d, true );
     }
 
     /**
@@ -141,7 +139,7 @@ public class LatLonGeo implements Serializable
      */
     public LatLonGeo( double northLatDeg, double eastLonDeg )
     {
-        this( northLatDeg*piOver180, eastLonDeg*piOver180, 0d, true );
+        this( northLatDeg * piOver180, eastLonDeg * piOver180, 0d, true );
     }
 
     /**
@@ -158,7 +156,7 @@ public class LatLonGeo implements Serializable
      */
     public LatLonGeo( double northLatDeg, double eastLonDeg, double altitude )
     {
-        this( northLatDeg*piOver180, eastLonDeg*piOver180, altitude, true );
+        this( northLatDeg * piOver180, eastLonDeg * piOver180, altitude, true );
     }
 
     /**
@@ -234,7 +232,7 @@ public class LatLonGeo implements Serializable
     /**
      * @return altitude above surface
      */
-    public double getAltitude()
+    public double getAltitude( )
     {
         return altitude;
     }
@@ -242,7 +240,7 @@ public class LatLonGeo implements Serializable
     /**
      * @return north latitude in radians
      */
-    public double getLatRad()
+    public double getLatRad( )
     {
         return lat;
     }
@@ -250,7 +248,7 @@ public class LatLonGeo implements Serializable
     /**
      * @return east longitude in radians
      */
-    public double getLonRad()
+    public double getLonRad( )
     {
         return lon;
     }
@@ -258,7 +256,7 @@ public class LatLonGeo implements Serializable
     /**
      * @return north latitude in degrees
      */
-    public double getLatDeg()
+    public double getLatDeg( )
     {
         return lat * invPiOver180;
     }
@@ -266,7 +264,7 @@ public class LatLonGeo implements Serializable
     /**
      * @return east longitude in degrees
      */
-    public double getLonDeg()
+    public double getLonDeg( )
     {
         return lon * invPiOver180;
     }
@@ -351,7 +349,7 @@ public class LatLonGeo implements Serializable
 
     public LatLonGeo displacedBy( DistanceAzimuth distAzimuth, Datum datum )
     {
-        return displacedBy( distAzimuth.getDistance(), distAzimuth.getAzimuth(), datum);
+        return displacedBy( distAzimuth.getDistance( ), distAzimuth.getAzimuth( ), datum );
     }
 
     public LatLonGeo displacedBy( DistanceAzimuth distAzimuth )
@@ -424,7 +422,7 @@ public class LatLonGeo implements Serializable
         }
         else if ( angle > piOverTwo )
         {
-            angle =  pi - angle;
+            angle = pi - angle;
         }
         return angle;
     }
@@ -434,76 +432,70 @@ public class LatLonGeo implements Serializable
      */
     public static final double normalizeAnglePi( double rad )
     {
-        rad = Angle.normalizeAnglePi(rad);
+        rad = Angle.normalizeAnglePi( rad );
 
-        if (rad == Math.PI)
+        if ( rad == Math.PI )
         {
-            return -Math.PI;  // to maintain backward compatibility for this version of the method
+            return -Math.PI; // to maintain backward compatibility for this version of the method
         }
 
         return rad;
     }
 
-    public String format(String componentFormat)
+    public String format( String componentFormat )
     {
-        return formatDeg(componentFormat);
+        return formatDeg( componentFormat );
     }
 
-    public String formatDeg(String componentFormat)
+    public String formatDeg( String componentFormat )
     {
-        return String.format(componentFormat + "," + componentFormat, getLatDeg(), getLonDeg());
+        return String.format( componentFormat + "," + componentFormat, getLatDeg( ), getLonDeg( ) );
     }
 
-    public String formatRad(String componentFormat)
+    public String formatRad( String componentFormat )
     {
-        return String.format(componentFormat + "," + componentFormat, getLatRad(), getLonRad());
+        return String.format( componentFormat + "," + componentFormat, getLatRad( ), getLonRad( ) );
     }
 
-    public String toString(LatLonFormat latLonFormat)
+    public String toString( LatLonFormat latLonFormat )
     {
         return latLonFormat.format( this );
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
         return defaultFormat.format( this );
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
         final int prime = 31;
         int result = 1;
         long temp;
         temp = Double.doubleToLongBits( altitude );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         temp = Double.doubleToLongBits( lat );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         temp = Double.doubleToLongBits( lon );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         return result;
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals( Object obj )
     {
-        if( this == obj )
-            return true;
-        if( obj == null )
-            return false;
-        if( getClass( ) != obj.getClass( ) )
-            return false;
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( getClass( ) != obj.getClass( ) ) return false;
 
-        LatLonGeo other = (LatLonGeo) obj;
-        if( Double.doubleToLongBits( altitude ) != Double.doubleToLongBits( other.altitude ) )
-            return false;
+        LatLonGeo other = ( LatLonGeo ) obj;
+        if ( Double.doubleToLongBits( altitude ) != Double.doubleToLongBits( other.altitude ) ) return false;
 
-        if( Double.doubleToLongBits( lat ) != Double.doubleToLongBits( other.lat ) )
-            return false;
+        if ( Double.doubleToLongBits( lat ) != Double.doubleToLongBits( other.lat ) ) return false;
 
-        if( Double.doubleToLongBits( lon ) != Double.doubleToLongBits( other.lon ) )
-            return false;
+        if ( Double.doubleToLongBits( lon ) != Double.doubleToLongBits( other.lon ) ) return false;
 
         return true;
     }

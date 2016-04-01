@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.screenshot;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -35,7 +35,6 @@ import javax.imageio.ImageIO;
 
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
-import com.metsci.glimpse.axis.factory.ConditionalStartsWithAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;

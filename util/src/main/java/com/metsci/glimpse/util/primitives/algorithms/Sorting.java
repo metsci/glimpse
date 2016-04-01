@@ -41,108 +41,113 @@ public class Sorting
 
     public static boolean isSorted( long[] x, int fromIndex, int toIndex )
     {
-        for( int i = fromIndex; i < toIndex-1; i++ )
-            if( x[i] > x[i+1] )
-                return false;
+        for ( int i = fromIndex; i < toIndex - 1; i++ )
+            if ( x[i] > x[i + 1] ) return false;
 
         return true;
     }
 
     public static void mergesort( final long[] x, final int[] aux, int fromIndex, int toIndex )
     {
-         final Swapper swap = new Swapper() {
+        final Swapper swap = new Swapper( )
+        {
 
-             long xTemp;
-             int auxTemp;
+            long xTemp;
+            int auxTemp;
 
-             public void swap(int a, int b) {
+            public void swap( int a, int b )
+            {
 
-                 xTemp = x[a];
-                 x[a] = x[b];
-                 x[b] = xTemp;
+                xTemp = x[a];
+                x[a] = x[b];
+                x[b] = xTemp;
 
-                 auxTemp = aux[a];
-                 aux[a] = aux[b];
-                 aux[b] = auxTemp;
+                auxTemp = aux[a];
+                aux[a] = aux[b];
+                aux[b] = auxTemp;
 
-             }
+            }
 
-             protected void vecswap(int a0, int b0, int n) {
+            protected void vecswap( int a0, int b0, int n )
+            {
 
-                 for (int i = 0, a = a0, b = b0; i < n; i++, a++, b++)
-                 {
-                     xTemp = x[a];
-                     x[a] = x[b];
-                     x[b] = xTemp;
-                 }
+                for ( int i = 0, a = a0, b = b0; i < n; i++, a++, b++ )
+                {
+                    xTemp = x[a];
+                    x[a] = x[b];
+                    x[b] = xTemp;
+                }
 
-                 for (int i = 0, a = a0, b = b0; i < n; i++, a++, b++)
-                 {
-                     auxTemp = aux[a];
-                     aux[a] = aux[b];
-                     aux[b] = auxTemp;
-                 }
+                for ( int i = 0, a = a0, b = b0; i < n; i++, a++, b++ )
+                {
+                    auxTemp = aux[a];
+                    aux[a] = aux[b];
+                    aux[b] = auxTemp;
+                }
 
-             }
-         };
+            }
+        };
 
-         final Comparator comp = new Comparator()
-         {
-             public int compare(int a, int b)
-             {
-                 return x[a] == x[b] ? 0 : (x[a] < x[b] ? -1 : 1);
-             }
-         };
+        final Comparator comp = new Comparator( )
+        {
+            public int compare( int a, int b )
+            {
+                return x[a] == x[b] ? 0 : ( x[a] < x[b] ? -1 : 1 );
+            }
+        };
 
-         GenericSorting.mergesort(fromIndex, toIndex, comp, swap);
+        GenericSorting.mergesort( fromIndex, toIndex, comp, swap );
     }
 
     public static void quicksort( final long[] x, final int[] aux, int fromIndex, int toIndex )
     {
-         final Swapper s = new Swapper() {
+        final Swapper s = new Swapper( )
+        {
 
-             long xTemp;
-             int auxTemp;
+            long xTemp;
+            int auxTemp;
 
-             public void swap(int a, int b) {
+            public void swap( int a, int b )
+            {
 
-                 xTemp = x[a];
-                 x[a] = x[b];
-                 x[b] = xTemp;
+                xTemp = x[a];
+                x[a] = x[b];
+                x[b] = xTemp;
 
-                 auxTemp = aux[a];
-                 aux[a] = aux[b];
-                 aux[b] = auxTemp;
+                auxTemp = aux[a];
+                aux[a] = aux[b];
+                aux[b] = auxTemp;
 
-             }
+            }
 
-             protected void vecswap(int a0, int b0, int n) {
+            protected void vecswap( int a0, int b0, int n )
+            {
 
-                 for (int i = 0, a = a0, b = b0; i < n; i++, a++, b++)
-                 {
-                     xTemp = x[a];
-                     x[a] = x[b];
-                     x[b] = xTemp;
-                 }
+                for ( int i = 0, a = a0, b = b0; i < n; i++, a++, b++ )
+                {
+                    xTemp = x[a];
+                    x[a] = x[b];
+                    x[b] = xTemp;
+                }
 
-                 for (int i = 0, a = a0, b = b0; i < n; i++, a++, b++)
-                 {
-                     auxTemp = aux[a];
-                     aux[a] = aux[b];
-                     aux[b] = auxTemp;
-                 }
+                for ( int i = 0, a = a0, b = b0; i < n; i++, a++, b++ )
+                {
+                    auxTemp = aux[a];
+                    aux[a] = aux[b];
+                    aux[b] = auxTemp;
+                }
 
-             }
-         };
+            }
+        };
 
-         final Comparator c = new Comparator()
-         {
-             public int compare( int a, int b )
-             {
-                 return x[a] == x[b] ? 0 : (x[a] < x[b] ? -1 : 1);
-             }
-         };
+        final Comparator c = new Comparator( )
+        {
+            public int compare( int a, int b )
+            {
+                return x[a] == x[b] ? 0 : ( x[a] < x[b] ? -1 : 1 );
+            }
+        };
 
-         GenericSorting.quicksort(fromIndex, toIndex, c, s);
+        GenericSorting.quicksort( fromIndex, toIndex, c, s );
     }
 }

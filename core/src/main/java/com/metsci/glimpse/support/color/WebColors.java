@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.color;
 
-import static com.metsci.glimpse.support.color.RGBA.*;
+import static com.metsci.glimpse.support.color.RGBA.fromIntRGB;
 
 import java.util.Collections;
 import java.util.Map;

@@ -31,6 +31,7 @@ package com.metsci.glimpse.util.quadtree;
  */
 public interface Xy
 {
-    float x();
-    float y();
+    float x( );
+
+    float y( );
 }

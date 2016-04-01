@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;

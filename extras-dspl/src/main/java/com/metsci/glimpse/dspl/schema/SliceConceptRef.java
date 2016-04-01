@@ -31,7 +31,6 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -39,7 +38,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
-
 
 /**
  *
@@ -62,11 +60,12 @@ import javax.xml.namespace.QName;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SliceConceptRef")
-public class SliceConceptRef {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "SliceConceptRef" )
+public class SliceConceptRef
+{
 
-    @XmlAttribute(name = "concept", required = true)
+    @XmlAttribute( name = "concept", required = true )
     protected QName conceptRef;
 
     /**
@@ -77,7 +76,8 @@ public class SliceConceptRef {
      *     {@link QName }
      *
      */
-    public QName getConceptRef() {
+    public QName getConceptRef( )
+    {
         return conceptRef;
     }
 
@@ -89,10 +89,10 @@ public class SliceConceptRef {
      *     {@link QName }
      *
      */
-    public void setConceptRef(QName value) {
+    public void setConceptRef( QName value )
+    {
         this.conceptRef = value;
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected Slice slice;
@@ -112,6 +112,5 @@ public class SliceConceptRef {
         DataSet dataset = this.slice.getDataSet( );
         return dataset.getConcept( this.conceptRef );
     }
-
 
 }

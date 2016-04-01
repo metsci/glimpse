@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
-import static com.metsci.glimpse.axis.UpdateMode.*;
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static java.lang.Math.*;
+import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static java.lang.Math.PI;
 
 import java.io.File;
 import java.io.IOException;

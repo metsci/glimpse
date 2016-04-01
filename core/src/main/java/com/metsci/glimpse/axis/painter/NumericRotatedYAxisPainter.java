@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.*;
+import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 

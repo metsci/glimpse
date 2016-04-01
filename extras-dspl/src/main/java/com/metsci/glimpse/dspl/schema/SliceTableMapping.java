@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-
 
 /**
  *
@@ -88,16 +87,14 @@ import javax.xml.namespace.QName;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SliceTableMapping", propOrder = {
-    "mapDimension",
-    "mapMetric"
-})
-public class SliceTableMapping {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "SliceTableMapping", propOrder = { "mapDimension", "mapMetric" } )
+public class SliceTableMapping
+{
 
     protected List<SliceTableMapping.MapDimension> mapDimension;
     protected List<SliceTableMapping.MapMetric> mapMetric;
-    @XmlAttribute(name = "ref", required = true)
+    @XmlAttribute( name = "ref", required = true )
     protected QName ref;
 
     /**
@@ -122,9 +119,11 @@ public class SliceTableMapping {
      *
      *
      */
-    public List<SliceTableMapping.MapDimension> getMapDimension() {
-        if (mapDimension == null) {
-            mapDimension = new ArrayList<SliceTableMapping.MapDimension>();
+    public List<SliceTableMapping.MapDimension> getMapDimension( )
+    {
+        if ( mapDimension == null )
+        {
+            mapDimension = new ArrayList<SliceTableMapping.MapDimension>( );
         }
         return this.mapDimension;
     }
@@ -151,9 +150,11 @@ public class SliceTableMapping {
      *
      *
      */
-    public List<SliceTableMapping.MapMetric> getMapMetric() {
-        if (mapMetric == null) {
-            mapMetric = new ArrayList<SliceTableMapping.MapMetric>();
+    public List<SliceTableMapping.MapMetric> getMapMetric( )
+    {
+        if ( mapMetric == null )
+        {
+            mapMetric = new ArrayList<SliceTableMapping.MapMetric>( );
         }
         return this.mapMetric;
     }
@@ -166,7 +167,8 @@ public class SliceTableMapping {
      *     {@link QName }
      *
      */
-    public QName getRef() {
+    public QName getRef( )
+    {
         return ref;
     }
 
@@ -178,10 +180,10 @@ public class SliceTableMapping {
      *     {@link QName }
      *
      */
-    public void setRef(QName value) {
+    public void setRef( QName value )
+    {
         this.ref = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -201,14 +203,15 @@ public class SliceTableMapping {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class MapDimension {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class MapDimension
+    {
 
-        @XmlAttribute(name = "concept", required = true)
+        @XmlAttribute( name = "concept", required = true )
         protected QName concept;
-        @XmlAttribute(name = "toColumn", required = true)
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+        @XmlAttribute( name = "toColumn", required = true )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
         protected String toColumn;
 
         /**
@@ -219,7 +222,8 @@ public class SliceTableMapping {
          *     {@link QName }
          *
          */
-        public QName getConcept() {
+        public QName getConcept( )
+        {
             return concept;
         }
 
@@ -231,7 +235,8 @@ public class SliceTableMapping {
          *     {@link QName }
          *
          */
-        public void setConcept(QName value) {
+        public void setConcept( QName value )
+        {
             this.concept = value;
         }
 
@@ -243,7 +248,8 @@ public class SliceTableMapping {
          *     {@link String }
          *
          */
-        public String getToColumn() {
+        public String getToColumn( )
+        {
             return toColumn;
         }
 
@@ -255,13 +261,13 @@ public class SliceTableMapping {
          *     {@link String }
          *
          */
-        public void setToColumn(String value) {
+        public void setToColumn( String value )
+        {
             this.toColumn = value;
         }
 
     }
 
-
     /**
      * <p>Java class for anonymous complex type.
      *
@@ -280,14 +286,15 @@ public class SliceTableMapping {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class MapMetric {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class MapMetric
+    {
 
-        @XmlAttribute(name = "concept", required = true)
+        @XmlAttribute( name = "concept", required = true )
         protected QName concept;
-        @XmlAttribute(name = "toColumn", required = true)
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+        @XmlAttribute( name = "toColumn", required = true )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
         protected String toColumn;
 
         /**
@@ -298,7 +305,8 @@ public class SliceTableMapping {
          *     {@link QName }
          *
          */
-        public QName getConcept() {
+        public QName getConcept( )
+        {
             return concept;
         }
 
@@ -310,7 +318,8 @@ public class SliceTableMapping {
          *     {@link QName }
          *
          */
-        public void setConcept(QName value) {
+        public void setConcept( QName value )
+        {
             this.concept = value;
         }
 
@@ -322,7 +331,8 @@ public class SliceTableMapping {
          *     {@link String }
          *
          */
-        public String getToColumn() {
+        public String getToColumn( )
+        {
             return toColumn;
         }
 
@@ -334,7 +344,8 @@ public class SliceTableMapping {
          *     {@link String }
          *
          */
-        public void setToColumn(String value) {
+        public void setToColumn( String value )
+        {
             this.toColumn = value;
         }
 

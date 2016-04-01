@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.spacenav;
 
-import static com.metsci.glimpse.spacenav.SpaceNavPoller.*;
+import static com.metsci.glimpse.spacenav.SpaceNavPoller.POLL_INTERVAL;
 import static java.lang.Math.abs;
 
 import com.metsci.glimpse.axis.Axis1D;

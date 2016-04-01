@@ -37,6 +37,6 @@ public interface SortedDoublesModifiable extends SortedDoubles, DoublesModifiabl
     /**
      * @return The index at which v was inserted
      */
-    int add(double v);
+    int add( double v );
 
 }

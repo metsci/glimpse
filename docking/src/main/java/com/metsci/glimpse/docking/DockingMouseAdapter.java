@@ -56,7 +56,6 @@ public class DockingMouseAdapter extends MouseAdapter
     protected View draggedView = null;
     protected int draggedViewNum = -1;
 
-
     public DockingMouseAdapter( Tile tile, DockingGroup dockingGroup, TileFactory tileFactory )
     {
         this.tile = tile;

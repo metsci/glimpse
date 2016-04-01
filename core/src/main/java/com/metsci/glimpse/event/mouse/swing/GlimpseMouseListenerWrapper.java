@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.event.mouse.swing;
 
+import static com.metsci.glimpse.event.mouse.swing.GlimpseMouseWrapper.fromMouseEvent;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-
-import static com.metsci.glimpse.event.mouse.swing.GlimpseMouseWrapper.*;
 
 public class GlimpseMouseListenerWrapper implements MouseListener
 {

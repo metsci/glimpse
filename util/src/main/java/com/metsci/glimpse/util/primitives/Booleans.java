@@ -35,26 +35,25 @@ public interface Booleans
     /**
      * Value at index i
      */
-    boolean v(int i);
+    boolean v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, boolean[] dest, int iDest, int c);
-
+    void copyTo( int i, boolean[] dest, int iDest, int c );
 
     // Convenience Methods
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    boolean first();
+    boolean first( );
 
-    boolean last();
+    boolean last( );
 
-    boolean[] copyOf(int i, int c);
+    boolean[] copyOf( int i, int c );
 
-    boolean[] copyOf();
+    boolean[] copyOf( );
 
 }

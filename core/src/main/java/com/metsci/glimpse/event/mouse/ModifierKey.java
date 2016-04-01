@@ -28,8 +28,5 @@ package com.metsci.glimpse.event.mouse;
 
 public enum ModifierKey
 {
-    Shift,
-    Ctrl,
-    Alt,
-    Meta;
+    Shift, Ctrl, Alt, Meta;
 }

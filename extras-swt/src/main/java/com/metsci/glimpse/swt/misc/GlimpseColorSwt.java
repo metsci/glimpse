@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.swt.misc;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.*;
+import static com.metsci.glimpse.support.color.GlimpseColor.fromColorRgb;
 
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
@@ -57,7 +57,7 @@ public class GlimpseColorSwt
 
         return fromColorRgb( r, g, b );
     }
-    
+
     public static float[] fromColorSwt( RGB color, float alpha )
     {
         float[] out = fromColorSwt( color );

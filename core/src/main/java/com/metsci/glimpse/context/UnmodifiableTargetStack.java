@@ -37,7 +37,7 @@ public class UnmodifiableTargetStack implements GlimpseTargetStack
     {
         this.delegate = stack;
     }
-    
+
     @Override
     public GlimpseTargetStack push( GlimpseTarget target, GlimpseBounds bounds )
     {

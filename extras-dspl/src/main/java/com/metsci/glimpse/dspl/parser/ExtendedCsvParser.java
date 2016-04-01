@@ -26,11 +26,10 @@
  */
 package com.metsci.glimpse.dspl.parser;
 
-import static com.metsci.glimpse.dspl.parser.util.ParserUtils.*;
-import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.buildPropertyTableData;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.buildSliceTableData;
+import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.splitLine;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -61,15 +60,18 @@ import com.metsci.glimpse.dspl.parser.util.ParserUtils.ParserFactory;
 import com.metsci.glimpse.dspl.parser.util.ParserUtils.TableParserInfo;
 import com.metsci.glimpse.dspl.schema.Concept;
 import com.metsci.glimpse.dspl.schema.Data;
+import com.metsci.glimpse.dspl.schema.Data.File;
 import com.metsci.glimpse.dspl.schema.DataSet;
 import com.metsci.glimpse.dspl.schema.DataType;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.schema.Table;
-import com.metsci.glimpse.dspl.schema.Data.File;
 import com.metsci.glimpse.dspl.schema.Table.Column;
 import com.metsci.glimpse.dspl.util.DsplException;
 import com.metsci.glimpse.util.primitives.BytesArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
+
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class ExtendedCsvParser extends CsvParser implements MultipleFileTableParser
 {
@@ -104,7 +106,7 @@ public class ExtendedCsvParser extends CsvParser implements MultipleFileTablePar
         while ( ( line = in.readLine( ) ) != null )
         {
             if ( line.isEmpty( ) ) continue;
-            
+
             String[] tokens = splitLine( line, splitLimit );
 
             for ( int i = 0; i < size; i++ )
@@ -468,7 +470,7 @@ public class ExtendedCsvParser extends CsvParser implements MultipleFileTablePar
                     }
                     else
                     {
-                        logWarning( logger,  "Trouble parsing date: %s. Adding gap instead.", token );
+                        logWarning( logger, "Trouble parsing date: %s. Adding gap instead.", token );
                         addGap( );
                     }
                 }

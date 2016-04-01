@@ -50,8 +50,8 @@ public abstract class FastFuncUnboundedDomain extends FastFunc
     @Override
     protected double f( double x )
     {
-        if ( x == -1.0 ) return gNegativeInfinity();
-        if ( x == 1.0 ) return gPositiveInfinity();
+        if ( x == -1.0 ) return gNegativeInfinity( );
+        if ( x == 1.0 ) return gPositiveInfinity( );
         return g( x / ( 1.0 - Math.abs( x ) ) );
     }
 
@@ -69,10 +69,10 @@ public abstract class FastFuncUnboundedDomain extends FastFunc
     /**
      * lim[x->-inf] g(x)
      */
-    protected abstract double gNegativeInfinity();
+    protected abstract double gNegativeInfinity( );
 
     /**
      * lim[x->+inf] g(x)
      */
-    protected abstract double gPositiveInfinity();
+    protected abstract double gPositiveInfinity( );
 }

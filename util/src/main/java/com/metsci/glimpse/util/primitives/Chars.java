@@ -35,30 +35,29 @@ public interface Chars
     /**
      * Value at index i
      */
-    char v(int i);
+    char v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, char[] dest, int iDest, int c);
+    void copyTo( int i, char[] dest, int iDest, int c );
 
-    String string(int i, int c);
-
+    String string( int i, int c );
 
     // Convenience Methods
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    char first();
+    char first( );
 
-    char last();
+    char last( );
 
-    char[] copyOf(int i, int c);
+    char[] copyOf( int i, int c );
 
-    char[] copyOf();
+    char[] copyOf( );
 
-    String string();
+    String string( );
 
 }

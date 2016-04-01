@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.spacenav;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.util.List;
 import java.util.Timer;

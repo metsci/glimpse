@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.util.logging.Logger;
 
@@ -222,11 +222,11 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
             }
         } );
     }
-    
+
     public void layoutTo( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
-        
+        assert ( SwingUtilities.isEventDispatchThread( ) );
+
         for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
         {
             layout.layoutTo( getGlimpseContext( ) );

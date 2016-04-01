@@ -28,8 +28,6 @@ package com.metsci.glimpse.util.math.fast;
 
 import static java.lang.Math.exp;
 
-import com.metsci.glimpse.util.math.fast.FastFunc;
-
 /**
  * @author ellis
  */

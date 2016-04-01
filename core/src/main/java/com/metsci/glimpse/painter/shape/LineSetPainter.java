@@ -230,17 +230,17 @@ public class LineSetPainter extends GlimpseDataPainter2D
 
                 newData = false;
             }
-    
+
             gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
             gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
             gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-    
+
             gl.glColor4fv( lineColor, 0 );
             gl.glLineWidth( lineWidth );
-    
+
             offsetBuffer.rewind( );
             sizeBuffer.rewind( );
-    
+
             gl.glMultiDrawArrays( GL2.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
         }
         finally

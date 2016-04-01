@@ -195,7 +195,7 @@ public class PlotInfoWrapper implements PlotInfo
     {
         return info.getParent( );
     }
-    
+
     /**
      * @deprecated {@link #removePlot()}
      */

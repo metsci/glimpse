@@ -27,7 +27,6 @@
 package com.metsci.glimpse.painter.treemap;
 
 import static java.lang.Math.ceil;
-import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -40,6 +39,8 @@ import javax.media.opengl.GLContext;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+
+import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 
 /**
  * Draws a <a href="http://en.wikipedia.org/wiki/Treemapping">TreeMap</a>,
@@ -236,9 +237,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
             for ( int i = 0; i < rects.length - 1; i++ )
             {
                 Rectangle2D oldRect = rects[i];
-                Rectangle2D newRect = new Rectangle2D.Double( ( oldRect.getMinX( ) - origBound.getMinX( ) ) * scaleX + boundary.getMinX( ),
-                        ( oldRect.getMinY( ) - origBound.getMinY( ) ) * scaleY + boundary.getMinY( ),
-                        oldRect.getWidth( ) * scaleX, oldRect.getHeight( ) * scaleY );
+                Rectangle2D newRect = new Rectangle2D.Double( ( oldRect.getMinX( ) - origBound.getMinX( ) ) * scaleX + boundary.getMinX( ), ( oldRect.getMinY( ) - origBound.getMinY( ) ) * scaleY + boundary.getMinY( ), oldRect.getWidth( ) * scaleX, oldRect.getHeight( ) * scaleY );
                 newRects[i] = newRect;
             }
 
@@ -257,10 +256,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
     protected void displayNode( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
         // are the node bounds outside the viewport
-        if ( axis.getMinX( ) >= nodeBounds.getMaxX( ) ||
-                axis.getMinY( ) >= nodeBounds.getMaxY( ) ||
-                nodeBounds.getMinX( ) >= axis.getMaxX( ) ||
-                nodeBounds.getMinY( ) >= axis.getMaxY( ) )
+        if ( axis.getMinX( ) >= nodeBounds.getMaxX( ) || axis.getMinY( ) >= nodeBounds.getMaxY( ) || nodeBounds.getMinX( ) >= axis.getMaxX( ) || nodeBounds.getMinY( ) >= axis.getMaxY( ) )
         {
             return;
         }

@@ -26,13 +26,6 @@
  */
 package com.metsci.glimpse.examples.worldwind;
 
-import gov.nasa.worldwind.BasicModel;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.layers.ViewControlsLayer;
-import gov.nasa.worldwind.layers.ViewControlsSelectListener;
-import gov.nasa.worldwindx.examples.ApplicationTemplate;
-
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,6 +39,13 @@ import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
+
+import gov.nasa.worldwind.BasicModel;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.layers.ViewControlsLayer;
+import gov.nasa.worldwind.layers.ViewControlsSelectListener;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 /**
  * Demonstrates rendering the contents of a Glimpse plot onto

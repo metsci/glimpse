@@ -31,7 +31,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.LogRecord;
 
-
 /**
  * Extends TerseLogFormatter to include a timestamp before each line.
  *
@@ -39,52 +38,51 @@ import java.util.logging.LogRecord;
  */
 public class TimestampingLogFormatter extends TerseLogFormatter
 {
-    private final DateFormat _fullDateTriggerFormatter = new SimpleDateFormat("yyyy-MM-dd z");
-    private final DateFormat _fullFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-    private final DateFormat _shortFormatter = new SimpleDateFormat("HH:mm:ss");
+    private final DateFormat _fullDateTriggerFormatter = new SimpleDateFormat( "yyyy-MM-dd z" );
+    private final DateFormat _fullFormatter = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss z" );
+    private final DateFormat _shortFormatter = new SimpleDateFormat( "HH:mm:ss" );
 
     private String _previousDateString = null;
 
-
     @Override
-    public String format(LogRecord record)
+    public String format( LogRecord record )
     {
-        Date now = new Date(record.getMillis());
-        String dateString = getFullDateTriggerFormatter().format(now);
-        if ((_previousDateString == null) || !_previousDateString.equals(dateString))
+        Date now = new Date( record.getMillis( ) );
+        String dateString = getFullDateTriggerFormatter( ).format( now );
+        if ( ( _previousDateString == null ) || !_previousDateString.equals( dateString ) )
         {
             _previousDateString = dateString;
-            StringBuilder stringBuilder = new StringBuilder(getFullFormatter().format(now));
-            stringBuilder.append(LINE_SEPARATOR);
-            stringBuilder.append(super.format(record));
-            return stringBuilder.toString();
+            StringBuilder stringBuilder = new StringBuilder( getFullFormatter( ).format( now ) );
+            stringBuilder.append( LINE_SEPARATOR );
+            stringBuilder.append( super.format( record ) );
+            return stringBuilder.toString( );
         }
         else
         {
-            return super.format(record);
+            return super.format( record );
         }
     }
 
     @Override
-    protected void appendPrefix(LogRecord record, StringBuilder prefix)
+    protected void appendPrefix( LogRecord record, StringBuilder prefix )
     {
-        Date now = new Date(record.getMillis());
-        prefix.append(getShortFormatter().format(now));
-        prefix.append(" ");
-        super.appendPrefix(record, prefix);
+        Date now = new Date( record.getMillis( ) );
+        prefix.append( getShortFormatter( ).format( now ) );
+        prefix.append( " " );
+        super.appendPrefix( record, prefix );
     }
 
-    protected DateFormat getFullDateTriggerFormatter()
+    protected DateFormat getFullDateTriggerFormatter( )
     {
         return _fullDateTriggerFormatter;
     }
 
-    protected DateFormat getFullFormatter()
+    protected DateFormat getFullFormatter( )
     {
         return _fullFormatter;
     }
 
-    protected DateFormat getShortFormatter()
+    protected DateFormat getShortFormatter( )
     {
         return _shortFormatter;
     }

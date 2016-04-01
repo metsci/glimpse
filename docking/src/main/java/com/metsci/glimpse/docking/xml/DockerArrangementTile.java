@@ -33,15 +33,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType( name="Tile" )
+@XmlType( name = "Tile" )
 public class DockerArrangementTile extends DockerArrangementNode
 {
 
-    @XmlElementWrapper( name="views" )
-    @XmlElement( name="view" )
+    @XmlElementWrapper( name = "views" )
+    @XmlElement( name = "view" )
     public List<String> viewIds = new ArrayList<>( );
 
-    @XmlElement( name="selectedView" )
+    @XmlElement( name = "selectedView" )
     public String selectedViewId = null;
 
     public boolean isMaximized = false;

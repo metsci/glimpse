@@ -37,6 +37,6 @@ public interface SortedIntsModifiable extends SortedInts, IntsModifiable
     /**
      * @return The index at which v was inserted
      */
-    int add(int v);
+    int add( int v );
 
 }

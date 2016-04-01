@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.log;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

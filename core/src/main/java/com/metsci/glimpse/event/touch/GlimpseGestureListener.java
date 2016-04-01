@@ -29,8 +29,12 @@ package com.metsci.glimpse.event.touch;
 public interface GlimpseGestureListener
 {
     public void panDetected( GlimpsePanGestureEvent event );
+
     public void pinchDetected( GlimpsePinchGestureEvent event );
+
     public void tapDetected( GlimpseTapGestureEvent event );
+
     public void longPressDetected( GlimpseLongPressGestureEvent event );
+
     public void swipeDetected( GlimpseSwipeGestureEvent event );
 }

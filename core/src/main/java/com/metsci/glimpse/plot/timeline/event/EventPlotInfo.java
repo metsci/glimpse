@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Font;
 import java.awt.image.BufferedImage;
@@ -392,7 +392,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                 StackedTimePlot2D plot = getStackedTimePlot( );
                 TooltipPainter tooltipPainter = plot.getTooltipPainter( );
                 tooltipPainter.clear( );
-                
+
                 selection = null;
             }
         }

@@ -72,9 +72,8 @@ public class LandShape
 {
     public static interface VertexConverter
     {
-        void toXY(double lat, double lon, Point2D.Double xy);
+        void toXY( double lat, double lon, Point2D.Double xy );
     }
-
 
     private final List<LandSegment> segments;
     private final LandVertex swCorner;
@@ -86,128 +85,128 @@ public class LandShape
 
     private final boolean invertFill;
 
-    public LandShape(List<LandSegment> segments, LandBox box)
+    public LandShape( List<LandSegment> segments, LandBox box )
     {
         assert segments != null;
 
         this.box = box;
-        this.segments = Collections.unmodifiableList(new ArrayList<LandSegment>(segments));
-        this.swCorner = new LandVertex(box.southLat, box.westLon);
-        this.neCorner = new LandVertex(box.northLat, box.eastLon);
-        this.suConverter = new VertexConverter()
+        this.segments = Collections.unmodifiableList( new ArrayList<LandSegment>( segments ) );
+        this.swCorner = new LandVertex( box.southLat, box.westLon );
+        this.neCorner = new LandVertex( box.northLat, box.eastLon );
+        this.suConverter = new VertexConverter( )
         {
-            public void toXY(double lat, double lon, Point2D.Double xy)
+            public void toXY( double lat, double lon, Point2D.Double xy )
             {
-                xy.x = (swCorner.getDistanceX_SU(lon));
-                xy.y = (swCorner.getDistanceY_SU(lat));
+                xy.x = ( swCorner.getDistanceX_SU( lon ) );
+                xy.y = ( swCorner.getDistanceY_SU( lat ) );
             }
         };
 
-        Shape rawSuShape = getRawFillShape(suConverter);
-        this.invertFill = (rawSuShape.contains(0, 0) != box.isSwCornerLand);
-        this.suShape = (invertFill ? invert(rawSuShape, suConverter) : rawSuShape);
+        Shape rawSuShape = getRawFillShape( suConverter );
+        this.invertFill = ( rawSuShape.contains( 0, 0 ) != box.isSwCornerLand );
+        this.suShape = ( invertFill ? invert( rawSuShape, suConverter ) : rawSuShape );
     }
 
     public boolean isLand( double latDeg, double lonDeg )
     {
-        Point2D.Double xy = new Point2D.Double();
-        suConverter.toXY(latDeg, lonDeg, xy);
-        return suShape.contains(xy.getX(), xy.getY());
+        Point2D.Double xy = new Point2D.Double( );
+        suConverter.toXY( latDeg, lonDeg, xy );
+        return suShape.contains( xy.getX( ), xy.getY( ) );
     }
 
-    public Shape getStrokeShape(VertexConverter converter)
+    public Shape getStrokeShape( VertexConverter converter )
     {
-        Path2D stroke = new Path2D.Double();
-        Point2D.Double xy = new Point2D.Double();
+        Path2D stroke = new Path2D.Double( );
+        Point2D.Double xy = new Point2D.Double( );
 
-        for (LandSegment segment : segments)
+        for ( LandSegment segment : segments )
         {
-            LandVertex vertex0 = segment.vertices.get(0);
-            converter.toXY(vertex0.lat, vertex0.lon, xy);
-            stroke.moveTo(xy.getX(), xy.getY());
+            LandVertex vertex0 = segment.vertices.get( 0 );
+            converter.toXY( vertex0.lat, vertex0.lon, xy );
+            stroke.moveTo( xy.getX( ), xy.getY( ) );
 
-            for (int i = 1; i < segment.vertices.size(); i++)
+            for ( int i = 1; i < segment.vertices.size( ); i++ )
             {
-                LandVertex vertex = segment.vertices.get(i);
-                converter.toXY(vertex.lat, vertex.lon, xy);
-                stroke.lineTo(xy.getX(), xy.getY());
+                LandVertex vertex = segment.vertices.get( i );
+                converter.toXY( vertex.lat, vertex.lon, xy );
+                stroke.lineTo( xy.getX( ), xy.getY( ) );
             }
         }
         return stroke;
     }
 
-    public Shape getFillShape(VertexConverter converter)
+    public Shape getFillShape( VertexConverter converter )
     {
-        Shape fill = getRawFillShape(converter);
-        return (invertFill ? invert(fill, converter) : fill);
+        Shape fill = getRawFillShape( converter );
+        return ( invertFill ? invert( fill, converter ) : fill );
     }
 
-    private Shape getRawFillShape(VertexConverter converter)
+    private Shape getRawFillShape( VertexConverter converter )
     {
-        Path2D fill = new Path2D.Double(Path2D.WIND_EVEN_ODD);
-        Point2D.Double xy = new Point2D.Double();
+        Path2D fill = new Path2D.Double( Path2D.WIND_EVEN_ODD );
+        Point2D.Double xy = new Point2D.Double( );
 
-        for (LandSegment segment : segments)
+        for ( LandSegment segment : segments )
         {
-            if (!segment.isFillable) continue;
+            if ( !segment.isFillable ) continue;
 
-            LandVertex vertex0 = segment.vertices.get(0);
-            converter.toXY(vertex0.lat, vertex0.lon, xy);
-            fill.moveTo(xy.getX(), xy.getY());
+            LandVertex vertex0 = segment.vertices.get( 0 );
+            converter.toXY( vertex0.lat, vertex0.lon, xy );
+            fill.moveTo( xy.getX( ), xy.getY( ) );
 
-            for (int i = 1; i < segment.vertices.size(); i++)
+            for ( int i = 1; i < segment.vertices.size( ); i++ )
             {
-                LandVertex vertex = segment.vertices.get(i);
-                converter.toXY(vertex.lat, vertex.lon, xy);
-                fill.lineTo(xy.getX(), xy.getY());
+                LandVertex vertex = segment.vertices.get( i );
+                converter.toXY( vertex.lat, vertex.lon, xy );
+                fill.lineTo( xy.getX( ), xy.getY( ) );
             }
 
-            for (LandVertex ghostVertex : segment.ghostVertices)
+            for ( LandVertex ghostVertex : segment.ghostVertices )
             {
-                converter.toXY(ghostVertex.lat, ghostVertex.lon, xy);
-                fill.lineTo(xy.getX(), xy.getY());
+                converter.toXY( ghostVertex.lat, ghostVertex.lon, xy );
+                fill.lineTo( xy.getX( ), xy.getY( ) );
             }
 
-            converter.toXY(vertex0.lat, vertex0.lon, xy);
-            fill.lineTo(xy.getX(), xy.getY());
+            converter.toXY( vertex0.lat, vertex0.lon, xy );
+            fill.lineTo( xy.getX( ), xy.getY( ) );
         }
         return fill;
     }
 
-    private Shape invert(Shape shape, VertexConverter converter)
+    private Shape invert( Shape shape, VertexConverter converter )
     {
-        Point2D.Double sw = new Point2D.Double();
-        converter.toXY(swCorner.lat, swCorner.lon, sw);
+        Point2D.Double sw = new Point2D.Double( );
+        converter.toXY( swCorner.lat, swCorner.lon, sw );
 
-        Point2D.Double ne = new Point2D.Double();
-        converter.toXY(neCorner.lat, neCorner.lon, ne);
+        Point2D.Double ne = new Point2D.Double( );
+        converter.toXY( neCorner.lat, neCorner.lon, ne );
 
-        double x = Math.min(sw.getX(), ne.getX());
-        double y = Math.min(sw.getY(), ne.getY());
-        double w = Math.abs(sw.getX() - ne.getX());
-        double h = Math.abs(sw.getY() - ne.getY());
+        double x = Math.min( sw.getX( ), ne.getX( ) );
+        double y = Math.min( sw.getY( ), ne.getY( ) );
+        double w = Math.abs( sw.getX( ) - ne.getX( ) );
+        double h = Math.abs( sw.getY( ) - ne.getY( ) );
 
-        Area inverted = new Area(new Rectangle2D.Double(x, y, w, h));
-        inverted.subtract(new Area(shape));
+        Area inverted = new Area( new Rectangle2D.Double( x, y, w, h ) );
+        inverted.subtract( new Area( shape ) );
         return inverted;
     }
 
-    public LatLonGeo getSwCorner()
+    public LatLonGeo getSwCorner( )
     {
         return LatLonGeo.fromDeg( swCorner.lat, swCorner.lon );
     }
 
-    public LatLonGeo getNeCorner()
+    public LatLonGeo getNeCorner( )
     {
         return LatLonGeo.fromDeg( neCorner.lat, neCorner.lon );
     }
 
-    public List< LandSegment > getSegments()
+    public List<LandSegment> getSegments( )
     {
-         return segments;
+        return segments;
     }
 
-    public LandBox getLandBox()
+    public LandBox getLandBox( )
     {
         return box;
     }

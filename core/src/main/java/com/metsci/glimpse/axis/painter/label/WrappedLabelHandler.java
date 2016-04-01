@@ -39,7 +39,7 @@ public class WrappedLabelHandler extends GridAxisLabelHandler
             WrappedAxis1D wrappedAxis = ( WrappedAxis1D ) axis;
             number = wrappedAxis.getWrappedValue( number );
         }
-        
+
         return super.tickString( axis, number, orderAxis );
     }
 }

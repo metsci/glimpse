@@ -74,15 +74,15 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     {
         updateTextRenderer( );
         if ( textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
         gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL2.GL_BLEND );
-        
+
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
@@ -92,7 +92,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
-        
+
         paintTicks( gl, axis, width, height );
         paintAxisLabel( gl, axis, width, height );
         paintSelectionLine( gl, axis, width, height );

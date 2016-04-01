@@ -26,7 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Icon;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Label;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
 
 import java.util.ArrayList;
 import java.util.Collection;

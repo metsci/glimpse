@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
@@ -33,7 +34,6 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
@@ -46,9 +46,6 @@ import java.util.logging.Logger;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.swing.UIManager;
 
-import net.sf.tinylaf.Theme;
-import net.sf.tinylaf.TinyLookAndFeel;
-
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
@@ -58,10 +55,12 @@ import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
 
+import net.sf.tinylaf.Theme;
+import net.sf.tinylaf.TinyLookAndFeel;
+
 public class GlimpseDockingExample
 {
     protected static final Logger logger = Logger.getLogger( GlimpseDockingExample.class.getName( ) );
-
 
     public static void main( String[] args ) throws Exception
     {
@@ -71,12 +70,10 @@ public class GlimpseDockingExample
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
-
         final String appName = "glimpse-docking-example";
         final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
         dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
-
 
         GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
@@ -91,13 +88,7 @@ public class GlimpseDockingExample
         animator.add( bCanvas.getGLDrawable( ) );
         animator.start( );
 
-
-        final View[] views =
-        {
-            new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ),
-            new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) )
-        };
-
+        final View[] views = { new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ), new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) ) };
 
         // Certain components are picky about being added to a frame from the Swing thread
         // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good
@@ -122,7 +113,6 @@ public class GlimpseDockingExample
         } );
     }
 
-
     public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
     {
         try
@@ -135,7 +125,6 @@ public class GlimpseDockingExample
             logger.log( WARNING, "Failed to write docking arrangement to file", e );
         }
     }
-
 
     public static GroupArrangement loadDockingArrangement( String appName )
     {

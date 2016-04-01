@@ -34,20 +34,20 @@ public class TableColumnUtils
 
         switch ( in.getType( ) )
         {
-        case STRING:
-            return buildTableColumn( in, buildStringArray( in, indexArray ), size );
-        case FLOAT:
-            return buildTableColumn( in, buildFloatArray( in, indexArray ), size );
-        case INTEGER:
-            return buildTableColumn( in, buildIntegerArray( in, indexArray ), size );
-        case BOOLEAN:
-            return buildTableColumn( in, buildBooleanArray( in, indexArray ), size );
-        case DATE:
-            return buildTableColumn( in, buildDateArray( in, indexArray ), size );
-        case CONCEPT:
-            return buildTableColumn( in, buildStringArray( in, indexArray ), size );
-        default:
-            throw new UnsupportedOperationException( "Unknown Type: " + in.getType( ) );
+            case STRING:
+                return buildTableColumn( in, buildStringArray( in, indexArray ), size );
+            case FLOAT:
+                return buildTableColumn( in, buildFloatArray( in, indexArray ), size );
+            case INTEGER:
+                return buildTableColumn( in, buildIntegerArray( in, indexArray ), size );
+            case BOOLEAN:
+                return buildTableColumn( in, buildBooleanArray( in, indexArray ), size );
+            case DATE:
+                return buildTableColumn( in, buildDateArray( in, indexArray ), size );
+            case CONCEPT:
+                return buildTableColumn( in, buildStringArray( in, indexArray ), size );
+            default:
+                throw new UnsupportedOperationException( "Unknown Type: " + in.getType( ) );
         }
     }
 

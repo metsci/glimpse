@@ -45,7 +45,7 @@ public interface Texture
      * to support proper handling of multitexturing shaders.
      */
     public int[] getHandles( );
-    
+
     /**
      * Most Texture implementations are backed by a buffer on the
      * heap which acts as a staging area for data changes to the

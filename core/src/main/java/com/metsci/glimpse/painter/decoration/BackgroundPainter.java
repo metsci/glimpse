@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.*;
+import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.FRAME_BACKGROUND_COLOR;
+import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.PLOT_BACKGROUND_COLOR;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;

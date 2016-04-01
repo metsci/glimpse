@@ -118,9 +118,9 @@ public class TangentPlane implements GeoProjection, Serializable
     }
 
     // This is defined here as a member function so it can be overriden by subclasses to improve runtime.
-    protected double calcAtan2(double y, double x)
+    protected double calcAtan2( double y, double x )
     {
-        return Math.atan2(y, x);
+        return Math.atan2( y, x );
     }
 
     /**
@@ -140,7 +140,7 @@ public class TangentPlane implements GeoProjection, Serializable
      */
     private LatLonGeo pointOnUnitSphereToLatLon( Vector3d pointOnUnitSphere )
     {
-        double lonRad = calcAtan2(pointOnUnitSphere.getY(), pointOnUnitSphere.getX());
+        double lonRad = calcAtan2( pointOnUnitSphere.getY( ), pointOnUnitSphere.getX( ) );
         double latRad = PolynomialApprox.asin( pointOnUnitSphere.getZ( ) );
 
         LatLonGeo latLon = new LatLonGeo( Angle.radiansToDegrees( latRad ), Angle.radiansToDegrees( lonRad ) );

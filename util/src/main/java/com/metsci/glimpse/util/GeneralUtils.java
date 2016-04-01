@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util;
 
-import static java.util.Collections.*;
+import static java.util.Collections.unmodifiableList;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -51,12 +51,12 @@ import java.util.TreeSet;
  */
 public class GeneralUtils
 {
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+    public static final String LINE_SEPARATOR = System.getProperty( "line.separator", "\n" );
 
     /**
      * Prevent instantiation.
      */
-    private GeneralUtils()
+    private GeneralUtils( )
     {
     }
 
@@ -64,9 +64,9 @@ public class GeneralUtils
      * Workaround for <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539">bug #6480539</a>:
      * BigDecimal.stripTrailingZeros() has no effect on zero itself ("0.0").
      */
-    public static BigDecimal stripTrailingZeros(BigDecimal value)
+    public static BigDecimal stripTrailingZeros( BigDecimal value )
     {
-        return (value.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : value.stripTrailingZeros());
+        return ( value.compareTo( BigDecimal.ZERO ) == 0 ? BigDecimal.ZERO : value.stripTrailingZeros( ) );
     }
 
     /**
@@ -77,10 +77,10 @@ public class GeneralUtils
      * @param   longVal  value for which to compute hashCode
      * @return  hashCode
      */
-    public static int hashCode(long longVal)
+    public static int hashCode( long longVal )
     {
         // combine upper 32 and lower 32 bits via exclusive or
-        return (int) (longVal ^ (longVal >>> 32));
+        return ( int ) ( longVal ^ ( longVal >>> 32 ) );
     }
 
     /**
@@ -91,9 +91,9 @@ public class GeneralUtils
      * @param   floatVal  value for which to compute hashCode
      * @return  hashCode
      */
-    public static int hashCode(float floatVal)
+    public static int hashCode( float floatVal )
     {
-        return Float.floatToIntBits(floatVal);
+        return Float.floatToIntBits( floatVal );
     }
 
     /**
@@ -104,9 +104,9 @@ public class GeneralUtils
      * @param   doubleVal  value for which to compute hashCode
      * @return  hashCode
      */
-    public static int hashCode(double doubleVal)
+    public static int hashCode( double doubleVal )
     {
-        return hashCode(Double.doubleToLongBits(doubleVal));
+        return hashCode( Double.doubleToLongBits( doubleVal ) );
     }
 
     /**
@@ -117,9 +117,9 @@ public class GeneralUtils
      * @param   booleanVal  value for which to compute hashCode
      * @return  hashCode
      */
-    public static int hashCode(boolean booleanVal)
+    public static int hashCode( boolean booleanVal )
     {
-        return (booleanVal ? 1231 : 1237);
+        return ( booleanVal ? 1231 : 1237 );
     }
 
     /**
@@ -131,9 +131,9 @@ public class GeneralUtils
      * @param   shortVal2
      * @return  -1, 0, or 1 if shortVal1 is less than, equal to, or greater than shortVal2 respectively.
      */
-    public static short compare(short shortVal1, short shortVal2)
+    public static short compare( short shortVal1, short shortVal2 )
     {
-        return compareShorts(shortVal1, shortVal2);
+        return compareShorts( shortVal1, shortVal2 );
     }
 
     /**
@@ -145,13 +145,13 @@ public class GeneralUtils
      * @param   shortVal2
      * @return  -1, 0, or 1 if shortVal1 is less than, equal to, or greater than shortVal2 respectively.
      */
-    public static short compareShorts(short shortVal1, short shortVal2)
+    public static short compareShorts( short shortVal1, short shortVal2 )
     {
-        if (shortVal1 < shortVal2)
+        if ( shortVal1 < shortVal2 )
         {
             return -1;
         }
-        else if (shortVal1 > shortVal2)
+        else if ( shortVal1 > shortVal2 )
         {
             return 1;
         }
@@ -168,9 +168,9 @@ public class GeneralUtils
      * @param   intVal2
      * @return  -1, 0, or 1 if intVal1 is less than, equal to, or greater than intVal2 respectively.
      */
-    public static int compare(int intVal1, int intVal2)
+    public static int compare( int intVal1, int intVal2 )
     {
-        return compareInts(intVal1, intVal2);
+        return compareInts( intVal1, intVal2 );
     }
 
     /**
@@ -182,13 +182,13 @@ public class GeneralUtils
      * @param   intVal2
      * @return  -1, 0, or 1 if intVal1 is less than, equal to, or greater than intVal2 respectively.
      */
-    public static int compareInts(int intVal1, int intVal2)
+    public static int compareInts( int intVal1, int intVal2 )
     {
-        if (intVal1 < intVal2)
+        if ( intVal1 < intVal2 )
         {
             return -1;
         }
-        else if (intVal1 > intVal2)
+        else if ( intVal1 > intVal2 )
         {
             return 1;
         }
@@ -206,9 +206,9 @@ public class GeneralUtils
      * @return  -1, 0, or 1 if longVal1 is less than, equal to, or greater than longVal2
      *          respectively.
      */
-    public static int compare(long longVal1, long longVal2)
+    public static int compare( long longVal1, long longVal2 )
     {
-        return compareLongs(longVal1, longVal2);
+        return compareLongs( longVal1, longVal2 );
     }
 
     /**
@@ -221,13 +221,13 @@ public class GeneralUtils
      * @return  -1, 0, or 1 if longVal1 is less than, equal to, or greater than longVal2
      *          respectively.
      */
-    public static int compareLongs(long longVal1, long longVal2)
+    public static int compareLongs( long longVal1, long longVal2 )
     {
-        if (longVal1 < longVal2)
+        if ( longVal1 < longVal2 )
         {
             return -1;
         }
-        else if (longVal1 > longVal2)
+        else if ( longVal1 > longVal2 )
         {
             return 1;
         }
@@ -239,18 +239,18 @@ public class GeneralUtils
      * This method returns the correct type as specified by the caller, unlike {@link Class#forName(String)}.
      * It also helps localizing the "Type safety" warnings to a single place.
      */
-    public static <T> Class<? extends T> classForName(String className) throws ClassNotFoundException
+    public static <T> Class<? extends T> classForName( String className ) throws ClassNotFoundException
     {
-        return GeneralUtils.cast(Class.forName(className));
+        return GeneralUtils.cast( Class.forName( className ) );
     }
 
     /**
      * Returns the directory in which the application was started (this is the
      * working/current directory).
      */
-    public static String getWorkingDir()
+    public static String getWorkingDir( )
     {
-        return System.getProperty("user.dir");
+        return System.getProperty( "user.dir" );
     }
 
     /**
@@ -260,10 +260,10 @@ public class GeneralUtils
      * NOTE: When using the Sun Java compiler, this method should be invoked as GeneralUtils.< T, U >cast(u)
      * to avoid the following <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6302954">bug</a>.
      */
-    @SuppressWarnings("unchecked")
-    public static <T,U> T cast(U u)
+    @SuppressWarnings( "unchecked" )
+    public static <T, U> T cast( U u )
     {
-        return (T) u;
+        return ( T ) u;
     }
 
     /**
@@ -271,7 +271,7 @@ public class GeneralUtils
      */
     public static final <K> HashSet<K> newHashSet( )
     {
-        return new HashSet<K>();
+        return new HashSet<K>( );
     }
 
     /**
@@ -280,9 +280,9 @@ public class GeneralUtils
      * 
      * @see {@link HashSet#HashSet(Collection)}
      */
-    public static final <K> HashSet<K> newHashSet(Collection<? extends K> c)
+    public static final <K> HashSet<K> newHashSet( Collection<? extends K> c )
     {
-        return new HashSet<K>(c);
+        return new HashSet<K>( c );
     }
 
     /**
@@ -290,7 +290,7 @@ public class GeneralUtils
      */
     public static final <K> LinkedHashSet<K> newLinkedHashSet( )
     {
-        return new LinkedHashSet<K>();
+        return new LinkedHashSet<K>( );
     }
 
     /**
@@ -299,9 +299,9 @@ public class GeneralUtils
      *
      * @see {@link LinkedHashSet#LinkedHashSet(Collection)}
      */
-    public static final <K> LinkedHashSet<K> newLinkedHashSet(Collection<? extends K> c)
+    public static final <K> LinkedHashSet<K> newLinkedHashSet( Collection<? extends K> c )
     {
-        return new LinkedHashSet<K>(c);
+        return new LinkedHashSet<K>( c );
     }
 
     /**
@@ -309,15 +309,15 @@ public class GeneralUtils
      */
     public static final <K> TreeSet<K> newTreeSet( )
     {
-        return new TreeSet<K>();
+        return new TreeSet<K>( );
     }
 
     /**
      * Creates a new {@link HashMap} by examining the expected return type.
      */
-    public static final <K,V> HashMap<K,V> newHashMap( )
+    public static final <K, V> HashMap<K, V> newHashMap( )
     {
-        return new HashMap<K,V>();
+        return new HashMap<K, V>( );
     }
 
     /**
@@ -326,33 +326,33 @@ public class GeneralUtils
      * 
      * @see {@link HashMap#HashMap(Map)}
      */
-    public static final <K,V> HashMap<K,V> newHashMap(Map<? extends K,? extends V> m)
+    public static final <K, V> HashMap<K, V> newHashMap( Map<? extends K, ? extends V> m )
     {
-        return new HashMap<K,V>(m);
+        return new HashMap<K, V>( m );
     }
 
     /**
      * Creates a new {@link LinkedHashMap} by examining the expected return type.
      */
-    public static final <K,V> LinkedHashMap<K,V> newLinkedHashMap( )
+    public static final <K, V> LinkedHashMap<K, V> newLinkedHashMap( )
     {
-        return new LinkedHashMap<K,V>();
+        return new LinkedHashMap<K, V>( );
     }
 
     /**
      * Creates a new {@link TreeMap} by examining the expected return type.
      */
-    public static final <K,V> TreeMap<K,V> newTreeMap( )
+    public static final <K, V> TreeMap<K, V> newTreeMap( )
     {
-        return new TreeMap<K,V>();
+        return new TreeMap<K, V>( );
     }
 
     /**
      * Creates a new {@link ArrayList} by examining the expected return type.
      */
-    public static final <K> ArrayList<K> newArrayList()
+    public static final <K> ArrayList<K> newArrayList( )
     {
-        return new ArrayList<K>();
+        return new ArrayList<K>( );
     }
 
     /**
@@ -361,39 +361,39 @@ public class GeneralUtils
      * 
      * @see {@link ArrayList#ArrayList(Collection)}.
      */
-    public static final <K> ArrayList<K> newArrayList(Collection<? extends K> c)
+    public static final <K> ArrayList<K> newArrayList( Collection<? extends K> c )
     {
-        return new ArrayList<K>(c);
+        return new ArrayList<K>( c );
     }
 
     /**
      * Creates a new unmodifiable {@link List} containing the elements of the
      * specified collection, in order.
      */
-    public static final <K> List<K> newUnmodifiableList(Collection<? extends K> c)
+    public static final <K> List<K> newUnmodifiableList( Collection<? extends K> c )
     {
-        return unmodifiableList(newArrayList(c));
+        return unmodifiableList( newArrayList( c ) );
     }
 
     /**
      * Creates a new {@link ArrayList} from a collection by building an
      * enumeration over the collection.
      */
-    public static final <K> ArrayList<K> asList(Collection<K> values)
+    public static final <K> ArrayList<K> asList( Collection<K> values )
     {
-        return Collections.list(Collections.<K>enumeration(values));
+        return Collections.list( Collections.<K> enumeration( values ) );
     }
 
     @SuppressWarnings( "unchecked" )
-    public static final <K> HashSet<K> asSet(K... values)
+    public static final <K> HashSet<K> asSet( K... values )
     {
-        return new HashSet<K>(Arrays.asList(values));
+        return new HashSet<K>( Arrays.asList( values ) );
     }
 
     /**
      * Terse (especially as a static import) way to create an int[] literal.
      */
-    public static int[] ints(int... values)
+    public static int[] ints( int... values )
     {
         return values;
     }
@@ -401,7 +401,7 @@ public class GeneralUtils
     /**
      * Terse (especially as a static import) way to create a long[] literal.
      */
-    public static long[] longs(long... values)
+    public static long[] longs( long... values )
     {
         return values;
     }
@@ -409,7 +409,7 @@ public class GeneralUtils
     /**
      * Terse (especially as a static import) way to create a float[] literal.
      */
-    public static float[] floats(float... values)
+    public static float[] floats( float... values )
     {
         return values;
     }
@@ -417,7 +417,7 @@ public class GeneralUtils
     /**
      * Terse (especially as a static import) way to create a double[] literal.
      */
-    public static double[] doubles(double... values)
+    public static double[] doubles( double... values )
     {
         return values;
     }
@@ -425,7 +425,7 @@ public class GeneralUtils
     /**
      * Terse (especially as a static import) way to create a boolean[] literal.
      */
-    public static boolean[] booleans(boolean... values)
+    public static boolean[] booleans( boolean... values )
     {
         return values;
     }
@@ -434,7 +434,7 @@ public class GeneralUtils
      * Terse (especially as a static import) way to create a T[] literal.
      */
     @SuppressWarnings( "unchecked" )
-    public static <T> T[] array(T... values)
+    public static <T> T[] array( T... values )
     {
         return values;
     }
@@ -443,24 +443,24 @@ public class GeneralUtils
      * Terse (especially as a static import) way to create an EnumSet.
      */
     @SuppressWarnings( "unchecked" )
-    public static <T extends Enum<T>> EnumSet<T> enumSet(T... elements)
+    public static <T extends Enum<T>> EnumSet<T> enumSet( T... elements )
     {
-        return EnumSet.<T>of(elements[0], elements);
+        return EnumSet.<T> of( elements[0], elements );
     }
 
     /**
      * Convenience method for formatting and appending data to an existing StringBuffer.
      */
-    public static void stringBufferAppend(StringBuffer sb, String format, Object... args)
+    public static void stringBufferAppend( StringBuffer sb, String format, Object... args )
     {
-        sb.append(String.format(format, args));
+        sb.append( String.format( format, args ) );
     }
 
     /**
      * Convenience method for formatting and appending data to an existing StringBuilder.
      */
-    public static void stringBuilderAppend(StringBuilder sb, String format, Object... args)
+    public static void stringBuilderAppend( StringBuilder sb, String format, Object... args )
     {
-        sb.append(String.format(format, args));
+        sb.append( String.format( format, args ) );
     }
 }

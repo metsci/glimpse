@@ -368,14 +368,14 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -388,16 +388,16 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -411,10 +411,10 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             }
         } );
     }
-    
+
     @Override
-    public int[] getSurfaceScale()
+    public int[] getSurfaceScale( )
     {
-        return this.glWindow.getNativeSurfaceScale(new int[2]);
+        return this.glWindow.getNativeSurfaceScale( new int[2] );
     }
 }

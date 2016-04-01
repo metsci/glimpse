@@ -34,7 +34,6 @@ import javax.media.opengl.GL2;
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.support.colormap.ColorGradient;
 
-
 public class ColorTexture1D extends AbstractTexture
 {
     protected FloatBuffer rgba;
@@ -63,7 +62,7 @@ public class ColorTexture1D extends AbstractTexture
     @Override
     protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_RGBA, dim[0], 0, GL2.GL_RGBA, GL2.GL_FLOAT, rgba.rewind() );
+        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_RGBA, dim[0], 0, GL2.GL_RGBA, GL2.GL_FLOAT, rgba.rewind( ) );
     }
 
     public void setColorGradient( ColorGradient gradient )
@@ -73,16 +72,16 @@ public class ColorTexture1D extends AbstractTexture
 
     public void mutate( MutatorColor1D mutator )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            rgba.rewind();
+            rgba.rewind( );
             mutator.mutate( rgba, dim[0] );
-            makeDirty();
+            makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
@@ -103,7 +102,7 @@ public class ColorTexture1D extends AbstractTexture
         @Override
         public void getColor( int index, int size, float[] rgba )
         {
-            gradient.toColor( ( (float) index ) / ( size - 1 ), rgba );
+            gradient.toColor( ( ( float ) index ) / ( size - 1 ), rgba );
         }
     }
 
@@ -115,7 +114,7 @@ public class ColorTexture1D extends AbstractTexture
         {
             float[] rgbaBytes = new float[4];
 
-            for( int i = 0; i < dim; i++ )
+            for ( int i = 0; i < dim; i++ )
             {
                 getColor( i, dim, rgbaBytes );
 

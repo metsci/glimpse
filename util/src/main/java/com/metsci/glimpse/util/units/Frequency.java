@@ -40,82 +40,115 @@ public class Frequency
 
     public static final double hertzToKilohertz = 1.0 / kilohertzToHertz;
 
+    /**
+     * Converts frequency from hertz to kilohertz.
+     */
+    public static double hertzToKiloherts( double frequency_HERTZ )
+    {
+        return frequency_HERTZ * hertzToKilohertz;
+    }
 
     /**
      * Converts frequency from hertz to kilohertz.
      */
-    public static double hertzToKiloherts(double frequency_HERTZ) { return frequency_HERTZ * hertzToKilohertz; }
-
-    /**
-     * Converts frequency from hertz to kilohertz.
-     */
-    public static double[] hertzToKiloherts(double... frequencies_HERTZ) { return multiply(frequencies_HERTZ, hertzToKilohertz); }
-
-    /**
-     * Converts frequency from kilohertz to hertz.
-     */
-    public static double kilohertzToHertz(double frequency_KILOHERTZ) { return frequency_KILOHERTZ * kilohertzToHertz; }
+    public static double[] hertzToKiloherts( double... frequencies_HERTZ )
+    {
+        return multiply( frequencies_HERTZ, hertzToKilohertz );
+    }
 
     /**
      * Converts frequency from kilohertz to hertz.
      */
-    public static double[] kilohertzToHertz(double... frequencies_KILOHERTZ) { return multiply(frequencies_KILOHERTZ, kilohertzToHertz); }
+    public static double kilohertzToHertz( double frequency_KILOHERTZ )
+    {
+        return frequency_KILOHERTZ * kilohertzToHertz;
+    }
 
+    /**
+     * Converts frequency from kilohertz to hertz.
+     */
+    public static double[] kilohertzToHertz( double... frequencies_KILOHERTZ )
+    {
+        return multiply( frequencies_KILOHERTZ, kilohertzToHertz );
+    }
 
     // System units for frequency are hertz.
     //
-    public static final double hertzToSu     = 1.0;
+    public static final double hertzToSu = 1.0;
     public static final double kilohertzToSu = kilohertzToHertz;
 
-    public static final double suToHertz     = 1.0 / hertzToSu;
+    public static final double suToHertz = 1.0 / hertzToSu;
     public static final double suToKilohertz = 1.0 / kilohertzToSu;
 
+    /**
+     * Converts frequency from hertz to system-units.
+     */
+    public static double fromHertz( double frequency_HERTZ )
+    {
+        return frequency_HERTZ * hertzToSu;
+    }
 
     /**
      * Converts frequency from hertz to system-units.
      */
-    public static double fromHertz(double frequency_HERTZ) { return frequency_HERTZ * hertzToSu; }
-
-    /**
-     * Converts frequency from hertz to system-units.
-     */
-    public static double[] fromHertz(double... frequencies_HERTZ) { return multiply(frequencies_HERTZ, hertzToSu); }
-
-    /**
-     * Converts frequency from system-units to hertz.
-     */
-    public static double toHertz(double frequency_SU) { return frequency_SU * suToHertz; }
+    public static double[] fromHertz( double... frequencies_HERTZ )
+    {
+        return multiply( frequencies_HERTZ, hertzToSu );
+    }
 
     /**
      * Converts frequency from system-units to hertz.
      */
-    public static double[] toHertz(double... frequencies_SU) { return multiply(frequencies_SU, suToHertz); }
+    public static double toHertz( double frequency_SU )
+    {
+        return frequency_SU * suToHertz;
+    }
+
+    /**
+     * Converts frequency from system-units to hertz.
+     */
+    public static double[] toHertz( double... frequencies_SU )
+    {
+        return multiply( frequencies_SU, suToHertz );
+    }
 
     /**
      * Converts frequency from kilohertz to system-units.
      */
-    public static double fromKilohertz(double frequency_KILOHERTZ) { return frequency_KILOHERTZ * kilohertzToSu; }
+    public static double fromKilohertz( double frequency_KILOHERTZ )
+    {
+        return frequency_KILOHERTZ * kilohertzToSu;
+    }
 
     /**
      * Converts frequency from kilohertz to system-units.
      */
-    public static double[] fromKilohertz(double... frequencies_KILOHERTZ) { return multiply(frequencies_KILOHERTZ, kilohertzToSu); }
+    public static double[] fromKilohertz( double... frequencies_KILOHERTZ )
+    {
+        return multiply( frequencies_KILOHERTZ, kilohertzToSu );
+    }
 
     /**
      * Converts frequency from system-units to kilohertz
      */
-    public static double toKilohertz(double frequency_SU) { return frequency_SU * suToKilohertz; }
+    public static double toKilohertz( double frequency_SU )
+    {
+        return frequency_SU * suToKilohertz;
+    }
 
     /**
      * Converts frequency from system-units to kilohertz
      */
-    public static double[] toKilohertz(double... frequencies_SU) { return multiply(frequencies_SU, suToKilohertz); }
+    public static double[] toKilohertz( double... frequencies_SU )
+    {
+        return multiply( frequencies_SU, suToKilohertz );
+    }
 
-
-    private static double[] multiply(double[] array, double factor)
+    private static double[] multiply( double[] array, double factor )
     {
         double[] result = new double[array.length];
-        for (int i = 0; i < result.length; i++) result[i] = factor * array[i];
+        for ( int i = 0; i < result.length; i++ )
+            result[i] = factor * array[i];
         return result;
     }
 

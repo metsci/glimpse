@@ -48,7 +48,7 @@ public class AxisMouseListener2D extends AxisMouseListener
 
         if ( target instanceof GlimpseAxisLayout2D )
         {
-            return (GlimpseAxisLayout2D) target;
+            return ( GlimpseAxisLayout2D ) target;
         }
         else
         {

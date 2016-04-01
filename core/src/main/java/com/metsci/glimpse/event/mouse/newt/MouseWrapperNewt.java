@@ -105,12 +105,12 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
     {
         int[] allX = e.getAllX( );
         int[] newX = new int[allX.length];
-        
+
         for ( int i = 0; i < allX.length; i++ )
         {
             newX[i] = ( allX[i] / scaleX ) - bounds.getX( );
         }
-        
+
         return newX;
     }
 
@@ -118,12 +118,12 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
     {
         int[] allY = e.getAllY( );
         int[] newY = new int[allY.length];
-        
+
         for ( int i = 0; i < allY.length; i++ )
         {
             newY[i] = e.getY( ) / scaleY - ( parentHeight / scaleY - ( bounds.getY( ) + bounds.getHeight( ) ) );
         }
-        
+
         return newY;
     }
 

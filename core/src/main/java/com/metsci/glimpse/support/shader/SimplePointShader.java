@@ -143,10 +143,10 @@ public class SimplePointShader extends Shader
     public boolean preLink( GL gl, int glProgramHandle )
     {
         GL2 gl2 = gl.getGL2( );
-        
+
         gl2.glBindAttribLocation( glProgramHandle, colorAttributeIndex, "valColor" );
         gl2.glBindAttribLocation( glProgramHandle, sizeAttributeIndex, "valSize" );
-        
+
         return true;
     }
 

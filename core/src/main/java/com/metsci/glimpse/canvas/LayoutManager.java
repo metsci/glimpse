@@ -110,7 +110,7 @@ public class LayoutManager
         {
             temp.add( order.getLayout( ) );
         }
-        
+
         this.unmodifiableLayoutList = Collections.unmodifiableList( Lists.newArrayList( temp ) );
     }
 

@@ -29,7 +29,6 @@ package com.metsci.glimpse.util.primitives;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-
 /**
  * @author hogye
  */
@@ -39,33 +38,30 @@ public class ObjectsArray implements ObjectsModifiable
     public Object[] a;
     public int n;
 
-
-
-
     // Instantiation
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public ObjectsArray(Object[] a)
+    public ObjectsArray( Object[] a )
     {
-        this(a, a.length);
+        this( a, a.length );
     }
 
-    public ObjectsArray(int n)
+    public ObjectsArray( int n )
     {
-        this(new Object[n], 0);
+        this( new Object[n], 0 );
     }
 
-    public ObjectsArray()
+    public ObjectsArray( )
     {
-        this(new Object[0], 0);
+        this( new Object[0], 0 );
     }
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public ObjectsArray(Object[] a, int n)
+    public ObjectsArray( Object[] a, int n )
     {
         this.a = a;
         this.n = n;
@@ -74,20 +70,17 @@ public class ObjectsArray implements ObjectsModifiable
     /**
      * Clones the sequence arg.
      */
-    public ObjectsArray(Objects xs)
+    public ObjectsArray( Objects xs )
     {
-        n = xs.n();
+        n = xs.n( );
         a = new Object[n];
-        xs.copyTo(0, a, 0, n);
+        xs.copyTo( 0, a, 0, n );
     }
-
-
-
 
     // Accessors
 
     @Override
-    public Object v(int i)
+    public Object v( int i )
     {
         // Skip bounds check for speed
         //if (i >= n) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i + ", length = " + n);
@@ -96,70 +89,67 @@ public class ObjectsArray implements ObjectsModifiable
     }
 
     @Override
-    public int n()
+    public int n( )
     {
         return n;
     }
 
     @Override
-    public void copyTo(int i, Object[] dest, int iDest, int c)
+    public void copyTo( int i, Object[] dest, int iDest, int c )
     {
-        System.arraycopy(a, i, dest, iDest, c);
+        System.arraycopy( a, i, dest, iDest, c );
     }
 
     @Override
-    public Object[] copyOf(int i, int c)
+    public Object[] copyOf( int i, int c )
     {
         Object[] copy = new Object[c];
-        System.arraycopy(a, i, copy, 0, c);
+        System.arraycopy( a, i, copy, 0, c );
         return copy;
     }
 
     @Override
-    public Object[] copyOf()
+    public Object[] copyOf( )
     {
         Object[] copy = new Object[n];
-        System.arraycopy(a, 0, copy, 0, n);
+        System.arraycopy( a, 0, copy, 0, n );
         return copy;
     }
 
     @Override
-    public boolean isEmpty()
+    public boolean isEmpty( )
     {
-        return (n == 0);
+        return ( n == 0 );
     }
 
     @Override
-    public Object first()
+    public Object first( )
     {
         return a[0];
     }
 
     @Override
-    public Object last()
+    public Object last( )
     {
         return a[n - 1];
     }
 
-
-
-
     // Mutators
 
     @Override
-    public void set(int i, Object v)
+    public void set( int i, Object v )
     {
         a[i] = v;
     }
-    
+
     @Override
-    public void set(int i, Object[] vs)
+    public void set( int i, Object[] vs )
     {
         set( i, vs, 0, vs.length );
     }
-    
+
     @Override
-    public void set(int i, Object[] vs, int from, int to)
+    public void set( int i, Object[] vs, int from, int to )
     {
         int c = to - from;
         ensureCapacity( i + c );
@@ -168,40 +158,39 @@ public class ObjectsArray implements ObjectsModifiable
     }
 
     @Override
-    public void insert(int i, Object v)
+    public void insert( int i, Object v )
     {
-        prepForInsert(i, 1);
+        prepForInsert( i, 1 );
         a[i] = v;
     }
 
     @Override
-    public void insert(int i, Objects vs)
+    public void insert( int i, Objects vs )
     {
-        insert(i, vs, 0, vs.n());
+        insert( i, vs, 0, vs.n( ) );
     }
 
     @Override
-    public void insert(int i, Objects vs, int from, int to)
+    public void insert( int i, Objects vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        vs.copyTo(from, a, i, c);
+        prepForInsert( i, c );
+        vs.copyTo( from, a, i, c );
     }
 
     @Override
-    public void insert(int i, Object[] vs)
+    public void insert( int i, Object[] vs )
     {
-        insert(i, vs, 0, vs.length);
+        insert( i, vs, 0, vs.length );
     }
 
     @Override
-    public void insert(int i, Object[] vs, int from, int to)
+    public void insert( int i, Object[] vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        System.arraycopy(vs, from, a, i, c);
+        prepForInsert( i, c );
+        System.arraycopy( vs, from, a, i, c );
     }
-
 
     /**
      * Makes room in this array for new values to be inserted.
@@ -213,79 +202,75 @@ public class ObjectsArray implements ObjectsModifiable
      * @param i The index at which new values will be inserted
      * @param c The count of new values that will be inserted
      */
-    public void prepForInsert(int i, int c)
+    public void prepForInsert( int i, int c )
     {
         Object[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew;
-        if (i >= n)
+        if ( i >= n )
         {
             nNew = i + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                Object[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, n);
+                Object[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, n );
                 this.a = aNew;
             }
         }
         else
         {
             nNew = n + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                Object[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, i);
-                System.arraycopy(a, i, aNew, i+c, n-i);
+                Object[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, i );
+                System.arraycopy( a, i, aNew, i + c, n - i );
                 this.a = aNew;
             }
             else
             {
-                System.arraycopy(a, i, a, i+c, n-i);
+                System.arraycopy( a, i, a, i + c, n - i );
             }
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void prepend(Object v)
+    public void prepend( Object v )
     {
-        prepForPrepend(1);
+        prepForPrepend( 1 );
         a[0] = v;
     }
 
     @Override
-    public void prepend(Objects vs)
+    public void prepend( Objects vs )
     {
-        prepend(vs, 0, vs.n());
+        prepend( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void prepend(Objects vs, int from, int to)
+    public void prepend( Objects vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        vs.copyTo(from, a, 0, c);
+        prepForPrepend( c );
+        vs.copyTo( from, a, 0, c );
     }
 
     @Override
-    public void prepend(Object[] vs)
+    public void prepend( Object[] vs )
     {
-        prepend(vs, 0, vs.length);
+        prepend( vs, 0, vs.length );
     }
 
     @Override
-    public void prepend(Object[] vs, int from, int to)
+    public void prepend( Object[] vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        System.arraycopy(vs, from, a, 0, c);
+        prepForPrepend( c );
+        System.arraycopy( vs, from, a, 0, c );
     }
-
 
     /**
      * Makes room in this array for new values to be prepended.
@@ -296,64 +281,60 @@ public class ObjectsArray implements ObjectsModifiable
      *
      * @param c The count of new values that will be inserted
      */
-    public void prepForPrepend(int c)
+    public void prepForPrepend( int c )
     {
         Object[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            Object[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, c, n);
+            Object[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, c, n );
             this.a = aNew;
         }
         else
         {
-            System.arraycopy(a, 0, a, c, n);
+            System.arraycopy( a, 0, a, c, n );
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void append(Object v)
+    public void append( Object v )
     {
-        prepForAppend(1);
-        a[n-1] = v;
+        prepForAppend( 1 );
+        a[n - 1] = v;
     }
 
     @Override
-    public void append(Objects vs)
+    public void append( Objects vs )
     {
-        append(vs, 0, vs.n());
+        append( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void append(Objects vs, int from, int to)
+    public void append( Objects vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        vs.copyTo(from, a, n-c, c);
+        prepForAppend( c );
+        vs.copyTo( from, a, n - c, c );
     }
 
     @Override
-    public void append(Object[] vs)
+    public void append( Object[] vs )
     {
-        append(vs, 0, vs.length);
+        append( vs, 0, vs.length );
     }
 
     @Override
-    public void append(Object[] vs, int from, int to)
+    public void append( Object[] vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        System.arraycopy(vs, from, a, n-c, c);
+        prepForAppend( c );
+        System.arraycopy( vs, from, a, n - c, c );
     }
-
 
     /**
      * Makes room in this array for new values to be appended.
@@ -364,51 +345,48 @@ public class ObjectsArray implements ObjectsModifiable
      *
      * @param c The count of new values that will be appended
      */
-    public void prepForAppend(int c)
+    public void prepForAppend( int c )
     {
         Object[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            Object[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, 0, n);
+            Object[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void remove(Object v)
+    public void remove( Object v )
     {
-        for (int i = 0; i < n; i++)
+        for ( int i = 0; i < n; i++ )
         {
-            if (a[i] == v)
+            if ( a[i] == v )
             {
-                System.arraycopy(a, i+1, a, i, n-(i+1));
+                System.arraycopy( a, i + 1, a, i, n - ( i + 1 ) );
                 n--;
                 return;
             }
         }
     }
-    
+
     @Override
     public void removeRange( int from, int to )
     {
-        int length = n-to;
+        int length = n - to;
         System.arraycopy( a, to, a, from, length );
-        n -= to-from;
+        n -= to - from;
     }
-    
+
     @Override
     public void removeIndex( int index )
     {
-        removeRange( index, index+1 );
+        removeRange( index, index + 1 );
     }
 
     @Override
@@ -417,39 +395,33 @@ public class ObjectsArray implements ObjectsModifiable
         n = 0;
     }
 
-
-
-
     @Override
-    public void ensureCapacity(int minCapacity)
+    public void ensureCapacity( int minCapacity )
     {
         int capacity = a.length;
-        if (minCapacity > capacity)
+        if ( minCapacity > capacity )
         {
-            Object[] aNew = newArray(capacity, minCapacity);
-            System.arraycopy(a, 0, aNew, 0, n);
+            Object[] aNew = newArray( capacity, minCapacity );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
     }
 
     @Override
-    public void compact()
+    public void compact( )
     {
         Object[] compact = new Object[n];
-        System.arraycopy(a, 0, compact, 0, n);
+        System.arraycopy( a, 0, compact, 0, n );
         a = compact;
     }
-
-
-
 
     /**
      * Creates a new array whose capacity is at least minNewCapacity, and at least
      * 1.618 * oldCapacity, up to Integer.MAX_VALUE.
      */
-    public static Object[] newArray(int oldCapacity, int minNewCapacity)
+    public static Object[] newArray( int oldCapacity, int minNewCapacity )
     {
-        int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
+        int newCapacity = ( int ) max( minNewCapacity, min( Integer.MAX_VALUE, ( 106039L * oldCapacity ) >>> 16 ) );
         return new Object[newCapacity];
     }
 

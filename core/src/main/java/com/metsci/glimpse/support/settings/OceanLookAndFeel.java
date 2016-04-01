@@ -26,8 +26,10 @@
  */
 package com.metsci.glimpse.support.settings;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.*;
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.color.GlimpseColor.addRgb;
+import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.support.color.GlimpseColor.getWhite;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
 

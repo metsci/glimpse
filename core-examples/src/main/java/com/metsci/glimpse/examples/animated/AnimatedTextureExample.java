@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.examples.animated;
 
-import static java.lang.Math.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;

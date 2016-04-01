@@ -31,11 +31,11 @@
 // Generated on: 2011.12.06 at 04:31:59 PM EST
 //
 
-
 package com.metsci.glimpse.dspl.lite.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  * <p>Java class for anonymous complex type.
@@ -76,19 +75,17 @@ import javax.xml.bind.annotation.XmlType;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "file",
-    "columns"
-})
-@XmlRootElement(name = "dspl-lite")
-public class DsplLite {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "", propOrder = { "file", "columns" } )
+@XmlRootElement( name = "dspl-lite" )
+public class DsplLite
+{
 
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected File file;
     protected DsplLite.Columns columns;
-    @XmlAttribute(name = "targetNamespace")
-    @XmlSchemaType(name = "anyURI")
+    @XmlAttribute( name = "targetNamespace" )
+    @XmlSchemaType( name = "anyURI" )
     protected String targetNamespace;
 
     /**
@@ -99,7 +96,8 @@ public class DsplLite {
      *     {@link File }
      *
      */
-    public File getFile() {
+    public File getFile( )
+    {
         return file;
     }
 
@@ -111,7 +109,8 @@ public class DsplLite {
      *     {@link File }
      *
      */
-    public void setFile(File value) {
+    public void setFile( File value )
+    {
         this.file = value;
     }
 
@@ -123,7 +122,8 @@ public class DsplLite {
      *     {@link DsplLite.Columns }
      *
      */
-    public DsplLite.Columns getColumns() {
+    public DsplLite.Columns getColumns( )
+    {
         return columns;
     }
 
@@ -135,7 +135,8 @@ public class DsplLite {
      *     {@link DsplLite.Columns }
      *
      */
-    public void setColumns(DsplLite.Columns value) {
+    public void setColumns( DsplLite.Columns value )
+    {
         this.columns = value;
     }
 
@@ -147,7 +148,8 @@ public class DsplLite {
      *     {@link String }
      *
      */
-    public String getTargetNamespace() {
+    public String getTargetNamespace( )
+    {
         return targetNamespace;
     }
 
@@ -159,10 +161,10 @@ public class DsplLite {
      *     {@link String }
      *
      */
-    public void setTargetNamespace(String value) {
+    public void setTargetNamespace( String value )
+    {
         this.targetNamespace = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -183,11 +185,10 @@ public class DsplLite {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "column"
-    })
-    public static class Columns {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "column" } )
+    public static class Columns
+    {
 
         protected List<Column> column;
 
@@ -213,9 +214,11 @@ public class DsplLite {
          *
          *
          */
-        public List<Column> getColumn() {
-            if (column == null) {
-                column = new ArrayList<Column>();
+        public List<Column> getColumn( )
+        {
+            if ( column == null )
+            {
+                column = new ArrayList<Column>( );
             }
             return this.column;
         }

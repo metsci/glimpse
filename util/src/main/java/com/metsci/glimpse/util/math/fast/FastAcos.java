@@ -33,7 +33,7 @@ public final class FastAcos extends FastFunc
 {
     private static final FastAcos instance = new FastAcos( ( float ) -1.0, ( float ) 1.0, 100000 );
 
-    public static FastAcos getInstance()
+    public static FastAcos getInstance( )
     {
         return instance;
     }

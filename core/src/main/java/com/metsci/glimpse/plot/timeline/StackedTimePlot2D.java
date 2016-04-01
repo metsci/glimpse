@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -735,7 +736,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.showLabelLayout = show;
         this.validateLayout( );
     }
-    
+
     /**
      * Method name changed to be more consistent with other setters.
      * @deprecated {@link #setShowLabels(boolean)}

@@ -51,7 +51,7 @@ public abstract class RateLimitedAxisListener1D extends RateLimitedEventDispatch
     {
         super( _idleTimeMillis );
     }
-    
+
     public abstract void axisUpdatedRateLimited( Axis1D axis );
 
     @Override

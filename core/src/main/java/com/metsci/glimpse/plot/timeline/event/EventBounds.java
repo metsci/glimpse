@@ -43,31 +43,31 @@ public class EventBounds
     protected TimeStamp iconEndTime;
     protected TimeStamp textStartTime;
     protected TimeStamp textEndTime;
-    
+
     public boolean containsText( TimeStamp time )
     {
         TimeStamp l1 = getTextStartTime( );
         TimeStamp l2 = getTextEndTime( );
-        
+
         if ( l1 == null || l2 == null ) return false;
-        
+
         boolean text = isTextVisible( ) && l1 != null && l2 != null && time.isAfterOrEquals( l1 ) && time.isBeforeOrEquals( l2 );
-        
+
         return text;
     }
-    
+
     public boolean containsIcon( TimeStamp time )
     {
         TimeStamp i1 = getIconStartTime( );
         TimeStamp i2 = getIconEndTime( );
-        
+
         if ( i1 == null || i2 == null ) return false;
-        
+
         boolean icon = isIconVisible( ) && i1 != null && i2 != null && time.isAfterOrEquals( i1 ) && time.isBeforeOrEquals( i2 );
-        
+
         return icon;
     }
-    
+
     public void setIconVisible( boolean isIconVisible )
     {
         this.isIconVisible = isIconVisible;
@@ -106,7 +106,7 @@ public class EventBounds
     {
         return isTextVisible;
     }
-    
+
     /**
      * @return if false, the icon is not visible, either because there is no room to show it,
      *         or {@link #isShowIcon()} is set to false.
@@ -115,7 +115,6 @@ public class EventBounds
     {
         return isIconVisible;
     }
-
 
     /**
      * Returns the timestamp associated with the left hand side of the icon. Because the icon

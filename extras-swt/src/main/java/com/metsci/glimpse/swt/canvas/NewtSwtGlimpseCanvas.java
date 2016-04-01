@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.swt.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
 import java.util.List;

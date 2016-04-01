@@ -30,7 +30,6 @@ import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.support.color.RGBA;
 
-
 public class GLColorUtils
 {
     public static void setClearColor( GL2 gl, RGBA color )

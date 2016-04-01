@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -45,7 +45,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-
 
 /**
  *
@@ -110,34 +109,26 @@ import javax.xml.namespace.QName;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Concept", propOrder = {
-    "info",
-    "topic",
-    "type",
-    "attribute",
-    "property",
-    "defaultValue",
-    "tableMapping",
-    "data"
-})
-public class Concept {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Concept", propOrder = { "info", "topic", "type", "attribute", "property", "defaultValue", "tableMapping", "data" } )
+public class Concept
+{
 
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected ConceptInfo info;
     protected List<Concept.Topic> topic;
     protected Concept.Type type;
     protected List<Attribute> attribute;
     protected List<ConceptProperty> property;
     protected Value defaultValue;
-    @XmlElement(name = "table")
+    @XmlElement( name = "table" )
     protected ConceptTableMapping tableMapping;
     protected Concept.Data data;
-    @XmlAttribute(name = "id", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "id", required = true )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     @XmlID
     protected String id;
-    @XmlAttribute(name = "extends")
+    @XmlAttribute( name = "extends" )
     protected QName _extends;
 
     /**
@@ -148,7 +139,8 @@ public class Concept {
      *     {@link ConceptInfo }
      *
      */
-    public ConceptInfo getInfo() {
+    public ConceptInfo getInfo( )
+    {
         return info;
     }
 
@@ -160,7 +152,8 @@ public class Concept {
      *     {@link ConceptInfo }
      *
      */
-    public void setInfo(ConceptInfo value) {
+    public void setInfo( ConceptInfo value )
+    {
         this.info = value;
     }
 
@@ -186,9 +179,11 @@ public class Concept {
      *
      *
      */
-    public List<Concept.Topic> getTopic() {
-        if (topic == null) {
-            topic = new ArrayList<Concept.Topic>();
+    public List<Concept.Topic> getTopic( )
+    {
+        if ( topic == null )
+        {
+            topic = new ArrayList<Concept.Topic>( );
         }
         return this.topic;
     }
@@ -201,7 +196,8 @@ public class Concept {
      *     {@link Concept.Type }
      *
      */
-    public Concept.Type getType() {
+    public Concept.Type getType( )
+    {
         return type;
     }
 
@@ -213,7 +209,8 @@ public class Concept {
      *     {@link Concept.Type }
      *
      */
-    public void setType(Concept.Type value) {
+    public void setType( Concept.Type value )
+    {
         this.type = value;
     }
 
@@ -239,9 +236,11 @@ public class Concept {
      *
      *
      */
-    public List<Attribute> getAttribute() {
-        if (attribute == null) {
-            attribute = new ArrayList<Attribute>();
+    public List<Attribute> getAttribute( )
+    {
+        if ( attribute == null )
+        {
+            attribute = new ArrayList<Attribute>( );
         }
         return this.attribute;
     }
@@ -268,9 +267,11 @@ public class Concept {
      *
      *
      */
-    public List<ConceptProperty> getProperty() {
-        if (property == null) {
-            property = new ArrayList<ConceptProperty>();
+    public List<ConceptProperty> getProperty( )
+    {
+        if ( property == null )
+        {
+            property = new ArrayList<ConceptProperty>( );
         }
         return this.property;
     }
@@ -283,7 +284,8 @@ public class Concept {
      *     {@link Value }
      *
      */
-    public Value getDefaultValue() {
+    public Value getDefaultValue( )
+    {
         return defaultValue;
     }
 
@@ -295,7 +297,8 @@ public class Concept {
      *     {@link Value }
      *
      */
-    public void setDefaultValue(Value value) {
+    public void setDefaultValue( Value value )
+    {
         this.defaultValue = value;
     }
 
@@ -307,7 +310,8 @@ public class Concept {
      *     {@link ConceptTableMapping }
      *
      */
-    public ConceptTableMapping getTableMapping() {
+    public ConceptTableMapping getTableMapping( )
+    {
         return tableMapping;
     }
 
@@ -319,7 +323,8 @@ public class Concept {
      *     {@link ConceptTableMapping }
      *
      */
-    public void setTableMapping(ConceptTableMapping value) {
+    public void setTableMapping( ConceptTableMapping value )
+    {
         this.tableMapping = value;
     }
 
@@ -331,7 +336,8 @@ public class Concept {
      *     {@link Concept.Data }
      *
      */
-    public Concept.Data getData() {
+    public Concept.Data getData( )
+    {
         return data;
     }
 
@@ -343,7 +349,8 @@ public class Concept {
      *     {@link Concept.Data }
      *
      */
-    public void setData(Concept.Data value) {
+    public void setData( Concept.Data value )
+    {
         this.data = value;
     }
 
@@ -355,7 +362,8 @@ public class Concept {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -367,7 +375,8 @@ public class Concept {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
 
@@ -379,7 +388,8 @@ public class Concept {
      *     {@link QName }
      *
      */
-    public QName getExtends() {
+    public QName getExtends( )
+    {
         return _extends;
     }
 
@@ -391,10 +401,10 @@ public class Concept {
      *     {@link QName }
      *
      */
-    public void setExtends(QName value) {
+    public void setExtends( QName value )
+    {
         this._extends = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -415,13 +425,12 @@ public class Concept {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "table"
-    })
-    public static class Data {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "table" } )
+    public static class Data
+    {
 
-        @XmlElement(required = true)
+        @XmlElement( required = true )
         protected ConceptTableMapping table;
 
         /**
@@ -432,7 +441,8 @@ public class Concept {
          *     {@link ConceptTableMapping }
          *
          */
-        public ConceptTableMapping getTable() {
+        public ConceptTableMapping getTable( )
+        {
             return table;
         }
 
@@ -444,12 +454,12 @@ public class Concept {
          *     {@link ConceptTableMapping }
          *
          */
-        public void setTable(ConceptTableMapping value) {
+        public void setTable( ConceptTableMapping value )
+        {
             this.table = value;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -468,11 +478,12 @@ public class Concept {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class Topic {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class Topic
+    {
 
-        @XmlAttribute(name = "ref")
+        @XmlAttribute( name = "ref" )
         protected QName ref;
 
         /**
@@ -483,7 +494,8 @@ public class Concept {
          *     {@link QName }
          *
          */
-        public QName getRef() {
+        public QName getRef( )
+        {
             return ref;
         }
 
@@ -495,12 +507,12 @@ public class Concept {
          *     {@link QName }
          *
          */
-        public void setRef(QName value) {
+        public void setRef( QName value )
+        {
             this.ref = value;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -519,11 +531,12 @@ public class Concept {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class Type {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class Type
+    {
 
-        @XmlAttribute(name = "ref", required = true)
+        @XmlAttribute( name = "ref", required = true )
         protected DataType ref;
 
         /**
@@ -534,7 +547,8 @@ public class Concept {
          *     {@link DataType }
          *
          */
-        public DataType getRef() {
+        public DataType getRef( )
+        {
             return ref;
         }
 
@@ -546,12 +560,12 @@ public class Concept {
          *     {@link DataType }
          *
          */
-        public void setRef(DataType value) {
+        public void setRef( DataType value )
+        {
             this.ref = value;
         }
 
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected com.metsci.glimpse.dspl.parser.table.PropertyTableData tableData;
@@ -588,8 +602,7 @@ public class Concept {
         {
             String englishName = info.getNameEnglish( );
 
-            if ( englishName != null )
-                return englishName;
+            if ( englishName != null ) return englishName;
         }
 
         // if no name is provided use the id
@@ -603,8 +616,7 @@ public class Concept {
 
     public com.metsci.glimpse.dspl.parser.table.PropertyTableData getTableData( ) throws javax.xml.bind.JAXBException, java.io.IOException, com.metsci.glimpse.dspl.util.DsplException
     {
-        if ( tableData != null )
-            return tableData;
+        if ( tableData != null ) return tableData;
 
         tableData = com.metsci.glimpse.dspl.util.DsplHelper.getTableData( this );
 
@@ -618,10 +630,9 @@ public class Concept {
 
     public ConceptProperty getProperty( String ref )
     {
-        if ( ref == null )
-            return null;
+        if ( ref == null ) return null;
 
-        for( ConceptProperty property : getProperty( ) )
+        for ( ConceptProperty property : getProperty( ) )
         {
             if ( ref.equals( property.getId( ) ) )
             {
@@ -634,10 +645,9 @@ public class Concept {
 
     public Attribute getAttribute( String ref )
     {
-        if ( ref == null )
-            return null;
+        if ( ref == null ) return null;
 
-        for( Attribute attribute : getAttribute( ) )
+        for ( Attribute attribute : getAttribute( ) )
         {
             if ( ref.equals( attribute.getId( ) ) )
             {
@@ -655,11 +665,10 @@ public class Concept {
         if ( o == this ) return true;
         if ( o instanceof Concept )
         {
-            Concept c = (Concept) o;
+            Concept c = ( Concept ) o;
             return com.metsci.glimpse.dspl.util.DsplHelper.equals( this, c );
         }
         return false;
     }
-
 
 }

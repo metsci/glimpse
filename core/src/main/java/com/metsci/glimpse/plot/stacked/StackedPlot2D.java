@@ -432,7 +432,7 @@ public class StackedPlot2D extends GlimpseLayout
     {
         removePlot( id );
     }
-    
+
     public void removePlot( Object id )
     {
         this.lock.lock( );
@@ -450,20 +450,20 @@ public class StackedPlot2D extends GlimpseLayout
             this.lock.unlock( );
         }
     }
-    
+
     public void addPlot( PlotInfo info )
     {
         if ( info.getStackedPlot( ) != this )
         {
             throw new IllegalArgumentException( "Only PlotInfo created by this StackedPlot2D may be added." );
         }
-        
+
         this.lock.lock( );
         try
         {
             stackedPlots.put( info.getId( ), info );
             addLayout( info.getBaseLayout( ) );
-            
+
             if ( isAutoValidate( ) ) validate( );
         }
         finally
@@ -499,7 +499,7 @@ public class StackedPlot2D extends GlimpseLayout
             this.lock.unlock( );
         }
     }
-    
+
     public Axis1D getCommonAxis( Axis2D axis )
     {
         return orient == HORIZONTAL ? axis.getAxisY( ) : axis.getAxisX( );

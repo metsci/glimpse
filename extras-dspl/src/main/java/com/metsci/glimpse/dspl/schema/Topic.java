@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -45,7 +45,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-
 
 /**
  *
@@ -74,21 +73,19 @@ import javax.xml.namespace.QName;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Topic", propOrder = {
-    "info",
-    "topic"
-})
-public class Topic {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Topic", propOrder = { "info", "topic" } )
+public class Topic
+{
 
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected Info info;
     protected List<Topic> topic;
-    @XmlAttribute(name = "id", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "id", required = true )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     @XmlID
     protected String id;
-    @XmlAttribute(name = "parentTopic")
+    @XmlAttribute( name = "parentTopic" )
     protected QName parentTopic;
 
     /**
@@ -99,7 +96,8 @@ public class Topic {
      *     {@link Info }
      *
      */
-    public Info getInfo() {
+    public Info getInfo( )
+    {
         return info;
     }
 
@@ -111,7 +109,8 @@ public class Topic {
      *     {@link Info }
      *
      */
-    public void setInfo(Info value) {
+    public void setInfo( Info value )
+    {
         this.info = value;
     }
 
@@ -137,9 +136,11 @@ public class Topic {
      *
      *
      */
-    public List<Topic> getTopic() {
-        if (topic == null) {
-            topic = new ArrayList<Topic>();
+    public List<Topic> getTopic( )
+    {
+        if ( topic == null )
+        {
+            topic = new ArrayList<Topic>( );
         }
         return this.topic;
     }
@@ -152,7 +153,8 @@ public class Topic {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -164,7 +166,8 @@ public class Topic {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
 
@@ -176,7 +179,8 @@ public class Topic {
      *     {@link QName }
      *
      */
-    public QName getParentTopic() {
+    public QName getParentTopic( )
+    {
         return parentTopic;
     }
 
@@ -188,7 +192,8 @@ public class Topic {
      *     {@link QName }
      *
      */
-    public void setParentTopic(QName value) {
+    public void setParentTopic( QName value )
+    {
         this.parentTopic = value;
     }
 

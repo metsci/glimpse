@@ -51,7 +51,7 @@ public abstract class GlimpsePainter2D extends GlimpsePainterImpl
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
         if ( target instanceof GlimpseAxisLayout2D )
         {
-            GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+            GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
             Axis2D axis = layout.getAxis( context );
 
             if ( axis == null )

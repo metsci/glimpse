@@ -75,7 +75,7 @@ public class AnimatedProjectionExample implements GlimpseLayoutProvider
 
         // lock the aspect ratio of the x and y axes
         plot.lockAspectRatioXY( 1 );
-        
+
         // add a painter that will use our new shader for color-mapping
         final HeatMapPainter painter = new HeatMapPainter( plot.getAxisZ( ) );
         plot.addPainter( painter );

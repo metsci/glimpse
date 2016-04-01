@@ -37,27 +37,27 @@ public interface Floats
     /**
      * Value at index i
      */
-    float v(int i);
+    float v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    float first();
+    float first( );
 
-    float last();
+    float last( );
 
-    void copyTo(int i, float[] dest, int iDest, int c);
+    void copyTo( int i, float[] dest, int iDest, int c );
 
-    void copyTo(int i, FloatBuffer dest, int c);
+    void copyTo( int i, FloatBuffer dest, int c );
 
-    void copyTo(FloatBuffer dest);
+    void copyTo( FloatBuffer dest );
 
-    float[] copyOf(int i, int c);
+    float[] copyOf( int i, int c );
 
-    float[] copyOf();
+    float[] copyOf( );
 
 }

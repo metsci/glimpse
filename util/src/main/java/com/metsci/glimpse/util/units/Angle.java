@@ -40,7 +40,7 @@ public class Angle
     //
     public static final double degreesToRadians = Math.PI / 180.0;
     public static final double radiansToDegrees = 1.0 / degreesToRadians;
-    public static final double rightAngle = fromDeg(90);
+    public static final double rightAngle = fromDeg( 90 );
 
     public static double fromDeg( double degrees )
     {
@@ -49,7 +49,7 @@ public class Angle
 
     public static double[] fromDeg( double... degrees )
     {
-        return multiply(degrees, degreesToRadians);
+        return multiply( degrees, degreesToRadians );
     }
 
     public static double fromRad( double radians )
@@ -59,7 +59,7 @@ public class Angle
 
     public static double[] fromRad( double... radians )
     {
-        return multiply(radians, 1);
+        return multiply( radians, 1 );
     }
 
     public static double toDeg( double su )
@@ -69,7 +69,7 @@ public class Angle
 
     public static double[] toDeg( double... su )
     {
-        return multiply(su, radiansToDegrees);
+        return multiply( su, radiansToDegrees );
     }
 
     public static double toRad( double su )
@@ -79,7 +79,7 @@ public class Angle
 
     public static double[] toRad( double... su )
     {
-        return multiply(su, 1);
+        return multiply( su, 1 );
     }
 
     /**
@@ -99,7 +99,7 @@ public class Angle
      */
     public static double[] degreesToRadians( double... degrees )
     {
-        return multiply(degrees, degreesToRadians);
+        return multiply( degrees, degreesToRadians );
     }
 
     /**
@@ -119,7 +119,7 @@ public class Angle
      */
     public static double[] radiansToDegrees( double... radians )
     {
-        return multiply(radians, radiansToDegrees);
+        return multiply( radians, radiansToDegrees );
     }
 
     /**
@@ -128,11 +128,11 @@ public class Angle
      * <p>Note: For extremely large arguments see
      * http://www.derekroconnor.net/Software/Ng--ArgReduction.pdf</p>
      */
-    public static double normalizeAngle360(double degrees)
+    public static double normalizeAngle360( double degrees )
     {
         degrees = degrees % 360;
 
-        return (degrees < 0) ? (degrees + 360) : degrees;
+        return ( degrees < 0 ) ? ( degrees + 360 ) : degrees;
     }
 
     /**
@@ -141,11 +141,11 @@ public class Angle
      * <p>Note: For extremely large arguments see
      * http://www.derekroconnor.net/Software/Ng--ArgReduction.pdf</p>
      */
-    public static double normalizeAngle180(double degrees)
+    public static double normalizeAngle180( double degrees )
     {
-        degrees = normalizeAngle360(degrees);
+        degrees = normalizeAngle360( degrees );
 
-        return (degrees > 180) ? (degrees - 360) : degrees;
+        return ( degrees > 180 ) ? ( degrees - 360 ) : degrees;
     }
 
     /**
@@ -154,11 +154,11 @@ public class Angle
      * <p>Note: For extremely large arguments see
      * http://www.derekroconnor.net/Software/Ng--ArgReduction.pdf</p>
      */
-    public static double normalizeAngleTwoPi(double radians)
+    public static double normalizeAngleTwoPi( double radians )
     {
         radians = radians % twoPi;
 
-        return (radians < 0) ? (radians + twoPi) : radians;
+        return ( radians < 0 ) ? ( radians + twoPi ) : radians;
     }
 
     /**
@@ -167,17 +167,18 @@ public class Angle
      * <p>Note: For extremely large arguments see
      * http://www.derekroconnor.net/Software/Ng--ArgReduction.pdf</p>
      */
-    public static double normalizeAnglePi(double radians)
+    public static double normalizeAnglePi( double radians )
     {
-        radians = normalizeAngleTwoPi(radians);
+        radians = normalizeAngleTwoPi( radians );
 
-        return (radians > Math.PI) ? (radians - twoPi) : radians;
+        return ( radians > Math.PI ) ? ( radians - twoPi ) : radians;
     }
 
-    private static double[] multiply(double[] array, double factor)
+    private static double[] multiply( double[] array, double factor )
     {
         double[] result = new double[array.length];
-        for (int i = 0; i < result.length; i++) result[i] = factor * array[i];
+        for ( int i = 0; i < result.length; i++ )
+            result[i] = factor * array[i];
         return result;
     }
 

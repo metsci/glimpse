@@ -199,7 +199,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
         {
             throw new AxisNotSetException( String.format( "GlimpseAxisLayout2D %s is not on top of GlimpseTargetStack %s. Cannot provide Axis2D", getName( ), stack ) );
         }
-        
+
         AxisFactory2D factory = getAxisFactory0( stack );
 
         for ( GlimpseTarget target : stack.getTargetList( ) )
@@ -210,7 +210,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
                 if ( layout.isAxisSet( ) )
                 {
                     Axis2D axis2d = getCachedAxis0( layout.getAxis( ), factory, stack );
-                                    
+
                     return axis2d;
                 }
             }
@@ -248,7 +248,7 @@ public class GlimpseAxisLayout2D extends GlimpseLayout
         Axis2D newAxis = cache.getValueNoBoundsCheck( stack );
 
         if ( newAxis == null )
-        {            
+        {
             newAxis = getNewAxis0( parent_axis, factory, stack );
             newAxis.setSizePixels( stack.getBounds( ) );
             cache.setValue( stack, newAxis );

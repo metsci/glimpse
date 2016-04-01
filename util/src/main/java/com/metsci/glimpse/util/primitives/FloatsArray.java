@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.nio.FloatBuffer;
 
@@ -39,33 +40,30 @@ public class FloatsArray implements FloatsModifiable
     public float[] a;
     public int n;
 
-
-
-
     // Instantiation
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public FloatsArray(float[] a)
+    public FloatsArray( float[] a )
     {
-        this(a, a.length);
+        this( a, a.length );
     }
 
-    public FloatsArray(int n)
+    public FloatsArray( int n )
     {
-        this(new float[n], 0);
+        this( new float[n], 0 );
     }
 
-    public FloatsArray()
+    public FloatsArray( )
     {
-        this(new float[0], 0);
+        this( new float[0], 0 );
     }
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public FloatsArray(float[] a, int n)
+    public FloatsArray( float[] a, int n )
     {
         this.a = a;
         this.n = n;
@@ -74,20 +72,17 @@ public class FloatsArray implements FloatsModifiable
     /**
      * Clones the sequence arg.
      */
-    public FloatsArray(Floats xs)
+    public FloatsArray( Floats xs )
     {
-        n = xs.n();
+        n = xs.n( );
         a = new float[n];
-        xs.copyTo(0, a, 0, n);
+        xs.copyTo( 0, a, 0, n );
     }
-
-
-
 
     // Accessors
 
     @Override
-    public float v(int i)
+    public float v( int i )
     {
         // Skip bounds check for speed
         //if (i >= n) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i + ", length = " + n);
@@ -96,82 +91,79 @@ public class FloatsArray implements FloatsModifiable
     }
 
     @Override
-    public int n()
+    public int n( )
     {
         return n;
     }
 
     @Override
-    public void copyTo(int i, float[] dest, int iDest, int c)
+    public void copyTo( int i, float[] dest, int iDest, int c )
     {
-        System.arraycopy(a, i, dest, iDest, c);
+        System.arraycopy( a, i, dest, iDest, c );
     }
 
     @Override
-    public void copyTo(int i, FloatBuffer dest, int c)
+    public void copyTo( int i, FloatBuffer dest, int c )
     {
-        dest.put(a, i, c);
+        dest.put( a, i, c );
     }
 
     @Override
-    public void copyTo(FloatBuffer dest)
+    public void copyTo( FloatBuffer dest )
     {
-        dest.put(a, 0, n);
+        dest.put( a, 0, n );
     }
 
     @Override
-    public float[] copyOf(int i, int c)
+    public float[] copyOf( int i, int c )
     {
         float[] copy = new float[c];
-        System.arraycopy(a, i, copy, 0, c);
+        System.arraycopy( a, i, copy, 0, c );
         return copy;
     }
 
     @Override
-    public float[] copyOf()
+    public float[] copyOf( )
     {
         float[] copy = new float[n];
-        System.arraycopy(a, 0, copy, 0, n);
+        System.arraycopy( a, 0, copy, 0, n );
         return copy;
     }
 
     @Override
-    public boolean isEmpty()
+    public boolean isEmpty( )
     {
-        return (n == 0);
+        return ( n == 0 );
     }
 
     @Override
-    public float first()
+    public float first( )
     {
         return a[0];
     }
 
     @Override
-    public float last()
+    public float last( )
     {
         return a[n - 1];
     }
 
-
-
-
     // Mutators
 
     @Override
-    public void set(int i, float v)
+    public void set( int i, float v )
     {
         a[i] = v;
     }
-    
+
     @Override
-    public void set(int i, float[] vs)
+    public void set( int i, float[] vs )
     {
         set( i, vs, 0, vs.length );
     }
-    
+
     @Override
-    public void set(int i, float[] vs, int from, int to)
+    public void set( int i, float[] vs, int from, int to )
     {
         int c = to - from;
         ensureCapacity( i + c );
@@ -180,51 +172,51 @@ public class FloatsArray implements FloatsModifiable
     }
 
     @Override
-    public void insert(int i, float v)
+    public void insert( int i, float v )
     {
-        prepForInsert(i, 1);
+        prepForInsert( i, 1 );
         a[i] = v;
     }
 
     @Override
-    public void insert(int i, Floats vs)
+    public void insert( int i, Floats vs )
     {
-        insert(i, vs, 0, vs.n());
+        insert( i, vs, 0, vs.n( ) );
     }
 
     @Override
-    public void insert(int i, Floats vs, int from, int to)
+    public void insert( int i, Floats vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        vs.copyTo(from, a, i, c);
+        prepForInsert( i, c );
+        vs.copyTo( from, a, i, c );
     }
 
     @Override
-    public void insert(int i, float[] vs)
+    public void insert( int i, float[] vs )
     {
-        insert(i, vs, 0, vs.length);
+        insert( i, vs, 0, vs.length );
     }
 
     @Override
-    public void insert(int i, float[] vs, int from, int to)
+    public void insert( int i, float[] vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        System.arraycopy(vs, from, a, i, c);
+        prepForInsert( i, c );
+        System.arraycopy( vs, from, a, i, c );
     }
 
     @Override
-    public void insert(int i, FloatBuffer vs)
+    public void insert( int i, FloatBuffer vs )
     {
-        insert(i, vs, vs.remaining());
+        insert( i, vs, vs.remaining( ) );
     }
 
     @Override
-    public void insert(int i, FloatBuffer vs, int c)
+    public void insert( int i, FloatBuffer vs, int c )
     {
-        prepForInsert(i, c);
-        vs.get(a, i, c);
+        prepForInsert( i, c );
+        vs.get( a, i, c );
     }
 
     /**
@@ -237,90 +229,87 @@ public class FloatsArray implements FloatsModifiable
      * @param i The index at which new values will be inserted
      * @param c The count of new values that will be inserted
      */
-    public void prepForInsert(int i, int c)
+    public void prepForInsert( int i, int c )
     {
         float[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew;
-        if (i >= n)
+        if ( i >= n )
         {
             nNew = i + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                float[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, n);
+                float[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, n );
                 this.a = aNew;
             }
         }
         else
         {
             nNew = n + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                float[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, i);
-                System.arraycopy(a, i, aNew, i+c, n-i);
+                float[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, i );
+                System.arraycopy( a, i, aNew, i + c, n - i );
                 this.a = aNew;
             }
             else
             {
-                System.arraycopy(a, i, a, i+c, n-i);
+                System.arraycopy( a, i, a, i + c, n - i );
             }
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void prepend(float v)
+    public void prepend( float v )
     {
-        prepForPrepend(1);
+        prepForPrepend( 1 );
         a[0] = v;
     }
 
     @Override
-    public void prepend(Floats vs)
+    public void prepend( Floats vs )
     {
-        prepend(vs, 0, vs.n());
+        prepend( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void prepend(Floats vs, int from, int to)
+    public void prepend( Floats vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        vs.copyTo(from, a, 0, c);
+        prepForPrepend( c );
+        vs.copyTo( from, a, 0, c );
     }
 
     @Override
-    public void prepend(float[] vs)
+    public void prepend( float[] vs )
     {
-        prepend(vs, 0, vs.length);
+        prepend( vs, 0, vs.length );
     }
 
     @Override
-    public void prepend(float[] vs, int from, int to)
+    public void prepend( float[] vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        System.arraycopy(vs, from, a, 0, c);
+        prepForPrepend( c );
+        System.arraycopy( vs, from, a, 0, c );
     }
 
     @Override
-    public void prepend(FloatBuffer vs)
+    public void prepend( FloatBuffer vs )
     {
-        prepend(vs, vs.remaining());
+        prepend( vs, vs.remaining( ) );
     }
 
     @Override
-    public void prepend(FloatBuffer vs, int c)
+    public void prepend( FloatBuffer vs, int c )
     {
-        prepForPrepend(c);
-        vs.get(a, 0, c);
+        prepForPrepend( c );
+        vs.get( a, 0, c );
     }
 
     /**
@@ -332,75 +321,72 @@ public class FloatsArray implements FloatsModifiable
      *
      * @param c The count of new values that will be inserted
      */
-    public void prepForPrepend(int c)
+    public void prepForPrepend( int c )
     {
         float[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            float[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, c, n);
+            float[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, c, n );
             this.a = aNew;
         }
         else
         {
-            System.arraycopy(a, 0, a, c, n);
+            System.arraycopy( a, 0, a, c, n );
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void append(float v)
+    public void append( float v )
     {
-        prepForAppend(1);
-        a[n-1] = v;
+        prepForAppend( 1 );
+        a[n - 1] = v;
     }
 
     @Override
-    public void append(Floats vs)
+    public void append( Floats vs )
     {
-        append(vs, 0, vs.n());
+        append( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void append(Floats vs, int from, int to)
+    public void append( Floats vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        vs.copyTo(from, a, n-c, c);
+        prepForAppend( c );
+        vs.copyTo( from, a, n - c, c );
     }
 
     @Override
-    public void append(float[] vs)
+    public void append( float[] vs )
     {
-        append(vs, 0, vs.length);
+        append( vs, 0, vs.length );
     }
 
     @Override
-    public void append(float[] vs, int from, int to)
+    public void append( float[] vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        System.arraycopy(vs, from, a, n-c, c);
+        prepForAppend( c );
+        System.arraycopy( vs, from, a, n - c, c );
     }
 
     @Override
-    public void append(FloatBuffer vs)
+    public void append( FloatBuffer vs )
     {
-        append(vs, vs.remaining());
+        append( vs, vs.remaining( ) );
     }
 
     @Override
-    public void append(FloatBuffer vs, int c)
+    public void append( FloatBuffer vs, int c )
     {
-        prepForAppend(c);
-        vs.get(a, n-c, c);
+        prepForAppend( c );
+        vs.get( a, n - c, c );
     }
 
     /**
@@ -412,51 +398,48 @@ public class FloatsArray implements FloatsModifiable
      *
      * @param c The count of new values that will be appended
      */
-    public void prepForAppend(int c)
+    public void prepForAppend( int c )
     {
         float[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            float[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, 0, n);
+            float[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void remove(float v)
+    public void remove( float v )
     {
-        for (int i = 0; i < n; i++)
+        for ( int i = 0; i < n; i++ )
         {
-            if (a[i] == v)
+            if ( a[i] == v )
             {
-                System.arraycopy(a, i+1, a, i, n-(i+1));
+                System.arraycopy( a, i + 1, a, i, n - ( i + 1 ) );
                 n--;
                 return;
             }
         }
     }
-    
+
     @Override
     public void removeRange( int from, int to )
     {
-        int length = n-to;
+        int length = n - to;
         System.arraycopy( a, to, a, from, length );
-        n -= to-from;
+        n -= to - from;
     }
-    
+
     @Override
     public void removeIndex( int index )
     {
-        removeRange( index, index+1 );
+        removeRange( index, index + 1 );
     }
 
     @Override
@@ -465,39 +448,33 @@ public class FloatsArray implements FloatsModifiable
         n = 0;
     }
 
-
-
-
     @Override
-    public void ensureCapacity(int minCapacity)
+    public void ensureCapacity( int minCapacity )
     {
         int capacity = a.length;
-        if (minCapacity > capacity)
+        if ( minCapacity > capacity )
         {
-            float[] aNew = newArray(capacity, minCapacity);
-            System.arraycopy(a, 0, aNew, 0, n);
+            float[] aNew = newArray( capacity, minCapacity );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
     }
 
     @Override
-    public void compact()
+    public void compact( )
     {
         float[] compact = new float[n];
-        System.arraycopy(a, 0, compact, 0, n);
+        System.arraycopy( a, 0, compact, 0, n );
         a = compact;
     }
-
-
-
 
     /**
      * Creates a new array whose capacity is at least minNewCapacity, and at least
      * 1.618 * oldCapacity, up to Integer.MAX_VALUE.
      */
-    public static float[] newArray(int oldCapacity, int minNewCapacity)
+    public static float[] newArray( int oldCapacity, int minNewCapacity )
     {
-        int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
+        int newCapacity = ( int ) max( minNewCapacity, min( Integer.MAX_VALUE, ( 106039L * oldCapacity ) >>> 16 ) );
         return new float[newCapacity];
     }
 }

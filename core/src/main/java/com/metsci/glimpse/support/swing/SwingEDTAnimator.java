@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -84,7 +84,7 @@ public class SwingEDTAnimator implements GLAnimatorControl
     {
         // do nothing if the animator is already running
         if ( this.future != null ) return;
-        
+
         ThreadFactory threadFactory = ConcurrencyUtils.newDaemonThreadFactory( new ThreadFactory( )
         {
             @Override
@@ -95,9 +95,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
                 return thread;
             }
         } );
-        
+
         ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( threadFactory );
-        
+
         this.future = exectuor.scheduleAtFixedRate( new Runnable( )
         {
             @Override
@@ -122,7 +122,7 @@ public class SwingEDTAnimator implements GLAnimatorControl
                                 }
                             }
                         }
-                    });
+                    } );
                 }
                 catch ( InvocationTargetException | InterruptedException e )
                 {
@@ -164,9 +164,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
     public synchronized boolean start( )
     {
         if ( isStarted( ) ) return false;
-        
+
         start0( );
-        
+
         return true;
     }
 
@@ -174,9 +174,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
     public synchronized boolean stop( )
     {
         if ( !isStarted( ) ) return false;
-        
+
         boolean success = this.future.cancel( false );
-        
+
         if ( success )
         {
             this.future = null;

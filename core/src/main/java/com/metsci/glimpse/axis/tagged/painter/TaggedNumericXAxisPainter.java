@@ -54,7 +54,7 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
 
     protected float[] tagColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f );
     protected boolean tagColorSet = false;
-    
+
     protected int tagWidth = DEFAULT_TAG_BASE;
     protected int tagHeight = DEFAULT_TAG_HEIGHT;
 
@@ -77,12 +77,12 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
     {
         this.tagHeight = height;
     }
-    
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
         super.setLookAndFeel( laf );
-        
+
         if ( !tagColorSet )
         {
             setTagColor( laf.getColor( AbstractLookAndFeel.AXIS_TAG_COLOR ) );
@@ -95,12 +95,12 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
     {
         updateTextRenderer( );
         if ( textRenderer == null ) return;
-        
+
         if ( axis instanceof TaggedAxis1D )
         {
-            TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
+            TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
-            GL2 gl = context.getGL( ).getGL2();
+            GL2 gl = context.getGL( ).getGL2( );
 
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
@@ -111,15 +111,15 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
-            
+
             paintTicks( gl, taggedAxis, width, height );
             paintAxisLabel( gl, taggedAxis, width, height );
             paintSelectionLine( gl, taggedAxis, width, height );
-            
+
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-            
+
             paintTags( gl, taggedAxis, width, height );
         }
     }
@@ -137,12 +137,12 @@ public class TaggedNumericXAxisPainter extends NumericXAxisPainter
         int x = taggedAxis.valueToScreenPixel( tag.getValue( ) );
         int y1 = height - 1 - tickBufferSize - tagHeight;
         int y2 = y1 + tagHeight;
-        
+
         float[] color = tagColor;
         Object colorValue = tag.getAttribute( Tag.TAG_COLOR_ATTR );
         if ( colorValue != null && colorValue instanceof float[] )
         {
-            color = (float[]) colorValue;
+            color = ( float[] ) colorValue;
         }
 
         GlimpseColor.glColor( gl, color, 0.2f );

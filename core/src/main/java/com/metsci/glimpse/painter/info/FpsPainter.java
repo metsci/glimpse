@@ -60,7 +60,7 @@ public class FpsPainter extends SimpleTextPainter
     private final void tickTock( GlimpseContext context )
     {
         if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
-        
+
         FpsHelper temp = cache.getValue( context );
         temp.setFrameCount( temp.getFrameCount( ) + 1 );
         long currentTime = System.currentTimeMillis( );
@@ -82,7 +82,7 @@ public class FpsPainter extends SimpleTextPainter
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
         if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
-        
+
         FpsHelper temp = cache.getValue( context );
         tickTock( context );
 

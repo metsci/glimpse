@@ -40,33 +40,30 @@ public class CharsArray implements CharsModifiable
     public char[] a;
     public int n;
 
-
-
-
     // Instantiation
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public CharsArray(char[] a)
+    public CharsArray( char[] a )
     {
-        this(a, a.length);
+        this( a, a.length );
     }
 
-    public CharsArray(int n)
+    public CharsArray( int n )
     {
-        this(new char[n], 0);
+        this( new char[n], 0 );
     }
 
-    public CharsArray()
+    public CharsArray( )
     {
-        this(new char[0], 0);
+        this( new char[0], 0 );
     }
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public CharsArray(char[] a, int n)
+    public CharsArray( char[] a, int n )
     {
         this.a = a;
         this.n = n;
@@ -75,27 +72,24 @@ public class CharsArray implements CharsModifiable
     /**
      * Clones the sequence arg.
      */
-    public CharsArray(Chars xs)
+    public CharsArray( Chars xs )
     {
-        n = xs.n();
+        n = xs.n( );
         a = new char[n];
-        xs.copyTo(0, a, 0, n);
+        xs.copyTo( 0, a, 0, n );
     }
 
-    public CharsArray(String xs)
+    public CharsArray( String xs )
     {
-        n = xs.length();
+        n = xs.length( );
         a = new char[n];
-        xs.getChars(0, n, a, 0);
+        xs.getChars( 0, n, a, 0 );
     }
-
-
-
 
     // Accessors
 
     @Override
-    public char v(int i)
+    public char v( int i )
     {
         // Skip bounds check for speed
         //if (i >= n) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i + ", length = " + n);
@@ -104,82 +98,79 @@ public class CharsArray implements CharsModifiable
     }
 
     @Override
-    public int n()
+    public int n( )
     {
         return n;
     }
 
     @Override
-    public void copyTo(int i, char[] dest, int iDest, int c)
+    public void copyTo( int i, char[] dest, int iDest, int c )
     {
-        System.arraycopy(a, i, dest, iDest, c);
+        System.arraycopy( a, i, dest, iDest, c );
     }
 
     @Override
-    public char[] copyOf(int i, int c)
+    public char[] copyOf( int i, int c )
     {
         char[] copy = new char[c];
-        System.arraycopy(a, i, copy, 0, c);
+        System.arraycopy( a, i, copy, 0, c );
         return copy;
     }
 
     @Override
-    public char[] copyOf()
+    public char[] copyOf( )
     {
         char[] copy = new char[n];
-        System.arraycopy(a, 0, copy, 0, n);
+        System.arraycopy( a, 0, copy, 0, n );
         return copy;
     }
 
     @Override
-    public String string()
+    public String string( )
     {
-        return new String(a, 0, n);
+        return new String( a, 0, n );
     }
 
     @Override
-    public String string(int i, int c)
+    public String string( int i, int c )
     {
-        return new String(a, i, c);
+        return new String( a, i, c );
     }
 
     @Override
-    public boolean isEmpty()
+    public boolean isEmpty( )
     {
-        return (n == 0);
+        return ( n == 0 );
     }
 
     @Override
-    public char first()
+    public char first( )
     {
         return a[0];
     }
 
     @Override
-    public char last()
+    public char last( )
     {
         return a[n - 1];
     }
 
-
-
-
     // Mutators
 
     @Override
-    public void set(int i, char v)
+    public void set( int i, char v )
     {
         a[i] = v;
     }
-    
+
     @Override
-    public void set(int i, char[] vs)
+    public void set( int i, char[] vs )
     {
         set( i, vs, 0, vs.length );
     }
-    
+
     @Override
-    public void set(int i, char[] vs, int from, int to)
+    public void set( int i, char[] vs, int from, int to )
     {
         int c = to - from;
         ensureCapacity( i + c );
@@ -188,65 +179,65 @@ public class CharsArray implements CharsModifiable
     }
 
     @Override
-    public void insert(int i, char v)
+    public void insert( int i, char v )
     {
-        prepForInsert(i, 1);
+        prepForInsert( i, 1 );
         a[i] = v;
     }
 
     @Override
-    public void insert(int i, Chars vs)
+    public void insert( int i, Chars vs )
     {
-        insert(i, vs, 0, vs.n());
+        insert( i, vs, 0, vs.n( ) );
     }
 
     @Override
-    public void insert(int i, Chars vs, int from, int to)
+    public void insert( int i, Chars vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        vs.copyTo(from, a, i, c);
+        prepForInsert( i, c );
+        vs.copyTo( from, a, i, c );
     }
 
     @Override
-    public void insert(int i, String vs)
+    public void insert( int i, String vs )
     {
-        insert(i, vs, 0, vs.length());
+        insert( i, vs, 0, vs.length( ) );
     }
 
     @Override
-    public void insert(int i, String vs, int from, int to)
-    {
-        int c = to - from;
-        prepForInsert(i, c);
-        vs.getChars(from, to, a, i);
-    }
-
-    @Override
-    public void insert(int i, char[] vs)
-    {
-        insert(i, vs, 0, vs.length);
-    }
-
-    @Override
-    public void insert(int i, char[] vs, int from, int to)
+    public void insert( int i, String vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        System.arraycopy(vs, from, a, i, c);
+        prepForInsert( i, c );
+        vs.getChars( from, to, a, i );
     }
 
     @Override
-    public void insert(int i, CharBuffer vs)
+    public void insert( int i, char[] vs )
     {
-        insert(i, vs, vs.remaining());
+        insert( i, vs, 0, vs.length );
     }
 
     @Override
-    public void insert(int i, CharBuffer vs, int c)
+    public void insert( int i, char[] vs, int from, int to )
     {
-        prepForInsert(i, c);
-        vs.get(a, i, c);
+        int c = to - from;
+        prepForInsert( i, c );
+        System.arraycopy( vs, from, a, i, c );
+    }
+
+    @Override
+    public void insert( int i, CharBuffer vs )
+    {
+        insert( i, vs, vs.remaining( ) );
+    }
+
+    @Override
+    public void insert( int i, CharBuffer vs, int c )
+    {
+        prepForInsert( i, c );
+        vs.get( a, i, c );
     }
 
     /**
@@ -259,104 +250,101 @@ public class CharsArray implements CharsModifiable
      * @param i The index at which new values will be inserted
      * @param c The count of new values that will be inserted
      */
-    public void prepForInsert(int i, int c)
+    public void prepForInsert( int i, int c )
     {
         char[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew;
-        if (i >= n)
+        if ( i >= n )
         {
             nNew = i + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                char[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, n);
+                char[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, n );
                 this.a = aNew;
             }
         }
         else
         {
             nNew = n + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                char[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, i);
-                System.arraycopy(a, i, aNew, i+c, n-i);
+                char[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, i );
+                System.arraycopy( a, i, aNew, i + c, n - i );
                 this.a = aNew;
             }
             else
             {
-                System.arraycopy(a, i, a, i+c, n-i);
+                System.arraycopy( a, i, a, i + c, n - i );
             }
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void prepend(char v)
+    public void prepend( char v )
     {
-        prepForPrepend(1);
+        prepForPrepend( 1 );
         a[0] = v;
     }
 
     @Override
-    public void prepend(Chars vs)
+    public void prepend( Chars vs )
     {
-        prepend(vs, 0, vs.n());
+        prepend( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void prepend(Chars vs, int from, int to)
+    public void prepend( Chars vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        vs.copyTo(from, a, 0, c);
+        prepForPrepend( c );
+        vs.copyTo( from, a, 0, c );
     }
 
     @Override
-    public void prepend(String vs)
+    public void prepend( String vs )
     {
-        prepend(vs, 0, vs.length());
+        prepend( vs, 0, vs.length( ) );
     }
 
     @Override
-    public void prepend(String vs, int from, int to)
-    {
-        int c = to - from;
-        prepForPrepend(c);
-        vs.getChars(from, to, a, 0);
-    }
-
-    @Override
-    public void prepend(char[] vs)
-    {
-        prepend(vs, 0, vs.length);
-    }
-
-    @Override
-    public void prepend(char[] vs, int from, int to)
+    public void prepend( String vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        System.arraycopy(vs, from, a, 0, c);
+        prepForPrepend( c );
+        vs.getChars( from, to, a, 0 );
     }
 
     @Override
-    public void prepend(CharBuffer vs)
+    public void prepend( char[] vs )
     {
-        prepend(vs, vs.remaining());
+        prepend( vs, 0, vs.length );
     }
 
     @Override
-    public void prepend(CharBuffer vs, int c)
+    public void prepend( char[] vs, int from, int to )
     {
-        prepForPrepend(c);
-        vs.get(a, 0, c);
+        int c = to - from;
+        prepForPrepend( c );
+        System.arraycopy( vs, from, a, 0, c );
+    }
+
+    @Override
+    public void prepend( CharBuffer vs )
+    {
+        prepend( vs, vs.remaining( ) );
+    }
+
+    @Override
+    public void prepend( CharBuffer vs, int c )
+    {
+        prepForPrepend( c );
+        vs.get( a, 0, c );
     }
 
     /**
@@ -368,89 +356,86 @@ public class CharsArray implements CharsModifiable
      *
      * @param c The count of new values that will be inserted
      */
-    public void prepForPrepend(int c)
+    public void prepForPrepend( int c )
     {
         char[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            char[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, c, n);
+            char[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, c, n );
             this.a = aNew;
         }
         else
         {
-            System.arraycopy(a, 0, a, c, n);
+            System.arraycopy( a, 0, a, c, n );
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void append(char v)
+    public void append( char v )
     {
-        prepForAppend(1);
-        a[n-1] = v;
+        prepForAppend( 1 );
+        a[n - 1] = v;
     }
 
     @Override
-    public void append(Chars vs)
+    public void append( Chars vs )
     {
-        append(vs, 0, vs.n());
+        append( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void append(Chars vs, int from, int to)
+    public void append( Chars vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        vs.copyTo(from, a, n-c, c);
+        prepForAppend( c );
+        vs.copyTo( from, a, n - c, c );
     }
 
     @Override
-    public void append(String vs)
+    public void append( String vs )
     {
-        append(vs, 0, vs.length());
+        append( vs, 0, vs.length( ) );
     }
 
     @Override
-    public void append(String vs, int from, int to)
-    {
-        int c = to - from;
-        prepForAppend(c);
-        vs.getChars(from, to, a, n-c);
-    }
-
-    @Override
-    public void append(char[] vs)
-    {
-        append(vs, 0, vs.length);
-    }
-
-    @Override
-    public void append(char[] vs, int from, int to)
+    public void append( String vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        System.arraycopy(vs, from, a, n-c, c);
+        prepForAppend( c );
+        vs.getChars( from, to, a, n - c );
     }
 
     @Override
-    public void append(CharBuffer vs)
+    public void append( char[] vs )
     {
-        append(vs, vs.remaining());
+        append( vs, 0, vs.length );
     }
 
     @Override
-    public void append(CharBuffer vs, int c)
+    public void append( char[] vs, int from, int to )
     {
-        prepForAppend(c);
-        vs.get(a, n-c, c);
+        int c = to - from;
+        prepForAppend( c );
+        System.arraycopy( vs, from, a, n - c, c );
+    }
+
+    @Override
+    public void append( CharBuffer vs )
+    {
+        append( vs, vs.remaining( ) );
+    }
+
+    @Override
+    public void append( CharBuffer vs, int c )
+    {
+        prepForAppend( c );
+        vs.get( a, n - c, c );
     }
 
     /**
@@ -462,51 +447,48 @@ public class CharsArray implements CharsModifiable
      *
      * @param c The count of new values that will be appended
      */
-    public void prepForAppend(int c)
+    public void prepForAppend( int c )
     {
         char[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            char[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, 0, n);
+            char[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void remove(char v)
+    public void remove( char v )
     {
-        for (int i = 0; i < n; i++)
+        for ( int i = 0; i < n; i++ )
         {
-            if (a[i] == v)
+            if ( a[i] == v )
             {
-                System.arraycopy(a, i+1, a, i, n-(i+1));
+                System.arraycopy( a, i + 1, a, i, n - ( i + 1 ) );
                 n--;
                 return;
             }
         }
     }
-    
+
     @Override
     public void removeRange( int from, int to )
     {
-        int length = n-to;
+        int length = n - to;
         System.arraycopy( a, to, a, from, length );
-        n -= to-from;
+        n -= to - from;
     }
-    
+
     @Override
     public void removeIndex( int index )
     {
-        removeRange( index, index+1 );
+        removeRange( index, index + 1 );
     }
 
     @Override
@@ -515,39 +497,33 @@ public class CharsArray implements CharsModifiable
         n = 0;
     }
 
-
-
-
     @Override
-    public void ensureCapacity(int minCapacity)
+    public void ensureCapacity( int minCapacity )
     {
         int capacity = a.length;
-        if (minCapacity > capacity)
+        if ( minCapacity > capacity )
         {
-            char[] aNew = newArray(capacity, minCapacity);
-            System.arraycopy(a, 0, aNew, 0, n);
+            char[] aNew = newArray( capacity, minCapacity );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
     }
 
     @Override
-    public void compact()
+    public void compact( )
     {
         char[] compact = new char[n];
-        System.arraycopy(a, 0, compact, 0, n);
+        System.arraycopy( a, 0, compact, 0, n );
         a = compact;
     }
-
-
-
 
     /**
      * Creates a new array whose capacity is at least minNewCapacity, and at least
      * 1.618 * oldCapacity, up to Integer.MAX_VALUE.
      */
-    public static char[] newArray(int oldCapacity, int minNewCapacity)
+    public static char[] newArray( int oldCapacity, int minNewCapacity )
     {
-        int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
+        int newCapacity = ( int ) max( minNewCapacity, min( Integer.MAX_VALUE, ( 106039L * oldCapacity ) >>> 16 ) );
         return new char[newCapacity];
     }
 

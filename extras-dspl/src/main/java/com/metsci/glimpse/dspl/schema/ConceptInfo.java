@@ -31,16 +31,15 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  *
@@ -87,16 +86,9 @@ import javax.xml.bind.annotation.XmlType;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ConceptInfo", propOrder = {
-    "pluralName",
-    "totalName",
-    "singularNonCapitalizedName",
-    "pluralNonCapitalizedName",
-    "synonym"
-})
-public class ConceptInfo
-    extends Info
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "ConceptInfo", propOrder = { "pluralName", "totalName", "singularNonCapitalizedName", "pluralNonCapitalizedName", "synonym" } )
+public class ConceptInfo extends Info
 {
 
     protected Values pluralName;
@@ -113,7 +105,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public Values getPluralName() {
+    public Values getPluralName( )
+    {
         return pluralName;
     }
 
@@ -125,7 +118,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public void setPluralName(Values value) {
+    public void setPluralName( Values value )
+    {
         this.pluralName = value;
     }
 
@@ -137,7 +131,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public Values getTotalName() {
+    public Values getTotalName( )
+    {
         return totalName;
     }
 
@@ -149,7 +144,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public void setTotalName(Values value) {
+    public void setTotalName( Values value )
+    {
         this.totalName = value;
     }
 
@@ -161,7 +157,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public Values getSingularNonCapitalizedName() {
+    public Values getSingularNonCapitalizedName( )
+    {
         return singularNonCapitalizedName;
     }
 
@@ -173,7 +170,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public void setSingularNonCapitalizedName(Values value) {
+    public void setSingularNonCapitalizedName( Values value )
+    {
         this.singularNonCapitalizedName = value;
     }
 
@@ -185,7 +183,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public Values getPluralNonCapitalizedName() {
+    public Values getPluralNonCapitalizedName( )
+    {
         return pluralNonCapitalizedName;
     }
 
@@ -197,7 +196,8 @@ public class ConceptInfo
      *     {@link Values }
      *
      */
-    public void setPluralNonCapitalizedName(Values value) {
+    public void setPluralNonCapitalizedName( Values value )
+    {
         this.pluralNonCapitalizedName = value;
     }
 
@@ -223,13 +223,14 @@ public class ConceptInfo
      *
      *
      */
-    public List<ConceptInfo.Synonym> getSynonym() {
-        if (synonym == null) {
-            synonym = new ArrayList<ConceptInfo.Synonym>();
+    public List<ConceptInfo.Synonym> getSynonym( )
+    {
+        if ( synonym == null )
+        {
+            synonym = new ArrayList<ConceptInfo.Synonym>( );
         }
         return this.synonym;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -256,16 +257,14 @@ public class ConceptInfo
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "value",
-        "conceptValue"
-    })
-    public static class Synonym {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "value", "conceptValue" } )
+    public static class Synonym
+    {
 
         protected List<Value> value;
         protected com.metsci.glimpse.dspl.schema.Attribute.ConceptValue conceptValue;
-        @XmlAttribute(name = "confidence")
+        @XmlAttribute( name = "confidence" )
         protected String confidence;
 
         /**
@@ -290,9 +289,11 @@ public class ConceptInfo
          *
          *
          */
-        public List<Value> getValue() {
-            if (value == null) {
-                value = new ArrayList<Value>();
+        public List<Value> getValue( )
+        {
+            if ( value == null )
+            {
+                value = new ArrayList<Value>( );
             }
             return this.value;
         }
@@ -305,7 +306,8 @@ public class ConceptInfo
          *     {@link com.metsci.glimpse.dspl.schema.Attribute.ConceptValue }
          *
          */
-        public com.metsci.glimpse.dspl.schema.Attribute.ConceptValue getConceptValue() {
+        public com.metsci.glimpse.dspl.schema.Attribute.ConceptValue getConceptValue( )
+        {
             return conceptValue;
         }
 
@@ -317,7 +319,8 @@ public class ConceptInfo
          *     {@link com.metsci.glimpse.dspl.schema.Attribute.ConceptValue }
          *
          */
-        public void setConceptValue(com.metsci.glimpse.dspl.schema.Attribute.ConceptValue value) {
+        public void setConceptValue( com.metsci.glimpse.dspl.schema.Attribute.ConceptValue value )
+        {
             this.conceptValue = value;
         }
 
@@ -329,10 +332,14 @@ public class ConceptInfo
          *     {@link String }
          *
          */
-        public String getConfidence() {
-            if (confidence == null) {
+        public String getConfidence( )
+        {
+            if ( confidence == null )
+            {
                 return "high";
-            } else {
+            }
+            else
+            {
                 return confidence;
             }
         }
@@ -345,12 +352,12 @@ public class ConceptInfo
          *     {@link String }
          *
          */
-        public void setConfidence(String value) {
+        public void setConfidence( String value )
+        {
             this.confidence = value;
         }
 
     }
-
 
     public String getPluralNameEnglish( )
     {
@@ -383,6 +390,5 @@ public class ConceptInfo
 
         return values.getValueEnglish( );
     }
-
 
 }

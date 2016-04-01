@@ -29,7 +29,6 @@ package com.metsci.glimpse.util.logging.format;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-
 /**
  * Extends TimestampingLogFormatter to include millisecond resolution in timestamps.
  *
@@ -37,24 +36,24 @@ import java.text.SimpleDateFormat;
  */
 public class FinegrainedTimestampingLogFormatter extends TimestampingMethodNameLogFormatter
 {
-    private final DateFormat _fullDateTriggerFormatter = new SimpleDateFormat("yyyy-MM-dd z");
-    private final DateFormat _fullFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
-    private final DateFormat _shortFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
+    private final DateFormat _fullDateTriggerFormatter = new SimpleDateFormat( "yyyy-MM-dd z" );
+    private final DateFormat _fullFormatter = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS z" );
+    private final DateFormat _shortFormatter = new SimpleDateFormat( "HH:mm:ss.SSS" );
 
     @Override
-    protected DateFormat getFullDateTriggerFormatter()
+    protected DateFormat getFullDateTriggerFormatter( )
     {
         return _fullDateTriggerFormatter;
     }
 
     @Override
-    protected DateFormat getFullFormatter()
+    protected DateFormat getFullFormatter( )
     {
         return _fullFormatter;
     }
 
     @Override
-    protected DateFormat getShortFormatter()
+    protected DateFormat getShortFormatter( )
     {
         return _shortFormatter;
     }

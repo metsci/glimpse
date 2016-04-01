@@ -96,7 +96,6 @@ public class DockingXmlUtils
         }
     }
 
-
     // Write
     //
 

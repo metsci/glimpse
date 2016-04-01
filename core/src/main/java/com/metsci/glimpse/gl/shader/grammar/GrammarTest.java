@@ -37,7 +37,6 @@ import com.metsci.glimpse.gl.shader.ShaderArg;
 import com.metsci.glimpse.gl.shader.ShaderSource;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-
 /**
  * @author osborn
  */
@@ -46,16 +45,16 @@ public class GrammarTest
     public static void main( String[] args ) throws Exception
     {
         ShaderSource source = new ShaderSource( "shaders/colormap/tagged_colorscale_shader.fs", StreamOpener.fileThenResource );
-        CharStream stream = new ANTLRStringStream( source.getSource() );
+        CharStream stream = new ANTLRStringStream( source.getSource( ) );
 
         GlslArgLexer lexer = new GlslArgLexer( stream );
         TokenStream tokenStream = new CommonTokenStream( lexer );
         GlslArgParser parser = new GlslArgParser( tokenStream );
 
-        List<ShaderArg> shaderArgs = parser.shader().result;
-        for( ShaderArg arg : shaderArgs )
+        List<ShaderArg> shaderArgs = parser.shader( ).result;
+        for ( ShaderArg arg : shaderArgs )
         {
-            System.out.println( arg.toString() );
+            System.out.println( arg.toString( ) );
         }
     }
 }

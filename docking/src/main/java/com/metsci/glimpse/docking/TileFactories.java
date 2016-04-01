@@ -57,7 +57,6 @@ public class TileFactories
         Tile newTile( );
     }
 
-
     public static class TileFactoryStandard implements TileFactory
     {
         public final DockingGroup dockingGroup;
@@ -78,7 +77,7 @@ public class TileFactories
             {
                 public void paintComponent( Graphics g )
                 {
-                    Tile tile = tileRef[ 0 ];
+                    Tile tile = tileRef[0];
                     MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
                     setIcon( docker.getMaximizedLeaf( ) == tile ? theme.unmaximizeIcon : theme.maximizeIcon );
 
@@ -142,7 +141,7 @@ public class TileFactories
             };
 
             final Tile tile = new TileImpl( theme, tabCornerComponentFactory, new Component[] { maximizeButton } );
-            tileRef[ 0 ] = tile;
+            tileRef[0] = tile;
 
             dockingGroup.attachListenerTo( tile );
 

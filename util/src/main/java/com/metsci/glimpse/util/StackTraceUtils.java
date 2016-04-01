@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.util;
 
-
 /**
  * Utilities for examining stack traces at any point during program execution.
  *
@@ -34,7 +33,7 @@ package com.metsci.glimpse.util;
  */
 public class StackTraceUtils
 {
-    private StackTraceUtils()
+    private StackTraceUtils( )
     {
     }
 
@@ -43,23 +42,23 @@ public class StackTraceUtils
      *
      * @return  Information String about caller suitable for logging.
      */
-    public static String getCaller()
+    public static String getCaller( )
     {
-        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+        StackTraceElement[] trace = Thread.currentThread( ).getStackTrace( );
 
         // skip past getCaller call, getStackTrace, and caller of this method to reach trace
         // element of interest
         int index = 3;
-        if (trace.length < (index + 1))
+        if ( trace.length < ( index + 1 ) )
         {
             return "n/a";
         }
 
         StackTraceElement elem = trace[index];
 
-        String className = elem.getClassName();
+        String className = elem.getClassName( );
 
-        return className + "." + elem.getMethodName() + " line " + elem.getLineNumber();
+        return className + "." + elem.getMethodName( ) + " line " + elem.getLineNumber( );
     }
 
     /**
@@ -68,26 +67,25 @@ public class StackTraceUtils
      * @param   nBack  how far up the stack to go (should be >=1)
      * @return  Information String about callers (up the stack) suitable for logging.
      */
-    public static String getCallers(int nBack)
+    public static String getCallers( int nBack )
     {
-        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+        StackTraceElement[] trace = Thread.currentThread( ).getStackTrace( );
 
         // skip past getCaller call, getStackTrace, and caller of this method to reach trace
         // element of interest
         int index = 3;
-        if (trace.length < (index + 1))
+        if ( trace.length < ( index + 1 ) )
         {
             return "callers unidentified";
         }
 
-        StringBuilder sb = new StringBuilder("called by...");
-        while (index < trace.length)
+        StringBuilder sb = new StringBuilder( "called by..." );
+        while ( index < trace.length )
         {
             StackTraceElement elem = trace[index];
-            sb.append(String.format("%n%s.%s line %s", elem.getClassName(), elem.getMethodName(),
-                                    elem.getLineNumber()));
+            sb.append( String.format( "%n%s.%s line %s", elem.getClassName( ), elem.getMethodName( ), elem.getLineNumber( ) ) );
             nBack--;
-            if (nBack <= 0)
+            if ( nBack <= 0 )
             {
                 break;
             }
@@ -95,7 +93,7 @@ public class StackTraceUtils
             index++;
         }
 
-        return sb.toString();
+        return sb.toString( );
     }
 
     /**
@@ -104,60 +102,58 @@ public class StackTraceUtils
      * @param   nBack  how far up the stack to go (should be >=1)
      * @return  Information String about callers (up the stack) suitable for logging.
      */
-    public static String getCallersCompact(int nBack)
+    public static String getCallersCompact( int nBack )
     {
-        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+        StackTraceElement[] trace = Thread.currentThread( ).getStackTrace( );
 
         // skip past getCaller call, getStackTrace, and caller of this method to reach trace
         // element of interest
         int index = 3;
-        if (trace.length < (index + 1))
+        if ( trace.length < ( index + 1 ) )
         {
             return "";
         }
 
-        StringBuilder sb = new StringBuilder();
-        while (index < trace.length)
+        StringBuilder sb = new StringBuilder( );
+        while ( index < trace.length )
         {
             StackTraceElement elem = trace[index];
-            String className = elem.getClassName();
-            sb.append(String.format("%s.%s:%s", className.substring(className.lastIndexOf(".") + 1),
-                                    elem.getMethodName(), elem.getLineNumber()));
+            String className = elem.getClassName( );
+            sb.append( String.format( "%s.%s:%s", className.substring( className.lastIndexOf( "." ) + 1 ), elem.getMethodName( ), elem.getLineNumber( ) ) );
             nBack--;
-            if (nBack <= 0)
+            if ( nBack <= 0 )
             {
                 break;
             }
 
-            sb.append(" <- ");
+            sb.append( " <- " );
 
             index++;
         }
 
-        return sb.toString();
+        return sb.toString( );
     }
 
-    public static String stackTraceToString(Exception e, int nBack)
+    public static String stackTraceToString( Exception e, int nBack )
     {
-        return stackTraceToString(e.getStackTrace(), nBack);
+        return stackTraceToString( e.getStackTrace( ), nBack );
     }
 
-    public static String stackTraceToString(StackTraceElement[] trace, int nBack)
+    public static String stackTraceToString( StackTraceElement[] trace, int nBack )
     {
         int index = 0;
-        if (trace.length < (index + 1))
+        if ( trace.length < ( index + 1 ) )
         {
             return "n/a";
         }
 
-        StringBuilder sb = new StringBuilder("trace...");
-        while (index < trace.length)
+        StringBuilder sb = new StringBuilder( "trace..." );
+        while ( index < trace.length )
         {
             StackTraceElement elem = trace[index];
-            sb.append(String.format("%n%s.%s line %s", elem.getClassName(), elem.getMethodName(),
-                                    elem.getLineNumber()));
+            sb.append( String.format( "%n%s.%s line %s", elem.getClassName( ), elem.getMethodName( ), elem.getLineNumber( ) ) );
             nBack--;
-            if (nBack <= 0)
+            if ( nBack <= 0 )
             {
                 break;
             }
@@ -165,6 +161,6 @@ public class StackTraceUtils
             index++;
         }
 
-        return sb.toString();
+        return sb.toString( );
     }
 }

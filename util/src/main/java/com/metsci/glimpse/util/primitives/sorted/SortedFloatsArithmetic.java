@@ -48,7 +48,6 @@ public class SortedFloatsArithmetic implements SortedFloats
     public final float oneOverVStep;
     public final float halfVStep;
 
-
     /**
      * @throws IllegalArgumentException if
      *         {@code v0} is NaN, or
@@ -59,20 +58,20 @@ public class SortedFloatsArithmetic implements SortedFloats
      *         {@code n} is negative, or
      *         {@code (v0 + (n-1)*vStep)} is greater than {@link Float#MAX_VALUE}
      */
-    public SortedFloatsArithmetic(float v0, float vStep, int n)
+    public SortedFloatsArithmetic( float v0, float vStep, int n )
     {
-        if (Float.isNaN(v0)) throw new IllegalArgumentException("v0 must be not be NaN");
-        if (Float.isInfinite(v0)) throw new IllegalArgumentException("v0 must be finite: v0 = " + v0);
-        if (Float.isNaN(vStep)) throw new IllegalArgumentException("vStep must be not be NaN");
-        if (Float.isInfinite(vStep)) throw new IllegalArgumentException("vStep must be finite: vStep = " + vStep);
-        if (vStep <= 0) throw new IllegalArgumentException("vStep must be positive: vStep = " + vStep);
-        if (n < 0) throw new IllegalArgumentException("n must be non-negative: n = " + n);
+        if ( Float.isNaN( v0 ) ) throw new IllegalArgumentException( "v0 must be not be NaN" );
+        if ( Float.isInfinite( v0 ) ) throw new IllegalArgumentException( "v0 must be finite: v0 = " + v0 );
+        if ( Float.isNaN( vStep ) ) throw new IllegalArgumentException( "vStep must be not be NaN" );
+        if ( Float.isInfinite( vStep ) ) throw new IllegalArgumentException( "vStep must be finite: vStep = " + vStep );
+        if ( vStep <= 0 ) throw new IllegalArgumentException( "vStep must be positive: vStep = " + vStep );
+        if ( n < 0 ) throw new IllegalArgumentException( "n must be non-negative: n = " + n );
 
-        if (n > 0)
+        if ( n > 0 )
         {
             // vMax = v0 + (n-1)*vStep
-            BigDecimal vMax = big(v0).add( big(n-1).multiply( big(vStep) ) );
-            if (vMax.compareTo( big(Float.MAX_VALUE) ) > 0) throw new IllegalArgumentException("Max value is larger than Float.MAX_VALUE: v0 = " + v0 + ", vStep = " + vStep + ", n = " + n);
+            BigDecimal vMax = big( v0 ).add( big( n - 1 ).multiply( big( vStep ) ) );
+            if ( vMax.compareTo( big( Float.MAX_VALUE ) ) > 0 ) throw new IllegalArgumentException( "Max value is larger than Float.MAX_VALUE: v0 = " + v0 + ", vStep = " + vStep + ", n = " + n );
         }
 
         this.v0 = v0;
@@ -83,32 +82,32 @@ public class SortedFloatsArithmetic implements SortedFloats
         this.halfVStep = 0.5f * vStep;
     }
 
-    public static BigDecimal big(float x)
+    public static BigDecimal big( float x )
     {
-        return BigDecimal.valueOf(x);
+        return BigDecimal.valueOf( x );
     }
 
     @Override
-    public float v(int i)
+    public float v( int i )
     {
         // Skip bounds checks for speed
         //if (i < 0) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i);
         //if (i >= n) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i + ", length = " + n);
 
-        return v0 + i*vStep;
+        return v0 + i * vStep;
     }
 
     @Override
-    public int n()
+    public int n( )
     {
         return n;
     }
 
     @Override
-    public void copyTo(int i, float[] dest, int iDest, int c)
+    public void copyTo( int i, float[] dest, int iDest, int c )
     {
-        float v = v0 + i*vStep;
-        for (int j = 0; j < c; j++)
+        float v = v0 + i * vStep;
+        for ( int j = 0; j < c; j++ )
         {
             dest[iDest + j] = v;
             v += vStep;
@@ -116,208 +115,202 @@ public class SortedFloatsArithmetic implements SortedFloats
     }
 
     @Override
-    public void copyTo(int i, FloatBuffer dest, int c)
+    public void copyTo( int i, FloatBuffer dest, int c )
     {
-        float v = v0 + i*vStep;
-        for (int j = 0; j < c; j++)
+        float v = v0 + i * vStep;
+        for ( int j = 0; j < c; j++ )
         {
-            dest.put(v);
+            dest.put( v );
             v += vStep;
         }
     }
 
     @Override
-    public void copyTo(FloatBuffer dest)
+    public void copyTo( FloatBuffer dest )
     {
-        copyTo(0, dest, n);
+        copyTo( 0, dest, n );
     }
 
     @Override
-    public float[] copyOf(int i, int c)
+    public float[] copyOf( int i, int c )
     {
         float[] copy = new float[c];
-        copyTo(i, copy, 0, c);
+        copyTo( i, copy, 0, c );
         return copy;
     }
 
     @Override
-    public float[] copyOf()
+    public float[] copyOf( )
     {
         float[] copy = new float[n];
-        copyTo(0, copy, 0, n);
+        copyTo( 0, copy, 0, n );
         return copy;
     }
 
     @Override
-    public boolean isEmpty()
+    public boolean isEmpty( )
     {
-        return (n == 0);
+        return ( n == 0 );
     }
 
     @Override
-    public float first()
+    public float first( )
     {
         return v0;
     }
 
     @Override
-    public float last()
+    public float last( )
     {
-        return v(n - 1);
+        return v( n - 1 );
     }
 
     @Override
-    public int indexOf(float x)
+    public int indexOf( float x )
     {
         float offset = x - v0;
-        if (offset < 0) return -1;
+        if ( offset < 0 ) return -1;
 
-        long i = (long) ceil(offset * oneOverVStep);
-        if (i >= n) return -(n + 1);
+        long i = ( long ) ceil( offset * oneOverVStep );
+        if ( i >= n ) return - ( n + 1 );
 
-        boolean exact = (x == (v0 + i*vStep));
-        return (int) (exact ? i : -(i + 1));
+        boolean exact = ( x == ( v0 + i * vStep ) );
+        return ( int ) ( exact ? i : - ( i + 1 ) );
     }
 
     @Override
-    public int indexNearest(float x)
+    public int indexNearest( float x )
     {
         float offset = x - v0;
-        if (offset <= 0) return 0;
+        if ( offset <= 0 ) return 0;
 
-        int i = (int) ((offset + halfVStep) * oneOverVStep);
-        return min(i, n - 1);
+        int i = ( int ) ( ( offset + halfVStep ) * oneOverVStep );
+        return min( i, n - 1 );
     }
 
     @Override
-    public int indexBefore(float x)
+    public int indexBefore( float x )
     {
-        return indexAtOrBefore(x - 1);
+        return indexAtOrBefore( x - 1 );
     }
 
     @Override
-    public int indexAfter(float x)
+    public int indexAfter( float x )
     {
-        return indexAtOrBefore(x) + 1;
+        return indexAtOrBefore( x ) + 1;
     }
 
     @Override
-    public int indexAtOrBefore(float x)
-    {
-        float offset = x - v0;
-        if (offset < 0) return -1;
-
-        int i = (int) (offset * oneOverVStep);
-        return min(i, n - 1);
-    }
-
-    @Override
-    public int indexAtOrAfter(float x)
-    {
-        return indexAtOrBefore(x - 1) + 1;
-    }
-
-    @Override
-    public void continuousIndexOf(float x, ContinuousIndex result)
+    public int indexAtOrBefore( float x )
     {
         float offset = x - v0;
-        long i = max( 0, min( n-2, (int) (offset * oneOverVStep) ) );
-        float f = ((offset - i*vStep) * oneOverVStep);
+        if ( offset < 0 ) return -1;
 
-        result.set((int) i, f);
+        int i = ( int ) ( offset * oneOverVStep );
+        return min( i, n - 1 );
     }
 
     @Override
-    public ContinuousIndex continuousIndexOf(float x)
+    public int indexAtOrAfter( float x )
     {
-        ContinuousIndex h = new ContinuousIndex();
-        continuousIndexOf(x, h);
+        return indexAtOrBefore( x - 1 ) + 1;
+    }
+
+    @Override
+    public void continuousIndexOf( float x, ContinuousIndex result )
+    {
+        float offset = x - v0;
+        long i = max( 0, min( n - 2, ( int ) ( offset * oneOverVStep ) ) );
+        float f = ( ( offset - i * vStep ) * oneOverVStep );
+
+        result.set( ( int ) i, f );
+    }
+
+    @Override
+    public ContinuousIndex continuousIndexOf( float x )
+    {
+        ContinuousIndex h = new ContinuousIndex( );
+        continuousIndexOf( x, h );
         return h;
     }
 
     @Override
-    public void continuousIndicesOf(Floats xs, ContinuousIndexArray result)
+    public void continuousIndicesOf( Floats xs, ContinuousIndexArray result )
     {
-        int nx = xs.n();
-        for (int ix = 0; ix < nx; ix++)
+        int nx = xs.n( );
+        for ( int ix = 0; ix < nx; ix++ )
         {
-            float x = xs.v(ix);
+            float x = xs.v( ix );
 
             float offset = x - v0;
-            long i = max( 0, min( n-2, (int) (offset * oneOverVStep) ) );
-            float f = (float) ((offset - i*vStep) * oneOverVStep);
+            long i = max( 0, min( n - 2, ( int ) ( offset * oneOverVStep ) ) );
+            float f = ( float ) ( ( offset - i * vStep ) * oneOverVStep );
 
-            result.put(ix, (int) i, f);
+            result.put( ix, ( int ) i, f );
         }
     }
 
     @Override
-    public ContinuousIndexArray continuousIndicesOf(Floats xs)
+    public ContinuousIndexArray continuousIndicesOf( Floats xs )
     {
-        ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
-        continuousIndicesOf(xs, hs);
+        ContinuousIndexArray hs = new ContinuousIndexArray( xs.n( ) );
+        continuousIndicesOf( xs, hs );
         return hs;
     }
 
     @Override
-    public void continuousIndicesOf(SortedFloats xs, ContinuousIndexArray result)
+    public void continuousIndicesOf( SortedFloats xs, ContinuousIndexArray result )
     {
         float v0 = this.v0;
         float vStep = this.vStep;
         int n = this.n;
         float oneOverVStep = this.oneOverVStep;
 
-        int nx = xs.n();
+        int nx = xs.n( );
         int ix = 0;
 
-
         // Zip through any xs smaller than v(1)
-        float v1 = v(1);
-        for (; ix < nx; ix++)
+        float v1 = v( 1 );
+        for ( ; ix < nx; ix++ )
         {
-            float x = xs.v(ix);
-            if (x >= v1) break;
+            float x = xs.v( ix );
+            if ( x >= v1 ) break;
 
-            float f = ((x - v0) * oneOverVStep);
-            result.put(ix, 0, f);
+            float f = ( ( x - v0 ) * oneOverVStep );
+            result.put( ix, 0, f );
         }
-
 
         // Walk through the window where xs and vs overlap
-        float vNextToLast = v(n-2);
-        for (; ix < nx; ix++)
+        float vNextToLast = v( n - 2 );
+        for ( ; ix < nx; ix++ )
         {
-            float x = xs.v(ix);
-            if (x >= vNextToLast) break;
+            float x = xs.v( ix );
+            if ( x >= vNextToLast ) break;
 
             float offset = x - v0;
-            long i = (int) (offset * oneOverVStep);
-            float f = (float) ((offset - i*vStep) * oneOverVStep);
+            long i = ( int ) ( offset * oneOverVStep );
+            float f = ( float ) ( ( offset - i * vStep ) * oneOverVStep );
 
-            result.put(ix, (int) i, f);
+            result.put( ix, ( int ) i, f );
         }
 
-
         // Zip through any xs larger than or equal to v(n-2)
-        for (; ix < nx; ix++)
+        for ( ; ix < nx; ix++ )
         {
-            float x = xs.v(ix);
+            float x = xs.v( ix );
 
-            float f = ((x - vNextToLast) * oneOverVStep);
-            result.put(ix, n-2, f);
+            float f = ( ( x - vNextToLast ) * oneOverVStep );
+            result.put( ix, n - 2, f );
         }
     }
 
     @Override
-    public ContinuousIndexArray continuousIndicesOf(SortedFloats xs)
+    public ContinuousIndexArray continuousIndicesOf( SortedFloats xs )
     {
-        ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
-        continuousIndicesOf(xs, hs);
+        ContinuousIndexArray hs = new ContinuousIndexArray( xs.n( ) );
+        continuousIndicesOf( xs, hs );
         return hs;
     }
-
-
-
 
     /**
      * Like continuousIndicesOf, but in reverse: for each v in this sequence,
@@ -326,68 +319,63 @@ public class SortedFloatsArithmetic implements SortedFloats
      * This may be faster than continuousIndicesOf when going from a sparser
      * sequence to a dense arithmetic sequence.
      */
-    public ContinuousIndexArray continuousIndicesIn(SortedFloats xs)
+    public ContinuousIndexArray continuousIndicesIn( SortedFloats xs )
     {
         float vStep = this.vStep;
         int n = this.n;
-        ContinuousIndexArray hs = new ContinuousIndexArray(n);
-
+        ContinuousIndexArray hs = new ContinuousIndexArray( n );
 
         int i = 0;
 
-
         // Zip through any vs smaller than x(1)
-        float x0 = xs.v(0);
-        float x1 = xs.v(1);
-        float oneOverXStep1 = 1.0f / (x1 - x0);
-        for (; i < n; i++)
+        float x0 = xs.v( 0 );
+        float x1 = xs.v( 1 );
+        float oneOverXStep1 = 1.0f / ( x1 - x0 );
+        for ( ; i < n; i++ )
         {
-            float v = v(i);
-            if (v >= x1) break;
+            float v = v( i );
+            if ( v >= x1 ) break;
 
-            float fx = ((v - x0) * oneOverXStep1);
-            hs.put(i, 0, fx);
+            float fx = ( ( v - x0 ) * oneOverXStep1 );
+            hs.put( i, 0, fx );
         }
 
-
         // Walk through the window where xs and vs overlap
-        float xb = xs.v(1);
-        int ib = indexAtOrAfter(xb);
-        int nx = xs.n();
-        for (int ixb = 2; ixb < nx-1 && ib < n; ixb++)
+        float xb = xs.v( 1 );
+        int ib = indexAtOrAfter( xb );
+        int nx = xs.n( );
+        for ( int ixb = 2; ixb < nx - 1 && ib < n; ixb++ )
         {
             int ixa = ixb - 1;
             float xa = xb;
             int ia = ib;
 
-            xb = xs.v(ixb);
-            ib = indexAtOrAfter(xb);
+            xb = xs.v( ixb );
+            ib = indexAtOrAfter( xb );
 
-            float oneOverXStep = 1.0f / (xb - xa);
+            float oneOverXStep = 1.0f / ( xb - xa );
 
-            float va = v(ia);
-            float vb = v(ib);
-            for (float v = va; v < vb; v += vStep)
+            float va = v( ia );
+            float vb = v( ib );
+            for ( float v = va; v < vb; v += vStep )
             {
-                float fx = ((v - xa) * oneOverXStep);
-                hs.put(i, ixa, fx);
+                float fx = ( ( v - xa ) * oneOverXStep );
+                hs.put( i, ixa, fx );
                 i++;
             }
         }
 
-
         // Zip through any vs larger than or equal to x(nx-2)
-        float xLast = xs.v(nx - 1);
-        float xNextToLast = xs.v(nx - 2);
-        float oneOverXStepLast = 1.0f / (xLast - xNextToLast);
-        for (; i < n; i++)
+        float xLast = xs.v( nx - 1 );
+        float xNextToLast = xs.v( nx - 2 );
+        float oneOverXStepLast = 1.0f / ( xLast - xNextToLast );
+        for ( ; i < n; i++ )
         {
-            float v = v(i);
+            float v = v( i );
 
-            float fx = ((v - xNextToLast) * oneOverXStepLast);
-            hs.put(i, nx-2, fx);
+            float fx = ( ( v - xNextToLast ) * oneOverXStepLast );
+            hs.put( i, nx - 2, fx );
         }
-
 
         return hs;
     }

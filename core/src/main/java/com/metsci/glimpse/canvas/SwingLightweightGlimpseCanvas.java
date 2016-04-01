@@ -97,12 +97,12 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         init( true, context.getGLDrawable( ).getGLProfile( ), context );
     }
-    
+
     public SwingLightweightGlimpseCanvas( GLProfile glProfile )
     {
         init( true, glProfile, null );
     }
-    
+
     /**
      * @deprecated Use {@link #SwingLightweightGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
@@ -118,7 +118,7 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         init( true, GLProfile.get( profile ), context );
     }
-    
+
     /**
      * @deprecated Use {@link #SwingLightweightGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
@@ -134,7 +134,7 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         init( setNoEraseBackgroundProperty, glProfile, context );
     }
-    
+
     private void init( boolean setNoEraseBackgroundProperty, GLProfile glProfile, GLContext context )
     {
         if ( setNoEraseBackgroundProperty )
@@ -147,10 +147,11 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
 
         this.glCanvas = new GLJPanel( glCapabilities, null );
 
-        if ( context != null ) {
+        if ( context != null )
+        {
             this.glCanvas.setSharedContext( context );
         }
-        
+
         this.mouseHelper = new MouseWrapperSwing( this );
         this.addMouseListener( this.mouseHelper );
         this.addMouseMotionListener( this.mouseHelper );
@@ -167,7 +168,7 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
         this.isDestroyed = false;
 
         this.glCanvas.addGLEventListener( createGLEventListener( ) );
-        
+
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
 
@@ -284,7 +285,7 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         this.glCanvas.removeKeyListener( listener );
     }
-    
+
     @Override
     public GLProfile getGLProfile( )
     {
@@ -432,15 +433,14 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     {
         this.disposeListeners.add( runnable );
     }
-    
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -453,16 +453,16 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -478,8 +478,8 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     }
 
     @Override
-    public int[] getSurfaceScale()
+    public int[] getSurfaceScale( )
     {
-        return this.glCanvas.getCurrentSurfaceScale(new int[2]);
+        return this.glCanvas.getCurrentSurfaceScale( new int[2] );
     }
 }

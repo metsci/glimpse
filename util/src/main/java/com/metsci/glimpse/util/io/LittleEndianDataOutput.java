@@ -40,104 +40,104 @@ public class LittleEndianDataOutput implements DataOutput
 {
     private DataOutput out;
 
-    public LittleEndianDataOutput(DataOutput out)
+    public LittleEndianDataOutput( DataOutput out )
     {
         this.out = out;
     }
 
     @Override
-    public void write(int arg0) throws IOException
+    public void write( int arg0 ) throws IOException
     {
-        out.write(arg0);
+        out.write( arg0 );
     }
 
     @Override
-    public void write(byte[] arg0) throws IOException
+    public void write( byte[] arg0 ) throws IOException
     {
-        out.write(arg0);
+        out.write( arg0 );
     }
 
     @Override
-    public void write(byte[] arg0, int arg1, int arg2) throws IOException
+    public void write( byte[] arg0, int arg1, int arg2 ) throws IOException
     {
-        out.write(arg0, arg1, arg2);
+        out.write( arg0, arg1, arg2 );
     }
 
     @Override
-    public void writeBoolean(boolean arg0) throws IOException
+    public void writeBoolean( boolean arg0 ) throws IOException
     {
-        out.writeBoolean(arg0);
+        out.writeBoolean( arg0 );
     }
 
     @Override
-    public void writeByte(int arg0) throws IOException
+    public void writeByte( int arg0 ) throws IOException
     {
-        out.writeByte(arg0);
+        out.writeByte( arg0 );
     }
 
     @Override
-    public void writeShort(int arg0) throws IOException
+    public void writeShort( int arg0 ) throws IOException
     {
-        out.write(arg0);
-        out.write(arg0 >>> 8);
+        out.write( arg0 );
+        out.write( arg0 >>> 8 );
     }
 
     @Override
-    public void writeChar(int arg0) throws IOException
+    public void writeChar( int arg0 ) throws IOException
     {
-        out.writeChar(arg0);
+        out.writeChar( arg0 );
     }
 
     @Override
-    public void writeInt(int arg0) throws IOException
+    public void writeInt( int arg0 ) throws IOException
     {
-        out.write(arg0);
-        out.write(arg0 >>> 8);
-        out.write(arg0 >>> 16);
-        out.write(arg0 >>> 24);
+        out.write( arg0 );
+        out.write( arg0 >>> 8 );
+        out.write( arg0 >>> 16 );
+        out.write( arg0 >>> 24 );
     }
 
     @Override
-    public void writeLong(long arg0) throws IOException
+    public void writeLong( long arg0 ) throws IOException
     {
-        out.write((int) arg0);
-        out.write((int) (arg0 >>> 8));
-        out.write((int) (arg0 >>> 16));
-        out.write((int) (arg0 >>> 24));
-        out.write((int) (arg0 >>> 32));
-        out.write((int) (arg0 >>> 40));
-        out.write((int) (arg0 >>> 48));
-        out.write((int) (arg0 >>> 56));
+        out.write( ( int ) arg0 );
+        out.write( ( int ) ( arg0 >>> 8 ) );
+        out.write( ( int ) ( arg0 >>> 16 ) );
+        out.write( ( int ) ( arg0 >>> 24 ) );
+        out.write( ( int ) ( arg0 >>> 32 ) );
+        out.write( ( int ) ( arg0 >>> 40 ) );
+        out.write( ( int ) ( arg0 >>> 48 ) );
+        out.write( ( int ) ( arg0 >>> 56 ) );
     }
 
     @Override
-    public void writeFloat(float arg0) throws IOException
+    public void writeFloat( float arg0 ) throws IOException
     {
-        writeInt(Float.floatToIntBits(arg0));
+        writeInt( Float.floatToIntBits( arg0 ) );
     }
 
     @Override
-    public void writeDouble(double arg0) throws IOException
+    public void writeDouble( double arg0 ) throws IOException
     {
-        writeLong(Double.doubleToLongBits(arg0));
+        writeLong( Double.doubleToLongBits( arg0 ) );
     }
 
     @Override
-    public void writeBytes(String arg0) throws IOException
+    public void writeBytes( String arg0 ) throws IOException
     {
-        out.writeBytes(arg0);
+        out.writeBytes( arg0 );
     }
 
     @Override
-    public void writeChars(String arg0) throws IOException
+    public void writeChars( String arg0 ) throws IOException
     {
-        out.writeChars(arg0);
+        out.writeChars( arg0 );
     }
 
     @Override
-    public void writeUTF(String arg0) throws IOException
+    public void writeUTF( String arg0 ) throws IOException
     {
-        out.writeUTF(arg0);
+        out.writeUTF( arg0 );
     }
 
 }

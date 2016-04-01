@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;

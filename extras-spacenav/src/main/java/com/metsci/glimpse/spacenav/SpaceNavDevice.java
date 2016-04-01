@@ -41,7 +41,7 @@ public class SpaceNavDevice
     public static final int NUM_BUTTONS = 2;
 
     private static final Logger logger = Logger.getLogger( SpaceNavDevice.class.getName( ) );
-    
+
     private int xAxisIdx, yAxisIdx, zAxisIdx, rxAxisIdx, ryAxisIdx, rzAxisIdx;
     private int buttonsIdx[];
 

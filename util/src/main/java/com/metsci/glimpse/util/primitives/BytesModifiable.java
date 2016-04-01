@@ -37,80 +37,91 @@ import java.nio.ByteBuffer;
 public interface BytesModifiable extends Bytes
 {
 
-    void set(int i, byte v);
-    void set(int i, byte[] vs);
-    void set(int i, byte[] vs, int from, int to);
-    
+    void set( int i, byte v );
 
+    void set( int i, byte[] vs );
 
-    void insert(int i, byte v);
+    void set( int i, byte[] vs, int from, int to );
 
-    void insert(int i, byte[] vs);
-    void insert(int i, Bytes vs);
-    void insert(int i, String s);
-    void insert(int i, ByteBuffer vs);
+    void insert( int i, byte v );
 
-    void insert(int i, byte[] vs, int from, int to);
-    void insert(int i, Bytes vs, int from, int to);
-    void insert(int i, String s, int from, int to);
-    void insert(int i, ByteBuffer vs, int c);
+    void insert( int i, byte[] vs );
 
+    void insert( int i, Bytes vs );
 
+    void insert( int i, String s );
 
-    void append(byte v);
+    void insert( int i, ByteBuffer vs );
 
-    void append(byte[] vs);
-    void append(Bytes vs);
-    void append(String s);
-    void append(ByteBuffer vs);
+    void insert( int i, byte[] vs, int from, int to );
 
-    void append(byte[] vs, int from, int to);
-    void append(Bytes vs, int from, int to);
-    void append(String s, int from, int to);
-    void append(ByteBuffer vs, int c);
+    void insert( int i, Bytes vs, int from, int to );
 
+    void insert( int i, String s, int from, int to );
 
+    void insert( int i, ByteBuffer vs, int c );
 
-    void prepend(byte v);
+    void append( byte v );
 
-    void prepend(byte[] vs);
-    void prepend(Bytes vs);
-    void prepend(String s);
-    void prepend(ByteBuffer vs);
+    void append( byte[] vs );
 
-    void prepend(byte[] vs, int from, int to);
-    void prepend(Bytes vs, int from, int to);
-    void prepend(String s, int from, int to);
-    void prepend(ByteBuffer vs, int c);
+    void append( Bytes vs );
 
+    void append( String s );
 
+    void append( ByteBuffer vs );
+
+    void append( byte[] vs, int from, int to );
+
+    void append( Bytes vs, int from, int to );
+
+    void append( String s, int from, int to );
+
+    void append( ByteBuffer vs, int c );
+
+    void prepend( byte v );
+
+    void prepend( byte[] vs );
+
+    void prepend( Bytes vs );
+
+    void prepend( String s );
+
+    void prepend( ByteBuffer vs );
+
+    void prepend( byte[] vs, int from, int to );
+
+    void prepend( Bytes vs, int from, int to );
+
+    void prepend( String s, int from, int to );
+
+    void prepend( ByteBuffer vs, int c );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(byte v);
-    
+    void remove( byte v );
+
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
      * All other values with indices greater than or equal to index to have
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
+    void removeIndex( int index );
 
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

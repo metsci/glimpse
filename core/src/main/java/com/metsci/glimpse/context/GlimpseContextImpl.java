@@ -54,7 +54,7 @@ public class GlimpseContextImpl implements GlimpseContext
         this.glContext = canvas.getGLContext( );
         this.targetStack = new GlimpseTargetStackImpl( canvas );
         this.dpi = defaultDpiValue; //TODO fix this
-        this.scale = canvas.getSurfaceScale();
+        this.scale = canvas.getSurfaceScale( );
     }
 
     @Override
@@ -86,9 +86,9 @@ public class GlimpseContextImpl implements GlimpseContext
     {
         return String.format( "[stack: %s dpi: %d]", targetStack, dpi );
     }
-    
+
     @Override
-    public int[] getSurfaceScale()
+    public int[] getSurfaceScale( )
     {
         return scale;
     }

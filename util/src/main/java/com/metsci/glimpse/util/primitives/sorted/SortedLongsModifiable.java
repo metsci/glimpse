@@ -37,6 +37,6 @@ public interface SortedLongsModifiable extends SortedLongs, LongsModifiable
     /**
      * @return The index at which v was inserted
      */
-    int add(long v);
+    int add( long v );
 
 }

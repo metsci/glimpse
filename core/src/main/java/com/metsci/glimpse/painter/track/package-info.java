@@ -6,4 +6,3 @@
  * only certain time segments of a given track.
  */
 package com.metsci.glimpse.painter.track;
-

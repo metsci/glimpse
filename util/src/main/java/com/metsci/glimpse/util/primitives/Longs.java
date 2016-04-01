@@ -35,26 +35,25 @@ public interface Longs
     /**
      * Value at index i
      */
-    long v(int i);
+    long v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, long[] dest, int iDest, int c);
-
+    void copyTo( int i, long[] dest, int iDest, int c );
 
     // Convenience Methods
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    long first();
+    long first( );
 
-    long last();
+    long last( );
 
-    long[] copyOf(int i, int c);
+    long[] copyOf( int i, int c );
 
-    long[] copyOf();
+    long[] copyOf( );
 
 }

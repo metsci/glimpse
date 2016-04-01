@@ -128,14 +128,11 @@ public class GlimpseVerticallyScrollableLayout extends GlimpseLayout
         };
     }
 
-
-
     protected int minContentHeight;
     protected int verticalOffset;
 
     // We rely on copy-on-write iteration semantics, so don't just declare as List
     protected final CopyOnWriteArrayList<Runnable> listeners;
-
 
     public GlimpseVerticallyScrollableLayout( int minContentHeight )
     {

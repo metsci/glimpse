@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
 
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
@@ -141,7 +141,7 @@ public class MeasurementPainter extends GlimpseDataPainter2D
     public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
         if ( textRenderer == null ) return;
-        
+
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 

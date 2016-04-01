@@ -44,16 +44,16 @@ public class LinkedTaggedHeatMapExample
     public static void main( String[] args ) throws Exception
     {
         final TaggedHeatMapExample example = new TaggedHeatMapExample( );
-        
+
         final ColorAxisPlot2D layout1 = example.getLayout( ColorGradients.greenBone );
         final ColorAxisPlot2D layout2 = example.getLayout( ColorGradients.jet );
-        
+
         // link x and y axes of the two plots
         layout1.getAxis( ).setParent( layout2.getAxis( ) );
-        
+
         // link z (color) axes of the two plots
         layout1.getAxisZ( ).setParent( layout2.getAxisZ( ) );
-        
+
         Example.showWithSwing( new GlimpseLayoutProvider( )
         {
             @Override

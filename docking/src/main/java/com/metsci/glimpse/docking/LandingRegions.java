@@ -77,12 +77,11 @@ public class LandingRegions
 
         Rectangle firstTabBounds = fromTile.viewTabBounds( 0 );
         Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
-        int xTileOffset = firstTabBounds.x + 7*draggedTabBounds.width/16;
-        int yTileOffset = firstTabBounds.y + 5*draggedTabBounds.height/8;
+        int xTileOffset = firstTabBounds.x + 7 * draggedTabBounds.width / 16;
+        int yTileOffset = firstTabBounds.y + 5 * draggedTabBounds.height / 8;
 
         return new InNewWindow( dockingGroup, pOnScreen.x - xTileOffset, pOnScreen.y - yTileOffset, fromTile.getWidth( ), fromTile.getHeight( ), xInset, yInset );
     }
-
 
     public static LandingRegion findLandingRegion( MultiSplitPane docker, Tile fromTile, int fromViewNum, Point pOnScreen )
     {
@@ -133,10 +132,14 @@ public class LandingRegions
             {
                 switch ( closest.index )
                 {
-                    case 0: return new EdgeOfDockingPane( docker, LEFT );
-                    case 1: return new EdgeOfDockingPane( docker, RIGHT );
-                    case 2: return new EdgeOfDockingPane( docker, TOP );
-                    case 3: return new EdgeOfDockingPane( docker, BOTTOM );
+                    case 0:
+                        return new EdgeOfDockingPane( docker, LEFT );
+                    case 1:
+                        return new EdgeOfDockingPane( docker, RIGHT );
+                    case 2:
+                        return new EdgeOfDockingPane( docker, TOP );
+                    case 3:
+                        return new EdgeOfDockingPane( docker, BOTTOM );
                 }
             }
         }
@@ -155,10 +158,14 @@ public class LandingRegions
             {
                 switch ( closest.index )
                 {
-                    case 0: return new BesideExistingTile( docker, toLeaf, LEFT );
-                    case 1: return new BesideExistingTile( docker, toLeaf, RIGHT );
-                    case 2: return new BesideExistingTile( docker, toLeaf, TOP );
-                    case 3: return new BesideExistingTile( docker, toLeaf, BOTTOM );
+                    case 0:
+                        return new BesideExistingTile( docker, toLeaf, LEFT );
+                    case 1:
+                        return new BesideExistingTile( docker, toLeaf, RIGHT );
+                    case 2:
+                        return new BesideExistingTile( docker, toLeaf, TOP );
+                    case 3:
+                        return new BesideExistingTile( docker, toLeaf, BOTTOM );
                 }
             }
         }
@@ -174,13 +181,12 @@ public class LandingRegions
         return null;
     }
 
-
     public static interface LandingRegion
     {
         Rectangle getIndicator( );
+
         void placeView( View view, TileFactory tileFactory );
     }
-
 
     public static class InEmptyDockingPane implements LandingRegion
     {
@@ -208,7 +214,6 @@ public class LandingRegions
         }
     }
 
-
     public static class EdgeOfDockingPane implements LandingRegion
     {
         public final MultiSplitPane docker;
@@ -233,12 +238,17 @@ public class LandingRegions
 
             switch ( edgeOfPane )
             {
-                case LEFT:   return new Rectangle( x,        y,         64,  h );
-                case RIGHT:  return new Rectangle( x+w-1-64, y,         64,  h );
-                case TOP:    return new Rectangle( x,        y,         w,  64 );
-                case BOTTOM: return new Rectangle( x,        y+h-1-64,  w,  64 );
+                case LEFT:
+                    return new Rectangle( x, y, 64, h );
+                case RIGHT:
+                    return new Rectangle( x + w - 1 - 64, y, 64, h );
+                case TOP:
+                    return new Rectangle( x, y, w, 64 );
+                case BOTTOM:
+                    return new Rectangle( x, y + h - 1 - 64, w, 64 );
 
-                default: return null;
+                default:
+                    return null;
             }
         }
 
@@ -250,7 +260,6 @@ public class LandingRegions
             docker.addEdgeLeaf( tile, edgeOfPane );
         }
     }
-
 
     public static class BesideExistingTile implements LandingRegion
     {
@@ -278,12 +287,17 @@ public class LandingRegions
 
             switch ( sideOfNeighbor )
             {
-                case LEFT:   return new Rectangle( x,       y,       w/2, h );
-                case RIGHT:  return new Rectangle( x+w-w/2, y,       w/2, h );
-                case TOP:    return new Rectangle( x,       y,       w,   h/2 );
-                case BOTTOM: return new Rectangle( x,       y+h-h/2, w,   h/2 );
+                case LEFT:
+                    return new Rectangle( x, y, w / 2, h );
+                case RIGHT:
+                    return new Rectangle( x + w - w / 2, y, w / 2, h );
+                case TOP:
+                    return new Rectangle( x, y, w, h / 2 );
+                case BOTTOM:
+                    return new Rectangle( x, y + h - h / 2, w, h / 2 );
 
-                default: return null;
+                default:
+                    return null;
             }
         }
 
@@ -295,7 +309,6 @@ public class LandingRegions
             docker.addNeighborLeaf( tile, neighbor, sideOfNeighbor );
         }
     }
-
 
     public static class InExistingTile implements LandingRegion
     {
@@ -343,7 +356,6 @@ public class LandingRegions
         }
     }
 
-
     public static class LastInExistingTile implements LandingRegion
     {
         public final Tile tile;
@@ -368,7 +380,6 @@ public class LandingRegions
             tile.selectView( view );
         }
     }
-
 
     public static class InNewWindow implements LandingRegion
     {

@@ -35,7 +35,6 @@ import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 
 /**
@@ -45,25 +44,30 @@ import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
  * 
  * @author oren
  */
-public class RGBATextureProjected2D extends TextureProjected2D {
+public class RGBATextureProjected2D extends TextureProjected2D
+{
 
     public static final int BYTES_PER_PIXEL = 4;
-    
-    public RGBATextureProjected2D(BufferedImage img) {
-        this(img.getWidth(), img.getHeight(), false);
-        setData(img);
+
+    public RGBATextureProjected2D( BufferedImage img )
+    {
+        this( img.getWidth( ), img.getHeight( ), false );
+        setData( img );
     }
-    
-    public RGBATextureProjected2D(int dataSizeX, int dataSizeY) {
-        this(dataSizeX, dataSizeY, false);
+
+    public RGBATextureProjected2D( int dataSizeX, int dataSizeY )
+    {
+        this( dataSizeX, dataSizeY, false );
     }
-    
-    public RGBATextureProjected2D(int dataSizeX, int dataSizeY, boolean useVertexZCoord) {
-        super(dataSizeX, dataSizeY, useVertexZCoord);
+
+    public RGBATextureProjected2D( int dataSizeX, int dataSizeY, boolean useVertexZCoord )
+    {
+        super( dataSizeX, dataSizeY, useVertexZCoord );
     }
 
     @Override
-    protected void prepare_setData(GL2 gl) {
+    protected void prepare_setData( GL2 gl )
+    {
 
         for ( int i = 0; i < numTextures; i++ )
         {
@@ -92,20 +96,22 @@ public class RGBATextureProjected2D extends TextureProjected2D {
     }
 
     @Override
-    protected int getRequiredCapacityBytes() {
+    protected int getRequiredCapacityBytes( )
+    {
         return BYTES_PER_PIXEL * dataSizeX * dataSizeY;
     }
 
     @Override
-    protected float getData(int index) {
-        return data.asIntBuffer().get(index);
+    protected float getData( int index )
+    {
+        return data.asIntBuffer( ).get( index );
     }
 
     public void setData( InputStream in ) throws IOException
     {
         setData( ImageIO.read( in ) );
     }
-    
+
     public void setData( InputStream in, final int alpha ) throws IOException
     {
         setData0( ImageIO.read( in ), true, alpha );
@@ -113,7 +119,7 @@ public class RGBATextureProjected2D extends TextureProjected2D {
 
     public void setData( final BufferedImage image )
     {
-        setData0(image, false, -1);
+        setData0( image, false, -1 );
     }
 
     public void setData( final BufferedImage image, final int alpha )
@@ -121,34 +127,40 @@ public class RGBATextureProjected2D extends TextureProjected2D {
         setData0( image, true, alpha );
     }
 
-    protected void setData0( final BufferedImage image, final boolean overrideAlpha, final int alpha)
+    protected void setData0( final BufferedImage image, final boolean overrideAlpha, final int alpha )
     {
         resize( image.getWidth( ), image.getHeight( ) );
-        
-        lock.lock();
-        try {
-            data.rewind();
+
+        lock.lock( );
+        try
+        {
+            data.rewind( );
             final byte[] rgba = new byte[4];
-            rgba[3] = (byte) (alpha & 0xff);
+            rgba[3] = ( byte ) ( alpha & 0xff );
             //Note: x and y here are in java image space, not texture space.
-            for ( int y = dataSizeY-1; y >= 0; y-- ) {
-                for ( int x = 0; x < dataSizeX; x++ ) {
-                    int argb = image.getRGB(x, y);
-                    rgba[0] = (byte) ((argb & 0x00ff0000) >> 16);
-                    rgba[1] = (byte) ((argb & 0x0000ff00) >> 8);
-                    rgba[2] = (byte) ((argb & 0x000000ff));
-                    if (!overrideAlpha) {
-                        rgba[3] = (byte) ((argb & 0xff000000) >> 24);
+            for ( int y = dataSizeY - 1; y >= 0; y-- )
+            {
+                for ( int x = 0; x < dataSizeX; x++ )
+                {
+                    int argb = image.getRGB( x, y );
+                    rgba[0] = ( byte ) ( ( argb & 0x00ff0000 ) >> 16 );
+                    rgba[1] = ( byte ) ( ( argb & 0x0000ff00 ) >> 8 );
+                    rgba[2] = ( byte ) ( ( argb & 0x000000ff ) );
+                    if ( !overrideAlpha )
+                    {
+                        rgba[3] = ( byte ) ( ( argb & 0xff000000 ) >> 24 );
                     }
-                    data.put(rgba);
+                    data.put( rgba );
                 }
             }
-            makeDirty();
-        } finally {
-            lock.unlock();
+            makeDirty( );
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
-    
+
     /**
      * Values inserted into the buffer are assumed to be ordered RGBA.
      * @param mutator
@@ -167,5 +179,5 @@ public class RGBATextureProjected2D extends TextureProjected2D {
             lock.unlock( );
         }
     }
-    
+
 }

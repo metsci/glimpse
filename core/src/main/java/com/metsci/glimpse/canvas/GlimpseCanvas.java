@@ -128,7 +128,7 @@ public interface GlimpseCanvas extends GlimpseTarget
      * GlimpseLayouts attached to this GlimpseCanvas should generally not be disposed when this callback occurs.
      */
     public void addDisposeListener( GLRunnable runnable );
-    
+
     /**
      * Returns the scale factors needed to convert the _native_ pixel coordinates to
      * the _window_ pixel coordinates. This only really matters on displays like like
@@ -136,5 +136,5 @@ public interface GlimpseCanvas extends GlimpseTarget
      * 
      * @return the scale factors as {scaleX, scaleY}
      */
-    public int[] getSurfaceScale();
+    public int[] getSurfaceScale( );
 }

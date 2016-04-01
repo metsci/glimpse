@@ -41,10 +41,10 @@ import com.google.common.collect.Maps;
 public abstract class NamedConstraint implements Constraint
 {
     protected String name;
-    
+
     protected Map<String, Tag> previousTags;
     protected TaggedAxis1D currentAxis;
-    
+
     public NamedConstraint( String name )
     {
         this.name = name;
@@ -60,19 +60,19 @@ public abstract class NamedConstraint implements Constraint
     public void applyConstraint( TaggedAxis1D axis )
     {
         currentAxis = axis;
-        
+
         if ( previousTags.isEmpty( ) ) saveTags( axis );
 
         applyConstraint( axis, previousTags );
 
         saveTags( axis );
     }
-    
+
     protected void resetTags( )
     {
         resetTags( currentAxis );
     }
-    
+
     /**
      * Resets the tags for the provided axis to the saved values
      */

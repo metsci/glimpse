@@ -28,7 +28,6 @@ package com.metsci.glimpse.util.units.time.format;
 
 import java.math.BigDecimal;
 
-
 public interface TimeStampFormat extends Cloneable
 {
     /**
@@ -57,18 +56,17 @@ public interface TimeStampFormat extends Cloneable
      *   <li>2008-06-11T13:40:12.5432931Z
      * </ul>
      */
-    public static final TimeStampFormat iso8601 = new TimeStampFormatStandard("%y-%M-%dT%H:%m:%SZ", "UTC");
-
+    public static final TimeStampFormat iso8601 = new TimeStampFormatStandard( "%y-%M-%dT%H:%m:%SZ", "UTC" );
 
     /**
      * @return seconds since the epoch
      * @throws TimeStampParseException if the string cannot be parsed according to this format
      */
-    BigDecimal parse(String string) throws TimeStampParseException;
+    BigDecimal parse( String string ) throws TimeStampParseException;
 
     /**
      * @return a date-time string, formatted according to this format
      */
-    String format(BigDecimal posixSeconds);
+    String format( BigDecimal posixSeconds );
 
 }

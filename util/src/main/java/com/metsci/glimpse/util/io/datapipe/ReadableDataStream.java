@@ -29,7 +29,6 @@ package com.metsci.glimpse.util.io.datapipe;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-
 /**
  * An implementation of {@link ReadableDataPipe} that uses standard io (not nio).
  *
@@ -39,66 +38,66 @@ public class ReadableDataStream implements ReadableDataPipe
 {
     private final DataInputStream _stream;
 
-    public ReadableDataStream(DataInputStream stream)
+    public ReadableDataStream( DataInputStream stream )
     {
         _stream = stream;
     }
 
-    public boolean readBoolean() throws IOException
+    public boolean readBoolean( ) throws IOException
     {
-        return _stream.readBoolean();
+        return _stream.readBoolean( );
     }
 
-    public byte readByte() throws IOException
+    public byte readByte( ) throws IOException
     {
-        return _stream.readByte();
+        return _stream.readByte( );
     }
 
-    public double readDouble() throws IOException
+    public double readDouble( ) throws IOException
     {
-        return _stream.readDouble();
+        return _stream.readDouble( );
     }
 
-    public float readFloat() throws IOException
+    public float readFloat( ) throws IOException
     {
-        return _stream.readFloat();
+        return _stream.readFloat( );
     }
 
-    public int readInt() throws IOException
+    public int readInt( ) throws IOException
     {
-        return _stream.readInt();
+        return _stream.readInt( );
     }
 
-    public long readLong() throws IOException
+    public long readLong( ) throws IOException
     {
-        return _stream.readLong();
+        return _stream.readLong( );
     }
 
-    public short readShort() throws IOException
+    public short readShort( ) throws IOException
     {
-        return _stream.readShort();
+        return _stream.readShort( );
     }
 
-    public String readString() throws IOException
+    public String readString( ) throws IOException
     {
         // Note: do not use DataInputStream.readUTF for compatibility with channel implementation
-        byte[] bytes = new byte[_stream.readInt()];
-        _stream.readFully(bytes);
+        byte[] bytes = new byte[_stream.readInt( )];
+        _stream.readFully( bytes );
 
-        return new String(bytes, "UTF-8");
+        return new String( bytes, "UTF-8" );
     }
 
-    public byte[] readByteArray(byte[] bytes) throws IOException
+    public byte[] readByteArray( byte[] bytes ) throws IOException
     {
-        _stream.readFully(bytes);
+        _stream.readFully( bytes );
         return bytes;
     }
 
-    public boolean[] readBooleanArray(boolean[] values) throws IOException
+    public boolean[] readBooleanArray( boolean[] values ) throws IOException
     {
-        byte[] values2 = readByteArray(new byte[values.length]);
+        byte[] values2 = readByteArray( new byte[values.length] );
 
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
             values[i] = values2[i] != 0;
         }
@@ -106,62 +105,62 @@ public class ReadableDataStream implements ReadableDataPipe
         return values;
     }
 
-    public short[] readShortArray(short[] values) throws IOException
+    public short[] readShortArray( short[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            values[i] = _stream.readShort();
+            values[i] = _stream.readShort( );
         }
 
         return values;
     }
 
-    public int[] readIntArray(int[] values) throws IOException
+    public int[] readIntArray( int[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            values[i] = _stream.readInt();
+            values[i] = _stream.readInt( );
         }
 
         return values;
     }
 
-    public long[] readLongArray(long[] values) throws IOException
+    public long[] readLongArray( long[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            values[i] = _stream.readLong();
+            values[i] = _stream.readLong( );
         }
 
         return values;
     }
 
-    public float[] readFloatArray(float[] values) throws IOException
+    public float[] readFloatArray( float[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            values[i] = _stream.readFloat();
+            values[i] = _stream.readFloat( );
         }
 
         return values;
     }
 
-    public double[] readDoubleArray(double[] values) throws IOException
+    public double[] readDoubleArray( double[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            values[i] = _stream.readDouble();
+            values[i] = _stream.readDouble( );
         }
 
         return values;
     }
 
-    public void close() throws IOException
+    public void close( ) throws IOException
     {
-        _stream.close();
+        _stream.close( );
     }
 
-    public DataInputStream getInputStream()
+    public DataInputStream getInputStream( )
     {
         return _stream;
     }

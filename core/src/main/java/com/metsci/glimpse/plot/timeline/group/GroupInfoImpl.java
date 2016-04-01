@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -33,11 +38,6 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 {
@@ -64,7 +64,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 
         this.children = new LinkedHashSet<PlotInfo>( );
         this.children.addAll( subplots );
-        
+
         for ( PlotInfo info : subplots )
         {
             info.setParent( this );
@@ -101,10 +101,10 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
                 if ( click && collapsible )
                 {
                     int x = event.getScreenPixelsX( );
-    
+
                     // collapse/expand via clicks on arrow button only
                     //if ( x < labelPainter.getArrowSize( ) + labelPainter.getArrowSpacing( ) * 2 )
-    
+
                     // collapse/expand via clicks on button or label
                     if ( x < plot.getLabelSize( ) )
                     {
@@ -112,7 +112,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
                         event.setHandled( true );
                         plot.validate( );
                     }
-                    
+
                     click = false;
                 }
             }
@@ -164,7 +164,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     {
         return this.labelPainter.getDividerColor( );
     }
-    
+
     @Override
     public boolean isExpanded( )
     {

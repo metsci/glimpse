@@ -26,54 +26,53 @@
  */
 package com.metsci.glimpse.util.primitives;
 
-
 /**
  * @author hogye
  */
 public interface ObjectsModifiable extends Objects
 {
 
-    void set(int i, Object v);
-    void set(int i, Object[] vs);
-    void set(int i, Object[] vs, int from, int to);
-    
+    void set( int i, Object v );
 
+    void set( int i, Object[] vs );
 
-    void insert(int i, Object v);
+    void set( int i, Object[] vs, int from, int to );
 
-    void insert(int i, Object[] vs);
-    void insert(int i, Objects vs);
+    void insert( int i, Object v );
 
-    void insert(int i, Object[] vs, int from, int to);
-    void insert(int i, Objects vs, int from, int to);
+    void insert( int i, Object[] vs );
 
+    void insert( int i, Objects vs );
 
+    void insert( int i, Object[] vs, int from, int to );
 
-    void append(Object v);
+    void insert( int i, Objects vs, int from, int to );
 
-    void append(Object[] vs);
-    void append(Objects vs);
+    void append( Object v );
 
-    void append(Object[] vs, int from, int to);
-    void append(Objects vs, int from, int to);
+    void append( Object[] vs );
 
+    void append( Objects vs );
 
+    void append( Object[] vs, int from, int to );
 
-    void prepend(Object v);
+    void append( Objects vs, int from, int to );
 
-    void prepend(Object[] vs);
-    void prepend(Objects vs);
+    void prepend( Object v );
 
-    void prepend(Object[] vs, int from, int to);
-    void prepend(Objects vs, int from, int to);
+    void prepend( Object[] vs );
 
+    void prepend( Objects vs );
 
+    void prepend( Object[] vs, int from, int to );
+
+    void prepend( Objects vs, int from, int to );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(Object v);
+    void remove( Object v );
 
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
@@ -81,20 +80,19 @@ public interface ObjectsModifiable extends Objects
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
+    void removeIndex( int index );
 
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

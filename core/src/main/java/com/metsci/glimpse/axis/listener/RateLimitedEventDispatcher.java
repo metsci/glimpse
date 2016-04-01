@@ -26,12 +26,11 @@
  */
 package com.metsci.glimpse.axis.listener;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
-
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-
 
 /**
  * A helper method used by RateLimitedAxisListener1D and RateLimitedAxisListener2D
@@ -113,7 +112,7 @@ public abstract class RateLimitedEventDispatcher<D>
                     long time;
 
                     if ( shutdown ) return;
-                    
+
                     // wait until enough time has passed between eventOccurred
                     while ( ( time = millisToNextUpdate( ) ) > 0 )
                     {
@@ -125,7 +124,7 @@ public abstract class RateLimitedEventDispatcher<D>
                         {
                         }
                     }
-                    
+
                     if ( shutdown ) return;
 
                     eventDispatch0( );
@@ -139,13 +138,13 @@ public abstract class RateLimitedEventDispatcher<D>
         // XXX: FIX, Don't start a thread in the constructor b/c subclasses possibly won't function properly
         this.thread.start( );
     }
-    
+
     public void dispose( )
     {
         lock.lock( );
         try
         {
-        	shutdown = true;
+            shutdown = true;
             updated = true;
             cond.signalAll( );
         }

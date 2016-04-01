@@ -35,5 +35,6 @@ package com.metsci.glimpse.axis.tagged;
 public interface Constraint
 {
     public String getName( );
+
     public void applyConstraint( TaggedAxis1D axis );
 }

@@ -237,7 +237,7 @@ public class MapBorderPainter extends GlimpsePainter2D
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );

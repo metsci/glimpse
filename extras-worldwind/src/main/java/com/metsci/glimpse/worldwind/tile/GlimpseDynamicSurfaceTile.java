@@ -26,16 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.PreRenderable;
-import gov.nasa.worldwind.render.Renderable;
-import gov.nasa.worldwind.util.OGLStackHandler;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -58,6 +49,16 @@ import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
+
+import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.PreRenderable;
+import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 /**
  * Displays the content of a GlimpseLayout onto the surface of the Worldwind globe

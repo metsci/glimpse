@@ -40,12 +40,12 @@ public class LandBox
 
     public final boolean isSwCornerLand;
 
-    public LandBox(LatLonGeo swCorner, LatLonGeo neCorner, boolean isSwCornerLand)
+    public LandBox( LatLonGeo swCorner, LatLonGeo neCorner, boolean isSwCornerLand )
     {
-        this(neCorner.getLatDeg(), swCorner.getLatDeg(), neCorner.getLonDeg(), swCorner.getLonDeg(), isSwCornerLand);
+        this( neCorner.getLatDeg( ), swCorner.getLatDeg( ), neCorner.getLonDeg( ), swCorner.getLonDeg( ), isSwCornerLand );
     }
 
-    public LandBox(double northLat, double southLat, double eastLon, double westLon, boolean isSwCornerLand)
+    public LandBox( double northLat, double southLat, double eastLon, double westLon, boolean isSwCornerLand )
     {
         this.northLat = northLat;
         this.southLat = southLat;

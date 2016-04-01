@@ -31,13 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  * <p>Java class for DataType.
@@ -58,39 +56,34 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  *
  */
-@XmlType(name = "DataType")
+@XmlType( name = "DataType" )
 @XmlEnum
-public enum DataType {
+public enum DataType
+{
 
-    @XmlEnumValue("string")
-    STRING("string"),
-    @XmlEnumValue("float")
-    FLOAT("float"),
-    @XmlEnumValue("integer")
-    INTEGER("integer"),
-    @XmlEnumValue("boolean")
-    BOOLEAN("boolean"),
-    @XmlEnumValue("date")
-    DATE("date"),
-    @XmlEnumValue("concept")
-    CONCEPT("concept");
+    @XmlEnumValue( "string" ) STRING("string"), @XmlEnumValue( "float" ) FLOAT("float"), @XmlEnumValue( "integer" ) INTEGER("integer"), @XmlEnumValue( "boolean" ) BOOLEAN("boolean"), @XmlEnumValue( "date" ) DATE("date"), @XmlEnumValue( "concept" ) CONCEPT("concept");
     private final String value;
 
-    DataType(String v) {
+    DataType( String v )
+    {
         value = v;
     }
 
-    public String value() {
+    public String value( )
+    {
         return value;
     }
 
-    public static DataType fromValue(String v) {
-        for (DataType c: DataType.values()) {
-            if (c.value.equals(v)) {
+    public static DataType fromValue( String v )
+    {
+        for ( DataType c : DataType.values( ) )
+        {
+            if ( c.value.equals( v ) )
+            {
                 return c;
             }
         }
-        throw new IllegalArgumentException(v);
+        throw new IllegalArgumentException( v );
     }
 
 }

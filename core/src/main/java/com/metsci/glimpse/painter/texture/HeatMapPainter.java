@@ -26,9 +26,10 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.gl.shader.Pipeline;
@@ -37,8 +38,6 @@ import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.shader.SampledColorScaleShader;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
-
-import java.util.logging.Logger;
 
 /**
  * A simplified facade to {@link ShadedTexturePainter} which applies
@@ -80,20 +79,20 @@ public class HeatMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            ((SampledColorScaleShader)this.fragShader).setDiscardNaN( discard );
+            ( ( SampledColorScaleShader ) this.fragShader ).setDiscardNaN( discard );
         }
         finally
         {
             lock.unlock( );
         }
     }
-    
+
     public void setAlpha( float alpha )
     {
         lock.lock( );
         try
         {
-            ((SampledColorScaleShader)this.fragShader).setAlpha( alpha );
+            ( ( SampledColorScaleShader ) this.fragShader ).setAlpha( alpha );
         }
         finally
         {

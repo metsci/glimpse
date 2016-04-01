@@ -220,7 +220,7 @@ public class TaggedAxis1D extends Axis1D
             this.applyTagConstraints( );
         }
     }
-    
+
     @Override
     public String toString( )
     {

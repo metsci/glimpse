@@ -165,7 +165,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
                 }
             }
         } );
-        
+
         plot.addPainter( new NumericXYAxisPainter( ) );
 
         return plot;

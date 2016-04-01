@@ -62,28 +62,28 @@ import com.metsci.glimpse.util.math.fast.PolynomialApprox;
  */
 public class PolynomialTangentPlane extends TangentPlane
 {
-    public PolynomialTangentPlane(LatLonGeo latLon)
+    public PolynomialTangentPlane( LatLonGeo latLon )
     {
-        super(latLon);
+        super( latLon );
     }
 
-    public PolynomialTangentPlane(LatLonGeo latLon, double tangentPointOnPlaneX, double tangentPointOnPlaneY)
+    public PolynomialTangentPlane( LatLonGeo latLon, double tangentPointOnPlaneX, double tangentPointOnPlaneY )
     {
-        super(latLon, tangentPointOnPlaneX, tangentPointOnPlaneY);
+        super( latLon, tangentPointOnPlaneX, tangentPointOnPlaneY );
     }
 
     @Override
-    protected double calcAtan2(double y, double x)
+    protected double calcAtan2( double y, double x )
     {
-        double polyValue = PolynomialApprox.atan2(y, x);
+        double polyValue = PolynomialApprox.atan2( y, x );
 
-//        double slowValue = Math.atan2(y, x);
-//        double deltaPoly = polyValue - slowValue;
+        //        double slowValue = Math.atan2(y, x);
+        //        double deltaPoly = polyValue - slowValue;
 
-//        if (Math.abs(deltaPoly) > 1.0e-6)
-//        {
-//            logWarning(logger, "deltaPoly %4g at y %.4f, x %.4f, slow %.8f", deltaPoly, y, x, slowValue);
-//        }
+        //        if (Math.abs(deltaPoly) > 1.0e-6)
+        //        {
+        //            logWarning(logger, "deltaPoly %4g at y %.4f, x %.4f, slow %.8f", deltaPoly, y, x, slowValue);
+        //        }
 
         return polyValue;
     }

@@ -26,13 +26,16 @@
  */
 package com.metsci.glimpse.util.geo.projection;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.atan;
+import static java.lang.Math.cos;
+import static java.lang.Math.exp;
+import static java.lang.Math.log;
+import static java.lang.Math.sin;
+
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.util.geo.projection.KinematicVector2d;
 import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.vector.Vector2d;
-
-import static java.lang.Math.*;
 
 /**
  * Mercator cylindrical map projection.

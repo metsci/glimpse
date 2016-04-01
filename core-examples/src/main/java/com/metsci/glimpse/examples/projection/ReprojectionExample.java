@@ -66,7 +66,8 @@ public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        GLProfile glProfile = GLUtils.getDefaultGLProfile( );;
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );
+
         GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
         GLContext glContext = glDrawable.getContext( );
 

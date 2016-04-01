@@ -42,49 +42,61 @@ import com.metsci.glimpse.axis.Axis1D;
  *
  * @author borkholder
  */
-public class HdrAxisLabelHandler extends GridAxisLabelHandler {
+public class HdrAxisLabelHandler extends GridAxisLabelHandler
+{
     protected boolean zoomedIn;
     protected int orderAxis;
     protected int orderDelta;
     protected double baseValue;
 
     @Override
-    public String getAxisLabel(Axis1D axis) {
-        double min = axis.getMin();
-        double max = axis.getMax();
+    public String getAxisLabel( Axis1D axis )
+    {
+        double min = axis.getMin( );
+        double max = axis.getMax( );
 
-        orderAxis = getOrderTick(abs(min));
-        orderDelta = getOrderTick(abs(max - min));
+        orderAxis = getOrderTick( abs( min ) );
+        orderDelta = getOrderTick( abs( max - min ) );
 
-        if (signum(min) != signum(max)) {
-            orderAxis = getOrderTick(max(abs(min), abs(max)));
+        if ( signum( min ) != signum( max ) )
+        {
+            orderAxis = getOrderTick( max( abs( min ), abs( max ) ) );
         }
 
-        zoomedIn = orderDelta <= orderAxis - 3 && signum(min) == signum(max);
+        zoomedIn = orderDelta <= orderAxis - 3 && signum( min ) == signum( max );
 
-        orderAxis = (int) floor(orderAxis / 3.0) * 3;
-        orderDelta = (int) ceil(orderDelta / 3.0) * 3;
+        orderAxis = ( int ) floor( orderAxis / 3.0 ) * 3;
+        orderDelta = ( int ) ceil( orderDelta / 3.0 ) * 3;
 
         String s = "";
-        if (zoomedIn) {
-            double e = pow(10, orderDelta + 1);
-            baseValue = floor(min / e) * e;
-            e = pow(10, orderDelta + 1);
-            baseValue = floor(min / e) * e;
+        if ( zoomedIn )
+        {
+            double e = pow( 10, orderDelta + 1 );
+            baseValue = floor( min / e ) * e;
+            e = pow( 10, orderDelta + 1 );
+            baseValue = floor( min / e ) * e;
 
-            if (orderDelta == 0) {
-                s = format("%,.0f + x", baseValue);
-            } else {
-                int precision = orderDelta < 0 ? -orderDelta : 1;
-                s = format("%,." + precision + "f + x e%d", baseValue, orderDelta);
+            if ( orderDelta == 0 )
+            {
+                s = format( "%,.0f + x", baseValue );
             }
-        } else if (orderAxis == 0) {
+            else
+            {
+                int precision = orderDelta < 0 ? -orderDelta : 1;
+                s = format( "%,." + precision + "f + x e%d", baseValue, orderDelta );
+            }
+        }
+        else if ( orderAxis == 0 )
+        {
             s = "";
-        } else {
-            s = format("x e%d", orderAxis);
+        }
+        else
+        {
+            s = format( "x e%d", orderAxis );
         }
 
-        if (axisUnits.length() != 0) {
+        if ( axisUnits.length( ) != 0 )
+        {
             s = s + " " + axisUnits;
         }
 
@@ -92,23 +104,31 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler {
     }
 
     @Override
-    public String[] getTickLabels(Axis1D axis, double[] tickPositions) {
+    public String[] getTickLabels( Axis1D axis, double[] tickPositions )
+    {
         String[] tickLabels = new String[tickPositions.length];
-        for (int i = 0; i < tickPositions.length; i++) {
+        for ( int i = 0; i < tickPositions.length; i++ )
+        {
             double value = tickPositions[i];
 
-            if (zoomedIn) {
+            if ( zoomedIn )
+            {
                 value -= baseValue;
-                value /= pow(10, orderDelta);
-            } else {
-                value /= pow(10, orderAxis);
+                value /= pow( 10, orderDelta );
+            }
+            else
+            {
+                value /= pow( 10, orderAxis );
             }
 
-            String s = format("%,.3f", value);
-            if (value < 0) {
-                s = s.substring(0, 6);
-            } else {
-                s = s.substring(0, 5);
+            String s = format( "%,.3f", value );
+            if ( value < 0 )
+            {
+                s = s.substring( 0, 6 );
+            }
+            else
+            {
+                s = s.substring( 0, 5 );
             }
 
             tickLabels[i] = s;

@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-
 /**
  * An implementation of {@link WritableDataPipe} that uses nio.
  *
@@ -40,24 +39,24 @@ import java.nio.channels.WritableByteChannel;
  */
 public class WritableDataChannel extends AbstractChannel implements WritableDataPipe
 {
-    private final DataOutputStream      _stream;
-    private long                        _totalBytesWritten;
+    private final DataOutputStream _stream;
+    private long _totalBytesWritten;
 
     protected final WritableByteChannel _channel;
 
-    public WritableDataChannel(WritableByteChannel channel) throws IOException
+    public WritableDataChannel( WritableByteChannel channel ) throws IOException
     {
-        super(channel);
+        super( channel );
 
         _channel = channel;
 
-        _stream = new DataOutputStream(new BufferedOutputStream(Channels.newOutputStream(channel)));
+        _stream = new DataOutputStream( new BufferedOutputStream( Channels.newOutputStream( channel ) ) );
     }
 
     /**
      * @return the total number of bytes written since this channel was created.
      */
-    public long getTotalBytesWritten()
+    public long getTotalBytesWritten( )
     {
         return _totalBytesWritten;
     }
@@ -65,195 +64,208 @@ public class WritableDataChannel extends AbstractChannel implements WritableData
     /**
      * @return the number of bytes written to the channel.
      */
-    public int flushBuffer() throws IOException
+    public int flushBuffer( ) throws IOException
     {
-        _byteBuffer.flip();
+        _byteBuffer.flip( );
         int nBytesWritten = 0;
 
-        while (_byteBuffer.hasRemaining()) {
-            nBytesWritten += _channel.write(_byteBuffer);
+        while ( _byteBuffer.hasRemaining( ) )
+        {
+            nBytesWritten += _channel.write( _byteBuffer );
         }
 
         _totalBytesWritten += nBytesWritten;
-        _byteBuffer.clear();
+        _byteBuffer.clear( );
 
         return nBytesWritten;
     }
 
-    public void writeBoolean(boolean value) throws IOException
+    public void writeBoolean( boolean value ) throws IOException
     {
-        writeByte(value ? TRUE : FALSE);
+        writeByte( value ? TRUE : FALSE );
     }
 
-    public void writeByte(byte value) throws IOException
+    public void writeByte( byte value ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        if (_byteBuffer.remaining() < 1) {
-            flushBuffer();
+        if ( _byteBuffer.remaining( ) < 1 )
+        {
+            flushBuffer( );
         }
 
-        _byteBuffer.put(value);
+        _byteBuffer.put( value );
     }
 
-    public void writeShort(short value) throws IOException
+    public void writeShort( short value ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        if (_byteBuffer.remaining() < 2) {
-            flushBuffer();
+        if ( _byteBuffer.remaining( ) < 2 )
+        {
+            flushBuffer( );
         }
 
-        _byteBuffer.putShort(value);
+        _byteBuffer.putShort( value );
     }
 
-    public void writeInt(int value) throws IOException
+    public void writeInt( int value ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        if (_byteBuffer.remaining() < 4) {
-            flushBuffer();
+        if ( _byteBuffer.remaining( ) < 4 )
+        {
+            flushBuffer( );
         }
 
-        _byteBuffer.putInt(value);
+        _byteBuffer.putInt( value );
     }
 
-    public void writeLong(long value) throws IOException
+    public void writeLong( long value ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        if (_byteBuffer.remaining() < 8) {
-            flushBuffer();
+        if ( _byteBuffer.remaining( ) < 8 )
+        {
+            flushBuffer( );
         }
 
-        _byteBuffer.putLong(value);
+        _byteBuffer.putLong( value );
     }
 
-    public void writeFloat(float value) throws IOException
+    public void writeFloat( float value ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        if (_byteBuffer.remaining() < 4) {
-            flushBuffer();
+        if ( _byteBuffer.remaining( ) < 4 )
+        {
+            flushBuffer( );
         }
 
-        _byteBuffer.putFloat(value);
+        _byteBuffer.putFloat( value );
     }
 
-    public void writeDouble(double value) throws IOException
+    public void writeDouble( double value ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        if (_byteBuffer.remaining() < 8) {
-            flushBuffer();
+        if ( _byteBuffer.remaining( ) < 8 )
+        {
+            flushBuffer( );
         }
 
-        _byteBuffer.putDouble(value);
+        _byteBuffer.putDouble( value );
     }
 
-    public void writeBooleanArray(boolean[] values) throws IOException
+    public void writeBooleanArray( boolean[] values ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
         byte[] values2 = new byte[values.length];
 
-        for (int i = 0, ni = values2.length; i < ni; i++) {
-            values2[i] = (values[i] ? TRUE : FALSE);
+        for ( int i = 0, ni = values2.length; i < ni; i++ )
+        {
+            values2[i] = ( values[i] ? TRUE : FALSE );
         }
 
-        writeByteArray(values2);
+        writeByteArray( values2 );
     }
 
-    public void writeByteArray(byte[] values) throws IOException
+    public void writeByteArray( byte[] values ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        for (int i = 0, ni = values.length; i < ni; ) {
-            if (!_byteBuffer.hasRemaining()) {
-                flushBuffer();
+        for ( int i = 0, ni = values.length; i < ni; )
+        {
+            if ( !_byteBuffer.hasRemaining( ) )
+            {
+                flushBuffer( );
             }
 
-            int length = Math.min(ni - i, _byteBuffer.remaining());
-            _byteBuffer.put(values, i, length);
+            int length = Math.min( ni - i, _byteBuffer.remaining( ) );
+            _byteBuffer.put( values, i, length );
 
             i += length;
         }
     }
 
-    public void writeShortArray(short[] values) throws IOException
+    public void writeShortArray( short[] values ) throws IOException
     {
-        writeArray(values, values.length, _shortBuffer);
+        writeArray( values, values.length, _shortBuffer );
     }
 
-    public void writeIntArray(int[] values) throws IOException
+    public void writeIntArray( int[] values ) throws IOException
     {
-        writeArray(values, values.length, _intBuffer);
+        writeArray( values, values.length, _intBuffer );
     }
 
-    public void writeLongArray(long[] values) throws IOException
+    public void writeLongArray( long[] values ) throws IOException
     {
-        writeArray(values, values.length, _longBuffer);
+        writeArray( values, values.length, _longBuffer );
     }
 
-    public void writeFloatArray(float[] values) throws IOException
+    public void writeFloatArray( float[] values ) throws IOException
     {
-        writeArray(values, values.length, _floatBuffer);
+        writeArray( values, values.length, _floatBuffer );
     }
 
-    public void writeDoubleArray(double[] values) throws IOException
+    public void writeDoubleArray( double[] values ) throws IOException
     {
-        writeArray(values, values.length, _doubleBuffer);
+        writeArray( values, values.length, _doubleBuffer );
     }
 
-    public void writeArray(Object array, int arrayLength, BufferWrapper buffer) throws IOException
+    public void writeArray( Object array, int arrayLength, BufferWrapper buffer ) throws IOException
     {
-        assert (_byteBuffer.limit() == _byteBuffer.capacity());
+        assert ( _byteBuffer.limit( ) == _byteBuffer.capacity( ) );
 
-        int shift = buffer.getShift();
-        int mask = (1 << shift) - 1;
+        int shift = buffer.getShift( );
+        int mask = ( 1 << shift ) - 1;
 
-        if ((_byteBuffer.position() & mask) != 0) {
-            flushBuffer();
+        if ( ( _byteBuffer.position( ) & mask ) != 0 )
+        {
+            flushBuffer( );
         }
 
-        buffer.positionAndLimit(_byteBuffer.position() >> shift, _byteBuffer.limit() >> shift);
+        buffer.positionAndLimit( _byteBuffer.position( ) >> shift, _byteBuffer.limit( ) >> shift );
 
-        for (int i = 0; i < arrayLength; ) {
-            if (!buffer.hasRemaining()) {
-                _byteBuffer.position(buffer.position() << shift);
-                flushBuffer();
-                buffer.clear();
+        for ( int i = 0; i < arrayLength; )
+        {
+            if ( !buffer.hasRemaining( ) )
+            {
+                _byteBuffer.position( buffer.position( ) << shift );
+                flushBuffer( );
+                buffer.clear( );
             }
 
-            int length = Math.min(arrayLength - i, buffer.remaining());
-            buffer.put(array, i, length);
+            int length = Math.min( arrayLength - i, buffer.remaining( ) );
+            buffer.put( array, i, length );
 
             i += length;
         }
 
-        _byteBuffer.position(buffer.position() << shift);
+        _byteBuffer.position( buffer.position( ) << shift );
     }
 
-    public void writeString(String value) throws IOException
+    public void writeString( String value ) throws IOException
     {
-        byte[] bytes = value.getBytes(STRING_ENCODING);
-        writeInt(bytes.length);
-        writeByteArray(bytes);
+        byte[] bytes = value.getBytes( STRING_ENCODING );
+        writeInt( bytes.length );
+        writeByteArray( bytes );
     }
 
-    public void flush() throws IOException
+    public void flush( ) throws IOException
     {
-        flushBuffer();
+        flushBuffer( );
     }
 
     @Override
-    public void close() throws IOException
+    public void close( ) throws IOException
     {
-        flushBuffer();
-        super.close();
+        flushBuffer( );
+        super.close( );
     }
 
-    public DataOutputStream getOutputStream()
+    public DataOutputStream getOutputStream( )
     {
         return _stream;
     }

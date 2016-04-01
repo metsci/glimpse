@@ -35,9 +35,9 @@ public class IconDrawInfo
     public double scaleY;
     public int centerX;
     public int centerY;
-    
+
     public boolean isX;
-    
+
     public IconDrawInfo( Object id, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, boolean isX )
     {
         this.id = id;

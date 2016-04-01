@@ -35,26 +35,25 @@ public interface Objects
     /**
      * Value at index i
      */
-    Object v(int i);
+    Object v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, Object[] dest, int iDest, int c);
-
+    void copyTo( int i, Object[] dest, int iDest, int c );
 
     // Convenience Methods
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    Object first();
+    Object first( );
 
-    Object last();
+    Object last( );
 
-    Object[] copyOf(int i, int c);
+    Object[] copyOf( int i, int c );
 
-    Object[] copyOf();
+    Object[] copyOf( );
 
 }

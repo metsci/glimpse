@@ -32,9 +32,7 @@ import static com.metsci.glimpse.util.logging.format.TerseLogFormatter.MAX_LEVEL
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import java.util.logging.LogRecord;
-
 
 /**
  * Produces "Terse" Log Messages which fit on one line and include just the level, method, class
@@ -45,52 +43,49 @@ import java.util.logging.LogRecord;
 public class TerseMethodNameLogFormatter extends Formatter
 {
     @Override
-    public String format(LogRecord record)
+    public String format( LogRecord record )
     {
-        super.format(record);
+        super.format( record );
 
-        StringBuilder prefix0 = new StringBuilder();
-        appendPrefix(record, prefix0);
+        StringBuilder prefix0 = new StringBuilder( );
+        appendPrefix( record, prefix0 );
 
-        String prefix = prefix0.toString();
+        String prefix = prefix0.toString( );
 
-        StringWriter message = new StringWriter();
-        message.write(record.getMessage());
+        StringWriter message = new StringWriter( );
+        message.write( record.getMessage( ) );
 
-        Throwable thrown = record.getThrown();
-        if (thrown != null)
+        Throwable thrown = record.getThrown( );
+        if ( thrown != null )
         {
             message.write( LINE_SEPARATOR );
-            thrown.printStackTrace(new PrintWriter(message));
+            thrown.printStackTrace( new PrintWriter( message ) );
         }
 
-        return prefix +
-               message.toString().replace(LINE_SEPARATOR, LINE_SEPARATOR +
-                                          prefix.replaceAll(".", " ")) +
-               LINE_SEPARATOR;
+        return prefix + message.toString( ).replace( LINE_SEPARATOR, LINE_SEPARATOR + prefix.replaceAll( ".", " " ) ) + LINE_SEPARATOR;
     }
 
-    protected void appendPrefix(LogRecord record, StringBuilder prefix)
+    protected void appendPrefix( LogRecord record, StringBuilder prefix )
     {
-        String levelName = record.getLevel().getName();
-        String padding = BLANKS.substring(0, MAX_LEVEL_LENGTH - levelName.length());
-        prefix.append(padding).append(levelName).append(": ");
+        String levelName = record.getLevel( ).getName( );
+        String padding = BLANKS.substring( 0, MAX_LEVEL_LENGTH - levelName.length( ) );
+        prefix.append( padding ).append( levelName ).append( ": " );
 
-        String loggerName = record.getLoggerName();
-        if (loggerName != null)
+        String loggerName = record.getLoggerName( );
+        if ( loggerName != null )
         {
-            prefix.append(Thread.currentThread().getName()).append(" - ");
+            prefix.append( Thread.currentThread( ).getName( ) ).append( " - " );
 
-            String loggerShortName = loggerName.substring(loggerName.lastIndexOf('.') + 1);
-            prefix.append(loggerShortName);
+            String loggerShortName = loggerName.substring( loggerName.lastIndexOf( '.' ) + 1 );
+            prefix.append( loggerShortName );
 
-            String methodName = record.getSourceMethodName();
-            if (methodName != null)
+            String methodName = record.getSourceMethodName( );
+            if ( methodName != null )
             {
-                prefix.append("." + methodName);
+                prefix.append( "." + methodName );
             }
 
-            prefix.append(": ");
+            prefix.append( ": " );
         }
     }
 }

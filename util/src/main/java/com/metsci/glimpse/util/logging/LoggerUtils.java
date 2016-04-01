@@ -26,10 +26,16 @@
  */
 package com.metsci.glimpse.util.logging;
 
-import static com.metsci.glimpse.util.io.StreamOpener.*;
-import static java.lang.String.*;
-import static java.util.logging.Level.*;
-import static java.util.logging.LogManager.*;
+import static com.metsci.glimpse.util.io.StreamOpener.fileThenResourceOpener;
+import static java.lang.String.format;
+import static java.util.logging.Level.CONFIG;
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.FINER;
+import static java.util.logging.Level.FINEST;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
+import static java.util.logging.LogManager.getLogManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -68,13 +74,13 @@ public class LoggerUtils
      */
     public static Level getLevelRecursive( Logger logger )
     {
-        Level level = logger.getLevel();
-        while( level == null )
+        Level level = logger.getLevel( );
+        while ( level == null )
         {
-            logger = logger.getParent();
-            if( logger != null )
+            logger = logger.getParent( );
+            if ( logger != null )
             {
-                level = logger.getLevel();
+                level = logger.getLevel( );
             }
             else
             {
@@ -88,26 +94,25 @@ public class LoggerUtils
     /**
      * Prints own and parents' log levels to standard out (for debugging).
      */
-    public void dumpAncestry(Logger logger)
+    public void dumpAncestry( Logger logger )
     {
         Logger loggerAncestor = logger;
 
         int nUp = 0;
-        while (loggerAncestor != null)
+        while ( loggerAncestor != null )
         {
-            String name = loggerAncestor.getName();
-            if (name.isEmpty())
+            String name = loggerAncestor.getName( );
+            if ( name.isEmpty( ) )
             {
                 name = "<root>";
             }
 
-            System.out.printf("logger ancestor %d: %s  level=%s%n", nUp, name,
-                              loggerAncestor.getLevel());
-            loggerAncestor = loggerAncestor.getParent();
+            System.out.printf( "logger ancestor %d: %s  level=%s%n", nUp, name, loggerAncestor.getLevel( ) );
+            loggerAncestor = loggerAncestor.getParent( );
             nUp++;
         }
 
-        System.out.println("recursive level = " + getLevelRecursive(logger));
+        System.out.println( "recursive level = " + getLevelRecursive( logger ) );
     }
 
     /**
@@ -183,17 +188,15 @@ public class LoggerUtils
     {
         java.util.logging.Logger logger = Logger.getLogger( "" );
 
-        if( logger == null )
-            return;
+        if ( logger == null ) return;
 
-        Handler[] handlers = logger.getHandlers();
-        for( Handler h: handlers )
-            if( h instanceof ConsoleHandler )
-                logger.removeHandler( h );
+        Handler[] handlers = logger.getHandlers( );
+        for ( Handler h : handlers )
+            if ( h instanceof ConsoleHandler ) logger.removeHandler( h );
 
-        ConsoleHandler handler = new ConsoleHandler()
+        ConsoleHandler handler = new ConsoleHandler( )
         {
-            Formatter formatter = new TimestampingMethodNameLogFormatter();
+            Formatter formatter = new TimestampingMethodNameLogFormatter( );
 
             @Override
             public Formatter getFormatter( )
@@ -218,12 +221,11 @@ public class LoggerUtils
     {
         java.util.logging.Logger logger = Logger.getLogger( "" );
 
-        if( logger == null )
-            return;
+        if ( logger == null ) return;
 
         FileHandler handler = new FileHandler( filename )
         {
-            Formatter formatter = new TimestampingMethodNameLogFormatter();
+            Formatter formatter = new TimestampingMethodNameLogFormatter( );
 
             @Override
             public Formatter getFormatter( )
@@ -240,26 +242,24 @@ public class LoggerUtils
     {
         java.util.logging.Logger logger = Logger.getLogger( "" );
 
-        if( logger == null )
-            return;
+        if ( logger == null ) return;
 
         logger.setLevel( level );
     }
 
     public static void sendStdoutToLog( )
     {
-        Logger logger = Logger.getLogger("stdout");
-        LoggingOutputStream los = new LoggingOutputStream(logger, StdOutErrLevel.STDOUT);
-        System.setOut(new PrintStream(los, true));
+        Logger logger = Logger.getLogger( "stdout" );
+        LoggingOutputStream los = new LoggingOutputStream( logger, StdOutErrLevel.STDOUT );
+        System.setOut( new PrintStream( los, true ) );
     }
 
-    public static void sendStderrToLog()
+    public static void sendStderrToLog( )
     {
-        Logger logger = Logger.getLogger("stderr");
-        LoggingOutputStream los= new LoggingOutputStream(logger, StdOutErrLevel.STDERR);
-        System.setErr(new PrintStream(los, true));
+        Logger logger = Logger.getLogger( "stderr" );
+        LoggingOutputStream los = new LoggingOutputStream( logger, StdOutErrLevel.STDERR );
+        System.setErr( new PrintStream( los, true ) );
     }
-
 
     /**
      * An OutputStream that writes contents to a Logger upon each call to flush()
@@ -282,7 +282,7 @@ public class LoggerUtils
          */
         public LoggingOutputStream( Logger logger, Level level )
         {
-            super();
+            super( );
             this.logger = logger;
             this.level = level;
             lineSeparator = System.getProperty( "line.separator" );
@@ -298,13 +298,13 @@ public class LoggerUtils
         {
 
             String record;
-            synchronized( this )
+            synchronized ( this )
             {
-                super.flush();
-                record = this.toString();
-                super.reset();
+                super.flush( );
+                record = this.toString( );
+                super.reset( );
 
-                if( record.length() == 0 || record.equals( lineSeparator ) )
+                if ( record.length( ) == 0 || record.equals( lineSeparator ) )
                 {
                     // avoid empty records
                     return;
@@ -314,7 +314,6 @@ public class LoggerUtils
             }
         }
     }
-
 
     /**
      * Class defining 2 new Logging levels, one for STDOUT, one for STDERR, used
@@ -338,12 +337,12 @@ public class LoggerUtils
         /**
          * Level for STDOUT activity.
          */
-        public static Level STDOUT = new StdOutErrLevel( "STDOUT", Level.INFO.intValue() + 53 );
+        public static Level STDOUT = new StdOutErrLevel( "STDOUT", Level.INFO.intValue( ) + 53 );
 
         /**
          * Level for STDERR activity
          */
-        public static Level STDERR = new StdOutErrLevel( "STDERR", Level.INFO.intValue() + 54 );
+        public static Level STDERR = new StdOutErrLevel( "STDERR", Level.INFO.intValue( ) + 54 );
 
         /**
          * Method to avoid creating duplicate instances when deserializing the
@@ -355,11 +354,9 @@ public class LoggerUtils
          */
         protected Object readResolve( ) throws ObjectStreamException
         {
-            if( this.intValue() == STDOUT.intValue() )
-                return STDOUT;
+            if ( this.intValue( ) == STDOUT.intValue( ) ) return STDOUT;
 
-            if( this.intValue() == STDERR.intValue() )
-                return STDERR;
+            if ( this.intValue( ) == STDERR.intValue( ) ) return STDERR;
 
             throw new InvalidObjectException( "Unknown instance :" + this );
         }
@@ -373,11 +370,11 @@ public class LoggerUtils
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void log(Logger logger, Level level, String format, Object... args)
+    public static void log( Logger logger, Level level, String format, Object... args )
     {
-        if (logger.isLoggable(level))
+        if ( logger.isLoggable( level ) )
         {
-            logger.log(level, format(format, args));
+            logger.log( level, format( format, args ) );
         }
     }
 
@@ -385,63 +382,63 @@ public class LoggerUtils
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logFinest(Logger logger, String format, Object... args)
+    public static void logFinest( Logger logger, String format, Object... args )
     {
-        log(logger, FINEST, format, args);
+        log( logger, FINEST, format, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logFiner(Logger logger, String format, Object... args)
+    public static void logFiner( Logger logger, String format, Object... args )
     {
-        log(logger, FINER, format, args);
+        log( logger, FINER, format, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logFine(Logger logger, String format, Object... args)
+    public static void logFine( Logger logger, String format, Object... args )
     {
-        log(logger, FINE, format, args);
+        log( logger, FINE, format, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logConfig(Logger logger, String format, Object... args)
+    public static void logConfig( Logger logger, String format, Object... args )
     {
-        log(logger, CONFIG, format, args);
+        log( logger, CONFIG, format, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logInfo(Logger logger, String format, Object... args)
+    public static void logInfo( Logger logger, String format, Object... args )
     {
-        log(logger, INFO, format, args);
+        log( logger, INFO, format, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logWarning(Logger logger, String format, Object... args)
+    public static void logWarning( Logger logger, String format, Object... args )
     {
-        log(logger, WARNING, format, args);
+        log( logger, WARNING, format, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logSevere(Logger logger, String format, Object... args)
+    public static void logSevere( Logger logger, String format, Object... args )
     {
-        log(logger, SEVERE, format, args);
+        log( logger, SEVERE, format, args );
     }
 
     ///////////////
@@ -452,12 +449,11 @@ public class LoggerUtils
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void log(Logger logger, Level level, String format, Throwable thrown,
-                           Object... args)
+    public static void log( Logger logger, Level level, String format, Throwable thrown, Object... args )
     {
-        if (logger.isLoggable(level))
+        if ( logger.isLoggable( level ) )
         {
-            logger.log(level, format(format, args), thrown);
+            logger.log( level, format( format, args ), thrown );
         }
     }
 
@@ -465,62 +461,62 @@ public class LoggerUtils
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logFinest(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logFinest( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, FINEST, format, thrown, args);
+        log( logger, FINEST, format, thrown, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logFiner(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logFiner( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, FINER, format, thrown, args);
+        log( logger, FINER, format, thrown, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logFine(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logFine( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, FINE, format, thrown, args);
+        log( logger, FINE, format, thrown, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logConfig(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logConfig( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, CONFIG, format, thrown, args);
+        log( logger, CONFIG, format, thrown, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logInfo(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logInfo( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, INFO, format, thrown, args);
+        log( logger, INFO, format, thrown, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logWarning(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logWarning( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, WARNING, format, thrown, args);
+        log( logger, WARNING, format, thrown, args );
     }
 
     /**
      * Wraps call to Java logger with varargs and performance optimization: no argument formatting
      * if unneeded.
      */
-    public static void logSevere(Logger logger, String format, Throwable thrown, Object... args)
+    public static void logSevere( Logger logger, String format, Throwable thrown, Object... args )
     {
-        log(logger, SEVERE, format, thrown, args);
+        log( logger, SEVERE, format, thrown, args );
     }
 }

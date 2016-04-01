@@ -40,7 +40,8 @@ public class FastLog extends FastFunc
 
     // Note: This must follow the static final variables above, which are used indirectly by the constructor call.
     private static final FastLog instance = new FastLog( 100000 );
-    public static FastLog getInstance()
+
+    public static FastLog getInstance( )
     {
         return instance;
     }

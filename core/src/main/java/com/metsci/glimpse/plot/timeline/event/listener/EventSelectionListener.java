@@ -45,5 +45,5 @@ public interface EventSelectionListener
      * @param selectedEvents the newly selected events
      */
     public void eventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents );
-    
+
 }

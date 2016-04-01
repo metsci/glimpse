@@ -33,7 +33,6 @@ public class DockingFrame extends JFrame
 
     public final MultiSplitPane docker;
 
-
     public DockingFrame( MultiSplitPane docker )
     {
         this.docker = docker;

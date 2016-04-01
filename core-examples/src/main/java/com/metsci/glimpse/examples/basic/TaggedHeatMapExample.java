@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TAG_COLOR_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.util.Arrays;
 

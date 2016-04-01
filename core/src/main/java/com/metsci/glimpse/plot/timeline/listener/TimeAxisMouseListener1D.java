@@ -181,12 +181,12 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
             super.mouseWheelMoved( e );
         }
     }
-    
+
     @Override
     public void mousePressed( GlimpseMouseEvent event )
     {
         super.mousePressed( event );
-        
+
         TaggedAxis1D taggedAxis = getAxis( event );
         if ( taggedAxis == null ) return;
         taggedAxis.validateTags( );
@@ -196,7 +196,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
     public void mouseMoved( GlimpseMouseEvent event )
     {
         super.mouseMoved( event );
-        
+
         TaggedAxis1D taggedAxis = getAxis( event );
         if ( taggedAxis == null ) return;
         taggedAxis.validateTags( );
@@ -206,7 +206,7 @@ public class TimeAxisMouseListener1D extends TaggedAxisMouseListener1D
     public void mouseReleased( GlimpseMouseEvent event )
     {
         super.mouseReleased( event );
-        
+
         TaggedAxis1D taggedAxis = getAxis( event );
         if ( taggedAxis == null ) return;
         taggedAxis.validateTags( );

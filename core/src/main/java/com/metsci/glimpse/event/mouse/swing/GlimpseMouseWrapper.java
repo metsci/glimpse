@@ -26,7 +26,16 @@
  */
 package com.metsci.glimpse.event.mouse.swing;
 
-import static java.awt.event.MouseEvent.*;
+import static java.awt.event.InputEvent.ALT_DOWN_MASK;
+import static java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
+import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
+import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
+import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
+import static java.awt.event.InputEvent.META_DOWN_MASK;
+import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
+import static java.awt.event.MouseEvent.BUTTON1;
+import static java.awt.event.MouseEvent.BUTTON2;
+import static java.awt.event.MouseEvent.BUTTON3;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -52,16 +61,16 @@ public class GlimpseMouseWrapper
 
         return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, 0, clickCount );
     }
-    
+
     public static GlimpseMouseEvent fromMouseEvent( MouseEvent event )
     {
         GlimpseTargetStack stack = null;
 
         if ( event instanceof GlimpseSwingMouseEvent )
         {
-            stack = ((GlimpseSwingMouseEvent)event).getTargetStack( );
+            stack = ( ( GlimpseSwingMouseEvent ) event ).getTargetStack( );
         }
-        
+
         return fromMouseEvent( event, stack, event.getX( ), event.getY( ) );
     }
 
@@ -75,14 +84,14 @@ public class GlimpseMouseWrapper
 
         return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, wheelRotation, clickCount );
     }
-    
+
     public static GlimpseMouseEvent fromMouseWheelEvent( MouseWheelEvent event )
     {
         GlimpseTargetStack stack = null;
 
         if ( event instanceof GlimpseSwingMouseWheelEvent )
         {
-            stack = ((GlimpseSwingMouseWheelEvent)event).getTargetStack( );
+            stack = ( ( GlimpseSwingMouseWheelEvent ) event ).getTargetStack( );
         }
 
         return fromMouseWheelEvent( event, stack, event.getX( ), event.getY( ) );
@@ -92,19 +101,27 @@ public class GlimpseMouseWrapper
     {
         EnumSet<MouseButton> buttons;
 
-        switch( event.getButton( ) )
+        switch ( event.getButton( ) )
         {
-            case BUTTON1: buttons = EnumSet.of( MouseButton.Button1 ); break;
-            case BUTTON2: buttons = EnumSet.of( MouseButton.Button2 ); break;
-            case BUTTON3: buttons = EnumSet.of( MouseButton.Button3 ); break;
-            default: buttons = EnumSet.noneOf( MouseButton.class ); break;
+            case BUTTON1:
+                buttons = EnumSet.of( MouseButton.Button1 );
+                break;
+            case BUTTON2:
+                buttons = EnumSet.of( MouseButton.Button2 );
+                break;
+            case BUTTON3:
+                buttons = EnumSet.of( MouseButton.Button3 );
+                break;
+            default:
+                buttons = EnumSet.noneOf( MouseButton.class );
+                break;
         }
 
         int mod = event.getModifiersEx( );
 
-        if ( ( mod & BUTTON1_DOWN_MASK ) == BUTTON1_DOWN_MASK )  buttons.add( MouseButton.Button1 );
-        if ( ( mod & BUTTON2_DOWN_MASK ) == BUTTON2_DOWN_MASK )  buttons.add( MouseButton.Button2 );
-        if ( ( mod & BUTTON3_DOWN_MASK ) == BUTTON3_DOWN_MASK )  buttons.add( MouseButton.Button3 );
+        if ( ( mod & BUTTON1_DOWN_MASK ) == BUTTON1_DOWN_MASK ) buttons.add( MouseButton.Button1 );
+        if ( ( mod & BUTTON2_DOWN_MASK ) == BUTTON2_DOWN_MASK ) buttons.add( MouseButton.Button2 );
+        if ( ( mod & BUTTON3_DOWN_MASK ) == BUTTON3_DOWN_MASK ) buttons.add( MouseButton.Button3 );
 
         return buttons;
     }
@@ -115,10 +132,10 @@ public class GlimpseMouseWrapper
 
         int mod = event.getModifiersEx( );
 
-        if ( ( mod & ALT_DOWN_MASK ) == ALT_DOWN_MASK )  modifiers.add( ModifierKey.Alt );
-        if ( ( mod & CTRL_DOWN_MASK ) == CTRL_DOWN_MASK )  modifiers.add( ModifierKey.Ctrl );
-        if ( ( mod & META_DOWN_MASK ) == META_DOWN_MASK )  modifiers.add( ModifierKey.Meta );
-        if ( ( mod & SHIFT_DOWN_MASK ) == SHIFT_DOWN_MASK )  modifiers.add( ModifierKey.Shift );
+        if ( ( mod & ALT_DOWN_MASK ) == ALT_DOWN_MASK ) modifiers.add( ModifierKey.Alt );
+        if ( ( mod & CTRL_DOWN_MASK ) == CTRL_DOWN_MASK ) modifiers.add( ModifierKey.Ctrl );
+        if ( ( mod & META_DOWN_MASK ) == META_DOWN_MASK ) modifiers.add( ModifierKey.Meta );
+        if ( ( mod & SHIFT_DOWN_MASK ) == SHIFT_DOWN_MASK ) modifiers.add( ModifierKey.Shift );
 
         return modifiers;
     }

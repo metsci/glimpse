@@ -56,7 +56,6 @@ public class DockingFrameTitlers
         };
     }
 
-
     public static abstract class DockingFrameTitler extends DockingGroupAdapter
     {
         public abstract String getTitle( DockingFrame frame );
@@ -129,6 +128,5 @@ public class DockingFrameTitlers
             updateFrameTitle( frame );
         }
     }
-
 
 }

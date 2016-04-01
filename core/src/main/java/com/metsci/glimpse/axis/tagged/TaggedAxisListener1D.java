@@ -50,7 +50,7 @@ public abstract class TaggedAxisListener1D implements AxisListener1D
 
         if ( axis instanceof TaggedAxis1D )
         {
-            TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
+            TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
             List<Tag> current = taggedAxis.getSortedTags( );
             if ( haveTagsChanged( previous, current ) )
@@ -77,9 +77,9 @@ public abstract class TaggedAxisListener1D implements AxisListener1D
         if ( previous == null && current != null ) return true;
         if ( previous != null && current == null ) return true;
         if ( previous == null && current == null ) return false;
-        if ( previous.size( ) != current.size( ) ) return true ;
+        if ( previous.size( ) != current.size( ) ) return true;
 
-        for ( int i = 0 ; i < previous.size( ) ; i++ )
+        for ( int i = 0; i < previous.size( ); i++ )
         {
             Tag previousTag = previous.get( i );
             Tag currentTag = current.get( i );

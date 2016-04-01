@@ -36,17 +36,16 @@ public final class Azimuth
     // factors based on the exact ones. Be careful about computing factors
     // based on others that are not literal-exact.
     //
-    private static final double pi                = Math.PI;
-    private static final double degreesToRadians  = pi / 180d;
-    private static final double radiansToDegrees  = 1d / degreesToRadians;
-    private static final double piOverTwo         = pi / 2d;
-
+    private static final double pi = Math.PI;
+    private static final double degreesToRadians = pi / 180d;
+    private static final double radiansToDegrees = 1d / degreesToRadians;
+    private static final double piOverTwo = pi / 2d;
 
     // cardinal directions for convenience
-    public static final double east   = 0d;
-    public static final double north  = pi / 2d;
-    public static final double west   = pi;
-    public static final double south  = 3d * pi / 2d;
+    public static final double east = 0d;
+    public static final double north = pi / 2d;
+    public static final double west = pi;
+    public static final double south = 3d * pi / 2d;
 
     // additional directions for convenience
     public static final double northeast = pi / 4d;

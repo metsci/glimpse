@@ -34,53 +34,59 @@ import java.nio.DoubleBuffer;
 public interface DoublesModifiable extends Doubles
 {
 
-    void set(int i, double v);
-    void set(int i, double[] vs);
-    void set(int i, double[] vs, int from, int to);
-    
+    void set( int i, double v );
 
+    void set( int i, double[] vs );
 
-    void insert(int i, double v);
+    void set( int i, double[] vs, int from, int to );
 
-    void insert(int i, double[] vs);
-    void insert(int i, Doubles vs);
-    void insert(int i, DoubleBuffer vs);
+    void insert( int i, double v );
 
-    void insert(int i, double[] vs, int from, int to);
-    void insert(int i, Doubles vs, int from, int to);
-    void insert(int i, DoubleBuffer vs, int c);
+    void insert( int i, double[] vs );
 
+    void insert( int i, Doubles vs );
 
+    void insert( int i, DoubleBuffer vs );
 
-    void append(double v);
+    void insert( int i, double[] vs, int from, int to );
 
-    void append(double[] vs);
-    void append(Doubles vs);
-    void append(DoubleBuffer vs);
+    void insert( int i, Doubles vs, int from, int to );
 
-    void append(double[] vs, int from, int to);
-    void append(Doubles vs, int from, int to);
-    void append(DoubleBuffer vs, int c);
+    void insert( int i, DoubleBuffer vs, int c );
 
+    void append( double v );
 
+    void append( double[] vs );
 
-    void prepend(double v);
+    void append( Doubles vs );
 
-    void prepend(double[] vs);
-    void prepend(Doubles vs);
-    void prepend(DoubleBuffer vs);
+    void append( DoubleBuffer vs );
 
-    void prepend(double[] vs, int from, int to);
-    void prepend(Doubles vs, int from, int to);
-    void prepend(DoubleBuffer vs, int c);
+    void append( double[] vs, int from, int to );
 
+    void append( Doubles vs, int from, int to );
 
+    void append( DoubleBuffer vs, int c );
+
+    void prepend( double v );
+
+    void prepend( double[] vs );
+
+    void prepend( Doubles vs );
+
+    void prepend( DoubleBuffer vs );
+
+    void prepend( double[] vs, int from, int to );
+
+    void prepend( Doubles vs, int from, int to );
+
+    void prepend( DoubleBuffer vs, int c );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(double v);
+    void remove( double v );
 
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
@@ -88,20 +94,19 @@ public interface DoublesModifiable extends Doubles
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
+    void removeIndex( int index );
 
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

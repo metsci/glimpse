@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.dspl.util;
 
-import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -28,9 +28,6 @@ package com.metsci.glimpse.worldwind.tile;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.render.DrawContext;
-
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -38,10 +35,13 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.render.DrawContext;
+
 public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
 {
     private static final Logger logger = Logger.getLogger( GlimpseResizingSurfaceTile.class.getName( ) );
-    
+
     // the maximum allowed size for the offscreen canvas
     protected int maxWidth;
     protected int maxHeight;
@@ -54,7 +54,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     // invariant: maxWidth >= currentWidth >= requestedWidth 
     protected int calculatedWidth;
     protected int calculatedHeight;
-    
+
     // the percentage of the offscreen buffer filled by the texture
     protected float scaleX = 1.0f;
     protected float scaleY = 1.0f;
@@ -88,7 +88,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         this.maxHeight = maxHeight;
         this.preferredPixelCount = width * height;
     }
-    
+
     public void setPreferredDimensions( int width, int height )
     {
         this.width = width;
@@ -140,13 +140,13 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         }
 
         resizeLayout( calculatedWidth, calculatedHeight );
-        
-        scaleX = (float) calculatedWidth / (float) currentWidth;
-        scaleY = (float) calculatedHeight / (float) currentHeight;
-        
+
+        scaleX = ( float ) calculatedWidth / ( float ) currentWidth;
+        scaleY = ( float ) calculatedHeight / ( float ) currentHeight;
+
         setTextureScale( tile );
     }
-    
+
     @Override
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
     {
@@ -154,12 +154,12 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         setTextureScale( tile );
         return tile;
     }
-    
+
     protected void setTextureScale( TextureSurfaceTile tile )
     {
         setTextureScale( tile, scaleX, scaleY );
     }
-    
+
     protected void setTextureScale( TextureSurfaceTile tile, float scaleX, float scaleY )
     {
         if ( tile != null ) tile.setTextureScale( scaleX, scaleY );
@@ -174,7 +174,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     protected void resizeCanvas( int width, int height )
     {
         logInfo( logger, "Resizing Offscreen Renderbuffer (%d x %d)", width, height );
-        
+
         offscreenCanvas.resize( width, height );
     }
 }

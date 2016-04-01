@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.factory;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.context.TargetStackUtil.intersects;
 
 import com.metsci.glimpse.context.GlimpseTargetStack;
 

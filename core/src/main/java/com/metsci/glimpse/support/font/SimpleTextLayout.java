@@ -28,8 +28,6 @@ package com.metsci.glimpse.support.font;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 
 import java.awt.Font;
 import java.awt.Shape;
@@ -40,6 +38,9 @@ import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 /**
  * Performs simple text layout so text can be wrapped in small areas or broken
@@ -121,12 +122,12 @@ public class SimpleTextLayout
         setLineSpacing( 0 );
         setBreakOnEol( true );
     }
-    
-    public double getLineHeight()
+
+    public double getLineHeight( )
     {
         return lineHeight;
     }
-    
+
     public double getDescent( )
     {
         return descent;

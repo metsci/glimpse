@@ -45,47 +45,47 @@ public interface SortedFloats extends Floats
      *
      * @see Arrays#binarySearch(float[], float)
      */
-    int indexOf(float x);
+    int indexOf( float x );
 
     /**
      * Index of the value closest to x. If the two closest values are x-C
      * and x+C, returns the index of x+C. If floats is empty, returns -1.
      */
-    int indexNearest(float x);
+    int indexNearest( float x );
 
     /**
      * Largest index whose value is less than x
      */
-    int indexBefore(float x);
+    int indexBefore( float x );
 
     /**
      * Smallest index whose value is greater than x
      */
-    int indexAfter(float x);
+    int indexAfter( float x );
 
     /**
      * Largest index whose value is less than or equal to x
      */
-    int indexAtOrBefore(float x);
+    int indexAtOrBefore( float x );
 
     /**
      * Smallest index whose value is greater than or equal to x
      */
-    int indexAtOrAfter(float x);
+    int indexAtOrAfter( float x );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    void continuousIndexOf(float x, ContinuousIndex result);
+    void continuousIndexOf( float x, ContinuousIndex result );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    ContinuousIndex continuousIndexOf(float x);
+    ContinuousIndex continuousIndexOf( float x );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -93,7 +93,7 @@ public interface SortedFloats extends Floats
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(Floats xs, ContinuousIndexArray result);
+    void continuousIndicesOf( Floats xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -101,7 +101,7 @@ public interface SortedFloats extends Floats
      *
      * @see com.metsci.tracks.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(Floats xs);
+    ContinuousIndexArray continuousIndicesOf( Floats xs );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -112,7 +112,7 @@ public interface SortedFloats extends Floats
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(SortedFloats xs, ContinuousIndexArray result);
+    void continuousIndicesOf( SortedFloats xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -123,6 +123,6 @@ public interface SortedFloats extends Floats
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(SortedFloats xs);
+    ContinuousIndexArray continuousIndicesOf( SortedFloats xs );
 
 }

@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  *
@@ -141,33 +140,25 @@ import javax.xml.bind.annotation.XmlType;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "_import",
-    "info",
-    "provider",
-    "attribute",
-    "topics",
-    "concepts",
-    "slices",
-    "tables"
-})
-@XmlRootElement(name = "dspl")
-public class DataSet {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "", propOrder = { "_import", "info", "provider", "attribute", "topics", "concepts", "slices", "tables" } )
+@XmlRootElement( name = "dspl" )
+public class DataSet
+{
 
-    @XmlElement(name = "import")
+    @XmlElement( name = "import" )
     protected List<DataSet.Import> _import;
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected Info info;
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected Info provider;
     protected List<Attribute> attribute;
     protected DataSet.Topics topics;
     protected DataSet.Concepts concepts;
     protected DataSet.Slices slices;
     protected DataSet.Tables tables;
-    @XmlAttribute(name = "targetNamespace")
-    @XmlSchemaType(name = "anyURI")
+    @XmlAttribute( name = "targetNamespace" )
+    @XmlSchemaType( name = "anyURI" )
     protected String targetNamespace;
 
     /**
@@ -192,9 +183,11 @@ public class DataSet {
      *
      *
      */
-    public List<DataSet.Import> getImport() {
-        if (_import == null) {
-            _import = new ArrayList<DataSet.Import>();
+    public List<DataSet.Import> getImport( )
+    {
+        if ( _import == null )
+        {
+            _import = new ArrayList<DataSet.Import>( );
         }
         return this._import;
     }
@@ -207,7 +200,8 @@ public class DataSet {
      *     {@link Info }
      *
      */
-    public Info getInfo() {
+    public Info getInfo( )
+    {
         return info;
     }
 
@@ -219,7 +213,8 @@ public class DataSet {
      *     {@link Info }
      *
      */
-    public void setInfo(Info value) {
+    public void setInfo( Info value )
+    {
         this.info = value;
     }
 
@@ -231,7 +226,8 @@ public class DataSet {
      *     {@link Info }
      *
      */
-    public Info getProvider() {
+    public Info getProvider( )
+    {
         return provider;
     }
 
@@ -243,7 +239,8 @@ public class DataSet {
      *     {@link Info }
      *
      */
-    public void setProvider(Info value) {
+    public void setProvider( Info value )
+    {
         this.provider = value;
     }
 
@@ -269,9 +266,11 @@ public class DataSet {
      *
      *
      */
-    public List<Attribute> getAttribute() {
-        if (attribute == null) {
-            attribute = new ArrayList<Attribute>();
+    public List<Attribute> getAttribute( )
+    {
+        if ( attribute == null )
+        {
+            attribute = new ArrayList<Attribute>( );
         }
         return this.attribute;
     }
@@ -284,7 +283,8 @@ public class DataSet {
      *     {@link DataSet.Topics }
      *
      */
-    public DataSet.Topics getTopics() {
+    public DataSet.Topics getTopics( )
+    {
         return topics;
     }
 
@@ -296,7 +296,8 @@ public class DataSet {
      *     {@link DataSet.Topics }
      *
      */
-    public void setTopics(DataSet.Topics value) {
+    public void setTopics( DataSet.Topics value )
+    {
         this.topics = value;
     }
 
@@ -308,7 +309,8 @@ public class DataSet {
      *     {@link DataSet.Concepts }
      *
      */
-    public DataSet.Concepts getConcepts() {
+    public DataSet.Concepts getConcepts( )
+    {
         return concepts;
     }
 
@@ -320,7 +322,8 @@ public class DataSet {
      *     {@link DataSet.Concepts }
      *
      */
-    public void setConcepts(DataSet.Concepts value) {
+    public void setConcepts( DataSet.Concepts value )
+    {
         this.concepts = value;
     }
 
@@ -332,7 +335,8 @@ public class DataSet {
      *     {@link DataSet.Slices }
      *
      */
-    public DataSet.Slices getSlices() {
+    public DataSet.Slices getSlices( )
+    {
         return slices;
     }
 
@@ -344,7 +348,8 @@ public class DataSet {
      *     {@link DataSet.Slices }
      *
      */
-    public void setSlices(DataSet.Slices value) {
+    public void setSlices( DataSet.Slices value )
+    {
         this.slices = value;
     }
 
@@ -356,7 +361,8 @@ public class DataSet {
      *     {@link DataSet.Tables }
      *
      */
-    public DataSet.Tables getTables() {
+    public DataSet.Tables getTables( )
+    {
         return tables;
     }
 
@@ -368,7 +374,8 @@ public class DataSet {
      *     {@link DataSet.Tables }
      *
      */
-    public void setTables(DataSet.Tables value) {
+    public void setTables( DataSet.Tables value )
+    {
         this.tables = value;
     }
 
@@ -380,7 +387,8 @@ public class DataSet {
      *     {@link String }
      *
      */
-    public String getTargetNamespace() {
+    public String getTargetNamespace( )
+    {
         return targetNamespace;
     }
 
@@ -392,10 +400,10 @@ public class DataSet {
      *     {@link String }
      *
      */
-    public void setTargetNamespace(String value) {
+    public void setTargetNamespace( String value )
+    {
         this.targetNamespace = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -416,13 +424,12 @@ public class DataSet {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "concept"
-    })
-    public static class Concepts {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "concept" } )
+    public static class Concepts
+    {
 
-        @XmlElement(required = true)
+        @XmlElement( required = true )
         protected List<Concept> concept;
 
         /**
@@ -447,15 +454,16 @@ public class DataSet {
          *
          *
          */
-        public List<Concept> getConcept() {
-            if (concept == null) {
-                concept = new ArrayList<Concept>();
+        public List<Concept> getConcept( )
+        {
+            if ( concept == null )
+            {
+                concept = new ArrayList<Concept>( );
             }
             return this.concept;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -475,15 +483,16 @@ public class DataSet {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class Import {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class Import
+    {
 
-        @XmlAttribute(name = "namespace", required = true)
-        @XmlSchemaType(name = "anySimpleType")
+        @XmlAttribute( name = "namespace", required = true )
+        @XmlSchemaType( name = "anySimpleType" )
         protected String namespace;
-        @XmlAttribute(name = "location")
-        @XmlSchemaType(name = "anySimpleType")
+        @XmlAttribute( name = "location" )
+        @XmlSchemaType( name = "anySimpleType" )
         protected String location;
 
         /**
@@ -494,7 +503,8 @@ public class DataSet {
          *     {@link String }
          *
          */
-        public String getNamespace() {
+        public String getNamespace( )
+        {
             return namespace;
         }
 
@@ -506,7 +516,8 @@ public class DataSet {
          *     {@link String }
          *
          */
-        public void setNamespace(String value) {
+        public void setNamespace( String value )
+        {
             this.namespace = value;
         }
 
@@ -518,7 +529,8 @@ public class DataSet {
          *     {@link String }
          *
          */
-        public String getLocation() {
+        public String getLocation( )
+        {
             return location;
         }
 
@@ -530,12 +542,12 @@ public class DataSet {
          *     {@link String }
          *
          */
-        public void setLocation(String value) {
+        public void setLocation( String value )
+        {
             this.location = value;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -556,13 +568,12 @@ public class DataSet {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "slice"
-    })
-    public static class Slices {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "slice" } )
+    public static class Slices
+    {
 
-        @XmlElement(required = true)
+        @XmlElement( required = true )
         protected List<Slice> slice;
 
         /**
@@ -587,15 +598,16 @@ public class DataSet {
          *
          *
          */
-        public List<Slice> getSlice() {
-            if (slice == null) {
-                slice = new ArrayList<Slice>();
+        public List<Slice> getSlice( )
+        {
+            if ( slice == null )
+            {
+                slice = new ArrayList<Slice>( );
             }
             return this.slice;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -616,13 +628,12 @@ public class DataSet {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "table"
-    })
-    public static class Tables {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "table" } )
+    public static class Tables
+    {
 
-        @XmlElement(required = true)
+        @XmlElement( required = true )
         protected List<Table> table;
 
         /**
@@ -647,15 +658,16 @@ public class DataSet {
          *
          *
          */
-        public List<Table> getTable() {
-            if (table == null) {
-                table = new ArrayList<Table>();
+        public List<Table> getTable( )
+        {
+            if ( table == null )
+            {
+                table = new ArrayList<Table>( );
             }
             return this.table;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -676,13 +688,12 @@ public class DataSet {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "topic"
-    })
-    public static class Topics {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "topic" } )
+    public static class Topics
+    {
 
-        @XmlElement(required = true)
+        @XmlElement( required = true )
         protected List<Topic> topic;
 
         /**
@@ -707,15 +718,16 @@ public class DataSet {
          *
          *
          */
-        public List<Topic> getTopic() {
-            if (topic == null) {
-                topic = new ArrayList<Topic>();
+        public List<Topic> getTopic( )
+        {
+            if ( topic == null )
+            {
+                topic = new ArrayList<Topic>( );
             }
             return this.topic;
         }
 
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected java.io.File file;
@@ -768,6 +780,5 @@ public class DataSet {
     {
         return parser.loadDataset( this, namespace, location );
     }
-
 
 }

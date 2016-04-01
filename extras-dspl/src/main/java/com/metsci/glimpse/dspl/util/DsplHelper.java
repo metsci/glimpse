@@ -26,14 +26,17 @@
  */
 package com.metsci.glimpse.dspl.util;
 
-import static com.metsci.glimpse.dspl.lite.DsplLiteHelper.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.dspl.lite.DsplLiteHelper.loadNonCanonicalDataSet_csv;
+import static com.metsci.glimpse.dspl.lite.DsplLiteHelper.loadNonCanonicalDataSet_xml_lite;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -51,17 +54,15 @@ import com.metsci.glimpse.dspl.schema.Attribute;
 import com.metsci.glimpse.dspl.schema.Concept;
 import com.metsci.glimpse.dspl.schema.ConceptProperty;
 import com.metsci.glimpse.dspl.schema.Data;
+import com.metsci.glimpse.dspl.schema.Data.File;
 import com.metsci.glimpse.dspl.schema.DataSet;
+import com.metsci.glimpse.dspl.schema.DataSet.Import;
 import com.metsci.glimpse.dspl.schema.DataType;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.schema.SliceConceptRef;
 import com.metsci.glimpse.dspl.schema.Table;
 import com.metsci.glimpse.dspl.schema.Value;
-import com.metsci.glimpse.dspl.schema.Data.File;
-import com.metsci.glimpse.dspl.schema.DataSet.Import;
 import com.metsci.glimpse.util.io.StreamOpener;
-
-import java.util.logging.Logger;
 
 public class DsplHelper
 {
@@ -77,7 +78,7 @@ public class DsplHelper
 
     public static final String dsplSchema = "com.metsci.glimpse.dspl.schema";
     public static final String objectFactoryProp = "com.sun.xml.bind.ObjectFactory";
-    
+
     private static JAXBContext jc;
 
     static
@@ -91,7 +92,7 @@ public class DsplHelper
             logWarning( logger, "Unable to initialize JAXB Context", e );
         }
     }
-    
+
     ///////////////////////////////////////////////////////////////////////
     //////                 DataSet utility methods                   //////
     ///////////////////////////////////////////////////////////////////////

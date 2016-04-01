@@ -342,7 +342,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
         StackedTimePlot2D parent = getStackedTimePlot( );
 
         int labelSize;
-        
+
         if ( parent instanceof CollapsibleTimePlot2D )
         {
             CollapsibleTimePlot2D collapsible = ( ( CollapsibleTimePlot2D ) parent );

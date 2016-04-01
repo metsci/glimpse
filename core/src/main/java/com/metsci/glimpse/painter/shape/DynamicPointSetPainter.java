@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.*;
+import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.shift;
+import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.shiftMaps;
+
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,7 +75,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected GLFloatBuffer colorBuffer;
     protected GLFloatBuffer2D pointBuffer;
-    
+
     protected FloatBuffer tempBuffer;
 
     // point id (which can be any object) -> index into pointBuffer
@@ -84,7 +86,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     protected ReentrantLock lock;
 
     protected IntsArray searchResults;
-    
+
     protected int initialSize;
 
     public DynamicPointSetPainter( )
@@ -96,7 +98,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     {
         this.initialSize = initialSize;
         this.pointSize = DEFAULT_POINT_SIZE;
-        
+
         this.lock = new ReentrantLock( );
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
@@ -159,7 +161,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             {
                 growBuffers( currentSize + newPoints );
             }
-            
+
             deletePositions( accumulator );
 
             mutatePositions( accumulator );
@@ -222,7 +224,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
-    
+
     public void removeAll( )
     {
         lock.lock( );
@@ -278,17 +280,17 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             lock.unlock( );
         }
     }
-    
+
     protected int getSize( )
     {
         return this.idMap.size( );
     }
-    
+
     protected int getCapacity( )
     {
         return this.pointBuffer.getMaxVertices( );
     }
-    
+
     protected void deletePositions( final Set<Integer> indices )
     {
         if ( indices.isEmpty( ) ) return;
@@ -322,12 +324,12 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
             }
         } );
     }
-    
+
     protected void deletePositions( BulkPointAccumulator accum )
     {
         Set<Integer> indices = Sets.newTreeSet( );
-        
-        for ( Object id :  accum.getRemovedIds( ) )
+
+        for ( Object id : accum.getRemovedIds( ) )
         {
             Integer index = this.idMap.get( id );
             if ( index != null )
@@ -335,15 +337,15 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
                 indices.add( index );
             }
         }
-        
+
         deletePositions( indices );
     }
-    
+
     protected void deletePosition( int index )
     {
         deletePositions( Collections.singleton( index ) );
     }
-    
+
     protected void mutateColor( final int index, final float[] color )
     {
         this.colorBuffer.mutate( new Mutator( )
@@ -542,7 +544,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     public static class BulkPointAccumulator
     {
-        List<Object> removedIds; 
+        List<Object> removedIds;
         List<Object> addedIds;
         FloatsArray addedVertices;
 
@@ -577,7 +579,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         {
             add( id, x, y, DEFAULT_COLOR );
         }
-        
+
         public void remove( Object id )
         {
             removedIds.add( id );
@@ -587,7 +589,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         {
             return 6;
         }
-        
+
         List<Object> getRemovedIds( )
         {
             return removedIds;

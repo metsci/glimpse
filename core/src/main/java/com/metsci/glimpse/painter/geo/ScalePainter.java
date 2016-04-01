@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.geo;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
@@ -244,32 +244,32 @@ public class ScalePainter extends GlimpsePainterImpl
     {
         if ( tickTextRenderer == null ) return;
         if ( overallTextRenderer == null ) return;
-        
+
         Axis1D axis = null;
-        
+
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
         if ( target instanceof GlimpseAxisLayout2D )
         {
-            GlimpseAxisLayout2D layout = (GlimpseAxisLayout2D) target;
+            GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
             axis = getAxis( layout.getAxis( context ) );
         }
         else if ( target instanceof GlimpseAxisLayout1D )
         {
-            GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+            GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
             axis = layout.getAxis( context );
         }
-        
+
         if ( axis == null )
         {
             // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
             throw new AxisNotSetException( this, context );
         }
-        
+
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
         context.getTargetStack( );
-        
+
         double diff = axis.getMax( ) - axis.getMin( );
         double ratio = axis.getSizePixels( ) / converter.toAxisUnits( diff );
 
@@ -291,7 +291,7 @@ public class ScalePainter extends GlimpsePainterImpl
 
         double totalSize = scalePixelSize * tickCount;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
@@ -357,12 +357,12 @@ public class ScalePainter extends GlimpsePainterImpl
         if ( showTickLength )
         {
             String tickText = formatter.format( scaleValueSize ) + " " + unitLabel;
-    
+
             Rectangle2D textBounds = tickTextRenderer.getBounds( tickText );
-    
+
             int posX = ( int ) ( width - 1 - bufferX - textBounds.getWidth( ) - 1 );
             int posY = ( int ) ( bufferY + pixelHeight / 2 - textBounds.getHeight( ) / 2 );
-    
+
             tickTextRenderer.beginRendering( width, height );
             try
             {
@@ -374,17 +374,16 @@ public class ScalePainter extends GlimpsePainterImpl
                 tickTextRenderer.endRendering( );
             }
         }
-        
-        
+
         if ( showOverallLength )
         {
             String overallText = formatter.format( scaleValueSize * tickCount ) + " " + unitLabel;
-            
+
             Rectangle2D overallTextBounds = overallTextRenderer.getBounds( overallText );
-    
+
             int posX = ( int ) ( width - pixelWidth / 2 - overallTextBounds.getWidth( ) / 2 );
             int posY = ( int ) ( bufferY + pixelHeight / 2 - overallTextBounds.getHeight( ) / 2 );
-    
+
             overallTextRenderer.beginRendering( width, height );
             try
             {

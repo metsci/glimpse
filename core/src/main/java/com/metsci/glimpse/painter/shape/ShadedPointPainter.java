@@ -379,7 +379,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
                 if ( pipeline != null ) pipeline.endUse( gl );
                 if ( positionBuffer != null ) positionBuffer.unbind( gl );
                 if ( !constantColor && colorAttributeBuffer != null ) colorAttributeBuffer.unbind( gl );
-                if ( !constantSize  && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
+                if ( !constantSize && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
             }
             finally
             {
@@ -387,7 +387,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             }
         }
     }
-    
+
     protected void drawArrays( GL gl )
     {
         gl.glDrawArrays( GL2.GL_POINTS, 0, positionBuffer.getNumVertices( ) );

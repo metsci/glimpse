@@ -84,7 +84,6 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     public static final Font textFont = FontUtils.getDefaultBold( 12 );
 
-    
     protected int dataBufferSize = 0;
     protected FloatBuffer dataBuffer = null;
     protected ReentrantLock trackUpdateLock = null;
@@ -1589,7 +1588,7 @@ public class TrackPainter extends GlimpseDataPainter2D
             if ( _points == null || _points.size( ) == 0 ) return;
 
             List<Point> sortedPoints = new ArrayList<Point>( _points );
-            Collections.sort( sortedPoints, comparator);
+            Collections.sort( sortedPoints, comparator );
             Point firstPoint = sortedPoints.get( 0 );
 
             // add the point to the temporal and spatial indexes
@@ -1662,7 +1661,7 @@ public class TrackPainter extends GlimpseDataPainter2D
             int index = Collections.binarySearch( points, point, comparator );
             if ( index < 0 ) index = - ( index + 1 );
 
-            while ( index < points.size() && points.get( index ).time == point.time )
+            while ( index < points.size( ) && points.get( index ).time == point.time )
             {
                 index++;
             }
@@ -1732,7 +1731,7 @@ public class TrackPainter extends GlimpseDataPainter2D
                 points.get( i ).loadIntoBuffer( buffer );
             }
         }
-        
+
         public Object getTrackId( )
         {
             return trackId;

@@ -32,6 +32,6 @@ package com.metsci.glimpse.util.quadtree;
 public interface FilterLong2
 {
 
-    boolean include(long v1, long v2);
+    boolean include( long v1, long v2 );
 
 }

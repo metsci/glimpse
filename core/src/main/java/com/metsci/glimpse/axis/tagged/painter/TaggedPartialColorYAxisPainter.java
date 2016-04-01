@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.nio.FloatBuffer;
 import java.util.List;
@@ -62,7 +62,7 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
     {
         if ( colorTexture != null && axis instanceof TaggedAxis1D )
         {
-            TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
+            TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
             colorTexture.prepare( gl, 0 );
 

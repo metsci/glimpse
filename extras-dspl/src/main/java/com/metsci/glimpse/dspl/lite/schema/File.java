@@ -31,7 +31,6 @@
 // Generated on: 2011.12.06 at 04:31:59 PM EST
 //
 
-
 package com.metsci.glimpse.dspl.lite.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -39,7 +38,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-
 
 /**
  *
@@ -64,17 +62,16 @@ import javax.xml.bind.annotation.XmlValue;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "File", propOrder = {
-    "value"
-})
-public class File {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "File", propOrder = { "value" } )
+public class File
+{
 
     @XmlValue
     protected String value;
-    @XmlAttribute(name = "format")
+    @XmlAttribute( name = "format" )
     protected String format;
-    @XmlAttribute(name = "encoding")
+    @XmlAttribute( name = "encoding" )
     protected String encoding;
 
     /**
@@ -85,7 +82,8 @@ public class File {
      *     {@link String }
      *
      */
-    public String getValue() {
+    public String getValue( )
+    {
         return value;
     }
 
@@ -97,7 +95,8 @@ public class File {
      *     {@link String }
      *
      */
-    public void setValue(String value) {
+    public void setValue( String value )
+    {
         this.value = value;
     }
 
@@ -109,10 +108,14 @@ public class File {
      *     {@link String }
      *
      */
-    public String getFormat() {
-        if (format == null) {
+    public String getFormat( )
+    {
+        if ( format == null )
+        {
             return "csv";
-        } else {
+        }
+        else
+        {
             return format;
         }
     }
@@ -125,7 +128,8 @@ public class File {
      *     {@link String }
      *
      */
-    public void setFormat(String value) {
+    public void setFormat( String value )
+    {
         this.format = value;
     }
 
@@ -137,10 +141,14 @@ public class File {
      *     {@link String }
      *
      */
-    public String getEncoding() {
-        if (encoding == null) {
+    public String getEncoding( )
+    {
+        if ( encoding == null )
+        {
             return "utf-8";
-        } else {
+        }
+        else
+        {
             return encoding;
         }
     }
@@ -153,7 +161,8 @@ public class File {
      *     {@link String }
      *
      */
-    public void setEncoding(String value) {
+    public void setEncoding( String value )
+    {
         this.encoding = value;
     }
 

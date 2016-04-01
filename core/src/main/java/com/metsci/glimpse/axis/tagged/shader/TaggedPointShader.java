@@ -45,26 +45,19 @@ public class TaggedPointShader extends SimplePointShader
 
     protected AxisListener1D colorAxisListener;
     protected AxisListener1D sizeAxisListener;
-    
-    public TaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
-                              int colorAttributeIndex, int sizeAttributeIndex,
-                              TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
+
+    public TaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
         super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis );
     }
 
-    protected TaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
-                                 int colorAttributeIndex, int sizeAttributeIndex,
-                                 TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis,
-                                 ShaderSource... source ) throws IOException
+    protected TaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis, ShaderSource... source ) throws IOException
     {
         super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, source );
     }
 
     @Override
-    protected void initializeShaderValues( int colorTextureUnit, int sizeTextureUnit,
-                                           int colorAttributeIndex, int sizeAttributeIndex,
-                                           Axis1D colorAxis, Axis1D sizeAxis )
+    protected void initializeShaderValues( int colorTextureUnit, int sizeTextureUnit, int colorAttributeIndex, int sizeAttributeIndex, Axis1D colorAxis, Axis1D sizeAxis )
     {
         this.taggedColorAxis = ( TaggedAxis1D ) colorAxis;
         this.taggedSizeAxis = ( TaggedAxis1D ) sizeAxis;
@@ -85,7 +78,7 @@ public class TaggedPointShader extends SimplePointShader
                 colorMax.setValue( getMaxTag( taggedColorAxis ) );
             }
         };
-        
+
         this.taggedColorAxis.addAxisListener( colorAxisListener );
 
         this.sizeTexUnit.setValue( sizeTextureUnit );
@@ -101,7 +94,7 @@ public class TaggedPointShader extends SimplePointShader
                 sizeMax.setValue( getMaxTag( taggedSizeAxis ) );
             }
         };
-        
+
         this.taggedSizeAxis.addAxisListener( sizeAxisListener );
 
         this.discardAboveColor.setValue( false );
@@ -124,7 +117,7 @@ public class TaggedPointShader extends SimplePointShader
         List<Tag> tags = axis.getSortedTags( );
         return tags.get( tags.size( ) - 1 ).getValue( );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

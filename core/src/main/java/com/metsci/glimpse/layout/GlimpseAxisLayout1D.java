@@ -193,7 +193,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
         {
             throw new AxisNotSetException( String.format( "GlimpseAxisLayout1D %s is not on top of GlimpseTargetStack %s. Cannot provide Axis1D", getName( ), stack ) );
         }
-        
+
         AxisFactory1D factory = getAxisFactory0( stack );
 
         for ( GlimpseTarget target : stack.getTargetList( ) )
@@ -262,7 +262,7 @@ public abstract class GlimpseAxisLayout1D extends GlimpseLayout
             newAxis.setSizePixels( getSize( stack.getBounds( ) ) );
             cache.setValue( stack, newAxis );
         }
-        
+
         return newAxis;
     }
 

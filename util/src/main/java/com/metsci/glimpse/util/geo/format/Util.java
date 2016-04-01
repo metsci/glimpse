@@ -37,89 +37,83 @@ public class Util
     public static final String minuteSign = "'";
     public static final String secondSign = "\"";
 
-    public final static String toDegreesMinutesSeconds(double degrees, int nDecimals, boolean longitude)
+    public final static String toDegreesMinutesSeconds( double degrees, int nDecimals, boolean longitude )
     {
-        double[] dms = toDegreesMinutesSeconds(degrees);
-        int deg = (int) dms[0];
-        int min = (int) dms[1];
+        double[] dms = toDegreesMinutesSeconds( degrees );
+        int deg = ( int ) dms[0];
+        int min = ( int ) dms[1];
         double sec = dms[2];
 
-        NumberFormat secondsFormatter = NumberFormat.getInstance();
-        secondsFormatter.setMinimumFractionDigits(nDecimals);
-        secondsFormatter.setMaximumFractionDigits(nDecimals);
-        secondsFormatter.setMinimumIntegerDigits(2);
+        NumberFormat secondsFormatter = NumberFormat.getInstance( );
+        secondsFormatter.setMinimumFractionDigits( nDecimals );
+        secondsFormatter.setMaximumFractionDigits( nDecimals );
+        secondsFormatter.setMinimumIntegerDigits( 2 );
 
-        String hemisphere = longitude ? (degrees >= 0.0 ? "E" : "W")
-                                      : (degrees >= 0.0 ? "N" : "S");
+        String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
-        String degString = Integer.toString(Math.abs(deg));
-        String zeroes = "00".substring(0, (longitude ? 3 : 2) - degString.length());
+        String degString = Integer.toString( Math.abs( deg ) );
+        String zeroes = "00".substring( 0, ( longitude ? 3 : 2 ) - degString.length( ) );
         degString = zeroes + degString;
 
-        return degString + degreeSign
-        + (min < 10 ? "0" : "") + min + minuteSign
-        + secondsFormatter.format(sec) + secondSign + hemisphere;
+        return degString + degreeSign + ( min < 10 ? "0" : "" ) + min + minuteSign + secondsFormatter.format( sec ) + secondSign + hemisphere;
     }
 
-    public final static String toDegreesMinutes(double degrees, int nDecimals, boolean longitude)
+    public final static String toDegreesMinutes( double degrees, int nDecimals, boolean longitude )
     {
-        double[] dms = toDegreesMinutes(degrees);
-        int deg = (int) dms[0];
+        double[] dms = toDegreesMinutes( degrees );
+        int deg = ( int ) dms[0];
         double min = dms[1];
 
-        NumberFormat minutesFormatter = NumberFormat.getInstance();
-        minutesFormatter.setMinimumFractionDigits(nDecimals);
-        minutesFormatter.setMaximumFractionDigits(nDecimals);
-        minutesFormatter.setMinimumIntegerDigits(2);
+        NumberFormat minutesFormatter = NumberFormat.getInstance( );
+        minutesFormatter.setMinimumFractionDigits( nDecimals );
+        minutesFormatter.setMaximumFractionDigits( nDecimals );
+        minutesFormatter.setMinimumIntegerDigits( 2 );
 
-        String hemisphere = longitude ? (degrees >= 0.0 ? "E" : "W")
-                                      : (degrees >= 0.0 ? "N" : "S");
+        String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
-        String degString = Integer.toString(Math.abs(deg));
-        String zeroes = "00".substring(0, (longitude ? 3 : 2) - degString.length());
+        String degString = Integer.toString( Math.abs( deg ) );
+        String zeroes = "00".substring( 0, ( longitude ? 3 : 2 ) - degString.length( ) );
         degString = zeroes + degString;
 
-        return degString + degreeSign
-        + minutesFormatter.format(min) + minuteSign + hemisphere;
+        return degString + degreeSign + minutesFormatter.format( min ) + minuteSign + hemisphere;
     }
 
-    public final static String toDegrees(double degrees, int nDecimals, boolean longitude)
+    public final static String toDegrees( double degrees, int nDecimals, boolean longitude )
     {
-        NumberFormat degreesFormatter = NumberFormat.getInstance();
-        degreesFormatter.setMinimumFractionDigits(nDecimals);
-        degreesFormatter.setMaximumFractionDigits(nDecimals);
-        degreesFormatter.setMinimumIntegerDigits(longitude ? 3 : 2);
+        NumberFormat degreesFormatter = NumberFormat.getInstance( );
+        degreesFormatter.setMinimumFractionDigits( nDecimals );
+        degreesFormatter.setMaximumFractionDigits( nDecimals );
+        degreesFormatter.setMinimumIntegerDigits( longitude ? 3 : 2 );
 
-        String hemisphere = longitude ? (degrees >= 0.0 ? "E" : "W")
-                                      : (degrees >= 0.0 ? "N" : "S");
+        String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
-        String degString = Integer.toString((int)Math.abs(Math.floor(degrees)));
-        String zeroes = "00".substring(0, (longitude ? 3 : 2) - degString.length());
+        String degString = Integer.toString( ( int ) Math.abs( Math.floor( degrees ) ) );
+        String zeroes = "00".substring( 0, ( longitude ? 3 : 2 ) - degString.length( ) );
         degString = zeroes + degString;
 
-        return degreesFormatter.format(degrees) + degreeSign + hemisphere;
+        return degreesFormatter.format( degrees ) + degreeSign + hemisphere;
     }
 
-    public final static double[] toDegreesMinutesSeconds(double degrees)
+    public final static double[] toDegreesMinutesSeconds( double degrees )
     {
-        double sign = (degrees >= 0.0) ? 1.0 : -1.0;
-        degrees = Math.abs(degrees);
+        double sign = ( degrees >= 0.0 ) ? 1.0 : -1.0;
+        degrees = Math.abs( degrees );
         double[] dms = new double[3];
-        dms[0] = Math.floor(degrees);
-        double minutes = (degrees - dms[0]) * 60.0;
-        dms[1] = Math.floor(minutes);
-        dms[2] = (minutes - dms[1]) * 60.0;
+        dms[0] = Math.floor( degrees );
+        double minutes = ( degrees - dms[0] ) * 60.0;
+        dms[1] = Math.floor( minutes );
+        dms[2] = ( minutes - dms[1] ) * 60.0;
         dms[0] *= sign;
         return dms;
     }
 
-    public final static double[] toDegreesMinutes(double degrees)
+    public final static double[] toDegreesMinutes( double degrees )
     {
-        double sign = (degrees >= 0.0) ? 1.0 : -1.0;
-        degrees = Math.abs(degrees);
+        double sign = ( degrees >= 0.0 ) ? 1.0 : -1.0;
+        degrees = Math.abs( degrees );
         double[] dms = new double[2];
-        dms[0] = Math.floor(degrees);
-        double minutes = (degrees - dms[0]) * 60.0;
+        dms[0] = Math.floor( degrees );
+        double minutes = ( degrees - dms[0] ) * 60.0;
         dms[1] = minutes;
         dms[0] *= sign;
         return dms;

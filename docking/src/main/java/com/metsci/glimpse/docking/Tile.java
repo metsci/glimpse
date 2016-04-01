@@ -37,18 +37,26 @@ public abstract class Tile extends JComponent
     public static interface TileListener
     {
         void addedView( View view );
+
         void removedView( View view );
+
         void selectedView( View view );
     }
 
-
     public static class TileAdapter implements TileListener
     {
-        public void addedView( View view ) { }
-        public void removedView( View view ) { }
-        public void selectedView( View view ) { }
-    }
+        public void addedView( View view )
+        {
+        }
 
+        public void removedView( View view )
+        {
+        }
+
+        public void selectedView( View view )
+        {
+        }
+    }
 
     public abstract void addListener( TileListener listener );
 

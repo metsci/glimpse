@@ -46,15 +46,15 @@ import com.metsci.glimpse.dspl.parser.table.SimpleSliceTableData;
 import com.metsci.glimpse.dspl.schema.Concept;
 import com.metsci.glimpse.dspl.schema.ConceptProperty;
 import com.metsci.glimpse.dspl.schema.ConceptTableMapping;
+import com.metsci.glimpse.dspl.schema.ConceptTableMapping.MapProperty;
 import com.metsci.glimpse.dspl.schema.DataSet;
 import com.metsci.glimpse.dspl.schema.DataType;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.schema.SliceConceptRef;
 import com.metsci.glimpse.dspl.schema.SliceTableMapping;
-import com.metsci.glimpse.dspl.schema.Table;
-import com.metsci.glimpse.dspl.schema.ConceptTableMapping.MapProperty;
 import com.metsci.glimpse.dspl.schema.SliceTableMapping.MapDimension;
 import com.metsci.glimpse.dspl.schema.SliceTableMapping.MapMetric;
+import com.metsci.glimpse.dspl.schema.Table;
 import com.metsci.glimpse.dspl.schema.Table.Column;
 import com.metsci.glimpse.dspl.util.DsplException;
 import com.metsci.glimpse.util.Pair;
@@ -116,12 +116,12 @@ public class ParserUtils
 
             switch ( sliceType )
             {
-            case Dimension:
-                map = dimensionMap;
-                break;
-            case Metric:
-                map = metricMap;
-                break;
+                case Dimension:
+                    map = dimensionMap;
+                    break;
+                case Metric:
+                    map = metricMap;
+                    break;
             }
 
             map.put( column.getId( ), parser.createTableColumn( column, columnConcept, type ) );
@@ -286,26 +286,26 @@ public class ParserUtils
 
             switch ( type )
             {
-            case STRING:
-                parser = newStringParser( column );
-                break;
-            case FLOAT:
-                parser = newFloatParser( column );
-                break;
-            case INTEGER:
-                parser = newIntegerParser( column );
-                break;
-            case BOOLEAN:
-                parser = newBooleanParser( column );
-                break;
-            case DATE:
-                parser = newDateParser( column );
-                break;
-            case CONCEPT:
-                parser = newConceptParser( column );
-                break;
-            default:
-                throw new DsplException( "Unknown Type %s provided for Column %s.", type, column.getId( ) );
+                case STRING:
+                    parser = newStringParser( column );
+                    break;
+                case FLOAT:
+                    parser = newFloatParser( column );
+                    break;
+                case INTEGER:
+                    parser = newIntegerParser( column );
+                    break;
+                case BOOLEAN:
+                    parser = newBooleanParser( column );
+                    break;
+                case DATE:
+                    parser = newDateParser( column );
+                    break;
+                case CONCEPT:
+                    parser = newConceptParser( column );
+                    break;
+                default:
+                    throw new DsplException( "Unknown Type %s provided for Column %s.", type, column.getId( ) );
             }
 
             return parser;

@@ -27,12 +27,6 @@
 package com.metsci.glimpse.examples.worldwind;
 
 import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
-import gov.nasa.worldwind.BasicModel;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.layers.ViewControlsLayer;
-import gov.nasa.worldwind.layers.ViewControlsSelectListener;
-import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
@@ -58,6 +52,13 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
 import com.metsci.glimpse.worldwind.tile.GlimpseDynamicSurfaceTile;
 import com.metsci.glimpse.worldwind.tile.GlimpseReprojectingSurfaceTile;
+
+import gov.nasa.worldwind.BasicModel;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.layers.ViewControlsLayer;
+import gov.nasa.worldwind.layers.ViewControlsSelectListener;
+import gov.nasa.worldwindx.examples.ApplicationTemplate;
 
 public class BathymetryTileExample
 {
@@ -134,7 +135,7 @@ public class BathymetryTileExample
         worldwindFrame.setSize( 800, 800 );
         worldwindFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         worldwindFrame.setVisible( true );
-        
+
         // create a Glimpse Frame
         NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );

@@ -139,7 +139,7 @@ public class EventSelectionHandler
     public void setSelectedEvents( Set<Event> newEvents )
     {
         Set<Event> oldEvents = Sets.newHashSet( selectedEvents );
-        
+
         if ( newEvents.equals( oldEvents ) ) return;
 
         // set of deselected events

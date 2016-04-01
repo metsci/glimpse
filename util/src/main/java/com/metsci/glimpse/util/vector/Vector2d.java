@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.vector;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.Serializable;
 import java.util.logging.Logger;
@@ -37,7 +37,6 @@ import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.units.AngleRelative;
 import com.metsci.glimpse.util.units.Azimuth;
 
-
 /**
  * Basic class representing an immutable vector containing 2 doubles.  All inputs and outputs are in
  * system units.
@@ -47,56 +46,55 @@ import com.metsci.glimpse.util.units.Azimuth;
 public final class Vector2d implements Serializable
 {
     private static final long serialVersionUID = 7660130239937273594L;
-    private static final Logger logger = Logger.getLogger(Vector2d.class.getName());
+    private static final Logger logger = Logger.getLogger( Vector2d.class.getName( ) );
 
     private final double x;
     private final double y;
 
-
-    public Vector2d(double x, double y)
+    public Vector2d( double x, double y )
     {
         this.x = x;
         this.y = y;
     }
 
-    public Vector2d()
+    public Vector2d( )
     {
-        this(0, 0);
+        this( 0, 0 );
     }
 
-    public double getX()
+    public double getX( )
     {
         return x;
     }
 
-    public double getY()
+    public double getY( )
     {
         return y;
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals( Object o )
     {
-        if (o == null)
+        if ( o == null )
         {
             return false;
         }
-        else if (!(o instanceof Vector2d))
+        else if ( ! ( o instanceof Vector2d ) )
         {
             return false;
         }
         else
         {
-            Vector2d other = (Vector2d) o;
+            Vector2d other = ( Vector2d ) o;
 
-            return (x == other.x) && (y == other.y);
+            return ( x == other.x ) && ( y == other.y );
         }
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
-        return new Double(x).hashCode() ^ new Double(y).hashCode();
+        return new Double( x ).hashCode( ) ^ new Double( y ).hashCode( );
     }
 
     /**
@@ -105,84 +103,84 @@ public final class Vector2d implements Serializable
      * @param   coordFormat  format applied to each coordinate (as in String.format)
      * @return  formatted string with comma separated coordinates
      */
-    public String format(String coordFormat)
+    public String format( String coordFormat )
     {
-        return String.format("(" + coordFormat + ", " + coordFormat + ")", x, y);
+        return String.format( "(" + coordFormat + ", " + coordFormat + ")", x, y );
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
-        return format("%.5g");
+        return format( "%.5g" );
     }
 
-    public Vector2d plus(Vector2d v)
+    public Vector2d plus( Vector2d v )
     {
-        return new Vector2d(x + v.x, y + v.y);
+        return new Vector2d( x + v.x, y + v.y );
     }
 
-    public Vector2d minus(Vector2d v)
+    public Vector2d minus( Vector2d v )
     {
-        return new Vector2d(x - v.x, y - v.y);
+        return new Vector2d( x - v.x, y - v.y );
     }
 
     /**
      * @deprecated use {@link #scaledBy(double)}
      */
     @Deprecated
-    public Vector2d scalarProduct(double alpha)
+    public Vector2d scalarProduct( double alpha )
     {
-        return scaledBy(alpha);
+        return scaledBy( alpha );
     }
 
-    public Vector2d scaledBy(double scaleFactor)
+    public Vector2d scaledBy( double scaleFactor )
     {
-        if (scaleFactor != 1.0)
+        if ( scaleFactor != 1.0 )
         {
-            return new Vector2d(scaleFactor * x, scaleFactor * y);
+            return new Vector2d( scaleFactor * x, scaleFactor * y );
         }
 
         return this;
     }
 
-    public double dotProduct(Vector2d v)
+    public double dotProduct( Vector2d v )
     {
-        return (x * v.x) + (y * v.y);
+        return ( x * v.x ) + ( y * v.y );
     }
 
-    public double crossProduct(Vector2d v)
+    public double crossProduct( Vector2d v )
     {
-        return (x * v.y) - (y * v.x);
+        return ( x * v.y ) - ( y * v.x );
     }
 
-    public boolean isToRightOf(Vector2d v)
+    public boolean isToRightOf( Vector2d v )
     {
-        return crossProduct(v) > 0.0;
+        return crossProduct( v ) > 0.0;
     }
 
-    public double azimuthAngle()
+    public double azimuthAngle( )
     {
-        return Azimuth.fromMathRad(Math.atan2(y, x));
+        return Azimuth.fromMathRad( Math.atan2( y, x ) );
     }
 
-    public double azimuthAngleFast()
+    public double azimuthAngleFast( )
     {
-        return Azimuth.fromMathRad(FastAtan.getInstance().atan2(this.getY(), this.getX()));
+        return Azimuth.fromMathRad( FastAtan.getInstance( ).atan2( this.getY( ), this.getX( ) ) );
     }
 
-    public double normSquared()
+    public double normSquared( )
     {
-        return (x * x) + (y * y);
+        return ( x * x ) + ( y * y );
     }
 
-    public double norm()
+    public double norm( )
     {
-        return Math.sqrt(normSquared());
+        return Math.sqrt( normSquared( ) );
     }
 
-    public boolean isZero()
+    public boolean isZero( )
     {
-        return (x == 0) && (y == 0);
+        return ( x == 0 ) && ( y == 0 );
     }
 
     /**
@@ -193,16 +191,15 @@ public final class Vector2d implements Serializable
      *
      * @return  normalized version of this vector
      */
-    public Vector2d normalized()
+    public Vector2d normalized( )
     {
-        double alpha = norm();
-        if (alpha == 0)
+        double alpha = norm( );
+        if ( alpha == 0 )
         {
-            logWarning(logger, "Normalizing a zero vector.  Will return all NaN values.\n" +
-                       StackTraceUtils.getCallers(5));
+            logWarning( logger, "Normalizing a zero vector.  Will return all NaN values.\n" + StackTraceUtils.getCallers( 5 ) );
         }
 
-        return scaledBy(1.0 / alpha);
+        return scaledBy( 1.0 / alpha );
     }
 
     /**
@@ -212,40 +209,39 @@ public final class Vector2d implements Serializable
      *
      * @return  normalized version of this vector
      */
-    public Vector2d normalizedLenient()
+    public Vector2d normalizedLenient( )
     {
-        double alpha = norm();
-        if (alpha == 0)
+        double alpha = norm( );
+        if ( alpha == 0 )
         {
-            return new Vector2d(1, 0);
+            return new Vector2d( 1, 0 );
         }
 
-        return scaledBy(1.0 / alpha);
+        return scaledBy( 1.0 / alpha );
     }
 
-    public double distanceSquared(Vector2d v)
+    public double distanceSquared( Vector2d v )
     {
-        return ((x - v.x) * (x - v.x)) +
-               ((y - v.y) * (y - v.y));
+        return ( ( x - v.x ) * ( x - v.x ) ) + ( ( y - v.y ) * ( y - v.y ) );
     }
 
-    public double distance(Vector2d v)
+    public double distance( Vector2d v )
     {
-        return Math.sqrt(distanceSquared(v));
+        return Math.sqrt( distanceSquared( v ) );
     }
 
     /**
      * Returns cosine of the angle between this vector and vector v.
      */
-    public double cosAngleWith(Vector2d v)
+    public double cosAngleWith( Vector2d v )
     {
-        if (isZero() || v.isZero())
+        if ( isZero( ) || v.isZero( ) )
         {
             return 1;
         }
 
-        double cosAngle = dotProduct(v) / (norm() * v.norm());
-        cosAngle = Math.min(1, Math.max(-1, cosAngle));
+        double cosAngle = dotProduct( v ) / ( norm( ) * v.norm( ) );
+        cosAngle = Math.min( 1, Math.max( -1, cosAngle ) );
 
         return cosAngle;
     }
@@ -253,9 +249,9 @@ public final class Vector2d implements Serializable
     /**
      * Returns the conical (unsigned) angle between this vector and vector v.
      */
-    public double angleWith(Vector2d v)
+    public double angleWith( Vector2d v )
     {
-        return Angle.fromRad(Math.acos(cosAngleWith(v)));
+        return Angle.fromRad( Math.acos( cosAngleWith( v ) ) );
     }
 
     /**
@@ -263,46 +259,46 @@ public final class Vector2d implements Serializable
      *
      * @see #projectionOnto(Vector2d, boolean) for lenient handling of v
      */
-    public Vector2d projectOnto(Vector2d v)
+    public Vector2d projectOnto( Vector2d v )
     {
-        double scale = dotProduct(v) / v.normSquared();
+        double scale = dotProduct( v ) / v.normSquared( );
 
-        return v.scaledBy(scale);
+        return v.scaledBy( scale );
     }
 
     /**
      * Returns the projection of this vector onto the vector v.  Lenient version treats zero vector for v as (1,0)
      * in order to avoid returning vector containing NaN values.
      */
-    public Vector2d projectionOnto(Vector2d v, boolean isLenient)
+    public Vector2d projectionOnto( Vector2d v, boolean isLenient )
     {
-        if (isLenient && v.isZero())
+        if ( isLenient && v.isZero( ) )
         {
-             v = new Vector2d(1, 0);
+            v = new Vector2d( 1, 0 );
         }
 
-        return projectOnto(v);
+        return projectOnto( v );
     }
 
     /**
      * @param   theta  rotation angle
      * @return  rotated copy
      */
-    public Vector2d rotatedAboutOriginBy(double theta)
+    public Vector2d rotatedAboutOriginBy( double theta )
     {
-        double theta_CCWRAD = AngleRelative.toCcwRad(theta);
-        double sin = Math.sin(theta_CCWRAD);
-        double cos = Math.cos(theta_CCWRAD);
+        double theta_CCWRAD = AngleRelative.toCcwRad( theta );
+        double sin = Math.sin( theta_CCWRAD );
+        double cos = Math.cos( theta_CCWRAD );
 
-        return new Vector2d((x * cos) - (y * sin), (x * sin) + (y * cos));
+        return new Vector2d( ( x * cos ) - ( y * sin ), ( x * sin ) + ( y * cos ) );
     }
 
     /**
      * Returns a vector perpendicular to this one, with same norm.
      */
-    public Vector2d perpendicularVector()
+    public Vector2d perpendicularVector( )
     {
-        return new Vector2d(-y, x);
+        return new Vector2d( -y, x );
     }
 
     /**
@@ -311,21 +307,21 @@ public final class Vector2d implements Serializable
      * @param   z
      * @return  ThreeVector
      */
-    public Vector3d toVector3d(double z)
+    public Vector3d toVector3d( double z )
     {
-        return new Vector3d(x, y, z);
+        return new Vector3d( x, y, z );
     }
 
-    public double[] toArray()
+    public double[] toArray( )
     {
         return new double[] { x, y };
     }
 
-    public static Vector2d fromArray(double[] coords)
+    public static Vector2d fromArray( double[] coords )
     {
         assert coords.length == 2;
 
-        return new Vector2d(coords[0], coords[1]);
+        return new Vector2d( coords[0], coords[1] );
     }
 
     /**
@@ -335,13 +331,13 @@ public final class Vector2d implements Serializable
      * @param   theta   azimuth angle
      * @return  Vector2d
      */
-    public static Vector2d createPolar(double radius, double theta)
+    public static Vector2d createPolar( double radius, double theta )
     {
-        double theta_MATHRAD = Azimuth.toMathRad(theta);
-        double unitX = Math.cos(theta_MATHRAD);
-        double unitY = Math.sin(theta_MATHRAD);
+        double theta_MATHRAD = Azimuth.toMathRad( theta );
+        double unitX = Math.cos( theta_MATHRAD );
+        double unitY = Math.sin( theta_MATHRAD );
 
-        return new Vector2d(radius * unitX, radius * unitY);
+        return new Vector2d( radius * unitX, radius * unitY );
     }
 
     /**
@@ -353,37 +349,35 @@ public final class Vector2d implements Serializable
      * @param   translateY
      * @return  Vector2d
      */
-    public static Vector2d createPolarTranslated(double radius, double theta, double translateX,
-                                                 double translateY)
+    public static Vector2d createPolarTranslated( double radius, double theta, double translateX, double translateY )
     {
-        double theta_MATHRAD = Azimuth.toMathRad(theta);
-        double unitX = Math.cos(theta_MATHRAD);
-        double unitY = Math.sin(theta_MATHRAD);
+        double theta_MATHRAD = Azimuth.toMathRad( theta );
+        double unitX = Math.cos( theta_MATHRAD );
+        double unitY = Math.sin( theta_MATHRAD );
 
-        return new Vector2d(translateX + (radius * unitX), translateY + (radius * unitY));
+        return new Vector2d( translateX + ( radius * unitX ), translateY + ( radius * unitY ) );
     }
 
-    public static Vector2d linearCombination(double a1, Vector2d v1, double a2, Vector2d v2)
+    public static Vector2d linearCombination( double a1, Vector2d v1, double a2, Vector2d v2 )
     {
-        return new Vector2d((a1 * v1.getX()) + (a2 * v2.getX()),
-                            (a1 * v1.getY()) + (a2 * v2.getY()));
+        return new Vector2d( ( a1 * v1.getX( ) ) + ( a2 * v2.getX( ) ), ( a1 * v1.getY( ) ) + ( a2 * v2.getY( ) ) );
     }
 
-    public static Vector2d linearCombination(double[] a, Vector2d[] w)
+    public static Vector2d linearCombination( double[] a, Vector2d[] w )
     {
-        if (a.length != w.length)
+        if ( a.length != w.length )
         {
-            throw new RuntimeException("Incompatible arrays in linearCombination");
+            throw new RuntimeException( "Incompatible arrays in linearCombination" );
         }
 
         double xTot = 0.0;
         double yTot = 0.0;
-        for (int i = 0; i < a.length; i++)
+        for ( int i = 0; i < a.length; i++ )
         {
-            xTot += (a[i] * w[i].getX());
-            yTot += (a[i] * w[i].getY());
+            xTot += ( a[i] * w[i].getX( ) );
+            yTot += ( a[i] * w[i].getY( ) );
         }
 
-        return new Vector2d(xTot, yTot);
+        return new Vector2d( xTot, yTot );
     }
 }

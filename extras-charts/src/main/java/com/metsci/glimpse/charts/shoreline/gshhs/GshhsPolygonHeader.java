@@ -51,7 +51,7 @@ public class GshhsPolygonHeader
      */
     public static enum PolygonType
     {
-        land( 1 ), lake( 2 ), islandInLake( 3 ), pondInIslandInLake( 4 ), riverLake( 2 );
+        land(1), lake(2), islandInLake(3), pondInIslandInLake(4), riverLake(2);
 
         public final int level;
 
@@ -124,14 +124,14 @@ public class GshhsPolygonHeader
         int dataSourceByte = ( ( flag >> 24 ) & 0x01 );
         switch ( dataSourceByte )
         {
-        case 0:
-            dataSource = PolygonDataSource.wdb2;
-            break;
-        case 1:
-            dataSource = PolygonDataSource.wvs;
-            break;
-        default:
-            throw new UnrecognizedValueException( "data source", dataSourceByte );
+            case 0:
+                dataSource = PolygonDataSource.wdb2;
+                break;
+            case 1:
+                dataSource = PolygonDataSource.wvs;
+                break;
+            default:
+                throw new UnrecognizedValueException( "data source", dataSourceByte );
         }
 
         boolean riverLake = ( ( flag >> 25 ) & 0x01 ) == 1;
@@ -143,20 +143,20 @@ public class GshhsPolygonHeader
         {
             switch ( typeByte )
             {
-            case 1:
-                type = PolygonType.land;
-                break;
-            case 2:
-                type = PolygonType.lake;
-                break;
-            case 3:
-                type = PolygonType.islandInLake;
-                break;
-            case 4:
-                type = PolygonType.pondInIslandInLake;
-                break;
-            default:
-                type = PolygonType.lake;
+                case 1:
+                    type = PolygonType.land;
+                    break;
+                case 2:
+                    type = PolygonType.lake;
+                    break;
+                case 3:
+                    type = PolygonType.islandInLake;
+                    break;
+                case 4:
+                    type = PolygonType.pondInIslandInLake;
+                    break;
+                default:
+                    type = PolygonType.lake;
             }
         }
 

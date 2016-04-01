@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.factory;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.context.TargetStackUtil.endsWith;
 
 import com.metsci.glimpse.context.GlimpseTargetStack;
 
@@ -47,7 +47,7 @@ public class ConditionalEndsWithAxisFactory2D extends ConditionalAxisFactory2D
     {
         super( stack, factory );
     }
-    
+
     @Override
     protected boolean isConditionMet( GlimpseTargetStack stack, GlimpseTargetStack candidate )
     {

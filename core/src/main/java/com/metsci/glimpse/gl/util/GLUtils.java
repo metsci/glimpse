@@ -39,7 +39,6 @@ import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-
 public class GLUtils
 {
     private GLUtils( )
@@ -78,7 +77,7 @@ public class GLUtils
 
     public static int getGLTextureDim( int ndim )
     {
-        switch( ndim )
+        switch ( ndim )
         {
             case 1:
                 return GL2.GL_TEXTURE_1D;
@@ -93,8 +92,7 @@ public class GLUtils
 
     public static int getGLTextureUnit( int texUnit )
     {
-        if( texUnit > 31 || texUnit < 0 )
-            throw new IllegalArgumentException( "Only 31 texture units supported." );
+        if ( texUnit > 31 || texUnit < 0 ) throw new IllegalArgumentException( "Only 31 texture units supported." );
 
         return GL2.GL_TEXTURE0 + texUnit;
     }
@@ -103,7 +101,7 @@ public class GLUtils
     {
         return newOffscreenDrawable( getDefaultGLProfile( ) );
     }
-    
+
     public static GLOffscreenAutoDrawable newOffscreenDrawable( String profileName )
     {
         return newOffscreenDrawable( GLProfile.get( profileName ) );
@@ -113,30 +111,30 @@ public class GLUtils
     {
         return newOffscreenDrawable( profile, null );
     }
-    
+
     public static GLOffscreenAutoDrawable newOffscreenDrawable( GLContext sharedContext )
     {
         return newOffscreenDrawable( sharedContext.getGLDrawable( ).getGLProfile( ), sharedContext );
     }
-    
+
     public static GLOffscreenAutoDrawable newOffscreenDrawable( GLProfile profile, GLContext sharedContext )
     {
         return newOffscreenDrawable( new GLCapabilities( profile ), profile, sharedContext );
     }
-    
+
     public static GLOffscreenAutoDrawable newOffscreenDrawable( GLCapabilities caps, GLProfile profile, GLContext sharedContext )
     {
         GLDrawableFactory drawableFactory = GLDrawableFactory.getFactory( profile );
-        
+
         GLOffscreenAutoDrawable offscreenDrawable = drawableFactory.createOffscreenAutoDrawable( null, caps, null, 1, 1 );
         if ( sharedContext != null ) offscreenDrawable.setSharedContext( sharedContext );
-        
+
         // Trigger context creation
         offscreenDrawable.display( );
 
         return offscreenDrawable;
     }
-    
+
     public static GLProfile getDefaultGLProfile( )
     {
         return GLProfile.getMaxFixedFunc( true );

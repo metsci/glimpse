@@ -43,7 +43,7 @@ public class LatLonRect
 
     private LatLonRect( double x, double y, double z )
     {
-        length = Math.sqrt( x*x + y*y + z*z );
+        length = Math.sqrt( x * x + y * y + z * z );
         final double invLen = 1d / length;
 
         xUnit = x * invLen;
@@ -63,7 +63,7 @@ public class LatLonRect
     {
         return new LatLonRect( xUnit, yUnit, xUnit, length );
     }
-    
+
     public static final LatLonRect fromEnu( Vector3d enuPoint, LatLonGeo refPoint, Datum datum )
     {
         return datum.fromEnu( enuPoint, refPoint );
@@ -81,12 +81,12 @@ public class LatLonRect
 
     public static LatLonRect fromDeg( double northLat, double eastLon, double altitude, Datum d )
     {
-        return d.toLatLonRect( northLat*piOver180, eastLon*piOver180, altitude );
+        return d.toLatLonRect( northLat * piOver180, eastLon * piOver180, altitude );
     }
 
     public static LatLonRect fromDeg( double northLat, double eastLon, Datum d )
     {
-        return d.toLatLonRect( northLat*piOver180, eastLon*piOver180, 0d );
+        return d.toLatLonRect( northLat * piOver180, eastLon * piOver180, 0d );
     }
 
     public static LatLonRect fromXyz( double x, double y, double z )
@@ -126,7 +126,7 @@ public class LatLonRect
         final double dy = yUnit * length - r.yUnit * rlen;
         final double dz = zUnit * length - r.zUnit * rlen;
 
-        return dx*dx + dy*dy + dz*dz;
+        return dx * dx + dy * dy + dz * dz;
     }
 
     public final double chordDistance( LatLonRect r )
@@ -136,88 +136,85 @@ public class LatLonRect
         final double dy = yUnit * length - r.yUnit * rlen;
         final double dz = zUnit * length - r.zUnit * rlen;
 
-        return Math.sqrt( dx*dx + dy*dy + dz*dz );
+        return Math.sqrt( dx * dx + dy * dy + dz * dz );
     }
 
-    public final double getX()
+    public final double getX( )
     {
         return xUnit * length;
     }
 
-    public final double getY()
+    public final double getY( )
     {
         return yUnit * length;
     }
 
-    public final double getZ()
+    public final double getZ( )
     {
         return zUnit * length;
     }
 
-    public final double getUnitX()
+    public final double getUnitX( )
     {
         return xUnit;
     }
 
-    public final double getUnitY()
+    public final double getUnitY( )
     {
         return yUnit;
     }
 
-    public final double getUnitZ()
+    public final double getUnitZ( )
     {
         return zUnit;
     }
 
-    public final double getLength()
+    public final double getLength( )
     {
         return length;
     }
 
     public final boolean almostEquals( LatLonRect o, double eps )
     {
-        if( Math.abs( o.xUnit - xUnit ) > eps ) return false;
-        if( Math.abs( o.yUnit - yUnit ) > eps ) return false;
-        if( Math.abs( o.zUnit - zUnit ) > eps ) return false;
-        if( Math.abs( o.length - length ) > eps ) return false;
+        if ( Math.abs( o.xUnit - xUnit ) > eps ) return false;
+        if ( Math.abs( o.yUnit - yUnit ) > eps ) return false;
+        if ( Math.abs( o.zUnit - zUnit ) > eps ) return false;
+        if ( Math.abs( o.length - length ) > eps ) return false;
 
         return true;
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals( Object obj )
     {
-        if( this == obj )
-            return true;
-        if( obj == null )
-            return false;
-        if( getClass( ) != obj.getClass( ) )
-            return false;
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( getClass( ) != obj.getClass( ) ) return false;
 
-        LatLonRect o = (LatLonRect) obj;
+        LatLonRect o = ( LatLonRect ) obj;
 
-        if( Double.doubleToLongBits( length ) != Double.doubleToLongBits( o.length ) ) return false;
-        if( Double.doubleToLongBits( xUnit ) != Double.doubleToLongBits( o.xUnit ) ) return false;
-        if( Double.doubleToLongBits( yUnit ) != Double.doubleToLongBits( o.yUnit ) ) return false;
-        if( Double.doubleToLongBits( zUnit ) != Double.doubleToLongBits( o.zUnit ) ) return false;
+        if ( Double.doubleToLongBits( length ) != Double.doubleToLongBits( o.length ) ) return false;
+        if ( Double.doubleToLongBits( xUnit ) != Double.doubleToLongBits( o.xUnit ) ) return false;
+        if ( Double.doubleToLongBits( yUnit ) != Double.doubleToLongBits( o.yUnit ) ) return false;
+        if ( Double.doubleToLongBits( zUnit ) != Double.doubleToLongBits( o.zUnit ) ) return false;
 
         return true;
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
         final int prime = 31;
         int result = 1;
         long temp;
         temp = Double.doubleToLongBits( length );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         temp = Double.doubleToLongBits( xUnit );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         temp = Double.doubleToLongBits( yUnit );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         temp = Double.doubleToLongBits( zUnit );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         return result;
     }
 }

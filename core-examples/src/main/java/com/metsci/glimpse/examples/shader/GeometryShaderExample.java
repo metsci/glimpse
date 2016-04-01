@@ -109,7 +109,9 @@ public class GeometryShaderExample implements GlimpseLayoutProvider
     final Pipeline[] pipelines;
     final String[] pipelineNames;
     int pipelineIndex1, pipelineIndex2, pipelineIndex3;
-    private final SimpleTextPainter textLeft = new SimpleTextPainter( ), textRight = new SimpleTextPainter( ), textCenter = new SimpleTextPainter( );
+    private final SimpleTextPainter textLeft = new SimpleTextPainter( );
+    private final SimpleTextPainter textRight = new SimpleTextPainter( );
+    private final SimpleTextPainter textCenter = new SimpleTextPainter( );
     RGBA[] colors;
 
     private static final float z = 0.0f, w = 1.0f;

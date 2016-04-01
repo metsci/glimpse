@@ -285,7 +285,7 @@ public class GLSimpleFrameBufferObject
 
         for ( GLEventListener entry : listeners )
         {
-            entry.dispose( (GLAutoDrawable) context.getGLDrawable( ) );
+            entry.dispose( ( GLAutoDrawable ) context.getGLDrawable( ) );
         }
 
         if ( textureId != null ) gl.glDeleteTextures( 1, textureId, 0 );

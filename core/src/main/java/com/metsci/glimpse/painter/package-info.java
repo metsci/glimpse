@@ -6,4 +6,3 @@
  * {@link com.metsci.glimpse.canvas.GlimpseCanvas}.<p>
  */
 package com.metsci.glimpse.painter;
-

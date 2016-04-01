@@ -138,14 +138,14 @@ public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
             target.setLookAndFeel( laf );
         }
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -158,16 +158,16 @@ public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {

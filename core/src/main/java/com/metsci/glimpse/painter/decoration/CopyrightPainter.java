@@ -75,7 +75,7 @@ public class CopyrightPainter extends GlimpsePainterImpl
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
         if ( textRenderer == null ) return;
-        
+
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 

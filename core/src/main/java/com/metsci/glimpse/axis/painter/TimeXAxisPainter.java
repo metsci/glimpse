@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.util.units.time.TimeStamp.*;
+import static com.metsci.glimpse.util.units.time.TimeStamp.currentTime;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -53,12 +53,12 @@ import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
  * @see TimeAxisPainter
  */
 public class TimeXAxisPainter extends TimeAxisPainter
-{	
+{
     public TimeXAxisPainter( TimeZone timeZone, Epoch epoch )
     {
         super( new TimeAxisLabelHandler( timeZone, epoch ) );
     }
-	
+
     public TimeXAxisPainter( Epoch epoch )
     {
         super( new TimeAxisLabelHandler( epoch ) );
@@ -66,17 +66,17 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
     public TimeXAxisPainter( TimeAxisLabelHandler handler )
     {
-    	super( handler );
+        super( handler );
     }
-    
+
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
         super.paintTo( context, bounds, axis );
-        
+
         if ( textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -86,7 +86,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
-        
+
         gl.glMatrixMode( GL2.GL_MODELVIEW );
         gl.glLoadIdentity( );
 
@@ -154,7 +154,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
             textRenderer.endRendering( );
         }
     }
-    
+
     protected TimeStamp getCurrentTime( )
     {
         return currentTime( );
@@ -240,7 +240,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
             textRenderer.endRendering( );
         }
     }
-    
+
     protected String getCurrentTimeTickText( TimeStamp currentTime )
     {
         return "NOW";

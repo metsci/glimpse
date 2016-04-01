@@ -6,4 +6,3 @@
  * Finally, painters are provided for visualizing the axis with tick marks, bounds, and labels.
  */
 package com.metsci.glimpse.axis;
-

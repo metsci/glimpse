@@ -27,12 +27,6 @@
 package com.metsci.glimpse.worldwind.tile;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.layers.AbstractLayer;
-import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.PreRenderable;
-import gov.nasa.worldwind.render.Renderable;
-import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.util.logging.Logger;
 
@@ -45,6 +39,13 @@ import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
+
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.layers.AbstractLayer;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.PreRenderable;
+import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.util.OGLStackHandler;
 
 /**
  * GlimpseSurfaceTile uses TextureSurfaceTile to display the output of Glimpse

@@ -52,7 +52,7 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
     protected volatile boolean pointSmooth = true;
     protected volatile boolean lineSmooth = true;
     protected volatile boolean blend = true;
-    
+
     public boolean isPointSmooth( )
     {
         return pointSmooth;
@@ -88,7 +88,7 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
     {
         if ( axis == null || axis.getAxisX( ) == null || axis.getAxisY( ) == null || !bounds.isValid( ) ) return;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
@@ -109,10 +109,10 @@ public abstract class GlimpseDataPainter2D extends GlimpsePainter2D
             gl.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
             gl.glEnable( GL2.GL_BLEND );
         }
-        
+
         if ( lineSmooth ) gl.glEnable( GL2.GL_LINE_SMOOTH );
         if ( pointSmooth ) gl.glEnable( GL2.GL_POINT_SMOOTH );
 
-        paintTo( context.getGL( ).getGL2(), bounds, axis );
+        paintTo( context.getGL( ).getGL2( ), bounds, axis );
     }
 }

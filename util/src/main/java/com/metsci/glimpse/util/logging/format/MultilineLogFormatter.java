@@ -33,7 +33,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-
 /**
  * Produces "Multiline" Log Messages which place each of LEVEL, CLASS, METHOD, MSG, and TIME on a
  * separate line.
@@ -43,61 +42,60 @@ import java.util.logging.LogRecord;
 public class MultilineLogFormatter extends Formatter
 {
     @Override
-    public String format(LogRecord rec)
+    public String format( LogRecord rec )
     {
-        super.format(rec);
+        super.format( rec );
 
-        StringBuilder builder = new StringBuilder(1000);
+        StringBuilder builder = new StringBuilder( 1000 );
 
         // give a red color to any messages with levels >= WARNING
-        builder.append(LINE_SEPARATOR);
-        builder.append("LEVEL  : ");
-        if (rec.getLevel().intValue() >= Level.WARNING.intValue())
+        builder.append( LINE_SEPARATOR );
+        builder.append( "LEVEL  : " );
+        if ( rec.getLevel( ).intValue( ) >= Level.WARNING.intValue( ) )
         {
-            builder.append("<font color=\"red\">");
-            builder.append(rec.getLevel());
-            builder.append("</font>");
+            builder.append( "<font color=\"red\">" );
+            builder.append( rec.getLevel( ) );
+            builder.append( "</font>" );
         }
         else
         {
-            builder.append(rec.getLevel());
+            builder.append( rec.getLevel( ) );
         }
 
         // builder.append(": ");
-        builder.append(LINE_SEPARATOR);
-        builder.append("CLASS  : ").append(rec.getSourceClassName());
+        builder.append( LINE_SEPARATOR );
+        builder.append( "CLASS  : " ).append( rec.getSourceClassName( ) );
 
         // builder.append('.');
-        builder.append(LINE_SEPARATOR);
-        builder.append("METHOD : ").append(rec.getSourceMethodName());
+        builder.append( LINE_SEPARATOR );
+        builder.append( "METHOD : " ).append( rec.getSourceMethodName( ) );
 
         // builder.append(": ");
-        builder.append(LINE_SEPARATOR);
-        builder.append("MSG    : ").append(formatMessage(rec));
+        builder.append( LINE_SEPARATOR );
+        builder.append( "MSG    : " ).append( formatMessage( rec ) );
 
         // builder.append('.');
-        builder.append(LINE_SEPARATOR);
-        builder.append("TIME   : ").append(new Date());
+        builder.append( LINE_SEPARATOR );
+        builder.append( "TIME   : " ).append( new Date( ) );
 
         // builder.append('\n');
-        builder.append(LINE_SEPARATOR);
+        builder.append( LINE_SEPARATOR );
 
-        return builder.toString();
+        return builder.toString( );
     }
 
     // This method is called when the handler is created
 
     @Override
-    public String getHead(Handler h)
+    public String getHead( Handler h )
     {
-        return "<HTML><HEAD> My Custom Log from " + new Date() +
-               "</HEAD><BODY><H1>The logs</H1><PRE>" + LINE_SEPARATOR;
+        return "<HTML><HEAD> My Custom Log from " + new Date( ) + "</HEAD><BODY><H1>The logs</H1><PRE>" + LINE_SEPARATOR;
     }
 
     // This method is called when the handler is closed
 
     @Override
-    public String getTail(Handler h)
+    public String getTail( Handler h )
     {
         return "</PRE></BODY></HTML>" + LINE_SEPARATOR;
     }

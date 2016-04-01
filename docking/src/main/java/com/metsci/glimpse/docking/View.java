@@ -42,7 +42,6 @@ public class View
     public final Icon icon;
     public final JToolBar toolbar;
 
-
     public View( String viewId, Component component, String title )
     {
         this( viewId, component, title, false, null, null, null );

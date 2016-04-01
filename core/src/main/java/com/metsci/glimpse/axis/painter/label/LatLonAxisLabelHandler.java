@@ -53,10 +53,10 @@ public class LatLonAxisLabelHandler extends GridAxisLabelHandler
     @Override
     public String[] getTickLabels( Axis1D axis, double[] tickPositions )
     {
-        String[] tickLabels = new String[ tickPositions.length ];
-        for ( int i = 0 ; i < tickPositions.length ; i++ )
+        String[] tickLabels = new String[tickPositions.length];
+        for ( int i = 0; i < tickPositions.length; i++ )
         {
-            double tickPosition = tickPositions[ i ];
+            double tickPosition = tickPositions[i];
 
             String tickString;
 

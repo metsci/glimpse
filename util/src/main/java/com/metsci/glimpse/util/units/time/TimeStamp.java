@@ -59,9 +59,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param posixSeconds seconds since the epoch
      */
-    public static TimeStamp fromPosixSeconds(double posixSeconds)
+    public static TimeStamp fromPosixSeconds( double posixSeconds )
     {
-        return Instances.factory.fromPosixSeconds(posixSeconds);
+        return Instances.factory.fromPosixSeconds( posixSeconds );
     }
 
     /**
@@ -69,9 +69,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param posixSeconds seconds since the epoch
      */
-    public static TimeStamp fromPosixSeconds(BigDecimal posixSeconds)
+    public static TimeStamp fromPosixSeconds( BigDecimal posixSeconds )
     {
-        return Instances.factory.fromPosixSeconds(posixSeconds);
+        return Instances.factory.fromPosixSeconds( posixSeconds );
     }
 
     /**
@@ -79,9 +79,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param posixMillis milliseconds since the epoch
      */
-    public static TimeStamp fromPosixMillis(long posixMillis)
+    public static TimeStamp fromPosixMillis( long posixMillis )
     {
-        return Instances.factory.fromPosixMillis(posixMillis);
+        return Instances.factory.fromPosixMillis( posixMillis );
     }
 
     /**
@@ -89,9 +89,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param posixMicros microseconds since the epoch
      */
-    public static TimeStamp fromPosixMicros(long posixMicros)
+    public static TimeStamp fromPosixMicros( long posixMicros )
     {
-        return Instances.factory.fromPosixMicros(posixMicros);
+        return Instances.factory.fromPosixMicros( posixMicros );
     }
 
     /**
@@ -99,9 +99,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param posixNanos nanoseconds since the epoch
      */
-    public static TimeStamp fromPosixNanos(long posixNanos)
+    public static TimeStamp fromPosixNanos( long posixNanos )
     {
-        return Instances.factory.fromPosixNanos(posixNanos);
+        return Instances.factory.fromPosixNanos( posixNanos );
     }
 
     /**
@@ -109,9 +109,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @throws NullPointerException if argument is null
      */
-    public static TimeStamp fromTimeStamp(TimeStamp timeStamp)
+    public static TimeStamp fromTimeStamp( TimeStamp timeStamp )
     {
-        return Instances.factory.fromTimeStamp(timeStamp);
+        return Instances.factory.fromTimeStamp( timeStamp );
     }
 
     /**
@@ -119,9 +119,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @throws NullPointerException if argument is null
      */
-    public static TimeStamp fromDate(Date date)
+    public static TimeStamp fromDate( Date date )
     {
-        return Instances.factory.fromDate(date);
+        return Instances.factory.fromDate( date );
     }
 
     /**
@@ -129,9 +129,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @throws NullPointerException if argument is null
      */
-    public static TimeStamp fromCalendar(Calendar calendar)
+    public static TimeStamp fromCalendar( Calendar calendar )
     {
-        return Instances.factory.fromCalendar(calendar);
+        return Instances.factory.fromCalendar( calendar );
     }
 
     /**
@@ -140,9 +140,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      * @throws NullPointerException if either argument is null
      * @throws TimeStampParseException if string parsing fails
      */
-    public static TimeStamp fromString(String string, TimeStampFormat format) throws TimeStampParseException
+    public static TimeStamp fromString( String string, TimeStampFormat format ) throws TimeStampParseException
     {
-        return Instances.factory.fromString(string, format);
+        return Instances.factory.fromString( string, format );
     }
 
     /**
@@ -151,31 +151,31 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      * @throws NullPointerException if either argument is null
      * @throws TimeStampParseException if string parsing fails
      */
-    public static TimeStamp fromString(String string) throws TimeStampParseException
+    public static TimeStamp fromString( String string ) throws TimeStampParseException
     {
-        return Instances.factory.fromString(string, defaultFormat);
+        return Instances.factory.fromString( string, defaultFormat );
     }
 
     /**
      * Returns a TimeStamp that represents the posix epoch.
      */
-    public static TimeStamp posixEpoch()
+    public static TimeStamp posixEpoch( )
     {
-        return Instances.factory.posixEpoch();
+        return Instances.factory.posixEpoch( );
     }
 
     /**
      * Creates a TimeStamp that represents the current system time. The precision
      * may be limited by the precision of Java's access to the system clock.
      */
-    public static TimeStamp currentTime()
+    public static TimeStamp currentTime( )
     {
-        return Instances.factory.currentTime();
+        return Instances.factory.currentTime( );
     }
 
-
-    protected TimeStamp()
-    { }
+    protected TimeStamp( )
+    {
+    }
 
     /**
      * Creates a new TimeStamp instance offset from this timestamp by the given
@@ -186,7 +186,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param duration the amount of time to add in system-units
      */
-    public abstract TimeStamp add(double duration);
+    public abstract TimeStamp add( double duration );
 
     /**
      * Creates a new TimeStamp instance offset from this timestamp by the given
@@ -197,7 +197,7 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @param duration the amount of time to subtract in system-units
      */
-    public abstract TimeStamp subtract(double duration);
+    public abstract TimeStamp subtract( double duration );
 
     /**
      * Determines how long before the given timestamp this timestamp is. That is:
@@ -211,10 +211,10 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      * @throws NullPointerException if argument is null
      * @return the difference, in system-units
      */
-    public double durationBefore(TimeStamp o)
+    public double durationBefore( TimeStamp o )
     {
-        BigDecimal secondsBefore = o.toPosixSecondsExact().subtract(toPosixSecondsExact());
-        return Time.fromSeconds(secondsBefore.doubleValue());
+        BigDecimal secondsBefore = o.toPosixSecondsExact( ).subtract( toPosixSecondsExact( ) );
+        return Time.fromSeconds( secondsBefore.doubleValue( ) );
     }
 
     /**
@@ -229,10 +229,10 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      * @throws NullPointerException if argument is null
      * @return the difference, in system-units
      */
-    public double durationAfter(TimeStamp o)
+    public double durationAfter( TimeStamp o )
     {
-        BigDecimal secondsAfter = toPosixSecondsExact().subtract(o.toPosixSecondsExact());
-        return Time.fromSeconds(secondsAfter.doubleValue());
+        BigDecimal secondsAfter = toPosixSecondsExact( ).subtract( o.toPosixSecondsExact( ) );
+        return Time.fromSeconds( secondsAfter.doubleValue( ) );
     }
 
     /**
@@ -240,38 +240,38 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @return seconds since the epoch
      */
-    public abstract double toPosixSeconds();
+    public abstract double toPosixSeconds( );
 
     /**
      * Converts this TimeStamp to posix milliseconds.
      *
      * @return milliseconds since the epoch
      */
-    public abstract long toPosixMillis();
+    public abstract long toPosixMillis( );
 
     /**
      * Converts this TimeStamp to posix microseconds.
      *
      * @return microseconds since the epoch
      */
-    public abstract long toPosixMicros();
+    public abstract long toPosixMicros( );
 
     /**
      * Converts this TimeStamp to posix nanoseconds.
      *
      * @return nanoseconds since the epoch
      */
-    public abstract long toPosixNanos();
+    public abstract long toPosixNanos( );
 
     /**
      * Converts this TimeStamp to a {@link Date}.
      */
-    public abstract Date toDate();
+    public abstract Date toDate( );
 
     /**
      * Converts this TimeStamp to a {@link Calendar}.
      */
-    public abstract Calendar toCalendar();
+    public abstract Calendar toCalendar( );
 
     /**
      * Converts this TimeStamp to posix seconds. The returned representation is
@@ -289,16 +289,16 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @return seconds since the epoch
      */
-    public abstract BigDecimal toPosixSecondsExact();
+    public abstract BigDecimal toPosixSecondsExact( );
 
     /**
      * Returns true iff this timestamp is before the given timestamp.
      *
      * @throws NullPointerException if argument is null
      */
-    public boolean isBefore(TimeStamp o)
+    public boolean isBefore( TimeStamp o )
     {
-        return compareTo(o) < 0;
+        return compareTo( o ) < 0;
     }
 
     /**
@@ -306,9 +306,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @throws  NullPointerException  if argument is null
      */
-    public boolean isBeforeOrEquals(TimeStamp o)
+    public boolean isBeforeOrEquals( TimeStamp o )
     {
-        return compareTo(o) <= 0;
+        return compareTo( o ) <= 0;
     }
 
     /**
@@ -316,9 +316,9 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @throws NullPointerException if argument is null
      */
-    public boolean isAfter(TimeStamp o)
+    public boolean isAfter( TimeStamp o )
     {
-        return compareTo(o) > 0;
+        return compareTo( o ) > 0;
     }
 
     /**
@@ -326,50 +326,48 @@ public abstract class TimeStamp implements Comparable<TimeStamp>, Serializable
      *
      * @throws  NullPointerException  if argument is null
      */
-    public boolean isAfterOrEquals(TimeStamp o)
+    public boolean isAfterOrEquals( TimeStamp o )
     {
-        return compareTo(o) >= 0;
+        return compareTo( o ) >= 0;
     }
 
     @Override
-    public int compareTo(TimeStamp o)
+    public int compareTo( TimeStamp o )
     {
-        if (o == this)
-            return 0;
+        if ( o == this ) return 0;
 
-        return toPosixSecondsExact().compareTo(o.toPosixSecondsExact());
+        return toPosixSecondsExact( ).compareTo( o.toPosixSecondsExact( ) );
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals( Object o )
     {
-        if (o instanceof TimeStamp)
-            return compareTo((TimeStamp) o) == 0;
+        if ( o instanceof TimeStamp ) return compareTo( ( TimeStamp ) o ) == 0;
 
         return false;
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
-        return GeneralUtils.stripTrailingZeros(toPosixSecondsExact()).hashCode();
+        return GeneralUtils.stripTrailingZeros( toPosixSecondsExact( ) ).hashCode( );
     }
 
     /**
      * Converts this timestamp to a {@link String}, according to the given format.
      */
-    public String toString(TimeStampFormat format)
+    public String toString( TimeStampFormat format )
     {
-        return format.format(toPosixSecondsExact());
+        return format.format( toPosixSecondsExact( ) );
     }
 
     /**
      * Converts this timestamp to a {@link String}, according to {@link #defaultFormat}.
      */
     @Override
-    public String toString()
+    public String toString( )
     {
-        return toString(defaultFormat);
+        return toString( defaultFormat );
     }
 
 }
