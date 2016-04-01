@@ -3,9 +3,10 @@ package com.metsci.glimpse.plot.timeline.event.paint;
 import com.metsci.glimpse.plot.timeline.event.Event;
 
 /**
- * A helper data structure used by 
+ * A helper data structure used by {@code DefaultGroupedEventPainter} to manage
+ * bounds of timeline events being rendered.
+ * 
  * @author ulman
- *
  */
 public class EventDrawInfo
 {
