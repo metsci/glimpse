@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static jogamp.opengl.glu.error.Error.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-
 
 public class GLErrorUtils
 {
@@ -44,15 +43,15 @@ public class GLErrorUtils
 
     public static boolean logGLError( Logger logger, Level level, GL gl, String prefix )
     {
-        int error = gl.glGetError();
-        if( error != GL2.GL_NO_ERROR )
+        int error = gl.glGetError( );
+        if ( error != GL2.GL_NO_ERROR )
         {
             StackTraceElement[] traceArray = Thread.currentThread( ).getStackTrace( );
             StringBuilder traceString = new StringBuilder( );
 
             if ( traceArray != null && traceArray.length > 0 )
             {
-                for ( int i = 0 ; i < traceArray.length - 1 ; i++ )
+                for ( int i = 0; i < traceArray.length - 1; i++ )
                 {
                     traceString.append( traceArray[i].toString( ) ).append( "\n" );
                 }
@@ -60,7 +59,7 @@ public class GLErrorUtils
             }
 
             String errorString = gluErrorString( error );
-            logWarning(logger, "%s (%d): %s%n%s", prefix, error, errorString, traceString.toString( ) );
+            logWarning( logger, "%s (%d): %s%n%s", prefix, error, errorString, traceString.toString( ) );
             return true;
         }
 

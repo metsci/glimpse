@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.charts.raster;
 
-import static com.metsci.glimpse.util.geo.datum.Datum.*;
+import static com.metsci.glimpse.util.geo.datum.Datum.wgs84sphere;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -51,7 +51,6 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D.MutatorColor1D;
 import com.metsci.glimpse.support.projection.FlatProjection;
@@ -63,6 +62,7 @@ import com.metsci.glimpse.util.Pair;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.LatLonRect;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.util.math.stat.StatCollectorNDim;
 import com.metsci.glimpse.util.vector.Vector2d;
 
@@ -172,7 +172,7 @@ public final class BsbRasterData
         int width_PIXELS = Integer.parseInt( results.group( 1 ) );
         int height_PIXELS = Integer.parseInt( results.group( 2 ) );
 
-        s.close();
+        s.close( );
         return new int[] { width_PIXELS, height_PIXELS };
     }
 
@@ -183,9 +183,9 @@ public final class BsbRasterData
 
         Scanner s = new Scanner( tokenData );
         s.findWithinHorizon( "NA=([\\w;\\s]+)", tokenData.length( ) );
-        
+
         String imageName = s.match( ).group( 1 );
-        s.close();
+        s.close( );
         return imageName;
     }
 
@@ -196,7 +196,7 @@ public final class BsbRasterData
         Vector<Pair<String, String>> allTokenData = extractTokenData( header, "REF" );
         for ( Pair<String, String> tokenData : allTokenData )
         {
-			Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
+            Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
 
             s.nextInt( );
             int x = s.nextInt( );
@@ -205,7 +205,7 @@ public final class BsbRasterData
             double lon_DEG = s.nextDouble( );
 
             refPoints.add( new Pair<IntPoint2d, LatLonGeo>( new IntPoint2d( x, y ), new LatLonGeo( lat_DEG, lon_DEG ) ) );
-            s.close();
+            s.close( );
         }
 
         return refPoints;
@@ -234,8 +234,8 @@ public final class BsbRasterData
             r[i] = ( byte ) color.getRed( );
             g[i] = ( byte ) color.getGreen( );
             b[i] = ( byte ) color.getBlue( );
-            
-            s.close();
+
+            s.close( );
         }
 
         return new IndexColorModel( 8, 16, r, g, b );

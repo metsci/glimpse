@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,7 +159,7 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
         plot.setAxisSizeY( 45 );
         plot.setAxisSizeX( 30 );
         plot.setTitleHeight( 0 );
-        
+
         // add an axis listener which adjusts the position of the floating layout painter as the axis changes
         // (the layout painter is tied to a fixed axis value)
         plot.addAxisListener( new AxisListener2D( )

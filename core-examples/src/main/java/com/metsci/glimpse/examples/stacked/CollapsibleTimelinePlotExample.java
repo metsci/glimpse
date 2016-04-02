@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.examples.stacked;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
 import java.util.Set;
@@ -115,14 +116,14 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.setLabelText( "Snail Schedule" );
         events2.setLabelText( "Holidays" );
         events3.setLabelText( "Weather" );
-        
+
         // set the event1 row to contain fixed height events (15 pixels tall)
         events1.setGrow( false );
         events1.setRowSize( 35 );
 
         // set the event2 row to contain variable size events which grow with available space
         events2.setGrow( true );
-        
+
         events3.setGrow( false );
 
         // set additional display options on each plot

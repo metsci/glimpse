@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,13 +30,17 @@ import java.util.Collection;
 
 public interface Touchable extends GlimpseGestureListener, GlimpseTouchListener
 {
-  public void addGlimpseGestureListener(GlimpseGestureListener listener);
-  public void addGlimpseTouchListener(GlimpseTouchListener listener);
-  public void removeGlimpseGestureListener(GlimpseGestureListener listener);
-  public void removeGlimpseTouchListener(GlimpseTouchListener listener);
+    public void addGlimpseGestureListener( GlimpseGestureListener listener );
 
-  public Collection<GlimpseGestureListener> getGlimpseGestureListeners();
-  public Collection<GlimpseTouchListener> getGlimpseTouchListeners();
+    public void addGlimpseTouchListener( GlimpseTouchListener listener );
 
-  public void removeAllGlimpseGestureListeners();
+    public void removeGlimpseGestureListener( GlimpseGestureListener listener );
+
+    public void removeGlimpseTouchListener( GlimpseTouchListener listener );
+
+    public Collection<GlimpseGestureListener> getGlimpseGestureListeners( );
+
+    public Collection<GlimpseTouchListener> getGlimpseTouchListeners( );
+
+    public void removeAllGlimpseGestureListeners( );
 }

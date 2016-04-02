@@ -7,4 +7,3 @@
  * in this package.
  */
 package com.metsci.glimpse.charts.bathy;
-

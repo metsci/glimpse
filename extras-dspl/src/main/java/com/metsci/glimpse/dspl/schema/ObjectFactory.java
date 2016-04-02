@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,9 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import javax.xml.bind.annotation.XmlRegistry;
-
 
 /**
  * This object contains factory methods for each
@@ -52,286 +50,321 @@ import javax.xml.bind.annotation.XmlRegistry;
  *
  */
 @XmlRegistry
-public class ObjectFactory {
-
+public class ObjectFactory
+{
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.metsci.glimpse.support.dspl.schema
      *
      */
-    public ObjectFactory() {
+    public ObjectFactory( )
+    {
     }
 
     /**
      * Create an instance of {@link Attribute }
      *
      */
-    public Attribute createAttribute() {
-        return new Attribute();
+    public Attribute createAttribute( )
+    {
+        return new Attribute( );
     }
 
     /**
      * Create an instance of {@link ConceptProperty }
      *
      */
-    public ConceptProperty createConceptProperty() {
-        return new ConceptProperty();
+    public ConceptProperty createConceptProperty( )
+    {
+        return new ConceptProperty( );
     }
 
     /**
      * Create an instance of {@link com.metsci.glimpse.dspl.schema.Data }
      *
      */
-    public com.metsci.glimpse.dspl.schema.Data createData() {
-        return new com.metsci.glimpse.dspl.schema.Data();
+    public com.metsci.glimpse.dspl.schema.Data createData( )
+    {
+        return new com.metsci.glimpse.dspl.schema.Data( );
     }
 
     /**
      * Create an instance of {@link Slice }
      *
      */
-    public Slice createSlice() {
-        return new Slice();
+    public Slice createSlice( )
+    {
+        return new Slice( );
     }
 
     /**
      * Create an instance of {@link Table }
      *
      */
-    public Table createTable() {
-        return new Table();
+    public Table createTable( )
+    {
+        return new Table( );
     }
 
     /**
      * Create an instance of {@link Concept }
      *
      */
-    public Concept createConcept() {
-        return new Concept();
+    public Concept createConcept( )
+    {
+        return new Concept( );
     }
 
     /**
      * Create an instance of {@link SliceTableMapping }
      *
      */
-    public SliceTableMapping createSliceTableMapping() {
-        return new SliceTableMapping();
+    public SliceTableMapping createSliceTableMapping( )
+    {
+        return new SliceTableMapping( );
     }
 
     /**
      * Create an instance of {@link ConceptTableMapping }
      *
      */
-    public ConceptTableMapping createConceptTableMapping() {
-        return new ConceptTableMapping();
+    public ConceptTableMapping createConceptTableMapping( )
+    {
+        return new ConceptTableMapping( );
     }
 
     /**
      * Create an instance of {@link ConceptInfo }
      *
      */
-    public ConceptInfo createConceptInfo() {
-        return new ConceptInfo();
+    public ConceptInfo createConceptInfo( )
+    {
+        return new ConceptInfo( );
     }
 
     /**
      * Create an instance of {@link DataSet }
      *
      */
-    public DataSet createDataSet() {
-        return new DataSet();
+    public DataSet createDataSet( )
+    {
+        return new DataSet( );
     }
 
     /**
      * Create an instance of {@link Values }
      *
      */
-    public Values createValues() {
-        return new Values();
+    public Values createValues( )
+    {
+        return new Values( );
     }
 
     /**
      * Create an instance of {@link SliceConceptRef }
      *
      */
-    public SliceConceptRef createSliceConceptRef() {
-        return new SliceConceptRef();
+    public SliceConceptRef createSliceConceptRef( )
+    {
+        return new SliceConceptRef( );
     }
 
     /**
      * Create an instance of {@link Value }
      *
      */
-    public Value createValue() {
-        return new Value();
+    public Value createValue( )
+    {
+        return new Value( );
     }
 
     /**
      * Create an instance of {@link com.metsci.glimpse.dspl.schema.Topic }
      *
      */
-    public com.metsci.glimpse.dspl.schema.Topic createTopic() {
-        return new com.metsci.glimpse.dspl.schema.Topic();
+    public com.metsci.glimpse.dspl.schema.Topic createTopic( )
+    {
+        return new com.metsci.glimpse.dspl.schema.Topic( );
     }
 
     /**
      * Create an instance of {@link Info }
      *
      */
-    public Info createInfo() {
-        return new Info();
+    public Info createInfo( )
+    {
+        return new Info( );
     }
 
     /**
      * Create an instance of {@link Attribute.Type }
      *
      */
-    public Attribute.Type createAttributeType() {
-        return new Attribute.Type();
+    public Attribute.Type createAttributeType( )
+    {
+        return new Attribute.Type( );
     }
 
     /**
      * Create an instance of {@link Attribute.ConceptValue }
      *
      */
-    public Attribute.ConceptValue createAttributeConceptValue() {
-        return new Attribute.ConceptValue();
+    public Attribute.ConceptValue createAttributeConceptValue( )
+    {
+        return new Attribute.ConceptValue( );
     }
 
     /**
      * Create an instance of {@link ConceptProperty.Type }
      *
      */
-    public ConceptProperty.Type createConceptPropertyType() {
-        return new ConceptProperty.Type();
+    public ConceptProperty.Type createConceptPropertyType( )
+    {
+        return new ConceptProperty.Type( );
     }
 
     /**
      * Create an instance of {@link com.metsci.glimpse.dspl.schema.Data.File }
      *
      */
-    public com.metsci.glimpse.dspl.schema.Data.File createDataFile() {
-        return new com.metsci.glimpse.dspl.schema.Data.File();
+    public com.metsci.glimpse.dspl.schema.Data.File createDataFile( )
+    {
+        return new com.metsci.glimpse.dspl.schema.Data.File( );
     }
 
     /**
      * Create an instance of {@link Slice.Data }
      *
      */
-    public Slice.Data createSliceData() {
-        return new Slice.Data();
+    public Slice.Data createSliceData( )
+    {
+        return new Slice.Data( );
     }
 
     /**
      * Create an instance of {@link Table.Column }
      *
      */
-    public Table.Column createTableColumn() {
-        return new Table.Column();
+    public Table.Column createTableColumn( )
+    {
+        return new Table.Column( );
     }
 
     /**
      * Create an instance of {@link Concept.Topic }
      *
      */
-    public Concept.Topic createConceptTopic() {
-        return new Concept.Topic();
+    public Concept.Topic createConceptTopic( )
+    {
+        return new Concept.Topic( );
     }
 
     /**
      * Create an instance of {@link Concept.Type }
      *
      */
-    public Concept.Type createConceptType() {
-        return new Concept.Type();
+    public Concept.Type createConceptType( )
+    {
+        return new Concept.Type( );
     }
 
     /**
      * Create an instance of {@link Concept.Data }
      *
      */
-    public Concept.Data createConceptData() {
-        return new Concept.Data();
+    public Concept.Data createConceptData( )
+    {
+        return new Concept.Data( );
     }
 
     /**
      * Create an instance of {@link SliceTableMapping.MapDimension }
      *
      */
-    public SliceTableMapping.MapDimension createSliceTableMappingMapDimension() {
-        return new SliceTableMapping.MapDimension();
+    public SliceTableMapping.MapDimension createSliceTableMappingMapDimension( )
+    {
+        return new SliceTableMapping.MapDimension( );
     }
 
     /**
      * Create an instance of {@link SliceTableMapping.MapMetric }
      *
      */
-    public SliceTableMapping.MapMetric createSliceTableMappingMapMetric() {
-        return new SliceTableMapping.MapMetric();
+    public SliceTableMapping.MapMetric createSliceTableMappingMapMetric( )
+    {
+        return new SliceTableMapping.MapMetric( );
     }
 
     /**
      * Create an instance of {@link ConceptTableMapping.MapConcept }
      *
      */
-    public ConceptTableMapping.MapConcept createConceptTableMappingMapConcept() {
-        return new ConceptTableMapping.MapConcept();
+    public ConceptTableMapping.MapConcept createConceptTableMappingMapConcept( )
+    {
+        return new ConceptTableMapping.MapConcept( );
     }
 
     /**
      * Create an instance of {@link ConceptTableMapping.MapProperty }
      *
      */
-    public ConceptTableMapping.MapProperty createConceptTableMappingMapProperty() {
-        return new ConceptTableMapping.MapProperty();
+    public ConceptTableMapping.MapProperty createConceptTableMappingMapProperty( )
+    {
+        return new ConceptTableMapping.MapProperty( );
     }
 
     /**
      * Create an instance of {@link ConceptInfo.Synonym }
      *
      */
-    public ConceptInfo.Synonym createConceptInfoSynonym() {
-        return new ConceptInfo.Synonym();
+    public ConceptInfo.Synonym createConceptInfoSynonym( )
+    {
+        return new ConceptInfo.Synonym( );
     }
 
     /**
      * Create an instance of {@link DataSet.Import }
      *
      */
-    public DataSet.Import createDataSetImport() {
-        return new DataSet.Import();
+    public DataSet.Import createDataSetImport( )
+    {
+        return new DataSet.Import( );
     }
 
     /**
      * Create an instance of {@link DataSet.Topics }
      *
      */
-    public DataSet.Topics createDataSetTopics() {
-        return new DataSet.Topics();
+    public DataSet.Topics createDataSetTopics( )
+    {
+        return new DataSet.Topics( );
     }
 
     /**
      * Create an instance of {@link DataSet.Concepts }
      *
      */
-    public DataSet.Concepts createDataSetConcepts() {
-        return new DataSet.Concepts();
+    public DataSet.Concepts createDataSetConcepts( )
+    {
+        return new DataSet.Concepts( );
     }
 
     /**
      * Create an instance of {@link DataSet.Slices }
      *
      */
-    public DataSet.Slices createDataSetSlices() {
-        return new DataSet.Slices();
+    public DataSet.Slices createDataSetSlices( )
+    {
+        return new DataSet.Slices( );
     }
 
     /**
      * Create an instance of {@link DataSet.Tables }
      *
      */
-    public DataSet.Tables createDataSetTables() {
-        return new DataSet.Tables();
+    public DataSet.Tables createDataSetTables( )
+    {
+        return new DataSet.Tables( );
     }
 
 }

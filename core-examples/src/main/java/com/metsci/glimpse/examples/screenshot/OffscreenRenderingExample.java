@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,23 +44,23 @@ public class OffscreenRenderingExample
     public static void main( String[] args ) throws Exception
     {
         GLProfile glProfile = GLUtils.getDefaultGLProfile( );
-        
+
         // generate a GLContext by constructing a small offscreen framebuffer
         final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
 
         // create an offscreen GlimpseCanvas which shares an OpenGL context with the above drawable
         // (its size is 1000 by 1000 pixels)
         final FBOGlimpseCanvas canvas = new FBOGlimpseCanvas( glDrawable.getContext( ), 1000, 1000 );
-        
+
         // set the Glimpse look and feed of the canvas just like we would for an onscreen canvas
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
-        
+
         // use one of the previous examples to build a simple plot to draw
         GlimpseLayout layout = new WrappedAxisExample( ).getLayout( );
 
         // add the layout to the offscreen canvas
         canvas.addLayout( layout );
-        
+
         // draw the canvas to a BufferedImage and write the image to a file
         BufferedImage image = canvas.toBufferedImage( );
         ImageIO.write( image, "PNG", new File( "OffscreenRenderingExample.png" ) );

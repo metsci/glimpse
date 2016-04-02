@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -110,7 +110,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
     public MapPlot2D getLayout( GeoProjection projection )
     {
         // create a premade heat map window
-        MapPlot2D plot = new MapPlot2D( projection)
+        MapPlot2D plot = new MapPlot2D( projection )
         {
             @Override
             protected Axis1D createAxisZ( )
@@ -138,7 +138,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         axisZ.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
         // add a constraint which disallows moving the max tag above 15000
-        axisZ.addConstraint( new NamedConstraint( "MaxConstraint")
+        axisZ.addConstraint( new NamedConstraint( "MaxConstraint" )
         {
             @Override
             public void applyConstraint( TaggedAxis1D currentAxis, Map<String, Tag> previousTags )

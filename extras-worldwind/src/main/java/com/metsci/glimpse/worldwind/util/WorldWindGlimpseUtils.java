@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,6 @@
  */
 package com.metsci.glimpse.worldwind.util;
 
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.event.PositionEvent;
-import gov.nasa.worldwind.event.PositionListener;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -39,6 +33,12 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.worldwind.event.MouseWrapperWorldwind;
 import com.metsci.glimpse.worldwind.tile.GlimpseSurfaceTile;
+
+import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.event.PositionEvent;
+import gov.nasa.worldwind.event.PositionListener;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 
 public class WorldWindGlimpseUtils
 {
@@ -54,7 +54,7 @@ public class WorldWindGlimpseUtils
     {
         MouseWrapperWorldwind.linkMouseEvents( wwd, projection, tile );
     }
-    
+
     /**
      * Links two WorldWindows so that the eye position of the master window is copied to the
      * eye position of the slave. Does not set up the reverse link. However, the caller may call

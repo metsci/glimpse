@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,6 @@ public interface SortedIntsModifiable extends SortedInts, IntsModifiable
     /**
      * @return The index at which v was inserted
      */
-    int add(int v);
+    int add( int v );
 
 }

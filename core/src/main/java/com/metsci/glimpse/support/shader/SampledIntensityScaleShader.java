@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ public class SampledIntensityScaleShader extends Shader implements AxisListener1
     private ShaderArg hueTexUnit;
 
     private Axis1D colorAxis;
-    
+
     /**
      * @param colorAxis color axis producing events
      * @param targetTexUnit 2D texture unit which is the target of color-mapping
@@ -79,7 +79,7 @@ public class SampledIntensityScaleShader extends Shader implements AxisListener1
     protected void initialize( Axis1D colorAxis, int DataTexUnit, int HueTexUnit )
     {
         this.colorAxis = colorAxis;
-        
+
         this.colorAxis.addAxisListener( this );
 
         this.dataMin = getArg( "dataMin" );
@@ -153,7 +153,7 @@ public class SampledIntensityScaleShader extends Shader implements AxisListener1
     {
         return axis.getMax( );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

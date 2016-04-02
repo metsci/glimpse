@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
         double diff = scale - 1;
         double scaleAdjMult = horizontal ? Math.abs( Math.cos( angle ) ) : Math.abs( Math.sin( angle ) );
 
-        return ( float )( diff * scaleAdjMult + 1 );
+        return ( float ) ( diff * scaleAdjMult + 1 );
     }
 
     protected int getDim( boolean horizontal, int x, int y )
@@ -180,4 +180,3 @@ public abstract class AxisGestureListener implements GlimpseGestureListener
         axis.setSelectionLock( !axis.isSelectionLocked( ) );
     }
 }
-

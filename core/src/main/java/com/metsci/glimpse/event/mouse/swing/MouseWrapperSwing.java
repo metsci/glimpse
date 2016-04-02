@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,9 +97,9 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
     {
         if ( stack == null ) return null;
 
-        if ( !(e instanceof MouseWheelEvent) ) return null;
+        if ( ! ( e instanceof MouseWheelEvent ) ) return null;
 
-        MouseWheelEvent wheelEvent = (MouseWheelEvent) e;
+        MouseWheelEvent wheelEvent = ( MouseWheelEvent ) e;
 
         GlimpseBounds bounds = stack.getBounds( );
 
@@ -133,7 +133,7 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
 
     protected GlimpseMouseEvent toGlimpseEventWheel( MouseEvent e )
     {
-        return GlimpseMouseWrapper.fromMouseWheelEvent( (MouseWheelEvent) e );
+        return GlimpseMouseWrapper.fromMouseWheelEvent( ( MouseWheelEvent ) e );
     }
 
     @Override

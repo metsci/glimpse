@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,8 @@ package com.metsci.glimpse.util.logging.format;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
 
 /**
  * Produces "Terse" Log Messages which fit on one line and include just the level, method, class
@@ -41,50 +39,47 @@ import java.util.logging.LogRecord;
  */
 public class TerseLogFormatter extends Formatter
 {
-    static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
-    static final String LONGEST_NAMED_LEVEL = Level.WARNING.getName();
-    static final int MAX_LEVEL_LENGTH = LONGEST_NAMED_LEVEL.length();
-    static final String BLANKS = LONGEST_NAMED_LEVEL.replaceAll(".", " ");
+    static final String LINE_SEPARATOR = System.getProperty( "line.separator", "\n" );
+    static final String LONGEST_NAMED_LEVEL = Level.WARNING.getName( );
+    static final int MAX_LEVEL_LENGTH = LONGEST_NAMED_LEVEL.length( );
+    static final String BLANKS = LONGEST_NAMED_LEVEL.replaceAll( ".", " " );
 
     @Override
-    public String format(LogRecord record)
+    public String format( LogRecord record )
     {
 
         // super.format(record);  // uncomment this line if accurate caller method name is needed
-        StringBuilder prefix0 = new StringBuilder();
-        appendPrefix(record, prefix0);
+        StringBuilder prefix0 = new StringBuilder( );
+        appendPrefix( record, prefix0 );
 
-        String prefix = prefix0.toString();
+        String prefix = prefix0.toString( );
 
-        StringWriter message = new StringWriter();
-        message.write(record.getMessage());
+        StringWriter message = new StringWriter( );
+        message.write( record.getMessage( ) );
 
-        Throwable thrown = record.getThrown();
-        if (thrown != null)
+        Throwable thrown = record.getThrown( );
+        if ( thrown != null )
         {
-            message.write(LINE_SEPARATOR);
-            thrown.printStackTrace(new PrintWriter(message));
+            message.write( LINE_SEPARATOR );
+            thrown.printStackTrace( new PrintWriter( message ) );
         }
 
-        return prefix +
-               message.toString().replace(LINE_SEPARATOR, LINE_SEPARATOR +
-                                          prefix.replaceAll(".", " ")) +
-               LINE_SEPARATOR;
+        return prefix + message.toString( ).replace( LINE_SEPARATOR, LINE_SEPARATOR + prefix.replaceAll( ".", " " ) ) + LINE_SEPARATOR;
     }
 
-    protected void appendPrefix(LogRecord record, StringBuilder prefix)
+    protected void appendPrefix( LogRecord record, StringBuilder prefix )
     {
-        String levelName = record.getLevel().getName();
-        String padding = BLANKS.substring(0, MAX_LEVEL_LENGTH - levelName.length());
-        prefix.append(padding).append(levelName).append(": ");
+        String levelName = record.getLevel( ).getName( );
+        String padding = BLANKS.substring( 0, MAX_LEVEL_LENGTH - levelName.length( ) );
+        prefix.append( padding ).append( levelName ).append( ": " );
 
-        String loggerName = record.getLoggerName();
-        if (loggerName != null)
+        String loggerName = record.getLoggerName( );
+        if ( loggerName != null )
         {
-            prefix.append(Thread.currentThread().getName()).append(" - ");
+            prefix.append( Thread.currentThread( ).getName( ) ).append( " - " );
 
-            String loggerShortName = loggerName.substring(loggerName.lastIndexOf('.') + 1);
-            prefix.append(loggerShortName).append(" - ");
+            String loggerShortName = loggerName.substring( loggerName.lastIndexOf( '.' ) + 1 );
+            prefix.append( loggerShortName ).append( " - " );
         }
     }
 

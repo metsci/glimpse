@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ public abstract class GlimpsePainter1D extends GlimpsePainterImpl
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
         if ( target instanceof GlimpseAxisLayout1D )
         {
-            GlimpseAxisLayout1D layout = (GlimpseAxisLayout1D) target;
+            GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
             Axis1D axis = layout.getAxis( context );
 
             if ( axis == null )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
 import javax.media.opengl.GL2;
 
@@ -60,7 +60,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 public class MinimapLayout extends GlimpseAxisLayout2D
 {
     protected GlimpseAxisLayout2D delegateLayer;
-    
+
     public MinimapLayout( )
     {
         Axis2D minimapAxis = new Axis2D( );
@@ -70,7 +70,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         this.delegateLayer.setAxisFactory( new DefaultAxisFactory2D( ) );
         this.delegateLayer.setEventConsumer( false );
         this.delegateLayer.setEventGenerator( true );
-        
+
         this.addLayout( this.delegateLayer );
         this.delegateLayer.addPainter( new MiniMapBoundsPainter( ), Plot2D.FOREGROUND_LAYER );
         this.delegateLayer.addPainter( new BorderPainter( ), Plot2D.FOREGROUND_LAYER );
@@ -87,7 +87,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
                 }
             }
 
-        });
+        } );
 
         addGlimpseMouseListener( new GlimpseMouseListener( )
         {
@@ -112,7 +112,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             {
             }
 
-        });
+        } );
     }
 
     public void addPainter( GlimpsePainter painter )
@@ -218,7 +218,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             Axis2D miniMapAxis = getMiniMapAxis0( context );
             Axis2D mainMapAxis = getMainMapAxis0( context );
 
-            GL2 gl = context.getGL( ).getGL2();
+            GL2 gl = context.getGL( ).getGL2( );
 
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
@@ -293,7 +293,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
     {
         return getAxis0( getMainMapTargetStack( stack ) );
     }
-    
+
     protected GlimpseTargetStack getMainMapTargetStack( GlimpseTargetStack stack )
     {
         return newTargetStack( stack ).pop( ).pop( );
@@ -307,7 +307,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
 
         if ( target instanceof GlimpseAxisLayout2D )
         {
-            axis = ((GlimpseAxisLayout2D) target).getAxis( stack );
+            axis = ( ( GlimpseAxisLayout2D ) target ).getAxis( stack );
         }
 
         return axis;
@@ -327,7 +327,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         mainMapAxis.getAxisX( ).setMin( x - width / 2.0 );
         mainMapAxis.getAxisX( ).setMax( x + width / 2.0 );
         mainMapAxis.getAxisX( ).validate( );
-        
+
         mainMapAxis.getAxisY( ).setMin( y - height / 2.0 );
         mainMapAxis.getAxisY( ).setMax( y + height / 2.0 );
         mainMapAxis.getAxisY( ).validate( );

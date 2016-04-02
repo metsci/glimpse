@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -254,12 +254,12 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     protected long maxTime = Long.MAX_VALUE;
 
     protected TextRenderer textRenderer;
-    
+
     public AnnotationPainter( )
     {
         this( new TextRenderer( FontUtils.getDefaultPlain( 14.0f ) ) );
     }
-    
+
     public AnnotationPainter( TextRenderer textRenderer )
     {
         this.annotations = new ArrayList<Annotation>( );

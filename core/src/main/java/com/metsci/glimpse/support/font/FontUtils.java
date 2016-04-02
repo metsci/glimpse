@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,18 @@
  */
 package com.metsci.glimpse.support.font;
 
-import com.metsci.glimpse.util.io.StreamOpener;
+import static java.awt.Font.createFont;
 
-import java.awt.*;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static java.awt.Font.createFont;
+import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * Utilities for loading default Glimpse fonts. Most applications should use the
@@ -55,7 +57,7 @@ public class FontUtils
     private static final Logger logger = Logger.getLogger( FontUtils.class.getName( ) );
 
     private static final boolean foundVerdana;
-    private static final Map<String, Font> loadedFonts = new HashMap<>();
+    private static final Map<String, Font> loadedFonts = new HashMap<>( );
 
     static
     {

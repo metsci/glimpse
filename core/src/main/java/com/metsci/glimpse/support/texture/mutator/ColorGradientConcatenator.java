@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,13 +43,13 @@ public class ColorGradientConcatenator implements MutatorColor1D
     @Override
     public void mutate( FloatBuffer floatBuffer, int dim )
     {
-        for ( int i = 0 ; i < colorGradients.length ; i++ )
+        for ( int i = 0; i < colorGradients.length; i++ )
         {
             ColorGradient colorScale = colorGradients[i];
 
-            int size = (int) Math.floor( (double) dim / (double) colorGradients.length );
+            int size = ( int ) Math.floor( ( double ) dim / ( double ) colorGradients.length );
             int startIndex = size * i;
-            int endIndex = Math.min( size * (i+1), dim );
+            int endIndex = Math.min( size * ( i + 1 ), dim );
 
             mutate( floatBuffer, colorScale, startIndex, endIndex );
         }
@@ -62,9 +62,9 @@ public class ColorGradientConcatenator implements MutatorColor1D
         float[] rgbaBytes = new float[4];
 
         int length = endIndex - startIndex;
-        for( int i = 0; i < length; i++ )
+        for ( int i = 0; i < length; i++ )
         {
-            colorGradient.toColor( i / (float) ( length - 1 ), rgbaBytes );
+            colorGradient.toColor( i / ( float ) ( length - 1 ), rgbaBytes );
 
             floatBuffer.put( rgbaBytes[0] );
             floatBuffer.put( rgbaBytes[1] );

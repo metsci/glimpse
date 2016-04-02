@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ public class AxisMouseListener2D extends AxisMouseListener
 
         if ( target instanceof GlimpseAxisLayout2D )
         {
-            return (GlimpseAxisLayout2D) target;
+            return ( GlimpseAxisLayout2D ) target;
         }
         else
         {

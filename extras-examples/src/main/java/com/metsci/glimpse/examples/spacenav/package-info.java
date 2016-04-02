@@ -3,4 +3,3 @@
  * (http://www.3dconnexion.com/)
  */
 package com.metsci.glimpse.examples.spacenav;
-

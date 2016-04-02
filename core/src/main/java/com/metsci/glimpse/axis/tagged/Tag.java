@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,22 +63,21 @@ public class Tag
      * Special tag value for setting the display color of a Tag.
      */
     public static final String TAG_COLOR_ATTR = "TagColor";
-    
-    public static final Comparator<Tag> tagValueComparator =
-        new Comparator<Tag>( )
+
+    public static final Comparator<Tag> tagValueComparator = new Comparator<Tag>( )
+    {
+        @Override
+        public int compare( Tag tag1, Tag tag2 )
         {
-            @Override
-            public int compare( Tag tag1, Tag tag2 )
-            {
-                return Double.compare( tag1.value, tag2.value );
-            }
-        };
+            return Double.compare( tag1.value, tag2.value );
+        }
+    };
 
     protected String name;
     protected double value;
 
     // lazily instantiate
-    protected Map<String,Object> attributeMap;
+    protected Map<String, Object> attributeMap;
 
     public Tag( Tag tag )
     {
@@ -87,7 +86,7 @@ public class Tag
 
         if ( tag.attributeMap != null )
         {
-            this.attributeMap = new HashMap<String,Object>( );
+            this.attributeMap = new HashMap<String, Object>( );
             this.attributeMap.putAll( tag.attributeMap );
         }
     }
@@ -125,7 +124,7 @@ public class Tag
 
     public Tag setAttribute( String key, Object value )
     {
-        if ( this.attributeMap == null ) this.attributeMap = new HashMap<String,Object>();
+        if ( this.attributeMap == null ) this.attributeMap = new HashMap<String, Object>( );
 
         this.attributeMap.put( key, value );
         return this;
@@ -144,22 +143,22 @@ public class Tag
 
         return this.attributeMap.get( key );
     }
-    
+
     public float getAttributeFloat( String key )
     {
         if ( this.attributeMap == null )
         {
             throw new IllegalArgumentException( "No value for key: " + key );
         }
-        
+
         Object value = this.attributeMap.get( key );
-    
-        if ( !(value instanceof Number) )
+
+        if ( ! ( value instanceof Number ) )
         {
             String message = String.format( "Value for key: %s of type: %s required type: %s", key, value.getClass( ), Number.class );
             throw new ClassCastException( message );
         }
-        
+
         return ( ( Number ) value ).floatValue( );
     }
 
@@ -179,7 +178,7 @@ public class Tag
         if ( name == null ) return other.name == null;
         return name.equals( other.name );
     }
-    
+
     @Override
     public String toString( )
     {

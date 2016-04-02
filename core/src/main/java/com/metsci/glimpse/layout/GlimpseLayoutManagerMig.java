@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.layout;
 
-import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
+import static com.metsci.glimpse.util.GeneralUtils.newHashMap;
 import static net.miginfocom.layout.ConstraintParser.parseColumnConstraints;
 import static net.miginfocom.layout.ConstraintParser.parseComponentConstraint;
 import static net.miginfocom.layout.ConstraintParser.parseLayoutConstraint;

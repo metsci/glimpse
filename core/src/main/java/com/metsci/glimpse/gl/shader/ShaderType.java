@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +28,11 @@ package com.metsci.glimpse.gl.shader;
 
 import javax.media.opengl.GL3;
 
-
 public enum ShaderType
 {
-	// TODO: I need to better understand the significance of using GL2 vs. (e.g.) GL3 
-	//       Don't think it matters here though ... -- ttran17
-    vertex( GL3.GL_VERTEX_SHADER ),
-    geometry( GL3.GL_GEOMETRY_SHADER ),
-    fragment( GL3.GL_FRAGMENT_SHADER );
-
+    // TODO: I need to better understand the significance of using GL2 vs. (e.g.) GL3 
+    //       Don't think it matters here though ... -- ttran17
+    vertex(GL3.GL_VERTEX_SHADER), geometry(GL3.GL_GEOMETRY_SHADER), fragment(GL3.GL_FRAGMENT_SHADER);
 
     private final int glShaderTypeCode;
 

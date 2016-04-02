@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ public class LandVertex
     public final double lat;
     public final double lon;
 
-    public LandVertex(double lat_DEG, double lon_DEG)
+    public LandVertex( double lat_DEG, double lon_DEG )
     {
         lat = lat_DEG;
         lon = lon_DEG;
@@ -58,57 +58,57 @@ public class LandVertex
      * The latitude of this vertex is used in converting longitudinal
      * degrees to distance.
      */
-    public double getDistanceX_SU(double longitude)
+    public double getDistanceX_SU( double longitude )
     {
-        return (longitude - lon) * Math.cos(Angle.degreesToRadians(lat)) * distancePerDegree_SU;
+        return ( longitude - lon ) * Math.cos( Angle.degreesToRadians( lat ) ) * distancePerDegree_SU;
     }
 
-    public double getDistanceX_SU(LandVertex vertex)
+    public double getDistanceX_SU( LandVertex vertex )
     {
-        return getDistanceX_SU(vertex.lon);
+        return getDistanceX_SU( vertex.lon );
     }
 
     /**
      * Returns signed north-south distance from this vertex to the given
      * latitude.
      */
-    public double getDistanceY_SU(double latitude)
+    public double getDistanceY_SU( double latitude )
     {
-        return (latitude - lat) *  distancePerDegree_SU;
+        return ( latitude - lat ) * distancePerDegree_SU;
     }
 
-    public double getDistanceY_SU(LandVertex vertex)
+    public double getDistanceY_SU( LandVertex vertex )
     {
-        return getDistanceY_SU(vertex.lat);
+        return getDistanceY_SU( vertex.lat );
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals( Object o )
     {
-        if (o == this) return true;
+        if ( o == this ) return true;
 
-        if (!(o instanceof LandVertex)) return false;
+        if ( ! ( o instanceof LandVertex ) ) return false;
 
-        LandVertex v = (LandVertex) o;
+        LandVertex v = ( LandVertex ) o;
         return v.lat == lat && v.lon == lon;
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
-        long a = Double.doubleToLongBits(lat);
-        int a1 = (int) (a & 0xffffff);
-        int a2 = (int) ((a >> 32) & 0xffffff);
+        long a = Double.doubleToLongBits( lat );
+        int a1 = ( int ) ( a & 0xffffff );
+        int a2 = ( int ) ( ( a >> 32 ) & 0xffffff );
 
-        long b = Double.doubleToLongBits(lon);
-        int b1 = (int) (b & 0xffffff);
-        int b2 = (int) ((b >> 32) & 0xffffff);
+        long b = Double.doubleToLongBits( lon );
+        int b1 = ( int ) ( b & 0xffffff );
+        int b2 = ( int ) ( ( b >> 32 ) & 0xffffff );
 
-        int hash = getClass().getName().hashCode();
-        hash = 31*hash + a1;
-        hash = 31*hash + a2;
-        hash = 31*hash + b1;
-        hash = 31*hash + b2;
+        int hash = getClass( ).getName( ).hashCode( );
+        hash = 31 * hash + a1;
+        hash = 31 * hash + a2;
+        hash = 31 * hash + b1;
+        hash = 31 * hash + b2;
         return hash;
     }
 

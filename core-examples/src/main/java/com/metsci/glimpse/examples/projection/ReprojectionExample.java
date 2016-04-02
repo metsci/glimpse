@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,8 @@ public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        GLProfile glProfile = GLUtils.getDefaultGLProfile( );;
+        GLProfile glProfile = GLUtils.getDefaultGLProfile( );
+
         GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
         GLContext glContext = glDrawable.getContext( );
 

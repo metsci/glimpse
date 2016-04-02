@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ public class AnimatedProjectionExample implements GlimpseLayoutProvider
 
         // lock the aspect ratio of the x and y axes
         plot.lockAspectRatioXY( 1 );
-        
+
         // add a painter that will use our new shader for color-mapping
         final HeatMapPainter painter = new HeatMapPainter( plot.getAxisZ( ) );
         plot.addPainter( painter );

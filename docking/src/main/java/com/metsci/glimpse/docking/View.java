@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ public class View
     public final String tooltip;
     public final Icon icon;
     public final JToolBar toolbar;
-
 
     public View( String viewId, Component component, String title )
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,6 @@ public class VerticallyScrollableLayoutExample
         // Much of the standard glimpse-canvas setup code here is copied from
         // com.metsci.glimpse.examples.Example, with modifications that allow
         // the canvas and the scrollbar to live in the same JFrame
-
 
         // Don't attempt to shrink content to any smaller than this height -- if canvas height is
         // less than this, make it scrollable instead of shrinking it further

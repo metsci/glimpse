@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ public class FastGaussian extends FastFunc
         return Math.sqrt( logz - loglogz + loglogz / logz );
     }
 
-    public static FastGaussian getInstance()
+    public static FastGaussian getInstance( )
     {
         return _instance;
     }

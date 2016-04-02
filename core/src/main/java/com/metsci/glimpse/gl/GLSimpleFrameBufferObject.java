@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -285,7 +285,7 @@ public class GLSimpleFrameBufferObject
 
         for ( GLEventListener entry : listeners )
         {
-            entry.dispose( (GLAutoDrawable) context.getGLDrawable( ) );
+            entry.dispose( ( GLAutoDrawable ) context.getGLDrawable( ) );
         }
 
         if ( textureId != null ) gl.glDeleteTextures( 1, textureId, 0 );

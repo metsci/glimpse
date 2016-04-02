@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,11 +64,11 @@ public class Axis1D
 
     //// axis linkable state fields ////
     // these values are shared between linked axis
-    
+
     protected double selectionCenterValue;
     protected double selectionSizeValue;
     protected boolean selectionLocked;
-    
+
     protected boolean lockMin;
     protected double lockMinValue;
     protected boolean lockMax;
@@ -78,18 +78,18 @@ public class Axis1D
     protected double minDiff;
     protected boolean constrainMaxDiff;
     protected double maxDiff;
-    
+
     protected double absoluteMin;
     protected double absoluteMax;
 
     protected double minValue;
     protected double maxValue;
     protected double pixelsPerValue;
-    
+
     protected double mousePosValue;
-    
+
     protected UpdateMode updateMode;
-    
+
     //// axis internal state fields ////
 
     // these values store information about the
@@ -904,7 +904,7 @@ public class Axis1D
     protected void updateAspectRatio( Axis1D updated, double aspectRatio, Set<Axis1D> visited )
     {
         if ( !isInitialized( ) ) return;
-        
+
         this.updateAspectRatio( updated, aspectRatio );
         this.broadcastAxisUpdateUp( this, visited );
     }
@@ -970,14 +970,14 @@ public class Axis1D
     protected void axisUpdated0( Axis1D axis )
     {
         this.updateMode = axis.getUpdateMode( );
-        
+
         this.mousePosValue = axis.getMouseValue( );
 
         this.minDiff = axis.getMinSpan( );
         this.maxDiff = axis.getMaxSpan( );
         this.constrainMinDiff = axis.isMinSpanConstrained( );
         this.constrainMaxDiff = axis.isMaxSpanConstrained( );
-        
+
         this.lockMin = axis.isLockMin( );
         this.lockMax = axis.isLockMax( );
         this.lockMinValue = axis.getLockMin( );
@@ -1083,7 +1083,7 @@ public class Axis1D
     {
         return ( maxValue - minValue ) / 2.0 + minValue;
     }
-    
+
     protected void broadcastAxisUpdateUp( )
     {
         broadcastAxisUpdateUp( this, new HashSet<Axis1D>( ) );

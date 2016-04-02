@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,36 +66,36 @@ public class EventSelection
          */
         Label;
     }
-    
+
     protected Event event;
     protected EnumSet<Location> locations;
-    
+
     public EventSelection( Event event, EnumSet<Location> locations )
     {
         this.event = event;
         this.locations = locations;
     }
-    
+
     public Event getEvent( )
     {
         return event;
     }
-    
+
     public EnumSet<Location> getLocations( )
     {
         return locations;
     }
-    
+
     public boolean isIconSelection( )
     {
         return locations.contains( Icon );
     }
-    
+
     public boolean isTextSelection( )
     {
         return locations.contains( Icon );
     }
-    
+
     public boolean isStartTimeSelection( )
     {
         return locations.contains( Start );
@@ -105,22 +105,22 @@ public class EventSelection
     {
         return locations.contains( End );
     }
-    
+
     public boolean isCenterSelection( )
     {
         return locations.contains( Center );
     }
-    
+
     public boolean isLocation( Location... locationList )
     {
         for ( Location location : locationList )
         {
             if ( locations.contains( location ) ) return true;
         }
-        
+
         return false;
     }
-    
+
     @Override
     public int hashCode( )
     {
@@ -144,7 +144,7 @@ public class EventSelection
         else if ( !event.equals( other.event ) ) return false;
         return true;
     }
-    
+
     @Override
     public String toString( )
     {

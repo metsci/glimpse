@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,17 +89,17 @@ public abstract class MouseWrapper<I>
         for ( int i = size - 1; i >= 0; i-- )
         {
             GlimpseTarget childLayout = list.get( i );
-            
+
             if ( childLayout.isVisible( ) )
             {
                 GlimpseBounds childBounds = childLayout.getTargetBounds( context.getTargetStack( ) );
-    
+
                 stack.push( childLayout, childBounds );
-    
+
                 boolean consumeEvent = getContainingTargets( e, context, accumulator );
-    
+
                 if ( consumeEvent ) return true;
-    
+
                 stack.pop( );
             }
         }

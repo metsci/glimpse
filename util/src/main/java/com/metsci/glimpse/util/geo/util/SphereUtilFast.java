@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,21 +48,21 @@ public class SphereUtilFast
      */
     public static double greatCircleAzimuth( LatLonGeo from, LatLonGeo to )
     {
-        final double lat1   = from.getLatRad( );
-        final double s1     = Math.sin(lat1);
-        final double c1     = Math.cos(lat1);
+        final double lat1 = from.getLatRad( );
+        final double s1 = Math.sin( lat1 );
+        final double c1 = Math.cos( lat1 );
 
-        final double lat2   = to.getLatRad( );
-        final double s2     = Math.sin(lat2);
-        final double c2     = Math.cos(lat2);
+        final double lat2 = to.getLatRad( );
+        final double s2 = Math.sin( lat2 );
+        final double c2 = Math.cos( lat2 );
 
-        final double lon1   = from.getLonRad();
-        final double lon2   = to.getLonRad( );
-        final double dLon   = lon2 - lon1;
-        final double sdLon  = Math.sin( dLon );
-        final double cdLon  = Math.cos( dLon );
+        final double lon1 = from.getLonRad( );
+        final double lon2 = to.getLonRad( );
+        final double dLon = lon2 - lon1;
+        final double sdLon = Math.sin( dLon );
+        final double cdLon = Math.cos( dLon );
 
-        final double theta  = fastAtan.atan2( sdLon*c2, c1*s2 - s1*c2*cdLon );
+        final double theta = fastAtan.atan2( sdLon * c2, c1 * s2 - s1 * c2 * cdLon );
 
         return Azimuth.fromNavRad( theta );
     }
@@ -72,9 +72,9 @@ public class SphereUtilFast
      */
     public static LatLonGeo toLatLonGeo( double x, double y, double z, double radius )
     {
-        final double lat  = fastAtan.atan2( z, Math.sqrt( x*x + y*y ) );
-        final double lon  = fastAtan.atan2( y, x );
-        final double h    = Math.sqrt( x*x + y*y + z*z ) - radius;
+        final double lat = fastAtan.atan2( z, Math.sqrt( x * x + y * y ) );
+        final double lon = fastAtan.atan2( y, x );
+        final double h = Math.sqrt( x * x + y * y + z * z ) - radius;
 
         return LatLonGeo.fromRad( lat, lon, h );
     }
@@ -87,36 +87,35 @@ public class SphereUtilFast
      * @param dist distance to shift point
      * @param azimuth initial azimuth of great circle
      */
-    public static LatLonGeo greatCircleShift( LatLonGeo from, double radius,
-                                              double dist, double azimuth )
+    public static LatLonGeo greatCircleShift( LatLonGeo from, double radius, double dist, double azimuth )
     {
-        final double lat      = from.getLatRad( );
-        final double cosLat1  = Math.cos(lat);
-        final double sinLat1  = Math.sin(lat);
+        final double lat = from.getLatRad( );
+        final double cosLat1 = Math.cos( lat );
+        final double sinLat1 = Math.sin( lat );
 
-        final double r        = dist / radius;
-        final double cosR     = Math.cos(r);
-        final double sinR     = Math.sin(r);
+        final double r = dist / radius;
+        final double cosR = Math.cos( r );
+        final double sinR = Math.sin( r );
 
-        final double b        = Azimuth.toNavRad( azimuth );
-        final double cosB     = Math.cos(b);
-        final double sinB     = Math.sin(b);
+        final double b = Azimuth.toNavRad( azimuth );
+        final double cosB = Math.cos( b );
+        final double sinB = Math.sin( b );
 
         // guard against roundoff
         double sinLat = sinLat1 * cosR + cosLat1 * sinR * cosB;
-        if (sinLat > 1d)
+        if ( sinLat > 1d )
         {
             sinLat = 1d;
         }
-        else if (sinLat < -1d)
+        else if ( sinLat < -1d )
         {
             sinLat = -1d;
         }
 
-        final double newLat  = fastAsin.evaluate(sinLat);
+        final double newLat = fastAsin.evaluate( sinLat );
 
-        final double dLon    = fastAtan.atan2( sinB*sinR*cosLat1, cosR-sinLat1*Math.sin(newLat) );
-        final double newLon  = from.getLonRad( ) + dLon;
+        final double dLon = fastAtan.atan2( sinB * sinR * cosLat1, cosR - sinLat1 * Math.sin( newLat ) );
+        final double newLon = from.getLonRad( ) + dLon;
 
         return LatLonGeo.fromRad( newLat, newLon, from.getAltitude( ) );
     }
@@ -127,17 +126,14 @@ public class SphereUtilFast
      */
     public static double greatCircleDistance( LatLonGeo from, LatLonGeo to, double radius )
     {
-        return greatCircleDistance( from.getLatRad( ), from.getLonRad( ),
-                                    to.getLatRad( ), to.getLonRad(), radius );
+        return greatCircleDistance( from.getLatRad( ), from.getLonRad( ), to.getLatRad( ), to.getLonRad( ), radius );
     }
 
     /**
      * Computes the great circle distance between the specified points using the
      * Haversine formula.
      */
-    public static double greatCircleDistance( double fromLat, double fromLon,
-                                              double toLat, double toLon,
-                                              double radius )
+    public static double greatCircleDistance( double fromLat, double fromLon, double toLat, double toLon, double radius )
     {
         double dLat = fromLat - toLat;
         double dLon = LatLonGeo.normalizeAnglePi( fromLon - toLon );
@@ -148,12 +144,12 @@ public class SphereUtilFast
         double s2 = Math.sin( 0.5d * dLon );
 
         // guard against roundoff-related problems
-        double sinA = Math.sqrt(s1 * s1 + c1 * c2 * s2 * s2);
-        if (sinA > 1d)
+        double sinA = Math.sqrt( s1 * s1 + c1 * c2 * s2 * s2 );
+        if ( sinA > 1d )
         {
             sinA = 1d;
         }
 
-        return 2d * radius * fastAsin.evaluate(sinA);
+        return 2d * radius * fastAsin.evaluate( sinA );
     }
 }

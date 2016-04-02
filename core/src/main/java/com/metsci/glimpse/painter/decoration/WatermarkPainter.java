@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,31 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import static com.jogamp.opengl.util.texture.TextureIO.newTexture;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.LEFT;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.RIGHT;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.BOTTOM;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.TOP;
+import static com.metsci.glimpse.util.GeneralUtils.doubles;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_LINEAR;
+import static javax.media.opengl.GL.GL_ONE;
+import static javax.media.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
+import static javax.media.opengl.GL.GL_REPLACE;
+import static javax.media.opengl.GL.GL_TEXTURE;
+import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static javax.media.opengl.GL2ES1.GL_TEXTURE_ENV;
+import static javax.media.opengl.GL2ES1.GL_TEXTURE_ENV_MODE;
+import static javax.media.opengl.GL2GL3.GL_QUADS;
+import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
+import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,15 +69,6 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.util.io.StreamOpener;
-
-import static com.jogamp.opengl.util.texture.TextureIO.*;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.*;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL2.*;
 
 public class WatermarkPainter extends GlimpsePainterImpl
 {
@@ -79,14 +95,7 @@ public class WatermarkPainter extends GlimpsePainterImpl
         public final VerticalPosition verticalPos;
         public final HorizontalPosition horizontalPos;
 
-        public WatermarkConfig( double maxWidthPixels,
-                                double maxHeightPixels,
-                                double maxAreaFraction,
-                                double maxWidthFraction,
-                                double maxHeightFraction,
-                                double maxPaddingPixels,
-                                VerticalPosition verticalPos,
-                                HorizontalPosition horizontalPos )
+        public WatermarkConfig( double maxWidthPixels, double maxHeightPixels, double maxAreaFraction, double maxWidthFraction, double maxHeightFraction, double maxPaddingPixels, VerticalPosition verticalPos, HorizontalPosition horizontalPos )
         {
             this.maxWidthPixels = maxWidthPixels;
             this.maxHeightPixels = maxHeightPixels;
@@ -98,15 +107,50 @@ public class WatermarkPainter extends GlimpsePainterImpl
             this.horizontalPos = horizontalPos;
         }
 
-        public WatermarkConfig withMaxWidthPixels( double maxWidthPixels )           { return new WatermarkConfig( maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withMaxHeightPixels( double maxHeightPixels )         { return new WatermarkConfig( this.maxWidthPixels, maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withMaxAreaFraction( double maxAreaFraction )         { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withMaxWidthFraction( double maxWidthFraction )       { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withMaxHeightFraction( double maxHeightFraction )     { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withMaxPaddingPixels( double maxPaddingPixels )       { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, maxPaddingPixels, this.verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withVerticalPos( VerticalPosition verticalPos )       { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, this.horizontalPos ); }
-        public WatermarkConfig withHorizontalPos( HorizontalPosition horizontalPos ) { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, horizontalPos ); }
-        public WatermarkConfig withPos( VerticalPosition verticalPos, HorizontalPosition horizontalPos ) { return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, horizontalPos ); }
+        public WatermarkConfig withMaxWidthPixels( double maxWidthPixels )
+        {
+            return new WatermarkConfig( maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withMaxHeightPixels( double maxHeightPixels )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withMaxAreaFraction( double maxAreaFraction )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withMaxWidthFraction( double maxWidthFraction )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withMaxHeightFraction( double maxHeightFraction )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withMaxPaddingPixels( double maxPaddingPixels )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, maxPaddingPixels, this.verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withVerticalPos( VerticalPosition verticalPos )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, this.horizontalPos );
+        }
+
+        public WatermarkConfig withHorizontalPos( HorizontalPosition horizontalPos )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, horizontalPos );
+        }
+
+        public WatermarkConfig withPos( VerticalPosition verticalPos, HorizontalPosition horizontalPos )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, horizontalPos );
+        }
     }
 
     public static final WatermarkConfig defaultConfig = new WatermarkConfig( 350, 350, 0.04, 0.28, 0.28, 10, BOTTOM, RIGHT );
@@ -116,13 +160,10 @@ public class WatermarkPainter extends GlimpsePainterImpl
     public static final WatermarkConfig topRight = defaultConfig.withPos( TOP, RIGHT );
     public static final WatermarkConfig topLeft = defaultConfig.withPos( TOP, LEFT );
 
-
-
     protected final Supplier<BufferedImage> imageSupplier;
     protected final WatermarkConfig config;
     protected Texture texture;
     protected boolean initialized;
-
 
     public WatermarkPainter( BufferedImage image )
     {
@@ -205,18 +246,18 @@ public class WatermarkPainter extends GlimpsePainterImpl
     // width, height, padding
     protected double[] computeQuadGeometry( double wImage, double hImage, double wBounds, double hBounds )
     {
-        double maxArea = config.maxAreaFraction * wBounds*hBounds;
+        double maxArea = config.maxAreaFraction * wBounds * hBounds;
 
         double w = config.maxWidthPixels;
-        w = min( w, config.maxWidthFraction*wBounds );
-        w = min( w, sqrt( maxArea*wImage/hImage ) );
+        w = min( w, config.maxWidthFraction * wBounds );
+        w = min( w, sqrt( maxArea * wImage / hImage ) );
 
         double h = config.maxHeightPixels;
-        h = min( h, config.maxHeightFraction*hBounds );
-        h = min( h, sqrt( maxArea*hImage/wImage ) );
+        h = min( h, config.maxHeightFraction * hBounds );
+        h = min( h, sqrt( maxArea * hImage / wImage ) );
 
-        w = min( w, h * wImage/hImage );
-        h = w * hImage/wImage;
+        w = min( w, h * wImage / hImage );
+        h = w * hImage / wImage;
 
         double p = 0;
         p = max( p, w / config.maxWidthPixels );
@@ -250,12 +291,10 @@ public class WatermarkPainter extends GlimpsePainterImpl
         texture.enable( gl );
         texture.bind( gl );
 
-
         // See the "Alpha premultiplication" section in Texture's class comment
         gl.glEnable( GL_BLEND );
         gl.glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         gl.glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-
 
         gl.glBegin( GL_QUADS );
         try
@@ -274,14 +313,14 @@ public class WatermarkPainter extends GlimpsePainterImpl
                     xLeft = ( float ) ( padding );
                     xRight = ( float ) ( xLeft + wQuad );
                 }
-                break;
+                    break;
 
                 default:
                 {
                     xRight = ( float ) ( bounds.getWidth( ) - padding );
                     xLeft = ( float ) ( xRight - wQuad );
                 }
-                break;
+                    break;
             }
 
             float yTop;
@@ -293,14 +332,14 @@ public class WatermarkPainter extends GlimpsePainterImpl
                     yTop = ( float ) ( bounds.getHeight( ) - padding );
                     yBottom = ( float ) ( yTop - hQuad );
                 }
-                break;
+                    break;
 
                 default:
                 {
                     yBottom = ( float ) ( padding );
                     yTop = ( float ) ( yBottom + hQuad );
                 }
-                break;
+                    break;
             }
 
             gl.glTexCoord2f( 0, 1 );
@@ -313,7 +352,7 @@ public class WatermarkPainter extends GlimpsePainterImpl
             gl.glVertex2f( xRight, yTop );
 
             gl.glTexCoord2f( 0, 0 );
-            gl.glVertex2f( xLeft, yTop);
+            gl.glVertex2f( xLeft, yTop );
         }
         finally
         {

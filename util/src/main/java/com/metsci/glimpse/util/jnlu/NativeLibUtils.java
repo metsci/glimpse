@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,44 +44,44 @@ import java.util.regex.Pattern;
 public class NativeLibUtils
 {
 
-    public static boolean onPlatform(String osPrefix, String osArch)
+    public static boolean onPlatform( String osPrefix, String osArch )
     {
-        String givenOsPrefix = osPrefix.toLowerCase();
-        String givenOsArch = osArch.toLowerCase();
+        String givenOsPrefix = osPrefix.toLowerCase( );
+        String givenOsArch = osArch.toLowerCase( );
 
-        String actualOsName = System.getProperty("os.name").toLowerCase();
-        String actualOsArch = System.getProperty("os.arch").toLowerCase();
+        String actualOsName = System.getProperty( "os.name" ).toLowerCase( );
+        String actualOsArch = System.getProperty( "os.arch" ).toLowerCase( );
 
-        return actualOsName.startsWith(givenOsPrefix) && actualOsArch.equals(givenOsArch);
+        return actualOsName.startsWith( givenOsPrefix ) && actualOsArch.equals( givenOsArch );
     }
 
-    public static void loadLibs(String resourceSearchPath, File extractDir, String... libShortNames) throws IOException
+    public static void loadLibs( String resourceSearchPath, File extractDir, String... libShortNames ) throws IOException
     {
-        loadLibs(new String[] { resourceSearchPath }, extractDir, libShortNames);
+        loadLibs( new String[] { resourceSearchPath }, extractDir, libShortNames );
     }
 
-    public static void loadLibs(String[] resourceSearchPaths, File extractDir, String... libShortNames) throws IOException
+    public static void loadLibs( String[] resourceSearchPaths, File extractDir, String... libShortNames ) throws IOException
     {
-        for (String libShortName : libShortNames)
+        for ( String libShortName : libShortNames )
         {
-            File libFile = extractLib(resourceSearchPaths, extractDir, libShortName);
-            System.load(libFile.getPath());
+            File libFile = extractLib( resourceSearchPaths, extractDir, libShortName );
+            System.load( libFile.getPath( ) );
         }
     }
 
-    public static File extractLib(String resourceSearchPath, File destDir, String libShortName) throws IOException
+    public static File extractLib( String resourceSearchPath, File destDir, String libShortName ) throws IOException
     {
-        return extractLib(new String[] { resourceSearchPath }, destDir, libShortName);
+        return extractLib( new String[] { resourceSearchPath }, destDir, libShortName );
     }
 
-    public static File extractLib(String[] resourceSearchPaths, File destDir, String libShortName) throws IOException
+    public static File extractLib( String[] resourceSearchPaths, File destDir, String libShortName ) throws IOException
     {
-        List<String> resourceSearchPaths2 = unmodifiableList(Arrays.asList(resourceSearchPaths));
+        List<String> resourceSearchPaths2 = unmodifiableList( Arrays.asList( resourceSearchPaths ) );
 
-        ResolvedResource lib = resolveLib(resourceSearchPaths2, libShortName);
-        if (lib == null) throw new RuntimeException("Couldn't find library on classpath: " + libShortName);
+        ResolvedResource lib = resolveLib( resourceSearchPaths2, libShortName );
+        if ( lib == null ) throw new RuntimeException( "Couldn't find library on classpath: " + libShortName );
 
-        return copy(lib, destDir);
+        return copy( lib, destDir );
     }
 
     public static class ResolvedResource
@@ -89,79 +89,80 @@ public class NativeLibUtils
         public final URL url;
         public final String name;
 
-        public ResolvedResource(URL url, String name)
+        public ResolvedResource( URL url, String name )
         {
             this.url = url;
             this.name = name;
         }
     }
 
-    public static ResolvedResource resolveLib(List<String> resourceSearchPaths, String libShortName)
+    public static ResolvedResource resolveLib( List<String> resourceSearchPaths, String libShortName )
     {
-        return resolveResource(resourceSearchPaths, possibleLibNames(libShortName));
+        return resolveResource( resourceSearchPaths, possibleLibNames( libShortName ) );
     }
 
-    public static List<String> possibleLibNames(String libShortName)
+    public static List<String> possibleLibNames( String libShortName )
     {
-        String likely = System.mapLibraryName(libShortName);
+        String likely = System.mapLibraryName( libShortName );
 
-        List<String> possibles = new ArrayList<String>();
-        possibles.add(likely);
+        List<String> possibles = new ArrayList<String>( );
+        possibles.add( likely );
 
         // On Darwin, we need to check the .dylib extension if no .jnilib is found
-        if (likely.endsWith(".jnilib")) possibles.add(likely.substring(0, likely.length() - ".jnilib".length()) + ".dylib");
+        if ( likely.endsWith( ".jnilib" ) ) possibles.add( likely.substring( 0, likely.length( ) - ".jnilib".length( ) ) + ".dylib" );
 
         return possibles;
     }
 
-    public static ResolvedResource resolveResource(List<String> possiblePaths, List<String> possibleNames)
+    public static ResolvedResource resolveResource( List<String> possiblePaths, List<String> possibleNames )
     {
-        ClassLoader cl = NativeLibUtils.class.getClassLoader();
-        for (String path : possiblePaths)
+        ClassLoader cl = NativeLibUtils.class.getClassLoader( );
+        for ( String path : possiblePaths )
         {
-            for (String name : possibleNames)
+            for ( String name : possibleNames )
             {
-                boolean needSep = (!path.isEmpty() && !path.endsWith("/"));
-                URL url = cl.getResource(path + (needSep ? "/" : "") + name);
-                if (url != null) return new ResolvedResource(url, name);
+                boolean needSep = ( !path.isEmpty( ) && !path.endsWith( "/" ) );
+                URL url = cl.getResource( path + ( needSep ? "/" : "" ) + name );
+                if ( url != null ) return new ResolvedResource( url, name );
             }
         }
         return null;
     }
 
-    public static File copy(ResolvedResource from, File toDir) throws IOException
+    public static File copy( ResolvedResource from, File toDir ) throws IOException
     {
-        File toFile = new File(toDir, from.name);
-        FileUtils.copy(from.url, toFile);
+        File toFile = new File( toDir, from.name );
+        FileUtils.copy( from.url, toFile );
         return toFile;
     }
-    
+
     /**
      * By itself, this method is not very helpful, because the ClassLoader loads the
      * "java.library.path" property once at startup. However, it can be useful in
      * conjunction with {@link NativeLibUtils#addLibDirToClassLoader_FRAGILE(File)}.
      */
-    public static void addLibDirToSystemProperty(File newDir, boolean prepend) throws IOException
+    public static void addLibDirToSystemProperty( File newDir, boolean prepend ) throws IOException
     {
         String propKey = "java.library.path";
-        
-        String originalProp = System.getProperty(propKey, "");
-        String[] originalArray = originalProp.split(Pattern.quote(File.pathSeparator));
-        
-        Set<String> originalPaths = new HashSet<String>();
-        for (String p : originalArray) originalPaths.add((new File(p)).getCanonicalPath());
-        if (originalPaths.contains(newDir.getCanonicalPath())) return;
-        
+
+        String originalProp = System.getProperty( propKey, "" );
+        String[] originalArray = originalProp.split( Pattern.quote( File.pathSeparator ) );
+
+        Set<String> originalPaths = new HashSet<String>( );
+        for ( String p : originalArray )
+            originalPaths.add( ( new File( p ) ).getCanonicalPath( ) );
+        if ( originalPaths.contains( newDir.getCanonicalPath( ) ) ) return;
+
         String newProp;
-        if (prepend)
+        if ( prepend )
         {
-            newProp = newDir.getPath() + File.pathSeparator + originalProp;
+            newProp = newDir.getPath( ) + File.pathSeparator + originalProp;
         }
         else
         {
-            newProp = originalProp + File.pathSeparator + newDir.getPath();
+            newProp = originalProp + File.pathSeparator + newDir.getPath( );
         }
-        System.setProperty(propKey, newProp);
+        System.setProperty( propKey, newProp );
     }
 
 }

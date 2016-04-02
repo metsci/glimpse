@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,59 +34,71 @@ import java.nio.CharBuffer;
 public interface CharsModifiable extends Chars
 {
 
-    void set(int i, char v);
-    void set(int i, char[] vs);
-    void set(int i, char[] vs, int from, int to);
-    
+    void set( int i, char v );
 
+    void set( int i, char[] vs );
 
-    void insert(int i, char v);
+    void set( int i, char[] vs, int from, int to );
 
-    void insert(int i, char[] vs);
-    void insert(int i, Chars vs);
-    void insert(int i, String vs);
-    void insert(int i, CharBuffer vs);
+    void insert( int i, char v );
 
-    void insert(int i, char[] vs, int from, int to);
-    void insert(int i, Chars vs, int from, int to);
-    void insert(int i, String vs, int from, int to);
-    void insert(int i, CharBuffer vs, int c);
+    void insert( int i, char[] vs );
 
+    void insert( int i, Chars vs );
 
+    void insert( int i, String vs );
 
-    void append(char v);
+    void insert( int i, CharBuffer vs );
 
-    void append(char[] vs);
-    void append(Chars vs);
-    void append(String vs);
-    void append(CharBuffer vs);
+    void insert( int i, char[] vs, int from, int to );
 
-    void append(char[] vs, int from, int to);
-    void append(Chars vs, int from, int to);
-    void append(String vs, int from, int to);
-    void append(CharBuffer vs, int c);
+    void insert( int i, Chars vs, int from, int to );
 
+    void insert( int i, String vs, int from, int to );
 
+    void insert( int i, CharBuffer vs, int c );
 
-    void prepend(char v);
+    void append( char v );
 
-    void prepend(char[] vs);
-    void prepend(Chars vs);
-    void prepend(String vs);
-    void prepend(CharBuffer vs);
+    void append( char[] vs );
 
-    void prepend(char[] vs, int from, int to);
-    void prepend(Chars vs, int from, int to);
-    void prepend(String vs, int from, int to);
-    void prepend(CharBuffer vs, int c);
+    void append( Chars vs );
 
+    void append( String vs );
 
+    void append( CharBuffer vs );
+
+    void append( char[] vs, int from, int to );
+
+    void append( Chars vs, int from, int to );
+
+    void append( String vs, int from, int to );
+
+    void append( CharBuffer vs, int c );
+
+    void prepend( char v );
+
+    void prepend( char[] vs );
+
+    void prepend( Chars vs );
+
+    void prepend( String vs );
+
+    void prepend( CharBuffer vs );
+
+    void prepend( char[] vs, int from, int to );
+
+    void prepend( Chars vs, int from, int to );
+
+    void prepend( String vs, int from, int to );
+
+    void prepend( CharBuffer vs, int c );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(char v);
+    void remove( char v );
 
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
@@ -94,20 +106,19 @@ public interface CharsModifiable extends Chars
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
+    void removeIndex( int index );
 
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.logGLProgramInfoLog;
 
 import java.util.logging.Logger;
 
@@ -49,7 +49,7 @@ import javax.media.opengl.GLException;
  */
 public class Pipeline
 {
-    private static final Logger logger = Logger.getLogger( Pipeline.class.getName() );
+    private static final Logger logger = Logger.getLogger( Pipeline.class.getName( ) );
 
     private final String name;
     private Shader geometryShader;
@@ -73,7 +73,7 @@ public class Pipeline
         fragmentShader = frag;
 
         isDirty = true;
-        if( geom == null && vert == null && frag == null )
+        if ( geom == null && vert == null && frag == null )
         {
             isEmpty = true;
             isDirty = false;
@@ -83,13 +83,9 @@ public class Pipeline
 
     private static void verify( Shader geom, Shader vert, Shader frag )
     {
-        if( geom != null && vert == null )
-            throw new GLException( "Geometry shader present w/o accompanying vertex shader." );
+        if ( geom != null && vert == null ) throw new GLException( "Geometry shader present w/o accompanying vertex shader." );
 
-        if( ( geom != null && geom.getType() != ShaderType.geometry ) ||
-            ( vert != null && vert.getType() != ShaderType.vertex ) ||
-            ( frag != null && frag.getType() != ShaderType.fragment ) )
-            throw new IllegalArgumentException( "Incorrect shader type supplied in pipeline construction." );
+        if ( ( geom != null && geom.getType( ) != ShaderType.geometry ) || ( vert != null && vert.getType( ) != ShaderType.vertex ) || ( frag != null && frag.getType( ) != ShaderType.fragment ) ) throw new IllegalArgumentException( "Incorrect shader type supplied in pipeline construction." );
     }
 
     public String getName( )
@@ -100,7 +96,7 @@ public class Pipeline
     @Override
     public String toString( )
     {
-        return "'PIPELINE " + getName() + "'";
+        return "'PIPELINE " + getName( ) + "'";
     }
 
     public boolean isLinked( GL gl )
@@ -110,35 +106,32 @@ public class Pipeline
 
     public void beginUse( GL2 gl )
     {
-        if( isEmpty )
-            return;
+        if ( isEmpty ) return;
 
-        if( isDirty )
-            isLinked = compileAndLink( gl );
+        if ( isDirty ) isLinked = compileAndLink( gl );
 
         // In the future we can support replacing pieces of the pipeline, even
         // functions inside the shaders, and relinking on the fly. For now,
         // we only init once.
         isDirty = false;
 
-        if( !isLinked )
-            return;
+        if ( !isLinked ) return;
 
         gl.glUseProgram( glProgramHandle );
 
-        if( vertexShader != null )
+        if ( vertexShader != null )
         {
             vertexShader.preDisplay( gl );
             vertexShader.updateArgValues( gl );
         }
 
-        if( geometryShader != null )
+        if ( geometryShader != null )
         {
             geometryShader.preDisplay( gl );
             geometryShader.updateArgValues( gl );
         }
 
-        if( fragmentShader != null )
+        if ( fragmentShader != null )
         {
             fragmentShader.preDisplay( gl );
             fragmentShader.updateArgValues( gl );
@@ -147,20 +140,15 @@ public class Pipeline
 
     public void endUse( GL2 gl )
     {
-        if( isEmpty )
-            return;
+        if ( isEmpty ) return;
 
-        if( !isLinked )
-            return;
+        if ( !isLinked ) return;
 
-        if( fragmentShader != null )
-            fragmentShader.postDisplay( gl );
+        if ( fragmentShader != null ) fragmentShader.postDisplay( gl );
 
-        if( geometryShader != null )
-            geometryShader.postDisplay( gl );
+        if ( geometryShader != null ) geometryShader.postDisplay( gl );
 
-        if( vertexShader != null )
-            vertexShader.postDisplay( gl );
+        if ( vertexShader != null ) vertexShader.postDisplay( gl );
 
         gl.glUseProgram( 0 );
     }
@@ -168,37 +156,33 @@ public class Pipeline
     // TODO: Clean up when compilation fails inside this method
     private boolean compileAndLink( GL2 gl )
     {
-        if( isEmpty )
-            return true;
+        if ( isEmpty ) return true;
 
         isLinked = false;
-        logger.info( "Compiling " + toString() + "..." );
+        logger.fine( "Compiling " + toString( ) + "..." );
 
-        glProgramHandle = gl.glCreateProgram();
+        glProgramHandle = gl.glCreateProgram( );
 
-        if( geometryShader != null )
+        if ( geometryShader != null )
         {
-            if( !geometryShader.compileAndAttach( gl, glProgramHandle ) )
-                return false;
+            if ( !geometryShader.compileAndAttach( gl, glProgramHandle ) ) return false;
         }
 
-        if( vertexShader != null )
+        if ( vertexShader != null )
         {
-            if( ! vertexShader.compileAndAttach( gl, glProgramHandle ) )
-                return false;
+            if ( !vertexShader.compileAndAttach( gl, glProgramHandle ) ) return false;
         }
 
-        if( fragmentShader != null )
+        if ( fragmentShader != null )
         {
-            if( ! fragmentShader.compileAndAttach( gl, glProgramHandle ) )
-                return false;
+            if ( !fragmentShader.compileAndAttach( gl, glProgramHandle ) ) return false;
         }
 
-        logger.info( "Linking " + toString() + "..." );
+        logger.fine( "Linking " + toString( ) + "..." );
         gl.glLinkProgram( glProgramHandle );
 
-        boolean success = logGLProgramInfoLog( logger, gl, glProgramHandle, toString() );
-        if( !success )
+        boolean success = logGLProgramInfoLog( logger, gl, glProgramHandle, toString( ) );
+        if ( !success )
         {
             return false;
         }
@@ -206,14 +190,11 @@ public class Pipeline
         {
             isLinked = true;
 
-            if( geometryShader != null )
-                geometryShader.getShaderArgHandles( gl, glProgramHandle );
+            if ( geometryShader != null ) geometryShader.getShaderArgHandles( gl, glProgramHandle );
 
-            if( vertexShader != null )
-                vertexShader.getShaderArgHandles( gl, glProgramHandle );
+            if ( vertexShader != null ) vertexShader.getShaderArgHandles( gl, glProgramHandle );
 
-            if( fragmentShader != null )
-                fragmentShader.getShaderArgHandles( gl, glProgramHandle );
+            if ( fragmentShader != null ) fragmentShader.getShaderArgHandles( gl, glProgramHandle );
 
             return true;
         }
@@ -221,7 +202,7 @@ public class Pipeline
 
     public void dispose( GLContext context )
     {
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         gl.glDeleteProgram( glProgramHandle );
 

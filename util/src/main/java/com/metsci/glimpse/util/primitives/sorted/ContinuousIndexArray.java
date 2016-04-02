@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,27 +37,27 @@ public class ContinuousIndexArray
     public int[] is;
     public float[] fs;
 
-    public ContinuousIndexArray(int n)
+    public ContinuousIndexArray( int n )
     {
         is = new int[n];
         fs = new float[n];
     }
 
-    public void put(int index, int i, float f)
+    public void put( int index, int i, float f )
     {
         is[index] = i;
         fs[index] = f;
     }
 
-    public void put(int index, ContinuousIndex h)
+    public void put( int index, ContinuousIndex h )
     {
         is[index] = h.i;
         fs[index] = h.f;
     }
 
-    public int capacity()
+    public int capacity( )
     {
-        return min(is.length, fs.length);
+        return min( is.length, fs.length );
     }
 
 }

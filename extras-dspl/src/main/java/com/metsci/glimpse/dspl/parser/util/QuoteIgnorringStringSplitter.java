@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.dspl.parser.util;
 
-import static com.metsci.glimpse.dspl.parser.util.QuoteIgnorringStringSplitter.ParseMode.*;
+import static com.metsci.glimpse.dspl.parser.util.QuoteIgnorringStringSplitter.ParseMode.BETWEEN_QUOTES;
+import static com.metsci.glimpse.dspl.parser.util.QuoteIgnorringStringSplitter.ParseMode.DEFAULT;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,39 +95,39 @@ public class QuoteIgnorringStringSplitter
             switch ( mode )
             {
 
-            case BETWEEN_QUOTES:
-                if ( c == QUOTE )
-                {
-                    mode = DEFAULT;
-                }
-                else if ( c == split )
-                {
-                    // ignore, this is part of item between quotes
-                }
-                else
-                {
-                    // ignore, part of item
-                }
-                break;
+                case BETWEEN_QUOTES:
+                    if ( c == QUOTE )
+                    {
+                        mode = DEFAULT;
+                    }
+                    else if ( c == split )
+                    {
+                        // ignore, this is part of item between quotes
+                    }
+                    else
+                    {
+                        // ignore, part of item
+                    }
+                    break;
 
-            case DEFAULT:
-                if ( c == QUOTE )
-                {
-                    mode = BETWEEN_QUOTES;
-                }
-                else if ( c == split )
-                {
-                    items.add( s.substring( itemStartPos, linePos ) );
-                    itemStartPos = linePos + 1;
-                }
-                else
-                {
-                    // ignore, part of item
-                }
-                break;
+                case DEFAULT:
+                    if ( c == QUOTE )
+                    {
+                        mode = BETWEEN_QUOTES;
+                    }
+                    else if ( c == split )
+                    {
+                        items.add( s.substring( itemStartPos, linePos ) );
+                        itemStartPos = linePos + 1;
+                    }
+                    else
+                    {
+                        // ignore, part of item
+                    }
+                    break;
 
-            default:
-                throw new RuntimeException( "Impossible state." );
+                default:
+                    throw new RuntimeException( "Impossible state." );
 
             }
         }

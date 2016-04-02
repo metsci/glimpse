@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline;
 
-import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.*;
+import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +48,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     protected boolean indentSubplots = false;
     protected int indentSize = -1;
     protected int maxLevel = 0;
-    
+
     public CollapsibleTimePlot2D( )
     {
         super( Orientation.VERTICAL );
@@ -80,12 +80,12 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
         this.indentSize = size;
         this.validate( );
     }
-    
+
     public int getIndentSize( )
     {
         return indentSize < 0 ? getLabelSize( ) : this.indentSize;
     }
-    
+
     /**
      * Create a collapsible/expandable group of plots.
      */
@@ -157,7 +157,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.lock.unlock( );
         }
     }
-    
+
     public List<PlotInfo> getUngroupedPlots( )
     {
         this.lock.lock( );
@@ -170,7 +170,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
             this.lock.unlock( );
         }
     }
-    
+
     public int getMaxLevel( )
     {
         this.lock.lock( );
@@ -196,7 +196,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
     protected void setRowColumnConstraints( )
     {
         int tempIndentSize = getIndentSize( );
-        
+
         if ( this.indentSubplots )
         {
             this.maxLevel = setIndentLevel0( ) + 1;
@@ -219,7 +219,7 @@ public class CollapsibleTimePlot2D extends StackedTimePlot2D
 
         return accumulator;
     }
-    
+
     @Override
     public int getOverlayLayoutOffsetX( )
     {

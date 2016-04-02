@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,16 +36,16 @@ public class ImageDataExternal
 {
     // unique identifier for the image data
     private Object id;
-    
+
     // the offset from the edge of the packed rectangle to the "center" of the image
     // (which might not be the middle of the image)
     private int centerX;
     private int centerY;
-    
+
     // width and height of the image
     private int width;
     private int height;
-    
+
     // the Graphics2D routine used to draw the image
     private ImageDrawer drawer;
 
@@ -58,7 +58,7 @@ public class ImageDataExternal
         this.height = height;
         this.drawer = drawer;
     }
-    
+
     public int getCenterY( )
     {
         return centerY;
@@ -83,7 +83,7 @@ public class ImageDataExternal
     {
         return id;
     }
-    
+
     public ImageDrawer getImageDrawer( )
     {
         return drawer;

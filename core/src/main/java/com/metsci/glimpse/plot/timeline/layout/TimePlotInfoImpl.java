@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -342,7 +342,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
         StackedTimePlot2D parent = getStackedTimePlot( );
 
         int labelSize;
-        
+
         if ( parent instanceof CollapsibleTimePlot2D )
         {
             CollapsibleTimePlot2D collapsible = ( ( CollapsibleTimePlot2D ) parent );

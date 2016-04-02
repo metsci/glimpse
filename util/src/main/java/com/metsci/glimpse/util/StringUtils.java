@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,22 +33,23 @@ import static java.lang.String.format;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-
 /**
  * @author hogye
  */
 public final class StringUtils
 {
-    public static final String degreeSymbol   = "\u00b0";
+    public static final String degreeSymbol = "\u00b0";
     public static final String superscriptTwo = "\u00B2";
     public static final String lowercaseSigma = "\u03C3";
 
-    public static final String whiteBox       = "\u25A0";
-    public static final String whiteCircle    = "\u25CF";
-    public static final String whiteDiamond   = "\u2666";
+    public static final String whiteBox = "\u25A0";
+    public static final String whiteCircle = "\u25CF";
+    public static final String whiteDiamond = "\u2666";
 
     // Prevent instantiation
-    private StringUtils() { }
+    private StringUtils( )
+    {
+    }
 
     /**
      * This method splits a String into an array of values, the values being delimited with the given character. For
@@ -63,28 +64,26 @@ public final class StringUtils
      */
     public static String[] split( String s, char delimiter )
     {
-        if ( s == null )
-            return null;
+        if ( s == null ) return null;
 
         // Determine the size of the returned array.
         int arraySize = 1;
-        for ( int i = 0; i < s.length(); ++i )
-            if ( s.charAt( i ) == delimiter )
-                ++arraySize;
+        for ( int i = 0; i < s.length( ); ++i )
+            if ( s.charAt( i ) == delimiter ) ++arraySize;
 
-        String[] values    = new String[ arraySize ];
-        int      index;
-        int      fromIndex = 0;
-        int      i         = 0;
-        while (( index = s.indexOf( delimiter, fromIndex ) ) >= 0)
+        String[] values = new String[arraySize];
+        int index;
+        int fromIndex = 0;
+        int i = 0;
+        while ( ( index = s.indexOf( delimiter, fromIndex ) ) >= 0 )
         {
-            values[ i ] = s.substring( fromIndex, index );
+            values[i] = s.substring( fromIndex, index );
             ++i;
             fromIndex = index + 1;
         }
 
         // Don't forget the last value!
-        values[ i ] = s.substring( fromIndex );
+        values[i] = s.substring( fromIndex );
 
         return values;
     }
@@ -95,17 +94,15 @@ public final class StringUtils
      */
     public static String join( String separator, String... strings )
     {
-        if ( strings == null )
-            return null;
+        if ( strings == null ) return null;
 
-        if ( separator == null )
-            separator = "";
+        if ( separator == null ) separator = "";
 
-        StringBuilder joined = new StringBuilder( strings[ 0 ] );
+        StringBuilder joined = new StringBuilder( strings[0] );
         for ( int i = 1; i < strings.length; i++ )
-            joined.append( separator ).append( strings[ i ] );
+            joined.append( separator ).append( strings[i] );
 
-        return joined.toString();
+        return joined.toString( );
     }
 
     /**
@@ -116,8 +113,7 @@ public final class StringUtils
      */
     public static String removeFilenameExtension( String filename )
     {
-        if ( filename == null )
-            return null;
+        if ( filename == null ) return null;
         int pos = filename.lastIndexOf( '.' );
         return ( pos >= 0 ) ? filename.substring( 0, pos ) : filename;
     }
@@ -128,44 +124,44 @@ public final class StringUtils
 
     public static String repeat( String val, int rep )
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder( );
         for ( int i = 0; i < rep; i++ )
             builder.append( val );
 
-        return builder.toString();
+        return builder.toString( );
     }
 
     public static String toString( int[] a )
     {
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new StringBuilder( );
         for ( int i = 0; i < a.length; i++ )
-            s.append( " " + a[ i ] );
+            s.append( " " + a[i] );
 
         s.append( GeneralUtils.LINE_SEPARATOR );
 
-        return s.toString();
+        return s.toString( );
     }
 
     public static String toString( long[] a )
     {
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new StringBuilder( );
         for ( int i = 0; i < a.length; i++ )
-            s.append( " " + a[ i ] );
+            s.append( " " + a[i] );
 
         s.append( GeneralUtils.LINE_SEPARATOR );
 
-        return s.toString();
+        return s.toString( );
     }
 
     public static String toString( double[] a )
     {
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new StringBuilder( );
         for ( int i = 0; i < a.length; i++ )
-            s.append( " " + a[ i ] );
+            s.append( " " + a[i] );
 
         s.append( GeneralUtils.LINE_SEPARATOR );
 
-        return s.toString();
+        return s.toString( );
     }
 
     /**
@@ -177,9 +173,9 @@ public final class StringUtils
         if ( filename != null )
         {
             int i = filename.lastIndexOf( '.' );
-            if ( ( i > 0 ) && ( i < ( filename.length() - 1 ) ) )
+            if ( ( i > 0 ) && ( i < ( filename.length( ) - 1 ) ) )
             {
-                ext = filename.substring( i + 1 ).toLowerCase();
+                ext = filename.substring( i + 1 ).toLowerCase( );
             }
         }
 
@@ -198,11 +194,11 @@ public final class StringUtils
         }
         else
         {
-            StringWriter sw = new StringWriter();
-            PrintWriter  pw = new PrintWriter( sw, true );
+            StringWriter sw = new StringWriter( );
+            PrintWriter pw = new PrintWriter( sw, true );
             t.printStackTrace( pw );
-            answer = sw.toString();
-            pw.close();
+            answer = sw.toString( );
+            pw.close( );
         }
 
         return answer;

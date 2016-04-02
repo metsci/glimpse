@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,10 +75,10 @@ public abstract class FastFunc
         this.invdx = 1 / dx;
         this.b = -min * invdx + 0.5;
 
-        precompute();
+        precompute( );
     }
 
-    protected void precompute()
+    protected void precompute( )
     {
         f = new double[nSamples];
 

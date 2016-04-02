@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  */
 package com.metsci.glimpse.axis.painter.label;
 
+import com.metsci.glimpse.axis.Axis1D;
+
 import it.unimi.dsi.fastutil.doubles.Double2ObjectAVLTreeMap;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectSortedMap;
 import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
-
-import com.metsci.glimpse.axis.Axis1D;
 
 /**
  * Draws pre-defined labels at pre-defined locations.

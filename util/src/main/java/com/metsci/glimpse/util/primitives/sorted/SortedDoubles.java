@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,47 +45,47 @@ public interface SortedDoubles extends Doubles
      *
      * @see Arrays#binarySearch(double[], double)
      */
-    int indexOf(double x);
+    int indexOf( double x );
 
     /**
      * Index of the value closest to x. If the two closest values are x-C
      * and x+C, returns the index of x+C. If doubles is empty, returns -1.
      */
-    int indexNearest(double x);
+    int indexNearest( double x );
 
     /**
      * Largest index whose value is less than x
      */
-    int indexBefore(double x);
+    int indexBefore( double x );
 
     /**
      * Smallest index whose value is greater than x
      */
-    int indexAfter(double x);
+    int indexAfter( double x );
 
     /**
      * Largest index whose value is less than or equal to x
      */
-    int indexAtOrBefore(double x);
+    int indexAtOrBefore( double x );
 
     /**
      * Smallest index whose value is greater than or equal to x
      */
-    int indexAtOrAfter(double x);
+    int indexAtOrAfter( double x );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    void continuousIndexOf(double x, ContinuousIndex result);
+    void continuousIndexOf( double x, ContinuousIndex result );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    ContinuousIndex continuousIndexOf(double x);
+    ContinuousIndex continuousIndexOf( double x );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -93,7 +93,7 @@ public interface SortedDoubles extends Doubles
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(Doubles xs, ContinuousIndexArray result);
+    void continuousIndicesOf( Doubles xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -101,7 +101,7 @@ public interface SortedDoubles extends Doubles
      *
      * @see com.metsci.tracks.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(Doubles xs);
+    ContinuousIndexArray continuousIndicesOf( Doubles xs );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -112,7 +112,7 @@ public interface SortedDoubles extends Doubles
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(SortedDoubles xs, ContinuousIndexArray result);
+    void continuousIndicesOf( SortedDoubles xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -123,6 +123,6 @@ public interface SortedDoubles extends Doubles
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(SortedDoubles xs);
+    ContinuousIndexArray continuousIndicesOf( SortedDoubles xs );
 
 }

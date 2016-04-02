@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,6 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
-import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
-
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,6 +36,9 @@ import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+
+import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
 
 /**
  * Plots a simple frequency histogram. Binning of
@@ -70,7 +70,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
     protected float maxY;
     protected float minX;
     protected float maxX;
-    
+
     protected final boolean asDensity;
 
     public HistogramPainter( boolean asDensity )
@@ -78,10 +78,10 @@ public class HistogramPainter extends GlimpseDataPainter2D
         this.dataBufferLock = new ReentrantLock( );
         this.asDensity = asDensity;
     }
-    
+
     public HistogramPainter( )
     {
-    	this( false );
+        this( false );
     }
 
     public void setColor( float[] rgba )
@@ -100,7 +100,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
     public void autoAdjustAxisBounds( Axis2D axis )
     {
         axis.getAxisX( ).setMin( minX );
-        axis.getAxisX( ).setMax( maxX + getBinSize() );
+        axis.getAxisX( ).setMax( maxX + getBinSize( ) );
         axis.getAxisY( ).setMin( minY );
         axis.getAxisY( ).setMax( maxY );
     }
@@ -117,7 +117,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
         double min = Double.MAX_VALUE;
         double max = -Double.MAX_VALUE;
 
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
             double value = data[i];
 
@@ -142,7 +142,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
         float min = Float.MAX_VALUE;
         float max = -Float.MAX_VALUE;
 
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
             float value = data[i];
 
@@ -162,11 +162,11 @@ public class HistogramPainter extends GlimpseDataPainter2D
 
     public void setData( double[] data, int size, double binSize, double binStart )
     {
-        this.binStart = (float) binStart;
+        this.binStart = ( float ) binStart;
 
-        Float2IntMap counts = new Float2IntOpenHashMap();
+        Float2IntMap counts = new Float2IntOpenHashMap( );
 
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
             double value = data[i];
 
@@ -182,9 +182,8 @@ public class HistogramPainter extends GlimpseDataPainter2D
             }
         }
 
-        setData( counts, size, (float) binSize );
+        setData( counts, size, ( float ) binSize );
     }
-
 
     /**
      * Sets the histogram data without automatically binning.
@@ -195,13 +194,13 @@ public class HistogramPainter extends GlimpseDataPainter2D
     public void setData( Float2IntMap counts, float binSize )
     {
         int sum = 0;
-        for ( Float2IntMap.Entry entry : counts.float2IntEntrySet() )
+        for ( Float2IntMap.Entry entry : counts.float2IntEntrySet( ) )
         {
             sum += entry.getIntValue( );
         }
         setData( counts, sum, binSize );
     }
-    
+
     /**
      * Sets the histogram data without automatically binning.
      * 
@@ -215,7 +214,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
         try
         {
             newData = true;
-            
+
             this.binSize = binSize;
 
             minY = 0;
@@ -231,9 +230,9 @@ public class HistogramPainter extends GlimpseDataPainter2D
                 dataBuffer = Buffers.newDirectFloatBuffer( dataSize * FLOATS_PER_BAR );
             }
 
-            final float denom = (asDensity) ? (binSize * totalCount) : totalCount;
-            
-            for ( Float2IntMap.Entry entry : counts.float2IntEntrySet() )
+            final float denom = ( asDensity ) ? ( binSize * totalCount ) : totalCount;
+
+            for ( Float2IntMap.Entry entry : counts.float2IntEntrySet( ) )
             {
                 float bin = entry.getFloatKey( );
                 int count = entry.getIntValue( );
@@ -255,7 +254,7 @@ public class HistogramPainter extends GlimpseDataPainter2D
         finally
         {
             dataBufferLock.unlock( );
-        }   
+        }
     }
 
     public void setData( double[] data, float binSize, float binStart )
@@ -267,9 +266,9 @@ public class HistogramPainter extends GlimpseDataPainter2D
     {
         this.binStart = binStart;
 
-        Float2IntMap counts = new Float2IntOpenHashMap();
+        Float2IntMap counts = new Float2IntOpenHashMap( );
 
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
             float value = data[i];
 
@@ -347,14 +346,14 @@ public class HistogramPainter extends GlimpseDataPainter2D
         gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
         int dataSizeTemp = dataSize;
-        
+
         if ( newData )
         {
             dataBufferLock.lock( );
             try
             {
                 dataSizeTemp = dataSize;
-                
+
                 // copy data from the host memory buffer to the device
                 gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSizeTemp * FLOATS_PER_BAR * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 

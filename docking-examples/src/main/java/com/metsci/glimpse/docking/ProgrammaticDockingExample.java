@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,17 +56,16 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
-import net.sf.tinylaf.Theme;
-import net.sf.tinylaf.TinyLookAndFeel;
-
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 
+import net.sf.tinylaf.Theme;
+import net.sf.tinylaf.TinyLookAndFeel;
+
 public class ProgrammaticDockingExample
 {
     protected static final Logger logger = Logger.getLogger( ProgrammaticDockingExample.class.getName( ) );
-
 
     public static void main( String[] args ) throws Exception
     {
@@ -74,11 +73,9 @@ public class ProgrammaticDockingExample
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
 
-
         final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
         dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
         final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
-
 
         // View Components
         //
@@ -91,7 +88,6 @@ public class ProgrammaticDockingExample
         JPanel fPanel = newSolidPanel( yellow );
         JPanel gPanel = newSolidPanel( gray );
         JPanel hPanel = newSolidPanel( white );
-
 
         // View Toolbars
         //
@@ -132,7 +128,6 @@ public class ProgrammaticDockingExample
         JToolBar hToolbar = newToolbar( true );
         hToolbar.add( new JButton( "H1" ) );
 
-
         // Views
         //
 
@@ -144,7 +139,6 @@ public class ProgrammaticDockingExample
         final View fView = new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar );
         final View gView = new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar );
         final View hView = new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar );
-
 
         // Certain components are picky about being added to a frame from the Swing thread
         // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good

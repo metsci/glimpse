@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,9 @@ import com.metsci.glimpse.gl.shader.grammar.GlslArgLexer;
 import com.metsci.glimpse.gl.shader.grammar.GlslArgParser;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-
 public class ShaderSource
 {
-    private static final Logger logger = Logger.getLogger( ShaderSource.class.getName() );
+    private static final Logger logger = Logger.getLogger( ShaderSource.class.getName( ) );
 
     private final String[] lines;
 
@@ -61,26 +60,24 @@ public class ShaderSource
         }
         finally
         {
-            if ( in != null )
-                in.close( );
+            if ( in != null ) in.close( );
         }
     }
 
     public String[] getSourceLines( )
     {
-        if( lines == null )
-            return null;
+        if ( lines == null ) return null;
 
         return Arrays.copyOf( lines, lines.length );
     }
 
     public String getSource( )
     {
-        StringBuffer r = new StringBuffer();
-        for( String line: lines )
+        StringBuffer r = new StringBuffer( );
+        for ( String line : lines )
             r.append( line ).append( "\n" );
 
-        return r.toString();
+        return r.toString( );
     }
 
     /**
@@ -93,49 +90,48 @@ public class ShaderSource
     {
         BufferedReader reader = new BufferedReader( new InputStreamReader( in ) );
 
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new StringBuilder( );
 
         String line = null;
         String sep = System.getProperty( "line.separator" );
-        while( ( line = reader.readLine() ) != null )
+        while ( ( line = reader.readLine( ) ) != null )
         {
-            b.append( line.trim() + sep );
+            b.append( line.trim( ) + sep );
         }
 
-        return new String[] { b.toString() };
+        return new String[] { b.toString( ) };
     }
 
     public boolean containsMain( )
     {
         // TODO: Do this in the lexer/parser. This is going to annoy someone at some point.
-        return getSource().contains( " main(" );
+        return getSource( ).contains( " main(" );
     }
 
     public List<ShaderArg> extractArgs( )
     {
-        if( !containsMain() )
-            return null;
+        if ( !containsMain( ) ) return null;
 
         try
         {
             // parse out arguments
-            CharStream stream = new ANTLRStringStream( getSource() );
+            CharStream stream = new ANTLRStringStream( getSource( ) );
             GlslArgLexer l = new GlslArgLexer( stream );
             GlslArgParser p = new GlslArgParser( new CommonTokenStream( l ) );
-            List<ShaderArg> shaderArgs = p.shader().result;
+            List<ShaderArg> shaderArgs = p.shader( ).result;
 
-            logger.log( Level.FINER, "Found " + shaderArgs.size() + " args." );
-            if( shaderArgs.size() > 0 )
+            logger.log( Level.FINER, "Found " + shaderArgs.size( ) + " args." );
+            if ( shaderArgs.size( ) > 0 )
             {
-                for( ShaderArg arg: shaderArgs )
+                for ( ShaderArg arg : shaderArgs )
                 {
-                    logger.log( Level.FINEST, "Shader arg: " + arg.toString() );
+                    logger.log( Level.FINEST, "Shader arg: " + arg.toString( ) );
                 }
             }
 
             return shaderArgs;
         }
-        catch( RecognitionException e )
+        catch ( RecognitionException e )
         {
             logger.severe( "Unable to parse shader file." );
             return null;

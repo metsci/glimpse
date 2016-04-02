@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ package com.metsci.glimpse.util.io.datapipe;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-
 /**
  * An implementation of {@link WritableDataPipe} that uses standard io (not nio).
  *
@@ -39,123 +38,122 @@ public class WritableDataStream implements WritableDataPipe
 {
     private final DataOutputStream _stream;
 
-    public WritableDataStream(DataOutputStream stream)
+    public WritableDataStream( DataOutputStream stream )
     {
         _stream = stream;
     }
 
-    public void writeBoolean(boolean value) throws IOException
+    public void writeBoolean( boolean value ) throws IOException
     {
-        _stream.writeBoolean(value);
+        _stream.writeBoolean( value );
     }
 
-    public void writeByte(byte value) throws IOException
+    public void writeByte( byte value ) throws IOException
     {
-        _stream.writeByte(value);
+        _stream.writeByte( value );
     }
 
-    public void writeDouble(double value) throws IOException
+    public void writeDouble( double value ) throws IOException
     {
-        _stream.writeDouble(value);
+        _stream.writeDouble( value );
     }
 
-    public void writeFloat(float value) throws IOException
+    public void writeFloat( float value ) throws IOException
     {
-        _stream.writeFloat(value);
+        _stream.writeFloat( value );
     }
 
-    public void writeInt(int value) throws IOException
+    public void writeInt( int value ) throws IOException
     {
-        _stream.writeInt(value);
+        _stream.writeInt( value );
     }
 
-    public void writeLong(long value) throws IOException
+    public void writeLong( long value ) throws IOException
     {
-        _stream.writeLong(value);
+        _stream.writeLong( value );
     }
 
-    public void writeShort(short value) throws IOException
+    public void writeShort( short value ) throws IOException
     {
-        _stream.writeShort(value);
+        _stream.writeShort( value );
     }
 
-    public void writeString(String value) throws IOException
+    public void writeString( String value ) throws IOException
     {
         // NOTE: do not use DataOutputStream.writeUTF for interoperability with channel implementation
-        byte[] bytes = value.getBytes("UTF-8");
-        _stream.writeInt(bytes.length);
-        _stream.write(bytes);
+        byte[] bytes = value.getBytes( "UTF-8" );
+        _stream.writeInt( bytes.length );
+        _stream.write( bytes );
     }
 
-    public void writeBooleanArray(boolean[] values) throws IOException
+    public void writeBooleanArray( boolean[] values ) throws IOException
     {
         byte[] values2 = new byte[values.length];
 
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
             values2[i] = values[i] ? AbstractChannel.TRUE : AbstractChannel.FALSE;
         }
 
-        writeByteArray(values2);
+        writeByteArray( values2 );
     }
 
-    public void writeByteArray(byte[] values) throws IOException
+    public void writeByteArray( byte[] values ) throws IOException
     {
-        _stream.write(values);
+        _stream.write( values );
     }
 
-
-    public void writeShortArray(short[] values) throws IOException
+    public void writeShortArray( short[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            _stream.writeShort(values[i]);
+            _stream.writeShort( values[i] );
         }
     }
 
-    public void writeIntArray(int[] values) throws IOException
+    public void writeIntArray( int[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            _stream.writeInt(values[i]);
+            _stream.writeInt( values[i] );
         }
     }
 
-    public void writeLongArray(long[] values) throws IOException
+    public void writeLongArray( long[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            _stream.writeLong(values[i]);
+            _stream.writeLong( values[i] );
         }
     }
 
-    public void writeFloatArray(float[] values) throws IOException
+    public void writeFloatArray( float[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            _stream.writeFloat(values[i]);
+            _stream.writeFloat( values[i] );
         }
     }
 
-    public void writeDoubleArray(double[] values) throws IOException
+    public void writeDoubleArray( double[] values ) throws IOException
     {
-        for (int i = 0, ni = values.length; i < ni; i++)
+        for ( int i = 0, ni = values.length; i < ni; i++ )
         {
-            _stream.writeDouble(values[i]);
+            _stream.writeDouble( values[i] );
         }
     }
 
-    public void flush() throws IOException
+    public void flush( ) throws IOException
     {
-        _stream.flush();
+        _stream.flush( );
     }
 
-    public void close() throws IOException
+    public void close( ) throws IOException
     {
-        _stream.close();
+        _stream.close( );
     }
 
-    public DataOutputStream getOutputStream()
+    public DataOutputStream getOutputStream( )
     {
         return _stream;
     }

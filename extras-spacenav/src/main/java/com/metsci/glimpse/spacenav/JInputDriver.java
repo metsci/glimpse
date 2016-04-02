@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,12 @@
  */
 package com.metsci.glimpse.spacenav;
 
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.loadLibs;
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 
 import java.io.File;
 
 import com.metsci.glimpse.util.jnlu.FileUtils;
-
-import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
-
 
 public class JInputDriver
 {

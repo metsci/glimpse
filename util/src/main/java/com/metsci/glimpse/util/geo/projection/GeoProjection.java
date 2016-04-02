@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,8 @@
  */
 package com.metsci.glimpse.util.geo.projection;
 
-
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.vector.Vector2d;
-
 
 /**
  * Interface for projections from LatLonGeo to two coordinates (x, y).
@@ -45,7 +43,7 @@ public interface GeoProjection
      * @param   latLon
      * @return  projected x, y
      */
-    Vector2d project(LatLonGeo latLon);
+    Vector2d project( LatLonGeo latLon );
 
     /**
      * Convert projected x,y position back to (nearly) equivalent LatLon.
@@ -54,7 +52,7 @@ public interface GeoProjection
      * @param   y  projected y position
      * @return  latLon
      */
-    LatLonGeo unproject(double x, double y);
+    LatLonGeo unproject( double x, double y );
 
     /**
      * Reproject an x,y position from a previous projection to this projection.
@@ -68,7 +66,7 @@ public interface GeoProjection
      * @param   fromProjection  previous projection
      * @return  projected position
      */
-    Vector2d reprojectFrom(double x, double y, GeoProjection fromProjection);
+    Vector2d reprojectFrom( double x, double y, GeoProjection fromProjection );
 
     /**
      * Reproject x, y position and corresponding x, y velocity vector at that location from a
@@ -81,7 +79,6 @@ public interface GeoProjection
      * @param   fromProjection  previous projection
      * @return  projected position and velocity
      */
-    KinematicVector2d reprojectPosVelFrom(double x, double y, double vx, double vy,
-                                          GeoProjection fromProjection);
+    KinematicVector2d reprojectPosVelFrom( double x, double y, double vx, double vy, GeoProjection fromProjection );
 
 }

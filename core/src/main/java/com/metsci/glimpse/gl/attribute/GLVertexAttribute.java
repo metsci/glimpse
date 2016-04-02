@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  */
 package com.metsci.glimpse.gl.attribute;
 
-import static javax.media.opengl.GL2.GL_COLOR_ARRAY;
-import static javax.media.opengl.GL2.GL_FLOAT;
-import static javax.media.opengl.GL2.GL_NORMAL_ARRAY;
-import static javax.media.opengl.GL2.GL_TEXTURE_COORD_ARRAY;
-import static javax.media.opengl.GL2.GL_VERTEX_ARRAY;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_COLOR_ARRAY;
+import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_NORMAL_ARRAY;
+import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_TEXTURE_COORD_ARRAY;
+import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_VERTEX_ARRAY;
 
 import javax.media.opengl.GL2;
 
@@ -65,20 +65,13 @@ import javax.media.opengl.GL2;
  */
 public enum GLVertexAttribute
 {
-    ATTRIB_POSITION_1D( 1 ),
-    ATTRIB_POSITION_2D( 2 ),
-    ATTRIB_POSITION_3D( 3 ),
-    ATTRIB_POSITION_4D( 4 ),
+    ATTRIB_POSITION_1D(1), ATTRIB_POSITION_2D(2), ATTRIB_POSITION_3D(3), ATTRIB_POSITION_4D(4),
 
-    ATTRIB_COLOR_3D( 3 ),
-    ATTRIB_COLOR_4D( 4 ),
+    ATTRIB_COLOR_3D(3), ATTRIB_COLOR_4D(4),
 
-    ATTRIB_NORMAL( 4 ),
+    ATTRIB_NORMAL(4),
 
-    ATTRIB_TEXCOORD_1D( 1 ),
-    ATTRIB_TEXCOORD_2D( 2 ),
-    ATTRIB_TEXCOORD_3D( 3 ),
-    ATTRIB_TEXCOORD_4D( 4 );
+    ATTRIB_TEXCOORD_1D(1), ATTRIB_TEXCOORD_2D(2), ATTRIB_TEXCOORD_3D(3), ATTRIB_TEXCOORD_4D(4);
 
     public final int length;
 
@@ -99,13 +92,13 @@ public enum GLVertexAttribute
 
     private final void toggle( GL2 gl, boolean bind, int stride, int offset )
     {
-        switch( this )
+        switch ( this )
         {
             case ATTRIB_POSITION_1D:
             case ATTRIB_POSITION_2D:
             case ATTRIB_POSITION_3D:
             case ATTRIB_POSITION_4D:
-                if( bind )
+                if ( bind )
                 {
                     gl.glEnableClientState( GL_VERTEX_ARRAY );
                     gl.glVertexPointer( length, GL_FLOAT, stride, offset );
@@ -118,7 +111,7 @@ public enum GLVertexAttribute
 
             case ATTRIB_COLOR_3D:
             case ATTRIB_COLOR_4D:
-                if( bind )
+                if ( bind )
                 {
                     gl.glEnableClientState( GL_COLOR_ARRAY );
                     gl.glColorPointer( length, GL_FLOAT, stride, offset );
@@ -130,7 +123,7 @@ public enum GLVertexAttribute
                 break;
 
             case ATTRIB_NORMAL:
-                if( bind )
+                if ( bind )
                 {
                     gl.glEnableClientState( GL_NORMAL_ARRAY );
                     gl.glNormalPointer( GL_FLOAT, stride, offset );
@@ -145,7 +138,7 @@ public enum GLVertexAttribute
             case ATTRIB_TEXCOORD_2D:
             case ATTRIB_TEXCOORD_3D:
             case ATTRIB_TEXCOORD_4D:
-                if( bind )
+                if ( bind )
                 {
                     gl.glEnableClientState( GL_TEXTURE_COORD_ARRAY );
                     gl.glTexCoordPointer( length, GL_FLOAT, 0, 0 );

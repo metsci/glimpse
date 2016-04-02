@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,13 @@
  */
 package com.metsci.glimpse.dspl.parser;
 
-import static com.metsci.glimpse.dspl.parser.util.ParserUtils.*;
-import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.buildPropertyTableData;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.buildSliceTableData;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getColumns;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getConcepts;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getTypes;
+import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.splitLine;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -162,7 +166,7 @@ public class CsvParser implements TableParser
         while ( ( line = in.readLine( ) ) != null )
         {
             if ( line.isEmpty( ) ) continue;
-            
+
             String[] tokens = splitLine( line );
 
             if ( tokens.length == size )
@@ -180,7 +184,7 @@ public class CsvParser implements TableParser
                 }
                 else
                 {
-                	logWarning( logger,  "Skipping row of incorrect size (expected %d found %d): [%s]", size, tokens.length, line );
+                    logWarning( logger, "Skipping row of incorrect size (expected %d found %d): [%s]", size, tokens.length, line );
                 }
             }
         }
@@ -301,7 +305,7 @@ public class CsvParser implements TableParser
                     }
                     else
                     {
-                        logWarning( logger,  "Problem parsing token %s as type integer. Adding gap instead.", token );
+                        logWarning( logger, "Problem parsing token %s as type integer. Adding gap instead.", token );
                         addGap( );
                     }
                 }
@@ -339,7 +343,7 @@ public class CsvParser implements TableParser
                     }
                     else
                     {
-                        logWarning( logger,  "Problem parsing token %s as type float. Adding gap instead.", token );
+                        logWarning( logger, "Problem parsing token %s as type float. Adding gap instead.", token );
                         addGap( );
                     }
                 }
@@ -377,7 +381,7 @@ public class CsvParser implements TableParser
                     }
                     else
                     {
-                        logWarning( logger,  "Problem parsing token %s as type boolean. Adding gap instead.", token );
+                        logWarning( logger, "Problem parsing token %s as type boolean. Adding gap instead.", token );
                         addGap( );
                     }
                 }
@@ -420,7 +424,7 @@ public class CsvParser implements TableParser
                     }
                     else
                     {
-                        logWarning( logger,  "Trouble parsing date: %s. Adding gap instead.", token );
+                        logWarning( logger, "Trouble parsing date: %s. Adding gap instead.", token );
                         addGap( );
                     }
                 }

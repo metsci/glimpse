@@ -3,4 +3,3 @@
  * and setting uniform variables.
  */
 package com.metsci.glimpse.gl.shader;
-

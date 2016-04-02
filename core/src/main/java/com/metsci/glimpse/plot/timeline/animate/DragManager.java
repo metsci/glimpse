@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,13 @@
  */
 package com.metsci.glimpse.plot.timeline.animate;
 
-import static com.metsci.glimpse.plot.timeline.animate.DragUtils.*;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getBottom;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getCoordinate;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getDragInfoList;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSize;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSortedDescendants;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSpacerSize;
+import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getTop;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -301,7 +307,7 @@ public class DragManager
     protected void applyDrag( GlimpseMouseEvent event )
     {
         normalizeOrder( );
-        
+
         DragInfo topDrag = dragging.get( 0 );
 
         // adjust the dragged plot's ordering constant
@@ -508,14 +514,14 @@ public class DragManager
 
     protected void chooseNewGrowing( GlimpseMouseEvent event )
     {
-//        if ( shouldChooseUnnested( ) )
-//        {
-//            chooseNewGrowingUnnested( event );
-//        }
-//        else
-//        {
-            chooseNewGrowingNested( event );
-//        }
+        //        if ( shouldChooseUnnested( ) )
+        //        {
+        //            chooseNewGrowingUnnested( event );
+        //        }
+        //        else
+        //        {
+        chooseNewGrowingNested( event );
+        //        }
     }
 
     protected void chooseNewGrowingNested( GlimpseMouseEvent event )
@@ -529,10 +535,10 @@ public class DragManager
             {
                 GroupInfo groupInfo = ( GroupInfo ) info;
                 List<PlotInfo> groupList = getSortedDescendants( groupInfo );
-    
+
                 PlotInfo bottomPlot = groupList.get( groupList.size( ) - 1 );
                 PlotInfo topPlot = groupList.get( 0 );
-    
+
                 if ( chooseNewGrowing( stack, bottomPlot, topPlot ) ) return;
             }
             else
@@ -556,11 +562,11 @@ public class DragManager
             return group.getChildPlots( );
         }
     }
-    
+
     protected Collection<PlotInfo> getTopPlots( )
     {
         List<PlotInfo> plots = Lists.newArrayList( );
-        
+
         for ( PlotInfo plot : this.plot.getAllPlots( ) )
         {
             if ( plot.getParent( ) == null )
@@ -568,7 +574,7 @@ public class DragManager
                 plots.add( plot );
             }
         }
-        
+
         return plots;
     }
 

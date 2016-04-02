@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ public class DatumSphereWgs84Fast extends DatumSphereWgs84
     @Override
     public LatLonGeo toLatLonGeo( double x, double y, double z )
     {
-        return SphereUtilFast.toLatLonGeo(x, y, z, getRadius());
+        return SphereUtilFast.toLatLonGeo( x, y, z, getRadius( ) );
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DatumSphereWgs84Fast extends DatumSphereWgs84
     @Override
     public double getDistance( LatLonGeo from, LatLonGeo to )
     {
-        return SphereUtilFast.greatCircleDistance(from, to, getRadius());
+        return SphereUtilFast.greatCircleDistance( from, to, getRadius( ) );
     }
 
     @Override

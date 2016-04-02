@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.*;
+import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
@@ -59,7 +59,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -67,7 +67,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
-        
+
         paintTicks( gl, axis, width, height );
         paintAxisLabel( gl, axis, width, height );
         paintSelectionLine( gl, axis, width, height );
@@ -146,26 +146,26 @@ public class NumericXAxisPainter extends NumericAxisPainter
                     Rectangle2D dashTextBounds = textRenderer.getBounds( "-" );
                     double dashTextWidth = xTick < 0 ? dashTextBounds.getWidth( ) : 0;
                     double absTextWidth = tickTextBounds.getWidth( ) - dashTextWidth;
-    
+
                     int jTickText = getTickTextPositionY( height, ( int ) tickTextBounds.getHeight( ) );
                     int iTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( xTick ) ) - 0.5f * absTextWidth - dashTextWidth );
-    
+
                     if ( keepLabelsForExtremaFullyVisible )
                     {
                         if ( iTickText < 0 )
                         {
                             iTickText = 0;
                         }
-    
+
                         if ( iTickText + tickTextBounds.getWidth( ) > width )
                         {
                             iTickText = width - ( int ) tickTextBounds.getWidth( );
                         }
                     }
-    
+
                     textRenderer.draw( xLabel, iTickText, jTickText );
                 }
-    
+
             }
             finally
             {
@@ -183,12 +183,12 @@ public class NumericXAxisPainter extends NumericAxisPainter
             textRenderer.beginRendering( width, height );
             try
             {
-	            String label = ticks.getAxisLabel( axis );
-	            Rectangle2D axisLabelBounds = textRenderer.getBounds( label );
-	            int iAxisLabel = round( 0.5f * ( width - ( int ) axisLabelBounds.getWidth( ) ) );
-	            int jAxisLabel = getAxisLabelPositionY( height, ( int ) axisLabelBounds.getHeight( ) );
+                String label = ticks.getAxisLabel( axis );
+                Rectangle2D axisLabelBounds = textRenderer.getBounds( label );
+                int iAxisLabel = round( 0.5f * ( width - ( int ) axisLabelBounds.getWidth( ) ) );
+                int jAxisLabel = getAxisLabelPositionY( height, ( int ) axisLabelBounds.getHeight( ) );
 
-	            textRenderer.draw( label, iAxisLabel, jAxisLabel );
+                textRenderer.draw( label, iAxisLabel, jAxisLabel );
             }
             finally
             {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -252,177 +252,194 @@ public class TimeStampFormatStandard implements TimeStampFormat
     private final String formatString;
     private final int precision;
 
-
-    public TimeStampFormatStandard(String format, String timeZoneName)
+    public TimeStampFormatStandard( String format, String timeZoneName )
     {
-        this(format, TimeZone.getTimeZone(timeZoneName));
+        this( format, TimeZone.getTimeZone( timeZoneName ) );
     }
 
-    public TimeStampFormatStandard(String format, String timeZoneName, int baseForTwoDigitYears)
+    public TimeStampFormatStandard( String format, String timeZoneName, int baseForTwoDigitYears )
     {
-        this(format, TimeZone.getTimeZone(timeZoneName), baseForTwoDigitYears);
+        this( format, TimeZone.getTimeZone( timeZoneName ), baseForTwoDigitYears );
     }
 
-    public TimeStampFormatStandard(String format, final TimeZone timeZone)
+    public TimeStampFormatStandard( String format, final TimeZone timeZone )
     {
-        this(format, timeZone, 1970);
+        this( format, timeZone, 1970 );
     }
 
-    public TimeStampFormatStandard(String format, final TimeZone timeZone, int baseForTwoDigitYears)
+    public TimeStampFormatStandard( String format, final TimeZone timeZone, int baseForTwoDigitYears )
     {
-        calendars = new ThreadLocal<Calendar>() { public Calendar initialValue() { return Calendar.getInstance(timeZone); } };
+        calendars = new ThreadLocal<Calendar>( )
+        {
+            public Calendar initialValue( )
+            {
+                return Calendar.getInstance( timeZone );
+            }
+        };
 
         this.baseForTwoDigitYears = baseForTwoDigitYears;
 
-        List<Field> fieldsList = new LinkedList<Field>();
-        StringBuilder patternBuilder = new StringBuilder();
-        StringBuilder formatBuilder = new StringBuilder();
+        List<Field> fieldsList = new LinkedList<Field>( );
+        StringBuilder patternBuilder = new StringBuilder( );
+        StringBuilder formatBuilder = new StringBuilder( );
         int floatSecondsPrecision = -1;
-        for (int i = 0; i < format.length(); )
+        for ( int i = 0; i < format.length( ); )
         {
-            char c = format.charAt(i);
+            char c = format.charAt( i );
             i++;
 
-            if (c != '%')
+            if ( c != '%' )
             {
-                formatBuilder.append(c);
-                patternBuilder.append(c);
+                formatBuilder.append( c );
+                patternBuilder.append( c );
             }
-            else if (c == '%' && i < format.length() && format.charAt(i) == '%')
+            else if ( c == '%' && i < format.length( ) && format.charAt( i ) == '%' )
             {
                 i++;
-                formatBuilder.append("%%");
-                patternBuilder.append('%');
+                formatBuilder.append( "%%" );
+                patternBuilder.append( '%' );
             }
             else
             {
                 char fieldCode = 0;
-                StringBuilder fieldFlags = new StringBuilder();
-                while (i < format.length())
+                StringBuilder fieldFlags = new StringBuilder( );
+                while ( i < format.length( ) )
                 {
-                    char c2 = format.charAt(i);
+                    char c2 = format.charAt( i );
                     i++;
 
-                    if (Character.isLetter(c2))
+                    if ( Character.isLetter( c2 ) )
                     {
                         fieldCode = c2;
                         break;
                     }
                     else
                     {
-                        fieldFlags.append(c2);
+                        fieldFlags.append( c2 );
                     }
                 }
-                if (fieldCode == 0) throw new IllegalArgumentException("Unclosed format specifier: format = " + format);
+                if ( fieldCode == 0 ) throw new IllegalArgumentException( "Unclosed format specifier: format = " + format );
 
-                Field field = newField(fieldCode, fieldFlags.toString());
-                fieldsList.add(field);
-                patternBuilder.append(field.getRegexSpecifier());
-                formatBuilder.append(field.getFormatSpecifier());
+                Field field = newField( fieldCode, fieldFlags.toString( ) );
+                fieldsList.add( field );
+                patternBuilder.append( field.getRegexSpecifier( ) );
+                formatBuilder.append( field.getFormatSpecifier( ) );
 
                 // See "Rollover and the %S Field" in the class comment
-                if (field instanceof FloatSecondField) floatSecondsPrecision = ((FloatSecondField) field).precision;
+                if ( field instanceof FloatSecondField ) floatSecondsPrecision = ( ( FloatSecondField ) field ).precision;
             }
         }
 
-        fields = fieldsList.toArray(new Field[0]);
-        parsePattern = Pattern.compile(patternBuilder.toString());
-        formatString = formatBuilder.toString();
+        fields = fieldsList.toArray( new Field[0] );
+        parsePattern = Pattern.compile( patternBuilder.toString( ) );
+        formatString = formatBuilder.toString( );
         precision = floatSecondsPrecision;
     }
 
-    public Field newField(char code, String flags)
+    public Field newField( char code, String flags )
     {
-        switch (code)
+        switch ( code )
         {
-            case 'y': return new YearField(flags, baseForTwoDigitYears);
-            case 'M': return new NumericMonthField(flags);
-            case 'N': return new TextMonthField(flags);
-            case 'd': return new DayOfMonthField(flags);
-            case 'j': return new DayOfYearField(flags);
-            case 'H': return new Hour24Field(flags);
-            case 'm': return new MinuteField(flags);
-            case 's': return new FloorSecondField(flags);
-            case 'S': return new FloatSecondField(flags);
-            case 'z': return new TimeZoneField(flags);
-            default: throw new IllegalArgumentException("Unrecognized field code: " + code);
+            case 'y':
+                return new YearField( flags, baseForTwoDigitYears );
+            case 'M':
+                return new NumericMonthField( flags );
+            case 'N':
+                return new TextMonthField( flags );
+            case 'd':
+                return new DayOfMonthField( flags );
+            case 'j':
+                return new DayOfYearField( flags );
+            case 'H':
+                return new Hour24Field( flags );
+            case 'm':
+                return new MinuteField( flags );
+            case 's':
+                return new FloorSecondField( flags );
+            case 'S':
+                return new FloatSecondField( flags );
+            case 'z':
+                return new TimeZoneField( flags );
+            default:
+                throw new IllegalArgumentException( "Unrecognized field code: " + code );
         }
     }
 
     @Override
-    public BigDecimal parse(String string)
+    public BigDecimal parse( String string )
     {
         try
         {
-            Matcher matcher = parsePattern.matcher(string);
-            if (!matcher.matches()) throw new TimeStampParseException(string);
+            Matcher matcher = parsePattern.matcher( string );
+            if ( !matcher.matches( ) ) throw new TimeStampParseException( string );
 
-            Calendar calendar = calendars.get();
-            calendar.setTimeInMillis(0);
+            Calendar calendar = calendars.get( );
+            calendar.setTimeInMillis( 0 );
 
             // Calendar.setTimeZone() recomputes fields based on the new
             // timezone and the posix-millis time. So set the timezone
             // before setting the other fields.
-            for (int i = 0; i < fields.length; i++)
+            for ( int i = 0; i < fields.length; i++ )
             {
-                if (!isTimeZoneField(fields[i])) continue;
+                if ( !isTimeZoneField( fields[i] ) ) continue;
 
-                String fieldString = matcher.group(i + 1);
-                fields[i].putValue(fieldString, calendar);
+                String fieldString = matcher.group( i + 1 );
+                fields[i].putValue( fieldString, calendar );
             }
 
             BigDecimal offset = BigDecimal.ZERO;
-            for (int i = 0; i < fields.length; i++)
+            for ( int i = 0; i < fields.length; i++ )
             {
-                if (isTimeZoneField(fields[i])) continue;
+                if ( isTimeZoneField( fields[i] ) ) continue;
 
-                String fieldString = matcher.group(i + 1);
-                BigDecimal remainder = fields[i].putValue(fieldString, calendar);
-                offset = offset.add(remainder);
+                String fieldString = matcher.group( i + 1 );
+                BigDecimal remainder = fields[i].putValue( fieldString, calendar );
+                offset = offset.add( remainder );
             }
 
-            BigDecimal posixSeconds = BigDecimal.valueOf(calendar.getTimeInMillis(), 3);
-            return posixSeconds.add(offset);
+            BigDecimal posixSeconds = BigDecimal.valueOf( calendar.getTimeInMillis( ), 3 );
+            return posixSeconds.add( offset );
         }
-        catch (NumberFormatException e)
+        catch ( NumberFormatException e )
         {
-            throw new TimeStampParseException(string, e);
+            throw new TimeStampParseException( string, e );
         }
     }
 
-    private static boolean isTimeZoneField(Field field)
+    private static boolean isTimeZoneField( Field field )
     {
-        return (field instanceof TimeZoneField);
+        return ( field instanceof TimeZoneField );
     }
 
     @Override
-    public String format(BigDecimal posixSeconds)
+    public String format( BigDecimal posixSeconds )
     {
         // See "Rollover and the %S Field" in the class comment
-        if (precision >= 0) posixSeconds = posixSeconds.scaleByPowerOfTen(precision).setScale(0, BigDecimal.ROUND_HALF_UP).scaleByPowerOfTen(-precision);
+        if ( precision >= 0 ) posixSeconds = posixSeconds.scaleByPowerOfTen( precision ).setScale( 0, BigDecimal.ROUND_HALF_UP ).scaleByPowerOfTen( -precision );
 
-        Calendar calendar = calendars.get();
-        long posixMillis = posixSeconds.scaleByPowerOfTen(3).setScale(0, BigDecimal.ROUND_FLOOR).longValue();
-        calendar.setTimeInMillis(posixMillis);
+        Calendar calendar = calendars.get( );
+        long posixMillis = posixSeconds.scaleByPowerOfTen( 3 ).setScale( 0, BigDecimal.ROUND_FLOOR ).longValue( );
+        calendar.setTimeInMillis( posixMillis );
 
         Object[] fieldValues = new Object[fields.length];
-        for (int i = 0; i < fields.length; i++) fieldValues[i] = fields[i].getValue(posixSeconds, calendar);
+        for ( int i = 0; i < fields.length; i++ )
+            fieldValues[i] = fields[i].getValue( posixSeconds, calendar );
 
-        return String.format(formatString, fieldValues);
+        return String.format( formatString, fieldValues );
     }
-
-
 
     private static interface Field
     {
-        String getRegexSpecifier();
-        String getFormatSpecifier();
-        Object getValue(BigDecimal posixSeconds, Calendar calendar);
+        String getRegexSpecifier( );
+
+        String getFormatSpecifier( );
+
+        Object getValue( BigDecimal posixSeconds, Calendar calendar );
 
         /**
          * @throws NumberFormatException if valueString cannot be parsed
          */
-        BigDecimal putValue(String valueString, Calendar calendar);
+        BigDecimal putValue( String valueString, Calendar calendar );
     }
 
     private static class CalendarField implements Field
@@ -431,43 +448,51 @@ public class TimeStampFormatStandard implements TimeStampFormat
         protected final int numDigits;
         protected final Padding padding;
 
-        public CalendarField(int calendarField, int numDigits, Padding padding)
+        public CalendarField( int calendarField, int numDigits, Padding padding )
         {
             this.calendarField = calendarField;
             this.numDigits = numDigits;
             this.padding = padding;
         }
 
-        public String getFormatSpecifier()
+        public String getFormatSpecifier( )
         {
-            switch (padding)
+            switch ( padding )
             {
-                case SPACES_ON_LEFT:  return "%" + numDigits + "d";
-                case SPACES_ON_RIGHT: return "%-" + numDigits + "d";
-                case NONE:            return "%d";
-                default:              return "%0" + numDigits + "d";
+                case SPACES_ON_LEFT:
+                    return "%" + numDigits + "d";
+                case SPACES_ON_RIGHT:
+                    return "%-" + numDigits + "d";
+                case NONE:
+                    return "%d";
+                default:
+                    return "%0" + numDigits + "d";
             }
         }
 
-        public String getRegexSpecifier()
+        public String getRegexSpecifier( )
         {
-            switch (padding)
+            switch ( padding )
             {
-                case SPACES_ON_LEFT:  return "\\s*(\\d{1," + numDigits + "})";
-                case SPACES_ON_RIGHT: return "(\\d{1," + numDigits + "})\\s*";
-                case NONE:            return "(\\d{1," + numDigits + "})";
-                default:              return "(\\d{" + numDigits + "})";
+                case SPACES_ON_LEFT:
+                    return "\\s*(\\d{1," + numDigits + "})";
+                case SPACES_ON_RIGHT:
+                    return "(\\d{1," + numDigits + "})\\s*";
+                case NONE:
+                    return "(\\d{1," + numDigits + "})";
+                default:
+                    return "(\\d{" + numDigits + "})";
             }
         }
 
-        public Integer getValue(BigDecimal posixSeconds, Calendar calendar)
+        public Integer getValue( BigDecimal posixSeconds, Calendar calendar )
         {
-            return calendar.get(calendarField);
+            return calendar.get( calendarField );
         }
 
-        public BigDecimal putValue(String valueString, Calendar calendar)
+        public BigDecimal putValue( String valueString, Calendar calendar )
         {
-            calendar.set(calendarField, Integer.parseInt(valueString));
+            calendar.set( calendarField, Integer.parseInt( valueString ) );
             return BigDecimal.ZERO;
         }
     }
@@ -477,100 +502,100 @@ public class TimeStampFormatStandard implements TimeStampFormat
         private final boolean twoDigit;
         private final int baseForTwoDigitYears;
 
-        public YearField(String flags, int baseForTwoDigitYears)
+        public YearField( String flags, int baseForTwoDigitYears )
         {
-            this(flags.contains("2"), baseForTwoDigitYears, getPadding(flags));
+            this( flags.contains( "2" ), baseForTwoDigitYears, getPadding( flags ) );
         }
 
-        public YearField(boolean twoDigit, int baseForTwoDigitYears, Padding padding)
+        public YearField( boolean twoDigit, int baseForTwoDigitYears, Padding padding )
         {
-            super(Calendar.YEAR, (twoDigit ? 2 : 4), padding);
+            super( Calendar.YEAR, ( twoDigit ? 2 : 4 ), padding );
             this.twoDigit = twoDigit;
             this.baseForTwoDigitYears = baseForTwoDigitYears;
         }
 
-        public Integer getValue(BigDecimal posixSeconds, Calendar calendar)
+        public Integer getValue( BigDecimal posixSeconds, Calendar calendar )
         {
-            Integer fourDigit = super.getValue(posixSeconds, calendar);
-            return (twoDigit ? fourDigit % 100 : fourDigit);
+            Integer fourDigit = super.getValue( posixSeconds, calendar );
+            return ( twoDigit ? fourDigit % 100 : fourDigit );
         }
 
-        public BigDecimal putValue(String valueString, Calendar calendar)
+        public BigDecimal putValue( String valueString, Calendar calendar )
         {
-            String fourDigit = (twoDigit ? twoDigitYearToFour(valueString) : valueString);
-            return super.putValue(fourDigit, calendar);
+            String fourDigit = ( twoDigit ? twoDigitYearToFour( valueString ) : valueString );
+            return super.putValue( fourDigit, calendar );
         }
 
-        private String twoDigitYearToFour(String s2)
+        private String twoDigitYearToFour( String s2 )
         {
-            int n2 = Integer.parseInt(s2);
-            int n4 = ((baseForTwoDigitYears / 100) * 100) + n2;
-            if (n4 < baseForTwoDigitYears)
+            int n2 = Integer.parseInt( s2 );
+            int n4 = ( ( baseForTwoDigitYears / 100 ) * 100 ) + n2;
+            if ( n4 < baseForTwoDigitYears )
             {
                 n4 += 100;
             }
-            return Integer.toString(n4);
+            return Integer.toString( n4 );
         }
     }
 
     private static class NumericMonthField extends CalendarField
     {
-        public NumericMonthField(String flags)
+        public NumericMonthField( String flags )
         {
-            super(Calendar.MONTH, 2, getPadding(flags));
+            super( Calendar.MONTH, 2, getPadding( flags ) );
         }
 
-        public Integer getValue(BigDecimal posixSeconds, Calendar calendar)
+        public Integer getValue( BigDecimal posixSeconds, Calendar calendar )
         {
             // Calendar uses 0 for January
-            return calendar.get(calendarField) + 1;
+            return calendar.get( calendarField ) + 1;
         }
 
-        public BigDecimal putValue(String valueString, Calendar calendar)
+        public BigDecimal putValue( String valueString, Calendar calendar )
         {
             // Calendar uses 0 for January
-            calendar.set(calendarField, Integer.parseInt(valueString) - 1);
+            calendar.set( calendarField, Integer.parseInt( valueString ) - 1 );
             return BigDecimal.ZERO;
         }
     }
 
     private static class DayOfMonthField extends CalendarField
     {
-        public DayOfMonthField(String flags)
+        public DayOfMonthField( String flags )
         {
-            super(Calendar.DAY_OF_MONTH, 2, getPadding(flags));
+            super( Calendar.DAY_OF_MONTH, 2, getPadding( flags ) );
         }
     }
 
     private static class DayOfYearField extends CalendarField
     {
-        public DayOfYearField(String flags)
+        public DayOfYearField( String flags )
         {
-            super(Calendar.DAY_OF_YEAR, 3, getPadding(flags));
+            super( Calendar.DAY_OF_YEAR, 3, getPadding( flags ) );
         }
     }
 
     private static class Hour24Field extends CalendarField
     {
-        public Hour24Field(String flags)
+        public Hour24Field( String flags )
         {
-            super(Calendar.HOUR_OF_DAY, 2, getPadding(flags));
+            super( Calendar.HOUR_OF_DAY, 2, getPadding( flags ) );
         }
     }
 
     private static class MinuteField extends CalendarField
     {
-        public MinuteField(String flags)
+        public MinuteField( String flags )
         {
-            super(Calendar.MINUTE, 2, getPadding(flags));
+            super( Calendar.MINUTE, 2, getPadding( flags ) );
         }
     }
 
     private static class FloorSecondField extends CalendarField
     {
-        public FloorSecondField(String flags)
+        public FloorSecondField( String flags )
         {
-            super(Calendar.SECOND, 2, getPadding(flags));
+            super( Calendar.SECOND, 2, getPadding( flags ) );
         }
     }
 
@@ -580,55 +605,58 @@ public class TimeStampFormatStandard implements TimeStampFormat
         private static final String[] shortMonthNames;
         static
         {
-            DateFormatSymbols symbols = new DateFormatSymbols();
-            longMonthNames = symbols.getMonths();
-            shortMonthNames = symbols.getShortMonths();
+            DateFormatSymbols symbols = new DateFormatSymbols( );
+            longMonthNames = symbols.getMonths( );
+            shortMonthNames = symbols.getShortMonths( );
         }
 
         private final boolean abbreviate;
         private final Case capitalization;
 
-        public TextMonthField(String flags)
+        public TextMonthField( String flags )
         {
-            abbreviate = flags.contains("3");
-            capitalization = getCase(flags);
+            abbreviate = flags.contains( "3" );
+            capitalization = getCase( flags );
         }
 
-        public String getFormatSpecifier()
+        public String getFormatSpecifier( )
         {
             return "%s";
         }
 
-        public String getRegexSpecifier()
+        public String getRegexSpecifier( )
         {
-            return (abbreviate ? "\\s*([a-zA-Z]{3})\\s*" : "\\s*([a-zA-Z]{3,})\\s*");
+            return ( abbreviate ? "\\s*([a-zA-Z]{3})\\s*" : "\\s*([a-zA-Z]{3,})\\s*" );
         }
 
-        public String getValue(BigDecimal posixSeconds, Calendar calendar)
+        public String getValue( BigDecimal posixSeconds, Calendar calendar )
         {
-            int month = calendar.get(Calendar.MONTH);
-            String monthName = (abbreviate ? shortMonthNames[month] : longMonthNames[month]);
-            switch (capitalization)
+            int month = calendar.get( Calendar.MONTH );
+            String monthName = ( abbreviate ? shortMonthNames[month] : longMonthNames[month] );
+            switch ( capitalization )
             {
-                case UPPERCASE: return monthName.toUpperCase();
-                case LOWERCASE: return monthName.toLowerCase();
-                default:        return monthName;
+                case UPPERCASE:
+                    return monthName.toUpperCase( );
+                case LOWERCASE:
+                    return monthName.toLowerCase( );
+                default:
+                    return monthName;
             }
         }
 
-        public BigDecimal putValue(String valueString, Calendar calendar)
+        public BigDecimal putValue( String valueString, Calendar calendar )
         {
             int month = -1;
-            String[] monthNames = (abbreviate ? shortMonthNames : longMonthNames);
-            for (int i = 0; i < monthNames.length; i++)
+            String[] monthNames = ( abbreviate ? shortMonthNames : longMonthNames );
+            for ( int i = 0; i < monthNames.length; i++ )
             {
-                if (monthNames[i].equalsIgnoreCase(valueString))
+                if ( monthNames[i].equalsIgnoreCase( valueString ) )
                 {
                     month = i;
                     break;
                 }
             }
-            calendar.set(Calendar.MONTH, month);
+            calendar.set( Calendar.MONTH, month );
 
             return BigDecimal.ZERO;
         }
@@ -636,98 +664,104 @@ public class TimeStampFormatStandard implements TimeStampFormat
 
     private static class TimeZoneField implements Field
     {
-        private static final Set<String> recognizedTimeZoneIds = new HashSet<String>(asList(TimeZone.getAvailableIDs()));
+        private static final Set<String> recognizedTimeZoneIds = new HashSet<String>( asList( TimeZone.getAvailableIDs( ) ) );
 
         private final Case capitalization;
 
-        public TimeZoneField(String flags)
+        public TimeZoneField( String flags )
         {
-            capitalization = getCase(flags);
+            capitalization = getCase( flags );
         }
 
-        public String getFormatSpecifier()
+        public String getFormatSpecifier( )
         {
             return "%s";
         }
 
-        public String getRegexSpecifier()
+        public String getRegexSpecifier( )
         {
             return "\\s*(\\S+)\\s*";
         }
 
-        public String getValue(BigDecimal posixSeconds, Calendar calendar)
+        public String getValue( BigDecimal posixSeconds, Calendar calendar )
         {
-            TimeZone tz = calendar.getTimeZone();
-            boolean daylightSavings = tz.inDaylightTime(calendar.getTime());
-            String tzString = tz.getDisplayName(daylightSavings, TimeZone.SHORT);
-            switch (capitalization)
+            TimeZone tz = calendar.getTimeZone( );
+            boolean daylightSavings = tz.inDaylightTime( calendar.getTime( ) );
+            String tzString = tz.getDisplayName( daylightSavings, TimeZone.SHORT );
+            switch ( capitalization )
             {
-                case UPPERCASE: return tzString.toUpperCase();
-                case LOWERCASE: return tzString.toLowerCase();
-                default:        return tzString;
+                case UPPERCASE:
+                    return tzString.toUpperCase( );
+                case LOWERCASE:
+                    return tzString.toLowerCase( );
+                default:
+                    return tzString;
             }
         }
 
-        public BigDecimal putValue(String valueString, Calendar calendar)
+        public BigDecimal putValue( String valueString, Calendar calendar )
         {
-            calendar.setTimeZone(getTimeZone(valueString));
+            calendar.setTimeZone( getTimeZone( valueString ) );
             return BigDecimal.ZERO;
         }
 
-        public static TimeZone getTimeZone(String id)
+        public static TimeZone getTimeZone( String id )
         {
-            if (!recognizedTimeZoneIds.contains(id)) throw new IllegalArgumentException("Unrecognized time-zone id: " + id);
-            return TimeZone.getTimeZone(id);
+            if ( !recognizedTimeZoneIds.contains( id ) ) throw new IllegalArgumentException( "Unrecognized time-zone id: " + id );
+            return TimeZone.getTimeZone( id );
         }
     }
 
     private static class FloatSecondField implements Field
     {
-        private static final BigDecimal ONE_HUNDRED = new BigDecimal(100);
+        private static final BigDecimal ONE_HUNDRED = new BigDecimal( 100 );
         protected final int precision;
 
-        public FloatSecondField(String flags)
+        public FloatSecondField( String flags )
         {
-            precision = getDigit(flags, -1);
+            precision = getDigit( flags, -1 );
         }
 
-        public String getFormatSpecifier()
+        public String getFormatSpecifier( )
         {
             return "%s";
         }
 
-        public String getRegexSpecifier()
+        public String getRegexSpecifier( )
         {
             // Greedily match up to precision digits after the decimal point,
             // then reluctantly match any number after that.
-            boolean fullPrecision = (precision < 0);
-            String greedyMax0 = (fullPrecision ? "" : "" + precision);
-            String greedyMax1 = (fullPrecision ? "" : "" + Math.max(1, precision));
+            boolean fullPrecision = ( precision < 0 );
+            String greedyMax0 = ( fullPrecision ? "" : "" + precision );
+            String greedyMax1 = ( fullPrecision ? "" : "" + Math.max( 1, precision ) );
             return "\\s*(\\d{1,2}(?:\\.\\d{0," + greedyMax0 + "}\\d*?)?|\\.\\d{1," + greedyMax1 + "}\\d*?)\\s*";
         }
 
-        public String getValue(BigDecimal posixSeconds, Calendar calendar)
+        public String getValue( BigDecimal posixSeconds, Calendar calendar )
         {
             // Use Calendar to find the minute-floor, instead of doing seconds % 60.
             // This way we stay consistent with Calendar, and don't have to rely on
             // assumptions about its handling of leap seconds.
-            long minuteFloorMillis = calendar.getTimeInMillis() - 1000*calendar.get(Calendar.SECOND) - calendar.get(Calendar.MILLISECOND);
-            BigDecimal minuteFloorSeconds = BigDecimal.valueOf(minuteFloorMillis, 3);
-            BigDecimal seconds = GeneralUtils.stripTrailingZeros(posixSeconds.subtract(minuteFloorSeconds));
+            long minuteFloorMillis = calendar.getTimeInMillis( ) - 1000 * calendar.get( Calendar.SECOND ) - calendar.get( Calendar.MILLISECOND );
+            BigDecimal minuteFloorSeconds = BigDecimal.valueOf( minuteFloorMillis, 3 );
+            BigDecimal seconds = GeneralUtils.stripTrailingZeros( posixSeconds.subtract( minuteFloorSeconds ) );
 
-            if (precision < 0)
+            if ( precision < 0 )
             {
-                String string = seconds.toPlainString();
-                int numWholeDigits = string.indexOf('.');
-                if (numWholeDigits < 0) numWholeDigits = string.length();
-                switch (numWholeDigits)
+                String string = seconds.toPlainString( );
+                int numWholeDigits = string.indexOf( '.' );
+                if ( numWholeDigits < 0 ) numWholeDigits = string.length( );
+                switch ( numWholeDigits )
                 {
-                    case 0: return "00" + string;
-                    case 1: return "0" + string;
-                    default: return string;
+                    case 0:
+                        return "00" + string;
+                    case 1:
+                        return "0" + string;
+                    default:
+                        return string;
                 }
             }
-            else if (seconds.compareTo(BigDecimal.ONE) < 0)
+            else if ( seconds.compareTo( BigDecimal.ONE ) < 0 )
             {
                 // Workaround for a Java bug:
                 //
@@ -740,85 +774,97 @@ public class TimeStampFormatStandard implements TimeStampFormat
                 // To work around, do String.format(100 + seconds), then chop off the
                 // first character.
                 //
-                BigDecimal secondsPlus = seconds.add(ONE_HUNDRED);
+                BigDecimal secondsPlus = seconds.add( ONE_HUNDRED );
 
                 // 3 chars for the whole number, possibly 1 for the decimal point
-                int width = precision + 3 + (precision > 0 ? 1 : 0);
-                return String.format("%0" + width + "." + precision + "f", secondsPlus).substring(1);
+                int width = precision + 3 + ( precision > 0 ? 1 : 0 );
+                return String.format( "%0" + width + "." + precision + "f", secondsPlus ).substring( 1 );
             }
             else
             {
                 // 2 chars for the whole number, possibly 1 for the decimal point
-                int width = precision + 2 + (precision > 0 ? 1 : 0);
-                return String.format("%0" + width + "." + precision + "f", seconds);
+                int width = precision + 2 + ( precision > 0 ? 1 : 0 );
+                return String.format( "%0" + width + "." + precision + "f", seconds );
             }
         }
 
-        public BigDecimal putValue(String valueString, Calendar calendar)
+        public BigDecimal putValue( String valueString, Calendar calendar )
         {
-            if (!isPlainDecimal(valueString)) throw new NumberFormatException("Illegal seconds string: " + valueString);
-            BigDecimal valueSeconds = new BigDecimal(valueString);
+            if ( !isPlainDecimal( valueString ) ) throw new NumberFormatException( "Illegal seconds string: " + valueString );
+            BigDecimal valueSeconds = new BigDecimal( valueString );
 
-            BigDecimal calendarSecond = valueSeconds.setScale(0, BigDecimal.ROUND_FLOOR);
-            calendar.set(Calendar.SECOND, calendarSecond.intValue());
+            BigDecimal calendarSecond = valueSeconds.setScale( 0, BigDecimal.ROUND_FLOOR );
+            calendar.set( Calendar.SECOND, calendarSecond.intValue( ) );
 
-            BigDecimal calendarMilli = valueSeconds.subtract(calendarSecond).scaleByPowerOfTen(3).setScale(0, BigDecimal.ROUND_FLOOR);
-            calendar.set(Calendar.MILLISECOND, calendarMilli.intValue());
+            BigDecimal calendarMilli = valueSeconds.subtract( calendarSecond ).scaleByPowerOfTen( 3 ).setScale( 0, BigDecimal.ROUND_FLOOR );
+            calendar.set( Calendar.MILLISECOND, calendarMilli.intValue( ) );
 
-            BigDecimal remainderSeconds = valueSeconds.subtract(valueSeconds.setScale(3, BigDecimal.ROUND_FLOOR));
+            BigDecimal remainderSeconds = valueSeconds.subtract( valueSeconds.setScale( 3, BigDecimal.ROUND_FLOOR ) );
             return remainderSeconds;
         }
 
-        private static boolean isPlainDecimal(String string)
+        private static boolean isPlainDecimal( String string )
         {
             boolean seenDecimalPoint = false;
-            for (int i = 0; i < string.length(); i++)
+            for ( int i = 0; i < string.length( ); i++ )
             {
-                char c = string.charAt(i);
-                if (!seenDecimalPoint && c == '.') seenDecimalPoint = true;
-                else if (!Character.isDigit(c)) return false;
+                char c = string.charAt( i );
+                if ( !seenDecimalPoint && c == '.' )
+                    seenDecimalPoint = true;
+                else if ( !Character.isDigit( c ) ) return false;
             }
             return true;
         }
     }
 
-
-
-    private static enum Padding { ZEROS, SPACES_ON_LEFT, SPACES_ON_RIGHT, NONE }
-    private static Padding getPadding(String flags)
+    private static enum Padding
     {
-        for (int i = 0; i < flags.length(); i++)
+        ZEROS, SPACES_ON_LEFT, SPACES_ON_RIGHT, NONE
+    }
+
+    private static Padding getPadding( String flags )
+    {
+        for ( int i = 0; i < flags.length( ); i++ )
         {
-            switch (flags.charAt(i))
+            switch ( flags.charAt( i ) )
             {
-                case '<': return Padding.SPACES_ON_RIGHT;
-                case '>': return Padding.SPACES_ON_LEFT;
-                case '!': return Padding.NONE;
+                case '<':
+                    return Padding.SPACES_ON_RIGHT;
+                case '>':
+                    return Padding.SPACES_ON_LEFT;
+                case '!':
+                    return Padding.NONE;
             }
         }
         return Padding.ZEROS;
     }
 
-    private static int getDigit(String flags, int defaultValue)
+    private static int getDigit( String flags, int defaultValue )
     {
-        for (int i = 0; i < flags.length(); i++)
+        for ( int i = 0; i < flags.length( ); i++ )
         {
             // Parsing a digit to an integer should always succeed
-            char c = flags.charAt(i);
-            if (Character.isDigit(c)) return Integer.parseInt(String.valueOf(c));
+            char c = flags.charAt( i );
+            if ( Character.isDigit( c ) ) return Integer.parseInt( String.valueOf( c ) );
         }
         return defaultValue;
     }
 
-    private static enum Case { NORMAL, LOWERCASE, UPPERCASE }
-    private static Case getCase(String flags)
+    private static enum Case
     {
-        for (int i = 0; i < flags.length(); i++)
+        NORMAL, LOWERCASE, UPPERCASE
+    }
+
+    private static Case getCase( String flags )
+    {
+        for ( int i = 0; i < flags.length( ); i++ )
         {
-            switch (flags.charAt(i))
+            switch ( flags.charAt( i ) )
             {
-                case '^': return Case.UPPERCASE;
-                case '/': return Case.LOWERCASE;
+                case '^':
+                    return Case.UPPERCASE;
+                case '/':
+                    return Case.LOWERCASE;
             }
         }
         return Case.NORMAL;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ public class TooltipPainter extends SimpleTextPainter
     protected int iconSpacing = 2;
     protected int textIconSpacing = 4;
     protected Insets insets = new Insets( 0, 2, 4, 0 );
-    
+
     protected SimpleTextLayout textLayout;
     protected BreakIterator breakIterator;
     protected List<TextBoundingBox> lines;
@@ -149,7 +149,7 @@ public class TooltipPainter extends SimpleTextPainter
         this.insets = insets;
         return this;
     }
-    
+
     /**
      * Sets the location of the upper left corner of the tooltip box
      * in screen/pixel coordinates.
@@ -189,7 +189,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setBorderSize( int size )
     {
         this.borderSize = size;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
@@ -197,35 +197,35 @@ public class TooltipPainter extends SimpleTextPainter
     {
         this.fixedWidth = fixedWidth;
         this.isFixedWidth = true;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
     public synchronized TooltipPainter setUnlimitedWidth( )
     {
         this.isFixedWidth = false;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
     public synchronized TooltipPainter setBreakOnEol( boolean breakOnEol )
     {
         this.breakOnEol = breakOnEol;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
     public synchronized TooltipPainter setLineSpacing( int lineSpacing )
     {
         this.lineSpacing = lineSpacing;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
     public synchronized TooltipPainter setBreakIterator( BreakIterator breakIterator )
     {
         this.breakIterator = breakIterator;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
@@ -233,7 +233,7 @@ public class TooltipPainter extends SimpleTextPainter
     public synchronized TooltipPainter setText( String text )
     {
         this.text = text;
-        this.resetTextLayout( ); 
+        this.resetTextLayout( );
         return this;
     }
 
@@ -242,14 +242,14 @@ public class TooltipPainter extends SimpleTextPainter
         this.textIconSpacing = textIconSpacing;
         return this;
     }
-    
+
     public synchronized TooltipPainter setIconSize( float size )
     {
         this.iconSize = size;
         this.iconSizeFixedToText = false;
         return this;
     }
-    
+
     /**
      * If true, the height of each icon will be set to the height of each line of text.
      */
@@ -264,14 +264,14 @@ public class TooltipPainter extends SimpleTextPainter
         iconSpacing = i;
         return this;
     }
-    
+
     public synchronized TooltipPainter clear( )
     {
         this.setText( null );
         this.setIcon( null );
         return this;
     }
-    
+
     public synchronized Insets getInsets( )
     {
         return this.insets;
@@ -296,7 +296,7 @@ public class TooltipPainter extends SimpleTextPainter
     {
         return this.isFixedWidth;
     }
-    
+
     public synchronized boolean isIconSizeFixedToTextHeight( )
     {
         return this.iconSizeFixedToText;
@@ -323,7 +323,7 @@ public class TooltipPainter extends SimpleTextPainter
     {
         return lineSpacing;
     }
-    
+
     public synchronized float getIconSize( )
     {
         return iconSize;
@@ -333,18 +333,18 @@ public class TooltipPainter extends SimpleTextPainter
     {
         return iconSpacing;
     }
-    
+
     protected void resetTextLayout( )
     {
         this.textLayout = null;
         this.lines = null;
     }
-    
+
     protected void resetIconLayout( )
     {
         this.icons = null;
     }
-    
+
     @Override
     protected synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
@@ -372,7 +372,7 @@ public class TooltipPainter extends SimpleTextPainter
         }
 
         if ( iconIds == null && lines == null ) return;
-        
+
         GL2 gl = context.getGL( ).getGL2( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -391,29 +391,28 @@ public class TooltipPainter extends SimpleTextPainter
         {
             textHeight = ( textLayout.getLineHeight( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
         }
-        
+
         float iconSize;
         if ( iconIds == null || iconIds.isEmpty( ) )
-        {            
+        {
             iconSize = 0;
         }
         else if ( iconSizeFixedToText && textHeight != 0 )
         {
-            iconSize = (float) textLayout.getLineHeight( );
+            iconSize = ( float ) textLayout.getLineHeight( );
         }
         else
         {
             iconSize = this.iconSize;
         }
-        
+
         // calculate largest height of box
         double iconHeight = 0;
         if ( icons != null )
         {
             iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
         }
-      
-        
+
         int boundingHeight = ( int ) ( borderSize * 2 + Math.max( iconHeight, textHeight ) );
 
         // calculate largest width of box
@@ -498,19 +497,17 @@ public class TooltipPainter extends SimpleTextPainter
                 {
                     posX += textIconSpacing;
                 }
-                
+
                 double posY = y - borderSize - textLayout.getLineHeight( );
                 double iconPosY = Float.NEGATIVE_INFINITY;
-                
+
                 if ( wrapTextAroundIcon && icons != null )
                 {
                     iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
                 }
-                
+
                 for ( int i = 0; i < lines.size( ); i++ )
                 {
-                    System.out.println( "|" + lines.get( i ).text + "|" );
-                    
                     if ( posY + textLayout.getLineHeight( ) < iconPosY ) posX = x + borderSize;
                     textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
                     posY = posY - lineSpacing - ( textLayout.getLineHeight( ) );
@@ -539,13 +536,13 @@ public class TooltipPainter extends SimpleTextPainter
                         double iconScale = iconSize / ( double ) iconData.getWidth( );
 
                         float[] color = defaultIconColor;
-                        
+
                         if ( iconColors != null && i < iconColors.size( ) )
                         {
                             float[] iconColor = iconColors.get( i );
                             if ( iconColor != null ) color = iconColor;
                         }
-                        
+
                         GlimpseColor.glColor( gl, color );
                         atlas.drawImage( gl, iconId, ( int ) ( x + borderSize + clampX ), ( int ) ( posY + clampY ), iconScale, iconScale, 0, iconData.getHeight( ) );
                         posY = posY - iconSize - iconSpacing;
@@ -559,18 +556,17 @@ public class TooltipPainter extends SimpleTextPainter
         }
     }
 
-
     protected void updateTextLayout( )
     {
         Font font = textRenderer.getFont( );
         FontRenderContext frc = textRenderer.getFontRenderContext( );
-        
+
         textLayout = new SimpleTextLayoutCenter( font, frc, breakIterator );
         textLayout.setBreakOnEol( breakOnEol );
         textLayout.setLineSpacing( lineSpacing );
-        
+
         if ( iconSize == 0 ) iconSize = ( float ) textLayout.getLineHeight( );
-        
+
         textLayout.doLayout( text, 0, 0, isFixedWidth ? fixedWidth : Float.MAX_VALUE );
         lines = textLayout.getLines( );
     }

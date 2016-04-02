@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ public class TargetStackUtil
     {
         return newTargetStack( ).push( stack );
     }
-    
+
     /**
      * Creates a new GlimpseTargetStack which is an exact copy of the given stack
      * and is unmodifiable.
@@ -110,7 +110,7 @@ public class TargetStackUtil
 
         return true;
     }
-    
+
     /**
      * Returns true if the query target stack contains the provided target.
      * 
@@ -131,7 +131,7 @@ public class TargetStackUtil
 
         return false;
     }
-    
+
     /**
      * 
      * @return true if either target stack contain a GlimpseTarget in common
@@ -145,7 +145,7 @@ public class TargetStackUtil
                 if ( target1.equals( target2 ) ) return true;
             }
         }
-        
+
         return false;
     }
 

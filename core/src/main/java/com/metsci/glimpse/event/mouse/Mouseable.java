@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,17 +37,25 @@ import java.util.Collection;
 public interface Mouseable extends GlimpseMouseListener, GlimpseMouseMotionListener, GlimpseMouseWheelListener
 {
     public Collection<GlimpseMouseListener> getGlimpseMouseListeners( );
+
     public Collection<GlimpseMouseMotionListener> getGlimpseMouseMotionListeners( );
+
     public Collection<GlimpseMouseWheelListener> getGlimpseMouseWheelListeners( );
 
     public void addGlimpseMouseAllListener( GlimpseMouseAllListener listener );
+
     public void addGlimpseMouseListener( GlimpseMouseListener listener );
+
     public void addGlimpseMouseMotionListener( GlimpseMouseMotionListener listener );
+
     public void addGlimpseMouseWheelListener( GlimpseMouseWheelListener listener );
 
     public void removeGlimpseMouseAllListener( GlimpseMouseAllListener listener );
+
     public void removeGlimpseMouseListener( GlimpseMouseListener listener );
+
     public void removeGlimpseMouseMotionListener( GlimpseMouseMotionListener listener );
+
     public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener );
 
     public void removeAllGlimpseListeners( );

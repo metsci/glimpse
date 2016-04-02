@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ public class MiscUtils
         int vBest = Integer.MAX_VALUE;
         for ( int i = 0; i < vs.length; i++ )
         {
-            int v = vs[ i ];
+            int v = vs[i];
             if ( v < vBest )
             {
                 iBest = i;
@@ -117,7 +117,8 @@ public class MiscUtils
     public static Box createVerticalBox( Component... cs )
     {
         Box box = Box.createVerticalBox( );
-        for ( Component c : cs ) box.add( c );
+        for ( Component c : cs )
+            box.add( c );
         return box;
     }
 

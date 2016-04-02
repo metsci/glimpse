@@ -7,4 +7,3 @@
  * shapes.
  */
 package com.metsci.glimpse.support.texture;
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,12 @@
  */
 package com.metsci.glimpse.examples.dspl;
 
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newConcept;
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newConceptInfo;
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newDataset;
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newInfo;
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newSlice;
+
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
@@ -38,8 +44,6 @@ import com.metsci.glimpse.dspl.schema.DataSet;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.util.DsplException;
 import com.metsci.glimpse.dspl.util.DsplHelper;
-
-import static com.metsci.glimpse.dspl.util.DataSetFactory.*;
 
 /**
  * XXX: Needs cleanup.

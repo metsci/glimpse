@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,7 @@ public class FloatTexture1D extends AbstractTexture
     @Override
     protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_LUMINANCE32F, dim[0], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT,
-                         data.rewind() );
+        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_LUMINANCE32F, dim[0], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, data.rewind( ) );
     }
 
     @Override
@@ -72,16 +71,16 @@ public class FloatTexture1D extends AbstractTexture
 
     public void mutate( MutatorFloat1D mutator )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            data.rewind();
+            data.rewind( );
             mutator.mutate( data, dim[0] );
-            makeDirty();
+            makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 

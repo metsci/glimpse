@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,15 +48,15 @@ public interface GlimpsePainter
      * Sets display options for the painter based on the provided LookAndFeel.
      */
     public void setLookAndFeel( LookAndFeel laf );
-    
+
     /**
      * A painter which is set to non-visible should make no OpenGL calls when its
      * paintTo method is called.
      */
     public void setVisible( boolean visible );
-    
+
     public boolean isVisible( );
-    
+
     /**
      * Free GPU and CPU memory associated with this this GlimpsePainter.
      * After this call returns, the results of calling other GlimpsePainter

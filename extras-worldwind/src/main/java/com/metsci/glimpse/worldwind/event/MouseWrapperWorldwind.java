@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,6 @@
  */
 package com.metsci.glimpse.worldwind.event;
 
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.geom.Position;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -49,6 +46,9 @@ import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.worldwind.tile.GlimpseSurfaceTile;
+
+import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Position;
 
 /**
  * A mouse event handler which listens for java.awt mouse events from a WorldWind

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.shader;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -40,9 +40,9 @@ import javax.media.opengl.GL2;
  */
 public class ShaderArg
 {
-    private static final Logger logger = Logger.getLogger( ShaderArg.class.getName() );
+    private static final Logger logger = Logger.getLogger( ShaderArg.class.getName( ) );
 
-    private final ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock( );
 
     private final String name;
     private String toStringResult;
@@ -62,7 +62,7 @@ public class ShaderArg
         this.qual = qual;
         this.inout = inout;
 
-        makeDirty();
+        makeDirty( );
     }
 
     public String getName( )
@@ -97,33 +97,30 @@ public class ShaderArg
 
     public void setValue( Object val )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
             currentValue = val;
-            if( lastPushedValue != null )
-                if( !currentValue.equals( lastPushedValue ) )
-                    makeDirty();
+            if ( lastPushedValue != null ) if ( !currentValue.equals( lastPushedValue ) ) makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
     protected void update( GL2 gl, int glArgHandle )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( lastPushedValue != null )
-                if( currentValue.equals( lastPushedValue ) )
-                {
-                    dirty = false;
-                    return;
-                }
+            if ( lastPushedValue != null ) if ( currentValue.equals( lastPushedValue ) )
+            {
+                dirty = false;
+                return;
+            }
 
-            switch( type )
+            switch ( type )
             {
                 case SAMPLER_2D_ARRAY:
                 case SAMPLER_1D_ARRAY:
@@ -136,30 +133,30 @@ public class ShaderArg
                 case USAMPLER_1D:
                 case INT:
                 {
-                    logFine( logger, "Updating %s to %s.", toString(), currentValue.toString() );
-                    gl.glUniform1i( glArgHandle, getIntValue() );
+                    logFine( logger, "Updating %s to %s.", toString( ), currentValue.toString( ) );
+                    gl.glUniform1i( glArgHandle, getIntValue( ) );
                     break;
                 }
                 case FLOAT:
                 {
-                    logFine( logger, "Updating %s to %s.", toString(), currentValue.toString() );
-                    gl.glUniform1f( glArgHandle, getFloatValue() );
+                    logFine( logger, "Updating %s to %s.", toString( ), currentValue.toString( ) );
+                    gl.glUniform1f( glArgHandle, getFloatValue( ) );
                     break;
                 }
                 case BOOLEAN:
                 {
-                    logFine( logger, "Updating %s to %s.", toString(), currentValue.toString() );
-                    gl.glUniform1i( glArgHandle, getBooleanValue() ? 1 : 0 );
+                    logFine( logger, "Updating %s to %s.", toString( ), currentValue.toString( ) );
+                    gl.glUniform1i( glArgHandle, getBooleanValue( ) ? 1 : 0 );
                     break;
                 }
                 case VEC2:
-                    gl.glUniform2fv( glArgHandle, 1, getFloatArrayValue(), 0 );
+                    gl.glUniform2fv( glArgHandle, 1, getFloatArrayValue( ), 0 );
                     break;
                 case VEC3:
-                    gl.glUniform3fv( glArgHandle, 1, getFloatArrayValue(), 0 );
+                    gl.glUniform3fv( glArgHandle, 1, getFloatArrayValue( ), 0 );
                     break;
                 case VEC4:
-                    gl.glUniform4fv( glArgHandle, 1, getFloatArrayValue(), 0 );
+                    gl.glUniform4fv( glArgHandle, 1, getFloatArrayValue( ), 0 );
                     break;
                 case MAT2:
                     gl.glUniformMatrix2fv( glArgHandle, 1, false, getFloatArrayValue( ), 0 );
@@ -180,54 +177,50 @@ public class ShaderArg
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
+
     private int getIntValue( )
     {
-        return ( (Number) currentValue ).intValue();
+        return ( ( Number ) currentValue ).intValue( );
     }
 
     private float getFloatValue( )
     {
-        return ( (Number) currentValue ).floatValue();
+        return ( ( Number ) currentValue ).floatValue( );
     }
 
     private boolean getBooleanValue( )
     {
-        return (Boolean) currentValue;
+        return ( Boolean ) currentValue;
     }
 
     private float[] getFloatArrayValue( )
     {
-        return (float[]) currentValue;
+        return ( float[] ) currentValue;
     }
-
 
     @Override
     public String toString( )
     {
-        if( toStringResult == null )
+        if ( toStringResult == null )
         {
-            StringBuilder b = new StringBuilder();
+            StringBuilder b = new StringBuilder( );
 
             b.append( "'" );
 
-            if( inout != null )
-                b.append( inout ).append( " " );
+            if ( inout != null ) b.append( inout ).append( " " );
 
-            if( qual != null )
-                b.append( qual ).append( " " );
+            if ( qual != null ) b.append( qual ).append( " " );
 
-            if( type != null )
-                b.append( type ).append( " " );
+            if ( type != null ) b.append( type ).append( " " );
 
-            if( name != null )
-                b.append( name );
+            if ( name != null ) b.append( name );
 
             b.append( "'" );
 
-            toStringResult = b.toString();
+            toStringResult = b.toString( );
         }
 
         return toStringResult;

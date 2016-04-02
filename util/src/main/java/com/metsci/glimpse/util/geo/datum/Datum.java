@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,9 @@ import com.metsci.glimpse.util.vector.Vector3d;
  */
 public abstract class Datum
 {
-    public final static Datum wgs84 = new DatumWgs84();
-    public final static DatumSphere wgs84sphere = new DatumSphereWgs84();
-    public final static DatumSphere unitSphere = new DatumSphereUnit();   
+    public final static Datum wgs84 = new DatumWgs84( );
+    public final static DatumSphere wgs84sphere = new DatumSphereWgs84( );
+    public final static DatumSphere unitSphere = new DatumSphereUnit( );
 
     private final double equatorialRadius;
     private final double flattening;
@@ -49,6 +49,7 @@ public abstract class Datum
     private final double eccentricitySquared;
 
     public abstract LatLonGeo toWgs84( LatLonGeo llg );
+
     public abstract DatumSphere getSphereApproximation( );
 
     /**
@@ -61,7 +62,7 @@ public abstract class Datum
         final double latRad = llg.getLatRad( );
         final double lonRad = llg.getLonRad( );
         final double newLatRad = SpheroidUtil.geodeticToGeocentric( latRad, eccentricitySquared );
-        return LatLonGeo.fromRad( newLatRad, lonRad, llg.getAltitude() );
+        return LatLonGeo.fromRad( newLatRad, lonRad, llg.getAltitude( ) );
     }
 
     /**
@@ -74,7 +75,7 @@ public abstract class Datum
         final double latRad = llg.getLatRad( );
         final double lonRad = llg.getLonRad( );
         final double newLatRad = SpheroidUtil.geocentricToGeodetic( latRad, eccentricitySquared );
-        return LatLonGeo.fromRad( newLatRad, lonRad, llg.getAltitude() );
+        return LatLonGeo.fromRad( newLatRad, lonRad, llg.getAltitude( ) );
     }
 
     /**
@@ -96,14 +97,12 @@ public abstract class Datum
         final double sinLon = Math.sin( refPoint.getLonRad( ) );
         final double cosLon = Math.cos( refPoint.getLonRad( ) );
 
-        final double dx = -sinLon * e - cosLon*sinLat * n + cosLon*cosLat * u;
-        final double dy =  cosLon * e - sinLon*sinLat * n + sinLon*cosLat * u;
-        final double dz =  0      * e + cosLat        * n + sinLat        * u;
+        final double dx = -sinLon * e - cosLon * sinLat * n + cosLon * cosLat * u;
+        final double dy = cosLon * e - sinLon * sinLat * n + sinLon * cosLat * u;
+        final double dz = 0 * e + cosLat * n + sinLat * u;
 
         LatLonRect refPointRect = refPoint.toLatLonRect( this );
-        return LatLonRect.fromXyz( refPointRect.getX() + dx,
-                                   refPointRect.getY() + dy,
-                                   refPointRect.getZ() + dz );
+        return LatLonRect.fromXyz( refPointRect.getX( ) + dx, refPointRect.getY( ) + dy, refPointRect.getZ( ) + dz );
     }
 
     /**
@@ -119,25 +118,25 @@ public abstract class Datum
         LatLonRect refPointRect = refPoint.toLatLonRect( this );
 
         // catastrophic cancellation: cleverness needed to maintain precision
-        final double dx = point.getX() - refPointRect.getX( );
-        final double dy = point.getY() - refPointRect.getY( );
-        final double dz = point.getZ() - refPointRect.getZ( );
+        final double dx = point.getX( ) - refPointRect.getX( );
+        final double dy = point.getY( ) - refPointRect.getY( );
+        final double dz = point.getZ( ) - refPointRect.getZ( );
 
         final double sinLat = Math.sin( refPoint.getLatRad( ) );
         final double cosLat = Math.cos( refPoint.getLatRad( ) );
         final double sinLon = Math.sin( refPoint.getLonRad( ) );
         final double cosLon = Math.cos( refPoint.getLonRad( ) );
 
-        final double e = -sinLon        * dx + cosLon        * dy + 0      * dz;
-        final double n = -sinLat*cosLon * dx - sinLat*sinLon * dy + cosLat * dz;
-        final double u =  cosLat*cosLon * dx + cosLat*sinLon * dy + sinLat * dz;
+        final double e = -sinLon * dx + cosLon * dy + 0 * dz;
+        final double n = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz;
+        final double u = cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz;
 
         return new Vector3d( e, n, u );
     }
 
     public LatLonGeo toLatLonGeo( LatLonRect from )
     {
-        return SpheroidUtil.toLatLonGeo( from.getX( ), from.getY(), from.getZ(), this );
+        return SpheroidUtil.toLatLonGeo( from.getX( ), from.getY( ), from.getZ( ), this );
     }
 
     public LatLonGeo toLatLonGeo( double x, double y, double z )
@@ -177,14 +176,14 @@ public abstract class Datum
 
     public Datum( double equatorialRadius, double flattening )
     {
-        assert( flattening >= 0d );
-        assert( flattening <  1d );
+        assert ( flattening >= 0d );
+        assert ( flattening < 1d );
 
         this.flattening = flattening;
         this.equatorialRadius = equatorialRadius;
 
         this.eccentricitySquared = flattening * ( 2d - flattening );
-        this.eccentricity  = Math.sqrt( eccentricitySquared );
+        this.eccentricity = Math.sqrt( eccentricitySquared );
         this.polarRadius = ( 1d - flattening ) * equatorialRadius;
     }
 
@@ -213,40 +212,33 @@ public abstract class Datum
         return flattening;
     }
 
-    public boolean isSpherical()
+    public boolean isSpherical( )
     {
         return flattening == 0;
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
         final int prime = 31;
         int result = 1;
         long temp;
         temp = Double.doubleToLongBits( equatorialRadius );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         temp = Double.doubleToLongBits( flattening );
-        result = prime * result + (int) ( temp ^ ( temp >>> 32 ) );
+        result = prime * result + ( int ) ( temp ^ ( temp >>> 32 ) );
         return result;
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals( Object obj )
     {
-        if( this == obj )
-            return true;
-        if( obj == null )
-            return false;
-        if( getClass( ) != obj.getClass( ) )
-            return false;
-        Datum other = (Datum) obj;
-        if( Double.doubleToLongBits( equatorialRadius ) != Double
-                .doubleToLongBits( other.equatorialRadius ) )
-            return false;
-        if( Double.doubleToLongBits( flattening ) != Double
-                .doubleToLongBits( other.flattening ) )
-            return false;
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( getClass( ) != obj.getClass( ) ) return false;
+        Datum other = ( Datum ) obj;
+        if ( Double.doubleToLongBits( equatorialRadius ) != Double.doubleToLongBits( other.equatorialRadius ) ) return false;
+        if ( Double.doubleToLongBits( flattening ) != Double.doubleToLongBits( other.flattening ) ) return false;
         return true;
     }
 }

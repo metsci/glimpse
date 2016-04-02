@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.shader;
 
-import static com.metsci.glimpse.gl.shader.ShaderType.*;
+import static com.metsci.glimpse.gl.shader.ShaderType.fragment;
 
 import java.io.IOException;
 
@@ -55,8 +55,10 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
     private ShaderArg alpha;
     private ShaderArg dataTexUnit;
     private ShaderArg colorTexUnit;
-    
+
     private Axis1D colorAxis;
+
+    private ShaderArg discardNaN;
 
     /**
      * @param colorAxis color axis producing events
@@ -79,7 +81,7 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
     protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
         this.colorAxis = colorAxis;
-        
+
         this.colorAxis.addAxisListener( this );
 
         this.dataMin = getArg( "dataMin" );
@@ -96,11 +98,19 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
 
         this.colorTexUnit = getArg( "colortex" );
         this.colorTexUnit.setValue( colorTexUnit );
+
+        this.discardNaN = getArg( "discardNaN" );
+        this.discardNaN.setValue( false );
     }
 
     private final static ShaderSource readSource( String source ) throws IOException
     {
         return new ShaderSource( source, StreamOpener.fileThenResource );
+    }
+
+    public void setDiscardNaN( boolean discard )
+    {
+        discardNaN.setValue( discard );
     }
 
     public void setAlpha( float alpha )
@@ -153,7 +163,7 @@ public class SampledColorScaleShader extends Shader implements AxisListener1D
     {
         return axis.getMax( );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

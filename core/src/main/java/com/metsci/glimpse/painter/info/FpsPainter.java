@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ public class FpsPainter extends SimpleTextPainter
     private final void tickTock( GlimpseContext context )
     {
         if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
-        
+
         FpsHelper temp = cache.getValue( context );
         temp.setFrameCount( temp.getFrameCount( ) + 1 );
         long currentTime = System.currentTimeMillis( );
@@ -82,7 +82,7 @@ public class FpsPainter extends SimpleTextPainter
     protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
     {
         if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
-        
+
         FpsHelper temp = cache.getValue( context );
         tickTock( context );
 

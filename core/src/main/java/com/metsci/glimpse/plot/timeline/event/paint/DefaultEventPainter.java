@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -148,7 +149,7 @@ public class DefaultEventPainter implements EventPainter
         boolean horiz = plot.isTimeAxisHorizontal( );
 
         EventBounds eventBounds = info.getEventBounds( event.getId( ) );
-        
+
         if ( !offEdgeMin && !offEdgeMax )
         {
             if ( event.isShowBackground( ) )
@@ -271,7 +272,7 @@ public class DefaultEventPainter implements EventPainter
                 }
             }
         }
-        
+
         Object defaultIconId = info.getDefaultIconId( );
 
         int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
@@ -535,7 +536,7 @@ public class DefaultEventPainter implements EventPainter
 
         return iconSizePerpPixels;
     }
-    
+
     public static boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds, OverlapRenderingMode mode )
     {
         return bounds.getWidth( ) + buffer > remainingSpaceX && mode == Overfull;
@@ -548,9 +549,9 @@ public class DefaultEventPainter implements EventPainter
 
     public static boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, OverlapRenderingMode mode )
     {
-        return ( size + buffer > remainingSpaceX && mode== Overfull ) || ( pixelX + size + buffer > nextStartPixel && mode == Intersecting );
+        return ( size + buffer > remainingSpaceX && mode == Overfull ) || ( pixelX + size + buffer > nextStartPixel && mode == Intersecting );
     }
-    
+
     public static double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, OverlapRenderingMode mode )
     {
         double insideBoxSpace = remainingSpaceX - buffer;
@@ -567,7 +568,7 @@ public class DefaultEventPainter implements EventPainter
                 return Double.MAX_VALUE;
         }
     }
-    
+
     public static String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
     {
         for ( int endIndex = fullText.length( ); endIndex >= 0; endIndex-- )
@@ -579,7 +580,7 @@ public class DefaultEventPainter implements EventPainter
 
         return "";
     }
-    
+
     public static float[] getBackgroundColor( Event event, EventPlotInfo info, boolean isSelected )
     {
         float[] backgroundColor = event.getBackgroundColor( );
@@ -631,7 +632,7 @@ public class DefaultEventPainter implements EventPainter
     public static float getBorderThickness( Event event, EventPlotInfo info, boolean isSelected )
     {
         float borderThickness = event.getBorderThickness( );
-        
+
         if ( isSelected )
         {
             return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,6 @@ public class DockingXmlUtils
             throw new ClassCastException( "Object is neither a " + GroupArrangement.class.getName( ) + " nor a " + JAXBElement.class.getName( ) + ": classname = " + object.getClass( ).getName( ) );
         }
     }
-
 
     // Write
     //

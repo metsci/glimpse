@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ public final class FastAcos extends FastFunc
 {
     private static final FastAcos instance = new FastAcos( ( float ) -1.0, ( float ) 1.0, 100000 );
 
-    public static FastAcos getInstance()
+    public static FastAcos getInstance( )
     {
         return instance;
     }

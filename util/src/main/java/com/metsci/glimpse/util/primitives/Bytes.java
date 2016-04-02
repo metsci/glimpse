@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,40 +37,38 @@ import java.nio.charset.Charset;
 public interface Bytes
 {
 
-    public static final Charset utf8 = Charset.forName("UTF-8");
-
+    public static final Charset utf8 = Charset.forName( "UTF-8" );
 
     /**
      * Value at index i
      */
-    byte v(int i);
+    byte v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, byte[] dest, int iDest, int c);
+    void copyTo( int i, byte[] dest, int iDest, int c );
 
     /**
      * Strings are encoded and decoded using the UTF-8 charset (multi-byte
      * charsets just aren't worth the increased complication in indexing).
      */
-    String string(int i, int c);
-
+    String string( int i, int c );
 
     // Convenience Methods
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    byte first();
+    byte first( );
 
-    byte last();
+    byte last( );
 
-    byte[] copyOf(int i, int c);
+    byte[] copyOf( int i, int c );
 
-    byte[] copyOf();
+    byte[] copyOf( );
 
-    String string();
+    String string( );
 
 }

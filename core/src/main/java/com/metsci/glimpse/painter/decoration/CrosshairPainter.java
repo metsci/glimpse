@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,10 +164,10 @@ public class CrosshairPainter extends GlimpseDataPainter2D
 
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
-        double minX = Math.min(axisX.getMax( ),axisX.getMin());
-        double maxX = Math.max(axisX.getMax( ),axisX.getMin());
-        double minY = Math.min(axisY.getMax( ),axisY.getMin());
-        double maxY = Math.max(axisY.getMax( ),axisY.getMin());
+        double minX = Math.min( axisX.getMax( ), axisX.getMin( ) );
+        double maxX = Math.max( axisX.getMax( ), axisX.getMin( ) );
+        double minY = Math.min( axisY.getMax( ), axisY.getMin( ) );
+        double maxY = Math.max( axisY.getMax( ), axisY.getMin( ) );
 
         double centerX = axisX.getSelectionCenter( );
         double sizeX = axisX.getSelectionSize( ) / 2;

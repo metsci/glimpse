@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.dspl.parser.util;
 
-import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.ParseMode.*;
+import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.ParseMode.AFTER_END_QUOTE_BEFORE_COMMA;
+import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.ParseMode.BETWEEN_QUOTES;
+import static com.metsci.glimpse.dspl.parser.util.QuoteAwareStringSplitter.ParseMode.DEFAULT;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -99,58 +101,58 @@ public class QuoteAwareStringSplitter
             switch ( mode )
             {
 
-            case BETWEEN_QUOTES:
-                if ( c == QUOTE )
-                {
-                    items.add( s.substring( itemStartPos, linePos ) );
-                    mode = AFTER_END_QUOTE_BEFORE_COMMA;
-                    itemStartPos = linePos + 1;
-                }
-                else if ( c == split )
-                {
-                    // ignore, this is part of item between quotes
-                }
-                else
-                {
-                    // ignore, part of item
-                }
-                break;
+                case BETWEEN_QUOTES:
+                    if ( c == QUOTE )
+                    {
+                        items.add( s.substring( itemStartPos, linePos ) );
+                        mode = AFTER_END_QUOTE_BEFORE_COMMA;
+                        itemStartPos = linePos + 1;
+                    }
+                    else if ( c == split )
+                    {
+                        // ignore, this is part of item between quotes
+                    }
+                    else
+                    {
+                        // ignore, part of item
+                    }
+                    break;
 
-            case AFTER_END_QUOTE_BEFORE_COMMA:
-                if ( c == QUOTE )
-                {
-                    throw new IOException( String.format( "Unable to parse: \"%s\"", s ) );
-                }
-                else if ( c == split )
-                {
-                    itemStartPos = linePos + 1;
-                    mode = DEFAULT;
-                }
-                else
-                {
-                    // no-mans land, not part of item
-                }
-                break;
+                case AFTER_END_QUOTE_BEFORE_COMMA:
+                    if ( c == QUOTE )
+                    {
+                        throw new IOException( String.format( "Unable to parse: \"%s\"", s ) );
+                    }
+                    else if ( c == split )
+                    {
+                        itemStartPos = linePos + 1;
+                        mode = DEFAULT;
+                    }
+                    else
+                    {
+                        // no-mans land, not part of item
+                    }
+                    break;
 
-            case DEFAULT:
-                if ( c == QUOTE )
-                {
-                    itemStartPos = linePos + 1;
-                    mode = BETWEEN_QUOTES;
-                }
-                else if ( c == split )
-                {
-                    items.add( s.substring( itemStartPos, linePos ) );
-                    itemStartPos = linePos + 1;
-                }
-                else
-                {
-                    // ignore, part of item
-                }
-                break;
+                case DEFAULT:
+                    if ( c == QUOTE )
+                    {
+                        itemStartPos = linePos + 1;
+                        mode = BETWEEN_QUOTES;
+                    }
+                    else if ( c == split )
+                    {
+                        items.add( s.substring( itemStartPos, linePos ) );
+                        itemStartPos = linePos + 1;
+                    }
+                    else
+                    {
+                        // ignore, part of item
+                    }
+                    break;
 
-            default:
-                throw new RuntimeException( String.format( "Unexpected state while parsing: \"%s\"", s ) );
+                default:
+                    throw new RuntimeException( String.format( "Unexpected state while parsing: \"%s\"", s ) );
 
             }
         }

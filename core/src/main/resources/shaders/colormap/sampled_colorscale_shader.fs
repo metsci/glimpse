@@ -7,9 +7,22 @@ uniform float dataMax;
 
 uniform float alpha;
 
+// skips fragments with NaN values
+uniform bool discardNaN;
+
 void main()
-{
+{ 
+	// retrieve the data value for this texel
     float dataVal = texture2D( datatex, gl_TexCoord[0].st ).r;
+    if( discardNaN )
+    {
+       // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
+       // NaN semantics in GLSL are mostly unspecified, but "x != x" seems to work.
+       //if( isnan( dataVal ) )
+       if( dataVal != dataVal )
+          discard;
+    }
+    
     float normalizedVal = ( dataVal - dataMin ) / ( dataMax - dataMin );
     normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 

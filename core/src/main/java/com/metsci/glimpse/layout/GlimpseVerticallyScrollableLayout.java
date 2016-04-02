@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,14 +128,11 @@ public class GlimpseVerticallyScrollableLayout extends GlimpseLayout
         };
     }
 
-
-
     protected int minContentHeight;
     protected int verticalOffset;
 
     // We rely on copy-on-write iteration semantics, so don't just declare as List
     protected final CopyOnWriteArrayList<Runnable> listeners;
-
 
     public GlimpseVerticallyScrollableLayout( int minContentHeight )
     {

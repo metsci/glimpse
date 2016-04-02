@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ import com.metsci.glimpse.painter.texture.TextureUnit;
  */
 public class FloatTexture2D extends AbstractTexture implements DrawableTexture
 {
-    private static final Logger logger = Logger.getLogger( FloatTexture2D.class.getName() );
+    private static final Logger logger = Logger.getLogger( FloatTexture2D.class.getName( ) );
 
     protected FloatBuffer data;
     protected boolean centers;
@@ -58,8 +58,8 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
 
         this.data = Buffers.newDirectFloatBuffer( n0 * n1 );
 
-        this.min = min.clone();
-        this.max = max.clone();
+        this.min = min.clone( );
+        this.max = max.clone( );
         this.centers = centers;
     }
 
@@ -70,7 +70,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     {
         boolean ready = prepare( gl, texUnit );
 
-        if( !ready )
+        if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
             return;
@@ -79,7 +79,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
         gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
         gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
 
-        double tminmax[][] = computeDrawMinMax();
+        double tminmax[][] = computeDrawMinMax( );
         double tmin[] = tminmax[0];
         double tmax[] = tminmax[1];
 
@@ -97,7 +97,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
             gl.glTexCoord2f( 0.0f, 1.0f );
             gl.glVertex2d( tmin[0], tmax[1] );
         }
-        gl.glEnd();
+        gl.glEnd( );
     }
 
     private final double[][] computeDrawMinMax( )
@@ -107,7 +107,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
         double d0 = ( max[0] - min[0] ) / dim[0];
         double d1 = ( max[1] - min[1] ) / dim[1];
 
-        if( !centers )
+        if ( !centers )
         {
             texmin[0] = min[0];
             texmin[1] = min[1];
@@ -138,8 +138,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setData( GL2 gl )
     {
-        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT,
-                         data.rewind() );
+        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, data.rewind( ) );
     }
 
     @Override
@@ -148,19 +147,18 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
         gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
     }
 
-
     public void mutate( MutatorFloat2D mutator )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            data.rewind();
-            mutator.mutate( data, min, max, dim.clone() );
-            makeDirty();
+            data.rewind( );
+            mutator.mutate( data, min, max, dim.clone( ) );
+            makeDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 

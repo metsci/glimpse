@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -61,7 +61,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 {
     protected TextRenderer textRenderer;
     protected Font font;
-    
+
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
@@ -88,11 +88,11 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     protected boolean lockRight = false;
     protected boolean lockTop = false;
     protected boolean lockBottom = false;
-    
+
     protected boolean fontSet = false;
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
-    
+
     public NumericXYAxisPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
@@ -103,27 +103,27 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         this.textColor = GlimpseColor.getBlack( );
         this.lineColor = GlimpseColor.getBlack( );
     }
-    
+
     public NumericXYAxisPainter( )
     {
         this( new GridAxisExponentLabelHandler( ), new GridAxisExponentLabelHandler( ) );
     }
-    
+
     public void setLabelHandlerX( AxisLabelHandler ticksX )
     {
         this.ticksX = ticksX;
     }
-    
+
     public void setLabelHandlerY( AxisLabelHandler ticksY )
     {
         this.ticksY = ticksY;
     }
-    
+
     public AxisLabelHandler getLabelHandlerX( )
     {
         return this.ticksX;
     }
-    
+
     public AxisLabelHandler getLabelHandlerY( )
     {
         return this.ticksY;
@@ -157,7 +157,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         lineColor[3] = a;
 
         this.tickColorSet = true;
-        
+
         return this;
     }
 
@@ -231,10 +231,10 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
             this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
             this.newFont = null;
         }
-        
+
         if ( this.textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -287,9 +287,9 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         }
         else
         {
-            doriginX = axisX.valueToScreenPixelUnits( 0.0 ) / (double)  width;
+            doriginX = axisX.valueToScreenPixelUnits( 0.0 ) / ( double ) width;
         }
-        
+
         double doriginY;
         if ( lockBottom )
         {
@@ -313,15 +313,15 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         }
         else
         {
-            doriginY = axisY.valueToScreenPixelUnits( 0.0 ) / (double) height;
+            doriginY = axisY.valueToScreenPixelUnits( 0.0 ) / ( double ) height;
         }
 
         boolean labelRight = width - originX > rightBuffer;
         boolean labelTop = height - originY > topBuffer;
 
-        boolean[] paintLabelsX = new boolean[ positionsX.length ];
-        boolean[] paintLabelsY = new boolean[ positionsY.length ];
-        
+        boolean[] paintLabelsX = new boolean[positionsX.length];
+        boolean[] paintLabelsY = new boolean[positionsY.length];
+
         GlimpseColor.setColor( textRenderer, textColor );
         textRenderer.beginRendering( width, height );
         try
@@ -397,28 +397,28 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
         gl.glOrtho( 0, 1, 0, 1, -1, 1 );
-        
+
         GlimpseColor.glColor( gl, lineColor );
-        
-        double labelBufferX = labelBuffer / (double) width;
-        double labelBufferY = labelBuffer / (double) height;
-        
+
+        double labelBufferX = labelBuffer / ( double ) width;
+        double labelBufferY = labelBuffer / ( double ) height;
+
         gl.glBegin( GL2.GL_LINES );
         try
         {
             if ( showHorizontal )
             {
-                double tickWidthY = tickWidth / (double) height;
+                double tickWidthY = tickWidth / ( double ) height;
 
                 for ( int i = 0; i < positionsX.length; i++ )
                 {
                     if ( paintLabelsX[i] )
                     {
-                        double valueX = axis.getAxisX( ).valueToScreenPixelUnits( convX.fromAxisUnits( positionsX[i] ) ) / (double) width;
-    
+                        double valueX = axis.getAxisX( ).valueToScreenPixelUnits( convX.fromAxisUnits( positionsX[i] ) ) / ( double ) width;
+
                         gl.glVertex2d( valueX, doriginY - tickWidthY );
                         gl.glVertex2d( valueX, doriginY + tickWidthY );
-    
+
                         if ( labelTop )
                         {
                             gl.glVertex2d( valueX, doriginY + tickWidthY );
@@ -435,17 +435,17 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
             if ( showVertical )
             {
-                double tickWidthX = tickWidth / (double) width;
+                double tickWidthX = tickWidth / ( double ) width;
 
                 for ( int i = 0; i < positionsY.length; i++ )
                 {
                     if ( paintLabelsY[i] )
                     {
-                        double valueY = axis.getAxisY( ).valueToScreenPixelUnits( convY.fromAxisUnits( positionsY[i] ) ) / (double) height;
-    
+                        double valueY = axis.getAxisY( ).valueToScreenPixelUnits( convY.fromAxisUnits( positionsY[i] ) ) / ( double ) height;
+
                         gl.glVertex2d( doriginX - tickWidthX, valueY );
                         gl.glVertex2d( doriginX + tickWidthX, valueY );
-    
+
                         if ( labelRight )
                         {
                             gl.glVertex2d( doriginX + tickWidthX, valueY );
@@ -459,13 +459,13 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
                     }
                 }
             }
-            
+
             if ( showHorizontal && showOrigin )
             {
                 gl.glVertex2d( 0, doriginY );
                 gl.glVertex2d( 1, doriginY );
             }
-    
+
             if ( showVertical && showOrigin )
             {
                 gl.glVertex2d( doriginX, 0 );
@@ -482,7 +482,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     {
         return ( showLabelsNearOrigin || ( ( !atMaxCorner || labelPos > buffer ) && ( !atMinCorner || labelPos < axisSize - buffer ) ) );
     }
-    
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
@@ -492,13 +492,13 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
             setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
             fontSet = false;
         }
-        
+
         if ( !tickColorSet )
         {
             setLineColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );
             tickColorSet = false;
         }
-        
+
         if ( !labelColorSet )
         {
             setTextColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );

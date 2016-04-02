@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,6 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class DockingUtils
 {
     private static final Logger logger = Logger.getLogger( DockingUtils.class.getName( ) );
-
 
     public static void requireSwingThread( )
     {
@@ -147,8 +146,13 @@ public class DockingUtils
                 } );
             }
 
-            public void popupMenuWillBecomeVisible( PopupMenuEvent ev ) { }
-            public void popupMenuCanceled( PopupMenuEvent ev ) { }
+            public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
+            {
+            }
+
+            public void popupMenuCanceled( PopupMenuEvent ev )
+            {
+            }
         } );
 
         return popup;

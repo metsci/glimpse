@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,47 +32,47 @@ package com.metsci.glimpse.util.primitives;
 public interface BooleansModifiable extends Booleans
 {
 
-    void set(int i, boolean v);
-    void set(int i, boolean[] vs);
-    void set(int i, boolean[] vs, int from, int to);
-    
+    void set( int i, boolean v );
 
+    void set( int i, boolean[] vs );
 
-    void insert(int i, boolean v);
+    void set( int i, boolean[] vs, int from, int to );
 
-    void insert(int i, boolean[] vs);
-    void insert(int i, Booleans vs);
+    void insert( int i, boolean v );
 
-    void insert(int i, boolean[] vs, int from, int to);
-    void insert(int i, Booleans vs, int from, int to);
+    void insert( int i, boolean[] vs );
 
+    void insert( int i, Booleans vs );
 
+    void insert( int i, boolean[] vs, int from, int to );
 
-    void append(boolean v);
+    void insert( int i, Booleans vs, int from, int to );
 
-    void append(boolean[] vs);
-    void append(Booleans vs);
+    void append( boolean v );
 
-    void append(boolean[] vs, int from, int to);
-    void append(Booleans vs, int from, int to);
+    void append( boolean[] vs );
 
+    void append( Booleans vs );
 
+    void append( boolean[] vs, int from, int to );
 
-    void prepend(boolean v);
+    void append( Booleans vs, int from, int to );
 
-    void prepend(boolean[] vs);
-    void prepend(Booleans vs);
+    void prepend( boolean v );
 
-    void prepend(boolean[] vs, int from, int to);
-    void prepend(Booleans vs, int from, int to);
+    void prepend( boolean[] vs );
 
+    void prepend( Booleans vs );
 
+    void prepend( boolean[] vs, int from, int to );
+
+    void prepend( Booleans vs, int from, int to );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(boolean v);
+    void remove( boolean v );
 
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
@@ -80,20 +80,19 @@ public interface BooleansModifiable extends Booleans
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
-    
+    void removeIndex( int index );
+
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

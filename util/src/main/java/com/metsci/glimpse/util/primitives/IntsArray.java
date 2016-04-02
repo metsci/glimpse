@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.nio.IntBuffer;
 
@@ -428,7 +429,7 @@ public class IntsArray implements IntsModifiable
     {
         removeRange( index, index + 1 );
     }
-    
+
     @Override
     public void clear( )
     {

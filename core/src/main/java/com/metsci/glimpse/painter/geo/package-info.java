@@ -6,4 +6,3 @@
  * of the plot.
  */
 package com.metsci.glimpse.painter.geo;
-

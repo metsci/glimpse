@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,7 +165,7 @@ public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
                 }
             }
         } );
-        
+
         plot.addPainter( new NumericXYAxisPainter( ) );
 
         return plot;

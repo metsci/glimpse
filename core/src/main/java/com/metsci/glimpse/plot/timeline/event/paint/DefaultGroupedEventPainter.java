@@ -1,6 +1,42 @@
+/*
+ * Copyright (c) 2016, Metron, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Metron, Inc. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL METRON, INC. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.*;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_SIZE;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_TIP_BUFFER;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.DEFAULT_NUM_ICONS_ROWS;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.calculateDisplayText;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBackgroundColor;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBorderColor;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getIconSizePerpPixels;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getTextAvailableSpace;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isIconOverlapping;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextIntersecting;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextOverfull;
 
 import java.awt.geom.Rectangle2D;
 import java.nio.FloatBuffer;
@@ -53,7 +89,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
     {
         return this.maxIconRows;
     }
-    
+
     /**
      * If the width of an event is less than this value, text is never displayed.
      * This provides an optimization when lots of events are on screen since it
@@ -115,17 +151,17 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 int posMin = eventInfo.posMin;
                 Event event = eventInfo.event;
                 Event nextEvent = eventInfo.nextEvent;
-    
+
                 // the size of the event in pixels perpendicular to the time axis
                 int sizePerpPixels = posMax - posMin;
                 // the location of the event center perpendicular to the time axis
                 double sizePerpCenter = posMin + sizePerpPixels / 2.0;
                 int arrowSize = Math.min( sizePerpPixels, ARROW_SIZE );
-    
+
                 Epoch epoch = plot.getEpoch( );
                 double timeMin = epoch.fromTimeStamp( event.getStartTime( ) );
                 double timeMax = epoch.fromTimeStamp( event.getEndTime( ) );
-    
+
                 double arrowBaseMin = timeMin;
                 boolean offEdgeMin = false;
                 if ( timeAxis.getMin( ) > timeMin )
@@ -134,7 +170,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     timeMin = timeAxis.getMin( ) + ARROW_TIP_BUFFER / timeAxis.getPixelsPerValue( );
                     arrowBaseMin = timeMin + arrowSize / timeAxis.getPixelsPerValue( );
                 }
-    
+
                 double arrowBaseMax = timeMax;
                 boolean offEdgeMax = false;
                 if ( timeAxis.getMax( ) < timeMax )
@@ -143,25 +179,25 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     timeMax = timeAxis.getMax( ) - ARROW_TIP_BUFFER / timeAxis.getPixelsPerValue( );
                     arrowBaseMax = timeMax - arrowSize / timeAxis.getPixelsPerValue( );
                 }
-    
+
                 arrowBaseMax = Math.max( timeMin, arrowBaseMax );
                 arrowBaseMin = Math.min( timeMax, arrowBaseMin );
-    
+
                 double timeSpan = arrowBaseMax - arrowBaseMin;
                 double remainingSpace = timeAxis.getPixelsPerValue( ) * timeSpan - buffer * 2;
-    
+
                 int pixel = buffer + ( offEdgeMin ? arrowSize : 0 ) + Math.max( 0, timeAxis.valueToScreenPixel( timeMin ) );
-    
+
                 // start positions of the next event in this row
                 double nextStartValue = nextEvent != null ? epoch.fromTimeStamp( nextEvent.getStartTime( ) ) : timeAxis.getMax( );
                 int nextStartPixel = nextEvent != null ? timeAxis.valueToScreenPixel( nextStartValue ) : size;
-    
+
                 EventSelectionHandler selectionHandler = info.getEventSelectionHandler( );
                 boolean highlightSelected = selectionHandler.isHighlightSelectedEvents( );
                 boolean isSelected = highlightSelected ? selectionHandler.isEventSelected( event ) : false;
-    
+
                 EventBounds eventBounds = info.getEventBounds( event.getId( ) );
-    
+
                 if ( !offEdgeMin && !offEdgeMax )
                 {
                     if ( event.isShowBackground( ) )
@@ -170,7 +206,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                         fillIndex = addVerticesBox( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
                         fillCount++;
                     }
-    
+
                     if ( event.isShowBorder( ) )
                     {
                         float[] color = getBorderColor( event, info, isSelected );
@@ -186,7 +222,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                         fillIndex = addVerticesArrow( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
                         fillCount++;
                     }
-    
+
                     if ( event.isShowBorder( ) )
                     {
                         float[] color = getBorderColor( event, info, isSelected );
@@ -194,33 +230,33 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                         borderCount++;
                     }
                 }
-    
+
                 int totalIconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
-    
+
                 if ( event.hasChildren( ) )
                 {
                     final int numChildren = event.getEventCount( );
                     final int numRows = maxIconRows;
-    
+
                     // the requested size of the icon in the direction perpendicular to the time axis
                     int iconSizePerpPixels = totalIconSizePerpPixels / numRows;
-    
+
                     int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePerpPixels );
                     int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
                     int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
-    
+
                     double iconSizePerpValue = iconSizePerpPixels / timeAxis.getPixelsPerValue( );
                     int totalIconWidthPixels = iconSizePerpPixels * numColumns;
-    
+
                     eventBounds.setIconVisible( event.isShowIcon( ) && !isIconOverlapping( totalIconWidthPixels, 0, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) ) );
                     if ( eventBounds.isIconVisible( ) )
                     {
                         double value = timeAxis.screenPixelToValue( pixel );
                         eventBounds.setIconStartTime( epoch.toTimeStamp( value ) );
                         eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
-    
+
                         Iterator<Event> iter = event.iterator( );
-    
+
                         outer: for ( int c = 0; c < numColumns; c++ )
                         {
                             for ( int r = numRows - 1; r >= 0; r-- )
@@ -238,20 +274,20 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                                     {
                                         GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
                                     }
-    
+
                                     if ( atlas.isImageLoaded( icon ) )
                                     {
                                         ImageData iconData = atlas.getImageData( icon );
-    
+
                                         // the size of the icon in the direction perpendicular to the time axis
                                         int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
-    
+
                                         double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
-    
+
                                         double x = value + c * iconSizePerpValue;
                                         double startY = sizePerpCenter - totalIconSizePerpPixels / 2.0;
                                         double y = startY + r * iconSizePerpPixels;
-    
+
                                         if ( horiz )
                                         {
                                             iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, true ) );
@@ -268,7 +304,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                                 }
                             }
                         }
-    
+
                         remainingSpace -= totalIconWidthPixels + buffer;
                         pixel += totalIconWidthPixels + buffer;
                     }
@@ -277,7 +313,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 {
                     boolean isOverlapping = isIconOverlapping( totalIconSizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
                     eventBounds.setIconVisible( event.isShowIcon( ) && event.getIconId( ) != null && !isOverlapping );
-    
+
                     if ( eventBounds.isIconVisible( ) )
                     {
                         Object icon = event.getIconId( );
@@ -285,35 +321,35 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                         {
                             icon = defaultIconId;
                         }
-    
+
                         if ( atlas.isImageLoaded( icon ) )
                         {
                             ImageData iconData = atlas.getImageData( icon );
-    
+
                             // the size of the icon in the direction perpendicular to the time axis
                             int iconSizePerp = horiz ? iconData.getHeight( ) : iconData.getWidth( );
-    
+
                             // the size of the icon in the direction parallel to the time axis
                             int iconSizeTime = horiz ? iconData.getWidth( ) : iconData.getHeight( );
-    
+
                             // the requested size of the icon in the direction perpendicular to the time axis
                             int iconSizePerpPixels = getIconSizePerpPixels( event, info, sizePerpPixels );
-    
+
                             double iconScale = iconSizePerpPixels / ( double ) iconSizePerp;
-    
+
                             // the axis value corresponding to the left side of the icon
                             double posTime = timeAxis.screenPixelToValue( pixel );
                             eventBounds.setIconStartTime( epoch.toTimeStamp( posTime ) );
                             // the size of the icon (parallel to the time axis) in axis units
                             double iconSizeTimeAxis = iconSizeTime / timeAxis.getPixelsPerValue( );
                             eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( iconSizeTimeAxis ) );
-    
+
                             // the scaled size of the icon parallel to the time axis in pixels
                             int iconSizeTimeScaledPixels = ( int ) ( iconSizeTime * iconScale );
-    
+
                             // the position of the bottom of the icon in pixels perpendicular to the time axis
                             double posPerp = sizePerpCenter - iconSizePerpPixels / 2.0;
-    
+
                             if ( horiz )
                             {
                                 iconDrawList.add( new IconDrawInfo( icon, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp, true ) );
@@ -322,43 +358,43 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                             {
                                 iconDrawList.add( new IconDrawInfo( icon, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp, false ) );
                             }
-    
+
                             remainingSpace -= iconSizeTimeScaledPixels + buffer;
                             pixel += iconSizeTimeScaledPixels + buffer;
                         }
                     }
                 }
-    
+
                 boolean isBoxTooSmallForText = remainingSpace < this.minimumTextDisplayWidth;
-                
+
                 if ( event.isShowLabel( ) && event.getLabel( ) != null && !isBoxTooSmallForText )
                 {
                     Rectangle2D labelBounds = textRenderer.getBounds( event.getLabel( ) );
-    
+
                     boolean isTextOverfull = isTextOverfull( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
                     boolean isTextIntersecting = isTextIntersecting( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, labelBounds, event.getOverlapRenderingMode( ) );
                     boolean isTextOverlappingAndHidden = ( ( isTextOverfull || isTextIntersecting ) && event.getTextRenderingMode( ) == TextRenderingMode.HideAll );
                     double availableSpace = getTextAvailableSpace( sizePerpPixels, buffer, remainingSpace, pixel, nextStartPixel, event.getOverlapRenderingMode( ) );
-    
+
                     eventBounds.setTextVisible( !isTextOverlappingAndHidden );
-    
+
                     if ( eventBounds.isTextVisible( ) )
                     {
                         Rectangle2D displayBounds = labelBounds;
                         String displayText = event.getLabel( );
-    
+
                         if ( labelBounds.getWidth( ) > availableSpace && event.getTextRenderingMode( ) != TextRenderingMode.ShowAll )
                         {
                             displayText = calculateDisplayText( textRenderer, displayText, availableSpace );
                             displayBounds = textRenderer.getBounds( displayText );
                         }
-    
+
                         double value = timeAxis.screenPixelToValue( pixel );
                         eventBounds.setTextStartTime( epoch.toTimeStamp( value ) );
                         eventBounds.setTextEndTime( eventBounds.getTextStartTime( ).add( displayBounds.getWidth( ) / timeAxis.getPixelsPerValue( ) ) );
-    
+
                         float[] color;
-                        
+
                         // use this event's text color if it has been set
                         if ( event.getLabelColor( ) != null )
                         {
@@ -375,15 +411,15 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                         {
                             color = info.getTextColor( );
                         }
-    
+
                         if ( horiz )
                         {
-    
+
                             // use the labelBounds for the height (if the text shortening removed a character which
                             // hangs below the line, we don't want the text position to move)
                             int pixelY = ( int ) ( sizePerpPixels / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
                             textDrawList.add( new TextDrawInfo( displayText, color, pixel, pixelY, 0, 0 ) );
-    
+
                             remainingSpace -= displayBounds.getWidth( ) + buffer;
                             pixel += displayBounds.getWidth( ) + buffer;
                         }
@@ -391,12 +427,12 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                         {
                             double shiftX = sizePerpPixels / 2.0 + posMin;
                             int pixelX = ( int ) shiftX;
-    
+
                             double shiftY = pixel;
                             int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
-    
+
                             textDrawList.add( new TextDrawInfo( displayText, color, pixelX, pixelY, shiftX, shiftY ) );
-    
+
                             remainingSpace -= displayBounds.getWidth( ) + buffer;
                             pixel += displayBounds.getWidth( ) + buffer;
                         }
@@ -407,45 +443,45 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     eventBounds.setTextVisible( false );
                 }
             }
-    
+
             if ( fillCount > 0 )
             {
                 gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
                 gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-                
+
                 fillBuffer.flip( );
                 fillColorBuffer.flip( );
                 fillIndices.flip( );
                 fillCounts.flip( );
-    
+
                 gl.glVertexPointer( 2, GL.GL_FLOAT, 0, fillBuffer );
                 gl.glColorPointer( 4, GL.GL_FLOAT, 0, fillColorBuffer );
                 gl.glMultiDrawArrays( GL2.GL_POLYGON, fillIndices, fillCounts, fillCount );
-                
+
                 gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
                 gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
             }
-    
+
             if ( borderCount > 0 )
             {
                 gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
                 gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-                
+
                 gl.glLineWidth( info.getDefaultEventBorderThickness( ) );
-                
+
                 borderBuffer.flip( );
                 borderColorBuffer.flip( );
                 borderIndices.flip( );
                 borderCounts.flip( );
-    
+
                 gl.glVertexPointer( 2, GL.GL_FLOAT, 0, borderBuffer );
                 gl.glColorPointer( 4, GL.GL_FLOAT, 0, borderColorBuffer );
                 gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, borderIndices, borderCounts, borderCount );
-                
+
                 gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
                 gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
             }
-    
+
             if ( !iconDrawList.isEmpty( ) )
             {
                 atlas.beginRendering( );
@@ -468,7 +504,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     atlas.endRendering( );
                 }
             }
-    
+
             if ( !textDrawList.isEmpty( ) )
             {
                 textRenderer.beginRendering( width, height );
@@ -476,16 +512,16 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 {
                     for ( TextDrawInfo textInfo : textDrawList )
                     {
-    
+
                         if ( !horiz )
                         {
                             gl.glMatrixMode( GL2.GL_PROJECTION );
-    
+
                             gl.glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
                             gl.glRotated( 90, 0, 0, 1.0f );
                             gl.glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
                         }
-    
+
                         GlimpseColor.setColor( textRenderer, textInfo.getColor( ) );
                         textRenderer.draw( textInfo.getText( ), textInfo.getX( ), textInfo.getY( ) );
                     }

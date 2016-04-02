@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@ package com.metsci.glimpse.util.logging.format;
 
 import java.util.logging.LogRecord;
 
-
 /**
  * Base class for Metron logging formatters.  This exists in order to provide a base format method
  * which will infer the correct caller and method names and inject them into the LogRecord.
@@ -46,9 +45,9 @@ public abstract class Formatter extends java.util.logging.Formatter
      * @see  java.util.logging.Formatter#format(java.util.logging.LogRecord)
      */
     @Override
-    public String format(LogRecord record)
+    public String format( LogRecord record )
     {
-        inferAndInjectCaller(record);
+        inferAndInjectCaller( record );
 
         return null;
     }
@@ -58,24 +57,24 @@ public abstract class Formatter extends java.util.logging.Formatter
     //
     // Note: Based on similar method in the LogRecord class but filters out
     // Metron LoggerUtils in addition to standard Java Logger.
-    private void inferAndInjectCaller(LogRecord record)
+    private void inferAndInjectCaller( LogRecord record )
     {
 
         // Get the stack trace.
-        StackTraceElement[] stack = (new Throwable()).getStackTrace();
+        StackTraceElement[] stack = ( new Throwable( ) ).getStackTrace( );
 
         // First, search back to a method in the Logger or LoggerUtils class.
         int ix = 0;
-        while (ix < stack.length)
+        while ( ix < stack.length )
         {
             StackTraceElement frame = stack[ix];
-            String cname = frame.getClassName();
-            if (cname.equals("java.util.logging.Logger"))
+            String cname = frame.getClassName( );
+            if ( cname.equals( "java.util.logging.Logger" ) )
             {
                 break;
             }
 
-            if (cname.equals("com.metsci.glimpse.util.logging.LoggerUtils"))
+            if ( cname.equals( "com.metsci.glimpse.util.logging.LoggerUtils" ) )
             {
                 break;
             }
@@ -84,17 +83,16 @@ public abstract class Formatter extends java.util.logging.Formatter
         }
 
         // Now search for the first frame before the "Logger" class.
-        while (ix < stack.length)
+        while ( ix < stack.length )
         {
             StackTraceElement frame = stack[ix];
-            String cname = frame.getClassName();
-            if (!cname.equals("java.util.logging.Logger") &&
-                    !cname.equals("com.metsci.glimpse.util.logging.LoggerUtils"))
+            String cname = frame.getClassName( );
+            if ( !cname.equals( "java.util.logging.Logger" ) && !cname.equals( "com.metsci.glimpse.util.logging.LoggerUtils" ) )
             {
 
                 // We've found the relevant frame.
-                record.setSourceClassName(cname);
-                record.setSourceMethodName(frame.getMethodName());
+                record.setSourceClassName( cname );
+                record.setSourceMethodName( frame.getMethodName( ) );
 
                 return;
             }

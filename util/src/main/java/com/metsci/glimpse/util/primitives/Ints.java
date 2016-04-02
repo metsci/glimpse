@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,26 +35,25 @@ public interface Ints
     /**
      * Value at index i
      */
-    int v(int i);
+    int v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, int[] dest, int iDest, int c);
-
+    void copyTo( int i, int[] dest, int iDest, int c );
 
     // Convenience Methods
 
-    boolean isEmpty();
+    boolean isEmpty( );
 
-    int first();
+    int first( );
 
-    int last();
+    int last( );
 
-    int[] copyOf(int i, int c);
+    int[] copyOf( int i, int c );
 
-    int[] copyOf();
+    int[] copyOf( );
 
 }

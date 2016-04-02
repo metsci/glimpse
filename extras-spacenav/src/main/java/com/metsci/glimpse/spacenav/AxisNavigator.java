@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.spacenav;
 
-import static com.metsci.glimpse.spacenav.SpaceNavPoller.*;
+import static com.metsci.glimpse.spacenav.SpaceNavPoller.POLL_INTERVAL;
 import static java.lang.Math.abs;
 
 import com.metsci.glimpse.axis.Axis1D;

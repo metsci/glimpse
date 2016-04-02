@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,28 +28,5 @@ package com.metsci.glimpse.gl.shader;
 
 public enum ShaderArgType
 {
-    FLOAT,
-    INT,
-    BOOLEAN,
-    VEC2,
-    VEC3,
-    VEC4,
-    BVEC2,
-    BVEC3,
-    BVEC4,
-    IVEC2,
-    IVEC3,
-    IVEC4,
-    MAT2,
-    MAT3,
-    MAT4,
-    SAMPLER_1D,
-    ISAMPLER_1D,
-    USAMPLER_1D,
-    SAMPLER_2D,
-    ISAMPLER_2D,
-    USAMPLER_2D,
-    SAMPLER_CUBE,
-    SAMPLER_1D_ARRAY,
-    SAMPLER_2D_ARRAY;
+    FLOAT, INT, BOOLEAN, VEC2, VEC3, VEC4, BVEC2, BVEC3, BVEC4, IVEC2, IVEC3, IVEC4, MAT2, MAT3, MAT4, SAMPLER_1D, ISAMPLER_1D, USAMPLER_1D, SAMPLER_2D, ISAMPLER_2D, USAMPLER_2D, SAMPLER_CUBE, SAMPLER_1D_ARRAY, SAMPLER_2D_ARRAY;
 }
