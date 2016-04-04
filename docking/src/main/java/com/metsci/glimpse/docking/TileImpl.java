@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.JLabel;
@@ -492,7 +493,7 @@ public class TileImpl extends Tile
         {
             public void mousePressed( MouseEvent ev )
             {
-                selectView( view );
+                selectViewById( view.viewId );
             }
         } );
         for ( MouseAdapter mouseAdapter : dockingMouseAdapters )
@@ -507,7 +508,7 @@ public class TileImpl extends Tile
         {
             public void actionPerformed( ActionEvent ev )
             {
-                selectView( view );
+                selectViewById( view.viewId );
             }
         } );
         overflowPopup.add( overflowMenuItem );
@@ -524,6 +525,38 @@ public class TileImpl extends Tile
         {
             selectView( view );
         }
+    }
+
+    @Override
+    public void updateView( View view )
+    {
+        ViewEntry entry = viewMap.get( view.viewId );
+        int index = views.indexOf( view );
+
+        if ( entry == null || index < 0 )
+        {
+            throw new IllegalArgumentException( String.format( "View %s does not exist. addView( ) must be called prior to updateView( ).", view.viewId ) );
+        }
+
+        if ( view.component != entry.view.component )
+        {
+            entry.card.add( view.component, BorderLayout.CENTER );
+        }
+        
+        entry.tab.label.setText( view.title );
+        entry.tab.label.setIcon( view.icon );
+        entry.tab.setToolTipText( view.tooltip );
+        entry.overflowMenuItem.setText( view.title );
+        entry.overflowMenuItem.setIcon( view.icon );
+        entry.overflowMenuItem.setToolTipText( view.tooltip );
+
+        if ( Objects.equals( selectedView, view ) )
+        {
+            selectedView = view;
+        }
+
+        views.set( index, view );
+        viewMap.put( view.viewId, new ViewEntry( view, entry.card, entry.tab, entry.overflowMenuItem ) );
     }
 
     @Override
@@ -560,6 +593,11 @@ public class TileImpl extends Tile
     public boolean hasView( View view )
     {
         return ( view != null && viewMap.containsKey( view.viewId ) );
+    }
+
+    protected void selectViewById( String viewId )
+    {
+        selectView( viewMap.get( viewId ).view );
     }
 
     @Override

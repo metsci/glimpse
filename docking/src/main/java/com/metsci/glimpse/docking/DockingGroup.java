@@ -460,6 +460,38 @@ public class DockingGroup
             listener.closedView( this, view );
         }
     }
+    
+    // update all Tiles containing a View with view.viewId to
+    // reflect the content of the provided view
+    public void updateView( View view )
+    {
+        for ( DockingFrame frame : frames )
+        {
+            for ( Tile tile : findTiles( frame.docker ) )
+            {
+                if ( tile.hasView( view ) )
+                {
+                    tile.updateView( view );
+                }
+            }
+        }
+    }
+    
+    // find all Tiles in the provied MultiSplitPane
+    // helper function for {@code #updateView( View )}
+    protected static Set<Tile> findTiles( MultiSplitPane docker )
+    {
+        Set<Tile> tiles = new LinkedHashSet<>( );
+        for ( Component c : docker.leaves( ) )
+        {
+            if ( c instanceof Tile )
+            {
+                Tile tile = ( Tile ) c;
+                tiles.add( tile );
+            }
+        }
+        return tiles;
+    }
 
     // Snapshots
     //
