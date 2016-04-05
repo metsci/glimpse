@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.JLabel;
@@ -264,11 +265,13 @@ public class TileImpl extends Tile
         this.overflowBar = newToolbar( true );
         this.overflowPopupButton = new JToggleButton( "\u00BB" );
         this.overflowPopup = newButtonPopup( overflowPopupButton );
-        overflowBar.add( overflowPopupButton );
+        this.overflowBar.add( overflowPopupButton );
 
         this.cornerBar = newToolbar( true );
         for ( Component c : tileCornerComponents )
+        {
             cornerBar.add( c );
+        }
 
         this.viewBarHolder = new JPanel( new GridLayout( 1, 1 ) );
 
@@ -386,7 +389,7 @@ public class TileImpl extends Tile
 
                 viewBarHolder.removeAll( );
 
-                if ( selectedView == null || selectedView.toolbar == null )
+                if ( selectedView == null || selectedView.toolbar == null || !viewMap.containsKey( selectedView.viewId ) )
                 {
                     viewBarHolder.setVisible( false );
                 }
@@ -492,7 +495,7 @@ public class TileImpl extends Tile
         {
             public void mousePressed( MouseEvent ev )
             {
-                selectView( view );
+                selectViewById( view.viewId );
             }
         } );
         for ( MouseAdapter mouseAdapter : dockingMouseAdapters )
@@ -507,7 +510,7 @@ public class TileImpl extends Tile
         {
             public void actionPerformed( ActionEvent ev )
             {
-                selectView( view );
+                selectViewById( view.viewId );
             }
         } );
         overflowPopup.add( overflowMenuItem );
@@ -523,6 +526,46 @@ public class TileImpl extends Tile
         if ( selectedView == null )
         {
             selectView( view );
+        }
+    }
+
+    @Override
+    public void updateView( View view )
+    {
+        int index = views.indexOf( view );
+        ViewEntry entry = viewMap.get( view.viewId );
+
+        if ( entry == null || index < 0 )
+        {
+            throw new IllegalArgumentException( String.format( "View %s does not exist. addView( ) must be called prior to updateView( ).", view.viewId ) );
+        }
+
+        // only replace the component if it has changed (avoids flicker under some circumstances)
+        if ( view.component != entry.view.component )
+        {
+            entry.card.remove( entry.view.component );
+            entry.card.add( view.component, BorderLayout.CENTER );
+        }
+
+        entry.tab.label.setText( view.title );
+        entry.tab.label.setIcon( view.icon );
+        entry.tab.setToolTipText( view.tooltip );
+        entry.overflowMenuItem.setText( view.title );
+        entry.overflowMenuItem.setIcon( view.icon );
+        entry.overflowMenuItem.setToolTipText( view.tooltip );
+
+        views.set( index, view );
+        viewMap.put( view.viewId, new ViewEntry( view, entry.card, entry.tab, entry.overflowMenuItem ) );
+
+        // if the view being updated is the selectedView:
+        // 1) set selectedView to point to the new view
+        // 2) update the toolbar, which may have changed
+        if ( Objects.equals( selectedView, view ) )
+        {
+            selectedView = view;
+
+            topBar.doLayout( );
+            topBar.repaint( );
         }
     }
 
@@ -560,6 +603,11 @@ public class TileImpl extends Tile
     public boolean hasView( View view )
     {
         return ( view != null && viewMap.containsKey( view.viewId ) );
+    }
+
+    protected void selectViewById( String viewId )
+    {
+        selectView( viewMap.get( viewId ).view );
     }
 
     @Override
@@ -702,5 +750,4 @@ public class TileImpl extends Tile
             this.overflowMenuItem = overflowMenuItem;
         }
     }
-
 }
