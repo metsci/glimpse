@@ -75,16 +75,6 @@ public class PolynomialTangentPlane extends TangentPlane
     @Override
     protected double calcAtan2( double y, double x )
     {
-        double polyValue = PolynomialApprox.atan2( y, x );
-
-        //        double slowValue = Math.atan2(y, x);
-        //        double deltaPoly = polyValue - slowValue;
-
-        //        if (Math.abs(deltaPoly) > 1.0e-6)
-        //        {
-        //            logWarning(logger, "deltaPoly %4g at y %.4f, x %.4f, slow %.8f", deltaPoly, y, x, slowValue);
-        //        }
-
-        return polyValue;
+        return PolynomialApprox.atan2( y, x );
     }
 }
