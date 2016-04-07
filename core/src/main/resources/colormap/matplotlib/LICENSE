@@ -1,0 +1,5 @@
+Colorscales in core/src/main/resources/colorscales/matplotlib are derived from colorscales available
+in Matplotlib (http://matplotlib.org/users/installing.html). Matplotlib uses a BSD compatible
+license based on the PSF license:
+
+http://matplotlib.org/users/license.html

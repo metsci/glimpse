@@ -481,3 +481,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 The Fugue icon set is covered by the Creative Commons Attribution 3.0 license:
 
 http://creativecommons.org/licenses/by/3.0/
+
+-----------------------------------------------------------------------------
+
+Colorscales in core/src/main/resources/colormap/matplotlib are derived from colorscales available
+in Matplotlib (http://matplotlib.org/users/installing.html). Matplotlib uses a BSD compatible
+license based on the PSF license:
+
+http://matplotlib.org/users/license.html
