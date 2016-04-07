@@ -69,6 +69,8 @@ public interface Bytes
     /**
      * Strings are encoded and decoded using the UTF-8 charset (multi-byte
      * charsets just aren't worth the increased complication in indexing).
+     *
+     * XXX: This is probably broken, because UTF-8 *is* a multi-byte charset
      */
     String string( int i, int c );
 
