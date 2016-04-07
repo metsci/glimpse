@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.CharBuffer;
+
 /**
  * @author hogye
  */
@@ -42,21 +44,23 @@ public interface Chars
      */
     int n( );
 
-    void copyTo( int i, char[] dest, int iDest, int c );
-
-    String string( int i, int c );
-
-    // Convenience Methods
-
     boolean isEmpty( );
 
     char first( );
 
     char last( );
 
+    void copyTo( int i, char[] dest, int iDest, int c );
+
+    void copyTo( int i, CharBuffer dest, int c );
+
+    void copyTo( CharBuffer dest );
+
     char[] copyOf( int i, int c );
 
     char[] copyOf( );
+
+    String string( int i, int c );
 
     String string( );
 

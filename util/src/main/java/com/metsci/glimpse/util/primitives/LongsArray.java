@@ -103,6 +103,18 @@ public class LongsArray implements LongsModifiable
     }
 
     @Override
+    public void copyTo( int i, LongBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( LongBuffer dest )
+    {
+        dest.put( a, 0, n );
+    }
+
+    @Override
     public long[] copyOf( int i, int c )
     {
         long[] copy = new long[c];

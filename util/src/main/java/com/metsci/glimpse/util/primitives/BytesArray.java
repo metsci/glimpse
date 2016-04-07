@@ -117,6 +117,18 @@ public class BytesArray implements BytesModifiable
     }
 
     @Override
+    public void copyTo( int i, ByteBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( ByteBuffer dest )
+    {
+        dest.put( a, 0, n );
+    }
+
+    @Override
     public byte[] copyOf( int i, int c )
     {
         byte[] copy = new byte[c];

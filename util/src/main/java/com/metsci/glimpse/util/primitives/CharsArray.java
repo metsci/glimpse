@@ -110,6 +110,18 @@ public class CharsArray implements CharsModifiable
     }
 
     @Override
+    public void copyTo( int i, CharBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( CharBuffer dest )
+    {
+        dest.put( a, 0, n );
+    }
+
+    @Override
     public char[] copyOf( int i, int c )
     {
         char[] copy = new char[c];

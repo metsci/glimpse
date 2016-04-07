@@ -30,6 +30,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.math.BigInteger;
+import java.nio.LongBuffer;
 
 import com.metsci.glimpse.util.primitives.Longs;
 
@@ -113,6 +114,23 @@ public class SortedLongsArithmetic implements SortedLongs
         long[] copy = new long[c];
         copyTo( i, copy, 0, c );
         return copy;
+    }
+
+    @Override
+    public void copyTo( int i, LongBuffer dest, int c )
+    {
+        long v = v0 + i * vStep;
+        for ( int j = 0; j < c; j++ )
+        {
+            dest.put( v );
+            v += vStep;
+        }
+    }
+
+    @Override
+    public void copyTo( LongBuffer dest )
+    {
+        copyTo( 0, dest, n );
     }
 
     @Override

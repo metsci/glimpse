@@ -103,6 +103,18 @@ public class DoublesArray implements DoublesModifiable
     }
 
     @Override
+    public void copyTo( int i, DoubleBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( DoubleBuffer dest )
+    {
+        dest.put( a, 0, n );
+    }
+
+    @Override
     public double[] copyOf( int i, int c )
     {
         double[] copy = new double[c];
