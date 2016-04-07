@@ -273,6 +273,7 @@ public class ColorGradients
         }
     };
 
+    // matplotlib colormaps: http://matplotlib.org/examples/color/colormaps_reference.html
     public static final ColorGradient wistia = fromCSV( "colormap/matplotlib/wistia.csv" );
     public static final ColorGradient viridis = fromCSV( "colormap/matplotlib/viridis.csv" );
     public static final ColorGradient terrain = fromCSV( "colormap/matplotlib/terrain.csv" );
