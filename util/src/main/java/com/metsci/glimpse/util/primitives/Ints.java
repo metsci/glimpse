@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.IntBuffer;
+
 /**
  * @author hogye
  */
@@ -42,15 +44,17 @@ public interface Ints
      */
     int n( );
 
-    void copyTo( int i, int[] dest, int iDest, int c );
-
-    // Convenience Methods
-
     boolean isEmpty( );
 
     int first( );
 
     int last( );
+
+    void copyTo( int i, int[] dest, int iDest, int c );
+
+    void copyTo( int i, IntBuffer dest, int c );
+
+    void copyTo( IntBuffer dest );
 
     int[] copyOf( int i, int c );
 

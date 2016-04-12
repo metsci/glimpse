@@ -30,6 +30,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.math.BigInteger;
+import java.nio.IntBuffer;
 
 import com.metsci.glimpse.util.primitives.Ints;
 
@@ -100,6 +101,23 @@ public class SortedIntsArithmetic implements SortedInts
             dest[iDest + j] = v;
             v += vStep;
         }
+    }
+
+    @Override
+    public void copyTo( int i, IntBuffer dest, int c )
+    {
+        int v = v0 + i * vStep;
+        for ( int j = 0; j < c; j++ )
+        {
+            dest.put( v );
+            v += vStep;
+        }
+    }
+
+    @Override
+    public void copyTo( IntBuffer dest )
+    {
+        copyTo( 0, dest, n );
     }
 
     @Override

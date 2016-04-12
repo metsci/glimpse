@@ -31,6 +31,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.math.BigDecimal;
+import java.nio.DoubleBuffer;
 
 import com.metsci.glimpse.util.primitives.Doubles;
 
@@ -111,6 +112,23 @@ public class SortedDoublesArithmetic implements SortedDoubles
             dest[iDest + j] = v;
             v += vStep;
         }
+    }
+
+    @Override
+    public void copyTo( int i, DoubleBuffer dest, int c )
+    {
+        double v = v0 + i * vStep;
+        for ( int j = 0; j < c; j++ )
+        {
+            dest.put( v );
+            v += vStep;
+        }
+    }
+
+    @Override
+    public void copyTo( DoubleBuffer dest )
+    {
+        copyTo( 0, dest, n );
     }
 
     @Override

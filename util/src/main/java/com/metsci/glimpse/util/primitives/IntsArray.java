@@ -103,6 +103,18 @@ public class IntsArray implements IntsModifiable
     }
 
     @Override
+    public void copyTo( int i, IntBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( IntBuffer dest )
+    {
+        dest.put( a, 0, n );
+    }
+
+    @Override
     public int[] copyOf( int i, int c )
     {
         int[] copy = new int[c];

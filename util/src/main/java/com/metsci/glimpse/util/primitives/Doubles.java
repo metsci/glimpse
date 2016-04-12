@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.DoubleBuffer;
+
 /**
  * @author hogye
  */
@@ -42,15 +44,17 @@ public interface Doubles
      */
     int n( );
 
-    void copyTo( int i, double[] dest, int iDest, int c );
-
-    // Convenience Methods
-
     boolean isEmpty( );
 
     double first( );
 
     double last( );
+
+    void copyTo( int i, double[] dest, int iDest, int c );
+
+    void copyTo( int i, DoubleBuffer dest, int c );
+
+    void copyTo( DoubleBuffer dest );
 
     double[] copyOf( int i, int c );
 

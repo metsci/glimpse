@@ -273,44 +273,28 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient parula = fromCSV( "colormap/parula.csv" );
-
-    public static final ColorGradient hsv = fromCSV( "colormap/hsv.csv" );
-
-    public static final ColorGradient hot = fromCSV( "colormap/hot.csv" );
-
-    public static final ColorGradient cool = fromCSV( "colormap/cool.csv" );
-
-    public static final ColorGradient spring = fromCSV( "colormap/spring.csv" );
-
-    public static final ColorGradient summer = fromCSV( "colormap/summer.csv" );
-
-    public static final ColorGradient autumn = fromCSV( "colormap/autumn.csv" );
-
-    public static final ColorGradient winter = fromCSV( "colormap/winter.csv" );
-
-    public static final ColorGradient bone = fromCSV( "colormap/bone.csv" );
-
-    public static final ColorGradient copper = fromCSV( "colormap/copper.csv" );
-
-    public static final ColorGradient pink = fromCSV( "colormap/pink.csv" );
-
-    public static final ColorGradient lines = fromCSV( "colormap/lines.csv" ); //diff color??
-
-    public static final ColorGradient colorcube = fromCSV( "colormap/colorcube.csv" );
-
-    public static final ColorGradient prism = fromCSV( "colormap/prism.csv" );
-
-    public static final ColorGradient flag = fromCSV( "colormap/flag.csv" ); //diff color??
-
-    public static final ColorGradient white = fromCSV( "colormap/white.csv" );
-
-    // see: https://mycarta.wordpress.com/2013/02/21/perceptual-rainbow-palette-the-method/
-    public static final ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
-
-    // see: http://www.cs.utah.edu/~gk/papers/vis02/FaceLumin.pdf
-    // see: https://mycarta.wordpress.com/2012/12/06/the-rainbow-is-deadlong-live-the-rainbow-part-5-cie-lab-linear-l-rainbow/
-    public static final ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
+    // matplotlib colormaps: http://matplotlib.org/examples/color/colormaps_reference.html
+    public static final ColorGradient wistia = fromCSV( "colormap/matplotlib/wistia.csv" );
+    public static final ColorGradient viridis = fromCSV( "colormap/matplotlib/viridis.csv" );
+    public static final ColorGradient terrain = fromCSV( "colormap/matplotlib/terrain.csv" );
+    public static final ColorGradient summer = fromCSV( "colormap/matplotlib/summer.csv" );
+    public static final ColorGradient spring = fromCSV( "colormap/matplotlib/spring.csv" );
+    public static final ColorGradient spectral = fromCSV( "colormap/matplotlib/spectral.csv" );
+    public static final ColorGradient seismic = fromCSV( "colormap/matplotlib/seismic.csv" );
+    public static final ColorGradient rainbow = fromCSV( "colormap/matplotlib/rainbow.csv" );
+    public static final ColorGradient prism = fromCSV( "colormap/matplotlib/prism.csv" );
+    public static final ColorGradient plasma = fromCSV( "colormap/matplotlib/plasma.csv" );
+    public static final ColorGradient oranges = fromCSV( "colormap/matplotlib/oranges.csv" );
+    public static final ColorGradient ocean = fromCSV( "colormap/matplotlib/ocean.csv" );
+    public static final ColorGradient magma = fromCSV( "colormap/matplotlib/magma.csv" );
+    public static final ColorGradient inferno = fromCSV( "colormap/matplotlib/inferno.csv" );
+    public static final ColorGradient hot = fromCSV( "colormap/matplotlib/hot.csv" );
+    public static final ColorGradient flag = fromCSV( "colormap/matplotlib/flag.csv" );
+    public static final ColorGradient copper = fromCSV( "colormap/matplotlib/copper.csv" );
+    public static final ColorGradient coolwarm = fromCSV( "colormap/matplotlib/coolwarm.csv" );
+    public static final ColorGradient cool = fromCSV( "colormap/matplotlib/cool.csv" );
+    public static final ColorGradient autumn = fromCSV( "colormap/matplotlib/autumn.csv" );
+    public static final ColorGradient accent = fromCSV( "colormap/matplotlib/accent.csv" );
 
     public static ColorGradient nColorFade( final List<float[]> colors )
     {

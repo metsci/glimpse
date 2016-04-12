@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.LongBuffer;
+
 /**
  * @author hogye
  */
@@ -42,15 +44,17 @@ public interface Longs
      */
     int n( );
 
-    void copyTo( int i, long[] dest, int iDest, int c );
-
-    // Convenience Methods
-
     boolean isEmpty( );
 
     long first( );
 
     long last( );
+
+    void copyTo( int i, long[] dest, int iDest, int c );
+
+    void copyTo( int i, LongBuffer dest, int c );
+
+    void copyTo( LongBuffer dest );
 
     long[] copyOf( int i, int c );
 

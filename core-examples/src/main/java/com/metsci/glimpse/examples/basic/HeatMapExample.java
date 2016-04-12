@@ -148,7 +148,7 @@ public class HeatMapExample implements GlimpseLayoutProvider
     {
         // setup the color map for the painter
         ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
+        colors.setColorGradient( ColorGradients.accent );
 
         return colors;
     }
