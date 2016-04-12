@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -39,7 +38,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  *
@@ -66,18 +64,13 @@ import javax.xml.bind.annotation.XmlType;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Info", propOrder = {
-    "name",
-    "description",
-    "url"
-})
-@XmlSeeAlso({
-    ConceptInfo.class
-})
-public class Info {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Info", propOrder = { "name", "description", "url" } )
+@XmlSeeAlso( { ConceptInfo.class } )
+public class Info
+{
 
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected Values name;
     protected Values description;
     protected Values url;
@@ -90,7 +83,8 @@ public class Info {
      *     {@link Values }
      *
      */
-    public Values getName() {
+    public Values getName( )
+    {
         return name;
     }
 
@@ -102,7 +96,8 @@ public class Info {
      *     {@link Values }
      *
      */
-    public void setName(Values value) {
+    public void setName( Values value )
+    {
         this.name = value;
     }
 
@@ -114,7 +109,8 @@ public class Info {
      *     {@link Values }
      *
      */
-    public Values getDescription() {
+    public Values getDescription( )
+    {
         return description;
     }
 
@@ -126,7 +122,8 @@ public class Info {
      *     {@link Values }
      *
      */
-    public void setDescription(Values value) {
+    public void setDescription( Values value )
+    {
         this.description = value;
     }
 
@@ -138,7 +135,8 @@ public class Info {
      *     {@link Values }
      *
      */
-    public Values getUrl() {
+    public Values getUrl( )
+    {
         return url;
     }
 
@@ -150,10 +148,10 @@ public class Info {
      *     {@link Values }
      *
      */
-    public void setUrl(Values value) {
+    public void setUrl( Values value )
+    {
         this.url = value;
     }
-
 
     public String getNameEnglish( )
     {
@@ -178,6 +176,5 @@ public class Info {
 
         return values.getValueEnglish( );
     }
-
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,28 +40,27 @@ public class LandSegment
     public boolean isFillable;
     public final List<LandVertex> ghostVertices;
 
-
-    public static LandSegment newFillableSegment(List<LandVertex> vertices)
+    public static LandSegment newFillableSegment( List<LandVertex> vertices )
     {
-        return new LandSegment(vertices, true, new ArrayList<LandVertex>());
+        return new LandSegment( vertices, true, new ArrayList<LandVertex>( ) );
     }
 
-    public static LandSegment newFillableSegment(List<LandVertex> vertices, List<LandVertex> ghostVertices)
+    public static LandSegment newFillableSegment( List<LandVertex> vertices, List<LandVertex> ghostVertices )
     {
-        return new LandSegment(vertices, true, ghostVertices);
+        return new LandSegment( vertices, true, ghostVertices );
     }
 
-    public static LandSegment newUnfillableSegment(List<LandVertex> vertices)
+    public static LandSegment newUnfillableSegment( List<LandVertex> vertices )
     {
-        return new LandSegment(vertices, false, new ArrayList<LandVertex>());
+        return new LandSegment( vertices, false, new ArrayList<LandVertex>( ) );
     }
 
-    private LandSegment(List<LandVertex> vertices, boolean isFillable, List<LandVertex> ghostVertices)
+    private LandSegment( List<LandVertex> vertices, boolean isFillable, List<LandVertex> ghostVertices )
     {
-        this.vertices = Collections.unmodifiableList(new ArrayList<LandVertex>(vertices));
+        this.vertices = Collections.unmodifiableList( new ArrayList<LandVertex>( vertices ) );
 
         this.isFillable = isFillable;
-        this.ghostVertices = Collections.unmodifiableList(new ArrayList<LandVertex>(ghostVertices));
+        this.ghostVertices = Collections.unmodifiableList( new ArrayList<LandVertex>( ghostVertices ) );
     }
 
 }

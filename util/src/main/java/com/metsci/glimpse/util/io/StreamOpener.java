@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,53 +37,57 @@ import java.io.InputStream;
 public interface StreamOpener
 {
 
-    InputStream openForRead(String location) throws IOException;
+    InputStream openForRead( String location ) throws IOException;
 
-
-    public static final StreamOpener fileOpener = new StreamOpener()
+    public static final StreamOpener fileOpener = new StreamOpener( )
     {
-        public InputStream openForRead(String location) throws IOException
+        public InputStream openForRead( String location ) throws IOException
         {
-            return new FileInputStream(location);
+            return new FileInputStream( location );
         }
     };
 
-
-    public static final StreamOpener resourceOpener = new StreamOpener()
+    public static final StreamOpener resourceOpener = new StreamOpener( )
     {
-        public InputStream openForRead(String location) throws IOException
+        public InputStream openForRead( String location ) throws IOException
         {
-            InputStream stream = getClass().getClassLoader().getResourceAsStream(location);
-            if (stream == null) throw new FileNotFoundException("Resource not found: " + location);
+            InputStream stream = getClass( ).getClassLoader( ).getResourceAsStream( location );
+            if ( stream == null ) throw new FileNotFoundException( "Resource not found: " + location );
             return stream;
         }
     };
 
-
-    public static final StreamOpener fileThenResourceOpener = new StreamOpener()
+    public static final StreamOpener fileThenResourceOpener = new StreamOpener( )
     {
-        public InputStream openForRead(String location) throws IOException
+        public InputStream openForRead( String location ) throws IOException
         {
             try
             {
-                return new FileInputStream(location);
+                return new FileInputStream( location );
             }
-            catch (FileNotFoundException e) { }
-            catch (SecurityException e) { }
+            catch ( FileNotFoundException e )
+            {
+            }
+            catch ( SecurityException e )
+            {
+            }
 
             try
             {
-                InputStream stream = getClass().getClassLoader().getResourceAsStream(location);
-                if (stream == null) throw new FileNotFoundException();
+                InputStream stream = getClass( ).getClassLoader( ).getResourceAsStream( location );
+                if ( stream == null ) throw new FileNotFoundException( );
                 return stream;
             }
-            catch (FileNotFoundException e) { }
-            catch (SecurityException e) { }
+            catch ( FileNotFoundException e )
+            {
+            }
+            catch ( SecurityException e )
+            {
+            }
 
-            throw new FileNotFoundException("File is not available as a local file or as a classpath resource: " + location);
+            throw new FileNotFoundException( "File is not available as a local file or as a classpath resource: " + location );
         }
     };
-
 
     // Here for compatibility; will soon be deprecated
 

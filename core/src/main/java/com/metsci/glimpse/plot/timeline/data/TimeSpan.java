@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,13 @@ public class TimeSpan
 {
     TimeStamp startTime;
     TimeStamp endTime;
-    
+
     public TimeSpan( TimeStamp startTime, TimeStamp endTime )
     {
         this.startTime = startTime;
         this.endTime = endTime;
     }
-    
+
     public double getDuration( )
     {
         return endTime.durationAfter( startTime );
@@ -62,5 +62,16 @@ public class TimeSpan
     public void setEndTime( TimeStamp endTime )
     {
         this.endTime = endTime;
+    }
+
+    public boolean contains( TimeStamp time )
+    {
+        return time.isAfterOrEquals( startTime ) && time.isBeforeOrEquals( endTime );
+    }
+
+    @Override
+    public String toString( )
+    {
+        return String.format( "[%s, %s]", startTime, endTime );
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,9 @@ import com.metsci.glimpse.util.math.LinearInterpolator;
  */
 public class FastErfInverse
 {
-    private static final FastErfInverse instance = new FastErfInverse();
+    private static final FastErfInverse instance = new FastErfInverse( );
 
-    public static final FastErfInverse getInstance()
+    public static final FastErfInverse getInstance( )
     {
         return instance;
     }
@@ -55,7 +55,7 @@ public class FastErfInverse
 
     private static final LinearInterpolator INTERPOLATOR = LinearInterpolator.createFromArrays( XS, YS );
 
-    private FastErfInverse()
+    private FastErfInverse( )
     {
     }
 

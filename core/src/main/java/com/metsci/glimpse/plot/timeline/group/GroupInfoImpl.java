@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -33,11 +38,6 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.PlotInfoWrapper;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
 {
@@ -59,11 +59,16 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         this.labelPainter = new GroupLabelPainter( "" );
         this.info.getLayout( ).addPainter( this.labelPainter );
         this.info.setSize( 22 );
-        this.expanded = true;
         this.collapsible = true;
+        this.expanded = true;
 
         this.children = new LinkedHashSet<PlotInfo>( );
         this.children.addAll( subplots );
+
+        for ( PlotInfo info : subplots )
+        {
+            info.setParent( this );
+        }
 
         GlimpseLayout layout = this.info.getLayout( );
         layout.setEventConsumer( false );
@@ -96,17 +101,18 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
                 if ( click && collapsible )
                 {
                     int x = event.getScreenPixelsX( );
-    
+
                     // collapse/expand via clicks on arrow button only
                     //if ( x < labelPainter.getArrowSize( ) + labelPainter.getArrowSpacing( ) * 2 )
-    
+
                     // collapse/expand via clicks on button or label
                     if ( x < plot.getLabelSize( ) )
                     {
-                        setExpanded( !expanded );
+                        setExpanded( !isExpanded( ) );
                         event.setHandled( true );
+                        plot.validate( );
                     }
-                    
+
                     click = false;
                 }
             }
@@ -162,7 +168,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     @Override
     public boolean isExpanded( )
     {
-        return this.expanded;
+        return super.isExpanded( ) ? this.expanded : false;
     }
 
     @Override
@@ -170,8 +176,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     {
         this.expanded = expanded;
         this.labelPainter.setExpanded( expanded );
-        this.setVisible0( this, expanded );
-        this.plot.validateLayout( );
+        if ( this.plot.isAutoValidate( ) ) this.plot.validateLayout( );
     }
 
     @Override
@@ -186,27 +191,10 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         return this.collapsible;
     }
 
-    protected void setVisible0( GroupInfo parent, boolean visible )
-    {
-        for ( PlotInfo child : parent.getChildPlots( ) )
-        {
-            child.setVisible( visible );
-
-            if ( child instanceof GroupInfo )
-            {
-                GroupInfo childGroup = ( GroupInfo ) child;
-                if ( childGroup.isExpanded( ) )
-                {
-                    setVisible0( childGroup, visible );
-                }
-            }
-        }
-    }
-
     @Override
     public void addChildPlot( PlotInfo childPlot )
     {
-        childPlot.setVisible( this.expanded );
+        childPlot.setParent( this );
         this.children.add( childPlot );
         if ( this.plot.isAutoValidate( ) ) this.plot.validateLayout( );
     }
@@ -214,6 +202,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
     @Override
     public void removeChildPlot( PlotInfo childPlot )
     {
+        childPlot.setParent( null );
         this.children.remove( childPlot );
         if ( this.plot.isAutoValidate( ) ) this.plot.validateLayout( );
     }

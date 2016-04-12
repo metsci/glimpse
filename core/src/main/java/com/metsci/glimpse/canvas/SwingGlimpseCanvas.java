@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 /**
  * A Swing GlimpseCanvas implementation which draws to a {@link javax.media.opengl.awt.GLCanvas}. This
  * Canvas implementation is not as well supported as the newer JOGL {@link com.jogamp.newt.awt.NewtCanvasAWT}.
- * For this reason, {@link NewtSwingGlimpseCanvas} should generally be prefered over this class.
+ * For this reason, {@link NewtSwingGlimpseCanvas} should generally be preferred over this class.
  * 
  * @author ulman
  * @deprecated see {@link NewtSwingGlimpseCanvas}
@@ -432,14 +432,14 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -452,16 +452,16 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -474,5 +474,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return this.glCanvas.getCurrentSurfaceScale( new int[2] );
     }
 }

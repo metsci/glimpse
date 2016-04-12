@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,29 +57,29 @@ public class TimelineInfo extends PlotInfoWrapper
     protected BorderPainter borderPainter;
 
     protected GlimpseAxisLayout1D timeLayout;
-    
+
     protected StackedTimePlot2D plot;
 
     public TimelineInfo( StackedTimePlot2D plot, PlotInfo info )
     {
         super( info );
-        
+
         this.plot = plot;
-        
+
         this.initialize( );
     }
-    
+
     public void setEpoch( Epoch epoch )
     {
         this.timeAxisPainter.setEpoch( epoch );
     }
-    
+
     public void setTimeZone( TimeZone timeZone )
     {
         this.timeAxisPainter.getLabelHandler( ).setTimeZone( timeZone );
         this.timeZonePainter.setText( timeZone.getID( ) );
     }
-    
+
     public TimeZone getTimeZone( )
     {
         return this.timeAxisPainter.getLabelHandler( ).getTimeZone( );
@@ -104,7 +104,7 @@ public class TimelineInfo extends PlotInfoWrapper
     {
         return borderPainter;
     }
-    
+
     /**
      * The layout on which the time axis markings are painted. Painters may be added
      * to this layout to draw additional decorations onto the time axis.
@@ -113,14 +113,14 @@ public class TimelineInfo extends PlotInfoWrapper
     {
         return this.timeLayout;
     }
-    
+
     public void setTimeAxisPainter( TimeAxisPainter painter )
     {
         this.timeAxisDelegate.removePainter( this.timeAxisPainter );
         this.timeAxisPainter = painter;
         this.timeAxisDelegate.addPainter( this.timeAxisPainter );
     }
-    
+
     public void setAxisColor( float[] rgba )
     {
         this.timeAxisPainter.setTextColor( rgba );
@@ -142,7 +142,7 @@ public class TimelineInfo extends PlotInfoWrapper
         this.timeAxisPainter.setCurrentTimeTextColor( rgba );
         this.timeAxisPainter.setCurrentTimeTickColor( rgba );
     }
-    
+
     protected void initialize( )
     {
         info.setPlotSpacing( 0 );
@@ -191,7 +191,7 @@ public class TimelineInfo extends PlotInfoWrapper
         timeLayout.addPainter( timeZonePainter );
         timeLayout.addPainter( borderPainter );
     }
-    
+
     protected TimeAxisPainter createTimeAxisPainter( )
     {
         TimeAxisPainter painter;
@@ -231,11 +231,11 @@ public class TimelineInfo extends PlotInfoWrapper
         // push the timeline plot over so that it lines up with the plot labels
         if ( plot.isTimeAxisHorizontal( ) )
         {
-            timeLayout.setLayoutData( String.format( "push x, grow x, gapleft %d!", plot.getLabelSize( ) ) );
+            timeLayout.setLayoutData( String.format( "push x, grow x, gapleft %d!", plot.getOverlayLayoutOffsetX( ) ) );
         }
         else
         {
-            timeLayout.setLayoutData( String.format( "push y, grow y, gaptop %d!", plot.getLabelSize( ) ) );
+            timeLayout.setLayoutData( String.format( "push y, grow y, gaptop %d!", plot.getOverlayLayoutOffsetY2( ) ) );
         }
     }
 }

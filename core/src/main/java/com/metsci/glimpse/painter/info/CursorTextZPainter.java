@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
 package com.metsci.glimpse.painter.info;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 
 /**

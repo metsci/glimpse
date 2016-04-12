@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     @Override
     protected void setBounds( TimePlotInfo chart )
     {
-        Axis1D axis = chart.getLayout( ).getAxis( ).getAxisX( );
+        Axis1D axis = chart.getOrthogonalAxis( );
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
     }

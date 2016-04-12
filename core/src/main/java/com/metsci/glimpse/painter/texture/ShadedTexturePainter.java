@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,16 @@
  */
 package com.metsci.glimpse.painter.texture;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
+import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -56,15 +59,15 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     protected final ReentrantLock lock = new ReentrantLock( );
 
     protected Set<TextureUnit<Texture>> nonDrawableTextures;
-    protected Set<TextureUnit<DrawableTexture>> drawableTextures;
+    protected Map<TextureUnit<DrawableTexture>, Set<TextureUnit<Texture>>> drawableTextures;
 
     // the shader pipeline
     protected Pipeline pipeline;
 
     public ShadedTexturePainter( )
     {
-        this.nonDrawableTextures = new HashSet<TextureUnit<Texture>>( );
-        this.drawableTextures = new HashSet<TextureUnit<DrawableTexture>>( );
+        this.nonDrawableTextures = new HashSet<>( );
+        this.drawableTextures = new HashMap<>( );
     }
 
     public void setPipeline( Pipeline pipeline )
@@ -90,7 +93,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
         lock.lock( );
         try
         {
-            this.drawableTextures.add( new TextureUnit<DrawableTexture>( textureUnit, texture ) );
+            this.drawableTextures.put( new TextureUnit<>( textureUnit, texture ), Sets.<TextureUnit<Texture>> newHashSet( ) );
         }
         finally
         {
@@ -117,6 +120,34 @@ public class ShadedTexturePainter extends GlimpsePainter2D
         try
         {
             this.drawableTextures.clear( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void addNonDrawableTexture( Texture drawableTexture, Texture nonDrawableTexture, int textureUnit )
+    {
+        lock.lock( );
+        try
+        {
+            Set<TextureUnit<Texture>> nonDrawableTextures = this.drawableTextures.get( new TextureUnit<>( drawableTexture ) );
+            nonDrawableTextures.add( new TextureUnit<>( textureUnit, nonDrawableTexture ) );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+
+    public void removeNonDrawableTexture( Texture drawableTexture, Texture nonDrawableTexture )
+    {
+        lock.lock( );
+        try
+        {
+            Set<TextureUnit<Texture>> nonDrawableTextures = this.drawableTextures.get( new TextureUnit<>( drawableTexture ) );
+            nonDrawableTextures.remove( new TextureUnit<>( nonDrawableTexture ) );
         }
         finally
         {
@@ -171,7 +202,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         lock.lock( );
         try
@@ -183,7 +214,7 @@ public class ShadedTexturePainter extends GlimpsePainter2D
             if ( pipeline != null ) pipeline.beginUse( gl );
             try
             {
-                for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures )
+                for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures.keySet( ) )
                 {
                     draw( textureUnit, gl );
                 }
@@ -201,6 +232,8 @@ public class ShadedTexturePainter extends GlimpsePainter2D
 
     protected void draw( TextureUnit<DrawableTexture> textureUnit, GL2 gl )
     {
+        Set<TextureUnit<Texture>> nonDrawableTextures = Sets.union( this.nonDrawableTextures, this.drawableTextures.get( textureUnit ) );
+
         textureUnit.texture.draw( gl, textureUnit.textureUnit, nonDrawableTextures );
     }
 

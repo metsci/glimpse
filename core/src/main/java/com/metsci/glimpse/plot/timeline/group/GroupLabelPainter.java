@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
-import static javax.media.opengl.fixedfunc.GLMatrixFunc.*;
+import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
+import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
 
 import java.awt.geom.Rectangle2D;
 
@@ -142,7 +143,7 @@ public class GroupLabelPainter extends GlimpsePainterImpl
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
 
         gl.glMatrixMode( GL_PROJECTION );
         gl.glLoadIdentity( );
@@ -175,6 +176,9 @@ public class GroupLabelPainter extends GlimpsePainterImpl
 
         if ( showArrow )
         {
+            gl.glLineWidth( 1.0f );
+            GlimpseColor.glColor( gl, lineColor );
+
             float halfSize = buttonSize / 2.0f;
             float centerX = halfSize + padding;
             float centerY = height / 2.0f;

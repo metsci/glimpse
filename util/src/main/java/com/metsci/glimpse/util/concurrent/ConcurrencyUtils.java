@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.concurrent;
 
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ConcurrencyUtils
@@ -37,6 +38,19 @@ public class ConcurrencyUtils
         {
             throw new RuntimeException( "Lock is not held by current thread: thread-name = " + Thread.currentThread( ).getName( ) );
         }
+    }
+
+    public static ThreadFactory newDaemonThreadFactory( final ThreadFactory baseThreadFactory )
+    {
+        return new ThreadFactory( )
+        {
+            public Thread newThread( Runnable r )
+            {
+                Thread thread = baseThreadFactory.newThread( r );
+                thread.setDaemon( true );
+                return thread;
+            }
+        };
     }
 
 }

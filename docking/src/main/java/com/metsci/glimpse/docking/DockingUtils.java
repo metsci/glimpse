@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
+import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
+import static java.util.logging.Level.WARNING;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -34,9 +37,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -48,8 +54,11 @@ import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import com.metsci.glimpse.docking.xml.GroupArrangement;
+
 public class DockingUtils
 {
+    private static final Logger logger = Logger.getLogger( DockingUtils.class.getName( ) );
 
     public static void requireSwingThread( )
     {
@@ -137,8 +146,13 @@ public class DockingUtils
                 } );
             }
 
-            public void popupMenuWillBecomeVisible( PopupMenuEvent ev ) { }
-            public void popupMenuCanceled( PopupMenuEvent ev ) { }
+            public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
+            {
+            }
+
+            public void popupMenuCanceled( PopupMenuEvent ev )
+            {
+            }
         } );
 
         return popup;
@@ -219,6 +233,62 @@ public class DockingUtils
         if ( !appDir.canWrite( ) ) throw new RuntimeException( "Do not have write permission on app dir: " + appDir.getAbsolutePath( ) );
 
         return appDir;
+    }
+
+    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
+    {
+        try
+        {
+            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
+            writeArrangementXml( groupArr, arrFile );
+        }
+        catch ( Exception e )
+        {
+            logger.log( WARNING, "Failed to write docking arrangement to file: app-name = " + appName, e );
+        }
+    }
+
+    public static GroupArrangement loadDockingArrangement( String appName, URL fallback )
+    {
+        try
+        {
+            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
+            if ( arrFile.exists( ) )
+            {
+                return readArrangementXml( arrFile );
+            }
+        }
+        catch ( Exception e )
+        {
+            logger.log( WARNING, "Failed to load docking arrangement from file: app-name = " + appName, e );
+        }
+
+        InputStream fallbackStream = null;
+        try
+        {
+            fallbackStream = fallback.openStream( );
+            return readArrangementXml( fallbackStream );
+        }
+        catch ( Exception e )
+        {
+            logger.log( WARNING, "Failed to load default docking arrangement from resource: resource = " + fallback.toString( ), e );
+        }
+        finally
+        {
+            if ( fallbackStream != null )
+            {
+                try
+                {
+                    fallbackStream.close( );
+                }
+                catch ( IOException e )
+                {
+                    logger.log( WARNING, "Failed to close default docking arrangement resource: resource = " + fallback.toString( ), e );
+                }
+            }
+        }
+
+        return null;
     }
 
     public static <C extends Component> C findLargestComponent( Collection<C> components )

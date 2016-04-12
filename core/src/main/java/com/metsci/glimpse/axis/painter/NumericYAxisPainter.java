@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.*;
+import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
@@ -56,8 +56,8 @@ public class NumericYAxisPainter extends NumericAxisPainter
     {
         updateTextRenderer( );
         if ( textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -131,38 +131,41 @@ public class NumericYAxisPainter extends NumericAxisPainter
             gl.glEnd( );
         }
 
-        // Tick labels
-        GlimpseColor.setColor( textRenderer, tickLabelColor );
-        textRenderer.beginRendering( width, height );
-        try
+        if ( showTickLabels )
         {
-            for ( int i = min + 1; i < max; i++ )
+            // Tick labels
+            GlimpseColor.setColor( textRenderer, tickLabelColor );
+            textRenderer.beginRendering( width, height );
+            try
             {
-                double yTick = yTicks[i];
-                String yLabel = yLabels[i];
-                Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
-                int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getWidth( ) );
-                int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) - 0.35 * tickTextBounds.getHeight( ) );
-
-                if ( keepLabelsForExtremaFullyVisible )
+                for ( int i = min + 1; i < max; i++ )
                 {
-                    if ( jTickText < 0 )
+                    double yTick = yTicks[i];
+                    String yLabel = yLabels[i];
+                    Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
+                    int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getWidth( ) );
+                    int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) - 0.35 * tickTextBounds.getHeight( ) );
+
+                    if ( keepLabelsForExtremaFullyVisible )
                     {
-                        jTickText = 0;
+                        if ( jTickText < 0 )
+                        {
+                            jTickText = 0;
+                        }
+
+                        if ( jTickText + tickTextBounds.getHeight( ) > height )
+                        {
+                            jTickText = height - ( int ) tickTextBounds.getHeight( );
+                        }
                     }
 
-                    if ( jTickText + tickTextBounds.getHeight( ) > height )
-                    {
-                        jTickText = height - ( int ) tickTextBounds.getHeight( );
-                    }
+                    textRenderer.draw( yLabel, iTickText, jTickText );
                 }
-
-                textRenderer.draw( yLabel, iTickText, jTickText );
             }
-        }
-        finally
-        {
-            textRenderer.endRendering( );
+            finally
+            {
+                textRenderer.endRendering( );
+            }
         }
     }
 

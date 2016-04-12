@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,7 +43,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-
 
 /**
  *
@@ -81,23 +80,19 @@ import javax.xml.namespace.QName;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Attribute", propOrder = {
-    "info",
-    "type",
-    "value",
-    "conceptValue"
-})
-public class Attribute {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Attribute", propOrder = { "info", "type", "value", "conceptValue" } )
+public class Attribute
+{
 
     protected Info info;
     protected Attribute.Type type;
     protected List<Value> value;
     protected Attribute.ConceptValue conceptValue;
-    @XmlAttribute(name = "id")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "id" )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     protected String id;
-    @XmlAttribute(name = "concept")
+    @XmlAttribute( name = "concept" )
     protected QName conceptRef;
 
     /**
@@ -108,7 +103,8 @@ public class Attribute {
      *     {@link Info }
      *
      */
-    public Info getInfo() {
+    public Info getInfo( )
+    {
         return info;
     }
 
@@ -120,7 +116,8 @@ public class Attribute {
      *     {@link Info }
      *
      */
-    public void setInfo(Info value) {
+    public void setInfo( Info value )
+    {
         this.info = value;
     }
 
@@ -132,7 +129,8 @@ public class Attribute {
      *     {@link Attribute.Type }
      *
      */
-    public Attribute.Type getType() {
+    public Attribute.Type getType( )
+    {
         return type;
     }
 
@@ -144,7 +142,8 @@ public class Attribute {
      *     {@link Attribute.Type }
      *
      */
-    public void setType(Attribute.Type value) {
+    public void setType( Attribute.Type value )
+    {
         this.type = value;
     }
 
@@ -170,9 +169,11 @@ public class Attribute {
      *
      *
      */
-    public List<Value> getValue() {
-        if (value == null) {
-            value = new ArrayList<Value>();
+    public List<Value> getValue( )
+    {
+        if ( value == null )
+        {
+            value = new ArrayList<Value>( );
         }
         return this.value;
     }
@@ -185,7 +186,8 @@ public class Attribute {
      *     {@link Attribute.ConceptValue }
      *
      */
-    public Attribute.ConceptValue getConceptValue() {
+    public Attribute.ConceptValue getConceptValue( )
+    {
         return conceptValue;
     }
 
@@ -197,7 +199,8 @@ public class Attribute {
      *     {@link Attribute.ConceptValue }
      *
      */
-    public void setConceptValue(Attribute.ConceptValue value) {
+    public void setConceptValue( Attribute.ConceptValue value )
+    {
         this.conceptValue = value;
     }
 
@@ -209,7 +212,8 @@ public class Attribute {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -221,7 +225,8 @@ public class Attribute {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
 
@@ -233,7 +238,8 @@ public class Attribute {
      *     {@link QName }
      *
      */
-    public QName getConceptRef() {
+    public QName getConceptRef( )
+    {
         return conceptRef;
     }
 
@@ -245,10 +251,10 @@ public class Attribute {
      *     {@link QName }
      *
      */
-    public void setConceptRef(QName value) {
+    public void setConceptRef( QName value )
+    {
         this.conceptRef = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -267,11 +273,12 @@ public class Attribute {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class ConceptValue {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class ConceptValue
+    {
 
-        @XmlAttribute(name = "concept", required = true)
+        @XmlAttribute( name = "concept", required = true )
         protected QName concept;
 
         /**
@@ -282,7 +289,8 @@ public class Attribute {
          *     {@link QName }
          *
          */
-        public QName getConcept() {
+        public QName getConcept( )
+        {
             return concept;
         }
 
@@ -294,12 +302,12 @@ public class Attribute {
          *     {@link QName }
          *
          */
-        public void setConcept(QName value) {
+        public void setConcept( QName value )
+        {
             this.concept = value;
         }
 
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -319,13 +327,14 @@ public class Attribute {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class Type {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class Type
+    {
 
-        @XmlAttribute(name = "ref", required = true)
+        @XmlAttribute( name = "ref", required = true )
         protected DataType ref;
-        @XmlAttribute(name = "format")
+        @XmlAttribute( name = "format" )
         protected String format;
 
         /**
@@ -336,7 +345,8 @@ public class Attribute {
          *     {@link DataType }
          *
          */
-        public DataType getRef() {
+        public DataType getRef( )
+        {
             return ref;
         }
 
@@ -348,7 +358,8 @@ public class Attribute {
          *     {@link DataType }
          *
          */
-        public void setRef(DataType value) {
+        public void setRef( DataType value )
+        {
             this.ref = value;
         }
 
@@ -360,7 +371,8 @@ public class Attribute {
          *     {@link String }
          *
          */
-        public String getFormat() {
+        public String getFormat( )
+        {
             return format;
         }
 
@@ -372,12 +384,12 @@ public class Attribute {
          *     {@link String }
          *
          */
-        public void setFormat(String value) {
+        public void setFormat( String value )
+        {
             this.format = value;
         }
 
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected Concept parentConcept;
@@ -510,8 +522,7 @@ public class Attribute {
         {
             String englishName = info.getNameEnglish( );
 
-            if ( englishName != null )
-                return englishName;
+            if ( englishName != null ) return englishName;
         }
 
         // if no name is provided use the id
@@ -522,6 +533,5 @@ public class Attribute {
     {
         return com.metsci.glimpse.dspl.util.DsplHelper.getValueEnglish( getValue( ) );
     }
-
 
 }

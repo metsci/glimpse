@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,13 +52,13 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
 
         // hide the cursor crosshairs
         plot.getCrosshairPainter( ).setVisible( false );
-        
+
         // set the x and y axis bounds
         plot.getAxis( ).set( -1, 2, -1, 2 );
 
         // create a painter to display dynamically colored lines
         final DynamicLineSetPainter painter = new DynamicLineSetPainter( );
-        
+
         // tell the painter to display dotted lines with the provided stipple pattern
         painter.setDotted( 2, ( short ) 0xAAAA );
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ import com.jogamp.opengl.util.texture.TextureCoords;
 public class ImageData
 {
     private ImageDataInternal delegate;
-    
+
     public ImageData( ImageDataInternal delegate )
     {
         this.delegate = delegate;
@@ -47,7 +47,7 @@ public class ImageData
     {
         return delegate.getId( );
     }
-    
+
     public final int getBufferX( )
     {
         return delegate.getBufferX( );
@@ -57,7 +57,7 @@ public class ImageData
     {
         return delegate.getBufferY( );
     }
-    
+
     public final int getLocationX( )
     {
         return delegate.getLocationX( );
@@ -77,12 +77,12 @@ public class ImageData
     {
         return delegate.getCenterY( );
     }
-    
+
     public final int getBufferedWidth( )
     {
         return delegate.getBufferedWidth( );
     }
-    
+
     public final int getBufferedHeight( )
     {
         return delegate.getBufferedHeight( );
@@ -97,7 +97,7 @@ public class ImageData
     {
         return delegate.getHeight( );
     }
-    
+
     public final TextureCoords getTextureCoordinates( )
     {
         return delegate.getTextureCoordinates( );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,15 @@
  */
 package com.metsci.glimpse.plot.timeline.animate;
 
-import static com.metsci.glimpse.plot.timeline.animate.DragUtils.findParent;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getBottom;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getCoordinate;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getDragInfoList;
-import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getIndex;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSize;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSortedDescendants;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getSpacerSize;
 import static com.metsci.glimpse.plot.timeline.animate.DragUtils.getTop;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
@@ -147,7 +147,7 @@ public class DragManager
                     {
                         dragCondition.await( );
                     }
-                    
+
                     updateGrowingShrinking( );
                     plot.validate( );
                 }
@@ -160,7 +160,7 @@ public class DragManager
                 }
             }
         }, TICK_TIME_MILLIS, TICK_TIME_MILLIS, TimeUnit.MILLISECONDS );
-        
+
         // create a listener which is notified when MouseEvents happen inside
         // any of the StackedPlot2D's PlotInfo
         this.plot.addPlotMouseListener( new PlotMouseAdapter( )
@@ -191,7 +191,7 @@ public class DragManager
 
             @Override
             public void mouseMoved( final GlimpseMouseEvent event, final PlotInfo info, final PlotLocation location )
-            {                
+            {
                 executor.execute( new Runnable( )
                 {
                     @Override
@@ -203,7 +203,7 @@ public class DragManager
                             boolean isButton1 = event.isButtonDown( MouseButton.Button1 );
                             boolean isGroup = info instanceof GroupInfo;
                             boolean isLabel = location == PlotLocation.Label;
-    
+
                             if ( !dragHappening && isButton1 && ( isGroup || isLabel ) )
                             {
                                 startDrag( event, info, location );
@@ -265,14 +265,14 @@ public class DragManager
                                     // we checked outside of asyncExec
                                     if ( dragHappening )
                                     {
-        
+
                                         // record the position of the click relative to the StackedPlot2D
                                         prevDragPosition = dragPosition;
                                         dragPosition = getDragPosition( event );
-        
+
                                         // check if the growing PlotInfo should be changed
                                         chooseNewGrowing( event );
-        
+
                                         // update layout data for dragged plots and animate
                                         updateLayoutData( );
                                         plot.validate( );
@@ -304,61 +304,11 @@ public class DragManager
         return this.allowNestedGroups;
     }
 
-    //XXX I don't think this will work under all circumstances
-    //XXX particularly with groups -- there's no way to say
-    //XXX "I don't want this in a group, I want it on the same level
-    //XXX as the group -- or on the top level"
-    //XXX
-    //XXX perhaps the user must hold down a modifier key, or drag
-    //XXX over the group name
     protected void applyDrag( GlimpseMouseEvent event )
     {
-        List<PlotInfo> list = normalizeOrder( );
+        normalizeOrder( );
 
         DragInfo topDrag = dragging.get( 0 );
-
-        // if the PlotInfo being dragged was in a group, remove it from the group
-        GroupInfo oldParent = findParent( list, topDrag.info );
-        if ( oldParent != null )
-        {
-            oldParent.removeChildPlot( topDrag.info );
-        }
-
-        // find the PlotInfo which should sit directly above topDrag
-        // once the drag is complete
-        PlotInfo newPosition = null;
-        if ( growing.top )
-        {
-            int index = getIndex( list, growing.info );
-            if ( index > 0 )
-            {
-                newPosition = list.get( index - 1 );
-            }
-        }
-        else
-        {
-            newPosition = growing.info;
-        }
-
-        // if we're dragging a group, and nested groups are not allowed
-        // then the group we're dragging should be placed on the top level
-        // (i.e. it should have no parent, so newParent == null)
-        GroupInfo newParent = null;
-        if ( topDrag.info instanceof GroupInfo && !allowNestedGroups )
-        {
-            newParent = null;
-        }
-        else if ( newPosition instanceof GroupInfo )
-        {
-            newParent = ( GroupInfo ) newPosition;
-        }
-        else
-        {
-            newParent = findParent( list, newPosition );
-        }
-
-        // if the plot was dragged into a new group, add it to the group
-        if ( newParent != null ) newParent.addChildPlot( topDrag.info );
 
         // adjust the dragged plot's ordering constant
         if ( growing.top )
@@ -506,7 +456,7 @@ public class DragManager
         initializeGrowingShrinking( dragging.get( 0 ) );
 
         dragCondition.signalAll( );
-        
+
         updateLayoutData( );
         updateGrowingShrinking( );
 
@@ -545,11 +495,11 @@ public class DragManager
 
             if ( plot.getOrientation( ) == Orientation.VERTICAL )
             {
-                drag.info.setLayoutData( String.format( "pos container.x+%3$d %d container.x2-%3$d %d", bottom, top, border ) );
+                drag.info.setLayoutData( String.format( "pos container.x+%d %d container.x2-%d %d", drag.indent + border, bottom, border, top ) );
             }
             else
             {
-                drag.info.setLayoutData( String.format( "pos %d container.y+%3$d %d container.y2-%3$d", bottom, top, border ) );
+                drag.info.setLayoutData( String.format( "pos %d container.y+%d %d container.y2-%d", bottom, drag.indent + border, top, border ) );
             }
 
             pos -= drag.size + drag.info.getPlotSpacing( );
@@ -564,14 +514,14 @@ public class DragManager
 
     protected void chooseNewGrowing( GlimpseMouseEvent event )
     {
-        if ( shouldChooseUnnested( ) )
-        {
-            chooseNewGrowingUnnested( event );
-        }
-        else
-        {
-            chooseNewGrowingNested( event );
-        }
+        //        if ( shouldChooseUnnested( ) )
+        //        {
+        //            chooseNewGrowingUnnested( event );
+        //        }
+        //        else
+        //        {
+        chooseNewGrowingNested( event );
+        //        }
     }
 
     protected void chooseNewGrowingNested( GlimpseMouseEvent event )
@@ -579,10 +529,53 @@ public class DragManager
         GlimpseTargetStack stack = TargetStackUtil.popTo( event.getTargetStack( ), plot );
 
         // check each PlotInfo, find the one we're currently dragging over
-        for ( PlotInfo info : plot.getAllPlots( ) )
+        for ( PlotInfo info : getAllPlots( ) )
         {
-            if ( chooseNewGrowing( stack, info, info ) ) return;
+            if ( info instanceof GroupInfo )
+            {
+                GroupInfo groupInfo = ( GroupInfo ) info;
+                List<PlotInfo> groupList = getSortedDescendants( groupInfo );
+
+                PlotInfo bottomPlot = groupList.get( groupList.size( ) - 1 );
+                PlotInfo topPlot = groupList.get( 0 );
+
+                if ( chooseNewGrowing( stack, bottomPlot, topPlot ) ) return;
+            }
+            else
+            {
+                if ( chooseNewGrowing( stack, info, info ) ) return;
+            }
         }
+    }
+
+    protected Collection<PlotInfo> getAllPlots( )
+    {
+        DragInfo topDrag = dragging.get( 0 );
+
+        if ( topDrag.info.getParent( ) == null )
+        {
+            return getTopPlots( );
+        }
+        else
+        {
+            GroupInfo group = ( GroupInfo ) topDrag.info.getParent( );
+            return group.getChildPlots( );
+        }
+    }
+
+    protected Collection<PlotInfo> getTopPlots( )
+    {
+        List<PlotInfo> plots = Lists.newArrayList( );
+
+        for ( PlotInfo plot : this.plot.getAllPlots( ) )
+        {
+            if ( plot.getParent( ) == null )
+            {
+                plots.add( plot );
+            }
+        }
+
+        return plots;
     }
 
     protected boolean shouldChooseUnnested( )

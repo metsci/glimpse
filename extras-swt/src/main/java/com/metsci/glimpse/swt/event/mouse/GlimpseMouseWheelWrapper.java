@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.swt.event.mouse;
 
+import static com.metsci.glimpse.swt.event.mouse.GlimpseMouseWrapper.fromMouseWheelEvent;
+
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseWheelListener;
 
 import com.metsci.glimpse.event.mouse.GlimpseMouseWheelListener;
-
-import static com.metsci.glimpse.swt.event.mouse.GlimpseMouseWrapper.*;
 
 public class GlimpseMouseWheelWrapper implements MouseWheelListener
 {

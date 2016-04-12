@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,42 +24,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.support.colormap;
 
-import java.util.Set;
-
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.plot.timeline.data.EventSelection;
-import com.metsci.glimpse.util.units.time.TimeStamp;
-
-/**
- * @author ulman
- * @see EventPlotListener
- */
-public class EventPlotAdapter implements EventPlotListener
+public class ColorGradientArray implements ColorGradient
 {
-    @Override
-    public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+    // array containing [r,g,b,r,g,b,...] samples of the color scale
+    protected float[] f;
+    protected int size;
+
+    public ColorGradientArray( float[] f )
     {
+        this.f = f;
+        this.size = f.length / 3;
     }
 
     @Override
-    public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
+    public void toColor( float fraction, float[] rgba )
     {
-    }
+        int index = ( int ) Math.floor( fraction * size );
+        if ( index < 0 ) index = 0;
+        if ( index >= size ) index = size - 1;
 
-    @Override
-    public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-    {
-    }
-
-    @Override
-    public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-    {
-    }
-
-    @Override
-    public void eventUpdated( GlimpseMouseEvent e, Event event )
-    {
+        rgba[0] = f[3 * index + 0];
+        rgba[1] = f[3 * index + 1];
+        rgba[2] = f[3 * index + 2];
+        rgba[3] = 1.0f;
     }
 }

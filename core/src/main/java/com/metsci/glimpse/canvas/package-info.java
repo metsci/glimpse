@@ -4,4 +4,3 @@
  * as well as for various off-screen rendering targets.
  */
 package com.metsci.glimpse.canvas;
-

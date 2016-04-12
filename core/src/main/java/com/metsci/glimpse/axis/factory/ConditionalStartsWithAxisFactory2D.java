@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,23 +24,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.axis.factory;
 
-import java.util.Set;
+import static com.metsci.glimpse.context.TargetStackUtil.startsWith;
 
-public interface EventSelectionListener
+import com.metsci.glimpse.context.GlimpseTargetStack;
+
+/**
+ * A {@link ConditionalAxisFactory2D} which chooses the AxisFactory2D to use based on
+ * whether the query GlimpseTargetStack starts with the associated GlimpseTargetStack.
+ * 
+ * @author ulman
+ */
+public class ConditionalStartsWithAxisFactory2D extends ConditionalAxisFactory2D
 {
-    /**
-     * <p>Indicates that the set of selected events has changed. Events are selected either programmatically
-     * or by the user clicking on the event. A click with no modifier keys selects the event, a click with
-     * the CTRL key down adds (or subtracts, if the event is already selected) from the current selection.</p>
-     * 
-     * <p>The selectedEvents Set contains only newly selected Events (for which an eventsSelected event has not
-     * yet been fired). It does not necessarily contain the full set of selected events. This can be obtained via
-     * {@link EventPlotInfo#getSelectedEvents()}.</p>
-     *  
-     * @param selectedEvents the newly selected events
-     */
-    public void eventsSelected( Set<Event> selectedEvents, Set<Event> deselectedEvents );
-    
+    public ConditionalStartsWithAxisFactory2D( )
+    {
+        super( );
+    }
+
+    public ConditionalStartsWithAxisFactory2D( GlimpseTargetStack stack, AxisFactory2D factory )
+    {
+        super( stack, factory );
+    }
+
+    @Override
+    protected boolean isConditionMet( GlimpseTargetStack stack, GlimpseTargetStack candidate )
+    {
+        return startsWith( stack, candidate );
+    }
 }

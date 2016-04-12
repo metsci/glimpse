@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,7 +44,7 @@ import javax.media.opengl.GLContext;
  */
 public abstract class AbstractTexture implements Texture
 {
-    protected ReentrantLock lock = new ReentrantLock();
+    protected ReentrantLock lock = new ReentrantLock( );
 
     protected boolean glAllocated;
     protected int glHandle;
@@ -52,28 +53,27 @@ public abstract class AbstractTexture implements Texture
 
     protected int[] dim;
 
-
     public AbstractTexture( int n0 )
     {
         this.dim = new int[] { n0 };
         this.glAllocated = false;
-        makeDirty();
+        makeDirty( );
     }
 
     public AbstractTexture( int n0, int n1 )
     {
         this.dim = new int[] { n0, n1 };
         this.glAllocated = false;
-        makeDirty();
+        makeDirty( );
     }
 
     public AbstractTexture( int n0, int n1, int n2 )
     {
         this.dim = new int[] { n0, n1, n2 };
         this.glAllocated = false;
-        makeDirty();
+        makeDirty( );
     }
-    
+
     @Override
     public int[] getHandles( )
     {
@@ -108,11 +108,10 @@ public abstract class AbstractTexture implements Texture
     // TODO: Figure out if this is expensive to call.
     public boolean isResident( GL2 gl )
     {
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( !glAllocated )
-                return false;
+            if ( !glAllocated ) return false;
 
             int[] handle = new int[] { glHandle };
             byte[] resident = new byte[1];
@@ -122,7 +121,7 @@ public abstract class AbstractTexture implements Texture
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
@@ -130,10 +129,10 @@ public abstract class AbstractTexture implements Texture
     public boolean prepare( GL2 gl, int texUnit )
     {
         // should we check for dirtiness and allocation before lock to speed up?
-        lock.lock();
+        lock.lock( );
         try
         {
-            if( !glAllocated )
+            if ( !glAllocated )
             {
                 allocate_genHandles( gl );
             }
@@ -141,7 +140,7 @@ public abstract class AbstractTexture implements Texture
             gl.glActiveTexture( getGLTextureUnit( texUnit ) );
             gl.glBindTexture( getGLTextureDim( dim.length ), glHandle );
 
-            if( glAllocated && isDirty() )
+            if ( glAllocated && isDirty( ) )
             {
                 prepare_setPixelStore( gl );
                 prepare_setTexParameters( gl );
@@ -149,11 +148,11 @@ public abstract class AbstractTexture implements Texture
                 dirty = false;
             }
 
-            return !isDirty();
+            return !isDirty( );
         }
         finally
         {
-            lock.unlock();
+            lock.unlock( );
         }
     }
 
@@ -165,19 +164,21 @@ public abstract class AbstractTexture implements Texture
         glHandle = handle[0];
         glAllocated = true;
 
-        makeDirty();
+        makeDirty( );
     }
 
     @Override
     public void dispose( GLContext context )
     {
-        if( glAllocated )
+        if ( glAllocated )
         {
             context.getGL( ).glDeleteTextures( 1, new int[] { glHandle }, 0 );
         }
     }
 
     protected abstract void prepare_setTexParameters( GL gl );
+
     protected abstract void prepare_setPixelStore( GL gl );
+
     protected abstract void prepare_setData( GL2 gl );
 }

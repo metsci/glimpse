@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@ import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -55,6 +57,7 @@ public class FontUtils
     private static final Logger logger = Logger.getLogger( FontUtils.class.getName( ) );
 
     private static final boolean foundVerdana;
+    private static final Map<String, Font> loadedFonts = new HashMap<>( );
 
     static
     {
@@ -172,13 +175,28 @@ public class FontUtils
 
     public static Font loadTrueTypeFont( String filename, float size, int style )
     {
+        synchronized ( loadedFonts )
+        {
+            Font font = loadedFonts.get( filename );
+            if ( font == null )
+            {
+                font = readFont( filename );
+                loadedFonts.put( filename, font );
+            }
+
+            return font.deriveFont( style, size );
+        }
+    }
+
+    private static Font readFont( String filename )
+    {
         try
         {
             InputStream stream = null;
             try
             {
                 stream = StreamOpener.fileThenResource.openForRead( filename );
-                return createFont( Font.TRUETYPE_FONT, stream ).deriveFont( style, size );
+                return createFont( Font.TRUETYPE_FONT, stream );
             }
             finally
             {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
@@ -57,8 +58,6 @@ import com.metsci.glimpse.dspl.util.DsplException;
 import com.metsci.glimpse.dspl.util.DsplHelper;
 import com.metsci.glimpse.dspl.util.FileNameCleaner;
 import com.metsci.glimpse.dspl.util.MD5Checksum;
-
-import java.util.logging.Logger;
 
 public class DsplCacheHelper
 {

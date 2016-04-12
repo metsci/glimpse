@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -42,7 +41,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 
 /**
  *
@@ -65,17 +63,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Value", propOrder = {
-    "value"
-})
-public class Value {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Value", propOrder = { "value" } )
+public class Value
+{
 
     @XmlValue
     protected String value;
-    @XmlAttribute(name = "lang", namespace = "http://www.w3.org/XML/1998/namespace")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    @XmlSchemaType(name = "language")
+    @XmlAttribute( name = "lang", namespace = "http://www.w3.org/XML/1998/namespace" )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
+    @XmlSchemaType( name = "language" )
     protected String lang;
 
     /**
@@ -86,7 +83,8 @@ public class Value {
      *     {@link String }
      *
      */
-    public String getValue() {
+    public String getValue( )
+    {
         return value;
     }
 
@@ -98,7 +96,8 @@ public class Value {
      *     {@link String }
      *
      */
-    public void setValue(String value) {
+    public void setValue( String value )
+    {
         this.value = value;
     }
 
@@ -114,7 +113,8 @@ public class Value {
      *     {@link String }
      *
      */
-    public String getLang() {
+    public String getLang( )
+    {
         return lang;
     }
 
@@ -126,7 +126,8 @@ public class Value {
      *     {@link String }
      *
      */
-    public void setLang(String value) {
+    public void setLang( String value )
+    {
         this.lang = value;
     }
 

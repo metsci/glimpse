@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,12 @@
  */
 package com.metsci.glimpse.dspl.parser;
 
-import static com.metsci.glimpse.dspl.parser.util.ParserUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getColumns;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getConcepts;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getConstantTableColumns;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getTypes;
+import static com.metsci.glimpse.util.GeneralUtils.newLinkedHashMap;
+import static com.metsci.glimpse.util.GeneralUtils.newTreeSet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -241,30 +245,30 @@ public class ColumnBinaryParser implements TableParser, TableWriter
 
         switch ( column.getType( ) )
         {
-        case STRING:
-            if ( columnFormat != null && columnFormat.contentEquals( "intern" ) )
-                writeInternStringArray( dataChannel, column.getStringData( ) );
-            else
-                writeStringArray( dataChannel, column.getStringData( ) );
-            break;
+            case STRING:
+                if ( columnFormat != null && columnFormat.contentEquals( "intern" ) )
+                    writeInternStringArray( dataChannel, column.getStringData( ) );
+                else
+                    writeStringArray( dataChannel, column.getStringData( ) );
+                break;
 
-        case FLOAT:
-            dataChannel.writeFloatArray( column.getFloatData( ) );
-            break;
-        case INTEGER:
-            dataChannel.writeIntArray( column.getIntegerData( ) );
-            break;
-        case BOOLEAN:
-            dataChannel.writeBooleanArray( column.getBooleanData( ) );
-            break;
-        case DATE:
-            dataChannel.writeLongArray( column.getDateData( ) );
-            break;
-        case CONCEPT:
-            writeStringArray( dataChannel, column.getStringData( ) );
-            break;
-        default:
-            throw new DsplException( "Unknown Type %s provided.", column.getType( ) );
+            case FLOAT:
+                dataChannel.writeFloatArray( column.getFloatData( ) );
+                break;
+            case INTEGER:
+                dataChannel.writeIntArray( column.getIntegerData( ) );
+                break;
+            case BOOLEAN:
+                dataChannel.writeBooleanArray( column.getBooleanData( ) );
+                break;
+            case DATE:
+                dataChannel.writeLongArray( column.getDateData( ) );
+                break;
+            case CONCEPT:
+                writeStringArray( dataChannel, column.getStringData( ) );
+                break;
+            default:
+                throw new DsplException( "Unknown Type %s provided.", column.getType( ) );
         }
     }
 
@@ -313,30 +317,30 @@ public class ColumnBinaryParser implements TableParser, TableWriter
 
                 switch ( type )
                 {
-                case STRING:
-                    if ( columnFormat != null && columnFormat.contentEquals( "intern" ) )
-                        columnData = readInternStringArray( dataChannel, column, columnConcept, new String[numRows] );
-                    else
-                        columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
-                    break;
+                    case STRING:
+                        if ( columnFormat != null && columnFormat.contentEquals( "intern" ) )
+                            columnData = readInternStringArray( dataChannel, column, columnConcept, new String[numRows] );
+                        else
+                            columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
+                        break;
 
-                case FLOAT:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readFloatArray( new float[numRows] ), numRows );
-                    break;
-                case INTEGER:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readIntArray( new int[numRows] ), numRows );
-                    break;
-                case BOOLEAN:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readBooleanArray( new boolean[numRows] ), numRows );
-                    break;
-                case DATE:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readLongArray( new long[numRows] ), numRows );
-                    break;
-                case CONCEPT:
-                    columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
-                    break;
-                default:
-                    throw new DsplException( "Unknown Type %s provided for Column %s.", type, info.getColumnIds( )[i] );
+                    case FLOAT:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readFloatArray( new float[numRows] ), numRows );
+                        break;
+                    case INTEGER:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readIntArray( new int[numRows] ), numRows );
+                        break;
+                    case BOOLEAN:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readBooleanArray( new boolean[numRows] ), numRows );
+                        break;
+                    case DATE:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readLongArray( new long[numRows] ), numRows );
+                        break;
+                    case CONCEPT:
+                        columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
+                        break;
+                    default:
+                        throw new DsplException( "Unknown Type %s provided for Column %s.", type, info.getColumnIds( )[i] );
                 }
 
                 map.put( column.getId( ), columnData );
@@ -387,42 +391,42 @@ public class ColumnBinaryParser implements TableParser, TableWriter
 
                 switch ( sliceType )
                 {
-                case Dimension:
-                    map = dimensionMap;
-                    break;
-                case Metric:
-                    map = metricMap;
-                    break;
+                    case Dimension:
+                        map = dimensionMap;
+                        break;
+                    case Metric:
+                        map = metricMap;
+                        break;
                 }
 
                 TableColumn columnData = null;
 
                 switch ( type )
                 {
-                case STRING:
-                    if ( columnFormat != null && columnFormat.contentEquals( "intern" ) )
-                        columnData = readInternStringArray( dataChannel, column, columnConcept, new String[numRows] );
-                    else
-                        columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
-                    break;
+                    case STRING:
+                        if ( columnFormat != null && columnFormat.contentEquals( "intern" ) )
+                            columnData = readInternStringArray( dataChannel, column, columnConcept, new String[numRows] );
+                        else
+                            columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
+                        break;
 
-                case FLOAT:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readFloatArray( new float[numRows] ), numRows );
-                    break;
-                case INTEGER:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readIntArray( new int[numRows] ), numRows );
-                    break;
-                case BOOLEAN:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readBooleanArray( new boolean[numRows] ), numRows );
-                    break;
-                case DATE:
-                    columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readLongArray( new long[numRows] ), numRows );
-                    break;
-                case CONCEPT:
-                    columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
-                    break;
-                default:
-                    throw new DsplException( "Unknown Type %s provided for Column %s.", type, info.getColumnIds( )[i] );
+                    case FLOAT:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readFloatArray( new float[numRows] ), numRows );
+                        break;
+                    case INTEGER:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readIntArray( new int[numRows] ), numRows );
+                        break;
+                    case BOOLEAN:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readBooleanArray( new boolean[numRows] ), numRows );
+                        break;
+                    case DATE:
+                        columnData = new SimpleTableColumn( column, columnConcept, type, dataChannel.readLongArray( new long[numRows] ), numRows );
+                        break;
+                    case CONCEPT:
+                        columnData = readStringArray( dataChannel, column, columnConcept, new String[numRows] );
+                        break;
+                    default:
+                        throw new DsplException( "Unknown Type %s provided for Column %s.", type, info.getColumnIds( )[i] );
                 }
 
                 map.put( column.getId( ), columnData );

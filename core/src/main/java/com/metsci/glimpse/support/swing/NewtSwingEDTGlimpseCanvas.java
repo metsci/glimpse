@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,20 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLRunnable;
 import javax.swing.SwingUtilities;
 
+import com.jogamp.newt.NewtFactory;
+import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -84,6 +87,21 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     public NewtSwingEDTGlimpseCanvas( )
     {
         super( );
+    }
+
+    @Override
+    protected GLWindow createGLWindow( GLCapabilities glCapabilities )
+    {
+        return new GLWindow( NewtFactory.createWindow( glCapabilities ) )
+        {
+            public void display( )
+            {
+                if ( SwingUtilities.isEventDispatchThread( ) )
+                {
+                    super.display( );
+                }
+            }
+        };
     }
 
     @Override
@@ -149,10 +167,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                         // (the canvas can report incorrect/transient sizes during this time)
                         if ( !glCanvas.isShowing( ) ) return;
 
-                        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                        {
-                            layout.layoutTo( getGlimpseContext( ) );
-                        }
+                        layoutTo( );
                     }
                 } );
             }
@@ -206,5 +221,15 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    public void layoutTo( )
+    {
+        assert ( SwingUtilities.isEventDispatchThread( ) );
+
+        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+        {
+            layout.layoutTo( getGlimpseContext( ) );
+        }
     }
 }

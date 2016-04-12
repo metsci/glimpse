@@ -3,4 +3,3 @@
  * it simpler to write common types of GlimpsePainters.
  */
 package com.metsci.glimpse.painter.base;
-

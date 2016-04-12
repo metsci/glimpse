@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,11 @@
  */
 package com.metsci.glimpse.axis.painter.label;
 
-import static java.lang.Math.*;
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
+import static java.lang.Math.log10;
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
 
 import java.text.NumberFormat;
 
@@ -67,20 +71,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.orderNumberFormatter = NumberFormat.getNumberInstance( );
         this.orderNumberFormatter.setGroupingUsed( true );
 
-        this.converter = new AxisUnitConverter( )
-        {
-            @Override
-            public double fromAxisUnits( double value )
-            {
-                return value;
-            }
-
-            @Override
-            public double toAxisUnits( double value )
-            {
-                return value;
-            }
-        };
+        this.converter = AxisUnitConverters.identity;
 
         this.tickSpacing = 100;
         this.minorTickCount = 4;
@@ -171,9 +162,15 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.minorTickCount = count;
     }
 
+    @Override
     public void setAxisLabel( String label )
     {
         this.axisLabel = label;
+    }
+
+    public String getAxisLabel( )
+    {
+        return this.axisLabel;
     }
 
     public void setAxisUnits( String units, boolean abbreviated )
@@ -193,6 +190,11 @@ public class GridAxisLabelHandler implements AxisLabelHandler
         this.axisMilliUnits = milliUnits;
         this.axisUnits = units;
         this.axisKiloUnits = kiloUnits;
+    }
+
+    public String getAxisUnits( )
+    {
+        return this.axisUnits;
     }
 
     protected String axisLabel( int orderX )
@@ -262,7 +264,6 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
     protected double tickInterval( Axis1D axis, double approxNumTicks )
     {
-
         double calculatedMin = converter.toAxisUnits( axis.getMin( ) );
         double calculatedMax = converter.toAxisUnits( axis.getMax( ) );
         double min = Math.min( calculatedMin, calculatedMax );
@@ -293,7 +294,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
             cacheMax = min;
         }
 
-        int minTickNumber = ( int ) floor( cacheMin / tickInterval );
+        double minTickNumber = floor( cacheMin / tickInterval );
         int tickCount = ( int ) ceil( ( cacheMax - cacheMin ) / tickInterval );
 
         double[] ticks = new double[tickCount + 1];
@@ -311,12 +312,17 @@ public class GridAxisLabelHandler implements AxisLabelHandler
                 ticks[size - i - 1] = temp;
             }
         }
-        
+
         return ticks;
     }
 
     protected int getOrderTick( double d )
     {
+        if ( d == 0 )
+        {
+            return 0;
+        }
+
         double log10 = Math.log10( d );
         int order = ( int ) Math.floor( log10 );
         if ( ( log10 - order ) > ( 1.0 - 1e-12 ) ) order++;

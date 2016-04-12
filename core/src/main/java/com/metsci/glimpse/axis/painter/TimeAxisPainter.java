@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
 
     public TimeAxisPainter( TimeAxisLabelHandler handler )
     {
-        super(handler);
+        super( handler );
         this.handler = handler;
 
         this.newFont = FontUtils.getBitstreamVeraSansPlain( 12.0f );
@@ -87,17 +87,17 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
         this.setCurrentTimeTickColor( GlimpseColor.getGreen( 1.0f ) );
         this.currentTimeLineThickness = 3;
     }
-    
+
     public boolean isShowDateLabels( )
     {
         return this.showDateLabels;
     }
-    
+
     public void setShowDateLabels( boolean show )
     {
         this.showDateLabels = show;
     }
-    
+
     public TimeAxisLabelHandler getLabelHandler( )
     {
         return this.handler;

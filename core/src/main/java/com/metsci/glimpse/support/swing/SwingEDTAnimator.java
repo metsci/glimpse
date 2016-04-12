@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import javax.swing.SwingUtilities;
 
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.FPSAnimator;
+import com.metsci.glimpse.util.concurrent.ConcurrencyUtils;
 
 /**
  * An FPSAnimator-like class which performs rendering on the Swing EDT.
@@ -82,8 +84,20 @@ public class SwingEDTAnimator implements GLAnimatorControl
     {
         // do nothing if the animator is already running
         if ( this.future != null ) return;
-        
-        ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( );
+
+        ThreadFactory threadFactory = ConcurrencyUtils.newDaemonThreadFactory( new ThreadFactory( )
+        {
+            @Override
+            public Thread newThread( Runnable r )
+            {
+                Thread thread = new Thread( r );
+                thread.setName( SwingEDTAnimator.class.getSimpleName( ) );
+                return thread;
+            }
+        } );
+
+        ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( threadFactory );
+
         this.future = exectuor.scheduleAtFixedRate( new Runnable( )
         {
             @Override
@@ -108,7 +122,7 @@ public class SwingEDTAnimator implements GLAnimatorControl
                                 }
                             }
                         }
-                    });
+                    } );
                 }
                 catch ( InvocationTargetException | InterruptedException e )
                 {
@@ -150,9 +164,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
     public synchronized boolean start( )
     {
         if ( isStarted( ) ) return false;
-        
+
         start0( );
-        
+
         return true;
     }
 
@@ -160,9 +174,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
     public synchronized boolean stop( )
     {
         if ( !isStarted( ) ) return false;
-        
+
         boolean success = this.future.cancel( false );
-        
+
         if ( success )
         {
             this.future = null;

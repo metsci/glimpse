@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.nio.IntBuffer;
 
@@ -99,6 +100,18 @@ public class IntsArray implements IntsModifiable
     public void copyTo( int i, int[] dest, int iDest, int c )
     {
         System.arraycopy( a, i, dest, iDest, c );
+    }
+
+    @Override
+    public void copyTo( int i, IntBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( IntBuffer dest )
+    {
+        dest.put( a, 0, n );
     }
 
     @Override
@@ -428,7 +441,7 @@ public class IntsArray implements IntsModifiable
     {
         removeRange( index, index + 1 );
     }
-    
+
     @Override
     public void clear( )
     {

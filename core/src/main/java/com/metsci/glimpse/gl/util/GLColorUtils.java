@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ package com.metsci.glimpse.gl.util;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.support.color.RGBA;
-
 
 public class GLColorUtils
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ package com.metsci.glimpse.plot.stacked;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -102,9 +101,22 @@ public interface PlotInfo
      */
     public boolean isGrow( );
 
+    /**
+     * If true, the PlotInfo will be drawn as a row on the timeline, if false the
+     * PlotInfo will be hidden.
+     */
     public void setVisible( boolean visible );
 
+    /**
+     * @see #setVisible(boolean)
+     */
     public boolean isVisible( );
+
+    public boolean isExpanded( );
+
+    public void setParent( PlotInfo parent );
+
+    public PlotInfo getParent( );
 
     /**
      * Sets the spacing between this plot and those above and below it. This value
@@ -133,7 +145,7 @@ public interface PlotInfo
      * Further, {@code #getBaseLayout()} will be a direct child of the {@link StackedPlot2D}
      * that this {@code PlotInfo} is part of.
      */
-    public GlimpseLayout getBaseLayout( );
+    public GlimpseAxisLayout2D getBaseLayout( );
 
     /**
      * Returns the common axis associated with the given GlimpseTargetStack.
@@ -173,10 +185,15 @@ public interface PlotInfo
     public void addLayout( GlimpseAxisLayout2D childLayout );
 
     /**
-     * Removes this plot from its StackedPlot2D. This has the same effect
-     * as calling StackedPlot2D.deletePlot( this.getId( ) )
+     * @deprecated {@link #removePlot()}
      */
     public void deletePlot( );
+
+    /**
+     * Removes this plot from its StackedPlot2D. This has the same effect
+     * as calling StackedPlot2D.removePlot( this.getId( ) )
+     */
+    public void removePlot( );
 
     /**
      * Sets the indentation level of this plot. This can be
@@ -189,7 +206,7 @@ public interface PlotInfo
      * @see #setIndentLevel(int)
      */
     public int getIndentLevel( );
-    
+
     /**
      * <p>Sets the MIG Layout constraints which position this PlotInfo within the
      * StackedPlot2D. Normally, calling this method is not necessary because
@@ -208,7 +225,7 @@ public interface PlotInfo
      * @see #setLayoutData(String)
      */
     public String getLayoutData( );
-    
+
     public void setLookAndFeel( LookAndFeel laf );
 
     public void updateLayout( int index );

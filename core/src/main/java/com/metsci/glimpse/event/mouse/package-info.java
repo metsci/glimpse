@@ -4,4 +4,3 @@
  * or Swing.
  */
 package com.metsci.glimpse.event.mouse;
-

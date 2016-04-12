@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,9 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.plot.timeline.event.listener;
 
-import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.*;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Center;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.End;
+import static com.metsci.glimpse.plot.timeline.data.EventSelection.Location.Start;
 
 import java.util.Set;
 
@@ -35,6 +37,8 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.data.EventSelection.Location;
+import com.metsci.glimpse.plot.timeline.event.Event;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -52,12 +56,12 @@ public class DragListener implements EventPlotListener, GlimpseMouseAllListener
     protected boolean enabled = true;
 
     protected EventPlotInfo info;
-    
+
     public DragListener( EventPlotInfo info )
     {
         this.info = info;
     }
-    
+
     public boolean isEnabled( )
     {
         return this.enabled;

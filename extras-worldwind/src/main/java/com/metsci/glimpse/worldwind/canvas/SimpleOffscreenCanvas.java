@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -198,7 +198,7 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     @Override
     public void paint( )
     {
-     // not a fully featured GlimpseCanvas
+        // not a fully featured GlimpseCanvas
     }
 
     @Override
@@ -266,20 +266,20 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
     {
         // not a fully featured GlimpseCanvas
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
         // not a fully featured GlimpseCanvas
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -292,5 +292,17 @@ public class SimpleOffscreenCanvas implements GlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    @Override
+    public boolean isVisible( )
+    {
+        return true;
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return new int[] { 1, 1 };
     }
 }

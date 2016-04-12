@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,27 +164,27 @@ public class DsplExample implements GlimpseLayoutProvider
     {
         switch ( concept.getType( ).getRef( ) )
         {
-        case STRING:
-            logInfo( logger, "String Data: %s", Arrays.toString( column.getStringData( ) ) );
-            break;
-        case FLOAT:
-            logInfo( logger, "Float Data: %s", Arrays.toString( column.getFloatData( ) ) );
-            break;
-        case INTEGER:
-            logInfo( logger, "Integer Data: %s", Arrays.toString( column.getIntegerData( ) ) );
-            break;
-        case BOOLEAN:
-            logInfo( logger, "Boolean Data: %s", Arrays.toString( column.getBooleanData( ) ) );
-            break;
-        case DATE:
-            logInfo( logger, "Date Data: %s", Arrays.toString( column.getDateData( ) ) );
-            break;
-        case CONCEPT:
-            logInfo( logger, "Concept Data: %s", Arrays.toString( column.getStringData( ) ) );
-            break;
-        default:
-            logInfo( logger, "Unrecognized Data Type" );
-            break;
+            case STRING:
+                logInfo( logger, "String Data: %s", Arrays.toString( column.getStringData( ) ) );
+                break;
+            case FLOAT:
+                logInfo( logger, "Float Data: %s", Arrays.toString( column.getFloatData( ) ) );
+                break;
+            case INTEGER:
+                logInfo( logger, "Integer Data: %s", Arrays.toString( column.getIntegerData( ) ) );
+                break;
+            case BOOLEAN:
+                logInfo( logger, "Boolean Data: %s", Arrays.toString( column.getBooleanData( ) ) );
+                break;
+            case DATE:
+                logInfo( logger, "Date Data: %s", Arrays.toString( column.getDateData( ) ) );
+                break;
+            case CONCEPT:
+                logInfo( logger, "Concept Data: %s", Arrays.toString( column.getStringData( ) ) );
+                break;
+            default:
+                logInfo( logger, "Unrecognized Data Type" );
+                break;
         }
     }
 }

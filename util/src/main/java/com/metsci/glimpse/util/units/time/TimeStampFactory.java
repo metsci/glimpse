@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,56 +41,56 @@ public interface TimeStampFactory<T extends TimeStamp>
     /**
      * See {@link TimeStamp#fromPosixSeconds}.
      */
-    T fromPosixSeconds(double posixSeconds);
+    T fromPosixSeconds( double posixSeconds );
 
     /**
      * See {@link TimeStamp#fromPosixSeconds}.
      */
-    T fromPosixSeconds(BigDecimal posixSeconds);
+    T fromPosixSeconds( BigDecimal posixSeconds );
 
     /**
      * See {@link TimeStamp#fromPosixMillis}.
      */
-    T fromPosixMillis(long posixMillis);
+    T fromPosixMillis( long posixMillis );
 
     /**
      * See {@link TimeStamp#fromPosixMicros}.
      */
-    T fromPosixMicros(long posixMicros);
+    T fromPosixMicros( long posixMicros );
 
     /**
      * See {@link TimeStamp#fromPosixNanos}.
      */
-    T fromPosixNanos(long posixNanos);
+    T fromPosixNanos( long posixNanos );
 
     /**
      * See {@link TimeStamp#fromTimeStamp}.
      */
-    T fromTimeStamp(TimeStamp timeStamp);
+    T fromTimeStamp( TimeStamp timeStamp );
 
     /**
      * See {@link TimeStamp#fromDate}.
      */
-    T fromDate(Date date);
+    T fromDate( Date date );
 
     /**
      * See {@link TimeStamp#fromCalendar}.
      */
-    T fromCalendar(Calendar calendar);
+    T fromCalendar( Calendar calendar );
 
     /**
      * See {@link TimeStamp#fromString}.
      */
-    T fromString(String string, TimeStampFormat format) throws TimeStampParseException;
+    T fromString( String string, TimeStampFormat format ) throws TimeStampParseException;
 
     /**
      * See {@link TimeStamp#posixEpoch}.
      */
-    T posixEpoch();
+    T posixEpoch( );
 
     /**
      * See {@link TimeStamp#currentTime}.
      */
-    T currentTime();
+    T currentTime( );
 
 }

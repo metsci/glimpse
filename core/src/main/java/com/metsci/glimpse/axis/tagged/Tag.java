@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.metsci.glimpse.axis.tagged.shader.TaggedColorScaleShader;
+import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
+import com.metsci.glimpse.support.colormap.ColorGradient;
+
 /**
  * A labeled marker on a {@link TaggedAxis1D}. Tags have a name and a
  * position along their axis. Tags may also have a number of optional
@@ -46,23 +50,34 @@ import java.util.Map;
  */
 public class Tag
 {
+    /**
+     * Special tag value used by TaggedHeatMapPainter to indicate which part
+     * of a {@link ColorGradient} a Tag should be associated with.
+     * 
+     * @see TaggedHeatMapPainter
+     * @see TaggedColorScaleShader
+     */
     public static final String TEX_COORD_ATTR = "TexCoord";
 
-    public static final Comparator<Tag> tagValueComparator =
-        new Comparator<Tag>( )
+    /**
+     * Special tag value for setting the display color of a Tag.
+     */
+    public static final String TAG_COLOR_ATTR = "TagColor";
+
+    public static final Comparator<Tag> tagValueComparator = new Comparator<Tag>( )
+    {
+        @Override
+        public int compare( Tag tag1, Tag tag2 )
         {
-            @Override
-            public int compare( Tag tag1, Tag tag2 )
-            {
-                return Double.compare( tag1.value, tag2.value );
-            }
-        };
+            return Double.compare( tag1.value, tag2.value );
+        }
+    };
 
     protected String name;
     protected double value;
 
     // lazily instantiate
-    protected Map<String,Object> attributeMap;
+    protected Map<String, Object> attributeMap;
 
     public Tag( Tag tag )
     {
@@ -71,7 +86,7 @@ public class Tag
 
         if ( tag.attributeMap != null )
         {
-            this.attributeMap = new HashMap<String,Object>( );
+            this.attributeMap = new HashMap<String, Object>( );
             this.attributeMap.putAll( tag.attributeMap );
         }
     }
@@ -109,7 +124,7 @@ public class Tag
 
     public Tag setAttribute( String key, Object value )
     {
-        if ( this.attributeMap == null ) this.attributeMap = new HashMap<String,Object>();
+        if ( this.attributeMap == null ) this.attributeMap = new HashMap<String, Object>( );
 
         this.attributeMap.put( key, value );
         return this;
@@ -128,22 +143,22 @@ public class Tag
 
         return this.attributeMap.get( key );
     }
-    
+
     public float getAttributeFloat( String key )
     {
         if ( this.attributeMap == null )
         {
             throw new IllegalArgumentException( "No value for key: " + key );
         }
-        
+
         Object value = this.attributeMap.get( key );
-    
-        if ( !(value instanceof Number) )
+
+        if ( ! ( value instanceof Number ) )
         {
             String message = String.format( "Value for key: %s of type: %s required type: %s", key, value.getClass( ), Number.class );
             throw new ClassCastException( message );
         }
-        
+
         return ( ( Number ) value ).floatValue( );
     }
 
@@ -162,5 +177,11 @@ public class Tag
         Tag other = ( Tag ) obj;
         if ( name == null ) return other.name == null;
         return name.equals( other.name );
+    }
+
+    @Override
+    public String toString( )
+    {
+        return String.format( "%s=%.2f", name, value );
     }
 }

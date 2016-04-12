@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,73 +34,79 @@ import java.nio.FloatBuffer;
 public interface FloatsModifiable extends Floats
 {
 
-    void set(int i, float v);
-    void set(int i, float[] vs);
-    void set(int i, float[] vs, int from, int to);
+    void set( int i, float v );
 
+    void set( int i, float[] vs );
 
-    void insert(int i, float v);
+    void set( int i, float[] vs, int from, int to );
 
-    void insert(int i, float[] vs);
-    void insert(int i, Floats vs);
-    void insert(int i, FloatBuffer vs);
+    void insert( int i, float v );
 
-    void insert(int i, float[] vs, int from, int to);
-    void insert(int i, Floats vs, int from, int to);
-    void insert(int i, FloatBuffer vs, int c);
+    void insert( int i, float[] vs );
 
+    void insert( int i, Floats vs );
 
+    void insert( int i, FloatBuffer vs );
 
-    void append(float v);
+    void insert( int i, float[] vs, int from, int to );
 
-    void append(float[] vs);
-    void append(Floats vs);
-    void append(FloatBuffer vs);
+    void insert( int i, Floats vs, int from, int to );
 
-    void append(float[] vs, int from, int to);
-    void append(Floats vs, int from, int to);
-    void append(FloatBuffer vs, int c);
+    void insert( int i, FloatBuffer vs, int c );
 
+    void append( float v );
 
+    void append( float[] vs );
 
-    void prepend(float v);
+    void append( Floats vs );
 
-    void prepend(float[] vs);
-    void prepend(Floats vs);
-    void prepend(FloatBuffer vs);
+    void append( FloatBuffer vs );
 
-    void prepend(float[] vs, int from, int to);
-    void prepend(Floats vs, int from, int to);
-    void prepend(FloatBuffer vs, int c);
+    void append( float[] vs, int from, int to );
 
+    void append( Floats vs, int from, int to );
 
+    void append( FloatBuffer vs, int c );
+
+    void prepend( float v );
+
+    void prepend( float[] vs );
+
+    void prepend( Floats vs );
+
+    void prepend( FloatBuffer vs );
+
+    void prepend( float[] vs, int from, int to );
+
+    void prepend( Floats vs, int from, int to );
+
+    void prepend( FloatBuffer vs, int c );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(float v);
-    
+    void remove( float v );
+
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
      * All other values with indices greater than or equal to index to have
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
+    void removeIndex( int index );
 
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

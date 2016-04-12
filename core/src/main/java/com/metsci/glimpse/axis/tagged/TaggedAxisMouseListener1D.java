@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@ public class TaggedAxisMouseListener1D extends AxisMouseListener1D
     @Override
     public void mouseMoved( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
     {
-        TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
+        TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
         if ( selectedTag == null )
         {
@@ -110,11 +110,11 @@ public class TaggedAxisMouseListener1D extends AxisMouseListener1D
         super.mousePressed( e, axis, horizontal );
         this.updateTagSelection( e, axis, horizontal );
     }
-    
+
     protected void updateTagSelection( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
     {
-        TaggedAxis1D taggedAxis = (TaggedAxis1D) axis;
-        
+        TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
+
         List<Tag> tags = taggedAxis.getSortedTags( );
         int pos = getDim( horizontal, e.getX( ), taggedAxis.getSizePixels( ) - e.getY( ) );
         this.selectedTag = getSelectedTag( taggedAxis, tags, pos, maxDistance );
@@ -153,10 +153,7 @@ public class TaggedAxisMouseListener1D extends AxisMouseListener1D
             }
         }
 
-        if ( enableDragTogether &&
-             selectedTag == null && tags.size( ) > 1 &&
-             mouseValue > tags.get( 0 ).getValue( ) &&
-             mouseValue < tags.get( tags.size( )-1 ).getValue( ) )
+        if ( enableDragTogether && selectedTag == null && tags.size( ) > 1 && mouseValue > tags.get( 0 ).getValue( ) && mouseValue < tags.get( tags.size( ) - 1 ).getValue( ) )
         {
             selectedTag = tags.get( 0 );
             dragTogether = true;

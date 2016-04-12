@@ -3,4 +3,3 @@
  * {@link com.metsci.glimpse.painter.base.GlimpsePainter}.
  */
 package com.metsci.glimpse.gl.texture;
-

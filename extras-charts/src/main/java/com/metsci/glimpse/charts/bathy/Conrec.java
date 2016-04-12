@@ -45,10 +45,10 @@ package com.metsci.glimpse.charts.bathy;
 public class Conrec
 {
 
-    private int[] sh    = new int[5];
+    private int[] sh = new int[5];
     private double[] xh = new double[5];
     private double[] yh = new double[5];
-    private double[] h  = new double[5];
+    private double[] h = new double[5];
 
     // Object that knows how to draw the contour
     private Render render = null;
@@ -108,25 +108,13 @@ public class Conrec
         // Note that castab is arranged differently from the FORTRAN code because
         // Fortran and C/C++ arrays are transposed of each other, in this case
         // it is more tricky as castab is in 3 dimension
-        int[][][] castab =
-            {
-                {
-                    { 0, 0, 8 }, { 0, 2, 5 }, { 7, 6, 9 }
-                },
-                {
-                    { 0, 3, 4 }, { 1, 3, 1 }, { 4, 3, 0 }
-                },
-                {
-                    { 9, 6, 7 }, { 5, 2, 0 }, { 8, 0, 0 }
-                }
-            };
+        int[][][] castab = { { { 0, 0, 8 }, { 0, 2, 5 }, { 7, 6, 9 } }, { { 0, 3, 4 }, { 1, 3, 1 }, { 4, 3, 0 } }, { { 9, 6, 7 }, { 5, 2, 0 }, { 8, 0, 0 } } };
 
         double z_0 = z[0];
         double z_n = z[nc - 1];
         double z_k;
         double d_i0j0, d_i0j1, d_i1j0, d_i1j1;
         double temp1, temp2;
-
 
         for ( i = ilb; i <= iub - 1; i++ )
         {
@@ -143,10 +131,10 @@ public class Conrec
 
                 temp1 = Math.min( d_i0j0, d_i0j1 );
                 temp2 = Math.min( d_i1j0, d_i1j1 );
-                dmin  = Math.min( temp1, temp2 );
+                dmin = Math.min( temp1, temp2 );
                 temp1 = Math.max( d_i0j0, d_i0j1 );
                 temp2 = Math.max( d_i1j0, d_i1j1 );
-                dmax  = Math.max( temp1, temp2 );
+                dmax = Math.max( temp1, temp2 );
 
                 if ( z_0 <= dmax && dmin <= z_n )
                 {
@@ -154,8 +142,7 @@ public class Conrec
                     {
                         z_k = z[k];
 
-                        if ( dmin == z_k && z_k == dmax )
-                            continue;
+                        if ( dmin == z_k && z_k == dmax ) continue;
 
                         if ( dmin <= z_k && z_k <= dmax )
                         {
@@ -232,62 +219,62 @@ public class Conrec
                                 {
                                     switch ( case_value )
                                     {
-                                    case 1: // Line between vertices 1 and 2
-                                        x1 = xh[m1];
-                                        y1 = yh[m1];
-                                        x2 = xh[m2];
-                                        y2 = yh[m2];
-                                        break;
-                                    case 2: // Line between vertices 2 and 3
-                                        x1 = xh[m2];
-                                        y1 = yh[m2];
-                                        x2 = xh[m3];
-                                        y2 = yh[m3];
-                                        break;
-                                    case 3: // Line between vertices 3 and 1
-                                        x1 = xh[m3];
-                                        y1 = yh[m3];
-                                        x2 = xh[m1];
-                                        y2 = yh[m1];
-                                        break;
-                                    case 4: // Line between vertex 1 and side 2-3
-                                        x1 = xh[m1];
-                                        y1 = yh[m1];
-                                        x2 = xsect( m2, m3 );
-                                        y2 = ysect( m2, m3 );
-                                        break;
-                                    case 5: // Line between vertex 2 and side 3-1
-                                        x1 = xh[m2];
-                                        y1 = yh[m2];
-                                        x2 = xsect( m3, m1 );
-                                        y2 = ysect( m3, m1 );
-                                        break;
-                                    case 6: //  Line between vertex 3 and side 1-2
-                                        x1 = xh[m3];
-                                        y1 = yh[m3];
-                                        x2 = xsect( m1, m2 );
-                                        y2 = ysect( m1, m2 );
-                                        break;
-                                    case 7: // Line between sides 1-2 and 2-3
-                                        x1 = xsect( m1, m2 );
-                                        y1 = ysect( m1, m2 );
-                                        x2 = xsect( m2, m3 );
-                                        y2 = ysect( m2, m3 );
-                                        break;
-                                    case 8: // Line between sides 2-3 and 3-1
-                                        x1 = xsect( m2, m3 );
-                                        y1 = ysect( m2, m3 );
-                                        x2 = xsect( m3, m1 );
-                                        y2 = ysect( m3, m1 );
-                                        break;
-                                    case 9: // Line between sides 3-1 and 1-2
-                                        x1 = xsect( m3, m1 );
-                                        y1 = ysect( m3, m1 );
-                                        x2 = xsect( m1, m2 );
-                                        y2 = ysect( m1, m2 );
-                                        break;
-                                    default:
-                                        break;
+                                        case 1: // Line between vertices 1 and 2
+                                            x1 = xh[m1];
+                                            y1 = yh[m1];
+                                            x2 = xh[m2];
+                                            y2 = yh[m2];
+                                            break;
+                                        case 2: // Line between vertices 2 and 3
+                                            x1 = xh[m2];
+                                            y1 = yh[m2];
+                                            x2 = xh[m3];
+                                            y2 = yh[m3];
+                                            break;
+                                        case 3: // Line between vertices 3 and 1
+                                            x1 = xh[m3];
+                                            y1 = yh[m3];
+                                            x2 = xh[m1];
+                                            y2 = yh[m1];
+                                            break;
+                                        case 4: // Line between vertex 1 and side 2-3
+                                            x1 = xh[m1];
+                                            y1 = yh[m1];
+                                            x2 = xsect( m2, m3 );
+                                            y2 = ysect( m2, m3 );
+                                            break;
+                                        case 5: // Line between vertex 2 and side 3-1
+                                            x1 = xh[m2];
+                                            y1 = yh[m2];
+                                            x2 = xsect( m3, m1 );
+                                            y2 = ysect( m3, m1 );
+                                            break;
+                                        case 6: //  Line between vertex 3 and side 1-2
+                                            x1 = xh[m3];
+                                            y1 = yh[m3];
+                                            x2 = xsect( m1, m2 );
+                                            y2 = ysect( m1, m2 );
+                                            break;
+                                        case 7: // Line between sides 1-2 and 2-3
+                                            x1 = xsect( m1, m2 );
+                                            y1 = ysect( m1, m2 );
+                                            x2 = xsect( m2, m3 );
+                                            y2 = ysect( m2, m3 );
+                                            break;
+                                        case 8: // Line between sides 2-3 and 3-1
+                                            x1 = xsect( m2, m3 );
+                                            y1 = ysect( m2, m3 );
+                                            x2 = xsect( m3, m1 );
+                                            y2 = ysect( m3, m1 );
+                                            break;
+                                        case 9: // Line between sides 3-1 and 1-2
+                                            x1 = xsect( m3, m1 );
+                                            y1 = ysect( m3, m1 );
+                                            x2 = xsect( m1, m2 );
+                                            y2 = ysect( m1, m2 );
+                                            break;
+                                        default:
+                                            break;
                                     }
                                     // Put your processing code here and comment out the printf
                                     //printf("%f %f %f %f %f\n",x1,y1,x2,y2,z[k]);

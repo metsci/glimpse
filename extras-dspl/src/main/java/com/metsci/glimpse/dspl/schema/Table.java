@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -44,7 +44,6 @@ import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 
 /**
  *
@@ -86,20 +85,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Table", propOrder = {
-    "info",
-    "column",
-    "data"
-})
-public class Table {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Table", propOrder = { "info", "column", "data" } )
+public class Table
+{
 
     protected Info info;
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected List<Table.Column> column;
     protected Data data;
-    @XmlAttribute(name = "id", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "id", required = true )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     @XmlID
     protected String id;
 
@@ -111,7 +107,8 @@ public class Table {
      *     {@link Info }
      *
      */
-    public Info getInfo() {
+    public Info getInfo( )
+    {
         return info;
     }
 
@@ -123,7 +120,8 @@ public class Table {
      *     {@link Info }
      *
      */
-    public void setInfo(Info value) {
+    public void setInfo( Info value )
+    {
         this.info = value;
     }
 
@@ -149,9 +147,11 @@ public class Table {
      *
      *
      */
-    public List<Table.Column> getColumn() {
-        if (column == null) {
-            column = new ArrayList<Table.Column>();
+    public List<Table.Column> getColumn( )
+    {
+        if ( column == null )
+        {
+            column = new ArrayList<Table.Column>( );
         }
         return this.column;
     }
@@ -164,7 +164,8 @@ public class Table {
      *     {@link Data }
      *
      */
-    public Data getData() {
+    public Data getData( )
+    {
         return data;
     }
 
@@ -176,7 +177,8 @@ public class Table {
      *     {@link Data }
      *
      */
-    public void setData(Data value) {
+    public void setData( Data value )
+    {
         this.data = value;
     }
 
@@ -188,7 +190,8 @@ public class Table {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -200,10 +203,10 @@ public class Table {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -227,19 +230,18 @@ public class Table {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "value"
-    })
-    public static class Column {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "value" } )
+    public static class Column
+    {
 
         protected String value;
-        @XmlAttribute(name = "id", required = true)
-        @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+        @XmlAttribute( name = "id", required = true )
+        @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
         protected String id;
-        @XmlAttribute(name = "type", required = true)
+        @XmlAttribute( name = "type", required = true )
         protected DataType type;
-        @XmlAttribute(name = "format")
+        @XmlAttribute( name = "format" )
         protected String format;
 
         /**
@@ -250,7 +252,8 @@ public class Table {
          *     {@link String }
          *
          */
-        public String getValue() {
+        public String getValue( )
+        {
             return value;
         }
 
@@ -262,7 +265,8 @@ public class Table {
          *     {@link String }
          *
          */
-        public void setValue(String value) {
+        public void setValue( String value )
+        {
             this.value = value;
         }
 
@@ -274,7 +278,8 @@ public class Table {
          *     {@link String }
          *
          */
-        public String getId() {
+        public String getId( )
+        {
             return id;
         }
 
@@ -286,7 +291,8 @@ public class Table {
          *     {@link String }
          *
          */
-        public void setId(String value) {
+        public void setId( String value )
+        {
             this.id = value;
         }
 
@@ -298,7 +304,8 @@ public class Table {
          *     {@link DataType }
          *
          */
-        public DataType getType() {
+        public DataType getType( )
+        {
             return type;
         }
 
@@ -310,7 +317,8 @@ public class Table {
          *     {@link DataType }
          *
          */
-        public void setType(DataType value) {
+        public void setType( DataType value )
+        {
             this.type = value;
         }
 
@@ -322,7 +330,8 @@ public class Table {
          *     {@link String }
          *
          */
-        public String getFormat() {
+        public String getFormat( )
+        {
             return format;
         }
 
@@ -334,12 +343,12 @@ public class Table {
          *     {@link String }
          *
          */
-        public void setFormat(String value) {
+        public void setFormat( String value )
+        {
             this.format = value;
         }
 
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected DataSet dataset;
@@ -353,6 +362,5 @@ public class Table {
     {
         this.dataset = dataSet;
     }
-
 
 }

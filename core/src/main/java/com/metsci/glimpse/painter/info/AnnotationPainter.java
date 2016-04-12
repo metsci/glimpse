@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.jogamp.opengl.util.gl2.GLUT;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -47,30 +49,6 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  */
 public class AnnotationPainter extends GlimpseDataPainter2D
 {
-    public static enum AnnotationFont
-    {
-        Monospace_8_BY_13(GLUT.BITMAP_8_BY_13, 13), Monospace_9_BY_15(GLUT.BITMAP_9_BY_15, 15), Times_Roman_10(GLUT.BITMAP_TIMES_ROMAN_10, 10), Times_Roman_24(GLUT.BITMAP_TIMES_ROMAN_24, 24), Helvetical_10(GLUT.BITMAP_HELVETICA_10, 10), Helvetical_12(GLUT.BITMAP_HELVETICA_12, 12), Helvetical_18(GLUT.BITMAP_HELVETICA_18, 18);
-
-        private int font;
-        private int height;
-
-        private AnnotationFont( int font, int height )
-        {
-            this.font = font;
-            this.height = height;
-        }
-
-        public int getFont( )
-        {
-            return this.font;
-        }
-
-        public int getHeight( )
-        {
-            return this.height;
-        }
-    }
-
     public static class Annotation
     {
         protected float x;
@@ -79,41 +57,27 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         protected int offset_y;
         protected float[] color;
         protected String text;
-        protected TextRenderer textRenderer;
-        protected int font;
-        protected int height;
-        protected boolean centerX;
-        protected boolean centerY;
+        protected HorizontalPosition hPos;
+        protected VerticalPosition vPos;
         protected long startTime;
         protected long endTime;
 
         public Annotation( String text, float x, float y )
         {
-            this( text, x, y, 0, 0, false, false, null, null );
+            this( text, x, y, HorizontalPosition.Left, VerticalPosition.Bottom );
         }
 
-        public Annotation( String text, float x, float y, boolean centerX, boolean centerY )
+        public Annotation( String text, float x, float y, HorizontalPosition hPos, VerticalPosition vPos )
         {
-            this( text, x, y, 0, 0, centerX, centerY, null, null );
+            this( text, x, y, 0, 0, hPos, vPos, GlimpseColor.getBlack( ) );
         }
 
         public Annotation( String text, float x, float y, float[] color )
         {
-            this( text, x, y, 0, 0, false, false, null, color );
+            this( text, x, y, 0, 0, HorizontalPosition.Left, VerticalPosition.Bottom, color );
         }
 
-        //@formatter:off
-        public Annotation( TextRenderer textRenderer, String text,
-                float x, float y, int offset_x, int offset_y,
-                boolean centerX, boolean centerY, float[] color )
-        {
-             this( textRenderer, text, x,  y,  offset_x,  offset_y, centerX,  centerY,  color, Long.MIN_VALUE, Long.MAX_VALUE );
-        }
-
-        public Annotation( String text, float x, float y,
-                           int offset_x, int offset_y,
-                           boolean centerX, boolean centerY,
-                           AnnotationFont font, float[] color )
+        public Annotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
         {
             this.x = x;
             this.y = y;
@@ -121,17 +85,11 @@ public class AnnotationPainter extends GlimpseDataPainter2D
             this.offset_y = offset_y;
             this.text = text;
             this.color = color;
-            this.centerX = centerX;
-            this.centerY = centerY;
-            font = font == null ? DEFAULT_FONT : font;
-            this.font = font.getFont( );
-            this.height = font.getHeight( );
+            this.hPos = hPos;
+            this.vPos = vPos;
         }
 
-        public Annotation( TextRenderer textRenderer, String text,
-                          float x, float y, int offset_x, int offset_y,
-                          boolean centerX, boolean centerY,
-                          float[] color, long startTime, long endTime )
+        public Annotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color, long startTime, long endTime )
         {
             this.x = x;
             this.y = y;
@@ -139,11 +97,8 @@ public class AnnotationPainter extends GlimpseDataPainter2D
             this.offset_y = offset_y;
             this.text = text;
             this.color = color;
-            this.centerX = centerX;
-            this.centerY = centerY;
-            this.font = -1;
-            this.height = -1;
-            this.textRenderer = textRenderer;
+            this.hPos = hPos;
+            this.vPos = vPos;
             this.startTime = startTime;
             this.endTime = endTime;
         }
@@ -169,7 +124,6 @@ public class AnnotationPainter extends GlimpseDataPainter2D
             this.startTime = startTime;
         }
 
-
         /**
          * @deprecated
          * @see #getEndTimeStamp()
@@ -189,7 +143,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         {
             this.endTime = endTime;
         }
-        
+
         public TimeStamp getStartTimeStamp( )
         {
             return TimeStamp.fromPosixMillis( startTime );
@@ -270,55 +224,28 @@ public class AnnotationPainter extends GlimpseDataPainter2D
             this.text = text;
         }
 
-        public int getFont( )
+        public HorizontalPosition getHorizontalPosition( )
         {
-            return font;
+            return this.hPos;
         }
 
-        public void setFont( int font )
+        public void setHorizontalPosition( HorizontalPosition hPos )
         {
-            this.font = font;
+            this.hPos = hPos;
         }
 
-        public int getHeight( )
+        public VerticalPosition getVerticalPosition( )
         {
-            return height;
+            return this.vPos;
         }
 
-        public void setHeight( int height )
+        public void setVerticalPosition( VerticalPosition vPos )
         {
-            this.height = height;
-        }
-
-        public boolean isCenterX( )
-        {
-            return centerX;
-        }
-
-        public void setCenterX( boolean centerX )
-        {
-            this.centerX = centerX;
-        }
-
-        public boolean isCenterY( )
-        {
-            return centerY;
-        }
-
-        public void setCenterY( boolean centerY )
-        {
-            this.centerY = centerY;
-        }
-
-        public TextRenderer getTextRenderer( )
-        {
-            return textRenderer;
+            this.vPos = vPos;
         }
     }
 
-    protected static final GLUT glut = new GLUT( );
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
-    protected static final AnnotationFont DEFAULT_FONT = AnnotationFont.Helvetical_12;
 
     protected Collection<Annotation> annotations;
     protected ReentrantLock lock;
@@ -326,10 +253,23 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     protected long minTime = Long.MIN_VALUE;
     protected long maxTime = Long.MAX_VALUE;
 
+    protected TextRenderer textRenderer;
+
     public AnnotationPainter( )
+    {
+        this( new TextRenderer( FontUtils.getDefaultPlain( 14.0f ) ) );
+    }
+
+    public AnnotationPainter( TextRenderer textRenderer )
     {
         this.annotations = new ArrayList<Annotation>( );
         this.lock = new ReentrantLock( );
+        this.textRenderer = textRenderer;
+    }
+
+    public TextRenderer getTextRenderer( )
+    {
+        return this.textRenderer;
     }
 
     public Annotation addAnnotation( String text, float x, float y )
@@ -347,27 +287,12 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
     }
 
-    public Annotation addAnnotation( String text, float x, float y, int offset_x, int offset_y, boolean centerX, boolean centerY, AnnotationFont font, float[] color )
+    public Annotation addAnnotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
     {
         this.lock.lock( );
         try
         {
-            Annotation annotation = new Annotation( text, x, y, offset_x, offset_y, centerX, centerY, font, color );
-            this.annotations.add( annotation );
-            return annotation;
-        }
-        finally
-        {
-            this.lock.unlock( );
-        }
-    }
-
-    public Annotation addAnnotation( TextRenderer textRenderer, String text, float x, float y, int offset_x, int offset_y, boolean centerX, boolean centerY, float[] color )
-    {
-        this.lock.lock( );
-        try
-        {
-            Annotation annotation = new Annotation( textRenderer, text, x, y, offset_x, offset_y, centerX, centerY, color );
+            Annotation annotation = new Annotation( text, x, y, offset_x, offset_y, hPos, vPos, color );
             this.annotations.add( annotation );
             return annotation;
         }
@@ -408,7 +333,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     {
         displayTime( time.toPosixMillis( ) );
     }
-    
+
     /**
      * @see #displayTime( TimeStamp )
      * @deprecated
@@ -432,7 +357,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     {
         displayTimeRange( minTime.toPosixMillis( ), maxTime.toPosixMillis( ) );
     }
-    
+
     /**
      * @see #displayTimeRange( TimeStamp, TimeStamp )
      * @deprecated
@@ -461,57 +386,59 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            for ( Annotation annotation : annotations )
+            textRenderer.beginRendering( width, height );
+            try
             {
-                if ( !inTimeRange( annotation ) )
-                    continue;
-
-                float[] textColor = DEFAULT_COLOR;
-                if ( annotation.color != null ) textColor = annotation.color;
-
-                if ( annotation.getTextRenderer( ) != null )
+                for ( Annotation annotation : annotations )
                 {
-                    TextRenderer textRenderer = annotation.getTextRenderer( );
+                    if ( !inTimeRange( annotation ) ) continue;
+
+                    float[] textColor = DEFAULT_COLOR;
+                    if ( annotation.color != null ) textColor = annotation.color;
 
                     Rectangle2D textBounds = textRenderer.getBounds( annotation.text );
-                    int x = ( int ) ( axis.getAxisX( ).valueToScreenPixel( annotation.x ) - ( annotation.centerX ? textBounds.getWidth( ) / 2 : 0 ) );
-                    int y = ( int ) ( axis.getAxisY( ).valueToScreenPixel( annotation.y ) - ( annotation.centerY ? textBounds.getHeight( ) / 2 : 0 ) );
 
-                    textRenderer.beginRendering( width, height );
-                    try
+                    double textWidth = textBounds.getWidth( );
+                    // textBounds.getHeight( ) is too conservative (box is too large, perhaps to fit every conceivable character)
+                    double textHeight = textRenderer.getFont( ).getSize( );
+
+                    int halfTextWidth = ( int ) ( textWidth / 2d );
+                    int halfTextHeight = ( int ) ( textHeight / 2d );
+
+                    int x = axis.getAxisX( ).valueToScreenPixel( annotation.x );
+                    int y = axis.getAxisY( ).valueToScreenPixel( annotation.y );
+
+                    switch ( annotation.hPos )
                     {
-                        textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
-                        textRenderer.draw( annotation.text, x + annotation.offset_x, y + annotation.offset_y );
+                        case Left:
+                            break;
+                        case Center:
+                            x = x - halfTextWidth;
+                            break;
+                        case Right:
+                            x = x - ( int ) textWidth;
+                            break;
                     }
-                    finally
+
+                    switch ( annotation.vPos )
                     {
-                        textRenderer.endRendering( );
+                        case Bottom:
+                            break;
+                        case Center:
+                            y = y - halfTextHeight;
+                            break;
+                        case Top:
+                            y = y - ( int ) textHeight;
+                            break;
                     }
+
+                    textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
+                    textRenderer.draw( annotation.text, x + annotation.offset_x, y + annotation.offset_y );
                 }
-                else
-                {
-                    gl.glColor3fv( textColor, 0 );
-
-                    float posX = annotation.x;
-                    float posY = annotation.y;
-
-                    posX += annotation.offset_x / axis.getAxisX( ).getPixelsPerValue( );
-                    posY += annotation.offset_y / axis.getAxisY( ).getPixelsPerValue( );
-
-                    if ( annotation.centerX )
-                    {
-                        posX -= glut.glutBitmapLength( annotation.font, annotation.text ) / ( 2 * axis.getAxisX( ).getPixelsPerValue( ) );
-                    }
-
-                    if ( annotation.centerY )
-                    {
-                        posY -= annotation.height / ( 3 * axis.getAxisY( ).getPixelsPerValue( ) );
-                    }
-
-                    gl.glRasterPos2f( posX, posY );
-
-                    glut.glutBitmapString( annotation.font, annotation.text );
-                }
+            }
+            finally
+            {
+                textRenderer.endRendering( );
             }
         }
         finally
@@ -522,7 +449,6 @@ public class AnnotationPainter extends GlimpseDataPainter2D
 
     protected boolean inTimeRange( Annotation annotation )
     {
-        return ( annotation.getStartTime( ) <= maxTime && annotation.getEndTime( ) >= minTime ) ||
-               ( minTime <= annotation.getEndTime( ) && maxTime >= annotation.getStartTime( ) );
+        return ( annotation.getStartTime( ) <= maxTime && annotation.getEndTime( ) >= minTime ) || ( minTime <= annotation.getEndTime( ) && maxTime >= annotation.getStartTime( ) );
     }
 }

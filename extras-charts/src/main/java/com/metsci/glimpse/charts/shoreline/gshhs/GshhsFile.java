@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,12 +68,11 @@ public class GshhsFile extends LandFile
     {
         super( readSegments( file, box ).first( ), box, false );
     }
-    
+
     public GshhsFile( InputStream stream, LandBox box, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
     {
         super( readSegments0( stream, box, isLittleEndian ).first( ), box, false );
     }
-    
 
     /**
      * Deprecated in favor of {@link GshhsReader#readSegments(File)}.
@@ -90,13 +89,12 @@ public class GshhsFile extends LandFile
             return readSegments0( file, box, true );
         }
     }
-    
 
     private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments0( File file, LandBox box1, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
     {
-        return readSegments0(new FileInputStream( file ), box1, isLittleEndian );
+        return readSegments0( new FileInputStream( file ), box1, isLittleEndian );
     }
-    
+
     private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments0( InputStream unbufferedInputStream, LandBox box1, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
     {
         DataInputStream stream = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,82 +42,115 @@ public class Speed
 
     public static final double metersPerSecondToKnots = 1.0 / knotsToMetersPerSecond;
 
+    /**
+     * Converts speed from meters-per-second to knots.
+     */
+    public static double metersPerSecondToKnots( double speed_METERS_PER_SECOND )
+    {
+        return speed_METERS_PER_SECOND * metersPerSecondToKnots;
+    }
 
     /**
      * Converts speed from meters-per-second to knots.
      */
-    public static double metersPerSecondToKnots(double speed_METERS_PER_SECOND) { return speed_METERS_PER_SECOND * metersPerSecondToKnots; }
-
-    /**
-     * Converts speed from meters-per-second to knots.
-     */
-    public static double[] metersPerSecondToKnots(double... speeds_METERS_PER_SECOND) { return multiply(speeds_METERS_PER_SECOND, metersPerSecondToKnots); }
-
-    /**
-     * Converts speed from knots to meters-per-second.
-     */
-    public static double knotsToMetersPerSecond(double speed_KNOTS) { return speed_KNOTS * knotsToMetersPerSecond; }
+    public static double[] metersPerSecondToKnots( double... speeds_METERS_PER_SECOND )
+    {
+        return multiply( speeds_METERS_PER_SECOND, metersPerSecondToKnots );
+    }
 
     /**
      * Converts speed from knots to meters-per-second.
      */
-    public static double[] knotsToMetersPerSecond(double... speeds_KNOTS) { return multiply(speeds_KNOTS, knotsToMetersPerSecond); }
+    public static double knotsToMetersPerSecond( double speed_KNOTS )
+    {
+        return speed_KNOTS * knotsToMetersPerSecond;
+    }
 
+    /**
+     * Converts speed from knots to meters-per-second.
+     */
+    public static double[] knotsToMetersPerSecond( double... speeds_KNOTS )
+    {
+        return multiply( speeds_KNOTS, knotsToMetersPerSecond );
+    }
 
     // System units for speed are derived from system units for length and time.
     //
     public static final double metersPerSecondToSu = Length.metersToSu / Time.secondsToSu;
-    public static final double knotsToSu           = Length.nauticalMilesToSu / Time.hoursToSu;
+    public static final double knotsToSu = Length.nauticalMilesToSu / Time.hoursToSu;
 
     public static final double suToMetersPerSecond = 1.0 / metersPerSecondToSu;
-    public static final double suToKnots           = 1.0 / knotsToSu;
-
-
-    /**
-     * Converts speed from meters-per-second to system-units.
-     */
-    public static double fromMetersPerSecond(double speed_METERS_PER_SECOND) { return speed_METERS_PER_SECOND * metersPerSecondToSu; }
+    public static final double suToKnots = 1.0 / knotsToSu;
 
     /**
      * Converts speed from meters-per-second to system-units.
      */
-    public static double[] fromMetersPerSecond(double... speeds_METERS_PER_SECOND) { return multiply(speeds_METERS_PER_SECOND, metersPerSecondToSu); }
+    public static double fromMetersPerSecond( double speed_METERS_PER_SECOND )
+    {
+        return speed_METERS_PER_SECOND * metersPerSecondToSu;
+    }
+
+    /**
+     * Converts speed from meters-per-second to system-units.
+     */
+    public static double[] fromMetersPerSecond( double... speeds_METERS_PER_SECOND )
+    {
+        return multiply( speeds_METERS_PER_SECOND, metersPerSecondToSu );
+    }
 
     /**
      * Converts speed from system-units to meters-per-second.
      */
-    public static double toMetersPerSecond(double speed_SU) { return speed_SU * suToMetersPerSecond; }
+    public static double toMetersPerSecond( double speed_SU )
+    {
+        return speed_SU * suToMetersPerSecond;
+    }
 
     /**
      * Converts speed from system-units to meters-per-second.
      */
-    public static double[] toMetersPerSecond(double... speeds_SU) { return multiply(speeds_SU, suToMetersPerSecond); }
+    public static double[] toMetersPerSecond( double... speeds_SU )
+    {
+        return multiply( speeds_SU, suToMetersPerSecond );
+    }
 
     /**
      * Converts speed from knots to system-units.
      */
-    public static double fromKnots(double speed_KNOTS) { return speed_KNOTS * knotsToSu; }
+    public static double fromKnots( double speed_KNOTS )
+    {
+        return speed_KNOTS * knotsToSu;
+    }
 
     /**
      * Converts speed from knots to system-units.
      */
-    public static double[] fromKnots(double... speeds_KNOTS) { return multiply(speeds_KNOTS, knotsToSu); }
+    public static double[] fromKnots( double... speeds_KNOTS )
+    {
+        return multiply( speeds_KNOTS, knotsToSu );
+    }
 
     /**
      * Converts speed from system-units to knots.
      */
-    public static double toKnots(double speed_SU) { return speed_SU * suToKnots; }
+    public static double toKnots( double speed_SU )
+    {
+        return speed_SU * suToKnots;
+    }
 
     /**
      * Converts speed from system-units to knots.
      */
-    public static double[] toKnots(double... speeds_SU) { return multiply(speeds_SU, suToKnots); }
+    public static double[] toKnots( double... speeds_SU )
+    {
+        return multiply( speeds_SU, suToKnots );
+    }
 
-
-    private static double[] multiply(double[] array, double factor)
+    private static double[] multiply( double[] array, double factor )
     {
         double[] result = new double[array.length];
-        for (int i = 0; i < result.length; i++) result[i] = factor * array[i];
+        for ( int i = 0; i < result.length; i++ )
+            result[i] = factor * array[i];
         return result;
     }
 

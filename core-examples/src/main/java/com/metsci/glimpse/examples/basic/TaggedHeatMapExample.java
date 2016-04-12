@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,13 @@
  */
 package com.metsci.glimpse.examples.basic;
 
+import static com.metsci.glimpse.axis.tagged.Tag.TAG_COLOR_ATTR;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
-import com.metsci.glimpse.axis.tagged.NamedConstraint;
-import com.metsci.glimpse.axis.tagged.Tag;
+import java.util.Arrays;
+
+import com.google.common.collect.Lists;
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -39,6 +42,7 @@ import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.plot.TaggedColorAxisPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.FlatProjection;
@@ -74,29 +78,15 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         // add some named tags at specific points along the axis
         // also add a custom "attribute" to each tag which specifies the relative (0 to 1)
         // point along the color scale which the tag is attached to
-        final Tag t1 = axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
-        final Tag t2 = axisZ.addTag( "T2", 300.0 ).setAttribute( TEX_COORD_ATTR, 0.3f );
-        final Tag t3 = axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f );
-        final Tag t4 = axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
-        final Tag t5 = axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        // also add a custom "attribute" which defines the display color of the tag
+        axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
+        axisZ.addTag( "T2", 300.0 ).setAttribute( TEX_COORD_ATTR, 0.3f );
+        axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getBlue( ) );
+        axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
+        axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
 
         // add a constraint which prevents dragging the tags past one another
-        axisZ.addConstraint( new NamedConstraint( "C1" )
-        {
-            final static double buffer = 1.0;
-
-            @Override
-            public void applyConstraint( TaggedAxis1D axis )
-            {
-                if ( t4.getValue( ) > t5.getValue( ) - buffer ) t4.setValue( t5.getValue( ) - buffer );
-
-                if ( t3.getValue( ) > t4.getValue( ) - buffer ) t3.setValue( t4.getValue( ) - buffer );
-
-                if ( t2.getValue( ) > t3.getValue( ) - buffer ) t2.setValue( t3.getValue( ) - buffer );
-
-                if ( t1.getValue( ) > t2.getValue( ) - buffer ) t1.setValue( t2.getValue( ) - buffer );
-            }
-        } );
+        axisZ.addConstraint( new OrderedConstraint( "C1", 20.0, Arrays.asList( "T1", "T2", "T3", "T4", "T5" ) ) );
 
         // set border and offset sizes in pixels
         plot.setBorderSize( 15 );
@@ -168,11 +158,14 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
         return plot;
     }
-    
+
     @Override
     public ColorAxisPlot2D getLayout( )
     {
-        return getLayout( ColorGradients.purpleBone );
+        // demonstrates three possible color maps, see ColorGradients for others
+        return getLayout( ColorGradients.customMap( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ), GlimpseColor.getMagenta( ) ) ) );
+        //return getLayout( ColorGradients.lighten( ColorGradients.winter, .25 ) );
+        //return getLayout( ColorGradients.nColorFade( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ) ) ) );
     }
 
     public GlimpsePainter getPainter( )

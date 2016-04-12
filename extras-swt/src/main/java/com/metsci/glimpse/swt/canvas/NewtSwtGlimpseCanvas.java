@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,13 +87,13 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         super( parent, options );
         init( parent, profile, null, options );
     }
-    
+
     public NewtSwtGlimpseCanvas( Composite parent, GLContext context, int options )
     {
         super( parent, options );
         init( parent, context.getGLDrawable( ).getGLProfile( ), context, options );
     }
-    
+
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
@@ -103,7 +103,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         super( parent, options );
         init( parent, glProfile, context, options );
     }
-    
+
     /**
      * @deprecated Use {@link #NewtSwtGlimpseCanvas(Composite, GLContext, int)} instead. The context implicitly provides a GLProfile.
      */
@@ -112,7 +112,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         this( parent, GLProfile.get( profile ), context, options );
     }
-    
+
     public void init( Composite parent, GLProfile glProfile, GLContext context, int options )
     {
         this.glProfile = glProfile;
@@ -125,7 +125,15 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
         FillLayout layout = new FillLayout( );
         this.setLayout( layout );
 
-        this.glCanvas = new NewtCanvasSWT( this, options, glWindow );
+        this.glCanvas = new NewtCanvasSWT( this, options, glWindow )
+        {
+            @Override
+            public void setBounds( int x, int y, int width, int height )
+            {
+                //do not allow a size of 0,0, because NEWT window becomes invisible
+                super.setBounds( x, y, Math.max( 1, width ), Math.max( 1, height ) );
+            }
+        };
 
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
@@ -192,7 +200,8 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                dimension = new Dimension( width, height );
+                int[] scale = getSurfaceScale( );
+                dimension = new Dimension( width / scale[0], height / scale[1] );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -215,7 +224,7 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         return glCanvas;
     }
-    
+
     @Override
     public GLProfile getGLProfile( )
     {
@@ -370,14 +379,14 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -390,16 +399,16 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -412,5 +421,11 @@ public class NewtSwtGlimpseCanvas extends Composite implements NewtGlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return glWindow.getNativeSurfaceScale( new int[2] );
     }
 }

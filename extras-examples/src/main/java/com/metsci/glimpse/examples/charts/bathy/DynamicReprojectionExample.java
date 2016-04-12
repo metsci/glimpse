@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,14 @@ import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.NamedConstraint;
-import com.metsci.glimpse.axis.tagged.Tag;
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
@@ -55,8 +55,8 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.projection.LatLonProjection;
+import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -123,27 +123,17 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         colorMapTexture.mutate( new ColorGradientConcatenator( ColorGradients.bathymetry, ColorGradients.topography ) );
         colorTagPainter.setColorScale( colorMapTexture );
 
-        final Tag maxTag = colorAxis.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
-        final Tag seaLevelTag = colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
-        final Tag minTag = colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
+        colorAxis.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+        colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
+        colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
-        colorAxis.addConstraint( new NamedConstraint( "OrderingConstraint" )
-        {
-            protected double buffer = 200;
-
-            @Override
-            public void applyConstraint( TaggedAxis1D axis )
-            {
-                if ( seaLevelTag.getValue( ) > maxTag.getValue( ) - buffer ) seaLevelTag.setValue( maxTag.getValue( ) - buffer );
-                if ( minTag.getValue( ) > seaLevelTag.getValue( ) - buffer ) minTag.setValue( seaLevelTag.getValue( ) - buffer );
-            }
-        } );
+        // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
+        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
 
         colorAxis.setMin( -10000 );
         colorAxis.setMax( 12000 );
 
         // miscellaneous painters
-
         plot.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getBlack( ) ) );
 
         GridPainter grid = new GridPainter( xTicks, yTicks );

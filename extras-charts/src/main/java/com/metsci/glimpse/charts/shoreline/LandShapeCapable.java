@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.charts.shoreline;
 
-
 public interface LandShapeCapable
 {
-	LandShape toShape();
+    LandShape toShape( );
 }

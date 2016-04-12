@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.dspl.util;
 
-import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 
 import java.io.IOException;
 import java.util.ArrayList;

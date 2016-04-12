@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,13 @@
  */
 package com.metsci.glimpse.util.primitives.sorted;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import java.util.Arrays;
 
 import com.metsci.glimpse.util.primitives.Doubles;
 import com.metsci.glimpse.util.primitives.DoublesArray;
-
-import static java.lang.Math.*;
 
 /**
  * @author hogye
@@ -47,19 +48,19 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      *
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public SortedDoublesArray(double[] a)
+    public SortedDoublesArray( double[] a )
     {
-        super(a);
+        super( a );
     }
 
-    public SortedDoublesArray(int n)
+    public SortedDoublesArray( int n )
     {
-        super(n);
+        super( n );
     }
 
-    public SortedDoublesArray()
+    public SortedDoublesArray( )
     {
-        super();
+        super( );
     }
 
     /**
@@ -68,9 +69,9 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      *
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public SortedDoublesArray(double[] a, int n)
+    public SortedDoublesArray( double[] a, int n )
     {
-        super(a, n);
+        super( a, n );
     }
 
     /**
@@ -79,118 +80,115 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      *
      * Clones the sequence arg.
      */
-    public SortedDoublesArray(Doubles xs)
+    public SortedDoublesArray( Doubles xs )
     {
-        super(xs);
+        super( xs );
     }
-
-
-
 
     // Search
 
     @Override
-    public int indexOf(double x)
+    public int indexOf( double x )
     {
-        return Arrays.binarySearch(a, 0, n, x);
+        return Arrays.binarySearch( a, 0, n, x );
     }
 
     @Override
-    public int indexNearest(double x)
+    public int indexNearest( double x )
     {
-        int i = indexOf(x);
+        int i = indexOf( x );
 
         // Exact value found
-        if (i >= 0) return i;
+        if ( i >= 0 ) return i;
 
         // Find the closer of the adjacent values
         int iAfter = -i - 1;
         int iBefore = iAfter - 1;
 
-        if (iAfter >= this.n) return iBefore;
-        if (iBefore < 0) return iAfter;
+        if ( iAfter >= this.n ) return iBefore;
+        if ( iBefore < 0 ) return iAfter;
 
         double[] a = this.a;
         double diffAfter = a[iAfter] - x;
         double diffBefore = x - a[iBefore];
 
-        return (diffAfter <= diffBefore ? iAfter : iBefore);
+        return ( diffAfter <= diffBefore ? iAfter : iBefore );
     }
 
     @Override
-    public int indexAfter(double x)
+    public int indexAfter( double x )
     {
-        int i = indexOf(x);
+        int i = indexOf( x );
 
         // Exact value not found
-        if (i < 0) return (-i - 1);
+        if ( i < 0 ) return ( -i - 1 );
 
         // If the exact value was found, find the value's
         // last occurrence
         double[] a = this.a;
         int n = this.n;
-        for (int j = i + 1; j < n; j++)
+        for ( int j = i + 1; j < n; j++ )
         {
-            if (a[j] > x) return j;
+            if ( a[j] > x ) return j;
         }
         return n;
     }
 
     @Override
-    public int indexAtOrAfter(double x)
+    public int indexAtOrAfter( double x )
     {
-        int i = indexOf(x);
+        int i = indexOf( x );
 
         // Exact value not found
-        if (i < 0) return (-i - 1);
+        if ( i < 0 ) return ( -i - 1 );
 
         // If the exact value was found, find the value's
         // first occurrence
         double[] a = this.a;
-        for (int j = i; j > 0; j--)
+        for ( int j = i; j > 0; j-- )
         {
-            if (a[j - 1] < x) return j;
+            if ( a[j - 1] < x ) return j;
         }
         return 0;
     }
 
     @Override
-    public int indexBefore(double x)
+    public int indexBefore( double x )
     {
-        return indexAtOrAfter(x) - 1;
+        return indexAtOrAfter( x ) - 1;
     }
 
     @Override
-    public int indexAtOrBefore(double x)
+    public int indexAtOrBefore( double x )
     {
-        return indexAfter(x) - 1;
+        return indexAfter( x ) - 1;
     }
 
     /**
      * @throws RuntimeException if n is less than 2 and the exact value is not found
      */
     @Override
-    public void continuousIndexOf(double x, ContinuousIndex result)
+    public void continuousIndexOf( double x, ContinuousIndex result )
     {
-        int i = indexOf(x);
-        if (i >= 0)
+        int i = indexOf( x );
+        if ( i >= 0 )
         {
             // Exact value found
-            result.set(i, 0);
+            result.set( i, 0 );
         }
         else
         {
             // Find the continuous index between values
             int n = this.n;
-            int iAfter = max( 1, min( n-1, (-i - 1) ) );
+            int iAfter = max( 1, min( n - 1, ( -i - 1 ) ) );
             int iBefore = iAfter - 1;
 
             double[] a = this.a;
             double vBefore = a[iBefore];
             double vAfter = a[iAfter];
-            float f = (float) ((x - vBefore) / (vAfter - vBefore));
+            float f = ( float ) ( ( x - vBefore ) / ( vAfter - vBefore ) );
 
-            result.set(iBefore, f);
+            result.set( iBefore, f );
         }
     }
 
@@ -198,10 +196,10 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      * @throws RuntimeException if n is less than 2 and the exact value is not found
      */
     @Override
-    public ContinuousIndex continuousIndexOf(double x)
+    public ContinuousIndex continuousIndexOf( double x )
     {
-        ContinuousIndex h = new ContinuousIndex();
-        continuousIndexOf(x, h);
+        ContinuousIndex h = new ContinuousIndex( );
+        continuousIndexOf( x, h );
         return h;
     }
 
@@ -209,19 +207,19 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public void continuousIndicesOf(Doubles xs, ContinuousIndexArray result)
+    public void continuousIndicesOf( Doubles xs, ContinuousIndexArray result )
     {
         int n = this.n;
-        if (n < 2) throw new RuntimeException();
+        if ( n < 2 ) throw new RuntimeException( );
 
-        int nx = xs.n();
+        int nx = xs.n( );
 
-        ContinuousIndex h = new ContinuousIndex();
-        for (int ix = 0; ix < nx; ix++)
+        ContinuousIndex h = new ContinuousIndex( );
+        for ( int ix = 0; ix < nx; ix++ )
         {
-            double x = xs.v(ix);
-            continuousIndexOf(x, h);
-            result.put(ix, h);
+            double x = xs.v( ix );
+            continuousIndexOf( x, h );
+            result.put( ix, h );
         }
     }
 
@@ -229,10 +227,10 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public ContinuousIndexArray continuousIndicesOf(Doubles xs)
+    public ContinuousIndexArray continuousIndicesOf( Doubles xs )
     {
-        ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
-        continuousIndicesOf(xs, hs);
+        ContinuousIndexArray hs = new ContinuousIndexArray( xs.n( ) );
+        continuousIndicesOf( xs, hs );
         return hs;
     }
 
@@ -240,40 +238,39 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public void continuousIndicesOf(SortedDoubles xs, ContinuousIndexArray result)
+    public void continuousIndicesOf( SortedDoubles xs, ContinuousIndexArray result )
     {
         double[] a = this.a;
         int n = this.n;
-        if (n < 2) throw new RuntimeException();
+        if ( n < 2 ) throw new RuntimeException( );
 
-        int nx = xs.n();
+        int nx = xs.n( );
         int ix = 0;
-
 
         // Zip through any xs smaller than v(1)
         double v0 = a[0];
         double v1 = a[1];
-        double oneOverVStep1 = 1.0 / (v1 - v0);
-        for (; ix < nx; ix++)
+        double oneOverVStep1 = 1.0 / ( v1 - v0 );
+        for ( ; ix < nx; ix++ )
         {
-            double x = xs.v(ix);
-            if (x >= v1) break;
+            double x = xs.v( ix );
+            if ( x >= v1 ) break;
 
-            float f = (float) ((x - v0) * oneOverVStep1);
-            result.put(ix, 0, f);
+            float f = ( float ) ( ( x - v0 ) * oneOverVStep1 );
+            result.put( ix, 0, f );
         }
 
-
         // Walk through the window where xs and vs overlap
-        if (ix >= nx) return;
-        int i = indexAtOrAfter(xs.v(ix));
-        double vNextToLast = a[n-2];
-        for (; ix < nx; ix++)
+        if ( ix >= nx ) return;
+        int i = indexAtOrAfter( xs.v( ix ) );
+        double vNextToLast = a[n - 2];
+        for ( ; ix < nx; ix++ )
         {
-            double x = xs.v(ix);
-            if (x >= vNextToLast) break;
+            double x = xs.v( ix );
+            if ( x >= vNextToLast ) break;
 
-            while (a[i] < x) i++;
+            while ( a[i] < x )
+                i++;
 
             double v = a[i];
 
@@ -283,20 +280,19 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
 
             int iBefore = i - 1;
             double vBefore = a[iBefore];
-            float f = (float) ((x - vBefore) / (v - vBefore));
-            result.put(ix, iBefore, f);
+            float f = ( float ) ( ( x - vBefore ) / ( v - vBefore ) );
+            result.put( ix, iBefore, f );
         }
 
-
         // Zip through any xs larger than or equal to v(n-2)
-        double vLast = a[n-1];
-        double oneOverVStepLast = 1.0 / (vLast - vNextToLast);
-        for (; ix < nx; ix++)
+        double vLast = a[n - 1];
+        double oneOverVStepLast = 1.0 / ( vLast - vNextToLast );
+        for ( ; ix < nx; ix++ )
         {
-            double x = xs.v(ix);
+            double x = xs.v( ix );
 
-            float f = (float) ((x - vNextToLast) * oneOverVStepLast);
-            result.put(ix, n-2, f);
+            float f = ( float ) ( ( x - vNextToLast ) * oneOverVStepLast );
+            result.put( ix, n - 2, f );
         }
     }
 
@@ -304,23 +300,20 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public ContinuousIndexArray continuousIndicesOf(SortedDoubles xs)
+    public ContinuousIndexArray continuousIndicesOf( SortedDoubles xs )
     {
-        ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
-        continuousIndicesOf(xs, hs);
+        ContinuousIndexArray hs = new ContinuousIndexArray( xs.n( ) );
+        continuousIndicesOf( xs, hs );
         return hs;
     }
-
-
-
 
     // Mutators
 
     @Override
-    public int add(double v)
+    public int add( double v )
     {
-        int i = indexAfter(v);
-        insert(i, v);
+        int i = indexAfter( v );
+        insert( i, v );
         return i;
     }
 

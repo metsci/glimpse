@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,53 +34,59 @@ import java.nio.IntBuffer;
 public interface IntsModifiable extends Ints
 {
 
-    void set(int i, int v);
-    void set(int i, int[] vs);
-    void set(int i, int[] vs, int from, int to);
-    
+    void set( int i, int v );
 
+    void set( int i, int[] vs );
 
-    void insert(int i, int v);
+    void set( int i, int[] vs, int from, int to );
 
-    void insert(int i, int[] vs);
-    void insert(int i, Ints vs);
-    void insert(int i, IntBuffer vs);
+    void insert( int i, int v );
 
-    void insert(int i, int[] vs, int from, int to);
-    void insert(int i, Ints vs, int from, int to);
-    void insert(int i, IntBuffer vs, int c);
+    void insert( int i, int[] vs );
 
+    void insert( int i, Ints vs );
 
+    void insert( int i, IntBuffer vs );
 
-    void append(int v);
+    void insert( int i, int[] vs, int from, int to );
 
-    void append(int[] vs);
-    void append(Ints vs);
-    void append(IntBuffer vs);
+    void insert( int i, Ints vs, int from, int to );
 
-    void append(int[] vs, int from, int to);
-    void append(Ints vs, int from, int to);
-    void append(IntBuffer vs, int c);
+    void insert( int i, IntBuffer vs, int c );
 
+    void append( int v );
 
+    void append( int[] vs );
 
-    void prepend(int v);
+    void append( Ints vs );
 
-    void prepend(int[] vs);
-    void prepend(Ints vs);
-    void prepend(IntBuffer vs);
+    void append( IntBuffer vs );
 
-    void prepend(int[] vs, int from, int to);
-    void prepend(Ints vs, int from, int to);
-    void prepend(IntBuffer vs, int c);
+    void append( int[] vs, int from, int to );
 
+    void append( Ints vs, int from, int to );
 
+    void append( IntBuffer vs, int c );
+
+    void prepend( int v );
+
+    void prepend( int[] vs );
+
+    void prepend( Ints vs );
+
+    void prepend( IntBuffer vs );
+
+    void prepend( int[] vs, int from, int to );
+
+    void prepend( Ints vs, int from, int to );
+
+    void prepend( IntBuffer vs, int c );
 
     /**
      * Removes a single copy of the specified value. If multiple copies
      * are present, there is no guarantee which one will be removed.
      */
-    void remove(int v);
+    void remove( int v );
 
     /**
      * Removes values starting at index from (inclusive) to index to (exclusive).
@@ -88,21 +94,19 @@ public interface IntsModifiable extends Ints
      * their index in the array decreased by to-from and the size of the array is
      * decreased by to-from.
      */
-    void removeRange(int from, int to);
-    
+    void removeRange( int from, int to );
+
     /**
      * Remove value at index. All other values with indices greater than index have
      * their index in the array decreased by one and the size of the array is
      * decreased by one.
      */
-    void removeIndex(int index);
-    
+    void removeIndex( int index );
+
     void clear( );
 
+    void ensureCapacity( int minCapacity );
 
-
-    void ensureCapacity(int minCapacity);
-
-    void compact();
+    void compact( );
 
 }

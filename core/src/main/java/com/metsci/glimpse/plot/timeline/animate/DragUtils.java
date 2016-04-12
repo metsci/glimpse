@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,14 +80,14 @@ public class DragUtils
 
         return size;
     }
-    
+
     static int getIndex( List<PlotInfo> list, PlotInfo search )
     {
-        for ( int i = 0 ; i < list.size( ) ; i++ )
+        for ( int i = 0; i < list.size( ); i++ )
         {
             if ( list.get( i ).equals( search ) ) return i;
         }
-        
+
         return 0;
     }
 
@@ -107,7 +107,7 @@ public class DragUtils
 
         return null;
     }
-    
+
     static List<DragInfo> getDragInfoList( Orientation orientation, GlimpseMouseEvent event, List<PlotInfo> list )
     {
         List<DragInfo> dragList = new ArrayList<DragInfo>( list.size( ) );
@@ -142,7 +142,7 @@ public class DragUtils
     {
         return info.getBaseLayout( ).getTargetBounds( stack );
     }
-    
+
     static int getTotalSize( List<DragInfo> list )
     {
         int total = 0;

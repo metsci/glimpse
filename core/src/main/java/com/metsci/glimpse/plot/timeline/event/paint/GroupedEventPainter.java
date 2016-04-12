@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,34 +24,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.plot.timeline.event.paint;
+
+import java.util.Collection;
 
 import javax.media.opengl.GL2;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 
 /**
- * A painter responsible for making OpenGL calls to visualize an {@code Event}.
+ * A painter responsible for making OpenGL calls to visualize a collection of {@code Event}.
  * 
  * @author ulman
  */
-public interface EventPainter
+public interface GroupedEventPainter
 {
     /**
-     * <p>Renders the provided Event (potentially displaying its icon, label, time extents, etc...).<p>
-     * 
-     * <p>Both the Event to be painted and the next Event in the row (the event with the next largest
-     * start time) are provided. Only event should be rendered by this call. The nextEvent argument
-     * is provided only as context to allow the EventPainter to modify its rendering to ensure that
-     * it does not overlap with nextEvent.</p>
+     * Draw all the events in the provided collection using the GL2 handle.
      * 
      * @param gl OpenGL handle
-     * @param Event the Event to be painted
-     * @param nextEvent the next Event to be painted (as ordered by start time) 
      * @param info parent EventPlotInfo of Event to be painted
      * @param bounds width, height, and position of GlimpseLayout containing EventPlotInfo
-     * @param posMin the min y (or x, depending on orientation) in pixel coordinates of the Event
-     * @param posMax the max y (or x, depending on orientation) in pixel coordinates of the Event
+     * @param timeAxis the plot time axis
+     * @param events the event objects to draw
      */
-    public void paint( GL2 gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax );
+    public void paint( GL2 gl, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, Collection<EventDrawInfo> events );
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,18 +37,26 @@ public abstract class Tile extends JComponent
     public static interface TileListener
     {
         void addedView( View view );
+
         void removedView( View view );
+
         void selectedView( View view );
     }
 
-
     public static class TileAdapter implements TileListener
     {
-        public void addedView( View view ) { }
-        public void removedView( View view ) { }
-        public void selectedView( View view ) { }
-    }
+        public void addedView( View view )
+        {
+        }
 
+        public void removedView( View view )
+        {
+        }
+
+        public void selectedView( View view )
+        {
+        }
+    }
 
     public abstract void addListener( TileListener listener );
 
@@ -62,6 +70,8 @@ public abstract class Tile extends JComponent
 
     public abstract void addView( final View view, int viewNum );
 
+    public abstract void updateView( View view );
+    
     public abstract void removeView( View view );
 
     public abstract boolean hasView( View view );

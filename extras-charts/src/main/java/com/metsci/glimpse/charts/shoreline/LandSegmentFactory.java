@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ public class LandSegmentFactory
 {
     private final LandBox box;
 
-    public LandSegmentFactory(LandBox box)
+    public LandSegmentFactory( LandBox box )
     {
         this.box = box;
     }
@@ -45,103 +45,116 @@ public class LandSegmentFactory
      * The returned LandSegment may have land on the wrong side. It is up
      * to the calling code to detect this and correct for it.
      */
-    public LandSegment newLandSegment(List<LandVertex> vertices)
+    public LandSegment newLandSegment( List<LandVertex> vertices )
     {
-        LandVertex start = vertices.get(0);
-        LandVertex end = vertices.get(vertices.size()-1);
+        LandVertex start = vertices.get( 0 );
+        LandVertex end = vertices.get( vertices.size( ) - 1 );
 
-        if (start.equals(end)) return LandSegment.newFillableSegment(vertices);
-
+        if ( start.equals( end ) ) return LandSegment.newFillableSegment( vertices );
 
         Edge startEdge = Edge.NONE;
-        if (start.lat >= box.northLat) startEdge = Edge.NORTH;
-        else if (start.lat <= box.southLat) startEdge = Edge.SOUTH;
-        else if (start.lon >= box.eastLon) startEdge = Edge.EAST;
-        else if (start.lon <= box.westLon) startEdge = Edge.WEST;
+        if ( start.lat >= box.northLat )
+            startEdge = Edge.NORTH;
+        else if ( start.lat <= box.southLat )
+            startEdge = Edge.SOUTH;
+        else if ( start.lon >= box.eastLon )
+            startEdge = Edge.EAST;
+        else if ( start.lon <= box.westLon ) startEdge = Edge.WEST;
 
         Edge endEdge = Edge.NONE;
-        if (end.lat >= box.northLat) endEdge = Edge.NORTH;
-        else if (end.lat <= box.southLat) endEdge = Edge.SOUTH;
-        else if (end.lon >= box.eastLon) endEdge = Edge.EAST;
-        else if (end.lon <= box.westLon) endEdge = Edge.WEST;
+        if ( end.lat >= box.northLat )
+            endEdge = Edge.NORTH;
+        else if ( end.lat <= box.southLat )
+            endEdge = Edge.SOUTH;
+        else if ( end.lon >= box.eastLon )
+            endEdge = Edge.EAST;
+        else if ( end.lon <= box.westLon ) endEdge = Edge.WEST;
 
-        if (startEdge == Edge.NONE || endEdge == Edge.NONE) return LandSegment.newUnfillableSegment(vertices);
+        if ( startEdge == Edge.NONE || endEdge == Edge.NONE ) return LandSegment.newUnfillableSegment( vertices );
 
-
-        List<LandVertex> ghostVertices = new ArrayList<LandVertex>();
-        if (startEdge.isSame(endEdge))
+        List<LandVertex> ghostVertices = new ArrayList<LandVertex>( );
+        if ( startEdge.isSame( endEdge ) )
         {
             // No ghost vertices needed
         }
-        else if (startEdge.isOpposite(endEdge))
+        else if ( startEdge.isOpposite( endEdge ) )
         {
-            switch (startEdge)
+            switch ( startEdge )
             {
                 case NORTH:
                 case SOUTH:
-                    ghostVertices.add(new LandVertex(end.lat, box.eastLon));
-                    ghostVertices.add(new LandVertex(start.lat, box.eastLon));
+                    ghostVertices.add( new LandVertex( end.lat, box.eastLon ) );
+                    ghostVertices.add( new LandVertex( start.lat, box.eastLon ) );
                     break;
 
                 case EAST:
                 case WEST:
-                    ghostVertices.add(new LandVertex(box.northLat, end.lon));
-                    ghostVertices.add(new LandVertex(box.northLat, start.lon));
+                    ghostVertices.add( new LandVertex( box.northLat, end.lon ) );
+                    ghostVertices.add( new LandVertex( box.northLat, start.lon ) );
                     break;
                 case NONE:
             }
         }
-        else if (startEdge.isAdjacent(endEdge))
+        else if ( startEdge.isAdjacent( endEdge ) )
         {
-            switch (startEdge)
+            switch ( startEdge )
             {
                 case NORTH:
                 case SOUTH:
-                    ghostVertices.add(new LandVertex(start.lat, end.lon));
+                    ghostVertices.add( new LandVertex( start.lat, end.lon ) );
                     break;
 
                 case EAST:
                 case WEST:
-                    ghostVertices.add(new LandVertex(end.lat, start.lon));
+                    ghostVertices.add( new LandVertex( end.lat, start.lon ) );
                     break;
                 case NONE:
             }
         }
 
-        return LandSegment.newFillableSegment(vertices, ghostVertices);
+        return LandSegment.newFillableSegment( vertices, ghostVertices );
     }
-
 
     private static enum Edge
     {
         NONE, EAST, WEST, NORTH, SOUTH;
 
-        public boolean isSame(Edge edge)
+        public boolean isSame( Edge edge )
         {
-            return (this != NONE && this == edge);
+            return ( this != NONE && this == edge );
         }
 
-        public boolean isOpposite(Edge edge)
+        public boolean isOpposite( Edge edge )
         {
-            switch (this)
+            switch ( this )
             {
-                case EAST:  return edge == WEST;
-                case WEST:  return edge == EAST;
-                case NORTH: return edge == SOUTH;
-                case SOUTH: return edge == NORTH;
-                default:    return false;
+                case EAST:
+                    return edge == WEST;
+                case WEST:
+                    return edge == EAST;
+                case NORTH:
+                    return edge == SOUTH;
+                case SOUTH:
+                    return edge == NORTH;
+                default:
+                    return false;
             }
         }
 
-        public boolean isAdjacent(Edge edge)
+        public boolean isAdjacent( Edge edge )
         {
-            switch (this)
+            switch ( this )
             {
-                case EAST:  return edge == NORTH || edge == SOUTH;
-                case WEST:  return edge == NORTH || edge == SOUTH;
-                case NORTH: return edge == EAST || edge == WEST;
-                case SOUTH: return edge == EAST || edge == WEST;
-                default:    return false;
+                case EAST:
+                    return edge == NORTH || edge == SOUTH;
+                case WEST:
+                    return edge == NORTH || edge == SOUTH;
+                case NORTH:
+                    return edge == EAST || edge == WEST;
+                case SOUTH:
+                    return edge == EAST || edge == WEST;
+                default:
+                    return false;
             }
         }
     }

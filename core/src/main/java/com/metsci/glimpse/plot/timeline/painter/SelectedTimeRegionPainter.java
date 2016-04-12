@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,13 +43,13 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
     protected StackedTimePlot2D plot;
 
     protected boolean showLockedStatus = true;
-    
+
     public SelectedTimeRegionPainter( StackedTimePlot2D plot )
     {
         super( plot.getOrientation( ) );
         this.plot = plot;
     }
-    
+
     public void setShowLockedStatus( boolean show )
     {
         this.showLockedStatus = show;

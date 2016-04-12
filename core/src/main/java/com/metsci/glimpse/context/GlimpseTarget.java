@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,13 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public interface GlimpseTarget
 {
+    /**
+     * If true, the GlimpseTarget should be drawn on the screen and mouse events
+     * should be dispatched for it. Otherwise it is invisible and mouse events should not
+     * fire for the GlimpseTarget or its children.
+     */
+    public boolean isVisible( );
+
     /**
      * Sets whether this GlimpseTarget hides events from GlimpseTargets under it. This
      * value does not determine whether or not the GlimpseTarget will generate
@@ -101,7 +108,7 @@ public interface GlimpseTarget
      * Clears the canvas, removing all attached GlimpseLayouts.
      */
     public void removeAllLayouts( );
-    
+
     /**
      * @return the list of children added through addLayout( GlimpseLayout ).
      */

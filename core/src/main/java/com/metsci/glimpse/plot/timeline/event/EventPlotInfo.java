@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Font;
 import java.awt.image.BufferedImage;
@@ -46,6 +46,7 @@ import javax.imageio.ImageIO;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
@@ -53,11 +54,19 @@ import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.painter.info.TooltipPainter;
+import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode;
 import com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode;
+import com.metsci.glimpse.plot.timeline.event.listener.DragListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
+import com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter;
+import com.metsci.glimpse.plot.timeline.event.paint.EventPainterManager;
+import com.metsci.glimpse.plot.timeline.event.paint.GroupedEventPainter;
+import com.metsci.glimpse.plot.timeline.event.paint.GroupedEventPainterAdapter;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -77,7 +86,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 {
     private static final Logger logger = Logger.getLogger( EventPlotInfo.class.getName( ) );
-    
+
     public static final int DEFAULT_ROW_SIZE = 26;
     public static final int DEFAULT_BUFFER_SIZE = 2;
 
@@ -93,7 +102,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected List<EventPlotListener> eventListeners;
 
     protected boolean isHorizontal;
-    
+
     protected EventToolTipHandler eventToolTipHandler;
     protected DragListener dragListener;
     protected TooltipListener tooltipListener;
@@ -101,9 +110,8 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     protected TextRenderingMode textRenderingMode = Ellipsis;
 
     protected EventSelectionHandler selectionHandler;
-    
+
     protected Object defaultIconId;
-    
     protected int defaultIconSize = 0;
     protected boolean useDefaultIconSize = false;
 
@@ -126,7 +134,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         {
             logWarning( logger, "Trouble loading default icon.", e );
         }
-        
+
         final Epoch epoch = getStackedTimePlot( ).getEpoch( );
         this.isHorizontal = getStackedTimePlot( ).isTimeAxisHorizontal( );
 
@@ -145,9 +153,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         this.layout1D.setEventConsumer( false );
         this.eventManager = new EventManager( this );
         this.eventPainterManager = new EventPainterManager( this, eventManager, epoch, atlas );
-        DefaultEventPainter defaultPainter = new DefaultEventPainter( );
-        defaultPainter.setDefaultIconId( defaultIconId );
-        this.eventPainterManager.setEventPainter( defaultPainter );
+        this.eventPainterManager.setEventPainter( new GroupedEventPainterAdapter( new DefaultEventPainter( ) ) );
         this.layout1D.addPainter( this.eventPainterManager );
 
         this.eventListeners = new CopyOnWriteArrayList<EventPlotListener>( );
@@ -168,33 +174,33 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             public void setToolTip( EventSelection selection, TooltipPainter tooltipPainter )
             {
                 Event event = selection.getEvent( );
-                
+
                 if ( event.hasChildren( ) && event.getLabel( ) == null && event.getToolTipText( ) == null )
                 {
                     List<Object> icons = new ArrayList<Object>( event.getEventCount( ) );
                     List<float[]> colors = new ArrayList<float[]>( event.getEventCount( ) );
                     StringBuilder b = new StringBuilder( );
-                    
+
                     Iterator<Event> iter = event.iterator( );
                     while ( iter.hasNext( ) )
                     {
                         Event child = iter.next( );
-                        
+
                         Object iconId = child.getIconId( );
                         float[] iconColor = null;
                         if ( iconId == null )
                         {
                             iconId = defaultIconId;
-                            iconColor = child.getBackgroundColor( child.getEventPlotInfo( ), selectionHandler.isEventSelected( child ) );
+                            iconColor = DefaultEventPainter.getBackgroundColor( child, child.getEventPlotInfo( ), selectionHandler.isEventSelected( child ) );
                         }
-                        
+
                         icons.add( iconId );
                         colors.add( iconColor );
-                        
+
                         b.append( child.getLabel( ) );
                         if ( iter.hasNext( ) ) b.append( "\n" );
                     }
-                    
+
                     tooltipPainter.setText( b.toString( ) );
                     tooltipPainter.setIcons( icons, colors );
                 }
@@ -204,10 +210,13 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                     String tip = event.getToolTipText( ) == null ? "" : event.getToolTipText( );
                     String text = String.format( "%s\n%s", label, tip );
                     tooltipPainter.setText( text );
-                    tooltipPainter.setIcon( event.getIconId( ) );   
+                    tooltipPainter.setIcon( event.getIconId( ) );
                 }
             }
         };
+
+        // by default don't grow event plots
+        this.setGrow( false );
 
         this.rowSize = DEFAULT_ROW_SIZE;
         this.eventPadding = DEFAULT_BUFFER_SIZE;
@@ -270,7 +279,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                         // special case: clicking a single selected event deselects it
                         if ( isDeselectSingleEvent( event ) )
                         {
-                            selectionHandler.setSelectedEvents( Collections.<Event>emptySet( ) );
+                            selectionHandler.setSelectedEvents( Collections.<Event> emptySet( ) );
                         }
                         else
                         {
@@ -318,10 +327,10 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
                 listener.eventsHovered( e, newHoveredEvents, time );
             }
 
-            hoveredEvents = Sets.newHashSet( newHoveredEvents );
+            hoveredEvents = newHoveredEvents;
         }
     }
-    
+
     protected boolean isDeselectSingleEvent( Event event )
     {
         if ( selectionHandler.getSelectedEvents( ).size( ) == 1 )
@@ -369,7 +378,10 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             StackedTimePlot2D plot = getStackedTimePlot( );
             TooltipPainter tooltipPainter = plot.getTooltipPainter( );
 
-            if ( eventToolTipHandler != null ) eventToolTipHandler.setToolTip( selection, tooltipPainter );
+            if ( eventToolTipHandler != null )
+            {
+                eventToolTipHandler.setToolTip( selection, tooltipPainter );
+            }
         }
 
         @Override
@@ -379,7 +391,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             {
                 StackedTimePlot2D plot = getStackedTimePlot( );
                 TooltipPainter tooltipPainter = plot.getTooltipPainter( );
-                tooltipPainter.setText( null );
+                tooltipPainter.clear( );
 
                 selection = null;
             }
@@ -407,44 +419,44 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         {
         }
     }
-    
+
     public void setDefaultIconSize( int size )
     {
         this.defaultIconSize = size;
         this.setUseDefaultIconSize( true );
     }
-    
+
     public int getDefaultIconSize( )
     {
         return this.defaultIconSize;
     }
-    
+
     public boolean isUseDefaultIconSize( )
     {
         return this.useDefaultIconSize;
     }
-    
+
     public void setUseDefaultIconSize( boolean useDefaultIconSize )
     {
         this.useDefaultIconSize = useDefaultIconSize;
     }
-    
+
     public void setAggregateNearbyEvents( boolean aggregate )
     {
         this.eventManager.setAggregateNearbyEvents( aggregate );
     }
-    
+
     public boolean isAggregateNearbyEvents( )
     {
         return this.eventManager.isAggregateNearbyEvents( );
     }
-    
-    public void setEventPainter( EventPainter painter )
+
+    public void setEventPainter( GroupedEventPainter painter )
     {
         this.eventPainterManager.setEventPainter( painter );
     }
 
-    public EventPainter getEventPainter( )
+    public GroupedEventPainter getEventPainter( )
     {
         return this.eventPainterManager.getEventPainter( );
     }
@@ -519,6 +531,37 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         return this.rowSize;
     }
 
+    public double getRowSize( GlimpseBounds bounds )
+    {
+        if ( isGrow( ) )
+        {
+            int rowCount = getRowCount( );
+            Orientation orient = getStackedPlot( ).getOrientation( );
+            int size = orient == Orientation.HORIZONTAL ? bounds.getWidth( ) : bounds.getHeight( );
+            int sizeMinusBuffer = size - ( rowCount + 1 ) * getEventPadding( );
+
+            return ( double ) sizeMinusBuffer / ( double ) rowCount;
+        }
+        else
+        {
+            return getRowSize( );
+        }
+    }
+
+    @Override
+    public void setGrow( boolean grow )
+    {
+        super.setGrow( grow );
+        this.updateSize( );
+    }
+
+    @Override
+    public void setSize( int size )
+    {
+        this.rowSize = size;
+        this.updateSize( );
+    }
+
     public void setEventPadding( int size )
     {
         this.eventPadding = size;
@@ -559,34 +602,51 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
 
     public void updateSize( )
     {
-        int rowCount = getRowCount( );
-
-        this.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.eventPadding );
+        if ( !isGrow( ) )
+        {
+            int rowCount = getRowCount( );
+            super.setSize( rowCount * this.rowSize + ( rowCount + 1 ) * this.eventPadding );
+        }
     }
-    
+
     public boolean isTextColorSet( )
     {
         return this.eventPainterManager.isTextColorSet( );
     }
-    
+
     public boolean isBackgroundColorSet( )
     {
         return this.eventPainterManager.isBackgroundColorSet( );
     }
-    
+
     public boolean isBorderColorSet( )
     {
         return this.eventPainterManager.isBorderColorSet( );
     }
-    
+
     public TextRenderer getTextRenderer( )
     {
         return this.eventPainterManager.getTextRenderer( );
     }
 
+    public Object getDefaultIconId( )
+    {
+        return this.defaultIconId;
+    }
+
     public TextureAtlas getTextureAtlas( )
     {
         return this.eventPainterManager.getTextureAtlas( );
+    }
+
+    public void setDefaultEventBorderThickness( float thickness )
+    {
+        this.eventPainterManager.setBorderThickness( thickness );
+    }
+
+    public float getDefaultEventBorderThickness( )
+    {
+        return this.eventPainterManager.getBorderThickness( );
     }
 
     public void setDefaultEventBackgroundColor( float[] backgroundColor )
@@ -598,7 +658,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return this.eventPainterManager.getBackgroundColor( );
     }
-    
+
     public void setDefaultEventBorderColor( float[] borderColor )
     {
         this.eventPainterManager.setBorderColor( borderColor );
@@ -613,12 +673,12 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         this.eventPainterManager.setTextColor( textColor );
     }
-    
+
     public float[] getTextColorNoBackground( )
     {
         return this.eventPainterManager.getTextColorNoBackground( );
     }
-    
+
     public float[] getTextColor( )
     {
         return this.eventPainterManager.getTextColor( );
@@ -637,6 +697,16 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     public Event getEvent( Object id )
     {
         return this.eventManager.getEvent( id );
+    }
+
+    public EventBounds getEventBounds( Object id )
+    {
+        return this.eventManager.getOrCreateEventBounds( id );
+    }
+
+    public EventManager getEventManager( )
+    {
+        return this.eventManager;
     }
 
     public Event addEvent( String label, TimeStamp time )
@@ -685,7 +755,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             event.setEventPlotInfo( null );
         }
     }
-    
+
     public void removeAllEvents( )
     {
         this.eventManager.removeAllEvents( );
@@ -724,14 +794,14 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         this.updateEvent0( null, oldEvent, newStartTime, newEndTime );
     }
-    
+
     protected void updateEvent0( GlimpseMouseEvent mouseEvent, Event oldEvent, TimeStamp newStartTime, TimeStamp newEndTime )
     {
         this.eventManager.moveEvent( oldEvent, newStartTime, newEndTime );
 
         this.notifyEventUpdated( mouseEvent, oldEvent );
     }
-    
+
     public void validate( )
     {
         this.eventManager.validate( );
@@ -741,7 +811,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         return layout1D;
     }
-    
+
     protected void notifyEventUpdated( GlimpseMouseEvent mouseEvent, Event event )
     {
         for ( EventPlotListener listener : eventListeners )

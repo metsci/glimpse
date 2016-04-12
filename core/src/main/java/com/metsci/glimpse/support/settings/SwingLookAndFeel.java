@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,17 @@
  */
 package com.metsci.glimpse.support.settings;
 
+import static com.metsci.glimpse.support.color.GlimpseColor.addRgb;
+import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.support.color.GlimpseColor.getWhite;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+
 import java.awt.Color;
 import java.awt.SystemColor;
 
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
-
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
-import static com.metsci.glimpse.support.color.GlimpseColor.*;
 
 public class SwingLookAndFeel extends AbstractLookAndFeel
 {

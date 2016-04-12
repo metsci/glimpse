@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
         } );
 
         // add painters to the layout
-        layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getWhite( ) ) );
+        layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getGray( ) ) );
         layout.addPainter( new NumericXYAxisPainter( ) );
         layout.addPainter( iconPainter );
         layout.addPainter( new FpsPainter( ) );

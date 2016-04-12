@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,53 +24,54 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.platformFixes;
+package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
-import static com.metsci.glimpse.util.jnlu.FileUtils.copy;
-import static com.metsci.glimpse.util.jnlu.FileUtils.createTempDir;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-
-import java.io.File;
-import java.net.URL;
-import java.util.List;
-
-public class LibraryList
+public class TextDrawInfo
 {
+    protected String text;
+    protected float[] color;
+    protected int x;
+    protected int y;
+    protected double shiftX;
+    protected double shiftY;
 
-    public final String resourceDir;
-    public final List<String> filenames;
-
-
-    public LibraryList( String resourceDir, String... filenames )
+    public TextDrawInfo( String text, float[] color, int x, int y, double shiftX, double shiftY )
     {
-        this( resourceDir, asList( filenames ) );
+        this.text = text;
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.shiftX = shiftX;
+        this.shiftY = shiftY;
     }
 
-    public LibraryList( String resourceDir, List<String> filenames )
+    public String getText( )
     {
-        this.resourceDir = resourceDir;
-        this.filenames = unmodifiableList( newArrayList( filenames ) );
+        return text;
     }
 
-    public void extractAndLoad( ClassLoader resourceLoader, String tempDirName )
+    public float[] getColor( )
     {
-        try
-        {
-            File tempDir = createTempDir( tempDirName );
-            for ( String filename : filenames )
-            {
-                URL url = resourceLoader.getResource( resourceDir + "/" + filename );
-                File file = new File( tempDir, filename );
-                copy( url, file );
-                System.load( file.getPath( ) );
-            }
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( "Failed to extract and load native libraries", e );
-        }
+        return this.color;
     }
 
+    public int getX( )
+    {
+        return x;
+    }
+
+    public int getY( )
+    {
+        return y;
+    }
+
+    public double getShiftX( )
+    {
+        return shiftX;
+    }
+
+    public double getShiftY( )
+    {
+        return shiftY;
+    }
 }

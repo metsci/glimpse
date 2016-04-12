@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,20 +38,21 @@ public class LandFile implements LandShapeCapable
 {
     private final LandShape _shape;
 
-    protected LandFile(List<List<LandVertex>> segments, LandBox box, boolean allowSegmentReversal)
+    protected LandFile( List<List<LandVertex>> segments, LandBox box, boolean allowSegmentReversal )
     {
-        if (segments == null || box == null)
+        if ( segments == null || box == null )
         {
             _shape = null;
             return;
         }
 
-        List<List<LandVertex>> segments2 = new ArrayList<List<LandVertex>>(segments.size());
-        for (List<LandVertex> segment : segments) if (!segment.isEmpty()) segments2.add(new ArrayList<LandVertex>(segment));
-        joinConnectedSegments(segments2, allowSegmentReversal);
+        List<List<LandVertex>> segments2 = new ArrayList<List<LandVertex>>( segments.size( ) );
+        for ( List<LandVertex> segment : segments )
+            if ( !segment.isEmpty( ) ) segments2.add( new ArrayList<LandVertex>( segment ) );
+        joinConnectedSegments( segments2, allowSegmentReversal );
 
-        List<LandSegment> segments3 = Collections.unmodifiableList(toLandSegments(segments2, box));
-        _shape = new LandShape(segments3, box);
+        List<LandSegment> segments3 = Collections.unmodifiableList( toLandSegments( segments2, box ) );
+        _shape = new LandShape( segments3, box );
     }
 
     /**
@@ -66,58 +67,59 @@ public class LandFile implements LandShapeCapable
      * to infer which side its interior is on, but helps with data in which winding
      * direction is meaningless to begin with.
      */
-    private static void joinConnectedSegments(List<List<LandVertex>> segments, boolean allowSegmentReversal)
+    private static void joinConnectedSegments( List<List<LandVertex>> segments, boolean allowSegmentReversal )
     {
-        int joinlessLoopsRemaining = segments.size();
-        while (joinlessLoopsRemaining > 0)
+        int joinlessLoopsRemaining = segments.size( );
+        while ( joinlessLoopsRemaining > 0 )
         {
-            List<LandVertex> base = segments.remove(0);
-            if (base.isEmpty())
+            List<LandVertex> base = segments.remove( 0 );
+            if ( base.isEmpty( ) )
             {
                 joinlessLoopsRemaining--;
                 continue;
             }
 
             boolean anyJoins = false;
-            for (Iterator<List<LandVertex>> i = segments.iterator(); i.hasNext(); )
+            for ( Iterator<List<LandVertex>> i = segments.iterator( ); i.hasNext( ); )
             {
-                List<LandVertex> extension = i.next();
+                List<LandVertex> extension = i.next( );
 
-                if (extension.get(0).equals(base.get(base.size()-1)))
+                if ( extension.get( 0 ).equals( base.get( base.size( ) - 1 ) ) )
                 {
-                    base.addAll(extension);
-                    i.remove();
+                    base.addAll( extension );
+                    i.remove( );
                     anyJoins = true;
                 }
-                else if (allowSegmentReversal && extension.get(extension.size()-1).equals(base.get(base.size()-1)))
+                else if ( allowSegmentReversal && extension.get( extension.size( ) - 1 ).equals( base.get( base.size( ) - 1 ) ) )
                 {
-                    Collections.reverse(extension);
-                    base.addAll(extension);
-                    i.remove();
+                    Collections.reverse( extension );
+                    base.addAll( extension );
+                    i.remove( );
                     anyJoins = true;
                 }
-                else if (allowSegmentReversal && extension.get(0).equals(base.get(0)))
+                else if ( allowSegmentReversal && extension.get( 0 ).equals( base.get( 0 ) ) )
                 {
-                    Collections.reverse(base);
-                    base.addAll(extension);
-                    i.remove();
+                    Collections.reverse( base );
+                    base.addAll( extension );
+                    i.remove( );
                     anyJoins = true;
                 }
             }
-            segments.add(base);
-            joinlessLoopsRemaining = (anyJoins ? segments.size() : joinlessLoopsRemaining - 1);
+            segments.add( base );
+            joinlessLoopsRemaining = ( anyJoins ? segments.size( ) : joinlessLoopsRemaining - 1 );
         }
     }
 
-    private static List<LandSegment> toLandSegments(List<List<LandVertex>> segments, LandBox box)
+    private static List<LandSegment> toLandSegments( List<List<LandVertex>> segments, LandBox box )
     {
-        LandSegmentFactory segmentFactory = new LandSegmentFactory(box);
-        List<LandSegment> segments2 = new ArrayList<LandSegment>();
-        for (List<LandVertex> vertices : segments) segments2.add(segmentFactory.newLandSegment(vertices));
+        LandSegmentFactory segmentFactory = new LandSegmentFactory( box );
+        List<LandSegment> segments2 = new ArrayList<LandSegment>( );
+        for ( List<LandVertex> vertices : segments )
+            segments2.add( segmentFactory.newLandSegment( vertices ) );
         return segments2;
     }
 
-    public LandShape toShape()
+    public LandShape toShape( )
     {
         return _shape;
     }

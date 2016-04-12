@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
     {
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
-        
+
         // set the time zone for the timeline to local time
         plot.getDefaultTimeline( ).setTimeZone( TimeZone.getDefault( ) );
 
@@ -110,7 +110,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
         // turn on timeline labels
         plot.setLabelSize( 30 );
-        plot.showLabels( true );
+        plot.setShowLabels( true );
 
         // display vertical labels
         plot1.getLabelPainter( ).setHorizontalLabels( false );
@@ -241,7 +241,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
     protected void setBounds( TimePlotInfo chart )
     {
-        Axis1D axis = chart.getLayout( ).getAxis( ).getAxisY( );
+        Axis1D axis = chart.getBaseLayout( ).getAxis( ).getAxisY( );
         axis.setMin( -20.0 );
         axis.setMax( 20.0 );
     }

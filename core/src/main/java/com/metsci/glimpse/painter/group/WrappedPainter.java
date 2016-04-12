@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,13 +44,13 @@ import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
@@ -60,17 +60,65 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class WrappedPainter extends GlimpsePainter2D
 {
+    private static class CustomFBOGlimpseCanvas extends FBOGlimpseCanvas
+    {
+        private int canvasWidth;
+        private int canvasHeight;
+        private GlimpseBounds effectiveGlimpseBounds;
+
+        public CustomFBOGlimpseCanvas( GLContext glContext )
+        {
+            super( glContext, 0, 0, false );
+            this.canvasWidth = 0;
+            this.canvasHeight = 0;
+            this.effectiveGlimpseBounds = new GlimpseBounds( 0, 0, 0, 0 );
+        }
+
+        public float getEffectiveWidthFrac( )
+        {
+            return ( canvasWidth == 0 ? 0 : effectiveGlimpseBounds.getWidth( ) / ( float ) canvasWidth );
+        }
+
+        public float getEffectiveHeightFrac( )
+        {
+            return ( canvasHeight == 0 ? 0 : effectiveGlimpseBounds.getHeight( ) / ( float ) canvasHeight );
+        }
+
+        public void paintWithEffectiveSize( int effectiveWidth, int effectiveHeight )
+        {
+            if ( effectiveWidth > canvasWidth || effectiveHeight > canvasHeight )
+            {
+                this.canvasWidth = Math.max( canvasWidth, effectiveWidth );
+                this.canvasHeight = Math.max( canvasHeight, effectiveHeight );
+                this.resize( this.canvasWidth, this.canvasHeight );
+            }
+
+            // the offscreen canvas may be larger than we need, only draw on the portion that we need
+            this.getGLContext( ).getGL( ).glViewport( 0, 0, effectiveWidth, effectiveHeight );
+
+            // remember the effective bounds, so they can be used to create the target-stack down inside the paint() call
+            this.effectiveGlimpseBounds = new GlimpseBounds( 0, 0, effectiveWidth, effectiveHeight );
+
+            this.paint( );
+        }
+
+        @Override
+        public GlimpseContext getGlimpseContext( )
+        {
+            GlimpseContext glimpseContext = new GlimpseContextImpl( getGLContext( ), getSurfaceScale( ) );
+            glimpseContext.getTargetStack( ).push( this, effectiveGlimpseBounds );
+            return glimpseContext;
+        }
+    }
+
     private List<GlimpsePainter2D> painters;
 
     private boolean isVisible = true;
     private boolean isDisposed = false;
 
-    private FBOGlimpseCanvas offscreen;
+    private CustomFBOGlimpseCanvas offscreen;
     private GLFloatBuffer2D vertCoordBuffer;
     private GLFloatBuffer2D texCoordBuffer;
-
-    private int offscreenWidth;
-    private int offscreenHeight;
 
     private Axis2D dummyAxis;
     private GlimpseAxisLayout2D dummyLayout;
@@ -148,22 +196,22 @@ public class WrappedPainter extends GlimpsePainter2D
 
             if ( this.offscreen == null )
             {
-                this.offscreen = new FBOGlimpseCanvas( context.getGLContext( ), 0, 0, false );
+                this.offscreen = new CustomFBOGlimpseCanvas( context.getGLContext( ) );
                 this.offscreen.addLayout( dummyLayout );
 
                 this.texCoordBuffer = new GLFloatBuffer2D( 4 );
                 this.vertCoordBuffer = new GLFloatBuffer2D( 4 );
-
-                this.offscreenHeight = 0;
-                this.offscreenWidth = 0;
             }
 
             this.dummyLayout.removeAllLayouts( );
-            this.dummyLayout.addPainter( new BackgroundPainter( ).setColor( 0, 0, 0, 0 ) );
             for ( GlimpsePainter2D painter : this.painters )
             {
                 this.dummyLayout.addPainter( painter );
             }
+
+            // before figuring out which tiles need to be rendered, make sure constraints are applied, etc.
+            // XXX: not sure why this doesn't get called automatically somewhere else
+            axis.validate( );
 
             List<WrappedTextureBounds> boundsX = Lists.newArrayList( iterator( axisX, bounds.getWidth( ) ) );
             List<WrappedTextureBounds> boundsY = Lists.newArrayList( iterator( axisY, bounds.getHeight( ) ) );
@@ -186,17 +234,11 @@ public class WrappedPainter extends GlimpsePainter2D
     {
         if ( boundsX.isRedraw( ) || boundsY.isRedraw( ) || forceRedraw )
         {
-            if ( this.offscreenWidth < boundsX.getTextureSize( ) || this.offscreenHeight < boundsY.getTextureSize( ) )
-            {
-                this.offscreenWidth = boundsX.getTextureSize( );
-                this.offscreenHeight = boundsY.getTextureSize( );
-                this.offscreen.resize( this.offscreenWidth, this.offscreenHeight );
-            }
-
             // when we draw offscreen, do so in "wrapped coordinates" (if the wrapped axis is
             // bounded from 0 to 10, it should be because that is the domain that the painters
             // are set up to draw in)
             this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
+            this.dummyAxis.validate( );
 
             // release the onscreen context and make the offscreen context current
             context.getGLContext( ).release( );
@@ -206,11 +248,8 @@ public class WrappedPainter extends GlimpsePainter2D
                 glContext.makeCurrent( );
                 try
                 {
-                    // the offscreen canvas may be larger than we need, only draw on the portion that we need
-                    glContext.getGL( ).glViewport( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) );
-
                     // draw the dummy layout onto the offscreen canvas
-                    this.offscreen.paint( );
+                    this.offscreen.paintWithEffectiveSize( boundsX.getTextureSize( ), boundsY.getTextureSize( ) );
                 }
                 finally
                 {
@@ -258,11 +297,8 @@ public class WrappedPainter extends GlimpsePainter2D
             @Override
             public void mutate( FloatBuffer data, int length )
             {
-                //TODO I'm not sure why 1.0 works here in the ZoomedIn case. We don't draw onto the whole
-                //     offscreen buffer, so we should need to use the tex coords to not use those areas
-                //     of the texture that we didn't draw into
-                float texEndX = 1.0f;//boundsX.getTextureSize( ) / ( float ) offscreenWidth;
-                float texEndY = 1.0f;//boundsY.getTextureSize( ) / ( float ) offscreenHeight;
+                float texEndX = offscreen.getEffectiveWidthFrac( );
+                float texEndY = offscreen.getEffectiveHeightFrac( );
 
                 data.rewind( );
                 data.put( 0 );
@@ -523,7 +559,9 @@ public class WrappedPainter extends GlimpsePainter2D
                         step = 1;
                     }
 
-                    return new WrappedTextureBounds( start, start + distance, wrappedStart, wrappedEnd, getTextureSize( distance ), true );
+                    int textureSize = getTextureSize( boundsSize, axis, distance );
+
+                    return new WrappedTextureBounds( start, start + distance, wrappedStart, wrappedEnd, textureSize, true );
                 }
                 else if ( step == 1 )
                 {
@@ -534,9 +572,11 @@ public class WrappedPainter extends GlimpsePainter2D
                     double wrappedStart = axis.getWrapMin( );
                     double wrappedEnd = axis.getWrappedValue( end, true );
 
+                    int textureSize = getTextureSize( boundsSize, axis, distance );
+
                     step = 2;
 
-                    return new WrappedTextureBounds( start + distanceToSeam, end, wrappedStart, wrappedEnd, getTextureSize( distance ), true );
+                    return new WrappedTextureBounds( start + distanceToSeam, end, wrappedStart, wrappedEnd, textureSize, true );
                 }
             }
 
@@ -547,12 +587,6 @@ public class WrappedPainter extends GlimpsePainter2D
         public void remove( )
         {
             throw new UnsupportedOperationException( );
-        }
-
-        protected int getTextureSize( double distance )
-        {
-            double percent = distance / ( axis.getMax( ) - axis.getMin( ) );
-            return ( int ) Math.ceil( percent * boundsSize );
         }
 
     }
@@ -588,8 +622,9 @@ public class WrappedPainter extends GlimpsePainter2D
                 double end = start + axis.getWrapSpan( );
                 this.current = end;
 
-                //TODO the texture bounds could be made smaller here -- the image is zoomed out and doesn't take up the whole screen
-                return new WrappedTextureBounds( start, end, axis.getWrapMin( ), axis.getWrapMax( ), boundsSize, false );
+                int textureSize = getTextureSize( boundsSize, axis, axis.getWrapSpan( ) );
+
+                return new WrappedTextureBounds( start, end, axis.getWrapMin( ), axis.getWrapMax( ), textureSize, true );
             }
             else
             {
@@ -603,5 +638,11 @@ public class WrappedPainter extends GlimpsePainter2D
             throw new UnsupportedOperationException( );
         }
 
+    }
+
+    protected static int getTextureSize( int boundsSize, Axis1D axis, double distanceAlongAxis )
+    {
+        double fractionOfAxis = distanceAlongAxis / ( axis.getMax( ) - axis.getMin( ) );
+        return ( int ) Math.ceil( fractionOfAxis * boundsSize );
     }
 }

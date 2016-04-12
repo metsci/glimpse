@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@ public class TaggedAxis1D extends Axis1D
     }
 
     @Override
-    public Axis1D clone( )
+    public TaggedAxis1D clone( )
     {
         TaggedAxis1D axis = new TaggedAxis1D( this );
 
@@ -219,5 +219,11 @@ public class TaggedAxis1D extends Axis1D
 
             this.applyTagConstraints( );
         }
+    }
+
+    @Override
+    public String toString( )
+    {
+        return String.format( "[%.3f %.3f %d %s]", minValue, maxValue, axisSizePixels, getSortedTags( ) );
     }
 }

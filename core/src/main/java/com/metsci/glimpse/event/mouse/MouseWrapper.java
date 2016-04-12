@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,15 +90,18 @@ public abstract class MouseWrapper<I>
         {
             GlimpseTarget childLayout = list.get( i );
 
-            GlimpseBounds childBounds = childLayout.getTargetBounds( context.getTargetStack( ) );
+            if ( childLayout.isVisible( ) )
+            {
+                GlimpseBounds childBounds = childLayout.getTargetBounds( context.getTargetStack( ) );
 
-            stack.push( childLayout, childBounds );
+                stack.push( childLayout, childBounds );
 
-            boolean consumeEvent = getContainingTargets( e, context, accumulator );
+                boolean consumeEvent = getContainingTargets( e, context, accumulator );
 
-            if ( consumeEvent ) return true;
+                if ( consumeEvent ) return true;
 
-            stack.pop( );
+                stack.pop( );
+            }
         }
 
         // if the layout neither consumes nor responds to events, we don't need

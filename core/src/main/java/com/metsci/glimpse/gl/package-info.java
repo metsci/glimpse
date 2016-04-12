@@ -4,4 +4,3 @@
  * The JOGL 2.0 classes should be preferred where this is the case.
  */
 package com.metsci.glimpse.gl;
-

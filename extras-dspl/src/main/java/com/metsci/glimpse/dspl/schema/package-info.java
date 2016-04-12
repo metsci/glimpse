@@ -5,5 +5,5 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://schemas.google.com/dspl/2010", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema( namespace = "http://schemas.google.com/dspl/2010", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED )
 package com.metsci.glimpse.dspl.schema;

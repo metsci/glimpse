@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.plot.timeline.event;
+package com.metsci.glimpse.plot.timeline.event.listener;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +34,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.plot.timeline.event.Event;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 
 /**
  * Helper class which manages keeping track of selected Events for {@code EventPlotInfo}.
@@ -137,7 +139,7 @@ public class EventSelectionHandler
     public void setSelectedEvents( Set<Event> newEvents )
     {
         Set<Event> oldEvents = Sets.newHashSet( selectedEvents );
-        
+
         if ( newEvents.equals( oldEvents ) ) return;
 
         // set of deselected events

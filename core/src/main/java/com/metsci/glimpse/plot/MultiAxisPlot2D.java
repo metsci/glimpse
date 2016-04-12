@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -500,6 +500,11 @@ public class MultiAxisPlot2D extends GlimpseLayout
     public void setTitleFont( Font font, boolean antialias )
     {
         this.titlePainter.setFont( font, antialias );
+    }
+
+    public String getTitle( )
+    {
+        return this.title;
     }
 
     public void setTitle( String title )
