@@ -26,18 +26,14 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.awt.BasicStroke.*;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.BorderLayout.NORTH;
-import static java.lang.Math.max;
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createMatteBorder;
-import static javax.swing.SwingConstants.LEFT;
+import static java.lang.Math.*;
+import static javax.swing.BorderFactory.*;
+import static javax.swing.SwingConstants.*;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -615,7 +611,7 @@ public class TileImpl extends Tile
     {
         if ( view == selectedView ) return;
 
-        if ( selectedView != null )
+        if ( selectedView != null && viewMap.containsKey( selectedView.viewId ) )
         {
             ViewEntry viewEntry = viewMap.get( selectedView.viewId );
             viewEntry.tab.setSelected( false );
