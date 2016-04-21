@@ -43,6 +43,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
 
+import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JFrame;
 
@@ -60,9 +61,39 @@ public class FrameUtils
     }
 
     /**
-     * Adds a window-closing listener that disposes of the canvas.
+     * Adds a window-closing listener that stops the animator. This is helpful
+     * for programs that end when a window gets closed. Typical setup sequence is:
      *
-     * @see #destroyOnWindowClosing(Window, GLAutoDrawable)
+     *     JFrame frame = newFrame( "Title", canvas, DISPOSE_ON_CLOSE );
+     *     stopOnWindowClosing( frame, animator );
+     *     disposeOnWindowClosing( frame, canvas );
+     *     destroyOnWindowClosing( frame, sharedDrawable );
+     *     showFrameCentered( frame );
+     *
+     */
+    public static WindowListener stopOnWindowClosing( Window window, final GLAnimatorControl animator )
+    {
+        WindowListener listener = new WindowAdapter( )
+        {
+            public void windowClosing( WindowEvent ev )
+            {
+                animator.stop( );
+            }
+        };
+        window.addWindowListener( listener );
+        return listener;
+    }
+
+    /**
+     * Adds a window-closing listener that disposes of the canvas. This is helpful
+     * for programs that end when a window gets closed. Typical setup sequence is:
+     *
+     *     JFrame frame = newFrame( "Title", canvas, DISPOSE_ON_CLOSE );
+     *     stopOnWindowClosing( frame, animator );
+     *     disposeOnWindowClosing( frame, canvas );
+     *     destroyOnWindowClosing( frame, sharedDrawable );
+     *     showFrameCentered( frame );
+     *
      */
     public static WindowListener disposeOnWindowClosing( Window window, final GlimpseCanvas canvas )
     {
@@ -78,11 +109,15 @@ public class FrameUtils
     }
 
     /**
-     * Adds a window-closing listener that destroys the drawable (and its context).
-     * This is helpful, for example, for programs that end when a window gets closed.
+     * Adds a window-closing listener that destroys the drawable. This is helpful
+     * for programs that end when a window gets closed. Typical setup sequence is:
      *
-     * Call this <em>after<em> all calls to {@link #disposeOnWindowClosing(Window, GlimpseCanvas)},
-     * so that the drawable gets destroyed after all canvases have been disposed of.
+     *     JFrame frame = newFrame( "Title", canvas, DISPOSE_ON_CLOSE );
+     *     stopOnWindowClosing( frame, animator );
+     *     disposeOnWindowClosing( frame, canvas );
+     *     destroyOnWindowClosing( frame, sharedDrawable );
+     *     showFrameCentered( frame );
+     *
      */
     public static WindowListener destroyOnWindowClosing( Window window, final GLAutoDrawable drawable )
     {
