@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<group xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://glimpse.metsci.com/docking">
+    <frames>
+        <frame>
+            <x>50</x>
+            <y>50</y>
+            <width>1280</width>
+            <height>960</height>
+            <docker xsi:type="Split">
+                <arrangeVertically>false</arrangeVertically>
+                <splitFrac>0.75</splitFrac>
+                <childA xsi:type="Tile">
+                    <views>
+                        <view>geoView</view>
+                    </views>
+                    <selectedView>geoView</selectedView>
+                    <isMaximized>false</isMaximized>
+                </childA>
+                <childB xsi:type="Tile">
+                    <views>
+                        <view>attrsView</view>
+                    </views>
+                    <selectedView>attrsView</selectedView>
+                    <isMaximized>false</isMaximized>
+                </childB>
+            </docker>
+        </frame>
+    </frames>
+</group>
