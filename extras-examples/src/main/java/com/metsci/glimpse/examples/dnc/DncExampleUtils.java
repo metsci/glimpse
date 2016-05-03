@@ -24,18 +24,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.dnc.example;
+package com.metsci.glimpse.examples.dnc;
 
-import static com.metsci.glimpse.dnc.convert.Vpf2Flat.convertVpfToFlat;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
-import java.io.IOException;
+import java.awt.Color;
+import java.util.logging.Logger;
 
-public class Vpf2FlatExample
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+public class DncExampleUtils
 {
+    private static final Logger logger = getLogger( DncExampleUtils.class );
 
-    public static void main( String[] args ) throws IOException
+
+    public static void initTinyLaf( )
     {
-        convertVpfToFlat( "/home/mike/metron/data/dnc/DNC/archive-pp", "/home/mike/metron/data/dnc/DNC_FLAT" );
+        try
+        {
+            net.sf.tinylaf.Theme.loadTheme( DncExampleUtils.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+            UIManager.setLookAndFeel( new net.sf.tinylaf.TinyLookAndFeel( ) );
+
+            // TinyLaf uses text-area foreground color for option-pane foreground, which doesn't look right
+            Color fgColor = UIManager.getColor( "Label.foreground" );
+            if ( fgColor != null )
+            {
+                UIManager.put( "OptionPane.messageForeground", fgColor );
+            }
+        }
+        catch ( UnsupportedLookAndFeelException e )
+        {
+            logWarning( logger, "Failed to init Tiny L&F", e );
+        }
     }
 
 }

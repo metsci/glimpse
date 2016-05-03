@@ -24,10 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.dnc.example;
+package com.metsci.glimpse.examples.dnc;
 
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
-import static com.metsci.glimpse.dnc.example.DncExampleUtils.initTinyLaf;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccFeatures;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
@@ -39,8 +38,8 @@ import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
-import static com.metsci.glimpse.util.io.StreamOpener.resourceOpener;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 
 import java.io.File;
@@ -60,6 +59,7 @@ import javax.swing.SwingUtilities;
 import org.jdesktop.swingx.JXTreeTable;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.DncLineFeature;
 import com.metsci.glimpse.dnc.DncPainter;
@@ -67,15 +67,14 @@ import com.metsci.glimpse.dnc.DncPainterSettings;
 import com.metsci.glimpse.dnc.DncPainterSettingsImpl;
 import com.metsci.glimpse.dnc.DncPointFeature;
 import com.metsci.glimpse.dnc.DncQuery;
-import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.convert.Flat2Query.QueryCache;
 import com.metsci.glimpse.dnc.convert.Flat2Query.QueryCacheConfig;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 import com.metsci.glimpse.dnc.facc.FaccAttr;
 import com.metsci.glimpse.dnc.facc.FaccFeature;
-import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
+import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
@@ -99,7 +98,7 @@ public class DncQueryExample
 
     public static void main( String[] args ) throws IOException
     {
-        initializeLogging( "config/dnc-example-logging.properties", resourceOpener );
+        initializeLogging( "dnc-examples/logging.properties" );
         fixPlatformQuirks( );
         initTinyLaf( );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
@@ -258,7 +257,7 @@ public class DncQueryExample
 
             TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
-            GroupArrangement groupArr = loadDockingArrangement( appName, DncQueryExample.class.getClassLoader( ).getResource( "docking/dnc-query-example-docking-defaults.xml" ) );
+            GroupArrangement groupArr = loadDockingArrangement( appName, DncQueryExample.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
             dockingGroup.restoreArrangement( groupArr, tileFactory, views );
             dockingGroup.addListener( new DockingGroupAdapter( )
             {

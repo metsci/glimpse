@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.dnc.example;
+package com.metsci.glimpse.examples.dnc;
 
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
@@ -32,7 +32,6 @@ import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
 import static com.metsci.glimpse.support.FrameUtils.newFrame;
 import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
-import static com.metsci.glimpse.util.io.StreamOpener.resourceOpener;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
@@ -60,7 +59,7 @@ public class DncPainterExample
 
     public static void main( String[] args ) throws IOException
     {
-        initializeLogging( "config/dnc-example-logging.properties", resourceOpener );
+        initializeLogging( "dnc-examples/logging.properties" );
 
 
 

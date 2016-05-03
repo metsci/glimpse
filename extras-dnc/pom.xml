@@ -30,34 +30,6 @@
             <version>2.0.0</version>
         </dependency>
 
-        <!-- For DncQueryExample -->
-        <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-core</artifactId>
-            <version>1.6.5-1</version>
-        </dependency>
-
-        <!-- For DncQueryExample -->
-        <dependency>
-            <groupId>net.sf.tinylaf</groupId>
-            <artifactId>tinylaf</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-
-        <!-- For DncQueryExample -->
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-docking</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <!-- For DncQueryExample -->
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-platform-fixes</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
     </dependencies>
 
     <!-- Use Java 8 for this module -->

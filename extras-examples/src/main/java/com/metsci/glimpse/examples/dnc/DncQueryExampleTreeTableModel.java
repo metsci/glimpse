@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.dnc.example;
+package com.metsci.glimpse.examples.dnc;
 
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.newThreadFactory;
 import static java.util.Collections.emptyList;
