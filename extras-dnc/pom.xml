@@ -19,7 +19,7 @@
 
         <dependency>
             <groupId>com.metsci.ext.com.kitfox.svg</groupId>
-            <artifactId>svg-salamander-core</artifactId>
+            <artifactId>svg-salamander</artifactId>
             <version>0.1.19</version>
         </dependency>
 
