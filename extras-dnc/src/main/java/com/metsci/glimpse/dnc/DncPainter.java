@@ -81,6 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL2;
@@ -111,9 +112,8 @@ import com.metsci.glimpse.dnc.convert.Render.RenderChunk;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLineAreaStyle;
 import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
-import com.metsci.glimpse.dnc.util.Callback;
-import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
+import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -455,9 +455,9 @@ public class DncPainter extends GlimpsePainter2D
                     final DncChunkKey chunkKey = new DncChunkKey( library, coverage );
                     if ( !dChunks.containsKey( chunkKey ) && !hChunks.containsKey( chunkKey ) )
                     {
-                        cache.getChunk( chunkKey, chunkPriorityFunc, new Callback<RenderChunk>( )
+                        cache.getChunk( chunkKey, chunkPriorityFunc, new Consumer<RenderChunk>( )
                         {
-                            public void run( final RenderChunk renderChunk )
+                            public void accept( final RenderChunk renderChunk )
                             {
                                 // On the async thread ...
                                 asyncExec.execute( new ThrowingRunnable( )

@@ -129,26 +129,26 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.google.common.base.Function;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.dnc.DncAreaFeature;
+import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.DncLibrary;
 import com.metsci.glimpse.dnc.DncLineFeature;
 import com.metsci.glimpse.dnc.DncPointFeature;
+import com.metsci.glimpse.dnc.DncProjections.DncProjection;
 import com.metsci.glimpse.dnc.DncQuery;
 import com.metsci.glimpse.dnc.DncTree;
-import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
-import com.metsci.glimpse.dnc.DncProjections.DncProjection;
 import com.metsci.glimpse.dnc.convert.Flat.FlatChunkKey;
 import com.metsci.glimpse.dnc.convert.Flat2Render.DncChunkJob;
 import com.metsci.glimpse.dnc.convert.Flat2Render.DncChunkPriority;
 import com.metsci.glimpse.dnc.convert.Query.QueryChunk;
-import com.metsci.glimpse.dnc.util.Callback;
 import com.metsci.glimpse.dnc.util.ToFloatFunction;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
@@ -390,7 +390,7 @@ public class Flat2Query
             return database.loadFeatures( chunkKey, featureNums );
         }
 
-        public void getChunk( DncChunkKey chunkKey, Function<DncChunkKey,DncChunkPriority> priorityFunc, Callback<DncTree> callback )
+        public void getChunk( DncChunkKey chunkKey, Function<DncChunkKey,DncChunkPriority> priorityFunc, Consumer<DncTree> callback )
         {
             // Maybe it's already in the cache
             DncTree tree;
@@ -400,7 +400,7 @@ public class Flat2Query
             }
             if ( tree != null )
             {
-                callback.run( tree );
+                callback.accept( tree );
                 return;
             }
 
@@ -418,7 +418,7 @@ public class Flat2Query
             }
         }
 
-        protected void enqueueConversion( DncChunkKey chunkKey, Function<DncChunkKey,DncChunkPriority> priorityFunc, Callback<DncTree> callback, long origTime_PMILLIS, DncChunkPriority earlyPriority, int numDeferrals )
+        protected void enqueueConversion( DncChunkKey chunkKey, Function<DncChunkKey,DncChunkPriority> priorityFunc, Consumer<DncTree> callback, long origTime_PMILLIS, DncChunkPriority earlyPriority, int numDeferrals )
         {
             conversionExec.execute( new DncChunkJob( chunkKey, origTime_PMILLIS, earlyPriority )
             {
@@ -432,7 +432,7 @@ public class Flat2Query
                     }
                     if ( tree != null )
                     {
-                        callback.run( tree );
+                        callback.accept( tree );
                         return;
                     }
 
@@ -460,7 +460,7 @@ public class Flat2Query
             } );
         }
 
-        protected void convertChunk( DncChunkKey chunkKey, Callback<DncTree> callback ) throws IOException
+        protected void convertChunk( DncChunkKey chunkKey, Consumer<DncTree> callback ) throws IOException
         {
             DncLibrary library = chunkKey.library;
             DncCoverage coverage = chunkKey.coverage;
@@ -505,7 +505,7 @@ public class Flat2Query
                     }
                     if ( tree != null )
                     {
-                        callback.run( tree );
+                        callback.accept( tree );
                         return;
                     }
                 }
@@ -567,7 +567,7 @@ public class Flat2Query
                 }
                 if ( tree != null )
                 {
-                    callback.run( tree );
+                    callback.accept( tree );
                     return;
                 }
 
@@ -655,7 +655,7 @@ public class Flat2Query
                 // Run callback
                 //
 
-                callback.run( tree );
+                callback.accept( tree );
 
 
 

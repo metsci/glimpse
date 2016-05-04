@@ -138,22 +138,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.google.common.base.Function;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.hash.Hashing;
+import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncLibrary;
-import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncProjections.DncProjection;
 import com.metsci.glimpse.dnc.convert.Flat.FlatChunkKey;
 import com.metsci.glimpse.dnc.convert.Render.RenderChunk;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLabelMaker;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLabelMaker.DncGeosymLabelMakerEntry;
-import com.metsci.glimpse.dnc.util.Callback;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
@@ -432,7 +432,7 @@ public class Flat2Render
             return labelLengthsBuf.slice( );
         }
 
-        public void getChunk( DncChunkKey chunkKey, Function<DncChunkKey,DncChunkPriority> priorityFunc, Callback<RenderChunk> callback )
+        public void getChunk( DncChunkKey chunkKey, Function<DncChunkKey,DncChunkPriority> priorityFunc, Consumer<RenderChunk> callback )
         {
             // Maybe it's already in the cache
             RenderChunk chunk;
@@ -442,7 +442,7 @@ public class Flat2Render
             }
             if ( chunk != null )
             {
-                callback.run( chunk );
+                callback.accept( chunk );
                 return;
             }
 
@@ -460,7 +460,7 @@ public class Flat2Render
             }
         }
 
-        protected void enqueueConversion( final DncChunkKey chunkKey, final Function<DncChunkKey,DncChunkPriority> priorityFunc, final Callback<RenderChunk> callback, final long origTime_PMILLIS, final DncChunkPriority earlyPriority, final int numDeferrals )
+        protected void enqueueConversion( final DncChunkKey chunkKey, final Function<DncChunkKey,DncChunkPriority> priorityFunc, final Consumer<RenderChunk> callback, final long origTime_PMILLIS, final DncChunkPriority earlyPriority, final int numDeferrals )
         {
             conversionExec.execute( new DncChunkJob( chunkKey, origTime_PMILLIS, earlyPriority )
             {
@@ -474,7 +474,7 @@ public class Flat2Render
                     }
                     if ( chunk != null )
                     {
-                        callback.run( chunk );
+                        callback.accept( chunk );
                         return;
                     }
 
@@ -502,7 +502,7 @@ public class Flat2Render
             } );
         }
 
-        protected void convertChunk( DncChunkKey chunkKey, Callback<RenderChunk> callback ) throws IOException
+        protected void convertChunk( DncChunkKey chunkKey, Consumer<RenderChunk> callback ) throws IOException
         {
             DncLibrary library = chunkKey.library;
             DncCoverage coverage = chunkKey.coverage;
@@ -548,7 +548,7 @@ public class Flat2Render
                     }
                     if ( chunk != null )
                     {
-                        callback.run( chunk );
+                        callback.accept( chunk );
                         return;
                     }
                 }
@@ -627,7 +627,7 @@ public class Flat2Render
                 }
                 if ( chunk != null )
                 {
-                    callback.run( chunk );
+                    callback.accept( chunk );
                     return;
                 }
 
@@ -766,7 +766,7 @@ public class Flat2Render
                 // Run callback
                 //
 
-                callback.run( chunk );
+                callback.accept( chunk );
 
 
 
@@ -1200,9 +1200,9 @@ public class Flat2Render
                 permits.acquireUninterruptibly( );
 
                 DncChunkKey chunkKey = new DncChunkKey( library, coverage );
-                cache.getChunk( chunkKey, priorityFunc, new Callback<RenderChunk>( )
+                cache.getChunk( chunkKey, priorityFunc, new Consumer<RenderChunk>( )
                 {
-                    public void run( RenderChunk renderChunk )
+                    public void accept( RenderChunk renderChunk )
                     {
                         permits.release( );
                     }
