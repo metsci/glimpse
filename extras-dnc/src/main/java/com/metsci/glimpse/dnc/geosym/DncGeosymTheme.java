@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.dnc.geosym;
 
+import static com.google.common.base.Objects.equal;
+
+import com.google.common.base.Objects;
+
 public class DncGeosymTheme
 {
 
@@ -44,6 +48,26 @@ public class DncGeosymTheme
         this.lineAreaStylesFile = lineAreaStylesFile;
         this.cgmDir = cgmDir;
         this.svgDir = svgDir;
+    }
+
+    @Override
+    public int hashCode( )
+    {
+        return Objects.hashCode( colorsFile, lineAreaStylesFile, cgmDir, svgDir );
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != getClass( ) ) return false;
+
+        DncGeosymTheme other = ( DncGeosymTheme ) o;
+        return ( equal( other.colorsFile, colorsFile )
+              && equal( other.lineAreaStylesFile, lineAreaStylesFile )
+              && equal( other.cgmDir, cgmDir )
+              && equal( other.svgDir, svgDir ) );
     }
 
 }
