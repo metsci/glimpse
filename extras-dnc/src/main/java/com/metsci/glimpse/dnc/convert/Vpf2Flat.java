@@ -386,7 +386,7 @@ public class Vpf2Flat
         File attrsFile     = new File( flatDir, flatAttrsFilename     );
         File stringsFile   = new File( flatDir, flatStringsFilename   );
 
-        File charsetFile       = new File( flatDir, flatCharsetFilename  );
+        File charsetFile       = new File( flatDir, flatCharsetFilename       );
         File libraryNamesFile  = new File( flatDir, flatLibraryNamesFilename  );
         File coverageNamesFile = new File( flatDir, flatCoverageNamesFilename );
         File fcodeNamesFile    = new File( flatDir, flatFcodeNamesFilename    );
