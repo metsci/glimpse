@@ -699,7 +699,7 @@ public class Vpf2Flat
         stringsMapped.force( );
 
 
-        // Make sure we wrote the write number of bytes to each buffer
+        // Make sure we wrote the expected number of bytes to each buffer
         if ( SIZEOF_INT    * chunksBuf.position( )    != totalChunksByteCount    ) logger.severe( "Wrong number of bytes written to chunks file: expected = "    + totalChunksByteCount    + ", found = " + ( SIZEOF_INT    * chunksBuf.position( )    ) );
         if ( SIZEOF_LONG   * librariesBuf.position( ) != totalLibrariesByteCount ) logger.severe( "Wrong number of bytes written to libraries file: expected = " + totalLibrariesByteCount + ", found = " + ( SIZEOF_LONG   * librariesBuf.position( ) ) );
         if ( SIZEOF_INT    * featuresBuf.position( )  != totalFeaturesByteCount  ) logger.severe( "Wrong number of bytes written to features file: expected = "  + totalFeaturesByteCount  + ", found = " + ( SIZEOF_INT    * featuresBuf.position( )  ) );
