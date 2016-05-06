@@ -33,8 +33,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 import java.util.List;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 public class DncGeosymLabelMaker
 {

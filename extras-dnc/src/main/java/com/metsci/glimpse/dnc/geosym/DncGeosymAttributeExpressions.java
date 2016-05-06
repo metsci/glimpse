@@ -31,8 +31,7 @@ import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 
 import java.util.List;
 import java.util.ListIterator;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 public class DncGeosymAttributeExpressions
 {

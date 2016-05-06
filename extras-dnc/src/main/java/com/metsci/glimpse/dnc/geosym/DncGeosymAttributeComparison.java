@@ -32,9 +32,8 @@ import static java.lang.Float.parseFloat;
 import static java.lang.Integer.parseInt;
 import static java.lang.Short.parseShort;
 
+import java.util.function.Function;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Function;
 
 public class DncGeosymAttributeComparison implements DncGeosymAttributeExpression
 {

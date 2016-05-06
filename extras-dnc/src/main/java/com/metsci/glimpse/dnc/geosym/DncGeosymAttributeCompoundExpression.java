@@ -29,8 +29,7 @@ package com.metsci.glimpse.dnc.geosym;
 import static com.metsci.glimpse.util.GeneralUtils.newUnmodifiableList;
 
 import java.util.List;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 public class DncGeosymAttributeCompoundExpression implements DncGeosymAttributeExpression
 {

@@ -130,10 +130,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import com.google.common.base.Function;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.dnc.DncAreaFeature;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
