@@ -26,31 +26,38 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
+import static com.metsci.glimpse.dnc.DncProjections.dncPlateCarree;
+
 import java.io.File;
 import java.io.IOException;
 
 import com.metsci.glimpse.dnc.DncPainter;
 import com.metsci.glimpse.dnc.DncPainterSettingsImpl;
-import com.metsci.glimpse.dnc.DncProjections;
 import com.metsci.glimpse.dnc.DncProjections.DncProjection;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 
-public class DncPainters {
+public class DncPainters
+{
 
-	public static DncPainter newPlateCarreeDncPainter( String flatParentPath ) throws IOException {
+	public static DncPainter newPlateCarreeDncPainter( String flatParentPath ) throws IOException
+	{
 		File flatParentDir = new File( flatParentPath );
 		return newPlateCarreeDncPainter( flatParentDir, new File( flatParentDir.getParent( ), "DNC_RENDER" ) );
 	}
 
-	public static DncPainter newPlateCarreeDncPainter( String flatParentPath, String renderParentPath ) throws IOException {
+	public static DncPainter newPlateCarreeDncPainter( String flatParentPath, String renderParentPath ) throws IOException
+	{
 		return newPlateCarreeDncPainter( new File( flatParentPath ), new File( renderParentPath ) );
 	}
 
-	public static DncPainter newPlateCarreeDncPainter( File flatParentDir, File renderParentDir ) throws IOException {
-		return newDncPainter(flatParentDir, renderParentDir, DncProjections.dncPlateCarree);
+	public static DncPainter newPlateCarreeDncPainter( File flatParentDir, File renderParentDir ) throws IOException
+	{
+		return newDncPainter( flatParentDir, renderParentDir, dncPlateCarree );
 	}
-	public static DncPainter newDncPainter( File flatParentDir, File renderParentDir,DncProjection projection) throws IOException {
+
+	public static DncPainter newDncPainter( File flatParentDir, File renderParentDir,DncProjection projection ) throws IOException
+	{
 		RenderCacheConfig cacheConfig = new RenderCacheConfig( );
 		cacheConfig.flatParentDir = flatParentDir;
 		cacheConfig.renderParentDir = renderParentDir;
@@ -60,7 +67,6 @@ public class DncPainters {
 		DncPainter painter = new DncPainter( cache, new DncPainterSettingsImpl( cacheConfig.proj ) );
 		painter.activateCoverages( "lim", "nav", "cul", "iwy", "obs", "hyd", "por", "ecr", "lcr", "env", "rel", "coa" );
 		return painter;
-
 	}
 
 }
