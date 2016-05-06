@@ -117,6 +117,7 @@ import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 
 public class DncPainter extends GlimpsePainter2D
@@ -197,12 +198,9 @@ public class DncPainter extends GlimpsePainter2D
     protected final Set<DncCoverage> activeCoverages;
     public final Function<DncChunkKey,DncChunkPriority> chunkPriorityFunc;
 
+    // Accessed while holding mutex
     protected DncGeosymTheme theme;
-
-    // Written by the async thread, read by the render thread
     protected Map<String,DncGeosymLineAreaStyle> lineAreaStyles;
-
-    // Written by the render thread, read by the async thread
     protected RasterizeArgs rasterizeArgs;
 
     // Accessed only on the labels thread
@@ -269,25 +267,14 @@ public class DncPainter extends GlimpsePainter2D
             }
         };
 
-        this.theme = theme;
+        this.theme = null;
         this.lineAreaStyles = emptyMap( );
-        asyncExec.execute( new ThrowingRunnable( )
-        {
-            public void runThrows( ) throws Exception
-            {
-                Map<String,DncGeosymLineAreaStyle> newLineAreaStyles = readGeosymLineAreaStyles( theme.lineAreaStylesFile );
-                synchronized ( mutex )
-                {
-                    lineAreaStyles = newLineAreaStyles;
-                    updateActiveLibraries( allLibraries );
-                }
-            }
-        } );
-
         this.rasterizeArgs = null;
 
-        this.labelColors = null;
+        this.labelColors = new Int2ObjectOpenHashMap<>( );
         this.labelColorsFile = null;
+
+        setTheme( theme );
     }
 
     public void addAxis( Axis2D axis )
@@ -344,6 +331,45 @@ public class DncPainter extends GlimpsePainter2D
                 }
             }
             return chunkKeys;
+        }
+    }
+
+    public void setTheme( DncGeosymTheme newTheme )
+    {
+        // If asyncExec is currently in a call to activateCoverages, it's possible for
+        // this block to run AFTER asyncExec reads this.theme, but BEFORE it populates
+        // maps with newly loaded chunk data.
+        //
+        // That feels wrong, and makes the whole thing tricky to reason about. However,
+        // it turns out okay, because after writing this.theme we re-activate everything,
+        // which guarantees eventual consistency.
+        //
+        synchronized ( mutex )
+        {
+            if ( !equal( newTheme, theme ) )
+            {
+                // Drop everything that was created using the old theme
+                deactivateChunks( activeLibraries, activeCoverages );
+                this.lineAreaStyles = emptyMap( );
+
+                // Store the theme
+                this.theme = newTheme;
+
+                // Reload everything using the new theme
+                activateChunks( activeLibraries, activeCoverages );
+                final String newLineAreaStylesFile = newTheme.lineAreaStylesFile;
+                asyncExec.execute( new ThrowingRunnable( )
+                {
+                    public void runThrows( ) throws Exception
+                    {
+                        Map<String,DncGeosymLineAreaStyle> newLineAreaStyles = readGeosymLineAreaStyles( newLineAreaStylesFile );
+                        synchronized ( mutex )
+                        {
+                            lineAreaStyles = newLineAreaStyles;
+                        }
+                    }
+                } );
+            }
         }
     }
 
@@ -512,8 +538,21 @@ public class DncPainter extends GlimpsePainter2D
                                                     }
                                                 }
 
+                                                // Get up-to-date cgmDir and svgDir
+                                                String cgmDir;
+                                                String svgDir;
+                                                synchronized ( mutex )
+                                                {
+                                                    if ( theme == null )
+                                                    {
+                                                        return;
+                                                    }
+                                                    cgmDir = theme.cgmDir;
+                                                    svgDir = theme.svgDir;
+                                                }
+
                                                 // Load, rasterize, and put chunk icons
-                                                DncHostIconAtlas hIconAtlas = createHostIconAtlas( hChunk, theme.cgmDir, theme.svgDir, rasterizeArgs.maxTextureDim, rasterizeArgs.screenDpi );
+                                                DncHostIconAtlas hIconAtlas = createHostIconAtlas( hChunk, cgmDir, svgDir, rasterizeArgs.maxTextureDim, rasterizeArgs.screenDpi );
                                                 if ( hIconAtlas != null )
                                                 {
                                                     synchronized ( mutex )
@@ -541,16 +580,20 @@ public class DncPainter extends GlimpsePainter2D
                                                     }
                                                 }
 
-                                                // Make sure labelColors map is up to date
-                                                String themeColorsFile;
+                                                // Get up-to-date colors map
+                                                String colorsFile;
                                                 synchronized ( mutex )
                                                 {
-                                                    themeColorsFile = theme.colorsFile;
+                                                    if ( theme == null )
+                                                    {
+                                                        return;
+                                                    }
+                                                    colorsFile = theme.colorsFile;
                                                 }
-                                                if ( !equal( labelColorsFile, themeColorsFile ) )
+                                                if ( !equal( colorsFile, labelColorsFile ) )
                                                 {
-                                                    labelColors = readGeosymColors( themeColorsFile );
-                                                    labelColorsFile = themeColorsFile;
+                                                    labelColors = readGeosymColors( colorsFile );
+                                                    labelColorsFile = colorsFile;
                                                 }
 
                                                 // Load, rasterize, and put chunk labels
