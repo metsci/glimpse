@@ -342,7 +342,7 @@ public class DncPainter extends GlimpsePainter2D
         //
         // That feels wrong, and makes the whole thing tricky to reason about. However,
         // it turns out okay, because after writing this.theme we re-activate everything,
-        // which guarantees eventual consistency.
+        // which gives eventual consistency.
         //
         synchronized ( mutex )
         {
@@ -557,7 +557,7 @@ public class DncPainter extends GlimpsePainter2D
                                                 {
                                                     synchronized ( mutex )
                                                     {
-                                                        if ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
+                                                        if ( equal( cgmDir, theme.cgmDir ) && equal( svgDir, theme.svgDir ) && activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
                                                         {
                                                             hIconAtlases.put( chunkKey, hIconAtlas );
                                                         }
@@ -604,7 +604,7 @@ public class DncPainter extends GlimpsePainter2D
                                                 {
                                                     synchronized ( mutex )
                                                     {
-                                                        if ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
+                                                        if ( equal( colorsFile, theme.colorsFile ) && activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
                                                         {
                                                             hLabelAtlases.put( chunkKey, hLabelAtlas );
                                                         }
@@ -872,7 +872,7 @@ public class DncPainter extends GlimpsePainter2D
             long chunkXferStart_PMILLIS = System.currentTimeMillis( );
             for ( DncChunkKey chunkKey : chunksToDraw )
             {
-                if ( !dChunks.containsKey( chunkKey ) && hChunks.containsKey( chunkKey ) )
+                if ( hChunks.containsKey( chunkKey ) )
                 {
                     boolean allowXfer = ( chunkXferCount < guaranteedChunkXfersPerFrame || timeSince_MILLIS( chunkXferStart_PMILLIS ) <= chunkXferTimeLimit_MILLIS );
                     if ( allowXfer )
@@ -891,7 +891,7 @@ public class DncPainter extends GlimpsePainter2D
             long iconAtlasXferStart_PMILLIS = System.currentTimeMillis( );
             for ( DncChunkKey chunkKey : chunksToDraw )
             {
-                if ( !dIconAtlases.containsKey( chunkKey ) && hIconAtlases.containsKey( chunkKey ) )
+                if ( hIconAtlases.containsKey( chunkKey ) )
                 {
                     boolean allowXfer = ( iconAtlasXferCount < guaranteedIconAtlasXfersPerFrame || timeSince_MILLIS( iconAtlasXferStart_PMILLIS ) <= iconAtlasXferTimeLimit_MILLIS );
                     if ( allowXfer )
@@ -910,7 +910,7 @@ public class DncPainter extends GlimpsePainter2D
             long labelAtlasXferStart_PMILLIS = System.currentTimeMillis( );
             for ( DncChunkKey chunkKey : chunksToDraw )
             {
-                if ( !dLabelAtlases.containsKey( chunkKey ) && hLabelAtlases.containsKey( chunkKey ) )
+                if ( hLabelAtlases.containsKey( chunkKey ) )
                 {
                     boolean allowXfer = ( labelAtlasXferCount < guaranteedLabelAtlasXfersPerFrame || timeSince_MILLIS( labelAtlasXferStart_PMILLIS ) <= labelAtlasXferTimeLimit_MILLIS );
                     if ( allowXfer )
