@@ -29,6 +29,7 @@ package com.metsci.glimpse.examples.dnc;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccFeatures;
+import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_NIGHT;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
@@ -36,6 +37,8 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameT
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
+import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
@@ -53,8 +56,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.media.opengl.GLAnimatorControl;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 
 import org.jdesktop.swingx.JXTreeTable;
 
@@ -73,6 +81,7 @@ import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 import com.metsci.glimpse.dnc.facc.FaccAttr;
 import com.metsci.glimpse.dnc.facc.FaccFeature;
+import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
@@ -102,6 +111,8 @@ public class DncQueryExample
         fixPlatformQuirks( );
         initTinyLaf( );
         DockingTheme dockingTheme = tinyLafDockingTheme( );
+        ToolTipManager.sharedInstance( ).setLightWeightPopupEnabled( false );
+        JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
 
 
@@ -245,9 +256,23 @@ public class DncQueryExample
             animator.add( geoCanvas.getGLDrawable( ) );
             animator.start( );
 
+            JCheckBoxMenuItem nightModeCheckbox = new JCheckBoxMenuItem( "Night mode" );
+            nightModeCheckbox.addItemListener( ( ev ) ->
+            {
+                DncGeosymTheme theme = ( nightModeCheckbox.isSelected( ) ? DNC_THEME_NIGHT : DNC_THEME_STANDARD );
+                dncPainter.setTheme( theme );
+            } );
+
+            JToolBar geoToolbar = newToolbar( true );
+            JToggleButton geoOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
+            JPopupMenu geoOptionsPopup = newButtonPopup( geoOptionsButton );
+            geoOptionsPopup.add( nightModeCheckbox );
+            geoToolbar.add( geoOptionsButton );
+
+
             View[] views =
             {
-                new View( "geoView",   geoCanvas,     "Geo",      false, null, requireIcon( "icons/fugue/map.png"        ) ),
+                new View( "geoView",   geoCanvas,     "Geo",      false, null, requireIcon( "icons/fugue/map.png"        ), geoToolbar ),
                 new View( "attrsView", attrsScroller, "Features", false, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
             };
 
