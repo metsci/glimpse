@@ -49,7 +49,7 @@ import com.metsci.glimpse.util.primitives.IntsArray;
 public class DncLineShaders
 {
 
-    // WIP: Need cumulativeDistanceX and cumulativeDistanceY separately
+    // XXX: Handling the ( ppvX != ppvY ) case will require separate values for cumulativeDistanceX and cumulativeDistanceY
     public static final String lineVertShader_GLSL = join( "\n",
         "                                                                                                   ",
         "  #version 120                                                                                     ",
