@@ -12,6 +12,9 @@ import javax.swing.JRadioButton;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.charts.slippy.SlippyAxisMouseListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyMapTilePainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
 import com.metsci.glimpse.examples.Example;
@@ -27,11 +30,8 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
     
     public static void main(String[] args) throws Exception {
         try {
-            // Set cross-platform Java L&F (also called "Metal")
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException e) {
-            // handle exception
-        }
+        } catch (UnsupportedLookAndFeelException e) { }
         SlippyTileExample slippy = new SlippyTileExample();
         Example example = Example.showWithSwing(slippy);
         example.getFrame().setJMenuBar(slippy.mapToolBar);
@@ -45,12 +45,15 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
         final GeoProjection geoProj = new TangentPlane(LatLonGeo.fromDeg(38.958374, -77.358548));
         final boolean inUS = true;
         
-        final MultiAxisPlot2D mapPlot = new MultiAxisPlot2D();
+        final MultiAxisPlot2D mapPlot = new MultiAxisPlot2D() {
+            @Override
+            protected AxisMouseListener createAxisMouseListenerXY( ) {
+                return new SlippyAxisMouseListener2D(geoProj);
+            }
+        };
         double rad = Length.fromKilometers(1);
         mapPlot.getCenterAxis().lockAspectRatioXY(1);
         mapPlot.getCenterAxis().set(-rad, rad, -rad, rad);
-        mapPlot.getCenterAxisX().setMaxSpan(Length.fromKilometers(50));
-        mapPlot.getCenterAxisY().setMaxSpan(Length.fromKilometers(50));
 
         Path userHome = Paths.get(System.getProperty("user.home"));
         Path cacheRoot = null;

@@ -102,7 +102,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter {
         double lonSizeDeg = (east-west)/xTileDim;
         
         double zoomApprox = Math.log(360/lonSizeDeg)/LOG2;
-        final int zoom = (int)Math.min(Math.ceil(zoomApprox), maxZoom);
+        final int zoom = (int)Math.min(Math.floor(zoomApprox), maxZoom);
         lastZoom.set(zoom);
         
         Vector2d tileNE = slippyProj[zoom].project(ne);
