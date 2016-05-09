@@ -35,7 +35,7 @@ public class Vpf2FlatExample
 
     public static void main( String[] args ) throws IOException
     {
-        convertVpfToFlat( "/home/mike/metron/data/dnc/DNC/archive-pp", "/home/mike/metron/data/dnc/DNC_FLAT" );
+        convertVpfToFlat( "/path/to/archive-pp", "/path/to/DNC_FLAT" );
     }
 
 }

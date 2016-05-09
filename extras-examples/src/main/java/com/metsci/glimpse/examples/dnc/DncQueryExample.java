@@ -120,11 +120,11 @@ public class DncQueryExample
         //
 
         RenderCacheConfig renderConfig = new RenderCacheConfig( );
-        renderConfig.flatParentDir = new File( "/home/mike/metron/data/dnc/DNC_FLAT" );
-        renderConfig.renderParentDir = new File( "/home/mike/metron/data/dnc/DNC_RENDER" );
+        renderConfig.flatParentDir = new File( "/path/to/DNC_FLAT" );
+        renderConfig.renderParentDir = new File( "/path/to/DNC_RENDER" );
 
         //renderConfig.proj = dncPlateCarree;
-        //renderConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Deigo
+        //renderConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Diego
         renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
         RenderCache renderCache = new RenderCache( renderConfig, 4 );
@@ -136,7 +136,7 @@ public class DncQueryExample
 
         QueryCacheConfig queryConfig = new QueryCacheConfig( );
         queryConfig.flatParentDir = renderConfig.flatParentDir;
-        queryConfig.queryParentDir = new File( "/home/mike/metron/data/dnc/DNC_QUERY" );
+        queryConfig.queryParentDir = new File( "/path/to/DNC_QUERY" );
         queryConfig.proj = renderConfig.proj;
 
         QueryCache queryCache = new QueryCache( queryConfig, 4 );
