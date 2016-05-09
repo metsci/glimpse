@@ -167,8 +167,11 @@ public class SlippyMapTilePainter extends ShadedTexturePainter {
         return contains(outerBounds,bounds[0],bounds[2])
                 || contains(outerBounds,bounds[0],bounds[3])
                 || contains(outerBounds,bounds[1],bounds[2])
-                || contains(outerBounds,bounds[1],bounds[3]);
-                
+                || contains(outerBounds,bounds[1],bounds[3])
+                || contains(bounds,outerBounds[0],outerBounds[2])
+                || contains(bounds,outerBounds[0],outerBounds[3])
+                || contains(bounds,outerBounds[1],outerBounds[2])
+                || contains(bounds,outerBounds[1],outerBounds[3]);
     }
     
     private static boolean contains(final double[] bounds, final double x, final double y) {
