@@ -36,8 +36,8 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D {
 
         Axis2D axis2D = layout.getAxis( event.getTargetStack( ) );
                 
-        double xTileDim = axis2D.getAxisX().getSizePixels()/256;
-        double yTileDim = axis2D.getAxisY().getSizePixels()/256;
+        double xTileDim = axis2D.getAxisX().getSizePixels()/256.;
+        double yTileDim = axis2D.getAxisY().getSizePixels()/256.;
         
         double minX = axis2D.getAxisX().getMin();
         double maxX = axis2D.getAxisX().getMax();

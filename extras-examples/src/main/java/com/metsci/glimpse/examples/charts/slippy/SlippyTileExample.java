@@ -10,12 +10,14 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.charts.slippy.SlippyAxisMouseListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyMapTilePainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -65,6 +67,11 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
         final SlippyMapTilePainter cartoDarkPainter = SlippyPainterFactory.getCartoMap(geoProj, false, false);
         mapPlot.addPainter(cartoDarkPainter);
         cartoDarkPainter.setVisible(false);
+        
+        ScalePainter scalePainter = new ScalePainter();
+        scalePainter.setUnitConverter(AxisUnitConverters.suShownAsMeters);
+        scalePainter.setUnitLabel("m");
+        mapPlot.addPainter(scalePainter);
         
         this.mapToolBar = new JMenuBar();
         ButtonGroup group = new ButtonGroup();
