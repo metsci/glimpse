@@ -2,7 +2,6 @@ package com.metsci.glimpse.charts.slippy;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -24,6 +25,8 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 public class SlippyCache {
 
+    private static final Logger logger = Logger.getLogger( SlippyCache.class.getName( ) );
+    
     /*
      * suffix pattern for slippy tiles zoom/x/y.png
      */
@@ -82,7 +85,28 @@ public class SlippyCache {
                 prefixQueue.add(prefix + (prefix.endsWith("/") ? "" : "/"));
             }
         }
-        this.cacheDir = cacheDir;
+        
+        if (cacheDir != null) {
+            if (Files.isDirectory(cacheDir)) {
+                this.cacheDir = cacheDir;
+            } else if (!Files.exists(cacheDir)) {
+                try {
+                    Files.createDirectories(cacheDir);
+                } catch (Exception e) {
+                    String msg = "Failed to created directory for disk cache: " + cacheDir.toAbsolutePath().toString();
+                    logger.log(Level.WARNING, msg, e);
+                }
+                if (Files.isDirectory(cacheDir)) {
+                    this.cacheDir = cacheDir;
+                } else {
+                    this.cacheDir = null;
+                }
+            } else {
+                throw new IllegalArgumentException("specified cache directory ("+cacheDir.toString()+")is a file");
+            }
+        } else {
+            this.cacheDir = null;
+        }
         
         for (int zoom = 0; zoom < slippyProj.length; zoom++) {
             this.slippyProj[zoom] = new SlippyProjection(zoom);
@@ -100,7 +124,7 @@ public class SlippyCache {
         try {
             tex = cache.get(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Failed to get texture from cache", e);
         }
         return tex;
     }
@@ -111,7 +135,7 @@ public class SlippyCache {
         try {
             tex = cache.getIfPresent(key);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.WARNING, "Failed to get texture from cache (if present)", e);
         }
         return tex;
     }
@@ -127,7 +151,7 @@ public class SlippyCache {
             return makeTex(key, img);
         }
 
-        private BufferedImage fetchFromWeb(String key) throws InterruptedException, IOException, MalformedURLException {
+        private BufferedImage fetchFromWeb(String key) {
             BufferedImage img = null;
             //Now try to pull the image from the web
             String prefix = null;
@@ -135,12 +159,26 @@ public class SlippyCache {
                 prefix = prefixQueue.take();
                 String urlStr = prefix + key;
                 //System.out.println("Fetching " + urlStr + " from the web");
-                img = ImageIO.read(new URL(urlStr));
+                try {
+                    img = ImageIO.read(new URL(urlStr));
+                } catch (IOException e) {
+                    logger.log(Level.WARNING, "Exception fetching tile from the web", e);
+                }
                 //If we got an image, try to cache it to disk
-                saveToDisk(key, img);
+                try {
+                    saveToDisk(key, img);
+                } catch (IOException e) {
+                    logger.log(Level.WARNING, "Exception saving tile to disk", e);
+                }
+            } catch (InterruptedException e) {
+                logger.log(Level.WARNING, "Interrupted while getting a URL", e);
             } finally {
                 if (prefix != null) {
-                    prefixQueue.put(prefix);
+                    try {
+                        prefixQueue.put(prefix);
+                    } catch (InterruptedException e) {
+                        logger.log(Level.WARNING, "Interrupted while putting a URL back on the queue", e);
+                    }
                 }
             }
             return img;
@@ -168,7 +206,7 @@ public class SlippyCache {
                     try {
                         img = ImageIO.read(imgPath.toFile());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.log(Level.WARNING, "Exception while attempting to read the tile from disk", e);
                     }
                 }
             }

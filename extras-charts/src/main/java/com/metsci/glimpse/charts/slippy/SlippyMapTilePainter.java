@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -30,6 +32,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
  */
 public class SlippyMapTilePainter extends ShadedTexturePainter {
 
+    private static final Logger logger = Logger.getLogger( SlippyCache.class.getName( ) );
     private static final double LOG2 = Math.log(2);
     
     private final GeoProjection geoProj;
@@ -214,7 +217,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();//TODO
+                logger.log(Level.WARNING, "Exception in tile fetching thread", e);
             } finally {
                 //nothing?
             }

@@ -2,9 +2,6 @@ package com.metsci.glimpse.examples.charts.slippy;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JMenuBar;
@@ -13,7 +10,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyAxisMouseListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyMapTilePainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
@@ -54,29 +50,19 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
         double rad = Length.fromKilometers(1);
         mapPlot.getCenterAxis().lockAspectRatioXY(1);
         mapPlot.getCenterAxis().set(-rad, rad, -rad, rad);
-
-        Path userHome = Paths.get(System.getProperty("user.home"));
-        Path cacheRoot = null;
-        if (userHome != null && Files.exists(userHome)) {
-            cacheRoot = userHome.resolve(".glimpse-slippy-cache");
-        }
         
-        Path mapImgCacheDir = cacheRoot != null ? cacheRoot.resolve("mapquest-map") : null;
-        final SlippyMapTilePainter mapPainter = SlippyPainterFactory.getMapQuestMaps(geoProj, mapImgCacheDir);
+        final SlippyMapTilePainter mapPainter = SlippyPainterFactory.getMapQuestMaps(geoProj);
         mapPlot.addPainter(mapPainter);
         
-        Path satImgCacheDir = cacheRoot != null ? cacheRoot.resolve("mapquest-sat") : null;
-        final SlippyMapTilePainter satPainter = SlippyPainterFactory.getMapQuestImagery(geoProj, satImgCacheDir, inUS);
+        final SlippyMapTilePainter satPainter = SlippyPainterFactory.getMapQuestImagery(geoProj, inUS);
         mapPlot.addPainter(satPainter);
         satPainter.setVisible(false);
 
-        Path cartoLightImgCacheDir = cacheRoot != null ? cacheRoot.resolve("cartodb-light") : null;
-        final SlippyMapTilePainter cartoLightPainter = SlippyPainterFactory.getCartoMapLight(geoProj, cartoLightImgCacheDir);
+        final SlippyMapTilePainter cartoLightPainter = SlippyPainterFactory.getCartoMap(geoProj, true, true);
         mapPlot.addPainter(cartoLightPainter);
         cartoLightPainter.setVisible(false);
 
-        Path cartoDarkImgCacheDir = cacheRoot != null ? cacheRoot.resolve("cartodb-dark") : null;
-        final SlippyMapTilePainter cartoDarkPainter = SlippyPainterFactory.getCartoMapDark(geoProj, cartoDarkImgCacheDir);
+        final SlippyMapTilePainter cartoDarkPainter = SlippyPainterFactory.getCartoMap(geoProj, false, false);
         mapPlot.addPainter(cartoDarkPainter);
         cartoDarkPainter.setVisible(false);
         
@@ -84,8 +70,8 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
         ButtonGroup group = new ButtonGroup();
         final JRadioButton mapCheckBox = new JRadioButton("Map Layer", mapPainter.isVisible());
         final JRadioButton satcheckBox = new JRadioButton("Imagery Layer", satPainter.isVisible());
-        final JRadioButton cartoLightCheckBox = new JRadioButton("CartoDBLight Layer", cartoLightPainter.isVisible());
-        final JRadioButton cartoDarkcheckBox = new JRadioButton("CartoDBDark Layer", cartoDarkPainter.isVisible());
+        final JRadioButton cartoLightCheckBox = new JRadioButton("CartoDBLight (Labels)", cartoLightPainter.isVisible());
+        final JRadioButton cartoDarkcheckBox = new JRadioButton("CartoDBDark (No Labels)", cartoDarkPainter.isVisible());
         
         group.add(mapCheckBox);
         group.add(satcheckBox);
