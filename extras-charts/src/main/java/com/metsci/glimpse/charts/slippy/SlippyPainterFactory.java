@@ -14,11 +14,9 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
  */
 public class SlippyPainterFactory {
 
-    //TODO maybe include default cache directory in user home
     private SlippyPainterFactory() {}
     
     public static final Path CACHE_ROOT = Paths.get(System.getProperty("user.home")).resolve(".glimpse-slippy-cache");
-
 
     public static SlippyMapTilePainter getOpenStreetMaps(GeoProjection geoProj) {
         return getOpenStreetMaps(geoProj, CACHE_ROOT.resolve("osm-maps"));

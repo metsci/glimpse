@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButton;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -32,7 +33,10 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
         } catch (UnsupportedLookAndFeelException e) { }
         SlippyTileExample slippy = new SlippyTileExample();
         Example example = Example.showWithSwing(slippy);
-        example.getFrame().setJMenuBar(slippy.mapToolBar);
+        SwingUtilities.invokeLater(() -> {
+            example.getFrame().setJMenuBar(slippy.mapToolBar);
+            example.getFrame().validate();
+        });
     }
 
     private JMenuBar mapToolBar;
