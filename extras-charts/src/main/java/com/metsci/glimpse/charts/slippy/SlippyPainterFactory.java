@@ -4,7 +4,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -22,12 +26,16 @@ public class SlippyPainterFactory {
         return getOpenStreetMaps(geoProj, CACHE_ROOT.resolve("osm-maps"));
     }
     
+    private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("slippy-tile-fetcher-%d").build();
+    
+    private static final ExecutorService EXEC = Executors.newFixedThreadPool(4, THREAD_FACTORY);
+    
     public static SlippyMapTilePainter getOpenStreetMaps(GeoProjection geoProj, Path cacheDir) {
         List<String> prefixes = new ArrayList<String>();
         prefixes.add("http://a.tile.openstreetmap.org/");
         prefixes.add("http://b.tile.openstreetmap.org/");
         prefixes.add("http://c.tile.openstreetmap.org/");
-        return new SlippyMapTilePainter(geoProj, prefixes, 8, cacheDir, 18);
+        return new SlippyMapTilePainter(geoProj, prefixes, EXEC, cacheDir, 18);
     }
 
     public static SlippyMapTilePainter getMapQuestMaps(GeoProjection geoProj) {
@@ -39,7 +47,7 @@ public class SlippyPainterFactory {
         for (int i = 1; i <= 4; i++) {
             prefixes.add("http://otile"+i+".mqcdn.com/tiles/1.0.0/osm/");
         }
-        return new SlippyMapTilePainter(geoProj, prefixes, 8, cacheDir, 17);
+        return new SlippyMapTilePainter(geoProj, prefixes, EXEC, cacheDir, 17);
     }
 
     public static SlippyMapTilePainter getMapQuestImagery(GeoProjection geoProj, boolean inUS) {
@@ -51,7 +59,7 @@ public class SlippyPainterFactory {
         for (int i = 1; i <= 4; i++) {
             prefixes.add("http://otile"+i+".mqcdn.com/tiles/1.0.0/sat/");
         }
-        return new SlippyMapTilePainter(geoProj, prefixes, 8, cacheDir, inUS ? 16 : 11);
+        return new SlippyMapTilePainter(geoProj, prefixes, EXEC, cacheDir, inUS ? 16 : 11);
     }
 
     public static SlippyMapTilePainter getCartoMap(GeoProjection geoProj, boolean light, boolean labels) {
@@ -66,6 +74,6 @@ public class SlippyPainterFactory {
         prefixes.add(String.format(template, "a"));
         prefixes.add(String.format(template, "b"));
         prefixes.add(String.format(template, "c"));
-        return new SlippyMapTilePainter(geoProj, prefixes, 8, cacheDir, 18);
+        return new SlippyMapTilePainter(geoProj, prefixes, EXEC, cacheDir, 18);
     }
 }

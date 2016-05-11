@@ -54,7 +54,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter {
      */
     private final ConcurrentHashMap<RGBTextureProjected2D, Integer> texZoomMap = new ConcurrentHashMap<>();
 
-    public SlippyMapTilePainter(GeoProjection geoProj, List<String> prefixes, int threads, Path cacheDir, int maxZoom) {
+    public SlippyMapTilePainter(GeoProjection geoProj, List<String> prefixes, ExecutorService exec, Path cacheDir, int maxZoom) {
         this.geoProj = geoProj;
         this.cache = new SlippyCache(geoProj, prefixes, cacheDir);
         this.maxZoom = maxZoom;
@@ -62,15 +62,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter {
         for (int zoom = 0; zoom <= maxZoom; zoom++) {
             this.slippyProj[zoom] = new SlippyProjection(zoom);
         }
-        this.exec = Executors.newFixedThreadPool(threads, new ThreadFactory() {
-            AtomicInteger count = new AtomicInteger(0);
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, "slippy-tile-fetcher-"+count.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
-        });
+        this.exec = exec;
     }
 
     @Override
