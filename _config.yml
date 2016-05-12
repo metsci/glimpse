@@ -1,8 +1,7 @@
-pygments: true
 permalink: ./:year/:month/:day/:title.html
 title: Glimpse
 
-pygments: true
+highlighter: rogue
 
 google_analytics:
    account: UA-29274683-1
