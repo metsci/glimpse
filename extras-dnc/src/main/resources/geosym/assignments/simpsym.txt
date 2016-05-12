@@ -1,0 +1,2683 @@
+simpsym.txt,Simplified Symbol Assignment File:
+id=N,2,Row Identifier,-,:
+pid=N,1,VPF Product Identifier,code.txt,:
+fcode=T,5,FACC Feature Code,-,:
+delin=N,1,Delineation of Feature Code,code.txt,:
+cov=T,5,VPF Coverage for Feature Code,-,:
+pointsym=T,4,Point Symbol Number,-,:
+linesym=T,4,Line Symbol Number,-,:
+areasym=T,4,Area Symbol Number,-,:
+dispri=N,1,Display Priority,-,:
+orient=T,3,Orientation Attribute,-,:
+labatt=T,*,Label Attribute,-,:
+txrowid=T,*,Foreign Key to Text Attribute File,-,:
+vgroup=N,4,IHO Viewing Group,-,:
+txtgroup=N,1,IHO Text Group,-,:
+radar=N,1,IHO Radar Display Category,code.txt,:
+dispcat=N,1,IMO Display Category,code.txt,:
+feadesc=T,256,N,Feature Description,-,:
+;
+1|1|AA010|1||2001|||8||||||||mine/quarry
+2|2|AA010|1||2001|||8||||||||mine/quarry - active
+3|2|AA010|1||6000|||8||||||||mine/quarry - inactive
+5|3|AA010|1||2001|||8||||||||mine/quarry - active
+6|3|AA010|1||6000|||8||||||||mine/quarry - inactive
+8|4|AA010|1||2001|||8||||||||mine - active
+9|4|AA010|1||6000|||8||||||||mine - inactive
+11|5|AA010|1||0001|||3||||32270||0|3|mine/quarry
+12|25|AA010|1||2001|||8||||||||mine - active
+13|25|AA010|1||6000|||8||||||||mine - inactive
+16|4|AA010|2|||3116||8||||||||mine
+18|1|AA010|3||2001|3116||5||||||||mine/quarry
+19|2|AA010|3||2001|3116||5||||||||mine/quarry - active
+20|2|AA010|3||6000|3116||5||||||||mine/quarry - inactive
+22|3|AA010|3||2001|3116||5||||||||mine/quarry - active
+23|3|AA010|3||6000|3116||5||||||||mine/quarry - inactive
+25|4|AA010|3||2001|3116||5||||||||mine - active
+26|4|AA010|3||6000|3116||5||||||||mine - inactive
+28|5|AA010|3||0027|0624||4||||32270||1|3|mine/quarry
+29|25|AA010|3||2001|3116||5||||||||mine - active
+30|25|AA010|3||6000|3116||5||||||||mine - inactive
+33|4|AA012|1||2001|||8||||||||quarry - active
+34|4|AA012|1||6000|||8||||||||quarry - inactive
+36|25|AA012|1||2001|||8||||||||quarry - active
+37|25|AA012|1||6000|||8||||||||quarry - inactive
+38|4|AA012|2|||3116||8||||||||quarry
+40|4|AA012|3||2001|3116||5||||||||quarry - active
+41|4|AA012|3||6000|3116||5||||||||quarry - inactive
+43|25|AA012|3||2001|3116||5||||||||quarry - active
+44|25|AA012|3||6000|3116||5||||||||quarry - inactive
+45|2|AA040|1||2019|||8||||||||rig/superstructure
+46|3|AA040|1||2019|||8||||||||rig/superstructure
+47|4|AA040|1||2019|||8||||||||rig/superstructure
+48|16|AA040|1||7000|||8||||||||rig / superstructure high
+49|16|AA040|1||7000|||8||||||||rig / superstructure
+50|16|AA040|1||7142|||8||||||||rig / superstructure light high
+51|16|AA040|1||7142|||8||||||||rig / superstructure light
+52|16|AA040|1|||||9||hgt|33|||||rig / superstructure - AGL label
+53|16|AA040|1|||||9||zv2|32|||||rig / superstructure - MSL label
+54|25|AA040|1||2019|||8||||||||rig/superstructure
+55|1|AA050|1||0078|||6||||||||well
+56|2|AA050|1||2003|||6||||||||well - water/non-perennial-dry
+57|2|AA050|1||2003|||6||||||||well - water/perennial
+58|2|AA050|1||0078|||8||||||||well - not water
+60|3|AA050|1||2003|||6||||||||well - water/non-perennial-dry
+61|3|AA050|1||2003|||6||||||||well - water/perennial
+62|3|AA050|1||0078|||8||||||||well - not water
+64|4|AA050|1||2003|||6||||||||well - water/non-perennial-dry
+65|4|AA050|1||2003|||6||||||||well - water/perennial
+66|4|AA050|1||0078|||8||||||||well - not water
+68|25|AA050|1||2003|||6||||||||well - water/non-perennial-dry
+69|25|AA050|1||2003|||6||||||||well - water/perennial
+70|25|AA050|1||0078|||8||||||||well - not water
+76|1|AA052|1||0078|||8||||||||oil/gas field
+77|1|AA052|3|||0600|0804|5||||||||oil/gas field
+78|16|AB000|1||7002|||8||||||||disposal site / waste pile high
+79|16|AB000|1||7002|||8||||||||disposal site / waste pile
+80|16|AB000|1||7142|||8||||||||disposal site / waste pile light high
+81|16|AB000|1||7142|||8||||||||disposal site / waste pile light
+82|16|AB000|1|||||9||hgt|33|||||disposal site/waste pile  - AGL label
+83|16|AB000|1|||||9||zv2|32|||||disposal site/waste pile - MSL label
+84|2|AB000|3|||0604|4015|5||||||||disposal site/waste pile
+85|3|AB000|3|||0604|4015|5||||||||disposal site/waste pile
+86|4|AB000|3|||0604|4015|5||||||||disposal site/waste pile
+87|5|AB000|3|||0624||4||||32270||1|3|disposal site/waste pile
+88|25|AB000|3|||0604|4015|5||||||||disposal site/waste pile
+90|3|AB010|3|||0604|4015|5||||||||wrecking yard/scrap yard
+91|4|AB010|3|||0604|4015|5||||||||wrecking yard/scrap yard
+92|5|AB010|3|||0624||4||||32270||1|3|wrecking yard/scrap yard
+93|25|AB010|3|||0604|4015|5||||||||wrecking yard/scrap yard
+95|1|AC000|1||2019|||8||||||||processing plant/treatment plant
+96|2|AC000|1||2019|||8||||||||processing plant/treatment plant
+98|3|AC000|1||2019|||8||||||||processing plant/treatment plant
+100|16|AC000|1||7004|||8||||||||processing plant / treatment plant high
+101|16|AC000|1||7004|||8||||||||processing plant / treatment plant
+102|16|AC000|1||7142|||8||||||||processing plant / treatment plant light high
+103|16|AC000|1||7142|||8||||||||processing plant / treatment plant light
+104|16|AC000|1|||||9||hgt|33|||||processing plant/treatment plant  - AGL label
+105|16|AC000|1|||||9||zv2|32|||||processing plant/treatment plant - MSL label
+106|25|AC000|1||2019|||8||||||||processing plant/treatment plant
+108|2|AC000|3|||0624||7||||||||processing plant/treatment plant
+110|3|AC000|3|||0624||7||||||||processing plant/treatment plant
+112|4|AC000|3|||0624||7||||||||processing plant/treatment plant
+114|5|AC000|3|||0624||4||||32270||1|3|processing plant/treatment plant
+115|25|AC000|3|||0624||7||||||||processing plant/treatment plant
+118|16|AC010|1||7006|||8||||||||blast furnace high
+119|16|AC010|1||7006|||8||||||||blast furnace
+120|16|AC010|1||7142|||8||||||||blast furnace light high
+121|16|AC010|1||7142|||8||||||||blast furnace light
+122|16|AC010|1|||||9||hgt|33|||||blast furnace - AGL label
+123|16|AC010|1|||||9||zv2|32|||||blast furnace - MSL label
+124|3|AC020|1||2005|||8||||||||catalytic cracker
+125|4|AC020|1||2005|||8||||||||catalytic cracker
+126|16|AC020|1||7008|||8||||||||catalytic cracker high
+127|16|AC020|1||7008|||8||||||||catalytic cracker
+128|16|AC020|1||7142|||8||||||||catalytic cracker light high
+129|16|AC020|1||7142|||8||||||||catalytic cracker light
+130|16|AC020|1|||||9||hgt|33|||||catalytic cracker - AGL label
+131|16|AC020|1|||||9||zv2|32|||||catalytic cracker - MSL label
+132|25|AC020|1||2005|||8||||||||catalytic cracker
+133|2|AC030|3|||0600|6042|3||||||||settling basin/sludge pond
+134|3|AC030|3|||0600|6042|3||||||||settling basin/sludge pond
+135|4|AC030|3|||0600|6042|3||||||||settling basin/sludge pond
+137|5|AC030|3|||0600|0804|3||||21060||1|2|settling basin/sludge pond
+138|17|AC030|3|||0600|6042|3||||||||settling basin/sludge pond
+139|25|AC030|3|||0600|6042|3||||||||settling basin/sludge pond
+141|1|AC040|1||2019|||8||||||||oil/gas facilities
+142|1|AD010|1||2019|||7||||||||power plant
+143|2|AD010|1||2019|||7||||||||power plant
+145|16|AD010|1||7010|||8||||||||power plant / power station high
+146|16|AD010|1||7010|||8||||||||power plant / power station
+147|16|AD010|1||7142|||8||||||||power plant / power station light high
+148|16|AD010|1||7142|||8||||||||power plant / power station light
+149|16|AD010|1|||||9||hgt|33|||||power plant/power station - AGL label
+150|16|AD010|1|||||9||zv2|32|||||power plant/power station - MSL label
+151|16|AD010|2|||7144||8||||||||power plant / power station
+152|2|AD010|3|||0600|0804|7||||||||power plant
+154|3|AD010|3|||0600|0804|7||||||||power plant
+156|4|AD010|3|||0600|0804|7||||||||power plant
+158|5|AD010|3|||0600|0804|4||||22220||1|2|power plant
+159|25|AD010|3|||0600|0804|7||||||||power plant
+162|3|AD020|1||2019|||7||||||||solar panels
+163|25|AD020|1||2019|||7||||||||solar panels
+164|1|AD030|1||2019|||8||||||||substation/transformer yard
+165|3|AD030|1||2019|||8||||||||substation/transformer yard
+166|4|AD030|1||2019|||8||||||||substation/transformer yard
+168|5|AD030|1||0002|||6||||22220||0|2|substation/transformer yard
+169|16|AD030|1||7012|||8||||||||substation / transformer yard high
+170|16|AD030|1||7012|||8||||||||substation / transformer yard
+171|16|AD030|1||7142|||8||||||||substation / transformer yard light high
+172|16|AD030|1||7142|||8||||||||substation / transformer yard light
+173|16|AD030|1|||||9||hgt|33|||||substation/transformer yard - AGL label
+174|16|AD030|1|||||9||zv2|32|||||substation/transformer yard - MSL label
+175|25|AD030|1||2019|||8||||||||substation/transformer yard
+177|3|AD030|3|||0600|0804|5||||||||substation/transformer yard
+178|4|AD030|3|||0600|0804|5||||||||substation/transformer yard
+180|5|AD030|3|||0600|0804|4||||22220||1|2|substation/transformer yard
+181|25|AD030|3|||0600|0804|5||||||||substation/transformer yard
+183|2|AF010|1||6015|||8||||||||chimney/smokestack
+184|3|AF010|1||6015|||8||||||||chimney/smokestack
+185|4|AF010|1||6015|||8||||||||chimney/smokestack
+186|5|AF010|1||0003|||6||||22220||0|2|chimney/smokestack
+187|16|AF010|1||7014|||8||||||||chimney / smokestack high
+188|16|AF010|1||7014|||8||||||||chimney / smokestack
+189|16|AF010|1||7145|||8||||||||chimney / smokestack light high
+190|16|AF010|1||7145|||8||||||||chimney / smokestack light
+191|16|AF010|1|||||9||hgt|33|||||chimney/smokestack - AGL label
+192|16|AF010|1|||||9||zv2|32|||||chimney/smokestack - MSL label
+193|25|AF010|1||6015|||8||||||||chimney/smokestack
+195|16|AF010|2|||7144||8||||||||chimney / smokestack
+196|16|AF020|1||7016|||8||||||||conveyor high
+197|16|AF020|1||7016|||8||||||||conveyor
+198|16|AF020|1||7142|||8||||||||conveyor light high
+199|16|AF020|1||7142|||8||||||||conveyor light
+200|16|AF020|1|||||9||hgt|33|||||conveyor - AGL label
+201|16|AF020|1|||||9||zv2|32|||||conveyor - MSL label
+202|2|AF020|2|||3086||8||||||||conveyor
+203|3|AF020|2|||3086||8||||||||conveyor
+204|4|AF020|2|||3086||8||||||||conveyor
+205|16|AF020|2|||7144||8||||||||conveyor
+206|25|AF020|2|||3086||8||||||||conveyor
+207|2|AF030|1||2016|||8||||||||cooling tower
+208|3|AF030|1||2016|||8||||||||cooling tower
+209|4|AF030|1||2016|||8||||||||cooling tower
+210|5|AF030|1||0004|||6||||22220||0|2|cooling tower
+211|16|AF030|1||7018|||8||||||||cooling tower high
+212|16|AF030|1||7018|||8||||||||cooling tower
+213|16|AF030|1||7142|||8||||||||cooling tower light high
+214|16|AF030|1||7142|||8||||||||cooling tower light
+215|16|AF030|1|||||9||hgt|33|||||cooling tower - AGL label
+216|16|AF030|1|||||9||zv2|32|||||cooling tower - MSL label
+217|25|AF030|1||2016|||8||||||||cooling tower
+219|4|AF030|3|||3117|4100|7||||||||cooling tower
+220|2|AF040|1||6015|||8||||||||crane
+221|3|AF040|1||6015|||8||||||||crane
+222|4|AF040|1||6015|||8||||||||crane
+223|5|AF040|1||0005|||4||||32440||0|3|crane
+224|16|AF040|1||7020|||8||||||||crane high
+225|16|AF040|1||7020|||8||||||||crane
+226|16|AF040|1||7142|||8||||||||crane light high
+227|16|AF040|1||7142|||8||||||||crane light
+228|16|AF040|1|||||9||hgt|33|||||crane - AGL label
+229|16|AF040|1|||||9||zv2|32|||||crane - MSL label
+230|25|AF040|1||6015|||8||||||||crane
+232|16|AF050|1||7022|||8||||||||dredge / powershovel / dragline high
+233|16|AF050|1||7022|||8||||||||dredge / powershovel / dragline
+234|16|AF050|1||7142|||8||||||||dredge / powershovel / dragline light high
+235|16|AF050|1||7142|||8||||||||dredge / powershovel / dragline light
+236|16|AF050|1|||||9||hgt|33|||||dredge/powershovel/dragline - AGL label
+237|16|AF050|1|||||9||zv2|32|||||dredge/powershovel/dragline - MSL label
+238|2|AF070|1||0051|||8||||||||flare pipe
+239|3|AF070|1||0051|||8||||||||flare pipe
+240|4|AF070|1||0051|||8||||||||flare pipe
+241|5|AF070|1||0006|||6||||22220||0|2|flare pipe
+242|16|AF070|1||7024|||8||||||||flare pipe high
+243|16|AF070|1||7024|||8||||||||flare pipe
+244|16|AF070|1||7145|||8||||||||flare pipe light high
+245|16|AF070|1||7145|||8||||||||flare pipe light
+246|16|AF070|1|||||9||hgt|33|||||flare pipe - AGL label
+247|16|AF070|1|||||9||zv2|32|||||flare pipe - MSL label
+248|25|AF070|1||0051|||8||||||||flare pipe
+250|16|AF080|1||7026|||8||||||||hopper high high
+251|16|AF080|1||7026|||8||||||||hopper
+252|16|AF080|1||7142|||8||||||||hopper light high
+253|16|AF080|1||7142|||8||||||||hopper light
+254|16|AF080|1|||||9||hgt|33|||||hopper - AGL label
+255|16|AF080|1|||||9||zv2|32|||||hopper - MSL label
+256|4|AH010|1||2043|||8||||||||bastion/rampart/fortification
+258|5|AH010|1||0007|||4||||22220||0|2|bastion/rampart/fortification
+260|4|AH010|2|||6004||8||||||||bastion/rampart/fortification
+262|4|AH010|3|||6004||7||||||||bastion/rampart/fortification
+264|5|AH010|3|||0600|0804|4||||22220||1|2|bastion/rampart/fortification
+266|2|AH050|1||2043|||8||||||||fortification
+268|3|AH050|1||2043|||8||||||||fortification
+270|4|AH050|1||2043|||8||||||||fortification
+272|5|AH050|1||0007|||4||||22220||0|2|fortification
+273|16|AH050|1||7028|||8||||||||fortification high
+274|16|AH050|1||7028|||8||||||||fortification
+275|16|AH050|1||7142|||8||||||||fortification light high
+276|16|AH050|1||7142|||8||||||||fortification light
+277|16|AH050|1|||||9||hgt|33|||||fortification - AGL label
+278|16|AH050|1|||||9||zv2|32|||||fortification - MSL label
+279|25|AH050|1||2043|||8||||||||fortification
+282|4|AH050|2|||6004||8||||||||fortification
+284|16|AH050|2|||7144||8||||||||fortification
+285|2|AH050|3|||6004||7||||||||fortification
+287|3|AH050|3|||6004||7||||||||fortification
+289|4|AH050|3|||6004||7||||||||fortification
+291|5|AH050|3|||0600|0804|4||||22220||1|2|fortification
+292|25|AH050|3|||6004||7||||||||fortification
+295|4|AH060|1||2072|||8||||||||underground bunker
+297|4|AH060|2|||3117||8||||||||underground bunker
+299|4|AH060|3|||3117||7||||||||underground bunker
+301|3|AI020|3|||3114||5||||||||mobile home/mobile home park
+302|4|AI020|3|||3114||5||||||||mobile home/mobile home park
+303|25|AI020|3|||3114||5||||||||mobile home/mobile home park
+304|1|AI030|1||2019|||5||||||||camp
+305|3|AJ030|3|||4217||5||||||||feedlot/stockyard/holding pen
+306|4|AJ030|3|||4217||5||||||||feedlot/stockyard/holding pen
+308|25|AJ030|3|||4217||5||||||||feedlot/stockyard/holding pen
+309|2|AJ050|1||0063|||8||||||||windmill
+310|3|AJ050|1||0063|||8||||||||windmill
+311|4|AJ050|1||0063|||8||||||||windmill
+312|5|AJ050|1||0008|||6||||22220||0|2|windmill
+313|16|AJ050|1||7032|||8||||||||windmill high
+314|16|AJ050|1||7032|||8||||||||windmill
+315|16|AJ050|1||7145|||8||||||||windmill light high
+316|16|AJ050|1||7145|||8||||||||windmill light
+317|16|AJ050|1|||||9||hgt|33|||||windmill - AGL label
+318|16|AJ050|1|||||9||zv2|32|||||windmill - MSL label
+319|25|AJ050|1||0063|||8||||||||windmill
+321|16|AJ051|1||7034|||8||||||||windmotor high
+322|16|AJ051|1||7034|||8||||||||windmotor
+323|16|AJ051|1||7145|||8||||||||windmotor light high
+324|16|AJ051|1||7145|||8||||||||windmotor light
+325|16|AJ051|1|||||9||hgt|33|||||windmotor - AGL label
+326|16|AJ051|1|||||9||zv2|32|||||windmotor - MSL label
+327|16|AJ051|2|||7144||8||||||||windmotor
+328|2|AK020|1||0051|||8||||||||amusement park attraction
+329|3|AK020|1||0051|||8||||||||amusement park attraction
+330|4|AK020|1||0051|||8||||||||amusement park attraction
+331|5|AK020|1||0024|||6||||22220||0|2|amusement park attraction
+332|16|AK020|1||7036|||8||||||||amusement park attraction high
+333|16|AK020|1||7036|||8||||||||amusement park attraction
+334|16|AK020|1||7142|||8||||||||amusement park attraction light high
+335|16|AK020|1||7142|||8||||||||amusement park attraction light
+336|16|AK020|1|||||9||hgt|33|||||amusement park attraction - AGL label
+337|16|AK020|1|||||9||zv2|32|||||amusement park attraction - MSL label
+338|25|AK020|1||0051|||8||||||||amusement park attraction
+340|5|AK020|2|||0600||3||||22220||0|2|amusement park attraction
+342|3|AK030|3|||3117|6005|5||||||||amusement park
+344|4|AK030|3|||3117|6005|5||||||||amusement park
+346|25|AK030|3|||3117|6005|5||||||||amusement park
+348|1|AK040|3|||4279||5||||||||athletic field
+349|3|AK040|3|||4279||5||||||||athletic field
+351|4|AK040|3|||4279||5||||||||athletic field
+353|5|AK040|3|||0600|0804|4||||22220||1|2|athletic field
+354|25|AK040|3|||4279||5||||||||athletic field
+357|3|AK060|3|||3117||5||||||||campground/campsite
+359|4|AK060|3|||3117||5||||||||campground/campsite
+361|25|AK060|3|||3117||5||||||||campground/campsite
+363|3|AK070|3|||4279||5||||||||drive in theater
+364|4|AK070|3|||4279||5||||||||drive in theater
+365|5|AK080|1||0024|||6||||22220||0|2|drive in theater screen
+367|3|AK090|3|||4279||5||||||||fairgrounds
+369|4|AK090|3|||4279||5||||||||fairgrounds
+371|5|AK090|3||||0822|1||||12010||1|1|fairgrounds
+372|5|AK090|3|||||8||nam|1|12010|26|1|1|fairgrounds - name label
+373|25|AK090|3|||4279||5||||||||fairgrounds
+377|3|AK100|3|||4279||5||||||||golf course
+379|4|AK100|3|||4279||5||||||||golf course
+381|5|AK100|3|||0600|0804|4||||22220||1|2|golf course
+382|25|AK100|3|||4279||5||||||||golf course
+385|4|AK110|3|||0600|4243|5||||||||grandstand
+386|2|AK120|3|||0600||5||||||||park
+388|3|AK120|3|||0600||5||||||||park
+390|4|AK120|3|||0600||5||||||||park
+392|5|AK120|3|||0600|0804|4||||22220||1|2|park
+393|25|AK120|3|||0600||5||||||||park
+396|2|AK130|2|||3114||8||||||||race track
+398|3|AK130|2|||3114||8||||||||race track
+400|4|AK130|2|||3114||5||||||||race track
+402|5|AK130|2|||0605||4||||32250||0|3|race track
+403|25|AK130|2|||3114||5||||||||race track
+406|1|AK130|3|||3114||5||||||||race track
+407|4|AK130|3|||3114||8||||||||race track
+409|2|AK150|1||0051|||8||||||||ski jump
+410|3|AK150|1||0051|||8||||||||ski jump
+411|4|AK150|1||0051|||8||||||||ski jump
+412|16|AK150|1||7038|||8||||||||ski jump high
+413|16|AK150|1||7038|||8||||||||ski jump
+414|16|AK150|1||7142|||8||||||||ski jump light high
+415|16|AK150|1||7142|||8||||||||ski jump light
+416|16|AK150|1|||||9||hgt|33|||||ski jump - AGL label
+417|16|AK150|1|||||9||zv2|32|||||ski jump - MSL label
+418|3|AK150|2|||0656||8||||||||ski jump
+419|4|AK150|2|||0656||8||||||||ski jump
+420|1|AK160|1||6048|||8||||||||stadium/amphitheater
+421|2|AK160|1||6048|||8||||||||stadium/amphitheater
+423|5|AK160|1||0002|||6||||22220||0|2|stadium/amphitheater
+424|16|AK160|1||7040|||8||||||||stadium / amphitheater high
+425|16|AK160|1||7040|||8||||||||stadium / amphitheater
+426|16|AK160|1||7142|||8||||||||stadium / amphitheater light high
+427|16|AK160|1||7142|||8||||||||stadium / amphitheater light
+428|16|AK160|1|||||9||hgt|33|||||stadium/amphitheater - AGL label
+429|16|AK160|1|||||9||zv2|32|||||stadium/amphitheater - MSL label
+431|16|AK160|2|||7144||8||||||||stadium / amphitheater
+432|3|AK160|3|||3113||5||||||||stadium/amphitheater
+434|4|AK160|3|||3113||5||||||||stadium/amphitheater
+436|5|AK160|3|||0600|0804|4||||22220||1|2|stadium/amphitheater
+437|25|AK160|3|||3113||5||||||||stadium/amphitheater
+440|3|AK170|3|||0600|4138|3||||||||swimming pool
+441|4|AK170|3|||0600|4138|3||||||||swimming pool
+442|25|AK170|3|||0600|4138|3||||||||swimming pool
+443|3|AK180|3|||3117|6005|5||||||||zoo/safari park
+445|4|AK180|3|||3117|6005|5||||||||zoo/safari park
+447|5|AK180|3|||0600|0804|4||||22220||1|2|zoo/safari park
+448|25|AK180|3|||3117|6005|5||||||||zoo/safari park
+451|5|AL005|3||0081|4186||5||||26010||1|2|animal sanctuary
+453|1|AL015|1||2036|||8||||||||building
+454|2|AL015|1||0038|||8||||||||building - generic
+455|2|AL015|1||0038|||8||||||||building - school
+456|2|AL015|1||0038|||8||||||||building - government
+457|2|AL015|1||0038|||8||||||||building - castle
+458|2|AL015|1||1003|||8||||||||building - house of worship - church
+459|2|AL015|1||0038|||8||||||||building - house of worship - pagoda
+460|2|AL015|1||0038|||8||||||||building - house of worship - temple
+461|2|AL015|1||0038|||8||||||||building - house of worship - synagogue
+462|2|AL015|1||0038|||8||||||||building - house of worship - stupa
+463|2|AL015|1||0038|||8||||||||building - house of worship - mosque
+464|2|AL015|1||6030|||8||||||||building - lighthouse
+466|3|AL015|1||0038|||8||||||||building - generic
+467|3|AL015|1||0038|||8||||||||building - school
+468|3|AL015|1||1001|||8||||||||building - government
+469|3|AL015|1||0038|||8||||||||building - castle
+470|3|AL015|1||0038|||8||||||||building - generic
+471|3|AL015|1||1002|||8||||||||building - hospital
+472|3|AL015|1||1003|||8||||||||building - house of worship - church
+473|3|AL015|1||0038|||8||||||||building - house of worship - pagoda
+474|3|AL015|1||0038|||8||||||||building - house of worship - temple
+475|3|AL015|1||0038|||8||||||||building - house of worship - synagogue
+476|3|AL015|1||0038|||8||||||||building - house of worship - stupa
+477|3|AL015|1||0038|||8||||||||building - house of worship - mosque
+478|3|AL015|1||6030|||8||||||||building - lighthouse
+480|4|AL015|1||0038|||8||||||||building - generic (population)
+481|4|AL015|1||0038|||8||||||||building - school, college, seminary
+482|4|AL015|1||0038|||8||||||||building - generic (industry)
+483|4|AL015|1||1001|||8||||||||building - government
+484|4|AL015|1||0038|||8||||||||building - castle
+485|4|AL015|1||0038|||8||||||||building - generic (population)
+486|4|AL015|1||1002|||8||||||||building - hospital
+487|4|AL015|1||1003|||8||||||||building - house of worship - church
+488|4|AL015|1||0038|||8||||||||building - house of worship - pagoda
+489|4|AL015|1||0038|||8||||||||building - house of worship - temple
+490|4|AL015|1||0038|||8||||||||building - house of worship - synagogue
+491|4|AL015|1||0038|||8||||||||building - house of worship - stupa
+492|4|AL015|1||0038|||8||||||||building - house of worship - mosque
+493|4|AL015|1||0038|||8||||||||building - generic (industry)
+494|4|AL015|1||6030|||8||||||||building - lighthouse
+496|5|AL015|1||2036|||4||||32220||0|3|building - not house of worship, not maritime station
+497|5|AL015|1||0010|||6||||22220||0|2|building - house of worship (church)
+498|5|AL015|1||0011|||6||||22220||0|2|building - house of worship (temple/pagoda)
+499|5|AL015|1||0012|||6||||22220||0|2|building - house of worship (mosque)
+500|5|AL015|1||0015|||7||||28020||0|2|building - maritime station
+501|5|AL015|1||0402|||6||||27080||0|2|building - maritime station (not rescue), sound signal
+502|5|AL015|1||0002|||6||||22220||0|2|building - maritime station
+503|5|AL015|1||0013|||7||||38030||0|3|building - maritime station
+504|5|AL015|1||0014|||7||||38030||0|3|building - maritime station
+505|5|AL015|1||0401|||6||||27080||0|2|building - maritime station (rescue), sound signal
+506|5|AL015|1|||||8||col|7|27070|23|0|3|building - not maritime station, light label
+507|5|AL015|1|||||8||sst|9|27080|24|0|3|building - maritime station - sound signal label (abbreviated)
+508|16|AL015|1||7044|||8||||||||building high
+509|16|AL015|1||7044|||8||||||||building
+510|16|AL015|1||7142|||8||||||||building light high
+511|16|AL015|1||7142|||8||||||||building light
+512|16|AL015|1|||||9||hgt|33|||||building - AGL label
+513|16|AL015|1|||||9||zv2|32|||||building - MSL label
+514|25|AL015|1||0038|||8||||||||building - generic
+515|25|AL015|1||0038|||8||||||||building - school
+516|25|AL015|1||0038|||8||||||||building - generic
+517|25|AL015|1||0038|||8||||||||building - castle
+518|25|AL015|1||1002|||8||||||||building - hospital
+519|25|AL015|1||1003|||8||||||||building - house of worship - church
+520|25|AL015|1||6030|||8||||||||building - lighthouse
+521|25|AL015|1||0038|||8||||||||building - generic
+535|3|AL015|2|||0600||8||||||||building - generic
+536|3|AL015|2|||0600||8||||||||building - school
+537|3|AL015|2|||0600||8||||||||building - hospital
+538|3|AL015|2|||0600||8||||||||building - house of worship
+540|4|AL015|2|||0600||8||||||||building - generic
+541|4|AL015|2|||0600||8||||||||building - school
+542|4|AL015|2|||0600||8||||||||building - government
+543|4|AL015|2|||0600||8||||||||building - hospital
+544|4|AL015|2|||0600||8||||||||building - house of worship
+546|16|AL015|2|||7144||8||||||||building
+547|25|AL015|2|||0600||8||||||||building - generic
+548|25|AL015|2|||0600||8||||||||building - school
+549|25|AL015|2|||0600||8||||||||building - hospital
+550|25|AL015|2|||0600||8||||||||building - house of worship
+552|2|AL015|3||||4156|8||||||||building - generic
+553|2|AL015|3||||4156|8||||||||building - school
+554|2|AL015|3||||4156|8||||||||building - house of worship
+556|3|AL015|3||||4156|8||||||||building - generic
+557|3|AL015|3||||4156|8||||||||building - school
+558|3|AL015|3||||4156|8||||||||building - hospital
+559|3|AL015|3||||4156|8||||||||building - house of worship
+561|4|AL015|3||||4156|8||||||||building - generic
+562|4|AL015|3||||4156|8||||||||building - school
+563|4|AL015|3||||4156|8||||||||building - government
+564|4|AL015|3||||4156|8||||||||building - hospital
+565|4|AL015|3||||4156|8||||||||building - house of worship
+567|5|AL015|3|||0600|0804|4||||22220||1|2|building
+568|25|AL015|3||||4156|8||||||||building - generic
+569|25|AL015|3||||4156|8||||||||building - school
+570|25|AL015|3||||4156|8||||||||building - hospital
+571|25|AL015|3||||4156|8||||||||building - house of worship
+574|5|AL018|1||0002|||6||||22220||0|2|building superstructure addition
+575|16|AL018|1||7044|||8||||||||building superstructure addition high
+576|16|AL018|1||7044|||8||||||||building superstructure addition
+577|16|AL018|1||7142|||8||||||||building superstructure addition light high
+578|16|AL018|1||7142|||8||||||||building superstructure addition light
+579|16|AL018|1|||||9||hgt|33|||||building superstructure addition - AGL label
+580|16|AL018|1|||||9||zv2|32|||||building superstructure addition - MSL label
+582|16|AL018|2|||7144||8||||||||building superstructure addition
+583|1|AL020|1||2053|||6||||||||built-up area
+585|2|AL020|1||2053|||6||||||||built-up area
+587|5|AL020|1||0016|||3||||22240||0|2|built-up area
+588|5|AL020|1|||||8||nam|14|22240|26|0|3|built-up area - name label
+591|1|AL020|3||||4128|2||||||||built-up area
+593|2|AL020|3||||4128|2||||||||built-up area
+595|3|AL020|3||||4002|2||||||||built-up area sparse
+596|3|AL020|3||||4128|2||||||||built-up area dense
+598|4|AL020|3||||4002|2||||||||built-up area sparse
+599|4|AL020|3||||4128|2||||||||built-up area dense
+601|5|AL020|3|||0604|0804|3||||22240||1|2|built-up area
+602|9|AL020|3||||4128|2||||||||built-up area
+603|17|AL020|3||||4128|2||||||||built-up area
+605|25|AL020|3|<>pop|||4128|2||||||||built-up area
+606|25|AL020|3|pop|||4128|2||||||||built-up area
+608|1|AL025|1||0078|||8||||||||cairn
+609|2|AL025|1||0078|||8||||||||cairn
+610|3|AL025|1||0078|||8||||||||cairn
+611|5|AL025|1||0017|||6||||22220||0|2|cairn
+612|25|AL025|1||0078|||8||||||||cairn
+614|3|AL030|1||0185|||8||||||||cemetery
+615|4|AL030|1||0185|||8||||||||cemetery
+617|25|AL030|1||0185|||8||||||||cemetery
+618|3|AL030|3|||3117||5||||||||cemetery
+620|4|AL030|3|||3117||5||||||||cemetery
+622|5|AL030|3|||0600|0804|4||||22220||1|2|cemetery
+623|25|AL030|3|||3117||5||||||||cemetery
+626|4|AL045|3|||0684||8||||||||complex outline
+628|17|AL045|3|||0684||8||||||||complex outline
+630|5|AL050|1||0018|||8||||17020||0|1|display sign
+631|16|AL050|1||7048|||8||||||||display sign high
+632|16|AL050|1||7048|||8||||||||display sign
+633|16|AL050|1||7142|||8||||||||display sign light high
+634|16|AL050|1||7142|||8||||||||display sign light
+635|16|AL050|1|||||9||hgt|33|||||display sign - AGL label
+636|16|AL050|1|||||9||zv2|32|||||display sign - MSL label
+638|3|AL060|2|||3113||7||||||||dragon teeth
+639|9|AL060|2|||3113||7||||||||dragon teeth
+640|25|AL060|2|||3113||7||||||||dragon teeth
+641|3|AL060|3|||3113||7||||||||dragon teeth
+642|9|AL060|3|||3113||7||||||||dragon teeth
+643|25|AL060|3|||3113||7||||||||dragon teeth
+644|2|AL070|2|||0600||7||||||||fence
+645|3|AL070|2|||0600||7||||||||fence
+646|4|AL070|2|||0600||7||||||||fence
+647|5|AL070|2|||0600||3||||22220||0|2|fence
+648|25|AL070|2|||0600||7||||||||fence
+650|5|AL073|1||0019|||6||||22220||0|2|flagstaff/flagpole
+652|25|AL075|1||1205|||8||||||||gallery
+653|25|AL075|2|||3113||3||||||||gallery
+654|2|AL100|1||2058|||8||||||||hut
+655|3|AL100|1||2058|||8||||||||hut
+656|4|AL100|1||2058|||8||||||||hut
+657|25|AL100|1||2058|||8||||||||hut
+658|1|AL105|1||2053|||6||||||||settlement
+659|3|AL105|1||2060|||6||||||||settlement
+661|2|AL105|3||||4100|2||||||||settlement
+662|3|AL105|3||||4100|2||||||||settlement
+664|17|AL105|3||||4100|2||||||||settlement
+666|25|AL105|3|<>pop|||0802|2||||||||settlement
+667|25|AL105|3|pop|||4100|2||||||||settlement
+668|16|AL110|1||7050|||8||||||||light standard / light support high
+669|16|AL110|1||7050|||8||||||||light standard / light support
+670|16|AL110|1||7142|||8||||||||light standard / light support light high
+671|16|AL110|1||7142|||8||||||||light standard / light support light
+672|16|AL110|1|||||9||hgt|33|||||light standard/light support - AGL label
+673|16|AL110|1|||||9||zv2|32|||||light standard/light support - MSL label
+674|16|AL110|2|||7144||8||||||||light standard / light support
+675|4|AL120|1||1004|||7||||||||missile site
+677|4|AL120|2|||3061||7||||||||missile site
+679|4|AL120|3|||3061||7||||||||missile site
+681|1|AL130|1||6048|||8||||||||monument
+682|2|AL130|1||6048|||8||||||||monument
+684|3|AL130|1||6048|||8||||||||monument
+686|4|AL130|1||6048|||8||||||||monument
+688|5|AL130|1||0020|||6||||22220||0|2|monument
+689|16|AL130|1||7052|||8||||||||monument high
+690|16|AL130|1||7052|||8||||||||monument
+691|16|AL130|1||7142|||8||||||||monument light high
+692|16|AL130|1||7142|||8||||||||monument light
+693|16|AL130|1|||||9||hgt|33|||||monument - AGL label
+694|16|AL130|1|||||9||zv2|32|||||monument - MSL label
+695|25|AL130|1||6048|||8||||||||monument
+698|16|AL130|2|||7144||8||||||||monument
+699|4|AL130|3|||0600||8||||||||monument
+701|1|AL135|1||2053|||6||||||||native settlement
+703|4|AL135|1||2060|||6||||||||native settlement
+705|1|AL135|3|||0600|0823|2||||||||native settlement
+707|2|AL135|3|||0600|0823|2||||||||native settlement
+708|3|AL135|3|||0600|0823|2||||||||native settlement
+710|4|AL135|3|||0600|0823|2||||||||native settlement
+712|17|AL135|3|||0600|0823|2||||||||native settlement
+714|25|AL135|3|<>pop||0600|0823|2||||||||native settlement
+715|25|AL135|3|pop||0600|0823|2||||||||native settlement
+716|2|AL140|1||0014|||7||||||||particle accelerator
+717|3|AL140|3|||0600|4100|7||||||||particle accelerator
+718|4|AL140|3|||0600|4100|7||||||||particle accelerator
+719|25|AL140|3|||0600|4100|7||||||||particle accelerator
+720|25|AL155|1||1206|||8||||||||overhead obstruction location
+721|25|AL155|2|||3114||3||||||||overhead obstruction location
+722|3|AL170|3|||0604|4002|5||||||||plaza/city square
+724|4|AL170|3|||0604|4002|5||||||||plaza/city square
+726|25|AL170|3|||0604|4002|5||||||||plaza/city square
+728|9|AL195|1||2051|||7||||||||ramp
+729|25|AL195|1||2051|||7||||||||ramp
+730|1|AL200|1||2036|||8||||||||ruins
+731|2|AL200|1||2036|||8||||||||ruins
+732|3|AL200|1||2036|||8||||||||ruins
+733|4|AL200|1||2036|||8||||||||ruins
+735|5|AL200|1||0052|||4||||34050||0|3|ruins - offshore, submerged - depth unknown
+736|5|AL200|1||0053|||4||||34050||0|3|ruins - offshore, submerged - depth 20m or less
+737|5|AL200|1||0054|||4||||34050||0|3|ruins - offshore, submerged - depth greater than 20m
+738|5|AL200|1||0055|||4||||34050||0|3|ruins - offshore, covers and uncovers
+739|5|AL200|1||0002|||6||||22220||0|2|ruins - offshore, does not cover
+740|5|AL200|1||0002|||6||||22220||0|2|ruins - on ground surface
+741|25|AL200|1||2036|||8||||||||ruins
+748|2|AL200|3|||3114||5||||||||ruins
+749|3|AL200|3|||3114||5||||||||ruins
+751|4|AL200|3|||3114||5||||||||ruins
+753|5|AL200|3|||0680|0810|4||||34050||1|3|ruins - offshore, submerged - depth unknown
+754|5|AL200|3|||0680||4||||34050||1|3|ruins - offshore, submerged - depth 20m or less
+755|5|AL200|3|||0629||4||||34050||1|3|ruins - offshore, submerged - depth greater than 20m
+756|5|AL200|3|||0626|0803|4||||34050||1|3|ruins - offshore, covers and uncovers
+757|5|AL200|3|||0600|0804|4||||22220||1|2|ruins - offshore, does not cover
+758|5|AL200|3|||0600|0804|4||||22220||1|2|ruins - on ground surface
+759|25|AL200|3|||3114||5||||||||ruins
+767|1|AL210|1||0078|||8||||||||snow shed/rock shed
+768|2|AL210|1||0078|||8||||||||snow shed/rock shed
+769|3|AL210|1||0078|||8||||||||snow shed/rock shed
+770|25|AL210|1||0078|||8||||||||snow shed/rock shed
+771|1|AL210|2|||3112||8||||||||snow shed/rock shed
+772|2|AL210|2|||3112||8||||||||snow shed/rock shed
+773|3|AL210|2|||3112||8||||||||snow shed/rock shed
+774|25|AL210|2|||3112||8||||||||snow shed/rock shed
+775|1|AL240|1||2019|||8||||||||tower (non-communication)
+776|2|AL240|1||2019|||8||||||||tower (non-communication)
+777|3|AL240|1||2019|||8||||||||tower (non-communication)
+778|4|AL240|1||2019|||8||||||||tower (non-communication)
+779|5|AL240|1||0004|||6||||22220||0|2|tower (non-communication)
+780|5|AL240|1|||||8||col|7|27070|23|0|3|tower - light label
+781|16|AL240|1||7140|||8||||||||tower (non-communication) high
+782|16|AL240|1||7141|||8||||||||tower (non-communication)
+783|16|AL240|1||7142|||8||||||||tower (non-communication) light high
+784|16|AL240|1||7146|||8||||||||tower (non-communication) light
+785|16|AL240|1|||||9||hgt|33|||||tower (non-communication) - AGL label
+786|16|AL240|1|||||9||zv2|32|||||tower (non-communication) - MSL label
+787|25|AL240|1||2019|||8||||||||tower (non-communication)
+791|16|AL240|2|||7144||8||||||||tower (non-communication)
+792|3|AL250|1||2072|||8||||||||underground dwelling
+793|4|AL250|1||2072|||8||||||||underground dwelling
+794|25|AL250|1||2072|||8||||||||underground dwelling
+795|4|AL250|3|||3117||7||||||||underground dwelling
+797|1|AL260|1||2323|||7||||||||wall
+798|1|AL260|2|||3113||7||||||||wall
+799|2|AL260|2|||3113||7||||||||wall
+800|3|AL260|2|||3113||7||||||||wall
+801|4|AL260|2|||3113||7||||||||wall
+802|5|AL260|2|||0600||3||||22220||0|2|wall
+803|9|AL260|2|||3113||2||||||||wall
+804|25|AL260|2|||3113||7||||||||wall
+806|1|AM010|1||2036|||5||||||||depot (storage)
+807|4|AM010|1||2036|||5||||||||depot (storage)
+809|16|AM010|1||7056|||8||||||||depot high
+810|16|AM010|1||7056|||8||||||||depot
+811|16|AM010|1|||||9||hgt|33|||||depot - AGL label
+812|16|AM010|1|||||9||zv2|32|||||depot - MSL label
+813|3|AM010|3|||1573|0804|5||||||||depot (storage)
+814|4|AM010|3|||1573|0804|5||||||||depot (storage)
+816|5|AM010|3|||0624||4||||32270||1|3|depot (storage)
+817|25|AM010|3|||1573|0804|5||||||||depot (storage)
+819|2|AM020|1||2074|||8||||||||grain bin/silo
+820|3|AM020|1||2074|||8||||||||grain bin/silo
+821|4|AM020|1||2074|||8||||||||grain bin/silo
+823|5|AM020|1||0021|||4||||22220||0|2|grain bin/silo
+824|16|AM020|1||7058|||8||||||||grain bin / silo high
+825|16|AM020|1||7058|||8||||||||grain bin / silo
+826|16|AM020|1||7142|||8||||||||grain bin / silo light high
+827|16|AM020|1||7142|||8||||||||grain bin / silo light
+828|16|AM020|1|||||9||hgt|33|||||grain bin/silo - AGL label
+829|16|AM020|1|||||9||zv2|32|||||grain bin/silo - MSL label
+830|25|AM020|1||2074|||8||||||||grain bin/silo
+832|3|AM020|3|||1573|0804|8||||||||grain bin/silo
+833|4|AM020|3|||1573|0804|8||||||||grain bin/silo
+835|25|AM020|3|||1573|0804|8||||||||grain bin/silo
+836|2|AM030|1||2019|||8||||||||grain elevator
+837|3|AM030|1||2019|||8||||||||grain elevator
+838|4|AM030|1||2019|||8||||||||grain elevator
+840|5|AM030|1||0004|||4||||22220||0|2|grain elevator
+841|16|AM030|1||7060|||8||||||||grain elevator high
+842|16|AM030|1||7060|||8||||||||grain elevator
+843|16|AM030|1||7142|||8||||||||grain elevator light high
+844|16|AM030|1||7142|||8||||||||grain elevator light
+845|16|AM030|1|||||9||hgt|33|||||grain elevator - AGL label
+846|16|AM030|1|||||9||zv2|32|||||grain elevator - MSL label
+847|25|AM030|1||2019|||8||||||||grain elevator
+849|3|AM030|3|||1573|0804|8||||||||grain elevator
+850|4|AM030|3|||1573|0804|8||||||||grain elevator
+852|5|AM030|3|||0600|0804|4||||22220||1|2|grain elevator
+853|25|AM030|3|||1573|0804|8||||||||grain elevator
+855|4|AM040|3|||0600||5||||||||mineral pile
+857|5|AM040|3|||0624||4||||32270||1|3|mineral pile
+859|3|AM060|1||2076|||5||||||||storage bunker/storage mound
+860|4|AM060|1||2076|||5||||||||storage bunker/storage mound
+862|25|AM060|1||2076|||5||||||||storage bunker/storage mound
+863|3|AM060|3|||0600|4109|5||||||||storage bunker/storage mound
+864|4|AM060|3|||0600|4109|5||||||||storage bunker/storage mound
+866|25|AM060|3|||0600|4109|5||||||||storage bunker/storage mound
+867|1|AM070|1||2019|||8||||||||tank
+868|2|AM070|1||2019|||8||||||||tank
+869|3|AM070|1||2019|||8||||||||tank
+870|4|AM070|1||2019|||8||||||||tank
+872|5|AM070|1||0022|||4||||22220||0|2|tank
+873|5|AM070|1|||||8||col|7|27070|23|0|3|tank - light label
+874|16|AM070|1||7062|||8||||||||tank high
+875|16|AM070|1||7062|||8||||||||tank
+876|16|AM070|1||7142|||8||||||||tank light high
+877|16|AM070|1||7142|||8||||||||tank light
+878|16|AM070|1|||||9||hgt|33|||||tank - AGL label
+879|16|AM070|1|||||9||zv2|32|||||tank - MSL label
+880|25|AM070|1||2019|||8||||||||tank
+883|16|AM070|2|||7144||8||||||||tank
+884|3|AM070|3||||4156|8||||||||tank
+885|4|AM070|3||||4156|8||||||||tank
+887|5|AM070|3|||0600|0804|4||||22220||1|2|tank
+888|25|AM070|3||||4156|8||||||||tank
+890|1|AM080|1||2003|||8||||||||water tower
+891|2|AM080|1||2078|||8||||||||water tower
+892|3|AM080|1||2078|||8||||||||water tower
+893|4|AM080|1||2078|||8||||||||water tower
+895|5|AM080|1||0023|||4||||22220||0|2|water tower
+896|16|AM080|1||7064|||8||||||||water tower high
+897|16|AM080|1||7064|||8||||||||water tower
+898|16|AM080|1||7142|||8||||||||water tower light high
+899|16|AM080|1||7142|||8||||||||water tower light
+900|16|AM080|1|||||9||hgt|33|||||water tower - AGL label
+901|16|AM080|1|||||9||zv2|32|||||water tower - MSL label
+902|25|AM080|1||2078|||8||||||||water tower
+904|4|AM080|3||||6007|7||||||||water tower
+906|1|AN010|2|||3120||8||||||||railroad -not operational/normal/multiple
+907|1|AN010|2|||3120||8||||||||railroad -not operational/normal/single
+908|1|AN010|2|||3113||8||||||||railroad -operational/normal/multiple
+909|1|AN010|2|||3113||8||||||||railroad -operational/normal/single
+910|2|AN010|2|||3112||8||||||||railroad -operational/normal/multiple
+911|2|AN010|2|||3112||8||||||||railroad -operational/narrow/multiple
+912|2|AN010|2|||3112||8||||||||railroad -operational/normal/single
+913|2|AN010|2|||3112||8||||||||railroad -operational/narrow/single
+914|2|AN010|2|||3117||8||||||||railroad -not operational/normal/multiple
+915|2|AN010|2|||3117||8||||||||railroad -not operational/narrow/multiple
+916|2|AN010|2|||3117||8||||||||railroad -not operational/normal/single
+917|2|AN010|2|||3117||8||||||||railroad -not operational/narrow/single
+918|2|AN010|2|||3114||8||||||||railroad -dismantled
+920|3|AN010|2|||3112||8||||||||railroad -operational/normal/multiple
+921|3|AN010|2|||3112||8||||||||railroad -operational/narrow/multiple
+922|3|AN010|2|||3112||8||||||||railroad -operational/normal/single
+923|3|AN010|2|||3112||8||||||||railroad -operational/narrow/single
+924|3|AN010|2|||3117||8||||||||railroad -not operational/normal/multiple
+925|3|AN010|2|||3117||8||||||||railroad -not operational/narrow/multiple
+926|3|AN010|2|||3117||8||||||||railroad -not operational/normal/single
+927|3|AN010|2|||3117||8||||||||railroad -not operational/narrow/single
+928|3|AN010|2|||3114||8||||||||railroad -dismantled
+930|4|AN010|2|||3112||8||||||||railroad -operational/normal/single
+931|4|AN010|2|||3112||8||||||||railroad -operational/narrow/single
+932|4|AN010|2|||3112||3||||||||railroad -operational/normal/multiple
+933|4|AN010|2|||3112||8||||||||railroad -operational/narrow/multiple
+934|4|AN010|2|||3117||8||||||||railroad -not operational/normal/single
+935|4|AN010|2|||3117||8||||||||railroad -not operational/narrow/single
+936|4|AN010|2|||3117||8||||||||railroad -not operational/normal/multiple
+937|4|AN010|2|||3117||8||||||||railroad -not operational/narrow/multiple
+938|4|AN010|2|||3114||8||||||||railroad -dismantled
+940|5|AN010|2|||0605||4||||32250||0|3|railroad
+941|9|AN010|2|||3112||3||||||||railroad -operational/normal/single
+942|9|AN010|2|||3112||8||||||||railroad -operational/narrow/single
+943|9|AN010|2|||3112||3||||||||railroad -operational/normal/multiple
+944|9|AN010|2|||3112||8||||||||railroad -operational/narrow/multiple
+945|9|AN010|2|||3117||3||||||||railroad -not operational/normal/single
+946|9|AN010|2|||3117||8||||||||railroad -not operational/narrow/single
+947|9|AN010|2|||3117||8||||||||railroad -not operational/normal/multiple
+948|9|AN010|2|||3117||8||||||||railroad -not operational/narrow/multiple
+949|9|AN010|2|||3114||8||||||||railroad -dismantled
+950|17|AN010|2|||3112||8||||||||railroad -operational/normal/single
+951|17|AN010|2|||3112||8||||||||railroad -operational/narrow/single
+952|17|AN010|2|||3112||3||||||||railroad -operational/normal/multiple
+953|17|AN010|2|||3112||8||||||||railroad -operational/narrow/multiple
+954|17|AN010|2|||3117||8||||||||railroad -not operational/normal/single
+955|17|AN010|2|||3117||8||||||||railroad -not operational/narrow/single
+956|17|AN010|2|||3117||8||||||||railroad -not operational/normal/multiple
+957|17|AN010|2|||3117||8||||||||railroad -not operational/narrow/multiple
+958|17|AN010|2|||3114||8||||||||railroad -dismantled
+959|25|AN010|2|||3112||3||||||||railroad -operational/normal/single
+960|25|AN010|2|||3112||8||||||||railroad -operational/narrow/single
+961|25|AN010|2|||3112||3||||||||railroad -operational/normal/multiple
+962|25|AN010|2|||3112||8||||||||railroad -operational/narrow/multiple
+963|25|AN010|2|||3117||3||||||||railroad -not operational/normal/single
+964|25|AN010|2|||3117||8||||||||railroad -not operational/narrow/single
+965|25|AN010|2|||3117||8||||||||railroad -not operational/normal/multiple
+966|25|AN010|2|||3117||8||||||||railroad -not operational/narrow/multiple
+967|25|AN010|2|||3114||8||||||||railroad -dismantled
+969|2|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/normal
+970|2|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/narrow
+971|2|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/normal
+972|2|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/narrow
+973|3|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/normal
+974|3|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/narrow
+975|3|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/normal
+976|3|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/narrow
+977|4|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/normal
+978|4|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/narrow
+979|4|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/normal
+980|4|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/narrow
+981|9|AN050|2|||0600||3||||||||railroad siding/railroad spur - operational/normal
+982|9|AN050|2|||0600||3||||||||railroad siding/railroad spur - operational/narrow
+983|9|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/normal
+984|9|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/narrow
+985|17|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/normal
+986|17|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/narrow
+987|17|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/normal
+988|17|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/narrow
+989|25|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/normal
+990|25|AN050|2|||3116||8||||||||railroad siding/railroad spur - non-operational/narrow
+991|25|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/normal
+992|25|AN050|2|||0600||8||||||||railroad siding/railroad spur - operational/narrow
+993|1|AN060|1||2036|||8||||||||railroad yard/marshalling yard
+994|9|AN060|2|||3121||3||||||||railroad yard/marshalling yard
+995|2|AN060|3|||0600|0802|8||||||||railroad yard/marshalling yard
+996|3|AN060|3|||0600|0802|8||||||||railroad yard/marshalling yard
+997|4|AN060|3|||0600|0802|8||||||||railroad yard/marshaling yard
+999|5|AN060|3||||0802|3||||32250||1|3|railroad yard/marshalling yard
+1000|9|AN060|3|||0600|0802|0||||||||railroad yard/marshalling yard
+1001|17|AN060|3|||0600|0802|8||||||||railroad yard/marshalling yard
+1002|25|AN060|3|||0600|0802|8||||||||railroad yard/marshaling yard
+1004|3|AN075|1||2080|||8||||||||railroad turntable
+1005|25|AN075|1||2080|||8||||||||railroad turntable
+1006|4|AN075|3||||4156|8||||||||railroad turntable
+1008|2|AP010|2|||3116||7||||||||cart track
+1009|3|AP010|2|||3117||7||||||||cart track
+1010|4|AP010|2|||3117||7||||||||cart track
+1011|9|AP010|2|||3116||3||||||||cart track
+1012|17|AP010|2|||3116||7||||||||cart track
+1013|25|AP010|2|||3117||7||||||||cart track
+1014|2|AP020|1||2081|||8||||||||interchange
+1015|3|AP020|2|||0600||8||||||||interchange
+1016|4|AP020|2|||0600||8||||||||interchange
+1018|5|AP020|2|||0605||4||||32250||0|3|interchange
+1019|25|AP020|2|||0600||8||||||||interchange
+1021|4|AP020|3|||0600|4018|8||||||||interchange
+1023|1|AP030|2|||1855||8||||||||road - no median
+1024|1|AP030|2|||1855||8||||||||road - divided w/ median
+1025|2|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 1 ln
+1026|2|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 2-3 lns
+1027|2|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 4 lns
+1028|2|AP030|2|||1855||8||||||||road - all weather, loose surface, no median
+1029|2|AP030|2|||1855||8||||||||road - fair weather, no median
+1030|2|AP030|2|||1855||8||||||||road - divided w/ median
+1032|3|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 1 ln
+1033|3|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 2-3 lns
+1034|3|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 4 lns
+1035|3|AP030|2|||1855||8||||||||road - all weather, loose surface, no median
+1036|3|AP030|2|||1855||8||||||||road - fair weather, no median
+1037|3|AP030|2|||1855||8||||||||road - divided w/ median
+1039|4|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 1 ln
+1040|4|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 2-3 lns
+1041|4|AP030|2|||1855||8||||||||road - all weather, hard surface, no median, 4 lns
+1042|4|AP030|2|||1855||8||||||||road - all weather, loose surface, no median
+1043|4|AP030|2|||1855||8||||||||road - fair weather, no median
+1044|4|AP030|2|||1855||8||||||||road - divided w/ median
+1046|5|AP030|2|||0605||4||||32250||0|3|road
+1047|9|AP030|2|||1855||8||||||||road - all weather, hard surface, no median
+1048|9|AP030|2|||1855||8||||||||road - all weather, loose surface, no median
+1049|9|AP030|2|||1855||8||||||||road - fair weather, no median
+1050|9|AP030|2|||1855||8||||||||road - divided w/ median
+1051|16|AP030|2|||6024||7||||||||road (libref)
+1052|17|AP030|2|||1855||8||||||||road - all weather, hard surface, no median
+1053|17|AP030|2|||1855||8||||||||road - all weather, loose surface, no median
+1054|17|AP030|2|||1855||8||||||||road - fair weather, no median
+1055|17|AP030|2|||1855||8||||||||road - divided w/ median
+1056|25|AP030|2|||1855||8||||||||road - all weather, hard surface, no median
+1057|25|AP030|2|||1855||8||||||||road - all weather, loose surface, no median
+1058|25|AP030|2|||1855||8||||||||road - fair weather, no median
+1059|25|AP030|2|||1855||8||||||||road - divided w/ median
+1061|4|AP030|3|||0600|1906|8||||||||road - all weather no median
+1062|4|AP030|3|||0600||8||||||||road - fair/dry weather no median
+1063|4|AP030|3|||0600|4036|8||||||||road - divided w/median
+1065|4|AP040|1||0078|||8||||||||gate
+1067|1|AP050|2|||0656||7||||||||trail
+1068|2|AP050|2|||0656||7||||||||trail
+1069|3|AP050|2|||0656||7||||||||trail
+1070|4|AP050|2|||0656||7||||||||trail
+1071|17|AP050|2|||0656||7||||||||trail
+1072|25|AP050|2|||0656||7||||||||trail
+1073|1|AQ010|2|||0657||8||||||||aerial cableway lines/ski lift lines
+1074|2|AQ010|2|||0657||8||||||||aerial cableway lines/ski lift lines
+1075|3|AQ010|2|||0657||8||||||||aerial cableway lines/ski lift lines
+1076|4|AQ010|2|||0657||8||||||||aerial cableway lines/ski lift lines
+1077|5|AQ010|2|||0657||8||||12210||0|1|aerial cableway lines/ski lift lines
+1078|16|AQ010|2|||7144||8||||||||aerial cableway lines / ski lift lines
+1079|25|AQ010|2|||0657||8||||||||aerial cableway lines/ski lift lines
+1081|5|AQ020|1||0024|||8||||12210||0|1|aerial cableway pylon/ski pylon
+1082|16|AQ020|1||7070|||8||||||||aerial cableway pylon / ski pylon high
+1083|16|AQ020|1||7070|||8||||||||aerial cableway pylon / ski pylon
+1084|16|AQ020|1||7142|||8||||||||aerial cableway pylon / ski pylon light high
+1085|16|AQ020|1||7142|||8||||||||aerial cableway pylon / ski pylon light
+1086|16|AQ020|1|||||9||hgt|33|||||aerial cableway pylon/ski pylon - AGL label
+1087|16|AQ020|1|||||9||zv2|32|||||aerial cableway pylon/ski pylon - MSL label
+1089|1|AQ040|1||6041|||8||||||||bridge/overpass/viaduct
+1090|2|AQ040|1||6041|||8||||||||bridge/overpass/viaduct
+1091|3|AQ040|1||6041|||8||||||||bridge/overpass/viaduct
+1092|4|AQ040|1||6041|||8||||||||bridge/overpass/viaduct
+1094|9|AQ040|1||6041|||7||||||||bridge/overpass/viaduct
+1095|16|AQ040|1||7072|||8||||||||bridge / overpass / viaduct high
+1096|16|AQ040|1||7072|||8||||||||bridge / overpass / viaduct
+1097|16|AQ040|1||7142|||8||||||||bridge / overpass / viaduct light high
+1098|16|AQ040|1||7142|||8||||||||bridge / overpass / viaduct light
+1099|16|AQ040|1|||||9||hgt|33|||||bridge/overpass/viaduct - AGL label
+1100|16|AQ040|1|||||9||zv2|32|||||bridge/overpass/viaduct - MSL label
+1101|17|AQ040|1||6041|||8||||||||bridge/overpass/viaduct
+1102|25|AQ040|1||6041|||8||||||||bridge/overpass/viaduct
+1103|1|AQ040|2|||3113||8||||||||bridge/overpass/viaduct
+1104|2|AQ040|2|||3113||8||||||||bridge/overpass/viaduct
+1105|3|AQ040|2|||3113||8||||||||bridge/overpass/viaduct
+1106|4|AQ040|2|||3113||8||||||||bridge/overpass/viaduct
+1108|5|AQ040|2|||0627||8||||12210||0|1|bridge/overpass/viaduct (opening)
+1109|5|AQ040|2|||0753||8||||12210||0|1|bridge/overpass/viaduct (not opening)
+1110|5|AQ040|2|||||8||nam|1|12210|21|0|3|bridge/overpass/viaduct - name label
+1111|9|AQ040|2|||3113||7||||||||bridge/overpass/viaduct
+1112|16|AQ040|2|||7144||8||||||||bridge / overpass / viaduct
+1113|17|AQ040|2|||3113||8||||||||bridge/overpass/viaduct
+1114|25|AQ040|2|||3113||8||||||||bridge/overpass/viaduct
+1118|4|AQ040|3||||4156|7||||||||bridge/overpass/viaduct
+1120|5|AQ040|3|||0611||8||||12210||0|1|bridge/overpass/viaduct (opening)
+1121|5|AQ040|3||0046|0611||8||||12210||0|1|bridge/overpass/viaduct (not opening)
+1122|5|AQ040|3|||||8||nam|14|12210|21|0|3|bridge/overpass/viaduct - name label
+1126|9|AQ045|1||6041|||7||||||||bridge span
+1127|25|AQ045|1||6041|||7||||||||bridge span
+1128|5|AQ045|2|||0627||8||||12210||0|1|bridge span
+1130|5|AQ045|3|||0611||8||||12210||0|1|bridge span
+1132|16|AQ050|1||7072|||8||||||||bridge superstructure high
+1133|16|AQ050|1||7072|||8||||||||bridge superstructure
+1134|16|AQ050|1||7142|||8||||||||bridge superstructure light high
+1135|16|AQ050|1||7142|||8||||||||bridge superstructure light
+1136|16|AQ050|1|||||9||hgt|33|||||bridge superstructure - AGL label
+1137|16|AQ050|1|||||9||zv2|32|||||bridge superstructure - MSL label
+1138|16|AQ050|2|||7144||8||||||||bridge superstructure
+1139|16|AQ055|1||7078|||8||||||||bridge tower / bridge pylon high
+1140|16|AQ055|1||7078|||8||||||||bridge tower / bridge pylon
+1141|16|AQ055|1||7142|||8||||||||bridge tower / bridge pylon light high
+1142|16|AQ055|1||7142|||8||||||||bridge tower / bridge pylon light
+1143|16|AQ055|1|||||9||hgt|33|||||bridge tower/bridge pylon - AGL label
+1144|16|AQ055|1|||||9||zv2|32|||||bridge tower/bridge pylon - MSL label
+1145|9|AQ058|1||1171|||8||||||||constriction/expansion
+1146|9|AQ058|1||1171|||8||||||||constriction/expansion
+1147|25|AQ058|1||1171|||8||||||||constriction/expansion
+1148|2|AQ060|1||2088|||8||||||||control tower
+1149|3|AQ060|1||2088|||8||||||||control tower
+1150|4|AQ060|1||2088|||8||||||||control tower
+1152|5|AQ060|1||0004|||6||||22220||0|2|control tower
+1153|16|AQ060|1||7080|||8||||||||control tower high
+1154|16|AQ060|1||7080|||8||||||||control tower
+1155|16|AQ060|1||7142|||8||||||||control tower light high
+1156|16|AQ060|1||7142|||8||||||||control tower light
+1157|16|AQ060|1|||||9||hgt|33|||||control tower - AGL label
+1158|16|AQ060|1|||||9||zv2|32|||||control tower - MSL label
+1159|25|AQ060|1||2088|||8||||||||control tower
+1161|1|AQ064|1||2090|||7||||||||causeway
+1162|1|AQ064|2|||3112||7||||||||causeway
+1163|3|AQ065|1||2090|||8||||||||culvert
+1164|25|AQ065|1||2090|||8||||||||culvert
+1165|4|AQ065|2|||3113||8||||||||culvert
+1166|4|AQ065|3|||0600||8||||||||culvert
+1167|1|AQ070|1||0078|||7||||||||ferry crossing
+1168|2|AQ070|1||0078|||7||||||||ferry crossing
+1170|3|AQ070|1||0078|||7||||||||ferry crossing
+1172|4|AQ070|1||0078|||7||||||||ferry crossing
+1174|9|AQ070|1||0078|||3||||||||ferry crossing
+1175|17|AQ070|1||0078|||7||||||||ferry crossing
+1176|25|AQ070|1||0078|||7||||||||ferry crossing
+1177|1|AQ070|2|||3115||7||||||||ferry crossing
+1178|2|AQ070|2|||3115||7||||||||ferry crossing
+1180|3|AQ070|2|||3115||7||||||||ferry crossing
+1182|4|AQ070|2|||3115||7||||||||ferry crossing
+1184|5|AQ070|2|||0701||4||||25030||0|2|ferry crossing - with cables
+1185|5|AQ070|2|||0700||4||||25030||0|2|ferry crossing - without cables
+1186|9|AQ070|2|||3115||3||||||||ferry crossing
+1187|17|AQ070|2|||3115||7||||||||ferry crossing
+1188|25|AQ070|2|||3115||7||||||||ferry crossing
+1191|5|AQ080|1||0096|||4||||32410||0|3|ferry site
+1193|4|AQ090|1||0078|||8||||||||entrance/exit
+1195|2|AQ110|1||6049|||8||||||||mooring mast
+1196|3|AQ110|1||6049|||8||||||||mooring mast
+1197|4|AQ110|1||6049|||8||||||||mooring mast
+1199|5|AQ110|1||0026|||6||||22220||0|2|mooring mast
+1200|16|AQ110|1||7082|||8||||||||mooring mast high
+1201|16|AQ110|1||7082|||8||||||||mooring mast
+1202|16|AQ110|1||7142|||8||||||||mooring mast light high
+1203|16|AQ110|1||7142|||8||||||||mooring mast light
+1204|16|AQ110|1|||||9||hgt|33|||||mooring mast - AGL label
+1205|16|AQ110|1|||||9||zv2|32|||||mooring mast - MSL label
+1206|25|AQ110|1||6049|||8||||||||mooring mast
+1208|9|AQ111|1||1171|||3||||||||prepared raft or float bridge site
+1209|25|AQ111|1||1171|||3||||||||prepared raft or float bridge site
+1210|9|AQ111|2|||3115||3||||||||prepared raft or float bridge site
+1211|1|AQ113|2|||6040||6||||||||pipeline/pipe - underground
+1212|1|AQ113|2|||1314||7||||||||pipeline/pipe - on ground
+1213|2|AQ113|2|||1314||7||||||||pipeline/pipe - surface; not water
+1214|2|AQ113|2|||4311||7||||||||pipeline/pipe - surface; water
+1215|2|AQ113|2|||6040||6||||||||pipeline/pipe - underground; not water
+1216|2|AQ113|2|||6037||6||||||||pipeline/pipe - undergound; water
+1217|3|AQ113|2|||4311||7||||||||pipeline - on ground/elevated - water
+1218|3|AQ113|2|||6037||7||||||||pipeline - underground - water
+1219|3|AQ113|2|||4311||7||||||||pipeline - abandoned/under construction - water
+1220|3|AQ113|2|||1314||7||||||||pipeline - on ground/elevated - not water
+1221|3|AQ113|2|||6040||7||||||||pipeline - underground - not water
+1222|4|AQ113|2|||4311||7||||||||pipeline - on ground/elevated - water
+1223|4|AQ113|2|||6037||7||||||||pipeline - underground - water
+1224|4|AQ113|2|||4311||7||||||||pipeline - abandoned/under construction - water
+1225|4|AQ113|2|||1314||7||||||||pipeline - on ground/elevated - not water
+1226|4|AQ113|2|||6040||7||||||||pipeline - underground - not water
+1227|5|AQ113|2|||0705||6||||34070||0|3|pipeline/pipe - not above ground or over water; not sewage or water
+1228|5|AQ113|2|||0704||6||||34070||0|3|pipeline/pipe - not above ground or over water; water
+1229|5|AQ113|2|||0704||6||||34070||0|3|pipeline/pipe - not above ground or over water; sewage, outfall, intake
+1230|5|AQ113|2|||0610||8||||12210||0|1|pipeline/pipe - above ground or over water
+1231|9|AQ113|2|||1314||7||||||||pipeline/pipe
+1232|16|AQ113|2|||7144||8||||||||pipeline / pipe
+1233|25|AQ113|2|||4311||7||||||||pipeline - on ground/elevated - water
+1234|25|AQ113|2|||6037||7||||||||pipeline - underground - water
+1235|25|AQ113|2|||4311||7||||||||pipeline - abandoned/under construction - water
+1236|25|AQ113|2|||1314||7||||||||pipeline - on ground/elevated - not water
+1237|25|AQ113|2|||6040||7||||||||pipeline - underground - not water
+1242|1|AQ116|1||2036|||8||||||||pumping station
+1243|2|AQ116|1||2036|||8||||||||pumping station
+1244|3|AQ116|1||2036|||8||||||||pumping station
+1245|4|AQ116|1||2036|||8||||||||pumping station
+1246|5|AQ116|1||0002|||6||||22220||0|2|pumping station
+1247|25|AQ116|1||2036|||8||||||||pumping station
+1249|3|AQ116|3|||4262||7||||||||pumping station
+1250|4|AQ116|3|||4262||7||||||||pumping station
+1251|5|AQ116|3|||0600|0804|4||||22220||1|2|pumping station
+1252|25|AQ116|3|||4262||7||||||||pumping station
+1254|9|AQ118|1||1172|||3||||||||sharp curve(s)
+1255|25|AQ118|1||1172|||3||||||||sharp curve(s)
+1256|25|AQ120|1||1211|||3||||||||steep grade
+1257|4|AQ125|1||2099|||7||||||||station (miscellaneous)
+1259|4|AQ125|3|||0600|4100|7||||||||station (miscellaneous)
+1261|1|AQ130|1||2019|||8||||||||tunnel
+1262|2|AQ130|1||2100|||8||||||||tunnel
+1264|3|AQ130|1||2100|||8||||||||tunnel
+1266|9|AQ130|1||2100|||3||||||||tunnel
+1267|17|AQ130|1||2100|||8||||||||tunnel
+1269|25|AQ130|1||2100|||8||||||||tunnel
+1271|1|AQ130|2|||3117||8||||||||tunnel
+1272|2|AQ130|2|||3117||8||||||||tunnel
+1274|3|AQ130|2|||3117||8||||||||tunnel
+1276|4|AQ130|2|||3117||8||||||||tunnel
+1278|5|AQ130|2|||0656||4||||32250||0|3|tunnel
+1279|9|AQ130|2|||3117||3||||||||tunnel
+1280|17|AQ130|2|||3117||8||||||||tunnel
+1282|25|AQ130|2|||3117||8||||||||tunnel
+1285|4|AQ130|3|||3112||3||||||||tunnel
+1286|2|AQ135|1||2101|||5||||||||vehicle stopping area/rest area
+1287|3|AQ135|3|||0600|4175|5||||||||vehicle stopping area/rest area
+1288|25|AQ135|3|||0600|4175|5||||||||vehicle stopping area/rest area
+1289|3|AQ140|3|||0600|4175|5||||||||vehicle storage/parking area
+1290|4|AQ140|3|||0600|4175|5||||||||vehicle storage/parking area
+1291|25|AQ140|3|||0600|4175|5||||||||vehicle storage/parking area
+1292|4|AQ150|3|||0600|1904|8||||||||flight of steps
+1294|5|AT005|2|||0708||3||||34070||0|3|cable
+1296|16|AT006|1||7090|||8||||||||overhead cable high
+1297|16|AT006|1||7090|||8||||||||overhead cable
+1298|16|AT006|1|||||9||hgt|33|||||overhead cable - AGL label
+1299|16|AT006|1|||||9||zv2|32|||||overhead cable - MSL label
+1300|2|AT010|1||0185|||8||||||||disk/dish
+1301|3|AT010|1||0185|||8||||||||disk/dish
+1302|4|AT010|1||0185|||8||||||||disk/dish
+1303|5|AT010|1||2102|||6||||22220||0|2|disk/dish
+1304|16|AT010|1||7092|||8||||||||disk / dish high
+1305|16|AT010|1||7092|||8||||||||disk / dish
+1306|16|AT010|1||7142|||8||||||||disk / dish light high
+1307|16|AT010|1||7142|||8||||||||disk / dish light
+1308|16|AT010|1|||||9||hgt|33|||||disk/dish - AGL label
+1309|16|AT010|1|||||9||zv2|32|||||disk/dish - MSL label
+1310|25|AT010|1||0185|||8||||||||disk/dish
+1312|4|AT010|3|||0600|4089|7||||||||disk/dish
+1313|4|AT020|1||0022|||7||||||||early warning radar site
+1315|4|AT020|2|||4236||7||||||||early warning radar site
+1317|4|AT020|3|||4236||7||||||||early warning radar site
+1319|5|AT020|3|||0600|0804|4||||22220||1|2|early warning radar site
+1321|1|AT030|2|||4262||8||||||||power transmission line
+1322|2|AT030|2|||4262||8||||||||power transmission line
+1323|3|AT030|2|||4262||8||||||||power transmission line
+1324|4|AT030|2|||4262||8||||||||power transmission line
+1325|5|AT030|2|||0657||8||||12210||0|1|power transmission line
+1326|16|AT030|2|||7157||8||||||||power transmission line
+1327|25|AT030|2|||4262||8||||||||power transmission line
+1329|4|AT040|1||6049|||8||||||||power transmission pylon
+1331|5|AT040|1||0024|||8||||12210||0|1|power transmission pylon
+1332|16|AT040|1||7096|||8||||||||power transmission pylon high
+1333|16|AT040|1||7096|||8||||||||power transmission pylon
+1334|16|AT040|1||7142|||8||||||||power transmission pylon light high
+1335|16|AT040|1||7142|||8||||||||power transmission pylon light
+1336|16|AT040|1|||||9||hgt|33|||||power transmission pylon - AGL label
+1337|16|AT040|1|||||9||zv2|32|||||power transmission pylon - MSL label
+1339|4|AT045|1||0022|||8||||||||radar transmitter
+1341|5|AT045|1||0511|||5||||38010||0|3|radar transmitter - other, unknown
+1342|5|AT045|1||0031|||5||||38010||0|3|radar transmitter - tower
+1343|5|AT045|1||0029|||5||||38010||0|3|radar transmitter - scanner
+1344|5|AT045|1||0030|||5||||38010||0|3|radar transmitter - mast
+1345|5|AT045|1||0028|||5||||38010||0|3|radar transmitter - dome
+1352|4|AT045|2|||4236||8||||||||radar transmitter
+1354|4|AT045|3|||4236||7||||||||radar transmitter
+1356|1|AT050|1||2036|||8||||||||communication building
+1357|3|AT050|1||2036|||8||||||||communication building
+1359|4|AT050|1||2036|||8||||||||communication building
+1361|5|AT050|1||0033|||6||||22220||0|2|communication building
+1362|16|AT050|1||7046|||8||||||||communication building high
+1363|16|AT050|1||7046|||8||||||||communication building
+1364|16|AT050|1||7142|||8||||||||communication building light high
+1365|16|AT050|1||7142|||8||||||||communication building light
+1366|16|AT050|1|||||9||hgt|33|||||communication building - AGL label
+1367|16|AT050|1|||||9||zv2|32|||||communication building - MSL label
+1368|25|AT050|1||2036|||8||||||||communication building
+1371|16|AT050|2|||7144||8||||||||communication building
+1372|3|AT050|3||||4003|7||||||||communication building
+1374|4|AT050|3||||4003|7||||||||communication building
+1376|25|AT050|3||||4003|7||||||||communication building
+1378|1|AT060|2|||3086||8||||||||telephone line/telegraph line
+1379|2|AT060|2|||3086||8||||||||telephone line/telegraph line
+1380|3|AT060|2|||3086||8||||||||telephone line/telegraph line
+1381|4|AT060|2|||3086||8||||||||telephone line/telegraph line
+1382|5|AT060|2|||0657||8||||12210||0|1|telephone line/telegraph line
+1383|16|AT060|2|||7144||8||||||||telephone line / telegraph line
+1384|25|AT060|2|||3086||8||||||||telephone line/telegraph line
+1386|4|AT070|1||0185|||8||||||||telephone-telegraph pylon/pole
+1388|16|AT070|1||7106|||8||||||||telephone-telegraph pylon / pole high
+1389|16|AT070|1||7106|||8||||||||telephone-telegraph pylon / pole
+1390|16|AT070|1||7142|||8||||||||telephone-telegraph pylon / pole light high
+1391|16|AT070|1||7142|||8||||||||telephone-telegraph pylon / pole light
+1392|16|AT070|1|||||9||hgt|33|||||telephone-telegraph pylon/pole - AGL label
+1393|16|AT070|1|||||9||zv2|32|||||telephone-telegraph pylon/pole - MSL label
+1394|1|AT080|1||0185|||8||||||||communication tower
+1395|2|AT080|1||0185|||8||||||||communication tower
+1397|3|AT080|1||0185|||8||||||||communication tower
+1399|4|AT080|1||0185|||8||||||||communication tower
+1401|5|AT080|1||0004|||6||||22220||0|2|communication tower
+1402|5|AT080|1|||||8||col|7|27070|23|0|3|communication tower - light label
+1403|16|AT080|1||7147|||8||||||||communication tower high
+1404|16|AT080|1||7148|||8||||||||communication tower
+1405|16|AT080|1||7142|||8||||||||communication tower - high light high
+1406|16|AT080|1||7146|||8||||||||communication tower light
+1407|16|AT080|1|||||9||hgt|33|||||communication tower - AGL label
+1408|16|AT080|1|||||9||zv2|32|||||communication tower - MSL label
+1409|25|AT080|1||0185|||8||||||||communication tower
+1413|16|AT080|2|||7144||8||||||||communication tower
+1414|1|BA010|2|||1656||7||||||||coastline/shoreline
+1415|2|BA010|2|||1656||7||||||||coastline/shoreline -not mangrove or marsh
+1416|2|BA010|2|||1656||7||||||||coastline/shoreline - mangrove, marsh
+1417|3|BA010|2|||1656||7||||||||coastline.shoreline - not mangrove or marsh
+1418|3|BA010|2|||1656||7||||||||coastline/shoreline - mangrove, marsh
+1419|4|BA010|2|||1656||7||||||||coastline/shoreline - not mangrove or marsh
+1420|4|BA010|2|||1656||7||||||||coastline/shoreline - mangrove, marsh
+1421|5|BA010|2|||1573||7||||12410||0|1|coastline/shoreline - accurate; not mangrove or marsh
+1422|5|BA010|2|||0743||7||||12410||0|1|coastline/shoreline - approximate; not mangrove or marsh
+1423|5|BA010|2|||0632||7||||12410||0|1|coastline/shoreline - mangrove, marsh
+1425|16|BA010|2|||1573||7||||||||coastline/shoreline (libref)
+1426|17|BA010|2|||1656||7||||||||coastline/shoreline - not accurate
+1427|17|BA010|2|||1656||7||||||||coastline/shoreline - accurate
+1428|25|BA010|2|||1656||7||||||||coastline/shoreline - not mangrove or marsh
+1429|25|BA010|2|||1656||6||||||||coastline/shoreline - mangrove, marsh
+1433|5|BA020|1||0150|||7||||12410||0|1|foreshore
+1435|5|BA020|2|||3082||4||||34010||0|3|foreshore
+1437|2|BA020|3||||0803|3||||||||foreshore
+1438|3|BA020|3||||0803|3||||||||foreshore
+1439|4|BA020|3||||0803|3||||||||foreshore
+1440|5|BA020|3||||0803|1||||13030||1|1|foreshore
+1441|5|BA020|3||||0949|1||||13030||1|1|foreshore - shallow display mode on
+1442|25|BA020|3||||0803|3||||||||foreshore
+1445|1|BA030|1||2111|||7||||||||island
+1446|5|BA030|1||0035|||4||||12010||0|1|island
+1448|2|BA030|3||||0822|0||||||||island
+1449|3|BA030|3||||0822|0||||||||island
+1451|4|BA030|3||||0822|0||||||||island
+1453|5|BA030|3||||0822|1||||12010||1|1|island
+1454|9|BA030|3||||0822|0||||||||island
+1455|17|BA030|3||||0822|0||||||||island
+1457|25|BA030|3||||0822|0||||||||island
+1459|1|BA040|3||||0805|3||||||||water (except inland)
+1461|2|BA040|3||||0805|3||||||||water (except inland)
+1462|3|BA040|3||||0805|3||||||||water (except inland)
+1463|4|BA040|3||||0805|3||||||||water (except inland)
+1465|5|BA040|3||||0805|0||||33020||1|3|water (except inland)
+1467|17|BA040|3||||0805|3||||||||water (except inland)
+1469|25|BA040|3||||0805|3||||||||water (except inland)
+1471|4|BA050|3||||4003|0||||||||beach
+1473|25|BA060|3||||4003|0||||||||beach zone
+1474|3|BB010|1||0036|||7||||||||anchorage
+1475|5|BB010|1||0036|||6||||26220||0|2|anchorage - not anchoring berth
+1476|5|BB010|1||0037|||5||||26220||0|2|anchorage - anchoring berth
+1477|5|BB010|1|||||8||nam|14|26220|29|0|3|anchorage - anchoring berth - name label
+1478|25|BB010|1||0036|||7||||||||anchorage
+1482|5|BB010|2|||3000||4||||26220||1|2|anchorage - not anchoring berth
+1483|5|BB010|2|||3000||6||||26220||1|2|anchorage - anchoring berth
+1486|3|BB010|3||0902|0634||7||||||||anchorage
+1487|5|BB010|3||0902|3000||3||||26220||1|2|anchorage - not anchoring berth
+1488|5|BB010|3||0037|3000||5||||26220||1|2|anchorage - anchoring berth
+1489|5|BB010|3|||||8||nam|15|26220|29|0|3|anchorage - anchoring berth - name label
+1490|25|BB010|3||0902|0634||7||||||||anchorage
+1494|5|BB020|1||0032|||5||||32440||0|3|berth
+1495|5|BB020|1|||||8||ber|12|32440|29|0|3|berth - ber label
+1498|5|BB030|1||0051|||6||||32440||0|3|bollard
+1500|1|BB040|2|||0623||7||||||||breakwater/groyne
+1501|2|BB040|2|||0623||7||||||||breakwater/groyne
+1502|3|BB040|2|||0623||7||||||||breakwater/groyne
+1503|4|BB040|2|||0623||7||||||||breakwater/groyne
+1504|5|BB040|2|||0623||7||||12410||0|1|breakwater/groyne - partly submerged at high water
+1505|5|BB040|2|||0626||7||||12410||0|1|breakwater/groyne - submerged, covers and uncovers
+1506|25|BB040|2|||0623||7||||||||breakwater/groyne
+1509|3|BB040|3|||0623||6||||||||breakwater/groyne
+1510|4|BB040|3|||0623||6||||||||breakwater/groyne
+1511|5|BB040|3|||0623||6||||12410||1|1|breakwater/groyne - partly submerged at high water
+1512|5|BB040|3|||0626||6||||12410||1|1|breakwater/groyne - submerged, covers and uncovers
+1513|25|BB040|3|||0623||6||||||||breakwater/groyne
+1516|5|BB050|1||0039|||6|df1|||15060||0|1|calling-in point - one way traffic
+1517|5|BB050|1||0041|||6||||15060||0|1|calling-in point - direction of traffic unknown
+1518|5|BB050|1||0040|||6|df1|||15060||0|1|calling-in point - two way traffic
+1519|5|BB050|1||0039|||6|df3|||15060||0|1|calling-in point - more than two-way traffic, 3rd direction
+1520|5|BB050|1||0039|||6|df2|||15060||0|1|calling-in point - more than two-way traffic, 2nd direction
+1521|5|BB050|1||0039|||6|df1|||15060||0|1|calling-in point - more than two-way traffic, 1st direction
+1522|5|BB050|1||0039|||6|df4|||15060||0|1|calling-in point - more than two-way traffic, 4th direction
+1523|5|BB050|1|||||8||nam|17|15060|21|0|3|calling-in point - name label
+1532|5|BB080|1||0038|||6||||12410||0|1|dolphin
+1534|3|BB090|3|||3112||3||||||||drydock
+1535|4|BB090|3|||3112||3||||||||drydock
+1536|5|BB090|3|||1573|0822|4||||32440||1|3|drydock
+1537|25|BB090|3|||3112||3||||||||drydock
+1539|5|BB100|2|||0712||4||||34040||0|3|fish stakes
+1541|5|BB105|1||0042|||4||||32410||0|3|fishing harbor
+1543|5|BB110|3|||0656|0903|4||||34040||1|3|fish traps/fish weirs
+1545|5|BB115|3|||0656||5||||32460||1|3|gridiron
+1547|2|BB140|2|||0623||7||||||||jetty - unknown, partly submerged at high water
+1548|2|BB140|2|||0623||7||||||||jetty - covers and uncovers
+1549|3|BB140|2|||0623||7||||||||jetty
+1550|4|BB140|2|||0623||7||||||||jetty
+1551|5|BB140|2|||0623||7||||12410||0|1|jetty - partly submerged at high water
+1552|5|BB140|2|||0626||7||||12410||0|1|jetty - submerged, covers and uncovers
+1553|25|BB140|2|||0623||7||||||||jetty
+1556|3|BB140|3|||0623||6||||||||jetty
+1557|4|BB140|3|||0623||6||||||||jetty
+1558|5|BB140|3|||0623||6||||12410||1|1|jetty - partly submerged at high water
+1559|5|BB140|3|||0626||6||||12410||1|1|jetty - submerged, covers and uncovers
+1560|25|BB140|3|||0623||6||||||||jetty
+1563|5|BB150|1||0043|||5||||38210||0|3|landing place
+1565|5|BB150|3||0043|0604|0804|4||||38210||1|3|landing place
+1567|5|BB160|1||0038|||6||||12410||0|1|mooring ring
+1569|5|BB170|1||0311|||8||||17010||0|1|offshore loading facility
+1570|5|BB170|1||0500|||8||||27070||0|2|offshore loading facility - light
+1571|5|BB170|1|||||8||nam|8|17010|21|0|3|offshore loading facility - name label
+1575|5|BB170|2|||0625||6||||12210||0|1|offshore loading facility
+1577|5|BB170|3|||0625|0804|5||||17010||0|1|offshore loading facility
+1578|5|BB170|3|||||8||nam|1|17010|21|0|3|offshore loading facility - name label
+1581|5|BB180|1||0045|||4||||26210||0|2|oyster bed/mussel bed
+1583|5|BB180|3|||0656|0904|3||||26210||1|2|oyster bed/mussel bed
+1585|1|BB190|2|||0623||7||||||||pier/wharf/quay
+1586|2|BB190|2|||0623||7||||||||pier/wharf/quay
+1587|3|BB190|2|||0623||7||||||||pier/wharf/quay
+1588|4|BB190|2|||0623||7||||||||pier/wharf/quay
+1589|5|BB190|2|||0625||7||||12410||0|1|pier/wharf/quay
+1590|17|BB190|2|||0623||7||||||||pier/wharf/quay
+1591|25|BB190|2|||0623||7||||||||pier/wharf/quay
+1593|2|BB190|3|||0623||7||||||||pier/wharf/quay
+1594|3|BB190|3|||0623||7||||||||pier/wharf/quay
+1595|4|BB190|3|||0623||7||||||||pier/wharf/quay
+1596|5|BB190|3|||0625||6||||12410||1|1|pier/wharf/quay
+1597|17|BB190|3|||0623||7||||||||pier/wharf/quay
+1598|25|BB190|3|||0623||7||||||||pier/wharf/quay
+1600|5|BB220|2|||0623||7||||12410||0|1|ramp (maritime) - partly submerged at high water
+1601|5|BB220|2|||0626||7||||12410||0|1|ramp (maritime) - submerged, covers and uncovers
+1602|25|BB220|2|||0623||6||||||||ramp (maritime)
+1605|5|BB220|3|||0623||6||||12410||1|1|ramp (maritime) - partly submerged at high water
+1606|5|BB220|3|||0626||6||||12410||1|1|ramp (maritime) - submerged, covers and uncovers
+1607|25|BB220|3|||0623||6||||||||ramp (maritime)
+1610|1|BB230|2|||0623||7||||||||seawall
+1611|2|BB230|2|||0623||7||||||||seawall
+1612|3|BB230|2|||0623||7||||||||seawall
+1613|4|BB230|2|||0623||7||||||||seawall
+1614|5|BB230|2|||0623||7||||12410||0|1|seawall
+1615|25|BB230|2|||0623||7||||||||seawall
+1617|3|BB240|2|||0623||7||||||||slipway/patent slip
+1618|4|BB240|2|||0623||7||||||||slipway/patent slip
+1619|5|BB240|2|||0623||7||||12410||0|1|slipway/patent slip - partly submerged at high water
+1620|5|BB240|2|||0626||7||||12410||0|1|slipway/patent slip - submerged, covers and uncovers
+1623|3|BB240|3|||0623||6||||||||slipway/patent slip
+1624|5|BC010|1||0101|||8||||17020||0|1|beacon - base
+1625|5|BC010|1||0512|||6||||27210||0|2|beacon - radar navigation system
+1626|5|BC010|1||0511|||4||||38010||0|3|beacon - radio navigation system
+1627|5|BC010|1||0009|||5||||38010||0|3|beacon - radar station
+1628|5|BC010|1||0510|||6||||27230||0|2|beacon - radar reflector present
+1629|5|BC010|1||0401|||6||||27080||0|2|beacon - sound signal
+1645|5|BC010|1|||||8||ccc|6|17020|24|0|3|beacon - color label (abbreviated)
+1646|5|BC010|1|||||8||nam|5|17020|21|0|3|beacon - name label
+1647|5|BC010|1|||||8||sst|4|27080|24|0|3|beacon - sound signal label (abbreviated)
+1673|5|BC020|1||0313|||8||||17010||0|1|buoy - default; type unknown
+1674|5|BC020|1||0313|||8||||17010||0|1|buoy - barrel; type unknown
+1675|5|BC020|1||6051|||8||||17010||0|1|buoy - pillar; type unknown
+1676|5|BC020|1||6051|||8||||17010||0|1|buoy - spar; type unknown
+1677|5|BC020|1||0313|||8||||17010||0|1|buoy - sphere; type unknown
+1678|5|BC020|1||6053|||8||||17010||0|1|buoy - conical; type unknown
+1679|5|BC020|1||6052|||8||||17010||0|1|buoy - can; type unknown
+1680|5|BC020|1||0312|||8||||17010||0|1|buoy - superbuoy; type unknown
+1681|5|BC020|1||0312|||8||||17010||0|1|buoy - ODAS
+1682|5|BC020|1||0051|||5||||12410||0|1|buoy - articulated light (base)
+1683|5|BC020|1||0312|||8||||17010||0|1|buoy - LANBY
+1684|5|BC020|1||0515|||8||||17010||0|1|buoy - light float
+1685|5|BC020|1||0311|||8||||17010||0|1|buoy - mooring; not barrel, not can
+1686|5|BC020|1||0311|||8||||17010||0|1|buoy - mooring; barrel
+1687|5|BC020|1||0311|||8||||17010||0|1|buoy - mooring;can
+1688|5|BC020|1||0512|||6||||27210||0|2|buoy - non-pillar; radar navigation system
+1689|5|BC020|1||0512|||6||||27210||0|2|buoy - pillar; radar navigation system
+1690|5|BC020|1||0511|||4||||38010||0|3|buoy - non-pillar; radio navigation system
+1691|5|BC020|1||0511|||4||||38010||0|3|buoy - pillar; radio navigation system
+1692|5|BC020|1||0009|||5||||38010||0|3|buoy - radar station
+1693|5|BC020|1||0510|||6||||27230||0|2|buoy - radar reflector present
+1694|5|BC020|1||0401|||6||||27080||0|2|buoy - sound signal
+1708|5|BC020|1|||||8||col,per,eol,lvn|22,23,24,25|27070|23|0|3|buoy - light label - col,per,eol,lvn (concatenated)
+1709|5|BC020|1|||||8||col,per,eol,mlr|22,23,24,25|27070|23|0|3|buoy - light label - col,per,eol,mlr (concatenated)
+1710|5|BC020|1|||||8||col,per,eol|22,23,24|27070|23|0|3|buoy - light label - col,per,eol  (concatenated)
+1711|5|BC020|1|||||8||col,per,lvn,mlr|22,23,25,25|27070|23|0|3|buoy - light label - col,per,lvn,mlr (concatenated)
+1712|5|BC020|1|||||8||col,per,lvn|22,23,25|27070|23|0|3|buoy - light label - col,per,lvn (concatenated)
+1713|5|BC020|1|||||8||col,per,mlr|22,23,25|27070|23|0|3|buoy - light label - col,per,mlr (concatenated)
+1714|5|BC020|1|||||8||col,per|22,23|27070|23|0|3|buoy - light label - col,per (concatenated)
+1715|5|BC020|1|||||8||col,per,eol,lvn,mlr|22,23,24,25,25|27070|23|0|3|buoy - light label - col,per,eol,lvn,mlr (concatenated)
+1716|5|BC020|1|||||8||col,eol,lvn,mlr|22,24,25,25|27070|23|0|3|buoy - light label - col,eol,lvn,mlr (concatenated)
+1717|5|BC020|1|||||8||col,eol,lvn|22,24,25|27070|23|0|3|buoy - light label - col,eol,lvn (concatenated)
+1718|5|BC020|1|||||8||col,eol,mlr|22,24,25|27070|23|0|3|buoy - light label - col,eol,mlr (concatenated)
+1719|5|BC020|1|||||8||col,eol|22,24|27070|23|0|3|buoy - light label - col,eol (concatenated)
+1720|5|BC020|1|||||8||col,lvn,mlr|22,25,25|27070|23|0|3|buoy - light label - col,lvn,mlr (concatenated)
+1721|5|BC020|1|||||8||col,lvn|22,25|27070|23|0|3|buoy - light label - col,lvn  (concatenated)
+1722|5|BC020|1|||||8||col,mlr|22,25|27070|23|0|3|buoy - light label - col,mlr (concatenated)
+1723|5|BC020|1|||||8||col|22|27070|23|0|3|buoy - light label - col
+1724|5|BC020|1|||||8||per,eol,lvn,mlr|26,24,25,25|27070|23|0|3|buoy - light label - per,eol,lvn,mlr (concatenated)
+1725|5|BC020|1|||||8||per,eol,lvn|26,24,25|27070|23|0|3|buoy - light label - per,eol,lvn  (concatenated)
+1726|5|BC020|1|||||8||per,eol,mlr|26,24,25|27070|23|0|3|buoy - light label - per,eol,mlr  (concatenated)
+1727|5|BC020|1|||||8||per,eol|26,24|27070|23|0|3|buoy - light label - per,eol  (concatenated)
+1728|5|BC020|1|||||8||per,lvn,mlr|26,25,25|27070|23|0|3|buoy - light label - per,lvn,mlr  (concatenated)
+1729|5|BC020|1|||||8||per,lvn|26,25|27070|23|0|3|buoy - light label - per,lvn  (concatenated)
+1730|5|BC020|1|||||8||per,mlr|26,25|27070|23|0|3|buoy - light label - per,mlr  (concatenated)
+1731|5|BC020|1|||||8||per|26|27070|23|0|3|buoy - light label - per
+1732|5|BC020|1|||||8||eol,lvn,mlr|27,25,25|27070|23|0|3|buoy - light label - eol,lvn,mlr (concatenated)
+1733|5|BC020|1|||||8||eol,lvn|27,25|27070|23|0|3|buoy - light label - eol,lvn  (concatenated)
+1734|5|BC020|1|||||8||eol,mlr|27,25|27070|23|0|3|buoy -  light label - eol,mlr  (concatenated)
+1735|5|BC020|1|||||8||eol|27|27070|23|0|3|buoy - light label - eol
+1736|5|BC020|1|||||8||lvn,mlr|28,25|27070|23|0|3|buoy - light label - lvn,mlr (concatenated)
+1737|5|BC020|1|||||8||lvn|28|27070|23|0|3|buoy - light label - lvn
+1738|5|BC020|1|||||8||mlr|28|27070|23|0|3|buoy - light label - mlr
+1739|5|BC020|1|||||8||ccc|6|17010|24|0|3|buoy - color label (abbreviated)
+1740|5|BC020|1|||||8||nam|5|17010|21|0|3|buoy - name label
+1741|5|BC020|1|||||8||sst|4|27080|24|0|3|buoy - sound signal label (abbreviated)
+1813|5|BC040|1||0051|||5||||12410||0|1|light - base symbol
+1814|5|BC040|1||0512|||6||||27210||0|2|light - radar navigation system
+1815|5|BC040|1||0511|||4||||38010||0|3|light - radio navigation system
+1816|5|BC040|1||0009|||5||||38010||0|3|light - radar station
+1817|5|BC040|1||0510|||6||||27230||0|2|light - radar reflector present
+1818|5|BC040|1||0401|||6||||27080||0|2|light - sound signal
+1834|5|BC040|1|||||8||col,per,eol,lvn|22,23,24,25|27070|23|0|3|light - light label - col,per,eol,lvn (concatenated)
+1835|5|BC040|1|||||8||col,per,eol,mlr|22,23,24,25|27070|23|0|3|light - light label - col,per,eol,mlr (concatenated)
+1836|5|BC040|1|||||8||col,per,eol|22,23,24|27070|23|0|3|light - light label - col,per,eol (concatenated)
+1837|5|BC040|1|||||8||col,per,lvn,mlr|22,23,25,25|27070|23|0|3|light - light label - col,per,lvn,mlr (concatenated)
+1838|5|BC040|1|||||8||col,per,lvn|22,23,25|27070|23|0|3|light - light label - col,per,lvn (concatenated)
+1839|5|BC040|1|||||8||col,per,mlr|22,23,25|27070|23|0|3|light - light label - col,per,mlr (concatenated)
+1840|5|BC040|1|||||8||col,per|22,23|27070|23|0|3|light - light label - col,per (concatenated)
+1841|5|BC040|1|||||8||col,per,eol,lvn,mlr|22,23,24,25,25|27070|23|0|3|light - light label - col,per,eol,lvn,mlr (concatenated)
+1842|5|BC040|1|||||8||col,eol,lvn,mlr|22,24,25,25|27070|23|0|3|light - light label - col,eol,lvn,mlr (concatenated)
+1843|5|BC040|1|||||8||col,eol,lvn|22,24,25|27070|23|0|3|light - light label - col,eol,lvn (concatenated)
+1844|5|BC040|1|||||8||col,eol,mlr|22,24,25|27070|23|0|3|light - light label - col,eol,mlr (concatenated)
+1845|5|BC040|1|||||8||col,eol|22,24|27070|23|0|3|light - light label - col,eol (concatenated)
+1846|5|BC040|1|||||8||col,lvn,mlr|22,25,25|27070|23|0|3|light - light label - col,lvn,mlr (concatenated)
+1847|5|BC040|1|||||8||col,lvn|22,25|27070|23|0|3|light - light label - col,lvn (concatenated)
+1848|5|BC040|1|||||8||col,mlr|22,25|27070|23|0|3|light - light label - col,mlr (concatenated)
+1849|5|BC040|1|||||8||col|22|27070|23|0|3|light - light label - col
+1850|5|BC040|1|||||8||per,eol,lvn,mlr|26,24,25,25|27070|23|0|3|light - light label - per,eol,lvn,mlr (concatenated)
+1851|5|BC040|1|||||8||per,eol,lvn|26,24,25|27070|23|0|3|light - light label - per,eol,lvn (concatenated)
+1852|5|BC040|1|||||8||per,eol,mlr|26,24,25|27070|23|0|3|light - light label - per,eol,mlr (concatenated)
+1853|5|BC040|1|||||8||per,eol|26,24|27070|23|0|3|light - light label - per,eol (concatenated)
+1854|5|BC040|1|||||8||per,lvn,mlr|26,25,25|27070|23|0|3|light - light label - per,lvn,mlr (concatenated)
+1855|5|BC040|1|||||8||per,lvn|26,25|27070|23|0|3|light - light label - per,lvn (concatenated)
+1856|5|BC040|1|||||8||per,mlr|26,25|27070|23|0|3|light - light label - per,mlr (concatenated)
+1857|5|BC040|1|||||8||per|26|27070|23|0|3|light - light label - per
+1858|5|BC040|1|||||8||eol,lvn,mlr|27,25,25|27070|23|0|3|light(concatenated) light label w/o col,per
+1859|5|BC040|1|||||8||eol,lvn|27,25|27070|23|0|3|light (concatenated) light label only eol,lvn
+1860|5|BC040|1|||||8||eol,mlr|27,25|27070|23|0|3|light - light label - eol,mlr (concatenated)
+1861|5|BC040|1|||||8||eol|27|27070|23|0|3|light - light label - eol
+1862|5|BC040|1|||||8||lvn,mlr|28,25|27070|23|0|3|light - light label - lvn,mlr (concatenated)
+1863|5|BC040|1|||||8||lvn|28|27070|23|0|3|light - light label - lvn
+1864|5|BC040|1|||||8||mlr|28|27070|23|0|3|light - light label - mlr
+1865|5|BC040|1|||||8||ccc|6|12410|24|0|3|light - color label (abbreviated)
+1866|5|BC040|1|||||8||nam|5|12410|21|0|3|light - name label
+1867|5|BC040|1|||||8||sst|4|27080|24|0|3|light - sound signal label (abbreviated)
+1868|16|BC040|1||7110|||8||||||||light high
+1869|16|BC040|1||7110|||8||||||||light
+1870|16|BC040|1||7142|||8||||||||light (lit) high
+1871|16|BC040|1||7142|||8||||||||light (lit)
+1872|16|BC040|1|||||9||hgt|33|||||light - AGL label
+1873|16|BC040|1|||||9||zv2|32|||||light - MSL label
+1932|5|BC040|2|||0713||6||||27070||0|2|light
+1934|1|BC050|1||6030|||8||||||||lighthouse
+1935|4|BC050|1||6030|||8||||||||lighthouse
+1937|16|BC050|1||7112|||8||||||||lighthouse high
+1938|16|BC050|1||7112|||8||||||||lighthouse
+1939|16|BC050|1||7142|||8||||||||lighthouse high lit
+1940|16|BC050|1||7142|||8||||||||lighthouse lit
+1941|16|BC050|1|||||9||hgt|33|||||lighthouse - AGL label
+1942|16|BC050|1|||||9||zv2|32|||||lighthouse - MSL label
+1943|5|BC055|1||0152|||7||||27025||0|2|marker
+1945|5|BC060|3|||3116||8||||27070||1|2|light sector
+1947|5|BC070|1||0516|||8||||17011||0|1|light vessel/lightship
+1948|5|BC070|1||0512|||6||||27210||0|2|light vessel/lightship - radar navigation system
+1949|5|BC070|1||0511|||4||||38010||0|3|light vessel/lightship - radio navigation system
+1950|5|BC070|1||0009|||5||||38010||0|3|light vessel/lightship - radar station
+1951|5|BC070|1||0510|||6||||27230||0|2|light vessel/lightship - radar reflector present
+1952|5|BC070|1||0401|||6||||27080||0|2|light vessel/lightship - sound signal
+1953|5|BC070|1|||||8||col,per,eol,lvn|22,23,24,25|27070|23|0|3|lightship - light label - col,per,eol,lvn (concatenated)
+1954|5|BC070|1|||||8||col,per,eol,mlr|22,23,24,25|27070|23|0|3|lightship - light label - col,per,eol,mlr (concatenated)
+1955|5|BC070|1|||||8||col,per,eol|22,23,24|27070|23|0|3|lightship - light label - col,per,eol (concatenated)
+1956|5|BC070|1|||||8||col,per,lvn,mlr|22,23,25,25|27070|23|0|3|lightship - light label - col,per,lvn,mlr (concatenated)
+1957|5|BC070|1|||||8||col,per,lvn|22,23,25|27070|23|0|3|lightship - light label - col,per,lvn (concatenated)
+1958|5|BC070|1|||||8||col,per,mlr|22,23,25|27070|23|0|3|lightship - light label - col,per,mlr (concatenated)
+1959|5|BC070|1|||||8||col,per|22,23|27070|23|0|3|lightship - light label - col,per  (concatenated)
+1960|5|BC070|1|||||8||col,per,eol,lvn,mlr|22,23,24,25,25|27070|23|0|3|lightship - light label - col,per,eol,lvn,mlr (concatenated)
+1961|5|BC070|1|||||8||col,eol,lvn,mlr|22,24,25,25|27070|23|0|3|lightship - light label - col,eol,lvn,mlr (concatenated)
+1962|5|BC070|1|||||8||col,eol,lvn|22,24,25|27070|23|0|3|lightship - light label - col,eol,lvn (concatenated)
+1963|5|BC070|1|||||8||col,eol,mlr|22,24,25|27070|23|0|3|lightship - light label - col,eol,mlr (concatenated)
+1964|5|BC070|1|||||8||col,eol|22,24|27070|23|0|3|lightship - light label - col,mlr (concatenated)
+1965|5|BC070|1|||||8||col,lvn,mlr|22,25,25|27070|23|0|3|lightship - light label - col,lvn,mlr (concatenated)
+1966|5|BC070|1|||||8||col,lvn|22,25|27070|23|0|3|lightship - light label - col,lvn (concatenated)
+1967|5|BC070|1|||||8||col,mlr|22,25|27070|23|0|3|lightship - light label - col,mlr (concatenated)
+1968|5|BC070|1|||||8||col|22|27070|23|0|3|lightship - light label - col
+1969|5|BC070|1|||||8||per,eol,lvn,mlr|26,24,25,25|27070|23|0|3|light - light label - col,per,eol,mlr (concatenated)
+1970|5|BC070|1|||||8||per,eol,lvn|26,24,25|27070|23|0|3|lightship - light label - per,eol,lvn (concatenated)
+1971|5|BC070|1|||||8||per,eol,mlr|26,24,25|27070|23|0|3|lightship - light label - per,eol,mlr (concatenated)
+1972|5|BC070|1|||||8||per,eol|26,24|27070|23|0|3|lightship - light label - per,eol (concatenated)
+1973|5|BC070|1|||||8||per,lvn,mlr|26,25,25|27070|23|0|3|lightship - light label - per,lvn,mlr (concatenated)
+1974|5|BC070|1|||||8||per,lvn|26,25|27070|23|0|3|lightship - light label - per,lvn (concatenated)
+1975|5|BC070|1|||||8||per,mlr|26,25|27070|23|0|3|lightship - light label - per,mlr (concatenated)
+1976|5|BC070|1|||||8||per|26|27070|23|0|3|lightship - light label - per
+1977|5|BC070|1|||||8||eol,lvn,mlr|27,25,25|27070|23|0|3|lightship - light label - eol,lvn,mlr (concatenated)
+1978|5|BC070|1|||||8||eol,lvn|27,25|27070|23|0|3|lightship - light label - eol,lvn (concatenated)
+1979|5|BC070|1|||||8||eol,mlr|27,25|27070|23|0|3|lightship - light label - eol,mlr (concatenated)
+1980|5|BC070|1|||||8||eol|27|27070|23|0|3|lightship - light label - eol
+1981|5|BC070|1|||||8||lvn,mlr|28,25|27070|23|0|3|lightship - light label - lvn,mlr (concatenated)
+1982|5|BC070|1|||||8||lvn|28|27070|23|0|3|lightship - light label - lvn
+1983|5|BC070|1|||||8||mlr|28|27070|23|0|3|lightship - light label - mlr
+1984|5|BC070|1|||||8||nam|5|17011|21|0|3|light vessel/lightship - name label
+1985|5|BC070|1|||||8||sst|4|27080|24|0|3|light vessel/lightship - sound signal label (abbreviated)
+1986|16|BC070|1||7113|||8||||||||light vessel / lightship high
+1987|16|BC070|1||7113|||8||||||||light vessel / lightship
+1988|16|BC070|1||7142|||8||||||||light vessel / lightship high lit
+1989|16|BC070|1||7142|||8||||||||light vessel / lightship lit
+1990|16|BC070|1|||||9||hgt|33|||||light vessel/lighthship - AGL label
+1991|16|BC070|1|||||9||zv2|32|||||light vessel/lighthship - MSL label
+2031|5|BC080|1||0052|||4||||34050||0|3|perches/stakes
+2033|5|BC080|3|||0680|0810|4||||34050||1|3|perches/stakes
+2035|5|BC100|2|||0656||4||||25010||0|2|leading line
+2037|5|BD000|1||0052|||4||||34050||0|3|underwater danger/hazard - depth unknown
+2038|5|BD000|1||0053|||4||||34050||0|3|underwater danger/hazard - depth 20m or less
+2039|5|BD000|1||0054|||4||||34050||0|3|underwater danger/hazard - depth greater than 20m
+2040|5|BD000|1||0058|||4||||31011||0|3|underwater danger/hazard - not accurate
+2046|1|BD000|2|||3139||8||||||||underwater danger/hazard
+2047|5|BD000|3|||0680|0810|4||||34050||1|3|underwater danger/hazard - depth unknown
+2048|5|BD000|3|||0680||4||||34050||1|3|underwater danger/hazard - depth 20m or less
+2049|5|BD000|3|||0629||4||||34050||1|3|underwater danger/hazard - depth greater than 20m
+2050|5|BD000|3||0058|||4||||31011||1|3|underwater danger/hazard - not accurate
+2055|19|BD005|1||0524|||4||||34050||1|3|miscellaneous underwater feature - sonar confirmed
+2056|19|BD005|1||0525|||4||||34050||1|3|miscellaneous underwater feature - reported
+2057|19|BD005|1|||||8||nam|12|34050|26|1|3|miscellaneous underwater feature - name label
+2058|20|BD005|1||0524|||4||||34050||1|3|miscellaneous underwater feature - sonar confirmed
+2059|20|BD005|1||0525|||4||||34050||1|3|miscellaneous underwater feature - reported
+2060|20|BD005|1|||||8||nam|12|34050|26|1|3|miscellaneous underwater feature - name label
+2061|21|BD005|1||0524|||4||||34050||1|3|miscellaneous underwater feature - sonar confirmed
+2062|21|BD005|1||0525|||4||||34050||1|3|miscellaneous underwater feature - reported
+2063|21|BD005|1|||||8||nam|12|34050|26|1|3|miscellaneous underwater feature - name label
+2066|5|BD010|1||0056|||3||||33040||0|3|breakers
+2068|5|BD010|2|||0752||4||||33040||0|3|breakers
+2070|5|BD010|3||0056|0656||4||||33040||1|3|breakers
+2072|5|BD020|1||0057|||4||||34050||0|3|crib - partly submerged/dry; depth null
+2073|5|BD020|1||0052|||4||||34050||0|3|crib - submerged; depth unknown
+2074|5|BD020|1||0053|||4||||34050||0|3|crib - submerged; depth 20m or less
+2075|5|BD020|1||0054|||4||||34050||0|3|crib - submerged; depth greater than 20m
+2076|5|BD020|1||0055|||4||||34050||0|3|crib - covers and uncovers; depth null
+2077|5|BD020|1||0058|||4||||31011||0|3|crib - not accurate
+2084|5|BD020|3|||0623|0804|4||||34050||1|3|crib - above surface
+2085|5|BD020|3|||0680|0810|4||||34050||1|3|crib - submerged; depth unknown
+2086|5|BD020|3|||0680||4||||34050||1|3|crib - submerged; depth 20m or less
+2087|5|BD020|3|||0629||4||||34050||1|3|crib - submerged; depth greater than 20m
+2088|5|BD020|3|||0626|0803|4||||34050||1|3|crib - covers and uncovers
+2089|5|BD020|3||0058|||4||||31011||1|3|crib - not accurate
+2096|5|BD030|1||0052|||4||||34050||0|3|discolored water
+2097|5|BD030|1||0058|||4||||31011||0|3|discolored water - not accurate
+2100|5|BD030|3|||0680|0810|4||||34050||1|3|discolored water
+2101|5|BD030|3||0058|||4||||31011||1|3|discolored water - not accurate
+2104|5|BD040|1||0056|||3||||33040||0|3|eddies
+2106|5|BD040|3||0056|0656||4||||33040||1|3|eddies
+2108|5|BD050|1||0059|||4||||34050||0|3|foul ground
+2110|5|BD050|3||0059|0656||4||||34050||1|3|foul ground
+2112|5|BD060|1||0060|||3||||34020||0|3|kelp/seaweed
+2114|5|BD060|3||0060|3077||3||||34020||0|3|kelp/seaweed
+2116|5|BD080|1||0056|||3||||33040||0|3|overfalls/tide rips
+2118|5|BD080|3||0056|0656||4||||33040||1|3|overfalls/tide rips
+2120|3|BD100|1||2264|||3||||||||pile/piling/post
+2121|5|BD100|1||0051|||5||||12410||0|1|pile/piling/post
+2122|25|BD100|1||2264|||3||||||||pile/piling/post
+2124|3|BD100|3|||0680|0810|3||||||||pile/piling/post
+2125|5|BD100|3|||0623|0804|4||||34050||1|3|pile/piling/post - does not cover
+2126|5|BD100|3|||0680|0810|4||||34050||1|3|pile/piling/post - submerged
+2127|5|BD100|3|||0626|0803|4||||34050||1|3|pile/piling/post - covers and uncovers
+2128|5|BD100|3||0058|||4||||31011||1|3|pile/piling/post - not accurate
+2129|25|BD100|3|||0680|0810|3||||||||pile/piling/post
+2134|5|BD110|1||0061|||5||||12210||0|1|platform
+2135|5|BD110|1||0512|||6||||27210||0|2|platform - radar navigation system
+2136|5|BD110|1||0500|||8||||27070||0|2|platform - lighted
+2137|5|BD110|1||0402|||6||||27080||0|2|platform - sound signal
+2138|5|BD110|1|||||8||nam|8|12210|21|0|3|platform - name label
+2139|5|BD110|1|||||8||sst|9|27080|24|0|3|platform - sound signal label (abbreviated)
+2140|16|BD110|1||7114|||8||||||||platform high
+2141|16|BD110|1||7114|||8||||||||platform
+2142|16|BD110|1||7142|||8||||||||platform light high
+2143|16|BD110|1||7142|||8||||||||platform light
+2144|16|BD110|1|||||9||hgt|33|||||platform - AGL label
+2145|16|BD110|1|||||9||zv2|32|||||platform - MSL label
+2154|1|BD120|2|||3112||8||||||||reef
+2155|2|BD120|2|||3112||8||||||||reef
+2157|3|BD120|2|||3112||8||||||||reef
+2158|25|BD120|2|||3112||8||||||||reef
+2159|2|BD120|3|||3112||7||||||||reef
+2161|3|BD120|3|||3112||7||||||||reef
+2162|5|BD120|3|||0680||4||||34050||1|3|reef - submerged, depth 20m or less
+2163|5|BD120|3|||0629||4||||34050||1|3|reef - submerged, depth greater than 20m
+2164|5|BD120|3|||0680|0810|4||||34050||1|3|reef - not covers and uncovers, depth unknown or null
+2165|5|BD120|3||0058|||4||||31011||1|3|reef - not covers and uncovers, not accurate
+2166|5|BD120|3||||0803|1||||13030||1|1|reef - covers and uncovers
+2167|5|BD120|3||||0949|1||||13030||1|1|reef - covers and uncovers, shallow display mode on
+2168|25|BD120|3|||3112||7||||||||reef
+2173|1|BD130|1||0063|||8||||||||rock
+2174|2|BD130|1||0063|||8||||||||rock - unk/covers/uncovers
+2175|2|BD130|1||6044|||8||||||||rock - awash
+2177|3|BD130|1||0063|||8||||||||rock - unk/covers/uncovers
+2178|3|BD130|1||6044|||8||||||||rock - awash
+2180|5|BD130|1||0063|||4||||34050||0|3|rock - depth null
+2181|5|BD130|1||0062|||4||||34050||0|3|rock - submerged; depth unknown
+2182|5|BD130|1||0053|||4||||34050||0|3|rock - submerged; depth 20m or less
+2183|5|BD130|1||0054|||4||||34050||0|3|rock - submerged; depth greater than 20m
+2184|5|BD130|1||0058|||4||||31011||0|3|rock - not accurate
+2185|25|BD130|1||0063|||8||||||||rock - unk/covers/uncovers
+2186|25|BD130|1||6044|||8||||||||rock - awash
+2191|5|BD140|1||0057|||4||||34050||0|3|snags/stumps - partly submergerd/dry; depth null
+2192|5|BD140|1||0052|||4||||34050||0|3|snags/stumps - submergerd; depth unknown
+2193|5|BD140|1||0053|||4||||34050||0|3|snags/stumps - submerged; depth 20m or less
+2194|5|BD140|1||0054|||4||||34050||0|3|snags/stumps - submerged; depth greater than 20m
+2195|5|BD140|1||0055|||4||||34050||0|3|snags/stumps - covers and uncovers; depth null
+2196|5|BD140|1||0058|||4||||31011||0|3|snags/stumps - not accurate
+2203|5|BD140|3|||0623|0804|4||||34050||1|3|snags/stumps - does not cover
+2204|5|BD140|3|||0680|0810|4||||34050||1|3|snags/stumps - submerged
+2205|5|BD140|3|||0626|0803|4||||34050||1|3|snags/stumps - covers and uncovers
+2206|5|BD140|3||0058|||4||||31011||1|3|snags/stumps - not accurate
+2211|1|BD180|1||0122|||8||||||||wreck
+2212|2|BD180|1||0122|||8||||||||wreck
+2213|3|BD180|1||0122|||8||||||||wreck
+2214|5|BD180|1||0053|||4||||34050||0|3|wreck - submerged; depth 20m or less
+2215|5|BD180|1||0054|||4||||34050||0|3|wreck - submerged; depth greater than 20m
+2216|5|BD180|1||0065|||4||||34050||0|3|wreck - submerged; dangerous; depth unknown
+2217|5|BD180|1||0066|||4||||34050||0|3|wreck - submerged; not dangerous; depth unknown
+2218|5|BD180|1||0064|||4||||34050||0|3|wreck - showing mast/hull/superstructure; depth null
+2219|5|BD180|1||0065|||4||||34050||0|3|wreck - unknown; depth null
+2220|5|BD180|1||0064|||4||||34050||0|3|wreck - not submerged; depth null
+2221|5|BD180|1||0058|||4||||31011||0|3|wreck - not accurate
+2222|19|BD180|1||0524|||4||||34050||1|3|wreck - sonar confirmed
+2223|19|BD180|1||0525|||4||||34050||1|3|wreck - reported
+2224|19|BD180|1|||||8||nam|12|34050|26|1|3|wreck - name label
+2225|20|BD180|1||0524|||4||||34050||1|3|wreck - sonar confirmed
+2226|20|BD180|1||0525|||4||||34050||1|3|wreck - reported
+2227|20|BD180|1|||||8||nam|12|34050|26|1|3|wreck - name label
+2228|21|BD180|1||0524|||4||||34050||1|3|wreck - sonar confirmed
+2229|21|BD180|1||0525|||4||||34050||1|3|wreck - reported
+2230|21|BD180|1|||||8||nam|12|34050|26|1|3|wreck - name label
+2232|25|BD180|1||0122|||8||||||||wreck
+2240|5|BD180|3|||0630|0810|4||||34050||1|3|wreck - unknown; awash; depth null
+2241|5|BD180|3|||0623|0804|4||||34050||1|3|wreck - does not cover; depth null
+2242|5|BD180|3|||0630|0810|4||||34050||1|3|wreck - submerged; depth unknown
+2243|5|BD180|3|||0680||4||||34050||1|3|wreck - submerged; depth 20m or less
+2244|5|BD180|3|||3117||4||||34050||1|3|wreck - submerged; depth greater than 20m
+2245|5|BD180|3|||0626|0803|4||||34050||1|3|wreck - covers and uncovers; depth null
+2251|5|BE010|2|||0608||5||||33020||0|3|depth curve - accurate
+2252|5|BE010|2|||0614||5||||33020||0|3|depth curve - not accurate
+2253|5|BE010|2|||||8||crv|3|33022|20|0|3|depth curve - label
+2257|5|BE010|3||||0805|0||||13030||1|1|depth area (very deep); 4 shades
+2258|5|BE010|3||||0820|0||||13030||1|1|depth area (medium deep); 4 shades
+2259|5|BE010|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode off
+2260|5|BE010|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode off
+2261|5|BE010|3||||0805|0||||13030||1|1|depth area (deep water); 2 shades
+2262|5|BE010|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode off
+2263|5|BE010|3||||0823|0||||13030||1|1|depth area; depth unknown
+2264|5|BE010|3||||0934|0||||13030||1|1|depth area; depth unknown
+2265|5|BE010|3|||0631||0||||13030||1|1|depth area; depth unknown
+2266|5|BE010|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2267|5|BE010|3||||0949|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2268|5|BE010|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2269|5|BE010|3||||0949|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2270|5|BE010|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2271|5|BE010|3||||0949|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2287|1|BE015|2|||3082||8||||||||depth contour
+2288|2|BE015|2|||3082||8||||||||depth contour
+2289|3|BE015|2|||3082||8||||||||depth contour
+2291|17|BE015|2|||3082||8||||||||depth contour
+2292|19|BE015|2|||0608||5||||33020||0|3|depth contour - accurate
+2293|19|BE015|2|||0614||5||||33020||0|3|depth contour - not accurate
+2294|19|BE015|2|||||8||crv|3|33022|20|0|3|depth curve - label
+2295|20|BE015|2|||0608||5||||33020||0|3|depth contour - accurate
+2296|20|BE015|2|||0614||5||||33020||0|3|depth contour - not accurate
+2297|20|BE015|2|||||8||crv|3|33022|20|0|3|depth curve - label
+2298|21|BE015|2|||0608||5||||33020||0|3|depth contour - accurate
+2299|21|BE015|2|||0614||5||||33020||0|3|depth contour - not accurate
+2300|21|BE015|2|||||8||crv|3|33022|20|0|3|depth curve - label
+2306|19|BE019|3||||0805|0||||13030||1|1|depth area (very deep); 4 shades
+2307|19|BE019|3||||0820|0||||13030||1|1|depth area (medium deep); 4 shades
+2308|19|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode off
+2309|19|BE019|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode off
+2310|19|BE019|3||||0805|0||||13030||1|1|depth area (deep water); 2 shades
+2311|19|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode off
+2312|19|BE019|3||||0823|0||||13030||1|1|depth area; depth unknown
+2313|19|BE019|3||||0934|0||||13030||1|1|depth area; depth unknown
+2314|19|BE019|3|||0631||0||||13030||1|1|depth area; depth unknown
+2315|19|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2316|19|BE019|3||||0949|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2317|19|BE019|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2318|19|BE019|3||||0949|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2319|19|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2320|19|BE019|3||||0949|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2321|20|BE019|3||||0805|0||||13030||1|1|depth area (very deep); 4 shades
+2322|20|BE019|3||||0820|0||||13030||1|1|depth area (medium deep); 4 shades
+2323|20|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode off
+2324|20|BE019|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode off
+2325|20|BE019|3||||0805|0||||13030||1|1|depth area (deep water); 2 shades
+2326|20|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode off
+2327|20|BE019|3||||0823|0||||13030||1|1|depth area; depth unknown
+2328|20|BE019|3||||0934|0||||13030||1|1|depth area; depth unknown
+2329|20|BE019|3|||0631||0||||13030||1|1|depth area; depth unknown
+2330|20|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2331|20|BE019|3||||0949|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2332|20|BE019|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2333|20|BE019|3||||0949|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2334|20|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2335|20|BE019|3||||0949|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2336|21|BE019|3||||0805|0||||13030||1|1|depth area (very deep); 4 shades
+2337|21|BE019|3||||0820|0||||13030||1|1|depth area (medium deep); 4 shades
+2338|21|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode off
+2339|21|BE019|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode off
+2340|21|BE019|3||||0805|0||||13030||1|1|depth area (deep water); 2 shades
+2341|21|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode off
+2342|21|BE019|3||||0823|0||||13030||1|1|depth area; depth unknown
+2343|21|BE019|3||||0934|0||||13030||1|1|depth area; depth unknown
+2344|21|BE019|3|||0631||0||||13030||1|1|depth area; depth unknown
+2345|21|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2346|21|BE019|3||||0949|0||||13030||1|1|depth area (very shallow); 4 shades; shallow mode on
+2347|21|BE019|3||||0821|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2348|21|BE019|3||||0949|0||||13030||1|1|depth area (medium shallow); 4 shades; shallow mode on
+2349|21|BE019|3||||0810|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2350|21|BE019|3||||0949|0||||13030||1|1|depth area (very shallow); 2 shades; shallow mode on
+2366|5|BE020|1|||||8||hdh|3|33010|10|0|3|drying height text (dark)
+2367|5|BE020|1|||||8||hdp|3|33010|10|0|3|sounding text (dark) - shallower than ssdc
+2368|5|BE020|1|||||8||hdp|2|33010|10|0|3|sounding text (light) - deeper than ssdc
+2369|5|BE020|1||1256|||6||||33010||0|3|drying height overbar (dark)
+2370|5|BE020|1||1251|||6||||33010||0|3|sounding or drying height - circle (light) indicating low accuracy
+2371|19|BE020|1|||||6||hdp|3|33010|11|1|3|sounding text (dark) - shallower than 200m
+2372|19|BE020|1|||||6||hdp|2|33010|11|1|3|sounding text (light) - deeper than 200m
+2373|19|BE020|1||1251|||6||||33010||1|3|sounding - circle (light) indicating low accuracy
+2374|20|BE020|1|||||6||hdp|3|33010|11|1|3|sounding text (dark) - shallower than 200m
+2375|20|BE020|1|||||6||hdp|2|33010|11|1|3|sounding text (light) - deeper than 200m
+2376|20|BE020|1||1251|||6||||33010||1|3|sounding - circle (light) indicating low accuracy
+2377|21|BE020|1|||||6||hdp|3|33010|11|1|3|sounding text (dark) - shallower than 200m
+2378|21|BE020|1|||||6||hdp|2|33010|11|1|3|sounding text (light) - deeper than 200m
+2379|21|BE020|1||1251|||6||||33010||1|3|sounding - circle (light) indicating low accuracy
+2390|19|BE030|3||||0820|1||||23030||0|2|track swath
+2391|20|BE030|3||||0820|1||||23030||0|2|track swath
+2392|21|BE030|3||||0820|1||||23030||0|2|track swath
+2393|19|BE040|2|||0670||6||||25020||0|2|track line
+2394|20|BE040|2|||0670||6||||25020||0|2|track line
+2395|21|BE040|2|||0670||6||||25020||0|2|track line
+2396|5|BF010|1|||||8||mcc|11|34010|25|0|3|bottom characteristics - label mcc only
+2397|5|BF010|1||1233|||4||||34010||0|3|bottom characteristics - surface unknown
+2398|5|BF010|1|||||8||psc,mcc|29,30|34010|25|0|3|bottom characteristics - label psc and mcc (concatenated)
+2399|5|BF010|1|||||8||psc|10|34010|25|0|3|bottom characteristics - label psc only
+2406|4|BG010|1||1006|||6|aoo|||||||current flow
+2407|5|BG010|1||0071|||5||||33060||0|3|current flow - general; direction unknown
+2408|5|BG010|1||0073|||4|dof|||33060||0|3|current flow - ebb; direction known
+2409|5|BG010|1||0074|||4|dof|||33060||0|3|current flow - flood; direction known
+2410|5|BG010|1||0072|||5|dof|||33060||0|3|current flow - general, ocean; direction known
+2411|18|BG010|1||0071|||5||||33060||0|3|current flow - general; direction unknown
+2412|18|BG010|1||0072|||5|dof|||33060||0|3|current flow - ocean; direction known
+2413|18|BG010|1|||||8||nam|17|33060|26|0|3|current flow - name label
+2418|5|BG020|1||0015|||7||||28020||0|2|tide gauge
+2420|5|BG030|1||0076|||4||||33060||0|3|tide data point
+2422|5|BG040|1||0154|||4||||33060||0|3|current diagram
+2424|1|BH000|2|||0621||6||||||||inland water
+2425|1|BH000|3||||4152|3||||||||inland water
+2426|2|BH010|1||1007|||6||||||||aqueduct
+2427|3|BH010|1||1007|||6||||||||aqueduct
+2428|4|BH010|1||1007|||6||||||||aqueduct
+2430|16|BH010|1||7117|||8||||||||aqueduct high
+2431|16|BH010|1||7117|||8||||||||aqueduct
+2432|16|BH010|1||7142|||8||||||||aqueduct light high
+2433|16|BH010|1||7142|||8||||||||aqueduct light
+2434|16|BH010|1|||||9||hgt|33|||||aqueduct - AGL label
+2435|16|BH010|1|||||9||zv2|32|||||aqueduct - MSL label
+2436|2|BH010|2|||4311||6||||||||aqueduct - surface/elevated
+2437|2|BH010|2|||6037||8||||||||aqueduct - underground
+2438|2|BH010|2|||4316||8||||||||aqueduct - abandoned/under construction
+2439|3|BH010|2|||4311||6||||||||aqueduct - surface/elevated
+2440|3|BH010|2|||6037||6||||||||aqueduct - underground
+2441|3|BH010|2|||4316||6||||||||aqueduct - abandoned/under construction
+2442|4|BH010|2|||4311||6||||||||aqueduct - surface/elevated
+2443|4|BH010|2|||6037||6||||||||aqueduct - underground
+2444|4|BH010|2|||4316||6||||||||aqueduct - adandoned/under construction
+2445|4|BH010|2|||6037||6||||||||aqueduct - kanat
+2447|5|BH010|2|||0704||6||||34070||0|3|aqueduct - not elevated
+2448|5|BH010|2|||0610||8||||12210||0|1|aqueduct - elevated
+2449|16|BH010|2|||7144||8||||||||aqueduct
+2450|17|BH010|2|||4311||6||||||||aqueduct - surface/elevated
+2451|17|BH010|2|||6037||8||||||||aqueduct - underground
+2452|25|BH010|2|||4311||6||||||||aqueduct - surface/elevated
+2453|25|BH010|2|||6037||8||||||||aqueduct - underground
+2456|1|BH015|3||||0810|2||||||||bog
+2457|2|BH015|3||||0810|2||||||||bog
+2458|3|BH015|3||||0810|2||||||||bog
+2459|4|BH015|3||||0810|2||||||||bog
+2460|2|BH020|2|||3108||6||||||||canal - not perennial
+2461|2|BH020|2|||3108||6||||||||canal - perennial
+2463|3|BH020|2|||3108||6||||||||canal - not perennial
+2464|3|BH020|2|||3108||6||||||||canal - perennial
+2466|4|BH020|2|||3108||6||||||||canal - not perennial
+2467|4|BH020|2|||3108||6||||||||canal - perennial
+2469|5|BH020|2|||0600||2||||12420||0|1|canal
+2470|9|BH020|2|||3108||6||||||||canal
+2471|17|BH020|2|||3108||6||||||||canal - not perennial
+2472|17|BH020|2|||3108||6||||||||canal - perennial
+2473|25|BH020|2|||3108||6||||||||canal - perennial
+2474|25|BH020|2|||3108||6||||||||canal - dry
+2476|3|BH020|3|||4182|0820|3||||||||canal - not navigable or not perennial
+2477|3|BH020|3|||1656|0820|3||||||||canal - navigable; perennial
+2479|4|BH020|3|||4182|0820|3||||||||canal - not navigable or not perennial
+2480|4|BH020|3|||1656|0820|3||||||||canal - navigable; perennial
+2482|5|BH020|3|||0600|0810|2||||12420||1|1|canal
+2483|9|BH020|3|||4182|0820|1||||||||canal - not perennial
+2484|9|BH020|3|||1656|0820|1||||||||canal - perennial
+2485|17|BH020|3|||4182|0820|3||||||||canal - non-perennial, dry, unknown
+2486|17|BH020|3|||1656|0820|3||||||||canal - perennial
+2487|25|BH020|3|<>sdr||1656|0820|1||||||||canal
+2488|25|BH020|3|sdr||4182|0820|1||||||||canal - non-perennial, dry, unknown
+2489|25|BH020|3|sdr||1656|0820|6||||||||canal - perennial
+2491|2|BH030|2|||0621||6||||||||ditch - not perennial
+2492|2|BH030|2|||0621||6||||||||ditch - perennial, unknown
+2493|3|BH030|2|||0621||6||||||||ditch - perennial, unknown
+2494|3|BH030|2|||0621||6||||||||ditch - intermittent
+2495|4|BH030|2|||0621||6||||||||ditch - perennial, unknown
+2496|4|BH030|2|||0621||6||||||||ditch - intermittent
+2497|17|BH030|2|||0621||6||||||||ditch
+2498|25|BH030|2|||0621||3||||||||ditch
+2499|3|BH030|3||||0821|3||||||||ditch
+2500|4|BH030|3||||0821|3||||||||ditch
+2501|17|BH030|3||||0821|3||||||||ditch
+2502|25|BH030|3|<>sdr||0600|0821|3||||||||ditch
+2503|25|BH030|3|sdr||0600|0821|3||||||||ditch - not covered
+2504|2|BH040|3|||0600|6042|3||||||||filtration beds/aeration beds
+2505|3|BH040|3|||0600|6042|3||||||||filtration beds/aeration beds
+2506|4|BH040|3|||0600|6042|3||||||||filtration beds/aeration beds
+2508|17|BH040|3|||0600|6042|3||||||||filtration beds/aeration beds
+2509|25|BH040|3|||0600|6042|3||||||||filtration beds/aeration beds
+2510|1|BH050|3|||0600|0810|3||||||||fish hatchery/fish farm/marine farm
+2511|2|BH050|3|||0600|0810|3||||||||fish hatchery/fish farm/marine farm
+2512|3|BH050|3|||0600|0810|3||||||||fish hatchery/fish farm/marine farm
+2513|4|BH050|3|||0600|0810|3||||||||fish hatchery/fish farm/marine farm
+2515|5|BH050|3|||0656|0904|3||||26210||1|2|fish hatchery/fish farm/marine farm
+2516|17|BH050|3|||0600|0810|3||||||||fish hatchery/fish farm/marine farm
+2517|25|BH050|3|||0600|0810|3||||||||fish hatchery/fish farm/marine farm
+2519|2|BH060|2|||4311||6||||||||flume
+2520|3|BH060|2|||4311||6||||||||flume
+2521|4|BH060|2|||4311||6||||||||flume
+2522|25|BH060|2|||4311||6||||||||flume
+2523|1|BH070|1||6048|||7||||||||ford
+2524|2|BH070|1||6048|||7||||||||ford
+2525|3|BH070|1||6048|||7||||||||ford
+2526|4|BH070|1||6048|||7||||||||ford
+2527|9|BH070|1||6048|||7||||||||ford
+2528|17|BH070|1||6048|||7||||||||ford
+2529|25|BH070|1||6048|||7||||||||ford
+2530|1|BH070|2|||3114||7||||||||ford
+2531|2|BH070|2|||3114||7||||||||ford
+2532|3|BH070|2|||3114||7||||||||ford
+2533|4|BH070|2|||3114||7||||||||ford
+2534|9|BH070|2|||3114||7||||||||ford
+2535|17|BH070|2|||3114||7||||||||ford
+2536|25|BH070|2|||3114||7||||||||ford
+2537|4|BH075|1||1009|||6||||||||fountain
+2539|4|BH075|3|||4266||6||||||||fountain
+2541|1|BH077|3|||3014||2||||||||hummock
+2542|3|BH077|3|||3014||2||||||||hummock
+2543|4|BH077|3|||3014||2||||||||hummock
+2544|2|BH080|3||1656||4154|3||||||||lake/pond - perennial, unknown
+2545|2|BH080|3||1656||4154|1||||||||lake/pond - dry, intermittent
+2547|3|BH080|3||1656||4154|3||||||||lake/pond - perennial, unknown
+2548|3|BH080|3||1656||4154|1||||||||lake/pond - dry, intermittent
+2550|4|BH080|3||1656||4154|3||||||||lake/pond - perennial, unknown
+2551|4|BH080|3||1656||4154|1||||||||lake/pond - dry, intermittent
+2553|5|BH080|3|||0600|0810|2||||22010||1|2|lake/pond
+2554|17|BH080|3||1656||4154|3||||||||lake/pond - perennial, unknown
+2555|17|BH080|3||1656||4154|1||||||||lake/pond - dry
+2558|25|BH080|3|<>sdr|1656||4154|3||||||||lake/pond
+2559|25|BH080|3|sdr|1656||4154|1||||||||lake/pond - not perennial
+2560|25|BH080|3|sdr|1656||4154|3||||||||lake/pond - perennial
+2562|1|BH090|3|||4266|4301|2||||||||land subject to inundation
+2563|2|BH090|3|||4266|4301|2||||||||land subject to inundation - natural
+2564|2|BH090|3|||4266|4301|2||||||||land subject to inundation - controllled
+2565|3|BH090|3|||4266|4301|2||||||||land subject to inundation - natural
+2566|3|BH090|3|||4266|4301|2||||||||land subject to inundation - controlled
+2567|4|BH090|3|||4266|4301|2||||||||land subject to inundation - natural
+2568|4|BH090|3|||4266|4301|2||||||||land subject to inundation - controlled
+2569|5|BH090|3||||6050|2||||12010||1|1|land subject to inundation
+2570|9|BH090|3|||4266|4301|2||||||||land subject to inundation
+2571|17|BH090|3|||4266|4301|2||||||||land subject to inundation
+2572|25|BH090|3|||4266|4301|2||||||||land subject to inundation
+2574|1|BH095|3||||6007|2||||||||marsh/swamp
+2575|2|BH095|3||||6007|2||||||||marsh/swamp
+2576|3|BH095|3||||6007|2||||||||marsh/swamp
+2577|4|BH095|3||||6007|2||||||||marsh/swamp
+2578|5|BH095|3||||0910|3||||21060||1|2|marsh/swamp
+2579|9|BH095|3||||6007|2||||||||marsh/swamp
+2580|17|BH095|3||||6007|2||||||||marsh/swamp
+2581|25|BH095|3||||6007|2||||||||marsh/swamp - no trees
+2582|25|BH095|3||||6007|2||||||||marsh/swamp - palm, mangrove
+2583|25|BH095|3||||6007|2||||||||marsh/swamp - deciduous
+2584|25|BH095|3||||6007|2||||||||marsh/swamp - evergreen, mixed
+2586|9|BH100|2|||3112||3||||||||moat
+2587|25|BH100|2|||3112||3||||||||moat
+2588|4|BH100|3|||0600|4152|3||||||||moat - not dry
+2589|4|BH100|3|||0600|4003|3||||||||moat - dry
+2591|2|BH110|2|||4311||6||||||||penstock - surface/elevated
+2592|2|BH110|2|||4311||8||||||||penstock - underground
+2593|3|BH110|2|||4311||6||||||||penstock - surface/elevated
+2594|3|BH110|2|||4311||8||||||||penstock - underground
+2595|4|BH110|2|||4311||6||||||||penstock - surface/elevated
+2596|4|BH110|2|||4311||8||||||||penstock - underground
+2597|25|BH110|2|||4311||6||||||||penstock - surface/elevated
+2598|25|BH110|2|||4311||8||||||||penstock - underground
+2599|1|BH120|1||2003|||3||||||||rapids
+2600|2|BH120|1||2231|||3||||||||rapids
+2601|3|BH120|1||2231|||3||||||||rapids
+2602|25|BH120|1||2231|||3||||||||rapids
+2603|2|BH120|2|||0682||3||||||||rapids
+2604|3|BH120|2|||0682||3||||||||rapids
+2605|5|BH120|2|||0610||3||||32050||0|3|rapids
+2606|25|BH120|2|||0682||3||||||||rapids
+2608|2|BH130|3|||1656|4154|3||||||||reservoir
+2610|3|BH130|3|||1656|4154|3||||||||reservoir
+2612|4|BH130|3|||1656|4154|3||||||||reservoir
+2614|5|BH130|3|||0600|0810|2||||22010||1|2|reservoir
+2615|17|BH130|3|||1656|4154|3||||||||reservoir
+2617|25|BH130|3|||1656|4154|3||||||||reservoir
+2620|1|BH135|3||||6002|2||||||||rice field
+2621|2|BH135|3||||6002|2||||||||rice field
+2622|3|BH135|3||||6002|2||||||||rice field
+2623|9|BH135|3||||6002|2||||||||rice field
+2624|17|BH135|3||||6002|2||||||||rice field
+2625|1|BH140|2|||1656||6||||||||river/stream - perennial, unknown
+2626|1|BH140|2|||1656||6||||||||river/stream - dry, intermittent
+2627|2|BH140|2|||1656||6||||||||river/stream - perennial, unknown
+2628|2|BH140|2|||1656||6||||||||river/stream - dry, intermittent
+2630|3|BH140|2|||1656||6||||||||river/stream - perennial, unknown
+2631|3|BH140|2|||1656||6||||||||river/stream - dry, intermittent
+2633|4|BH140|2|||1656||6||||||||river/stream - perennial, unknown
+2634|4|BH140|2|||1656||6||||||||river/stream - dry, intermittent
+2636|5|BH140|2|||0600||2||||22010||0|2|river/stream
+2637|9|BH140|2|||1656||6||||||||river/stream - perennial, braided, unknownn
+2638|9|BH140|2|||1656||6||||||||river/stream - dry, intermittent
+2639|16|BH140|2|||1656||7||||||||river/stream (libref)
+2640|17|BH140|2|||1656||6||||||||river/stream - perennial, unknown
+2641|17|BH140|2|||1656||6||||||||river/stream - dry, non-perennial
+2642|25|BH140|2|||1656||6||||||||river/stream - perennial, unknown
+2643|25|BH140|2|||1656||6||||||||river/stream - dry, intermittent
+2645|2|BH140|3|||1656|4154|3||||||||river/stream - perennial, unknown
+2646|2|BH140|3|||1656|4154|1||||||||river/stream - dry, intermittent
+2648|3|BH140|3|||1656|4154|3||||||||river/stream - perennial, unknown
+2649|3|BH140|3|||1656|4154|1||||||||river/stream - dry, intermittent
+2651|4|BH140|3|||1656|4154|3||||||||river/stream - perennial, unknown
+2652|4|BH140|3|||1656|4154|1||||||||river/stream - dry, intermittent
+2654|5|BH140|3|||0600|0810|2||||22010||1|2|river/stream
+2655|9|BH140|3|||1656|4154|1||||||||river/stream - perennial, braided, unknown
+2656|9|BH140|3|||1656|4154|1||||||||river/stream - dry, intermittent
+2657|17|BH140|3|||1656|4154|3||||||||river/stream - perennial, unknown
+2658|17|BH140|3|||1656|4154|1||||||||river/stream - dry, non-perennial
+2659|25|BH140|3|<>sdr||1656|4154|1||||||||river/stream
+2660|25|BH140|3|sdr||1656|4154|3||||||||river/stream - perennial, unknown
+2661|25|BH140|3|sdr||1656|4154|1||||||||river/stream - dry, intermittent
+2663|2|BH145|1||2232|||6||||||||river stream vanishing point
+2664|3|BH145|1||2232|||6||||||||river stream vanishing point
+2665|25|BH145|1||2232|||6||||||||river stream vanishing point
+2666|2|BH150|3|||4182|0810|3||||||||salt pan
+2667|3|BH150|3|||4182|0810|3||||||||salt pan
+2668|4|BH150|3|||4182|0810|3||||||||salt pan
+2669|25|BH150|3|||4182|0810|3||||||||salt pan
+2670|1|BH155|1||2233|||3||||||||salt evaporator
+2671|1|BH155|3|||1656|0810|3||||||||salt evaporator
+2672|2|BH155|3|||1656|0810|3||||||||salt evaporator
+2673|3|BH155|3|||1656|0810|3||||||||salt evaporator
+2674|4|BH155|3|||1656|0810|3||||||||salt evaporator
+2675|5|BH155|3||||0911|3||||21060||1|2|salt evaporator
+2676|17|BH155|3|||1656|0810|3||||||||salt evaporator
+2677|25|BH155|3|||1656|0810|3||||||||salt evaporator
+2679|2|BH160|3||||4071|1||||||||sebkha
+2680|3|BH160|3||||4071|1||||||||sebkha
+2681|4|BH160|3||||4071|1||||||||sebkha
+2682|25|BH160|3||||4071|1||||||||sebkha
+2683|4|BH165|1||2234|||8||||||||spillway
+2684|4|BH165|2|||3082||8||||||||spillway
+2685|4|BH165|3|||3082||6||||||||spillway
+2686|1|BH170|1||2003|||6||||||||spring/water-hole
+2687|2|BH170|1||2003|||6||||||||spring/water-hole - not perennial/dry
+2688|2|BH170|1||2003|||6||||||||spring/water-hole - perennial
+2689|3|BH170|1||2003|||6||||||||spring/water-hole - not perennial/dry
+2690|3|BH170|1||2003|||6||||||||spring/water-hole - perennial
+2691|4|BH170|1||2003|||6||||||||spring/water-hole - not perennial/dry
+2692|4|BH170|1||2003|||6||||||||spring/water-hole - perennial
+2693|25|BH170|1||2003|||6||||||||spring/water-hole - not perennial/dry
+2694|25|BH170|1||2003|||6||||||||spring/water-hole - perennial
+2695|1|BH180|1||2003|||3||||||||waterfall
+2696|2|BH180|1||2003|||3||||||||waterfall
+2698|3|BH180|1||2003|||3||||||||waterfall
+2700|25|BH180|1||2003|||3||||||||waterfall
+2702|2|BH180|2|||0682||3||||||||waterfall
+2704|3|BH180|2|||0682||3||||||||waterfall
+2706|5|BH180|2|||0615||3||||32050||0|3|waterfall
+2707|25|BH180|2|||0682||3||||||||waterfall
+2710|2|BH190|3|||3112||3||||||||lagoon/reef pool
+2711|25|BH200|2|||3109||2||||||||miscellaneous surface drainage feature
+2712|25|BH200|3||||0820|1||||||||miscellaneous surface drainage feature
+2713|4|BH210|2|||1656||7||||||||inland shoreline - unknown, rocky, rubble, sandy, stony, other
+2714|4|BH210|2|||1656||7||||||||inland shoreline - mangrove, marsh
+2715|5|BH210|2|||0600||3||||22010||0|2|inland shoreline
+2717|2|BI010|1||1010|||6||||||||cistern
+2718|3|BI010|1||1010|||6||||||||cistern
+2719|4|BI010|1||1010|||6||||||||cistern
+2720|25|BI010|1||1010|||6||||||||cistern
+2721|1|BI020|1||0078|||8||||||||dam/weir
+2722|2|BI020|1||0078|||8||||||||dam/weir
+2724|3|BI020|1||0078|||8||||||||dam/weir
+2726|9|BI020|1||0078|||5||||||||dam/weir
+2727|16|BI020|1||7119|||8||||||||dam / weir high
+2728|16|BI020|1||7119|||8||||||||dam / weir
+2729|16|BI020|1||7142|||8||||||||dam / weir light high
+2730|16|BI020|1||7142|||8||||||||dam / weir light
+2731|16|BI020|1|||||9||hgt|33|||||dam/weir - AGL label
+2732|16|BI020|1|||||9||zv2|32|||||dam/weir - MSL label
+2733|17|BI020|1||0078|||8||||||||dam/weir
+2735|25|BI020|1||0078|||8||||||||dam/weir
+2737|1|BI020|2|||3113||8||||||||dam/weir
+2738|2|BI020|2|||3113||8||||||||dam/weir
+2740|3|BI020|2|||3113||8||||||||dam/weir
+2742|4|BI020|2|||3113||8||||||||dam/weir
+2744|5|BI020|2|||0607||6||||22010||0|2|dam/weir
+2745|9|BI020|2|||3113||5||||||||dam/weir
+2746|16|BI020|2|||7144||8||||||||dam / weir
+2747|17|BI020|2|||3113||8||||||||dam/weir
+2749|25|BI020|2|||3113||8||||||||dam/weir
+2752|3|BI020|3||||4156|6||||||||dam/weir
+2754|4|BI020|3||||4156|6||||||||dam/weir
+2756|17|BI020|3||||4156|6||||||||dam/weir
+2758|25|BI020|3||||4156|6||||||||dam/weir
+2760|1|BI030|1||6047|||8||||||||lock
+2761|3|BI030|1||6047|||8||||||||lock
+2762|9|BI030|1||6047|||7||||||||lock
+2763|17|BI030|1||6047|||8||||||||lock
+2765|25|BI030|1||6047|||8||||||||lock
+2766|2|BI030|2|||0600||8||||||||lock
+2767|9|BI030|2|||0600||2||||||||lock
+2768|3|BI030|3|||0600||6||||||||lock
+2770|4|BI030|3|||0600||6||||||||lock
+2772|5|BI030|3|||0600|0810|2||||12420||1|1|lock
+2773|17|BI030|3|||0600||6||||||||lock
+2775|25|BI030|3|||0600||6||||||||lock
+2777|1|BI040|1||2239|||8||||||||sluice gate
+2778|3|BI040|1||2239|||8||||||||sluice gate
+2779|4|BI040|1||2239|||8||||||||sluice gate
+2780|25|BI040|1||2239|||8||||||||sluice gate
+2781|3|BI040|2|||0600||8||||||||sluice gate
+2782|4|BI040|2|||0600||8||||||||sluice gate
+2783|5|BI040|2|||0623||8||||12410||0|1|sluice gate
+2784|25|BI040|2|||0600||8||||||||sluice gate
+2786|2|BI050|1||0024|||8||||||||water intake tower
+2787|3|BI050|1||0024|||8||||||||water intake tower
+2788|4|BI050|1||0024|||8||||||||water intake tower
+2789|16|BI050|1||7125|||8||||||||water intake tower high
+2790|16|BI050|1||7125|||8||||||||water intake tower
+2791|16|BI050|1||7142|||8||||||||water intake tower light high
+2792|16|BI050|1||7142|||8||||||||water intake tower light
+2793|16|BI050|1|||||9||hgt|33|||||water intake tower - AGL label
+2794|16|BI050|1|||||9||zv2|32|||||water intake tower - MSL label
+2795|25|BI050|1||0024|||8||||||||water intake tower
+2796|3|BI050|3|||0600||6||||||||water intake tower
+2797|4|BI050|3|||0600||6||||||||water intake tower
+2798|25|BI050|3|||0600||6||||||||water intake tower
+2799|2|BJ020|3||||0804|1||||||||moraine
+2800|3|BJ020|3||||0804|1||||||||moraine
+2801|25|BJ020|3||||0804|1||||||||moraine
+2802|2|BJ030|3|||1655|4151|2||||||||glacier
+2803|3|BJ030|3|||1655|4151|2||||||||glacier
+2804|5|BJ030|3||||0823|3||||12410||1|1|glacier
+2805|5|BJ030|3|||0656|0912|3||||12410||1|1|glacier
+2806|25|BJ030|3|||1655|4151|2||||||||glacier
+2809|1|BJ040|2|||3047||7||||||||ice cliff
+2810|2|BJ040|2|||3047||7||||||||ice cliff
+2811|3|BJ040|2|||3047||7||||||||ice cliff
+2812|25|BJ040|2|||3047||7||||||||ice cliff
+2813|2|BJ060|1||2242|||7||||||||ice peak/nunatak
+2814|3|BJ060|1||2242|||7||||||||ice peak/nunatak
+2815|5|BJ060|1||0077|||3||||22220||1|2|ice peak/nunatak
+2816|25|BJ060|1||2242|||7||||||||ice peak/nunatak
+2818|1|BJ065|3|||4265|0810|2||||||||ice shelf
+2820|2|BJ065|3|||4265|0810|2||||||||ice shelf
+2821|3|BJ065|3|||4265|0810|2||||||||ice shelf
+2822|5|BJ065|3||||0823|3||||12410||1|1|ice shelf
+2823|5|BJ065|3|||0656|0912|3||||12410||1|1|ice shelf
+2824|25|BJ065|3|||4265|0810|2||||||||ice shelf
+2827|1|BJ070|3|||4265|0810|3||||||||pack ice
+2829|2|BJ070|3|||4265|0810|3||||||||pack ice
+2830|3|BJ070|3|||4265|0810|3||||||||pack ice
+2831|25|BJ070|3|||4265|0810|3||||||||pack ice
+2832|1|BJ080|3|||4265|0810|3||||||||polar ice
+2834|2|BJ080|3|||4265|0810|3||||||||polar ice
+2835|3|BJ080|3|||4265|0810|3||||||||polar ice
+2836|25|BJ080|3|||4265|0810|3||||||||polar ice
+2837|1|BJ100|3|||0669|0820|2||||||||snow field/ice field
+2838|2|BJ100|3|||0669|0820|2||||||||snow field/ice field
+2839|3|BJ100|3|||0669|0820|2||||||||snow field/ice field
+2840|5|BJ100|3||||0823|3||||12410||1|1|snow field/ice field
+2841|5|BJ100|3|||0656|0912|3||||12410||1|1|snow field/ice field
+2842|25|BJ100|3|||0669|0820|2||||||||snow field/ice field
+2845|1|BJ110|3||||0803|2||||||||tundra
+2846|2|BJ110|3||||0803|2||||||||tundra
+2847|3|BJ110|3||||0803|2||||||||tundra
+2848|5|BJ110|3||||0822|1||||12010||1|1|tundra
+2849|25|BJ110|3||||0803|2||||||||tundra
+2851|1|CA010|2|||6011||8||||||||contour line (land) - intermediate unknown
+2852|1|CA010|2|||6011||8||||||||contour line (land) - intermediate approximate
+2853|1|CA010|2|||6011||8||||||||contour line (land) - intermediate depression approx
+2854|1|CA010|2|||6011||8||||||||contour line (land) - carrying contour (coincident)
+2855|1|CA010|2|||6011||8||||||||contour line (land) - supplemental depression
+2856|1|CA010|2|||6011||8||||||||contour line (land) - supplementary approx., carrying, form lines
+2857|1|CA010|2|||6011||8||||||||contour line (land) - depression intermediate
+2858|2|CA010|2|||6011||8||||||||contour line (land)
+2859|3|CA010|2|||6011||8||||||||contour line (land) - index
+2860|3|CA010|2|||4312||8||||||||contour line (snow\ice) - index unknown
+2861|3|CA010|2|||6011||8||||||||contour line (land) - intermediate approximate
+2862|3|CA010|2|||4312||8||||||||contour line (snow\ice) - intermediate approximate
+2863|3|CA010|2|||6011||8||||||||contour line (land) - supplementary 1/4
+2864|3|CA010|2|||4312||8||||||||contour line (snow\ice) - supplementary 1/4
+2865|3|CA010|2|||6011||8||||||||contour line (land) - intermediate
+2866|3|CA010|2|||4312||8||||||||contour line (snow\ice) - intermediate
+2867|3|CA010|2|||6011||8||||||||contour line (land) - supplementary 1/2, approx, form lines
+2868|3|CA010|2|||4312||8||||||||contour line (snow\ice) - supplementary 1/2, approx, form lines, approx
+2869|3|CA010|2|||6011||8||||||||contour line (land) - depression mound
+2870|3|CA010|2|||4312||8||||||||contour line (snow\ice) - index depression mound
+2871|3|CA010|2|||6011||8||||||||contour line (land) - intermediate depression mound
+2872|3|CA010|2|||4312||8||||||||contour line (snow\ice) - intermediate depression mound
+2873|3|CA010|2|||6011||8||||||||contour line (land) - index approximate
+2874|3|CA010|2|||4312||8||||||||contour line (snow\ice) - index approximate
+2875|4|CA010|2|||6011||8||||||||contour line (land) - index
+2876|4|CA010|2|||4312||8||||||||contour line (snow\ice) - index unknown
+2877|4|CA010|2|||6011||8||||||||contour line (land) - intermediate approximate
+2878|4|CA010|2|||4312||8||||||||contour line (snow\ice) - intermediate approximate
+2879|4|CA010|2|||6011||8||||||||contour line (land) - supplementary 1/4
+2880|4|CA010|2|||4312||8||||||||contour line (snow\ice) - supplementary 1/4
+2881|4|CA010|2|||6011||8||||||||contour line (land) - intermediate
+2882|4|CA010|2|||4312||8||||||||contour line (snow\ice) - intermediate
+2883|4|CA010|2|||6011||8||||||||contour line (land) - supplementary 1/2
+2884|4|CA010|2|||4312||8||||||||contour line (snow\ice) - supplementary 1/2
+2885|4|CA010|2|||6011||8||||||||contour line (land) - depression index
+2886|4|CA010|2|||4312||8||||||||contour line (snow\ice) - index depression
+2887|4|CA010|2|||6011||8||||||||contour line (land) - intermediate depression
+2888|4|CA010|2|||4312||8||||||||contour line (snow\ice) - intermediate depression
+2889|4|CA010|2|||6011||8||||||||contour line (land) - index approximate
+2890|4|CA010|2|||4312||8||||||||contour line (snow\ice) - index approximate
+2891|5|CA010|2|||0604||4||||32010||0|3|contour line (land)
+2892|17|CA010|2|||6011||8||||||||contour line (land) - index, unknown
+2893|17|CA010|2|||6011||8||||||||contour line (land) - intermediate
+2894|17|CA010|2|||6011||8||||||||contour line (land) - depression
+2895|17|CA010|2|||6011||8||||||||contour line (land) - intermediate depression
+2897|1|CA030|1||2243|||8||||||||spot elevation
+2898|2|CA030|1||1011|||8||||||||spot elevation - not accurate
+2899|2|CA030|1||2243|||8||||||||spot elevation - accurate
+2900|3|CA030|1||1011|||8||||||||spot elevation - not accurate
+2901|3|CA030|1||2243|||8||||||||spot elevation - accurate
+2902|4|CA030|1||1011|||8||||||||spot elevation - not accurate
+2903|4|CA030|1||2243|||8||||||||spot elevation - accurate
+2904|5|CA030|1||0078|||4||||32010||0|3|spot elevation
+2905|17|CA030|1||1011|||8||||||||spot elevation - not accurate
+2906|17|CA030|1||2243|||8||||||||spot elevation - accurate
+2907|25|CA030|1||1011|||8||||||||spot elevation - not accurate
+2908|25|CA030|1||2243|||8||||||||spot elevation - accurate
+2910|1|CA035|1||2245|||8||||||||inland water elevation
+2911|2|DA005|3|||0600|4100|1||||||||asphalt lake
+2912|3|DA005|3|||0600|4100|1||||||||asphalt lake
+2913|4|DA005|3|||0600|4100|1||||||||asphalt lake
+2914|25|DA005|3|||0600|4100|1||||||||asphalt lake
+2915|1|DA010|3|||0604|0822|1||||||||ground surface element - not lava, not sand
+2916|1|DA010|3|||0604|0822|1||||||||ground surface element - lava
+2917|1|DA010|3|||0604|0822|1||||||||ground surface element - sand
+2918|2|DA010|3|||0604|0822|1||||||||ground surface element - not rock, not lava, not sand
+2919|2|DA010|3|||0604|0822|1||||||||ground surface element - boulders, gravel
+2920|2|DA010|3|||0604|0822|1||||||||ground surface element - lava
+2921|2|DA010|3|||0604|0822|1||||||||ground surface element - sand
+2922|3|DA010|3|||0604|0822|1||||||||ground surface element - not rock, not lava, not sand
+2923|3|DA010|3|||0604|0822|1||||||||ground surface element - boulders, gravel
+2924|3|DA010|3|||0604|0822|1||||||||ground surface element - lava
+2925|3|DA010|3|||0604|0822|1||||||||ground surface element - sand
+2926|4|DA010|3|||0604|0822|1||||||||ground surface element - not rock, not lava, not sand
+2927|4|DA010|3|||0604|0822|1||||||||ground surface element - lava
+2928|4|DA010|3|||0604|0822|1||||||||ground surface element - sand
+2929|4|DA010|3|||0604|0822|1||||||||ground surface element - boulders, gravel, rock
+2930|5|DA010|3||||0822|1||||12010||1|1|ground surface element
+2931|9|DA010|3|||0604|0822|0||||||||ground surface element - silts, clays, evaporites, other
+2932|9|DA010|3|||0604|0822|0||||||||ground surface element - gravels
+2933|9|DA010|3|||0604|0822|0||||||||ground surface element - sands
+2934|25|DA010|3|||0604|0822|0||||||||ground surface element - not rocky
+2935|25|DA010|3|||0604|0822|0||||||||ground surface element - rocky
+2937|9|DA020|3|||4201||0||||||||barren ground
+2938|25|DA020|3||||4003|0||||||||barren ground
+2939|1|DB010|2|||4217||7||||||||bluff/cliff/escarpment
+2940|2|DB010|2|||4217||7||||||||bluff/cliff/escarpment
+2941|3|DB010|2|||4217||7||||||||bluff/cliff/escarpment
+2942|4|DB010|2|||4217||7||||||||bluff/cliff/escarpment
+2943|9|DB010|2|||4217||3||||||||bluff/cliff/escarpment
+2944|25|DB010|2|||4217||7||||||||bluff/cliff/escarpment
+2945|2|DB030|1||2247|||7||||||||cave
+2947|3|DB030|1||2247|||7||||||||cave
+2949|4|DB030|1||2247|||7||||||||cave
+2951|25|DB030|1||2247|||7||||||||cave
+2953|4|DB030|3|||3117||7||||||||cave
+2955|2|DB060|2|||3024||7||||||||crevice/crevasse - earthen
+2956|2|DB060|2|||1656||7||||||||crevice/crevasse - snow/ice
+2957|3|DB060|2|||3024||7||||||||crevice/crevasse - earthen
+2958|3|DB060|2|||1656||7||||||||crevice/crevasse - snow/ice
+2959|25|DB060|2|||3024||7||||||||crevice/crevasse - earthen
+2960|25|DB060|2|||1656||7||||||||crevice/crevasse - snow/ice
+2961|3|DB060|3||||0804|7||||||||crevice/crevasse - earthen
+2962|3|DB060|3||||0820|7||||||||crevice/crevasse - snow/ice
+2963|25|DB060|3||||0804|7||||||||crevice/crevasse - earthen
+2964|25|DB060|3||||0820|7||||||||crevice/crevasse - snow/ice
+2965|2|DB070|2|||4217||7||||||||cut
+2966|3|DB070|2|||4217||7||||||||cut
+2967|4|DB070|2|||4217||7||||||||cut
+2968|9|DB070|2|||4217||3||||||||cut
+2969|25|DB070|2|||4217||7||||||||cut
+2970|1|DB080|2|||0600||7||||||||depression
+2971|25|DB080|2|||0600||7||||||||depression
+2972|9|DB080|3|||0600||3||||||||depression
+2973|1|DB090|2|||3112||7||||||||embankment/fill
+2974|2|DB090|2|||3112||7||||||||embankment/fill
+2975|3|DB090|2|||3112||7||||||||embankment/fill
+2976|4|DB090|2|||3112||7||||||||embankment/fill
+2977|5|DB090|2|||3082||4||||32010||0|3|embankment/fill
+2978|9|DB090|2|||3112||3||||||||embankment/fill
+2979|25|DB090|2|||3112||7||||||||embankment/fill
+2981|3|DB090|3|||3112||7||||||||embankment/fill
+2982|4|DB090|3|||3112||7||||||||embankment/fill
+2984|5|DB090|3||||0913|3||||32010||1|3|embankment/fill
+2986|2|DB100|2|||3003||7||||||||esker
+2987|3|DB100|2|||3003||7||||||||esker
+2988|25|DB100|2|||3003||7||||||||esker
+2989|1|DB110|2|||3026||7||||||||fault
+2990|2|DB110|2|||3026||7||||||||fault
+2991|3|DB110|2|||3026||7||||||||fault
+2993|4|DB110|2|||3026||7||||||||fault
+2995|25|DB110|2|||3026||7||||||||fault
+2997|2|DB115|1||2111|||7||||||||geothermal feature
+2998|3|DB115|1||2111|||7||||||||geothermal feature
+2999|25|DB115|1||2111|||7||||||||geothermal feature
+3000|25|DB145|2|||3112||7||||||||miscellaneous obstacle
+3001|25|DB145|3|||3112||7||||||||miscellaneous obstacle
+3002|2|DB150|1||2249|||7||||||||mountain pass
+3004|3|DB150|1||2249|||7||||||||mountain pass
+3006|25|DB150|1||2249|||7||||||||mountain pass
+3008|2|DB160|1||2250|||7||||||||rock strata/rock formation
+3009|3|DB160|1||2250|||7||||||||rock strata/rock formation
+3010|25|DB160|1||2250|||7||||||||rock strata/rock formation
+3011|1|DB160|2|||3017||7||||||||rock strata/rock formation
+3012|3|DB160|3|||1573|0804|7||||||||rock strata/rock formation
+3013|25|DB160|3|||1573|0804|7||||||||rock strata/rock formation
+3014|2|DB170|3||||1903|1||||||||sand dune/sand hills - unknown
+3015|2|DB170|3||||1903|1||||||||sand dune/sand hills - crescent
+3016|2|DB170|3||||1903|1||||||||sand dune/sand hills - lateral
+3017|2|DB170|3||||1903|1||||||||sand dune/sand hills - mounds
+3018|2|DB170|3||||1903|1||||||||sand dune/sand hills - ripple
+3019|2|DB170|3||||1903|1||||||||sand dune/sand hills - star
+3020|2|DB170|3||||1903|1||||||||sand dune/sand hills - transverse
+3021|3|DB170|3||||1903|1||||||||sand dune/sand hills - unknown
+3022|3|DB170|3||||1903|1||||||||sand dune/sand hills - crescent
+3023|3|DB170|3||||1903|1||||||||sand dune/sand hills - lateral
+3024|3|DB170|3||||1903|1||||||||sand dune/sand hills - mounds
+3025|3|DB170|3||||1903|1||||||||sand dune/sand hills - ripple
+3026|3|DB170|3||||1903|1||||||||sand dune/sand hills - star
+3027|3|DB170|3||||1903|1||||||||sand dune/sand hills - transverse
+3028|4|DB170|3||||1903|1||||||||sand dune/sand hills - unknown
+3029|4|DB170|3||||1903|1||||||||sand dune/sand hills - crescent
+3030|4|DB170|3||||1903|1||||||||sand dune/sand hills - lateral
+3031|4|DB170|3||||1903|1||||||||sand dune/sand hills - mounds
+3032|4|DB170|3||||1903|1||||||||sand dune/sand hills - ripple
+3033|4|DB170|3||||1903|1||||||||sand dune/sand hills - star
+3034|4|DB170|3||||1903|1||||||||sand dune/sand hills - transverse
+3035|5|DB170|3||||0913|3||||32010||1|3|sand dune/sand hills
+3036|25|DB170|3||||1903|1||||||||sand dune/sand hills - unknown
+3037|25|DB170|3||||1903|1||||||||sand dune/sand hills - crescent
+3038|25|DB170|3||||1903|1||||||||sand dune/sand hills - lateral
+3039|25|DB170|3||||1903|1||||||||sand dune/sand hills - mounds
+3040|25|DB170|3||||1903|1||||||||sand dune/sand hills - ripple
+3041|25|DB170|3||||1903|1||||||||sand dune/sand hills - star
+3042|25|DB170|3||||1903|1||||||||sand dune/sand hills - transverse
+3044|3|DB180|1||2251|||7||||||||volcano
+3045|25|DB180|1||2251|||7||||||||volcano
+3046|5|DB180|3|||||3||nam|1|21060|26|1|3|volcano - name label
+3048|9|DB190|2|||3112||3||||||||volcanic dike
+3049|25|DB190|2|||3112||3||||||||volcanic dike
+3050|9|DB200|2|||1406||3||||||||gully/gorge
+3051|4|DB200|3||||0804|3||||||||gully/gorge
+3053|9|DB200|3||||0804|3||||||||gully/gorge
+3054|1|EA010|3||||6012|2||||||||cropland - other
+3055|1|EA010|3|||1412||2||||||||cropland - other
+3056|1|EA010|3|||3026||2||||||||cropland - dry
+3057|1|EA010|3||||4018|2||||||||cropland - dry
+3058|2|EA010|3|||1412||2||||||||cropland - other
+3059|2|EA010|3||||6012|2||||||||cropland - other
+3060|2|EA010|3|||3026||2||||||||cropland - dry
+3061|2|EA010|3||||4018|2||||||||cropland - dry
+3062|3|EA010|3||||6012|2||||||||cropland - other
+3063|3|EA010|3|||1412||2||||||||cropland - other
+3064|3|EA010|3|||3026||2||||||||cropland - dry
+3065|3|EA010|3||||4018|2||||||||cropland - dry
+3066|4|EA010|3|||1412||2||||||||cropland - other
+3067|4|EA010|3||||6012|2||||||||cropland - other
+3068|4|EA010|3|||1412||2||||||||cropland - rice paddies
+3069|4|EA010|3||||6002|2||||||||cropland - rice paddies
+3070|4|EA010|3|||3026||2||||||||cropland - dry
+3071|4|EA010|3||||4018|2||||||||cropland - dry
+3072|9|EA010|3||||4018|2||||||||cropland - dry
+3073|9|EA010|3|||3026||2||||||||cropland - dry
+3074|9|EA010|3||||6012|2||||||||cropland - other
+3075|9|EA010|3|||1412||2||||||||cropland - other
+3076|25|EA010|3||||6012|2||||||||cropland - other
+3077|25|EA010|3|||1412||2||||||||cropland - other
+3078|25|EA010|3|||1412||2||||||||cropland - rice paddies
+3079|25|EA010|3||||6002|2||||||||cropland - rice paddies
+3080|25|EA010|3|||3026||2||||||||cropland - dry
+3081|25|EA010|3||||4018|2||||||||cropland - dry
+3082|1|EA020|2|||1412||2||||||||hedgerow
+3083|3|EA020|2|||1412||2||||||||hedgerow
+3084|4|EA020|2|||1412||3||||||||hedgerow
+3085|9|EA020|2|||1412||2||||||||hedgerow
+3086|25|EA020|2|||1412||3||||||||hedgerow
+3087|1|EA030|3|||1412|0805|2||||||||nursery
+3088|3|EA030|3|||1412|0805|2||||||||nursery
+3089|4|EA030|3|||1412|0805|2||||||||nursery
+3090|5|EA030|3||||0914|3||||32030||1|3|nursery
+3091|25|EA030|3|||1412|0805|2||||||||nursery
+3093|1|EA040|3|||4292|0805|2||||||||orchard/plantation
+3094|2|EA040|3|||4292|0805|2||||||||orchard/plantation
+3095|3|EA040|3|||4292|0805|2||||||||orchard/plantation
+3096|4|EA040|3|||4292|0805|2||||||||orchard/plantation
+3097|5|EA040|3|||0624|0915|3||||32030||1|3|orchard/plantation
+3098|9|EA040|3|||4292|0805|2||||||||orchard/plantation
+3099|17|EA040|3|||4292|0805|2||||||||orchard/plantation
+3100|25|EA040|3|||4292|0805|2||||||||orchard/plantation
+3102|1|EA050|3|||4292|0805|2||||||||vineyards
+3103|2|EA050|3|||4292|0805|2||||||||vineyards
+3104|3|EA050|3|||4292|0805|2||||||||vineyards
+3105|4|EA050|3|||4292|0805|2||||||||vineyards
+3106|5|EA050|3|||0624|0915|3||||32030||1|3|vineyards
+3107|9|EA050|3|||4292|0805|2||||||||vineyards
+3108|25|EA050|3|||4292|0805|2||||||||vineyards
+3110|4|EA055|3|||4292|0805|2||||||||hops
+3111|1|EB010|3||||0803|2||||||||grassland
+3112|2|EB010|3||||0803|2||||||||grassland
+3113|3|EB010|3||||0803|2||||||||grassland
+3114|4|EB010|3||||0803|2||||||||grassland
+3115|9|EB010|3||||0803|2||||||||grassland
+3116|25|EB010|3||||0803|2||||||||grassland
+3117|1|EB020|3||||0803|2||||||||scrub/brush
+3118|3|EB020|3||||0803|2||||||||scrub/brush
+3119|4|EB020|3||||0803|2||||||||scrub/brush
+3120|9|EB020|3||||0803|2||||||||scrub/brush
+3121|25|EB020|3||||0803|2||||||||scrub/brush
+3122|1|EC010|3||||0803|2||||||||bamboo/cane
+3123|3|EC010|3||||0803|2||||||||bamboo/cane
+3124|4|EC010|3||||0803|2||||||||bamboo/cane
+3125|9|EC010|3||||0803|2||||||||bamboo/cane
+3126|25|EC010|3||||0803|2||||||||bamboo/cane
+3127|2|EC020|1||0150|||3||||||||oasis - not palm
+3128|2|EC020|1||0150|||3||||||||oasis - palm
+3129|3|EC020|1||0150|||3||||||||oasis - not palm
+3130|3|EC020|1||0150|||3||||||||oasis - palm
+3131|25|EC020|1||0150|||3||||||||oasis - not palm
+3132|25|EC020|1||0150|||3||||||||oasis - palm
+3133|1|EC020|3||0150|1412||2||||||||oasis - not palm
+3134|1|EC020|3||0150|1412||2||||||||oasis - palm
+3135|3|EC020|3||0150|1412||2||||||||oasis - not palm
+3136|3|EC020|3||0150|1412||2||||||||oasis - palm
+3137|25|EC020|3||0150|1412||2||||||||oasis - not palm
+3138|25|EC020|3||0150|1412||2||||||||oasis - palm
+3139|3|EC030|1||0522|||4||||||||trees
+3140|5|EC030|1||0079|||4||||32030||0|3|trees
+3142|2|EC030|2|||3031||3||||||||trees
+3143|1|EC030|3|||4292|0803|2||||||||trees - unknown, deciduous, mixed, other
+3144|1|EC030|3|||4292|0803|2||||||||trees - casuarina, coniferous, palm, filao, evergreen, eucalyptus, cypress
+3145|1|EC030|3|||1655|0803|3||||||||trees - nipa palm, mangrove
+3146|2|EC030|3|||4292|0803|2||||||||trees - unknown, deciduous, mixed, other
+3147|2|EC030|3|||4292|0803|2||||||||trees - casuarina, coniferous, palm, filao, eucalyptus, cypress
+3148|2|EC030|3|||1655|0803|3||||||||trees - nipa palm, mangrove
+3150|3|EC030|3|||4292|0803|2||||||||trees - unknown, deciduous, mixed, other
+3151|3|EC030|3|||4292|0803|2||||||||trees - casuarina, coniferous, palm, filao, evergreen, eucalyptus, cypress
+3152|3|EC030|3|||1655|0803|3||||||||trees - nipa palm, mangrove
+3154|4|EC030|3|||4292|0803|2||||||||trees - deciduous, mixed, unknown
+3155|4|EC030|3|||4292|0803|2||||||||trees - evergreen
+3157|5|EC030|3|||0624|0915|3||||32030||1|3|trees - not mangrove
+3158|5|EC030|3|||0624|0916|3||||32030||1|3|trees - mangrove
+3159|9|EC030|3|||4292|0803|2||||||||trees - unknown, deciduous, mixed
+3160|9|EC030|3|||4292|0803|2||||||||trees - evergreen
+3161|9|EC030|3|||4292|0803|2||||||||trees - forest clearing
+3162|17|EC030|3|||4292|0803|2||||||||trees - deciduous, unknown
+3163|17|EC030|3|||4292|0803|2||||||||trees - evergreen, mixed
+3164|25|EC030|3|||4292|0803|2||||||||trees - deciduous, unknown
+3165|25|EC030|3|||4292|0803|2||||||||trees - evergreen, mixed
+3166|25|EC030|3|||4292|0803|2||||||||trees - clearing
+3169|1|EC040|2|||3076||7||||||||cleared way/cut line/firebreak
+3170|2|EC040|2|||3076||7||||||||cleared way/cut line/firebreak
+3171|3|EC040|2|||3076||7||||||||cleared way/cut line/firebreak
+3172|4|EC040|2|||3076||7||||||||cleared way/cut line/firebreak
+3173|4|EE000|3|||1412|0805|2||||||||miscellaneous vegetation
+3174|1|FA000|2|||1310||8||||||||administrative boundary - international
+3175|1|FA000|2|||1311||8||||||||administrative boundary - primary
+3176|2|FA000|2|||1311||8||||||||administrative boundary - primary, unknown
+3177|2|FA000|2|||3120||8||||||||administrative boundary - secondary
+3178|2|FA000|2|||3120||8||||||||administrative boundary - tertiary
+3179|2|FA000|2|||1310||8||||||||administrative boundary - international
+3180|3|FA000|2|||1311||8||||||||administrative boundary - primary, unknown
+3181|3|FA000|2|||1310||8||||||||administrative boundary - international
+3182|4|FA000|2|||1311||8||||||||administrative boundary - primary, unknown, other
+3183|4|FA000|2|||3120||8||||||||administrative boundary - city
+3184|4|FA000|2|||1310||8||||||||administrative boundary - international
+3185|5|FA000|2|||1310||4||||36050||1|3|administrative boundary - international
+3186|5|FA000|2|||0680||4||||36050||1|3|administrative boundary - insular
+3192|16|FA000|2|||1311||7||||||||Administrative Boundary (libref)
+3193|17|FA000|2|||1311||8||||||||administrative boundary - primary, unknown
+3194|17|FA000|2|||1310||8||||||||administrative boundary - international
+3195|25|FA000|2|||1311||8||||||||administrative boundary - primary, unknown
+3196|25|FA000|2|||1310||8||||||||administrative boundary - international
+3199|1|FA001|1||2256|||8||||||||administrative area
+3201|1|FA001|3|||0633||6||||||||administrative area
+3203|2|FA001|3|||0633||6||||||||administrative area
+3204|3|FA001|3|||0633||6||||||||administrative area
+3206|4|FA001|3|||0633||6||||||||administrative area
+3209|17|FA001|3|||0633||6||||||||administrative area
+3211|4|FA015|1||2257|||8||||||||firing range/gunnery range
+3213|4|FA015|2|||3054||8||||||||firing range/gunnery range
+3215|4|FA015|3|||3115||7||||||||firing range/gunnery range
+3217|1|FA020|2|||3119||8||||||||armistice line
+3218|2|FA020|2|||3119||8||||||||armistice line
+3219|3|FA020|2|||3119||8||||||||armistice line
+3220|4|FA020|2|||3119||8||||||||armistice line
+3221|5|FA020|2|||3119||4||||36050||1|3|armistice line
+3223|17|FA020|2|||3119||8||||||||armistice line
+3224|25|FA020|2|||3119||8||||||||armistice line
+3226|1|FA030|2|||3119||8||||||||cease-fire line
+3227|2|FA030|2|||3119||8||||||||cease-fire line
+3228|3|FA030|2|||3119||8||||||||cease-fire line
+3230|17|FA030|2|||3119||8||||||||cease-fire line
+3231|25|FA030|2|||3119||8||||||||cease-fire line
+3232|1|FA040|2|||3119||8||||||||claim line
+3233|5|FA040|2|||3120||4||||36050||1|3|claim line
+3236|1|FA050|2|||3119||8||||||||mandate line/convention line
+3237|2|FA050|2|||3119||8||||||||mandate line/convention line
+3239|1|FA060|2|||3119||8||||||||defacto boundary
+3240|2|FA060|2|||3119||8||||||||defacto boundary
+3241|3|FA060|2|||3119||8||||||||defacto boundary
+3242|5|FA060|2|||1310||4||||36050||1|3|defacto boundary
+3244|25|FA060|2|||3119||8||||||||defacto boundary
+3248|1|FA070|3|||3119||6||||||||demilitarized zone
+3249|2|FA070|3|||3119||6||||||||demilitarized zone
+3250|3|FA070|3|||3119||6||||||||demilitarized zone
+3251|4|FA070|3|||3119||6||||||||demilitarized zone
+3252|25|FA070|3|||3119||6||||||||demilitarized zone
+3253|2|FA090|2|||0612||7||||||||geophysical prospecting grid
+3254|3|FA090|2|||0612||7||||||||geophysical prospecting grid
+3255|25|FA090|2|||0612||7||||||||geophysical prospecting grid
+3256|1|FA110|2|||3120||8||||||||international date line
+3257|2|FA110|2|||3120||8||||||||international date line
+3258|3|FA110|2|||3120||8||||||||international date line
+3259|5|FA110|2|||3119||4||||36050||1|3|international date line
+3260|25|FA110|2|||3120||8||||||||international date line
+3263|1|FA170|3|||3118||6||||||||zone of occupation
+3264|2|FA170|3|||3118||6||||||||zone of occupation
+3265|3|FA170|3|||3118||6||||||||zone of occupation
+3267|25|FA170|3|||3118||6||||||||zone of occupation
+3269|5|FC021|1||0084|||4||||26050||0|2|maritime limit boundary - not pilot boarding
+3270|5|FC021|1||0080|||6||||28010||0|2|maritime limit boundary - pilot boarding
+3271|5|FC021|1|||||8||nam|12|28010|21|0|3|maritime limit boundary - pilot boarding - name label
+3275|5|FC021|2|||0663||4||||26050||0|2|maritime limit boundary - unknown, other
+3276|5|FC021|2|||4186||6||||26010||0|2|maritime limit boundary - turning area
+3277|5|FC021|2|||0634||4||||26240||0|2|maritime limit boundary - spoil
+3278|5|FC021|2|||0631||3||||11050||0|1|maritime limit boundary - unsurveyed
+3279|5|FC021|2|||4186||5||||26040||0|2|maritime limit boundary - submarine exercise, mine laying, firing range
+3280|5|FC021|2|||0634||4||||26240||0|2|maritime limit boundary - dumping, explosive dumping
+3281|5|FC021|2|||0635||4||||26250||0|2|maritime limit boundary - incineration
+3282|5|FC021|2|||4186||5||||26040||0|2|maritime limit boundary - oil field, gas field
+3283|5|FC021|2|||0663||5||||15010||0|1|maritime limit boundary - precautionary
+3284|5|FC021|2|||4186||6||||26010||0|2|maritime limit boundary - deguassing
+3285|5|FC021|2|||1651||5||||28010||0|2|maritime limit boundary - pilot boarding
+3286|5|FC021|2|||0635||4||||26250||0|2|maritime limit boundary - cargo Xshipment
+3287|5|FC021|2|||0656||5||||26050||0|2|maritime limit boundary - fairway
+3288|5|FC021|2|||0629||4||||34040||0|3|maritime limit boundary - fish traps
+3289|5|FC021|2|||0633||4||||26210||0|2|maritime limit boundary - marine farm
+3290|5|FC021|2|||4186||6||||26010||0|2|maritime limit boundary - dredging
+3291|5|FC021|2|||0629||3||||36020||0|3|maritime limit boundary - not clearing line
+3292|5|FC021|2|||0656||4||||25010||0|2|maritime limit boundary - clearing line
+3293|5|FC021|2|||3077||3||||36050||0|3|maritime limit boundary - territorial waters baseline
+3298|17|FC021|2|||3054||8||||||||maritime limit boundary - unknown
+3299|17|FC021|2|||3120||8||||||||maritime limit boundary - international (at sea)
+3300|18|FC021|2|||0633||5||||36050||1|3|maritime limit boundary - other
+3301|18|FC021|2|||0633||5||||36050||1|3|maritime limit boundary - limit of territorial waters
+3323|5|FC021|3||0097|0663||3||||26050||1|2|maritime limit boundary - unknown, other
+3324|5|FC021|3||0093|4186||5||||26010||1|2|maritime limit boundary - turning area
+3325|5|FC021|3||0081|0634||3||||26240||1|2|maritime limit boundary - spoil, dumping, explosive dumping
+3326|5|FC021|3||0093|4186||4||||26040||1|2|maritime limit boundary - submarine exercise, mine laying, firing range
+3327|5|FC021|3||0081|0635||3||||26250||1|2|maritime limit boundary - incineration
+3328|5|FC021|3||0093|4186||4||||26040||1|2|maritime limit boundary - oil field, gas field
+3329|5|FC021|3||0092|0663||4||||15010||1|1|maritime limit boundary - precautionary
+3330|5|FC021|3||0093|4186||5||||26010||1|2|maritime limit boundary - deguassing
+3331|5|FC021|3||0080|1651||4||||28010||1|2|maritime limit boundary - pilot boarding
+3332|5|FC021|3||0081|0635||3||||26250||1|2|maritime limit boundary - cargo Xshipment
+3333|5|FC021|3|||0656||4||||26050||1|2|maritime limit boundary - fairway
+3334|5|FC021|3|||0656|0903|4||||34040||1|3|maritime limit boundary - fish traps
+3335|5|FC021|3|||0656|0904|3||||26210||1|2|maritime limit boundary - marine farm
+3336|5|FC021|3||0093|4186||5||||26010||1|2|maritime limit boundary - dredging area
+3337|5|FC021|3||||0823|3||||11050||1|1|maritime limit boundary - unsurveyed
+3338|5|FC021|3||||0933|3||||11050||1|1|maritime limit boundary - unsurveyed
+3339|5|FC021|3|||0631||3||||11050||1|1|maritime limit boundary - unsurveyed
+3357|5|FC031|1||0084|||4||||26050||0|2|maritime area - unknown
+3358|5|FC031|1||0087|||4||||13030||0|1|maritime area - dredged area
+3359|5|FC031|1||0093|||6||||26010||0|2|maritime area - mine danger area
+3360|5|FC031|1||0083|||7||||15010||0|1|maritime area - roundabout zone (TSS)
+3361|5|FC031|1||0082|||7||||26010||0|2|maritime area - entry prohibited
+3367|5|FC031|2|||0663||4||||26050||0|2|maritime area - unknown,  work in progress
+3368|5|FC031|2|||3077||2||||13030||1|1|maritime area - dredged channel
+3369|5|FC031|2|||4186||6||||26010||0|2|maritime area - mine danger
+3370|5|FC031|2|||0665||7||||15010||0|1|maritime area - TSS
+3371|5|FC031|2|||4186||7||||26010||0|2|maritime area - entry prohibited
+3377|5|FC031|3||0097|0663||3||||26050||1|2|maritime area - unknown,  work in progress
+3378|5|FC031|3||0093|4186||5||||26010||1|2|maritime area - mine danger
+3379|5|FC031|3||0083|||6||||15010||1|1|maritime area - roundabout zone (TSS)
+3380|5|FC031|3||1236|0662||5||||15010||1|1|maritime area - inshore traffic zone (TSS)
+3381|5|FC031|3||0082|4186||6||||26010||1|2|maritime area - entry prohibited
+3382|5|FC031|3||||0803|1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode off
+3383|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode off
+3384|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode off
+3385|5|FC031|3||||0803|1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode on
+3386|5|FC031|3||||0949|1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode on
+3387|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode on
+3388|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, depth unknown, shallow mode on
+3389|5|FC031|3||||0810|1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode off
+3390|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode off
+3391|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode off
+3392|5|FC031|3||||0810|1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode on
+3393|5|FC031|3||||0949|1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode on
+3394|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode on
+3395|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 2 shades, very shallow, shallow mode on
+3396|5|FC031|3||||0805|1||||13030||1|1|maritime area - dredged channel, 2 shades, deep water
+3397|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 2 shades, deep water
+3398|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 2 shades, deep water
+3399|5|FC031|3||||0810|1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode off
+3400|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode off
+3401|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode off
+3402|5|FC031|3||||0810|1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode on
+3403|5|FC031|3||||0949|1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode on
+3404|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode on
+3405|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 4 shades, very shallow, shallow mode on
+3406|5|FC031|3||||0821|1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode off
+3407|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode off
+3408|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode off
+3409|5|FC031|3||||0821|1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode on
+3410|5|FC031|3||||0949|1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode on
+3411|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode on
+3412|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 4 shades, med shallow, shallow mode on
+3413|5|FC031|3||||0820|1||||13030||1|1|maritime area - dredged channel, 4 shades, medium deep
+3414|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 4 shades, medium deep
+3415|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 4 shades, medium deep
+3416|5|FC031|3||||0805|1||||13030||1|1|maritime area - dredged channel, 4 shades, deep water
+3417|5|FC031|3||||0919|1||||13030||1|1|maritime area - dredged channel, 4 shades, deep water
+3418|5|FC031|3|||3077||1||||13030||1|1|maritime area - dredged channel, 4 shades, deep water
+3419|18|FC031|3||0087|0734||5||||26010||1|2|maritime area - restricted areas
+3420|18|FC031|3||0081|0734||5||||26010||1|2|maritime area - marine sanctuary
+3421|18|FC031|3|||0681||5||||26010||1|2|maritime area - major op area
+3422|18|FC031|3|||0682||5||||26010||1|2|maritime area - minor op area
+3423|18|FC031|3|||0754||5||||26010||1|2|maritime area - ASW area
+3424|18|FC031|3|||0755||5||||26010||1|2|maritime area - submarine op area
+3425|18|FC031|3|||0756||5||||26010||1|2|maritime area - submarine traffic lane submerged
+3426|18|FC031|3|||0757||5||||26010||1|2|maritime area - submarine traffic lane surface
+3427|18|FC031|3|||0758||5||||26010||1|2|maritime area - surface traffic lane
+3428|18|FC031|3|||0683||5||||26010||1|2|maritime area - sea test range
+3429|18|FC031|3||0097|0742||3||||26050||1|2|maritime area - caution areas
+3430|18|FC031|3||0093|0734||5||||26010||1|2|maritime area - military area, minefield
+3431|18|FC031|3|||0716||4||||26050||1|2|maritime area - safety lane
+3432|18|FC031|3||0093|0734||4||||26040||1|2|maritime area - military practice areas
+3433|18|FC031|3|||||8||nam|16|26010|26|1|3|maritime area - name label for RESARE
+3434|18|FC031|3|||||8||nam|16|26050|26|1|3|maritime area - name label for CTNARE/FAIRWY
+3435|18|FC031|3|||||8||nam|16|26040|26|1|3|maritime area - name label for MIPARE
+3478|5|FC036|1||0087|||6||||26010||0|2|restricted area - unknown or other
+3479|5|FC036|1||0086|||7||||26010||0|2|restricted area - anchoring prohibited
+3480|5|FC036|1||0085|||7||||26010||0|2|restricted area - fishing prohibited
+3481|5|FC036|1||0093|||6||||26010||0|2|restricted area - safety zone
+3482|5|FC036|1||0082|||7||||26010||0|2|restricted area - area to be avoided
+3488|5|FC036|2|||0722||6||||26010||0|2|restricted area
+3490|5|FC036|3||0087|4186||5||||26010||1|2|restricted area - to be avoided, other
+3491|5|FC036|3||0086|4186||6||||26010||1|2|restricted area - anchoring prohibited
+3492|5|FC036|3||0094|4186||3||||26230||1|2|restricted area - cables
+3493|5|FC036|3||0081|4186||3||||26230||1|2|restricted area - pipelines, sewer
+3494|5|FC036|3||0085|4186||6||||26010||1|2|restricted area - fishing prohibited
+3495|5|FC036|3||0093|4186||5||||26010||1|2|restricted area - safety zone
+3496|5|FC036|3||0082|4186||6||||26010||1|2|restricted area - area to be avoided
+3497|5|FC036|3||0081|0629||3||||26230||1|2|restricted area - outfall, intake
+3498|18|FC036|3||0087|0734||5||||26010||1|2|restricted area
+3499|18|FC036|3|||||8||nam|16|26010|26|1|3|restricted area - name label
+3508|5|FC041|1||0088|||7|dof|||15010||0|1|traffic separation scheme (TSS)
+3510|5|FC041|2|||0665||7||||15010||0|1|traffic separation scheme (TSS) - outer boundary
+3511|5|FC041|2|||0620||8||||15010||0|1|traffic separation scheme (TSS) - separation zone line
+3514|5|FC041|3||||0824|4||||15010||1|1|traffic separation scheme (TSS) - separation zone area
+3515|5|FC041|3||0097|||6||||15010||1|1|traffic separation scheme (TSS) - inbound or outbound area
+3518|5|FC100|2|||0656||4||||25010||0|2|measured distance line
+3520|18|FC101|2|||0684||5||||25010||0|2|theodolite line
+3521|18|FC102|2|||3112||5||||25010||0|2|range center line
+3522|5|FC130|2|||0663||6||||25040||0|2|radar reference line
+3524|5|FC165|1||1220|||4|dof|||15020||0|1|route (maritime) - direction known
+3525|5|FC165|1||0089|||4||||15020||0|1|route (maritime) - direction unknown
+3528|5|FC165|2|||0728||6||||25020||0|2|route (maritime) - marked;1-way;not recomm for deep draft vessels
+3529|5|FC165|2|||0723||6||||15010||0|1|route (maritime) - marked;1-way;recomm for deep draft vessels
+3530|5|FC165|2|||0730||6||||25020||0|2|route (maritime) - marked;2-way;not recomm for deep draft vessels
+3531|5|FC165|2|||0725||6||||15010||0|1|route (maritime) - marked;2-way;recomm for deep draft vessels
+3532|5|FC165|2|||0729||6||||25020||0|2|route (maritime) - unmarked;1-way;not recomm for deep draft vessels
+3533|5|FC165|2|||0724||6||||15010||0|1|route (maritime) - unmarked;1-way;recomm for deep draft vessels
+3534|5|FC165|2|||0731||6||||25020||0|2|route (maritime) - unmarked;2-way;not recomm for deep draft vessels
+3535|5|FC165|2|||0726||6||||15010||0|1|route (maritime) - unmarked;2-way;recomm for deep draft vessels
+3536|5|FC165|2|||0732||6||||25020||0|2|route (maritime) - unknown;not recomm for deep draft vessels
+3537|5|FC165|2|||0727||6||||15010||0|1|route (maritime) - unknown;recomm for deep draft vessels
+3548|5|FC165|3||0097|0663||3||||26050||1|2|route (maritime) - use unknown
+3549|5|FC165|3||0098|0665||4||||15010||1|1|route (maritime) - 2-way
+3550|5|FC165|3||1238|0661||4||||15010||1|1|route (maritime) - deep water
+3554|5|FC170|2|||0732||6||||25020||0|2|safety fairway
+3556|5|FC170|3||0091|0656||6||||25020||1|2|safety fairway
+3557|18|FC170|3||0091|0656||6||||25020||1|2|safety fairway
+3558|18|FC170|3|||||8||nam|19|25020|26|1|3|safety fairway - name label
+3560|5|FC177|2|||0656||5||||23030||0|2|swept area
+3563|5|FC177|3||0095|0656||4||||23030||1|2|swept area
+3577|18|GA005|3|||0759||4||||36050||0|3|air lanes/corridors
+3578|18|GA005|3|||0762||4||||36050||0|3|airspace - flight information region
+3579|18|GA005|3|||0760||4||||36050||0|3|airspace - air defense zone
+3580|18|GA005|3|||0685||4||||36050||0|3|airspace - upper control area
+3581|18|GA005|3|||0763||4||||36050||0|3|airspace - upper flight information region
+3582|18|GA005|3|||0761||4||||36050||0|3|airspace - controlled
+3583|18|GA005|3|||||8||nam|1|36050|26|0|3|airspace - name label
+3584|18|GA015|3|||0764||4||||36050||0|3|special use airspace - warning area
+3585|18|GA015|3|||0765||4||||36050||0|3|special use airspace - prohibited,restricted
+3586|18|GA015|3|||||8||nam|1|36050|26|0|3|special use airspace - name label
+3587|5|GA020|1||0501|||8||||27070||0|2|air obstruction light [DNC-specific]
+3588|5|GA035|1||0511|||4||||38010||0|3|navaids (aeronautical)
+3589|16|GA035|1||7130|||8||||||||navaids high
+3590|16|GA035|1||7130|||8||||||||navaids
+3591|16|GA035|1||7142|||8||||||||navaids light high
+3592|16|GA035|1||7142|||8||||||||navaids light
+3593|16|GA035|1|||||9||hgt|33|||||navaids - AGL label
+3594|16|GA035|1|||||9||zv2|32|||||navaids - MSL label
+3595|18|GA035|1||0525|||5||||25010||0|2|navaids (aeronautical) - unknown
+3596|18|GA035|1||0517|||5||||25010||0|2|navaids (aeronautical) - NDB
+3597|18|GA035|1||0518|||5||||25010||0|2|navaids (aeronautical) - VOR
+3598|18|GA035|1||0519|||5||||25010||0|2|navaids (aeronautical) - VOR/DME
+3599|18|GA035|1||0520|||5||||25010||0|2|navaids (aeronautical) - VORTAC
+3600|18|GA035|1||0521|||5||||25010||0|2|navaids (aeronautical) - TACAN
+3601|18|GA035|1|||||8||nam|12|25010|26|0|3|navaids (aeronautical) - name label
+3603|16|GA035|2|||7144||8||||||||navaids
+3604|18|GA055|1||0522|||5||||25010||0|2|waypoint/reporting-calling in point - non compulsory
+3605|18|GA055|1||0523|||5||||25010||0|2|waypoint/reporting-calling in point - compulsory
+3606|18|GA055|1|||||8||nam|14|25010|26|0|3|waypoint/reporting-calling in point  - name label
+3608|1|GB005|1||2267|||8||||||||airport/airfield - non military
+3609|1|GB005|1||2269|||8||||||||airport/airfield - military
+3611|2|GB005|1||2268|||8||||||||airport/airfield - not operational
+3612|2|GB005|1||2267|||8||||||||airport/airfield - operational; non military
+3613|2|GB005|1||2269|||8||||||||airport/airfield - operational; military
+3615|3|GB005|1||2268|||8||||||||airport/airfield - not operational
+3616|3|GB005|1||2267|||8||||||||airport/airfield - operational; non military
+3617|3|GB005|1||2269|||8||||||||airport/airfield - operational; military
+3619|4|GB005|1||2268|||8||||||||airport/airfield - not operational
+3620|4|GB005|1||2267|||8||||||||airport/airfield - non military; operational
+3621|4|GB005|1||2269|||8||||||||airport/airfield - military; operational
+3623|5|GB005|1||0090|||4||||32240||0|3|airport/airfield
+3624|17|GB005|1||2268|||8||||||||airport/airfield - non-operational
+3625|17|GB005|1||2267|||8||||||||airport/airfield - civilian, operational
+3626|17|GB005|1||2269|||8||||||||airport/airfield - military, operational
+3628|25|GB005|1||2268|||8||||||||airport/airfield - not operational
+3629|25|GB005|1||2267|||8||||||||airport/airfield - non military; operational
+3630|25|GB005|1||2269|||8||||||||airport/airfield - military; operational
+3633|3|GB005|3|||4183||8||||||||airport/airfield
+3635|4|GB005|3|||4183||8||||||||airport/airfield
+3637|5|GB005|3||||0822|2||||22220||1|2|airport/airfield
+3638|5|GB005|3|||0600|0932|2||||22220||1|2|airport/airfield
+3639|17|GB005|3|||4183||8||||||||airport/airfield
+3641|25|GB005|3|||4183||8||||||||airport/airfield
+3645|2|GB010|1||1012|||8||||||||airport lighting
+3646|3|GB010|1||1012|||8||||||||airport lighting
+3647|4|GB010|1||1012|||8||||||||airport lighting
+3649|5|GB010|1||0503|||8||||27070||0|2|airport lighting
+3650|25|GB010|1||1012|||8||||||||airport lighting
+3652|3|GB015|3|||3082|4100|8||||||||apron/hardstand
+3653|4|GB015|3|||3082|4100|8||||||||apron/hardstand
+3654|25|GB015|3|||3082|4100|8||||||||apron/hardstand
+3655|4|GB030|1||6032|||8||||||||helicopter landing pad
+3657|25|GB030|1||6032|||8||||||||helicopter landing pad
+3658|25|GB030|1||6032|||8||||||||helicopter landing pad at hospital
+3660|4|GB030|3|||3052||8||||||||helicopter landing pad
+3662|17|GB035|1||6032|||8||||||||heliport
+3664|4|GB035|3|||4184||8||||||||heliport
+3666|17|GB035|3|||4184||8||||||||heliport
+3668|16|GB040|1||7132|||8||||||||launch pad high
+3669|16|GB040|1||7132|||8||||||||launch pad
+3670|16|GB040|1||7142|||8||||||||launch pad light high
+3671|16|GB040|1||7142|||8||||||||launch pad light
+3672|16|GB040|1|||||9||hgt|33|||||launch pad - AGL label
+3673|16|GB040|1|||||9||zv2|32|||||launch pad - MSL label
+3674|4|GB045|2|||3073||8||||||||overrun/stopway
+3675|3|GB045|3|||3073||8||||||||overrun/stopway
+3676|4|GB045|3|||3073||8||||||||overrun/stopway
+3677|25|GB045|3|||3073||8||||||||overrun/stopway
+3678|4|GB050|2|||3070||8||||||||revetment (airfield)
+3679|4|GB050|3|||3070||8||||||||revetment (airfield)
+3680|2|GB055|1||2273|||8||||||||runway - not operational
+3681|2|GB055|1||2273|||8||||||||runway - operational
+3683|2|GB055|2|||3069||8||||||||runway
+3685|4|GB055|2|||3069||8||||||||runway
+3686|5|GB055|2|||0606||6||||32240||0|3|runway
+3687|9|GB055|2|||3069||5||||||||runway
+3689|3|GB055|3||||4089|8||||||||runway
+3690|4|GB055|3||||4089|8||||||||runway
+3692|5|GB055|3|||0600|0804|5||||22220||1|2|runway
+3693|9|GB055|3||||4089|4||||||||runway
+3694|17|GB055|3||||4089|8||||||||runway
+3695|25|GB055|3||||4089|8||||||||runway
+3697|17|GB065|1||0080|||8||||||||seaplane base
+3699|17|GB065|3|||4186||8||||||||seaplane base
+3701|5|GB070|2|||0634||5||||26040||0|2|seaplane landing/seaplane take-off area
+3703|5|GB070|3||0093|0634||4||||26040||1|2|seaplane landing/seaplane take-off area
+3705|4|GB075|2|||3070||8||||||||taxiway
+3706|3|GB075|3|||3070||8||||||||taxiway
+3707|4|GB075|3|||3070||8||||||||taxiway
+3708|25|GB075|3|||3070||8||||||||taxiway
+3709|16|GB220|1||7134|||8||||||||air obstruction high
+3710|16|GB220|1||7134|||8||||||||air obstruction
+3711|16|GB220|1||7142|||8||||||||air obstruction light high
+3712|16|GB220|1||7142|||8||||||||air obstruction light
+3713|16|GB220|1|||||9||hgt|33|||||air obstruction - AGL label
+3714|16|GB220|1|||||9||zv2|32|||||air obstruction - MSL label
+3715|16|GB220|2|||7144||8||||||||air obstruction
+3716|16|GB221|1||7136|||8||||||||air obstruction miscellaneous high
+3717|16|GB221|1||7136|||8||||||||air obstruction miscellaneous
+3718|16|GB221|1||7142|||8||||||||air obstruction miscellaneous light high
+3719|16|GB221|1||7142|||8||||||||air obstruction miscellaneous light
+3720|16|GB221|1|||||9||hgt|33|||||air obstruction miscellaneous - AGL label
+3721|16|GB221|1|||||9||zv2|32|||||air obstruction miscellaneous - MSL label
+3722|16|GB221|2|||7144||8||||||||air obstruction miscellaneous
+3723|9|SA010|3|||4265||0||||||||common open water
+3724|9|SA020|3|||4201||0||||||||disturbed soil
+3725|9|SA030|3|||4202||0||||||||exposed bedrock
+3726|9|SA040|3|||1655||2||||||||permanent snowfield
+3727|9|SA050|3||||1905|0||||||||slope polygon - % unknown
+3728|9|SA050|3||||0803|0||||||||slope polygon - 0 to >45%, dissected
+3729|9|SA050|3||||4002|0||||||||slope polygon - <= 3%
+3730|9|SA050|3||||4003|0||||||||slope polygon - > 3% and <= 10%
+3731|9|SA050|3||||1901|0||||||||slope polygon - > 10% and <= 20%
+3732|9|SA050|3||||1903|0||||||||slope polygon - > 20% and <= 30%
+3733|9|SA050|3||||1904|0||||||||slope polygon - > 30% and <= 45%
+3734|9|SA050|3||||4175|0||||||||slope polygon - > 45%
+3735|25|SA050|3||||4002|0||||||||slope polygon - <= 3%
+3736|25|SA050|3||||4003|0||||||||slope polygon - > 3% and <= 10%
+3737|25|SA050|3||||1901|0||||||||slope polygon - > 10% and <= 15%
+3738|25|SA050|3||||1902|0||||||||slope polygon - > 15% and <= 20%
+3739|25|SA050|3||||1903|0||||||||slope polygon - > 20% and <= 30%
+3740|25|SA050|3||||1904|0||||||||slope polygon - > 30% and <= 45%
+3741|25|SA050|3||||4175|0||||||||slope polygon - > 45% and <= 60%
+3742|25|SA050|3||||1601|0||||||||slope polygon - > 60% and <= 85%
+3743|25|SA050|3||||1906|0||||||||slope polygon - > 85%
+3744|25|SA050|3||||1905|0||||||||slope polygon - % unknown
+3745|9|SA060|2|||3117||3||||||||covered drainage
+3746|1|SU001|1||2274|||7||||||||military base
+3747|1|SU001|3|||3104||7||||||||military base
+3748|4|ZB020|1||2279|||8||||||||benchmark
+3749|3|ZB030|1||2278|||8||||||||boundary monument
+3751|25|ZB030|1||2278|||8||||||||boundary monument
+3754|2|ZB035|1||2279|||8||||||||control point/control station
+3756|3|ZB035|1||2279|||8||||||||control point/control station
+3757|4|ZB035|1||2279|||8||||||||control point/control station
+3758|18|ZB035|1||0078|||5||||32250||0|3|control point/control station
+3759|25|ZB035|1||2279|||8||||||||control point/control station
+3760|2|ZC040|3||0733|0657||8||||||||magnetic disturbance area
+3761|5|ZC040|3||0733|0656||4||||31080||1|3|magnetic disturbance area
+3773|1|ZD020|3|||3082||8||||||||void collection area
+3774|2|ZD020|3|||3082|4100|8||||||||void collection area
+3775|3|ZD020|3|||3082|4100|8||||||||void collection area
+3776|17|ZD020|3|||3082|4100|8||||||||void collection area
+3777|18|ZD020|3|||3082|4105|0||||11050||1|1|void collection area
+3778|19|ZD020|3|||3082|4105|0||||11050||1|1|void collection area
+3779|20|ZD020|3|||3082|4105|0||||11050||1|1|void collection area
+3780|21|ZD020|3|||3082|4105|0||||11050||1|1|void collection area
+3782|25|ZD020|3|||3082|4100|8||||||||void collection area

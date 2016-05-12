@@ -51,6 +51,7 @@ public abstract class DelayedEventDispatcher<D>
     private ReentrantLock lock;
     private Condition cond;
     private volatile boolean updated;
+    private volatile boolean shutdown;
 
     private D data;
 
@@ -105,6 +106,8 @@ public abstract class DelayedEventDispatcher<D>
 
                     long time;
 
+                    if ( shutdown ) return;
+                    
                     // wait until enough time has passed between eventOccurred
                     while ( ( time = millisToNextUpdate( ) ) > 0 )
                     {
@@ -116,6 +119,8 @@ public abstract class DelayedEventDispatcher<D>
                         {
                         }
                     }
+                    
+                    if ( shutdown ) return;
 
                     eventDispatch0( );
                 }
@@ -129,6 +134,21 @@ public abstract class DelayedEventDispatcher<D>
     public void start( )
     {
         this.thread.start( );
+    }
+    
+    public void dispose( )
+    {
+        lock.lock( );
+        try
+        {
+            shutdown = true;
+            updated = true;
+            cond.signalAll( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     protected long millisToNextUpdate( )

@@ -1,0 +1,17 @@
+Night theme -- light gray on dark blue.
+
+Based on standard theme, with the following color replacements:
+
+    ## geosym-line-area-attr.csv and SVG replacements
+    91CAF3 -> 000058 (shallow water)
+    EAFFF4 -> 000040 (deep water)
+    DECD8B -> 53503D (land)
+    000001 -> 99999A (misc lines)
+
+    ## color.txt replacements
+    17|CHBLK|234|255|243
+    26|CHWHT|0|0|1
+    76|SNDG1|72|75|77
+    77|SNDG2|150|159|155
+
+Uses cgm files from standard theme.

@@ -64,6 +64,7 @@
 
         <module>extras-charts</module>
         <module>extras-dspl</module>
+        <module>extras-dnc</module>
         <module>extras-spacenav</module>
         <module>extras-swt</module>
         <module>extras-examples</module>
