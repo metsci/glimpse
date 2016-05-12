@@ -2,6 +2,7 @@ permalink: ./:year/:month/:day/:title.html
 title: Glimpse
 
 highlighter: rogue
+markdown: kramdown
 
 google_analytics:
    account: UA-29274683-1
