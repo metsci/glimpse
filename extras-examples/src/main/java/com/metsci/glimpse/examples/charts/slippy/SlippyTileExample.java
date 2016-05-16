@@ -13,6 +13,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.charts.slippy.SlippyAxisMouseListener2D;
+import com.metsci.glimpse.charts.slippy.SlippyMapPainter;
 import com.metsci.glimpse.charts.slippy.SlippyMapTilePainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
 import com.metsci.glimpse.examples.Example;
@@ -57,25 +58,25 @@ public class SlippyTileExample implements GlimpseLayoutProvider {
         mapPlot.getCenterAxis().lockAspectRatioXY(1);
         mapPlot.getCenterAxis().set(-rad, rad, -rad, rad);
         
-        final SlippyMapTilePainter mapPainter = SlippyPainterFactory.getMapQuestMaps(geoProj);
+        final SlippyMapPainter mapPainter = SlippyPainterFactory.getMapQuestMaps(geoProj);
         mapPlot.addPainter(mapPainter);
         
-        final SlippyMapTilePainter satPainter = SlippyPainterFactory.getMapQuestImagery(geoProj, inUS);
+        final SlippyMapPainter satPainter = SlippyPainterFactory.getMapQuestImagery(geoProj, inUS);
         mapPlot.addPainter(satPainter);
         satPainter.setVisible(false);
 
-        final SlippyMapTilePainter cartoLightPainter = SlippyPainterFactory.getCartoMap(geoProj, true, true);
+        final SlippyMapPainter cartoLightPainter = SlippyPainterFactory.getCartoMap(geoProj, true, true);
         mapPlot.addPainter(cartoLightPainter);
         cartoLightPainter.setVisible(false);
 
-        final SlippyMapTilePainter cartoDarkPainter = SlippyPainterFactory.getCartoMap(geoProj, false, false);
+        final SlippyMapPainter cartoDarkPainter = SlippyPainterFactory.getCartoMap(geoProj, false, false);
         mapPlot.addPainter(cartoDarkPainter);
         cartoDarkPainter.setVisible(false);
         
-        ScalePainter scalePainter = new ScalePainter();
-        scalePainter.setUnitConverter(AxisUnitConverters.suShownAsMeters);
-        scalePainter.setUnitLabel("m");
-        mapPlot.addPainter(scalePainter);
+//        ScalePainter scalePainter = new ScalePainter();
+//        scalePainter.setUnitConverter(AxisUnitConverters.suShownAsMeters);
+//        scalePainter.setUnitLabel("m");
+//        mapPlot.addPainter(scalePainter);
         
         this.mapToolBar = new JMenuBar();
         ButtonGroup group = new ButtonGroup();

@@ -25,6 +25,9 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D {
     private double ySpan;
     
     public SlippyAxisMouseListener2D(GeoProjection geoProj) {
+        if (geoProj == null) {
+            throw new IllegalArgumentException("geo projection cannot be null");
+        }
         this.geoProj = geoProj;
     }
 
