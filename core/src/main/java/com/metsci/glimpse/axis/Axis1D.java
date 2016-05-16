@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.axis;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -208,6 +209,16 @@ public class Axis1D
     protected void addChildAxis( Axis1D child )
     {
         this.children.add( child );
+    }
+    
+    public Axis1D getParent( )
+    {
+        return this.parentAxis;
+    }
+    
+    public Set<Axis1D> getChildren( )
+    {
+        return Collections.unmodifiableSet( this.children );
     }
 
     /**
