@@ -86,7 +86,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
         this.showCurrenTimeMarker = show;
     }
 
-    public void setCurrenTimeMarkerWidth( float width )
+    public void setCurrentTimeMarkerWidth( float width )
     {
         this.currentTimeMarkerWidth = width;
     }
