@@ -12,6 +12,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.charts.slippy.SlippyAxisListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyAxisMouseListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyMapPainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
@@ -37,8 +38,10 @@ public class SlippyTileExample implements GlimpseLayoutProvider
         catch ( UnsupportedLookAndFeelException e )
         {
         }
+
         SlippyTileExample slippy = new SlippyTileExample( );
         Example example = Example.showWithSwing( slippy );
+
         SwingUtilities.invokeLater( ( ) -> {
             example.getFrame( ).setJMenuBar( slippy.mapToolBar );
             example.getFrame( ).validate( );
@@ -50,10 +53,12 @@ public class SlippyTileExample implements GlimpseLayoutProvider
     @Override
     public GlimpseLayout getLayout( ) throws Exception
     {
-
         final GeoProjection geoProj = new TangentPlane( LatLonGeo.fromDeg( 38.958374, -77.358548 ) );
         final boolean inUS = true;
 
+        // create a plot with a custom mouse listener that restricts axis mouse wheel zooming
+        // to discrete steps where the imagery tiles will appear 1 screen pixel per image pixel
+        // this makes text in the images look sharper
         final MultiAxisPlot2D mapPlot = new MultiAxisPlot2D( )
         {
             @Override
@@ -62,6 +67,14 @@ public class SlippyTileExample implements GlimpseLayoutProvider
                 return new SlippyAxisMouseListener2D( geoProj );
             }
         };
+
+        // add an axis listener which initializes the axis bounds to a zoom level where
+        // the imagery tiles will appear 1 screen pixel per image pixel (similar in purpose
+        // to SlippyAxisMouseListener2D above, except this fires only once when the plot is
+        // initialized as opposed to every time the user scrolls the mouse wheel)
+        mapPlot.getCenterAxis( ).addAxisListener( new SlippyAxisListener2D( geoProj ) );
+
+        // set the bounds of the initial view
         double rad = Length.fromKilometers( 1 );
         mapPlot.getCenterAxis( ).lockAspectRatioXY( 1 );
         mapPlot.getCenterAxis( ).set( -rad, rad, -rad, rad );

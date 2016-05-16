@@ -17,7 +17,6 @@ import com.metsci.glimpse.util.vector.Vector2d;
  */
 public class SlippyAxisMouseListener2D extends AxisMouseListener2D
 {
-
     private static final double LOG2 = Math.log( 2 );
     private static final int MAX_ZOOM = 19;
 
@@ -31,6 +30,7 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
         {
             throw new IllegalArgumentException( "geo projection cannot be null" );
         }
+
         this.geoProj = geoProj;
     }
 
@@ -42,6 +42,15 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
 
         Axis2D axis2D = layout.getAxis( event.getTargetStack( ) );
 
+        this.update( axis2D, event.getWheelIncrement( ), false );
+
+        this.mouseWheelMoved( event, axis2D.getAxisX( ), true );
+        this.mouseWheelMoved( event, axis2D.getAxisY( ), false );
+        this.applyAndUpdate( axis2D.getAxisX( ), axis2D.getAxisY( ) );
+    }
+
+    protected void update( Axis2D axis2D, double zoomIncrement, boolean force )
+    {
         double xTileDim = axis2D.getAxisX( ).getSizePixels( ) / 256.;
         double yTileDim = axis2D.getAxisY( ).getSizePixels( ) / 256.;
 
@@ -63,11 +72,11 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
         int currentZoom = ( int ) Math.round( zoomApprox );
 
         int zoom = currentZoom;
-        if ( event.getWheelIncrement( ) == 0 )
+        if ( zoomIncrement == 0 )
         {
             //nothing
         }
-        else if ( event.getWheelIncrement( ) > 0 )
+        else if ( zoomIncrement > 0 )
         {
             zoom--;
         }
@@ -78,7 +87,7 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
         }
         zoom = Math.max( 0, Math.min( zoom, MAX_ZOOM ) );
 
-        if ( zoom == currentZoom )
+        if ( !force && zoom == currentZoom )
         {
             return;
         }
@@ -86,7 +95,7 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
 
         double lonTileSizeDeg = 360 / zoomFactor;
         double latTileSizeDeg = 170.1022 / zoomFactor;
-
+        
         double dLat = ( yTileDim / 2. ) * latTileSizeDeg;
         double dLon = ( xTileDim / 2. ) * lonTileSizeDeg;
         Vector2d maxVec = geoProj.project( LatLonGeo.fromDeg( center.getLatDeg( ) + dLat, center.getLonDeg( ) + dLon ) );
@@ -95,10 +104,6 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
         //The data should *probably* be aspect ratio locked anyway, so... these are the same?
         this.xSpan = maxVec.getX( ) - minVec.getX( );
         this.ySpan = maxVec.getY( ) - minVec.getY( );
-
-        this.mouseWheelMoved( event, axis2D.getAxisX( ), true );
-        this.mouseWheelMoved( event, axis2D.getAxisY( ), false );
-        this.applyAndUpdate( axis2D.getAxisX( ), axis2D.getAxisY( ) );
     }
 
     @Override
