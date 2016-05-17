@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -85,6 +85,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected LatLonBounds bounds;
     protected List<LatLon> corners;
+    protected boolean isMax = true;
 
     protected SimpleOffscreenCanvas offscreenCanvas;
     protected TextureSurfaceTile tile;
@@ -161,7 +162,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
         drawOffscreen( dc );
 
-        if ( tile == null )
+        if ( tile == null && corners != null )
         {
             int textureHandle = getTextureHandle( );
             tile = newTextureSurfaceTile( textureHandle, corners );
@@ -206,17 +207,32 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     {
         corners = maxCorners;
         bounds = maxBounds;
+        isMax = true;
 
         updateTile( );
     }
 
     protected void updateGeometry( List<LatLon> screenCorners )
     {
-        LatLonBounds screenBounds = bufferCorners( getCorners( screenCorners ), 0.5 );
-        bounds = getIntersectedCorners( maxBounds, screenBounds );
-        corners = getCorners( bounds );
+        LatLonBounds outerBounds = getBoundsFromCorners( screenCorners, 0.5 );
+        LatLonBounds innerBounds = getBoundsFromCorners( screenCorners, 0.2 );
 
-        updateTile( );
+        // Update the geometry if:
+        //
+        // 1) we were previously showing the max tile
+        // 2) the view has been panned to near the edge of the current tile
+        // 3) the view has been zoomed in by 10% or more (in visible area)
+        //
+        // This is done (instead of updating every time the bounds change by any amount
+        // to make slight numerical differences which cause jitter in the on map position
+        // of elements in the glimpse generated image.
+        if ( isMax || !contains( bounds, innerBounds ) || getArea( bounds ) > getArea( outerBounds ) * 1.1 )
+        {
+            bounds = outerBounds;
+            corners = getCorners( bounds );
+            isMax = false;
+            updateTile( );
+        }
     }
 
     protected void updateTile( )
@@ -226,6 +242,29 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             setAxes( axes, bounds, projection );
             tile.setCorners( corners );
         }
+    }
+
+    protected LatLonBounds getBoundsFromCorners( List<LatLon> screenCorners, double bufferFactor )
+    {
+        LatLonBounds bounds = getCorners( screenCorners );
+        LatLonBounds bufferedBounds = bufferCorners( bounds, bufferFactor );
+        LatLonBounds intersectedBounds = getIntersectedCorners( maxBounds, bufferedBounds );
+
+        return intersectedBounds;
+    }
+    
+    protected double getArea( LatLonBounds outerBounds )
+    {
+        return ( outerBounds.maxLat - outerBounds.minLat ) * ( outerBounds.maxLon - outerBounds.minLon );
+
+    }
+    
+    protected boolean contains( LatLonBounds outerBounds, LatLonBounds innerBounds )
+    {
+        return outerBounds.maxLat > innerBounds.maxLat &&
+                outerBounds.minLat < innerBounds.minLat &&
+                outerBounds.maxLon > innerBounds.maxLon &&
+                outerBounds.minLon < innerBounds.minLon;
     }
 
     protected void setAxes( Axis2D axes, LatLonBounds bounds, GeoProjection projection )
@@ -423,8 +462,10 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     @Override
     protected void doRender( DrawContext dc )
     {
-        tile.render( dc );
-
+        if ( tile != null )
+        {
+            tile.render( dc );
+        }
     }
 
     protected void drawOffscreen( DrawContext dc )
