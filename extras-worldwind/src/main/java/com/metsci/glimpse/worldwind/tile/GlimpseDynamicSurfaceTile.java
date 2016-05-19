@@ -91,6 +91,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     protected TextureSurfaceTile tile;
     protected GLContext context;
 
+    protected float alpha = 1.0f;
+
     public GlimpseDynamicSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int width, int height, double minLat, double maxLat, double minLon, double maxLon )
     {
         this( layout, axes, projection, width, height, getCorners( new LatLonBounds( minLat, maxLat, minLon, maxLon ) ) );
@@ -117,6 +119,12 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
         this.offscreenCanvas.addLayout( this.background );
+    }
+    
+    public void setAlpha( float alpha )
+    {
+        this.alpha = alpha;
+        if ( this.tile != null ) this.tile.setAlpha( alpha );
     }
 
     public void updateMaxCorners( List<LatLon> corners )
@@ -176,7 +184,9 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
     {
-        return new TextureSurfaceTile( textureHandle, corners );
+        TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
+        tile.setAlpha( alpha );
+        return tile;
     }
 
     protected void updateGeometry( DrawContext dc )

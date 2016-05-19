@@ -88,7 +88,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         this.maxHeight = maxHeight;
         this.preferredPixelCount = width * height;
     }
-
+    
     public void setPreferredDimensions( int width, int height )
     {
         this.width = width;
@@ -155,6 +155,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     {
         TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
         setTextureScale( tile );
+        tile.setAlpha( alpha );
         return tile;
     }
 

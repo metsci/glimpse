@@ -97,6 +97,8 @@ public class WorldwindDncPainterExample
                 layout.setVisible( false );
             }
         };
+        
+        glimpseLayer.setAlpha( 0.4f );
 
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
