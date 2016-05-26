@@ -1004,9 +1004,9 @@ public class DncPainter extends GlimpsePainter2D
                                 gl.glUniform1f( lineProgram.HIGHLIGHT_EXTRA_THICKNESS_PX, lineHighlightExtraThickness_PX );
                                 gl.glUniform4fv( lineProgram.RGBA, 1, style.lineRgba, 0 );
 
-                                gl.glUniform1ui( lineProgram.STIPPLE_ENABLE, style.hasLineStipple ? 1 : 0 );
+                                gl.glUniform1i( lineProgram.STIPPLE_ENABLE, style.hasLineStipple ? 1 : 0 );
                                 gl.glUniform1f( lineProgram.STIPPLE_FACTOR, style.lineStippleFactor );
-                                gl.glUniform1ui( lineProgram.STIPPLE_PATTERN, style.lineStipplePattern );
+                                gl.glUniform1i( lineProgram.STIPPLE_PATTERN, style.lineStipplePattern );
 
                                 gl.glBindBuffer( GL_ARRAY_BUFFER, dChunk.verticesHandle );
                                 gl.glVertexPointer( coordsPerRenderLineVertex, GL_FLOAT, 0, group.linesCoordFirst * SIZEOF_FLOAT );
