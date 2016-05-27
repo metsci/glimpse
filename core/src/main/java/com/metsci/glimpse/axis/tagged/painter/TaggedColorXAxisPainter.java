@@ -85,6 +85,11 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         this.tagHeight = height;
     }
 
+    public void setTagPointerHeight( int height )
+    {
+        this.tagPointerHeight = height;
+    }
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
