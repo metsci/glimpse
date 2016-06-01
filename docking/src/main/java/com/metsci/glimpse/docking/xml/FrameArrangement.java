@@ -37,6 +37,8 @@ public class FrameArrangement
     public int y = 50;
     public int width = 800;
     public int height = 600;
+    public boolean isMaximizedHoriz = false;
+    public boolean isMaximizedVert = false;
 
     @XmlElement( name = "docker" )
     public DockerArrangementNode dockerArr = null;

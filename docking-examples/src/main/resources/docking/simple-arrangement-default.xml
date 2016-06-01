@@ -6,6 +6,8 @@
             <y>100</y>
             <width>1024</width>
             <height>768</height>
+            <isMaximizedHoriz>false</isMaximizedHoriz>
+            <isMaximizedVert>false</isMaximizedVert>
             <docker xsi:type="Split">
                 <arrangeVertically>true</arrangeVertically>
                 <splitFrac>0.75</splitFrac>

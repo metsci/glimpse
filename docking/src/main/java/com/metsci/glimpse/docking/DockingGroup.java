@@ -31,9 +31,12 @@ import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
+import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
+import static java.awt.Frame.MAXIMIZED_HORIZ;
+import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -460,7 +463,7 @@ public class DockingGroup
             listener.closedView( this, view );
         }
     }
-    
+
     // update all Tiles containing a View with view.viewId to
     // reflect the content of the provided view
     public void updateView( View view )
@@ -476,7 +479,7 @@ public class DockingGroup
             }
         }
     }
-    
+
     // find all Tiles in the provied MultiSplitPane
     // helper function for {@code #updateView( View )}
     protected static Set<Tile> findTiles( MultiSplitPane docker )
@@ -520,6 +523,7 @@ public class DockingGroup
                     frame.docker.restore( dockerRoot );
                     frame.setLocation( frameArr.x, frameArr.y );
                     frame.setSize( frameArr.width, frameArr.height );
+                    frame.setExtendedState( getFrameExtendedState( frameArr ) );
                     frame.setVisible( true );
                 }
             }
@@ -562,11 +566,18 @@ public class DockingGroup
         for ( DockingFrame frame : frames )
         {
             FrameArrangement frameArr = new FrameArrangement( );
+
+            Rectangle bounds = frame.getNormalBounds( );
+            frameArr.x = bounds.x;
+            frameArr.y = bounds.y;
+            frameArr.width = bounds.width;
+            frameArr.height = bounds.height;
+
+            int state = frame.getExtendedState( );
+            frameArr.isMaximizedHoriz = ( ( state & MAXIMIZED_HORIZ ) != 0 );
+            frameArr.isMaximizedVert = ( ( state & MAXIMIZED_VERT ) != 0 );
+
             frameArr.dockerArr = toDockerArrNode( frame.docker.snapshot( ) );
-            frameArr.x = frame.getX( );
-            frameArr.y = frame.getY( );
-            frameArr.width = frame.getWidth( );
-            frameArr.height = frame.getHeight( );
 
             groupArr.frameArrs.add( frameArr );
         }

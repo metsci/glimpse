@@ -29,6 +29,8 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
 import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
+import static java.awt.Frame.MAXIMIZED_HORIZ;
+import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.logging.Level.WARNING;
 
 import java.awt.Color;
@@ -54,6 +56,7 @@ import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingUtils
@@ -200,6 +203,14 @@ public class DockingUtils
         toolbar.setRollover( true );
         toolbar.setOpaque( false );
         return toolbar;
+    }
+
+    public static int getFrameExtendedState( FrameArrangement frameArr )
+    {
+        int state = 0;
+        if ( frameArr.isMaximizedHoriz ) state |= MAXIMIZED_HORIZ;
+        if ( frameArr.isMaximizedVert ) state |= MAXIMIZED_VERT;
+        return state;
     }
 
     public static Color getUiColor( Object key, Color fallback )
