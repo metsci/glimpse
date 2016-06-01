@@ -29,128 +29,91 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
+import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
-import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
-import static java.util.logging.Level.WARNING;
-
-import java.io.File;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.swing.UIManager;
 
-import com.jogamp.opengl.util.FPSAnimator;
-import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
 
 public class GlimpseDockingExample
 {
-    protected static final Logger logger = Logger.getLogger( GlimpseDockingExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
     {
         fixPlatformQuirks( );
-
         Theme.loadTheme( GlimpseDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        DockingTheme dockingTheme = tinyLafDockingTheme( );
+        final DockingTheme dockingTheme = tinyLafDockingTheme( );
 
-        final String appName = "glimpse-docking-example";
-        final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
-        dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
-        final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
-
-        GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
-
-        NewtSwingGlimpseCanvas aCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
-        aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
-
-        NewtSwingGlimpseCanvas bCanvas = new NewtSwingGlimpseCanvas( glDrawable.getContext( ) );
-        bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
-
-        final FPSAnimator animator = new FPSAnimator( 30 );
-        animator.add( aCanvas.getGLDrawable( ) );
-        animator.add( bCanvas.getGLDrawable( ) );
-        animator.start( );
-
-        final View[] views = { new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ), new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) ) };
-
-        // Certain components are picky about being added to a frame from the Swing thread
-        // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good
-        // idea to call dockingGroup.restoreArrangement() on the Swing thread, whether you
-        // are using such picky components or not.
-        //
+        // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
             public void run( )
             {
-                GroupArrangement groupArr = loadDockingArrangement( appName );
+
+                // Create view components
+                //
+
+                GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
+
+                NewtSwingEDTGlimpseCanvas aCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
+                aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
+
+                NewtSwingEDTGlimpseCanvas bCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
+                bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
+
+                final SwingEDTAnimator glAnimator = new SwingEDTAnimator( 30 );
+                glAnimator.add( aCanvas.getGLDrawable( ) );
+                glAnimator.add( bCanvas.getGLDrawable( ) );
+                glAnimator.start( );
+
+
+                // Create views
+                //
+
+                View[] views = { new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ),
+                                 new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) ) };
+
+
+                // Create and show the docking group
+                //
+
+                final String appName = "glimpse-docking-example";
+                final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+                dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
+                TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+
+                GroupArrangement groupArr = loadDockingArrangement( appName, GlimpseDockingExample.class.getClassLoader( ).getResource( "docking/glimpse-arrangement-default.xml" ) );
                 dockingGroup.restoreArrangement( groupArr, tileFactory, views );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
                     public void disposingAllFrames( DockingGroup group )
                     {
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
-                        animator.stop( );
+                        glAnimator.stop( );
                     }
                 } );
+
             }
         } );
-    }
-
-    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeArrangementXml( groupArr, arrFile );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to write docking arrangement to file", e );
-        }
-    }
-
-    public static GroupArrangement loadDockingArrangement( String appName )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            if ( arrFile.exists( ) )
-            {
-                return readArrangementXml( arrFile );
-            }
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load docking arrangement from file", e );
-        }
-
-        try
-        {
-            return readArrangementXml( GlimpseDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/glimpse-arrangement-default.xml" ) );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load default docking arrangement from resource", e );
-        }
-
-        return null;
     }
 
 }
