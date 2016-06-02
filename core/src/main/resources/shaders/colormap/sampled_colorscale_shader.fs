@@ -17,9 +17,7 @@ void main()
     if( discardNaN )
     {
        // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
-       // NaN semantics in GLSL are mostly unspecified, but "x != x" seems to work.
-       //if( isnan( dataVal ) )
-       if( dataVal != dataVal )
+       if( ! ( dataVal < 0.0 || 0.0 < dataVal || dataVal == 0.0 ) )
           discard;
     }
     
