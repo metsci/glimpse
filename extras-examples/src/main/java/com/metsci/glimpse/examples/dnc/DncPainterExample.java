@@ -70,8 +70,8 @@ public class DncPainterExample
         renderConfig.flatParentDir = new File( "/path/to/DNC_FLAT" );
         renderConfig.renderParentDir = new File( "/path/to/DNC_RENDER" );
 
-        //dncCacheConfig.proj = dncPlateCarree;
-        //dncCacheConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Diego
+        //renderConfig.proj = dncPlateCarree;
+        //renderConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Diego
         renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
         RenderCache renderCache = new RenderCache( renderConfig, 4 );
