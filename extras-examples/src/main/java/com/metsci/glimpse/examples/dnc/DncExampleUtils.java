@@ -32,6 +32,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import javax.swing.JLabel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -58,6 +59,14 @@ public class DncExampleUtils
         {
             logWarning( logger, "Failed to init Tiny L&F", e );
         }
+    }
+
+
+    public static JLabel newLabel( String text, int fontStyle )
+    {
+        JLabel label = new JLabel( text );
+        label.setFont( label.getFont( ).deriveFont( fontStyle ) );
+        return label;
     }
 
 }

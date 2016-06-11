@@ -66,6 +66,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout-swing</artifactId>
+            <version>4.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.sf.tinylaf</groupId>
             <artifactId>tinylaf</artifactId>
             <version>1.4.0</version>

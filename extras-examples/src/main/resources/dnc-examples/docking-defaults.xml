@@ -5,23 +5,34 @@
             <x>50</x>
             <y>50</y>
             <width>1280</width>
-            <height>960</height>
+            <height>800</height>
             <docker xsi:type="Split">
                 <arrangeVertically>false</arrangeVertically>
-                <splitFrac>0.75</splitFrac>
+                <splitFrac>0.125</splitFrac>
                 <childA xsi:type="Tile">
                     <views>
-                        <view>geoView</view>
+                        <view>prefsView</view>
                     </views>
-                    <selectedView>geoView</selectedView>
+                    <selectedView>prefsView</selectedView>
                     <isMaximized>false</isMaximized>
                 </childA>
-                <childB xsi:type="Tile">
-                    <views>
-                        <view>attrsView</view>
-                    </views>
-                    <selectedView>attrsView</selectedView>
-                    <isMaximized>false</isMaximized>
+                <childB xsi:type="Split">
+                    <arrangeVertically>false</arrangeVertically>
+                    <splitFrac>0.75</splitFrac>
+                    <childA xsi:type="Tile">
+                        <views>
+                            <view>geoView</view>
+                        </views>
+                        <selectedView>geoView</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childA>
+                    <childB xsi:type="Tile">
+                        <views>
+                            <view>attrsView</view>
+                        </views>
+                        <selectedView>attrsView</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childB>
                 </childB>
             </docker>
         </frame>

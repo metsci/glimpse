@@ -385,6 +385,23 @@ public class DncPainter extends GlimpsePainter2D
         }
     }
 
+    public void setCoverageActive( DncCoverage coverage, boolean active )
+    {
+        setCoveragesActive( singleton( coverage ), active );
+    }
+
+    public void setCoveragesActive( Collection<DncCoverage> coverages, boolean active )
+    {
+        if ( active )
+        {
+            activateCoverages( coverages );
+        }
+        else
+        {
+            deactivateCoverages( coverages );
+        }
+    }
+
     public void activateCoverages( String... coverageNames )
     {
         Collection<DncCoverage> coverages = new ArrayList<>( );
