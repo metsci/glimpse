@@ -120,7 +120,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
         this.offscreenCanvas.addLayout( this.background );
     }
-    
+
     public void setAlpha( float alpha )
     {
         this.alpha = alpha;
@@ -191,19 +191,9 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected void updateGeometry( DrawContext dc )
     {
-        // two heuristic methods of calculating the screen corners
-        // heuristic 1 is basically never actually used to updateGeometry(),
-        // but it is a good indicator of whether heuristic 2 will provide
-        // good results (if heuristic 1 is not valid, heuristic 2 is likely
-        // to provide bad results, so updateGeometryDefault() is used)
-        List<LatLon> screenCorners1 = getCornersHeuristic1( dc );
         List<LatLon> screenCorners2 = getCornersHeuristic2( dc );
 
-        if ( !isValid( screenCorners1 ) )
-        {
-            updateGeometryDefault( );
-        }
-        else if ( isValid( screenCorners2 ) )
+        if ( isValid( screenCorners2 ) )
         {
             updateGeometry( screenCorners2 );
         }
@@ -262,13 +252,13 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
         return intersectedBounds;
     }
-    
+
     protected double getArea( LatLonBounds outerBounds )
     {
         return ( outerBounds.maxLat - outerBounds.minLat ) * ( outerBounds.maxLon - outerBounds.minLon );
 
     }
-    
+
     protected boolean contains( LatLonBounds outerBounds, LatLonBounds innerBounds )
     {
         return outerBounds.maxLat > innerBounds.maxLat &&
@@ -430,12 +420,14 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     // inspired by: gov.nasa.worldwind.layers.ScalebarLayer
     public static List<LatLon> getCornersHeuristic2( DrawContext dc )
     {
-        // Compute scale size in real world
-        Position referencePosition = dc.getViewportCenterPosition( );
-        if ( referencePosition == null ) return null;
+        double x = dc.getView( ).getViewport( ).getWidth( ) / 2;
+        double y = dc.getView( ).getViewport( ).getHeight( ) / 2;
 
-        Vec4 groundTarget = dc.getGlobe( ).computePointFromPosition( referencePosition );
-        Double distance = dc.getView( ).getEyePoint( ).distanceTo3( groundTarget );
+        Position centerPosition = dc.getView( ).computePositionFromScreenPoint( x, y );
+        Vec4 center = dc.getGlobe( ).computePointFromPosition( centerPosition );
+        Vec4 eye = dc.getView( ).getEyePoint( );
+
+        Double distance = center.distanceTo3( eye );
         double metersPerPixel = dc.getView( ).computePixelSizeAtDistance( distance );
 
         // now assume this size roughly holds across the whole screen
@@ -449,7 +441,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         // (which direction is north) just take the largest dimension
         double viewportSizeMeters = Math.max( viewportHeightMeters, viewportWidthMeters );
 
-        LatLonGeo centerLatLon = LatLonGeo.fromDeg( referencePosition.latitude.getDegrees( ), referencePosition.longitude.getDegrees( ) );
+        LatLonGeo centerLatLon = LatLonGeo.fromDeg( centerPosition.latitude.getDegrees( ), centerPosition.longitude.getDegrees( ) );
         LatLonGeo swLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southwest );
         LatLonGeo seLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southeast );
         LatLonGeo nwLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.northwest );
