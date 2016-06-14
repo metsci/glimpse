@@ -33,11 +33,28 @@ import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 import static com.metsci.glimpse.util.GeneralUtils.newHashMap;
 import static com.metsci.glimpse.util.GeneralUtils.newHashSet;
 import static gov.nasa.worldwind.formats.vpf.VPFConstants.EDGE_PRIMITIVE_TABLE;
-import static java.util.Arrays.asList;
+import static java.lang.String.format;
 import static java.util.Arrays.sort;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+
 import gov.nasa.worldwind.formats.vpf.VPFBasicPrimitiveDataFactory;
+import gov.nasa.worldwind.formats.vpf.VPFBufferedRecordData;
+import gov.nasa.worldwind.formats.vpf.VPFConstants;
 import gov.nasa.worldwind.formats.vpf.VPFCoverage;
 import gov.nasa.worldwind.formats.vpf.VPFDatabase;
 import gov.nasa.worldwind.formats.vpf.VPFFeature;
@@ -57,17 +74,6 @@ import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.util.CompoundVecBuffer;
 import gov.nasa.worldwind.util.VecBuffer;
 import gov.nasa.worldwind.util.VecBufferSequence;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 
 public class Vpf
 {
@@ -163,50 +169,42 @@ public class Vpf
 
     public static Iterable<VPFDatabase> vpfDatabases(File parentDir, int[] dbNums)
     {
-        final boolean filterOnDbNum = (dbNums != null);
-        final Set<String> includedNames = newHashSet();
-        if (filterOnDbNum)
-        {
-            for (int dbNum : dbNums) includedNames.add(String.format("dnc%02d", dbNum));
-        }
+        final Map<String,File> dhtFiles = vpfDatabaseFilesByName(parentDir);
 
-        // Some copies of the DNCs have uppercase symlinks to lowercase files,
-        // or vice versa, to allow case-insensitive code to work on case-sensitive
-        // file systems.
-        //
-        // We don't want to process the uppercase and the lowercase as if they were
-        // two separate items, so keep track of which names we've seen so far (in a
-        // consistent case), and don't process them again.
-        //
-        final List<File> dbDirs = asList( parentDir.listFiles( new FileFilter()
+        if (dbNums != null)
         {
-            Set<String> namesSeen = newHashSet();
-            public boolean accept(File f)
+            Set<String> dbNames = new HashSet<>();
+            for (int dbNum : dbNums)
             {
-                String name = f.getName().toLowerCase();
-                return namesSeen.add(name) && f.isDirectory() && name.matches("^dnc[0-9][0-9]$") && (!filterOnDbNum || includedNames.contains(name));
+                dbNames.add(format("DNC%02d", dbNum));
             }
-        } ) );
+            for (Iterator<String> it = dhtFiles.keySet().iterator(); it.hasNext(); )
+            {
+                String dbName = it.next();
+                if (!dbNames.contains(dbName.toUpperCase()))
+                {
+                    it.remove();
+                }
+            }
+        }
 
         return new Iterable<VPFDatabase>()
         {
             public Iterator<VPFDatabase> iterator()
             {
-                final Iterator<File> dbDirsIterator = dbDirs.iterator();
+                final Iterator<File> it = dhtFiles.values().iterator();
 
                 return new Iterator<VPFDatabase>()
                 {
                     public boolean hasNext()
                     {
-                        return dbDirsIterator.hasNext();
+                        return it.hasNext();
                     }
 
                     public VPFDatabase next()
                     {
-                        File dbDir = dbDirsIterator.next();
-                        File dht = new File(dbDir, "dht");
-                        if (!dht.exists()) dht = new File(dbDir, "DHT");
-                        return VPFDatabase.fromFile(dht.getPath());
+                        File dhtFile = it.next();
+                        return VPFDatabase.fromFile(dhtFile.getPath());
                     }
 
                     public void remove()
@@ -216,6 +214,68 @@ public class Vpf
                 };
             }
         };
+    }
+
+
+    /**
+     * Returns a map from database name to DHT file
+     */
+    public static Map<String,File> vpfDatabaseFilesByName(File parentDir)
+    {
+        Map<String,File> dbPaths = new LinkedHashMap<>();
+        for (File dbDir : parentDir.listFiles())
+        {
+            File dhtFile = findDhtFile(dbDir);
+            if (dhtFile != null)
+            {
+                String dbName = readDatabaseName(dhtFile);
+                if (dbName != null && !dbPaths.containsKey(dbName))
+                {
+                    dbPaths.put(dbName, dhtFile.getAbsoluteFile());
+                }
+            }
+        }
+        return dbPaths;
+    }
+
+
+    public static File findDhtFile(File dbDir)
+    {
+        File fileOrSymlink = null;
+        File fileActual = null;
+        if (dbDir.isDirectory())
+        {
+            for (File f : dbDir.listFiles())
+            {
+                if (f.getName().equalsIgnoreCase(VPFConstants.DATABASE_HEADER_TABLE) && f.isFile())
+                {
+                    fileOrSymlink = f;
+                    if (!Files.isSymbolicLink(f.toPath()))
+                    {
+                        fileActual = f;
+                    }
+                }
+            }
+        }
+        return (fileActual == null ? fileOrSymlink : fileActual);
+    }
+
+
+    public static String readDatabaseName(File dhtFile)
+    {
+        if (dhtFile != null)
+        {
+            VPFBufferedRecordData dht = VPFUtils.readTable(dhtFile);
+            if (dht != null && dht.getNumRecords() >= 1)
+            {
+                Object o = dht.getRecord(1).getValue("database_name");
+                if (o instanceof String)
+                {
+                    return ((String) o);
+                }
+            }
+        }
+        return null;
     }
 
 
