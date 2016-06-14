@@ -35,8 +35,10 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLOffscreenAutoDrawable.FBO;
 
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
@@ -87,9 +89,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     protected List<LatLon> corners;
     protected boolean isMax = true;
 
-    protected SimpleOffscreenCanvas offscreenCanvas;
+    protected FBOGlimpseCanvas offscreenCanvas;
     protected TextureSurfaceTile tile;
-    protected GLContext context;
 
     protected float alpha = 1.0f;
 
@@ -116,9 +117,6 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.background = new GlimpseLayout( );
         this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.background.addLayout( mask );
-
-        this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
-        this.offscreenCanvas.addLayout( this.background );
     }
 
     public void setAlpha( float alpha )
@@ -148,38 +146,88 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     @Override
     public GlimpseTargetStack getTargetStack( )
     {
-        return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );
+        if ( this.offscreenCanvas != null )
+        {
+            return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );            
+        }
+        else
+        {
+            return null;
+        }
     }
 
     @Override
     public void preRender( DrawContext dc )
     {
-        if ( tile == null )
+        if ( tile == null && offscreenCanvas == null )
         {
-
-            if ( context == null )
-            {
-                GLContext oldcontext = dc.getGLContext( );
-                context = dc.getGLDrawable( ).createContext( oldcontext );
-            }
-
-            offscreenCanvas.initialize( context );
+            offscreenCanvas = new FBOGlimpseCanvas( dc.getGLContext( ), width, height );
+            offscreenCanvas.addLayout( background );
         }
-
-        updateGeometry( dc );
-
-        drawOffscreen( dc );
-
-        if ( tile == null && corners != null )
+        
+        if ( offscreenCanvas.getGLContext( ) != null )
         {
-            int textureHandle = getTextureHandle( );
-            tile = newTextureSurfaceTile( textureHandle, corners );
+            updateGeometry( dc );
+    
+            drawOffscreen( dc );
+    
+            if ( tile == null && corners != null )
+            {
+                int textureHandle = getTextureHandle( );
+                tile = newTextureSurfaceTile( textureHandle, corners );
+            }
+        }
+    }
+    
+    @Override
+    protected void doRender( DrawContext dc )
+    {
+        if ( tile != null )
+        {
+            tile.render( dc );
+        }
+    }
+
+    protected void drawOffscreen( DrawContext dc )
+    {
+        drawOffscreen( dc.getGLContext( ) );
+    }
+
+    protected void drawOffscreen( GLContext glContext )
+    {
+        OGLStackHandler stack = new OGLStackHandler( );
+        GL2 gl = glContext.getGL( ).getGL2( );
+
+        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
+        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
+        stack.pushTexture( gl );
+        stack.pushModelview( gl );
+        stack.pushProjection( gl );
+
+        GLContext c = offscreenCanvas.getGLContext( );
+        
+        if ( c != null )
+        {
+            c.makeCurrent( );
+            try
+            {
+                offscreenCanvas.paint( );
+            }
+            catch ( Exception e )
+            {
+                logWarning( logger, "Trouble drawing to offscreen buffer", e );
+            }
+            finally
+            {
+                glContext.makeCurrent( );
+                stack.pop( gl );
+            }
         }
     }
 
     protected int getTextureHandle( )
     {
-        return offscreenCanvas.getFrameBuffer( ).getTextureId( );
+        return offscreenCanvas.getTextureUnit( );
     }
 
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
@@ -214,8 +262,8 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected void updateGeometry( List<LatLon> screenCorners )
     {
-        LatLonBounds outerBounds = getBoundsFromCorners( screenCorners, 0.5 );
-        LatLonBounds innerBounds = getBoundsFromCorners( screenCorners, 0.2 );
+        LatLonBounds outerBounds = getBoundsFromCorners( screenCorners, 0.9 );
+        LatLonBounds innerBounds = getBoundsFromCorners( screenCorners, 0.4 );
 
         // Update the geometry if:
         //
@@ -459,56 +507,6 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         corners.add( nePos );
 
         return corners;
-    }
-
-    @Override
-    protected void doRender( DrawContext dc )
-    {
-        if ( tile != null )
-        {
-            tile.render( dc );
-        }
-    }
-
-    protected void drawOffscreen( DrawContext dc )
-    {
-        context.makeCurrent( );
-        try
-        {
-            drawOffscreen( dc.getGLContext( ) );
-        }
-        finally
-        {
-            dc.getGLContext( ).makeCurrent( );
-        }
-    }
-
-    protected void drawOffscreen( GLContext glContext )
-    {
-        GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
-        OGLStackHandler stack = new OGLStackHandler( );
-        GL2 gl = glContext.getGL( ).getGL2( );
-
-        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
-        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
-        stack.pushTexture( gl );
-        stack.pushModelview( gl );
-        stack.pushProjection( gl );
-
-        fbo.bind( glContext );
-        try
-        {
-            background.paintTo( offscreenCanvas.getGlimpseContext( ) );
-        }
-        catch ( Exception e )
-        {
-            logWarning( logger, "Trouble drawing to offscreen buffer", e );
-        }
-        finally
-        {
-            fbo.unbind( glContext );
-            stack.pop( gl );
-        }
     }
 
     public static class LatLonBounds
