@@ -31,6 +31,8 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.lang.Boolean.FALSE;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
@@ -60,12 +62,25 @@ public class DncExampleUtils
                 UIManager.put( "OptionPane.messageForeground", fgColor );
             }
 
-            // TinyLaf disables the "new folder" button in some cases ... not clear why
+            // TinyLaf disables the "new folder" button in some cases ... not sure why
             UIManager.put( "FileChooser.readOnly", FALSE );
         }
         catch ( UnsupportedLookAndFeelException e )
         {
             logWarning( logger, "Failed to init Tiny L&F", e );
+        }
+    }
+
+
+    public static void setTreeEnabled( Component root, boolean enabled )
+    {
+        root.setEnabled( enabled );
+        if ( root instanceof Container )
+        {
+            for ( Component c : ( ( Container ) root ).getComponents( ) )
+            {
+                setTreeEnabled( c, enabled );
+            }
         }
     }
 

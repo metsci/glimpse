@@ -26,28 +26,41 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabaseFilesByName;
+import static com.metsci.glimpse.dnc.convert.Vpf2Flat.readVpfDatabase;
+import static com.metsci.glimpse.dnc.convert.Vpf2Flat.writeFlatDatabase;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.addTextListener;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
+import static com.metsci.glimpse.examples.dnc.DncExampleUtils.setTreeEnabled;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static javax.swing.JOptionPane.showMessageDialog;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -56,12 +69,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.metsci.glimpse.dnc.convert.Vpf2Flat.Database;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 
+import gov.nasa.worldwind.formats.vpf.VPFDatabase;
 import net.miginfocom.swing.MigLayout;
 
 public class Vpf2FlatConverter
@@ -142,6 +160,9 @@ public class Vpf2FlatConverter
             contentPane.add( flatParentButton, "wrap" );
 
             contentPane.add( convertButton, "gapy 12, span, split, alignx right, wrap" );
+
+            JFrame frame = new JFrame( "DNC Converter" );
+            frame.setContentPane( contentPane );
 
 
             // Browse to VPF dir
@@ -268,7 +289,7 @@ public class Vpf2FlatConverter
                 chooser.setMultiSelectionEnabled( false );
                 chooser.setAcceptAllFileFilterUsed( false );
 
-                if ( chooser.showOpenDialog( contentPane ) == APPROVE_OPTION )
+                if ( chooser.showSaveDialog( contentPane ) == APPROVE_OPTION )
                 {
                     File dir = chooser.getSelectedFile( );
                     flatParentField.setText( dir.getPath( ) );
@@ -283,19 +304,115 @@ public class Vpf2FlatConverter
 
             convertButton.addActionListener( ( ev ) ->
             {
-                for ( String dbName : state.dbNames )
+                File flatParentDir = new File( flatParentField.getText( ) );
+                Map<String,File> dhtFiles = ImmutableMap.copyOf( state.dhtFiles );
+                Set<String> dbNames = ImmutableSet.copyOf( state.dbNames );
+
+                setTreeEnabled( contentPane, false );
+
+                JFrame progressFrame = new JFrame( "DNC Conversion" );
+                ProgressPane progressPane = new ProgressPane( "Converting" );
+                progressFrame.setContentPane( progressPane );
+                progressFrame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
+                progressFrame.pack( );
+                progressFrame.setResizable( false );
+                progressFrame.setLocationRelativeTo( frame );
+                progressFrame.setVisible( true );
+
+                // Worldwind's VPF reader doesn't handle interrupts well, so this is the best we can do
+                AtomicBoolean cancelled = new AtomicBoolean( false );
+                class CancellationException extends RuntimeException { }
+                Runnable checkForCancellation = ( ) ->
                 {
-                    File dhtFile = state.dhtFiles.get( dbName );
-                    System.err.println( dbName + ": " + dhtFile.getPath( ) );
-                }
+                    if ( cancelled.get( ) )
+                    {
+                        throw new CancellationException( );
+                    }
+                };
+
+                startThread( "Converter", false, ( ) ->
+                {
+                    try
+                    {
+                        int stepsComplete = 0;
+                        flatParentDir.mkdirs( );
+                        for ( String dbName : dbNames )
+                        {
+                            File dhtFile = dhtFiles.get( dbName );
+                            checkForCancellation.run( );
+                            VPFDatabase vpfDatabase = VPFDatabase.fromFile( dhtFile.getPath( ) );
+                            checkForCancellation.run( );
+                            Database database = readVpfDatabase( vpfDatabase );
+                            checkForCancellation.run( );
+
+                            stepsComplete++;
+                            double fracCompleteA = stepsComplete / ( 2.0*dbNames.size( ) );
+                            SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteA ) );
+
+                            String dirname = vpfDatabase.getName( ).toLowerCase( ).replace( "dnc", "dncflat" );
+                            checkForCancellation.run( );
+                            File flatDir = createNewDir( flatParentDir, dirname );
+                            checkForCancellation.run( );
+                            writeFlatDatabase( database, flatDir, UTF_8 );
+                            checkForCancellation.run( );
+
+                            stepsComplete++;
+                            double fracCompleteB = stepsComplete / ( 2.0*dbNames.size( ) );
+                            SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteB ) );
+                        }
+
+                        SwingUtilities.invokeLater( ( ) ->
+                        {
+                            progressFrame.dispose( );
+                            showMessageDialog( frame, "Conversion succeeded", "Success", INFORMATION_MESSAGE );
+                            setTreeEnabled( contentPane, true );
+                        } );
+                    }
+                    catch ( CancellationException e )
+                    {
+                        SwingUtilities.invokeLater( ( ) ->
+                        {
+                            progressFrame.dispose( );
+                            showMessageDialog( frame, "Conversion cancelled", "Cancelled", INFORMATION_MESSAGE );
+                            setTreeEnabled( contentPane, true );
+                        } );
+                    }
+                    catch ( Exception e )
+                    {
+                        SwingUtilities.invokeLater( ( ) ->
+                        {
+                            progressFrame.dispose( );
+
+                            JLabel summaryLabel = new JLabel( "Conversion failed" );
+
+                            JTextArea detailArea = new JTextArea( );
+                            StringWriter detailText = new StringWriter( );
+                            e.printStackTrace( new PrintWriter( detailText ) );
+                            detailArea.setText( detailText.toString( ) );
+                            detailArea.setCaretPosition( 0 );
+
+                            JScrollPane detailScroller = new JScrollPane( detailArea, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_AS_NEEDED );
+
+                            JPanel messagePanel = new JPanel( new MigLayout( ) );
+                            messagePanel.add( summaryLabel, "wrap" );
+                            messagePanel.add( detailScroller, "height ::250" );
+
+                            showMessageDialog( frame, messagePanel, "Error", ERROR_MESSAGE );
+                            setTreeEnabled( contentPane, true );
+                        } );
+                    }
+                } );
+
+                progressPane.addCancelListener( ( ) ->
+                {
+                    cancelled.set( true );
+                } );
             } );
 
 
             // Show frame
             //
 
-            JFrame frame = new JFrame( "DNC Converter" );
-            frame.setContentPane( contentPane );
             frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
             frame.pack( );
             frame.setMinimumSize( frame.getPreferredSize( ) );
