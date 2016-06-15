@@ -43,10 +43,8 @@ import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -103,7 +101,9 @@ public class Vpf2FlatConverter
             JPanel vpfCheckboxesPanel = new JPanel( new MigLayout( "insets 2 4 2 2, gapy 0, wrap 1" ) );
 
             JScrollPane vpfCheckboxesScroller = new JScrollPane( vpfCheckboxesPanel, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_NEVER );
-            vpfCheckboxesScroller.setPreferredSize( new Dimension( 100, 100 ) );
+            int vpfCheckboxHeight = ( new JCheckBox( "X" ) ).getPreferredSize( ).height;
+            vpfCheckboxesScroller.getVerticalScrollBar( ).setUnitIncrement( vpfCheckboxHeight );
+            vpfCheckboxesScroller.setPreferredSize( new Dimension( 100, 5*vpfCheckboxHeight + 4 ) );
 
             JButton vpfCheckAllButton = new JButton( requireIcon( "icons/fugue/ui-check-box.png" ) );
             vpfCheckAllButton.setToolTipText( "Select All" );
@@ -199,13 +199,12 @@ public class Vpf2FlatConverter
                             state.dhtFiles = dhtFiles;
                             state.dbNames = new LinkedHashSet<>( dhtFiles.keySet( ) );
 
-                            List<JCheckBox> checkboxes = new ArrayList<>( );
                             dhtFiles.forEach( ( dbName, dhtFile ) ->
                             {
-                                JCheckBox check = new JCheckBox( dbName );
-                                check.addItemListener( ( ev ) ->
+                                JCheckBox checkbox = new JCheckBox( dbName );
+                                checkbox.addItemListener( ( ev ) ->
                                 {
-                                    if ( check.isSelected( ) )
+                                    if ( checkbox.isSelected( ) )
                                     {
                                         state.dbNames.add( dbName );
                                     }
@@ -214,19 +213,10 @@ public class Vpf2FlatConverter
                                         state.dbNames.remove( dbName );
                                     }
                                 } );
-                                check.setSelected( true );
-                                vpfCheckboxesPanel.add( check );
-                                checkboxes.add( check );
+                                checkbox.setSelected( true );
+                                vpfCheckboxesPanel.add( checkbox );
                             } );
                             vpfCheckboxesScroller.validate( );
-
-                            if ( checkboxes.size( ) > 1 )
-                            {
-                                int yFirst = checkboxes.get( 0 ).getY( );
-                                int yLast = checkboxes.get( checkboxes.size( ) - 1 ).getY( );
-                                int rowHeight = ( yLast - yFirst ) / ( checkboxes.size( ) - 1 );
-                                vpfCheckboxesScroller.getVerticalScrollBar( ).setUnitIncrement( rowHeight );
-                            }
                         } );
 
                         oldPath = newPath;
@@ -308,6 +298,7 @@ public class Vpf2FlatConverter
             frame.setContentPane( contentPane );
             frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
             frame.pack( );
+            frame.setMinimumSize( frame.getPreferredSize( ) );
             frame.setLocationRelativeTo( null );
             frame.setVisible( true );
 
