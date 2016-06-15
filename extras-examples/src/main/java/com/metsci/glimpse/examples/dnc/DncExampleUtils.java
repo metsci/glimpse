@@ -28,6 +28,7 @@ package com.metsci.glimpse.examples.dnc;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Boolean.FALSE;
 
 import java.awt.Color;
 import java.util.logging.Logger;
@@ -35,6 +36,10 @@ import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 public class DncExampleUtils
 {
@@ -54,6 +59,9 @@ public class DncExampleUtils
             {
                 UIManager.put( "OptionPane.messageForeground", fgColor );
             }
+
+            // TinyLaf disables the "new folder" button in some cases ... not clear why
+            UIManager.put( "FileChooser.readOnly", FALSE );
         }
         catch ( UnsupportedLookAndFeelException e )
         {
@@ -67,6 +75,40 @@ public class DncExampleUtils
         JLabel label = new JLabel( text );
         label.setFont( label.getFont( ).deriveFont( fontStyle ) );
         return label;
+    }
+
+
+    public static void addTextListener( JTextComponent c, Runnable listener )
+    {
+        DocumentListener docListener = new DocumentListener( )
+        {
+            public void insertUpdate( DocumentEvent ev ) { listener.run( ); }
+            public void removeUpdate( DocumentEvent ev ) { listener.run( ); }
+            public void changedUpdate( DocumentEvent ev ) { listener.run( ); }
+        };
+
+        c.addPropertyChangeListener( "document", ( ev ) ->
+        {
+            Document oldDoc = ( Document ) ev.getOldValue( );
+            if ( oldDoc != null )
+            {
+                oldDoc.removeDocumentListener( docListener );
+            }
+
+            Document newDoc = ( Document ) ev.getNewValue( );
+            if ( newDoc != null )
+            {
+                newDoc.addDocumentListener( docListener );
+            }
+
+            listener.run( );
+        } );
+
+        Document doc = c.getDocument( );
+        if ( doc != null )
+        {
+            doc.addDocumentListener( docListener );
+        }
     }
 
 }

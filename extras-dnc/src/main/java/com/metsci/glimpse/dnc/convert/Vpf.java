@@ -223,18 +223,24 @@ public class Vpf
     public static Map<String,File> vpfDatabaseFilesByName(File parentDir)
     {
         Map<String,File> dbPaths = new LinkedHashMap<>();
-        for (File dbDir : parentDir.listFiles())
+
+        File[] children = parentDir.listFiles();
+        if (children != null)
         {
-            File dhtFile = findDhtFile(dbDir);
-            if (dhtFile != null)
+            for (File dbDir : children)
             {
-                String dbName = readDatabaseName(dhtFile);
-                if (dbName != null && !dbPaths.containsKey(dbName))
+                File dhtFile = findDhtFile(dbDir);
+                if (dhtFile != null)
                 {
-                    dbPaths.put(dbName, dhtFile.getAbsoluteFile());
+                    String dbName = readDatabaseName(dhtFile);
+                    if (dbName != null && !dbPaths.containsKey(dbName))
+                    {
+                        dbPaths.put(dbName, dhtFile.getAbsoluteFile());
+                    }
                 }
             }
         }
+
         return dbPaths;
     }
 
