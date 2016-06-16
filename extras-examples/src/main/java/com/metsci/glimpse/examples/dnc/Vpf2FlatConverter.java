@@ -35,6 +35,7 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.addTextListener;
+import static com.metsci.glimpse.examples.dnc.DncExampleUtils.dncFlatDir;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.setTreeEnabled;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
@@ -130,7 +131,7 @@ public class Vpf2FlatConverter
             vpfCheckNoneButton.setToolTipText( "Select None" );
 
             JTextField flatParentField = new JTextField( 32 );
-            flatParentField.setText( "" );
+            flatParentField.setText( dncFlatDir( ).getAbsolutePath( ) );
 
             JButton flatParentButton = new JButton( requireIcon( "icons/fugue/folder-horizontal-open.png" ) );
             flatParentButton.setToolTipText( "Browse" );
