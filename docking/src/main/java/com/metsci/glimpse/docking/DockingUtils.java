@@ -80,6 +80,7 @@ public class DockingUtils
     {
         return new Runnable( )
         {
+            @Override
             public void run( )
             {
                 runnable1.run( t );
@@ -93,6 +94,7 @@ public class DockingUtils
         {
             SwingUtilities.invokeAndWait( new Runnable( )
             {
+                @Override
                 public void run( )
                 {
                     runnable.run( );
@@ -116,6 +118,7 @@ public class DockingUtils
 
         button.addActionListener( new ActionListener( )
         {
+            @Override
             public void actionPerformed( ActionEvent ev )
             {
                 if ( button.isSelected( ) )
@@ -131,6 +134,7 @@ public class DockingUtils
 
         popup.addPopupMenuListener( new PopupMenuListener( )
         {
+            @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent ev )
             {
                 button.setSelected( false );
@@ -142,6 +146,7 @@ public class DockingUtils
                 button.setEnabled( false );
                 SwingUtilities.invokeLater( new Runnable( )
                 {
+                    @Override
                     public void run( )
                     {
                         button.setEnabled( true );
@@ -149,10 +154,12 @@ public class DockingUtils
                 } );
             }
 
+            @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
             {
             }
 
+            @Override
             public void popupMenuCanceled( PopupMenuEvent ev )
             {
             }
@@ -169,6 +176,7 @@ public class DockingUtils
         {
             toolbar = new JToolBar( )
             {
+                @Override
                 protected void addImpl( Component c, Object constraints, int index )
                 {
                     int reverseIndex;
@@ -274,27 +282,30 @@ public class DockingUtils
             logger.log( WARNING, "Failed to load docking arrangement from file: app-name = " + appName, e );
         }
 
-        InputStream fallbackStream = null;
-        try
+        if ( fallback != null )
         {
-            fallbackStream = fallback.openStream( );
-            return readArrangementXml( fallbackStream );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load default docking arrangement from resource: resource = " + fallback.toString( ), e );
-        }
-        finally
-        {
-            if ( fallbackStream != null )
+            InputStream fallbackStream = null;
+            try
             {
-                try
+                fallbackStream = fallback.openStream( );
+                return readArrangementXml( fallbackStream );
+            }
+            catch ( Exception e )
+            {
+                logger.log( WARNING, "Failed to load default docking arrangement from resource: resource = " + fallback.toString( ), e );
+            }
+            finally
+            {
+                if ( fallbackStream != null )
                 {
-                    fallbackStream.close( );
-                }
-                catch ( IOException e )
-                {
-                    logger.log( WARNING, "Failed to close default docking arrangement resource: resource = " + fallback.toString( ), e );
+                    try
+                    {
+                        fallbackStream.close( );
+                    }
+                    catch ( IOException e )
+                    {
+                        logger.log( WARNING, "Failed to close default docking arrangement resource: resource = " + fallback.toString( ), e );
+                    }
                 }
             }
         }

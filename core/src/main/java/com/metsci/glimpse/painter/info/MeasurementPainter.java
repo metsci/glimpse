@@ -37,6 +37,8 @@ import javax.media.opengl.GLContext;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -68,6 +70,7 @@ public class MeasurementPainter extends GlimpseDataPainter2D
     protected TextRenderer textRenderer;
     protected DecimalFormat angleFormatter;
     protected DecimalFormat distanceFormatter;
+    protected AxisUnitConverter distanceUnitConverter;
 
     public MeasurementPainter( )
     {
@@ -84,6 +87,12 @@ public class MeasurementPainter extends GlimpseDataPainter2D
         this.textRenderer = new TextRenderer( getDefaultBold( 16 ) );
         this.angleFormatter = angleFormatter;
         this.distanceFormatter = distanceFormatter;
+        this.distanceUnitConverter = AxisUnitConverters.identity;
+    }
+
+    public void setDistanceUnitConverter( AxisUnitConverter converter )
+    {
+        distanceUnitConverter = converter;
     }
 
     public void setRulerWidth( float width )
@@ -237,7 +246,8 @@ public class MeasurementPainter extends GlimpseDataPainter2D
         }
 
         //// draw distance text ////
-        String distanceString = distanceFormatter.format( distance );
+        double distanceUnits = distanceUnitConverter.toAxisUnits( distance );
+        String distanceString = distanceFormatter.format( distanceUnits );
         int distancePosX = axisX.valueToScreenPixel( mouseX ) + DIST_TEXT_OFFSET_X;
         int distancePosY = axisY.valueToScreenPixel( mouseY ) + DIST_TEXT_OFFSET_Y;
 
