@@ -33,7 +33,6 @@ import static java.lang.Boolean.FALSE;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.io.File;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
@@ -47,64 +46,6 @@ import javax.swing.text.JTextComponent;
 public class DncExampleUtils
 {
     private static final Logger logger = getLogger( DncExampleUtils.class );
-
-
-    public static File file( String parent, String... segments )
-    {
-        return file( new File( parent ), segments );
-    }
-
-
-    public static File file( File parent, String... segments )
-    {
-        File f = parent;
-        for ( String s : segments )
-        {
-            f = new File( f, s );
-        }
-        return f;
-    }
-
-
-    public static File glimpseCacheDir( )
-    {
-        String override = System.getProperty( "GLIMPSE_CACHE_DIR" );
-        if ( override != null )
-        {
-            return file( override );
-        }
-        else
-        {
-            String osName = System.getProperty( "os.name" ).toLowerCase( );
-            String userHome = System.getProperty( "user.home" );
-            if ( osName.startsWith( "win" ) )
-            {
-                return file( userHome, "Application Data", "glimpse" );
-            }
-            else if ( osName.startsWith( "mac" ) )
-            {
-                return file( userHome, "Library", "Caches", "glimpse" );
-            }
-            else
-            {
-                return file( userHome, "var", "cache", "glimpse" );
-            }
-        }
-    }
-
-
-    public static File dncFlatDir( )
-    {
-        String override = System.getProperty( "DNC_FLAT_DIR" );
-        if ( override != null )
-        {
-            return file( override );
-        }
-        else
-        {
-            return file( glimpseCacheDir( ), "DNC_FLAT" );
-        }
-    }
 
 
     public static void initTinyLaf( )
