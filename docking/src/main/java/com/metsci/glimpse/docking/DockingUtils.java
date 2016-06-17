@@ -80,7 +80,6 @@ public class DockingUtils
     {
         return new Runnable( )
         {
-            @Override
             public void run( )
             {
                 runnable1.run( t );
@@ -94,7 +93,6 @@ public class DockingUtils
         {
             SwingUtilities.invokeAndWait( new Runnable( )
             {
-                @Override
                 public void run( )
                 {
                     runnable.run( );
@@ -118,7 +116,6 @@ public class DockingUtils
 
         button.addActionListener( new ActionListener( )
         {
-            @Override
             public void actionPerformed( ActionEvent ev )
             {
                 if ( button.isSelected( ) )
@@ -134,7 +131,6 @@ public class DockingUtils
 
         popup.addPopupMenuListener( new PopupMenuListener( )
         {
-            @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent ev )
             {
                 button.setSelected( false );
@@ -146,7 +142,6 @@ public class DockingUtils
                 button.setEnabled( false );
                 SwingUtilities.invokeLater( new Runnable( )
                 {
-                    @Override
                     public void run( )
                     {
                         button.setEnabled( true );
@@ -154,15 +149,11 @@ public class DockingUtils
                 } );
             }
 
-            @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
-            {
-            }
+            { }
 
-            @Override
             public void popupMenuCanceled( PopupMenuEvent ev )
-            {
-            }
+            { }
         } );
 
         return popup;
@@ -176,7 +167,6 @@ public class DockingUtils
         {
             toolbar = new JToolBar( )
             {
-                @Override
                 protected void addImpl( Component c, Object constraints, int index )
                 {
                     int reverseIndex;
