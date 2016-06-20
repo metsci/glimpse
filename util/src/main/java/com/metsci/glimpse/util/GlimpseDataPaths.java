@@ -244,4 +244,19 @@ public class GlimpseDataPaths
         return unixPath.replaceAll( "(?<=.)/*$", "" );
     }
 
+    /**
+     * Throws {@link RuntimeException} if {@code dir} is not an existing directory.
+     */
+    public static File requireExistingDir( File dir )
+    {
+        if ( dir.isDirectory( ) )
+        {
+            return dir;
+        }
+        else
+        {
+            throw new RuntimeException( "No such directory: " + dir.getAbsolutePath( ) );
+        }
+    }
+
 }
