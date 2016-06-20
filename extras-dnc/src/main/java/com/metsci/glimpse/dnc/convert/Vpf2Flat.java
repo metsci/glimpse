@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.dnc.convert;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
 import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
 import static com.jogamp.common.nio.Buffers.SIZEOF_LONG;
@@ -71,18 +70,6 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.writeIdsMapFile;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static java.lang.Double.doubleToLongBits;
-import gov.nasa.worldwind.formats.vpf.VPFBasicFeatureFactory;
-import gov.nasa.worldwind.formats.vpf.VPFCoverage;
-import gov.nasa.worldwind.formats.vpf.VPFDatabase;
-import gov.nasa.worldwind.formats.vpf.VPFFeature;
-import gov.nasa.worldwind.formats.vpf.VPFFeatureClass;
-import gov.nasa.worldwind.formats.vpf.VPFFeatureFactory;
-import gov.nasa.worldwind.formats.vpf.VPFLibrary;
-import gov.nasa.worldwind.formats.vpf.VPFPrimitiveData;
-import gov.nasa.worldwind.formats.vpf.VPFTile;
-import gov.nasa.worldwind.geom.LatLon;
-import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,22 +91,25 @@ import java.util.logging.Logger;
 
 import com.google.common.io.Files;
 
+import gov.nasa.worldwind.formats.vpf.VPFBasicFeatureFactory;
+import gov.nasa.worldwind.formats.vpf.VPFCoverage;
+import gov.nasa.worldwind.formats.vpf.VPFDatabase;
+import gov.nasa.worldwind.formats.vpf.VPFFeature;
+import gov.nasa.worldwind.formats.vpf.VPFFeatureClass;
+import gov.nasa.worldwind.formats.vpf.VPFFeatureFactory;
+import gov.nasa.worldwind.formats.vpf.VPFLibrary;
+import gov.nasa.worldwind.formats.vpf.VPFPrimitiveData;
+import gov.nasa.worldwind.formats.vpf.VPFTile;
+import gov.nasa.worldwind.geom.LatLon;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+
 public class Vpf2Flat
 {
 
     protected static final Logger logger = getLogger( Vpf2Flat.class );
 
 
-
-    public static void convertVpfToFlat( String vpfParentDir, String flatParentDir ) throws IOException
-    {
-        convertVpfToFlat( vpfParentDir, flatParentDir, UTF_8 );
-    }
-
-    public static void convertVpfToFlat( String vpfParentDir, String flatParentDir, Charset charset ) throws IOException
-    {
-        convertVpfToFlat( new File( vpfParentDir ), new File( flatParentDir ), charset );
-    }
 
     public static void convertVpfToFlat( File vpfParentDir, File flatParentDir, Charset charset ) throws IOException
     {

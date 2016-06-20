@@ -26,16 +26,17 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
 import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
 import static com.metsci.glimpse.support.FrameUtils.newFrame;
 import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -67,11 +68,7 @@ public class DncPainterExample
         //
 
         RenderCacheConfig renderConfig = new RenderCacheConfig( );
-        renderConfig.flatParentDir = new File( "/path/to/DNC_FLAT" );
-        renderConfig.renderParentDir = new File( "/path/to/DNC_RENDER" );
-
-        //renderConfig.proj = dncPlateCarree;
-        //renderConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Diego
+        renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
         renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
         RenderCache renderCache = new RenderCache( renderConfig, 4 );

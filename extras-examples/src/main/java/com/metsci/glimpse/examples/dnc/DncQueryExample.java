@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccFeatures;
@@ -44,10 +45,10 @@ import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.newLabel;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static java.awt.Font.BOLD;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -127,11 +128,7 @@ public class DncQueryExample
         //
 
         RenderCacheConfig renderConfig = new RenderCacheConfig( );
-        renderConfig.flatParentDir = new File( "/path/to/DNC_FLAT" );
-        renderConfig.renderParentDir = new File( "/path/to/DNC_RENDER" );
-
-        //renderConfig.proj = dncPlateCarree;
-        //renderConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Diego
+        renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
         renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
         RenderCache renderCache = new RenderCache( renderConfig, 4 );
@@ -143,7 +140,6 @@ public class DncQueryExample
 
         QueryCacheConfig queryConfig = new QueryCacheConfig( );
         queryConfig.flatParentDir = renderConfig.flatParentDir;
-        queryConfig.queryParentDir = new File( "/path/to/DNC_QUERY" );
         queryConfig.proj = renderConfig.proj;
 
         QueryCache queryCache = new QueryCache( queryConfig, 4 );
