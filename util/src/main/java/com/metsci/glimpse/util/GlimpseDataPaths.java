@@ -26,139 +26,211 @@
  */
 package com.metsci.glimpse.util;
 
-import java.io.File;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
+import java.io.File;
+import java.util.logging.Logger;
+
+/**
+ * A class containing paths for Glimpse-related data directories. Most client code should
+ * not refer to this class directly, but should instead use the appropriate module-specific
+ * {@code DataPaths} class (e.g. {@code DncDataPaths}).
+ * <p>
+ * If a Glimpse module needs to store module-specific data, it should have its own module-
+ * specific directories, and should provide a module-specific {@code DataPaths} class that
+ * contains the paths of those directories. Module-specific dirs should be subdirs under
+ * the {@link GlimpseDataPaths} dirs.
+ * <p>
+ * For each {@link GlimpseDataPaths} path, there is:
+ * <ol>
+ * <li>An OS-appropriate default
+ * <li>An environment variable (which, if present, overrides the default)
+ * <li>A JVM property (which, if present, overrides both default and env var)
+ * </ol>
+ * <p>
+ * The "shared" dir is intended to allow users to share data. It should generally be
+ * expected to be read-only.
+ * <p>
+ * The "user" dirs are user-specific, and can generally be assumed to be writable.
+ * Typically, if data exists in both the user dir and the shared dir, the user dir
+ * should take precedence, because the user has more control over it than over the
+ * shared dir.
+ * <p>
+ * The "cache" dir is intended to hold data that a program can generate if it does not
+ * already exist. Cache dirs can be freely deleted when the program is not running.
+ * <p>
+ * The "data" dirs are intended to hold data which cannot be regenerated easily.
+ * <p>
+ * @author hogye
+ */
 public class GlimpseDataPaths
 {
 
     /**
-     *
+     * Parent directory for permanent data (not easy to regenerate) that can be read by
+     * multiple users.
+     * <ol>
+     * <li>Default:
+     *   <ul>
+     *   <li>Windows: {@code %ALLUSERSPROFILE%\\Glimpse\\Data}
+     *   <li>Mac: {@code /Library/Application Support/Glimpse/Data}
+     *   <li>Other: {@code /var/lib/glimpse/data}
+     *   </ul>
+     * <li>Env-var: {@code GLIMPSE_SHARED_DATA}
+     * <li>JVM prop: {@code glimpse.sharedDataDir}
+     * </ol>
      */
-    public static final String glimpseSharedDataDirProp = "glimpse.sharedDataDir";
-
-    /**
-     *
-     */
-    public static final File glimpseSharedDataDir;
-    static
+    public static final File glimpseSharedDataDir = glimpseSharedDataDir( );
+    private static File glimpseSharedDataDir( )
     {
-        String override = System.getProperty( glimpseSharedDataDirProp );
-        if ( override != null )
+        String jvmProp = System.getProperty( "glimpse.sharedDataDir" );
+        if ( jvmProp != null )
         {
-            glimpseSharedDataDir = new File( override );
+            return new File( jvmProp );
         }
-        else if ( onWindows( ) )
+
+        String envVar = System.getenv( "GLIMPSE_SHARED_DATA" );
+        if ( envVar != null )
+        {
+            return new File( envVar );
+        }
+
+        if ( onWindows( ) )
         {
             String allUsersProfile = trimWindowsPath( System.getenv( "ALLUSERSPROFILE" ) );
-            glimpseSharedDataDir = new File( allUsersProfile + "\\Glimpse\\Data" );
+            return new File( allUsersProfile + "\\Glimpse\\Data" );
         }
-        else if ( onMac( ) )
+
+        if ( onMac( ) )
         {
-            glimpseSharedDataDir = new File( "/Library/Application Support/Glimpse/Data" );
+            return new File( "/Library/Application Support/Glimpse/Data" );
         }
-        else
-        {
-            glimpseSharedDataDir = new File( "/var/lib/glimpse/data" );
-        }
+
+        return new File( "/var/lib/glimpse/data" );
     }
 
     /**
-     *
+     * Parent directory for permanent data (not easy to regenerate) that can be read and
+     * written by the current user.
+     * <ol>
+     * <li>Default:
+     *   <ul>
+     *   <li>Windows: {@code %LOCALAPPDATA%\\Glimpse\\Data}
+     *   <li>Mac: {@code ~/Library/Glimpse/Data}
+     *   <li>Other: {@code ~/.local/share/glimpse}
+     *   </ul>
+     * <li>Env-var: {@code GLIMPSE_USER_DATA}
+     * <li>JVM prop: {@code glimpse.userDataDir}
+     * </ol>
      */
-    public static final String glimpseUserDataDirProp = "glimpse.userDataDir";
-
-    /**
-     *
-     */
-    public static final File glimpseUserDataDir;
-    static
+    public static final File glimpseUserDataDir = glimpseUserDataDir( );
+    private static File glimpseUserDataDir( )
     {
-        String override = System.getProperty( glimpseUserDataDirProp );
-        if ( override != null )
+        String jvmProp = System.getProperty( "glimpse.userDataDir" );
+        if ( jvmProp != null )
         {
-            glimpseUserDataDir = new File( override );
+            return new File( jvmProp );
         }
-        else if ( onWindows( ) )
+
+        String envVar = System.getenv( "GLIMPSE_USER_DATA" );
+        if ( envVar != null )
+        {
+            return new File( envVar );
+        }
+
+        if ( onWindows( ) )
         {
             String localAppData = trimWindowsPath( System.getenv( "LOCALAPPDATA" ) );
-            glimpseUserDataDir = new File( localAppData + "\\Glimpse\\Data" );
+            return new File( localAppData + "\\Glimpse\\Data" );
         }
-        else if ( onMac( ) )
+
+        if ( onMac( ) )
         {
             String userHome = trimUnixPath( System.getProperty( "user.home" ) );
-            glimpseUserDataDir = new File( userHome + "/Library/Glimpse/Data" );
+            return new File( userHome + "/Library/Glimpse/Data" );
         }
-        else
-        {
-            String userHome = trimUnixPath( System.getProperty( "user.home" ) );
-            glimpseUserDataDir = new File( userHome + "/.local/share/glimpse" );
-        }
+
+        String userHome = trimUnixPath( System.getProperty( "user.home" ) );
+        return new File( userHome + "/.local/share/glimpse" );
     }
 
     /**
-     *
+     * Parent directory for cache data (easy to regenerate) that can be read and written
+     * by the current user.
+     * <ol>
+     * <li>Default:
+     *   <ul>
+     *   <li>Windows: {@code %LOCALAPPDATA%\\Glimpse\\Cache}
+     *   <li>Mac: {@code ~/Library/Caches/Glimpse}
+     *   <li>Other: {@code ~/.cache/glimpse}
+     *   </ul>
+     * <li>Env-var: {@code GLIMPSE_USER_CACHE}
+     * <li>JVM prop: {@code glimpse.userCacheDir}
+     * </ol>
      */
-    public static final String glimpseUserCacheDirProp = "glimpse.userCacheDir";
-
-    /**
-     *
-     */
-    public static final File glimpseUserCacheDir;
-    static
+    public static final File glimpseUserCacheDir = glimpseUserCacheDir( );
+    private static File glimpseUserCacheDir( )
     {
-        String override = System.getProperty( glimpseUserCacheDirProp );
-        if ( override != null )
+        String jvmProp = System.getProperty( "glimpse.userCacheDir" );
+        if ( jvmProp != null )
         {
-            glimpseUserCacheDir = new File( override );
+            return new File( jvmProp );
         }
-        else if ( onWindows( ) )
+
+        String envVar = System.getenv( "GLIMPSE_USER_CACHE" );
+        if ( envVar != null )
+        {
+            return new File( envVar );
+        }
+
+        if ( onWindows( ) )
         {
             String localAppData = trimWindowsPath( System.getenv( "LOCALAPPDATA" ) );
-            glimpseUserCacheDir = new File( localAppData + "\\Glimpse\\Cache" );
+            return new File( localAppData + "\\Glimpse\\Cache" );
         }
-        else if ( onMac( ) )
+
+        if ( onMac( ) )
         {
             String userHome = trimUnixPath( System.getProperty( "user.home" ) );
-            glimpseUserCacheDir = new File( userHome + "/Library/Caches/Glimpse" );
+            return new File( userHome + "/Library/Caches/Glimpse" );
         }
-        else
-        {
-            String userHome = trimUnixPath( System.getProperty( "user.home" ) );
-            glimpseUserCacheDir = new File( userHome + "/.cache/glimpse" );
-        }
+
+        String userHome = trimUnixPath( System.getProperty( "user.home" ) );
+        return new File( userHome + "/.cache/glimpse" );
+    }
+
+    // Log dir locations, after they've been initialized
+    private static final Logger logger = getLogger( GlimpseDataPaths.class );
+    static
+    {
+        logInfo( logger, "Glimpse shared data: %s", glimpseSharedDataDir );
+        logInfo( logger, "Glimpse user data: %s", glimpseUserDataDir );
+        logInfo( logger, "Glimpse user cache: %s", glimpseUserCacheDir );
     }
 
     /**
-     *
+     * Determine whether current platform's OS is Windows.
      */
-    public static boolean onWindows( )
+    private static boolean onWindows( )
     {
         String osName = System.getProperty( "os.name" );
         return ( osName != null && osName.toLowerCase( ).startsWith( "windows" ) );
     }
 
     /**
-     *
+     * Determine whether current platform's OS is Mac OS.
      */
-    public static boolean onMac( )
+    private static boolean onMac( )
     {
         String osName = System.getProperty( "os.name" );
         return ( osName != null && osName.toLowerCase( ).startsWith( "mac" ) );
     }
 
     /**
-     *
-     */
-    public static boolean onLinux( )
-    {
-        String osName = System.getProperty( "os.name" );
-        return ( osName != null && osName.toLowerCase( ).startsWith( "linux" ) );
-    }
-
-    /**
      * Remove trailing backslashes.
      */
-    public static String trimWindowsPath( String windowsPath )
+    private static String trimWindowsPath( String windowsPath )
     {
         return windowsPath.replaceAll( "\\\\*$", "" );
     }
@@ -167,7 +239,7 @@ public class GlimpseDataPaths
      * Remove trailing forward slashes, except for a forward slash that is the
      * first char of the string.
      */
-    public static String trimUnixPath( String unixPath )
+    private static String trimUnixPath( String unixPath )
     {
         return unixPath.replaceAll( "(?<=.)/*$", "" );
     }
