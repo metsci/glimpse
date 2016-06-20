@@ -44,6 +44,7 @@ import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
@@ -68,6 +69,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -335,39 +337,51 @@ public class Vpf2FlatConverter
                 {
                     try
                     {
-                        int stepsComplete = 0;
-                        flatParentDir.mkdirs( );
-                        for ( String dbName : dbNames )
+                        if ( dbNames.isEmpty( ) )
                         {
-                            File dhtFile = dhtFiles.get( dbName );
-                            checkForCancellation.run( );
-                            VPFDatabase vpfDatabase = VPFDatabase.fromFile( dhtFile.getPath( ) );
-                            checkForCancellation.run( );
-                            Database database = readVpfDatabase( vpfDatabase );
-                            checkForCancellation.run( );
-
-                            stepsComplete++;
-                            double fracCompleteA = stepsComplete / ( 2.0*dbNames.size( ) );
-                            SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteA ) );
-
-                            String dirname = vpfDatabase.getName( ).toLowerCase( ).replace( "dnc", "dncflat" );
-                            checkForCancellation.run( );
-                            File flatDir = createNewDir( flatParentDir, dirname );
-                            checkForCancellation.run( );
-                            writeFlatDatabase( database, flatDir, UTF_8 );
-                            checkForCancellation.run( );
-
-                            stepsComplete++;
-                            double fracCompleteB = stepsComplete / ( 2.0*dbNames.size( ) );
-                            SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteB ) );
+                            SwingUtilities.invokeLater( ( ) ->
+                            {
+                                progressFrame.dispose( );
+                                showMessageDialog( frame, "No VPF databases to convert", "Error", ERROR_MESSAGE );
+                                setTreeEnabled( contentPane, true );
+                            } );
                         }
-
-                        SwingUtilities.invokeLater( ( ) ->
+                        else
                         {
-                            progressFrame.dispose( );
-                            showMessageDialog( frame, "Conversion succeeded", "Success", INFORMATION_MESSAGE );
-                            setTreeEnabled( contentPane, true );
-                        } );
+                            int stepsComplete = 0;
+                            flatParentDir.mkdirs( );
+                            for ( String dbName : dbNames )
+                            {
+                                File dhtFile = dhtFiles.get( dbName );
+                                checkForCancellation.run( );
+                                VPFDatabase vpfDatabase = VPFDatabase.fromFile( dhtFile.getPath( ) );
+                                checkForCancellation.run( );
+                                Database database = readVpfDatabase( vpfDatabase );
+                                checkForCancellation.run( );
+
+                                stepsComplete++;
+                                double fracCompleteA = stepsComplete / ( 2.0*dbNames.size( ) );
+                                SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteA ) );
+
+                                String dirname = vpfDatabase.getName( ).toLowerCase( ).replace( "dnc", "dncflat" );
+                                checkForCancellation.run( );
+                                File flatDir = createNewDir( flatParentDir, dirname );
+                                checkForCancellation.run( );
+                                writeFlatDatabase( database, flatDir, UTF_8 );
+                                checkForCancellation.run( );
+
+                                stepsComplete++;
+                                double fracCompleteB = stepsComplete / ( 2.0*dbNames.size( ) );
+                                SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteB ) );
+                            }
+
+                            SwingUtilities.invokeLater( ( ) ->
+                            {
+                                progressFrame.dispose( );
+                                showMessageDialog( frame, "Conversion succeeded", "Success", INFORMATION_MESSAGE );
+                                setTreeEnabled( contentPane, true );
+                            } );
+                        }
                     }
                     catch ( CancellationException e )
                     {

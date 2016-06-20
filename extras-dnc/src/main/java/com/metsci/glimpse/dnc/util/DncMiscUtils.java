@@ -430,7 +430,14 @@ public class DncMiscUtils
     {
         if ( !dir.mkdirs( ) )
         {
-            throw new RuntimeException( "Failed to create directory (maybe it already exists?): path = " + dir.getAbsolutePath( ) );
+            if ( dir.exists( ) )
+            {
+                throw new RuntimeException( "Directory already exists: path = " + dir.getAbsolutePath( ) );
+            }
+            else
+            {
+                throw new RuntimeException( "Failed to create directory: path = " + dir.getAbsolutePath( ) );
+            }
         }
         return dir;
     }
