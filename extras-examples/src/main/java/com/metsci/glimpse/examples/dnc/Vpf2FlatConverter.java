@@ -145,7 +145,7 @@ public class Vpf2FlatConverter
             JPanel contentPane = new JPanel( new MigLayout( ) );
 
             contentPane.add( new JLabel( "From:" ), "wrap" );
-            contentPane.add( new JLabel( "VFP Parent:" ), "gapleft 8" );
+            contentPane.add( new JLabel( "VPF Parent:" ), "gapleft 8" );
             contentPane.add( vpfParentField, "growx, pushx" );
             contentPane.add( vpfParentButton, "wrap" );
 
