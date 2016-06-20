@@ -27,7 +27,7 @@
 package com.metsci.glimpse.util;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logConfig;
 
 import java.io.File;
 import java.util.logging.Logger;
@@ -42,11 +42,11 @@ import java.util.logging.Logger;
  * contains the paths of those directories. Module-specific dirs should be subdirs under
  * the {@link GlimpseDataPaths} dirs.
  * <p>
- * For each {@link GlimpseDataPaths} path, there is:
+ * The value of each {@link GlimpseDataPaths} path is set based on:
  * <ol>
- * <li>An OS-appropriate default
- * <li>An environment variable (which, if present, overrides the default)
- * <li>A JVM property (which, if present, overrides both default and env var)
+ * <li>A JVM property (highest precedence)
+ * <li>An environment variable
+ * <li>An OS-appropriate default (lowest precedence)
  * </ol>
  * <p>
  * The "shared" dir is intended to allow users to share data. It should generally be
@@ -71,14 +71,14 @@ public class GlimpseDataPaths
      * Parent directory for permanent data (not easy to regenerate) that can be read by
      * multiple users.
      * <ol>
+     * <li>JVM prop (if defined): {@code glimpse.sharedDataDir}
+     * <li>Env var (if defined): {@code GLIMPSE_SHARED_DATA}
      * <li>Default:
      *   <ul>
      *   <li>Windows: {@code %ALLUSERSPROFILE%\\Glimpse\\Data}
      *   <li>Mac: {@code /Library/Application Support/Glimpse/Data}
      *   <li>Other: {@code /var/lib/glimpse/data}
      *   </ul>
-     * <li>Env-var: {@code GLIMPSE_SHARED_DATA}
-     * <li>JVM prop: {@code glimpse.sharedDataDir}
      * </ol>
      */
     public static final File glimpseSharedDataDir = glimpseSharedDataDir( );
@@ -114,14 +114,14 @@ public class GlimpseDataPaths
      * Parent directory for permanent data (not easy to regenerate) that can be read and
      * written by the current user.
      * <ol>
+     * <li>JVM prop (if defined): {@code glimpse.userDataDir}
+     * <li>Env var (if defined): {@code GLIMPSE_USER_DATA}
      * <li>Default:
      *   <ul>
      *   <li>Windows: {@code %LOCALAPPDATA%\\Glimpse\\Data}
      *   <li>Mac: {@code ~/Library/Glimpse/Data}
      *   <li>Other: {@code ~/.local/share/glimpse}
      *   </ul>
-     * <li>Env-var: {@code GLIMPSE_USER_DATA}
-     * <li>JVM prop: {@code glimpse.userDataDir}
      * </ol>
      */
     public static final File glimpseUserDataDir = glimpseUserDataDir( );
@@ -159,14 +159,14 @@ public class GlimpseDataPaths
      * Parent directory for cache data (easy to regenerate) that can be read and written
      * by the current user.
      * <ol>
+     * <li>JVM prop (if defined): {@code glimpse.userCacheDir}
+     * <li>Env var (if defined): {@code GLIMPSE_USER_CACHE}
      * <li>Default:
      *   <ul>
      *   <li>Windows: {@code %LOCALAPPDATA%\\Glimpse\\Cache}
      *   <li>Mac: {@code ~/Library/Caches/Glimpse}
      *   <li>Other: {@code ~/.cache/glimpse}
      *   </ul>
-     * <li>Env-var: {@code GLIMPSE_USER_CACHE}
-     * <li>JVM prop: {@code glimpse.userCacheDir}
      * </ol>
      */
     public static final File glimpseUserCacheDir = glimpseUserCacheDir( );
@@ -204,9 +204,9 @@ public class GlimpseDataPaths
     private static final Logger logger = getLogger( GlimpseDataPaths.class );
     static
     {
-        logInfo( logger, "Glimpse shared data: %s", glimpseSharedDataDir );
-        logInfo( logger, "Glimpse user data: %s", glimpseUserDataDir );
-        logInfo( logger, "Glimpse user cache: %s", glimpseUserCacheDir );
+        logConfig( logger, "Glimpse shared data: %s", glimpseSharedDataDir );
+        logConfig( logger, "Glimpse user data: %s", glimpseUserDataDir );
+        logConfig( logger, "Glimpse user cache: %s", glimpseUserCacheDir );
     }
 
     /**
