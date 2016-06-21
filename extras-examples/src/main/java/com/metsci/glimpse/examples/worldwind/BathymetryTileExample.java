@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.worldwind;
 
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.*;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class BathymetryTileExample
         worldwindFrame.setSize( 800, 800 );
         worldwindFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         worldwindFrame.setVisible( true );
-        
+
         // create a Glimpse Frame
         NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );
@@ -154,11 +154,11 @@ public class BathymetryTileExample
         glimpseFrame.setVisible( true );
 
         // pass mouse events from WorldWind back to Glimpse
-        //linkMouseEvents( wwc, projection, glimpseLayer );
+        linkMouseEvents( wwc, projection, glimpseLayer );
 
         // force the WorldWind and Glimpse windows to pan together
-        //linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
-        //linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
+        linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
+        linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
 
         // add a thread to constantly repaint the WorldWind window
         // this isn't an ideal solution, but because Glimpse currently
