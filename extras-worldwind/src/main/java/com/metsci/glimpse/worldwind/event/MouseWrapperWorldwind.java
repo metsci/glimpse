@@ -34,6 +34,7 @@ import java.awt.event.MouseWheelListener;
 import java.util.EnumSet;
 
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -103,6 +104,12 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
         {
             throw new IllegalArgumentException( "GlimpseSurfaceTile must use a GlimpseAxisLayout2D for delivery of GlimpseMouseEvents." );
         }
+    }
+    
+    @Override
+    protected GlimpseCanvas getCanvas( )
+    {
+        return tile.getGlimpseCanvas( );
     }
 
     @Override
