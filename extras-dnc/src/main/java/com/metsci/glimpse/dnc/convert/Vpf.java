@@ -167,6 +167,7 @@ public class Vpf
         File[] children = parentDir.listFiles();
         if (children != null)
         {
+            sort(children);
             for (File dbDir : children)
             {
                 File dhtFile = findDhtFile(dbDir);
