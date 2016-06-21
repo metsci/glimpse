@@ -155,7 +155,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     {
         TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
         setTextureScale( tile );
-        tile.setAlpha( alpha );
+        tile.setOpacity( getOpacity( ) );
         return tile;
     }
 
