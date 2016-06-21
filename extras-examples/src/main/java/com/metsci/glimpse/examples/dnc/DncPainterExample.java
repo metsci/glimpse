@@ -85,7 +85,7 @@ public class DncPainterExample
 
         DncPainterSettings dncPainterSettings = new DncPainterSettingsImpl( renderConfig.proj );
         DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings, DNC_THEME_STANDARD );
-        dncPainter.activateCoverages( "lim", "nav", "cul", "iwy", "obs", "hyd", "por", "ecr", "lcr", "env", "rel", "coa" );
+        dncPainter.activateCoverages( renderCache.coverages );
         dncPainter.addAxis( plot.getAxis( ) );
 
         plot.getLayoutCenter( ).addPainter( dncPainter );
