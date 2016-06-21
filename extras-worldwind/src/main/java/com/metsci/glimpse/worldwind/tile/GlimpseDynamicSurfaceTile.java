@@ -35,14 +35,12 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLOffscreenAutoDrawable.FBO;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
-import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -50,7 +48,6 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.vector.Vector2d;
-import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.LatLon;
@@ -148,7 +145,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     {
         if ( this.offscreenCanvas != null )
         {
-            return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );            
+            return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );
         }
         else
         {
@@ -164,13 +161,13 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             offscreenCanvas = new FBOGlimpseCanvas( dc.getGLContext( ), width, height );
             offscreenCanvas.addLayout( background );
         }
-        
+
         if ( offscreenCanvas.getGLContext( ) != null )
         {
             updateGeometry( dc );
-    
+
             drawOffscreen( dc );
-    
+
             if ( tile == null && corners != null )
             {
                 int textureHandle = getTextureHandle( );
@@ -178,7 +175,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             }
         }
     }
-    
+
     @Override
     protected void doRender( DrawContext dc )
     {
@@ -205,7 +202,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         stack.pushProjection( gl );
 
         GLContext c = offscreenCanvas.getGLContext( );
-        
+
         if ( c != null )
         {
             c.makeCurrent( );
@@ -239,9 +236,10 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected void updateGeometry( DrawContext dc )
     {
+        List<LatLon> screenCorners1 = getCornersHeuristic1( dc );
         List<LatLon> screenCorners2 = getCornersHeuristic2( dc );
 
-        if ( isValid( screenCorners2 ) )
+        if ( isValid( screenCorners1 ) && isValid( screenCorners2 ) )
         {
             updateGeometry( screenCorners2 );
         }
