@@ -33,7 +33,6 @@ import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 import static com.metsci.glimpse.util.GeneralUtils.newHashMap;
 import static com.metsci.glimpse.util.GeneralUtils.newHashSet;
 import static gov.nasa.worldwind.formats.vpf.VPFConstants.EDGE_PRIMITIVE_TABLE;
-import static java.lang.String.format;
 import static java.util.Arrays.sort;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
@@ -44,8 +43,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +53,6 @@ import gov.nasa.worldwind.formats.vpf.VPFBasicPrimitiveDataFactory;
 import gov.nasa.worldwind.formats.vpf.VPFBufferedRecordData;
 import gov.nasa.worldwind.formats.vpf.VPFConstants;
 import gov.nasa.worldwind.formats.vpf.VPFCoverage;
-import gov.nasa.worldwind.formats.vpf.VPFDatabase;
 import gov.nasa.worldwind.formats.vpf.VPFFeature;
 import gov.nasa.worldwind.formats.vpf.VPFFeatureClass;
 import gov.nasa.worldwind.formats.vpf.VPFFeatureTableFilter;
@@ -161,68 +157,12 @@ public class Vpf
     };
 
 
-    public static Iterable<VPFDatabase> vpfDatabases(File parentDir)
-    {
-        return vpfDatabases(parentDir, null);
-    }
-
-
-    public static Iterable<VPFDatabase> vpfDatabases(File parentDir, int[] dbNums)
-    {
-        final Map<String,File> dhtFiles = vpfDatabaseFilesByName(parentDir);
-
-        if (dbNums != null)
-        {
-            Set<String> dbNames = new HashSet<>();
-            for (int dbNum : dbNums)
-            {
-                dbNames.add(format("DNC%02d", dbNum));
-            }
-            for (Iterator<String> it = dhtFiles.keySet().iterator(); it.hasNext(); )
-            {
-                String dbName = it.next();
-                if (!dbNames.contains(dbName.toUpperCase()))
-                {
-                    it.remove();
-                }
-            }
-        }
-
-        return new Iterable<VPFDatabase>()
-        {
-            public Iterator<VPFDatabase> iterator()
-            {
-                final Iterator<File> it = dhtFiles.values().iterator();
-
-                return new Iterator<VPFDatabase>()
-                {
-                    public boolean hasNext()
-                    {
-                        return it.hasNext();
-                    }
-
-                    public VPFDatabase next()
-                    {
-                        File dhtFile = it.next();
-                        return VPFDatabase.fromFile(dhtFile.getPath());
-                    }
-
-                    public void remove()
-                    {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
-    }
-
-
     /**
-     * Returns a map from database name to DHT file
+     * Returns a map from database name to database dir
      */
-    public static Map<String,File> vpfDatabaseFilesByName(File parentDir)
+    public static Map<String,File> vpfDatabaseDirsByName(File parentDir)
     {
-        Map<String,File> dbPaths = new LinkedHashMap<>();
+        Map<String,File> dbDirs = new LinkedHashMap<>();
 
         File[] children = parentDir.listFiles();
         if (children != null)
@@ -233,15 +173,15 @@ public class Vpf
                 if (dhtFile != null)
                 {
                     String dbName = readDatabaseName(dhtFile);
-                    if (dbName != null && !dbPaths.containsKey(dbName))
+                    if (dbName != null && !dbDirs.containsKey(dbName))
                     {
-                        dbPaths.put(dbName, dhtFile.getAbsoluteFile());
+                        dbDirs.put(dbName, dhtFile.getParentFile().getAbsoluteFile());
                     }
                 }
             }
         }
 
-        return dbPaths;
+        return dbDirs;
     }
 
 

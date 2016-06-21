@@ -28,7 +28,7 @@ package com.metsci.glimpse.examples.dnc;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncDefaultUserFlatDir;
-import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabaseFilesByName;
+import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabaseDirsByName;
 import static com.metsci.glimpse.dnc.convert.Vpf2Flat.readVpfDatabase;
 import static com.metsci.glimpse.dnc.convert.Vpf2Flat.writeFlatDatabase;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
@@ -80,7 +80,6 @@ import com.metsci.glimpse.dnc.convert.Vpf2Flat.Database;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 
-import gov.nasa.worldwind.formats.vpf.VPFDatabase;
 import net.miginfocom.swing.MigLayout;
 
 public class Vpf2FlatConverter
@@ -102,7 +101,7 @@ public class Vpf2FlatConverter
             class State
             {
                 public File browseDir = new File( System.getProperty( "user.home" ) );
-                public Map<String,File> dhtFiles = new LinkedHashMap<>( );
+                public Map<String,File> dbDirs = new LinkedHashMap<>( );
                 public Set<String> dbNames = new LinkedHashSet<>( );
             }
             State state = new State( );
@@ -214,14 +213,14 @@ public class Vpf2FlatConverter
                             vpfCheckboxesScroller.validate( );
                         } );
 
-                        Map<String,File> dhtFiles = vpfDatabaseFilesByName( new File( newPath ) );
+                        Map<String,File> dbDirs = vpfDatabaseDirsByName( new File( newPath ) );
 
                         SwingUtilities.invokeAndWait( ( ) ->
                         {
-                            state.dhtFiles = dhtFiles;
-                            state.dbNames = new LinkedHashSet<>( dhtFiles.keySet( ) );
+                            state.dbDirs = dbDirs;
+                            state.dbNames = new LinkedHashSet<>( dbDirs.keySet( ) );
 
-                            dhtFiles.forEach( ( dbName, dhtFile ) ->
+                            dbDirs.forEach( ( dbName, dbDir ) ->
                             {
                                 JCheckBox checkbox = new JCheckBox( dbName );
                                 checkbox.addItemListener( ( ev ) ->
@@ -306,7 +305,7 @@ public class Vpf2FlatConverter
             convertButton.addActionListener( ( ev ) ->
             {
                 File flatParentDir = new File( flatParentField.getText( ) );
-                Map<String,File> dhtFiles = ImmutableMap.copyOf( state.dhtFiles );
+                Map<String,File> dbDirs = ImmutableMap.copyOf( state.dbDirs );
                 Set<String> dbNames = ImmutableSet.copyOf( state.dbNames );
 
                 setTreeEnabled( contentPane, false );
@@ -350,18 +349,16 @@ public class Vpf2FlatConverter
                             flatParentDir.mkdirs( );
                             for ( String dbName : dbNames )
                             {
-                                File dhtFile = dhtFiles.get( dbName );
+                                File dbDir = dbDirs.get( dbName );
                                 checkForCancellation.run( );
-                                VPFDatabase vpfDatabase = VPFDatabase.fromFile( dhtFile.getPath( ) );
-                                checkForCancellation.run( );
-                                Database database = readVpfDatabase( vpfDatabase );
+                                Database database = readVpfDatabase( dbDir );
                                 checkForCancellation.run( );
 
                                 stepsComplete++;
                                 double fracCompleteA = stepsComplete / ( 2.0*dbNames.size( ) );
                                 SwingUtilities.invokeAndWait( ( ) -> progressPane.setProgress( fracCompleteA ) );
 
-                                String dirname = vpfDatabase.getName( ).toLowerCase( ).replace( "dnc", "dncflat" );
+                                String dirname = database.name.toLowerCase( ).replace( "dnc", "dncflat" );
                                 checkForCancellation.run( );
                                 File flatDir = createNewDir( flatParentDir, dirname );
                                 checkForCancellation.run( );
