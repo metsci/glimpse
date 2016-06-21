@@ -58,7 +58,7 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 
     protected float scaleX = 1.0f;
     protected float scaleY = 1.0f;
-    protected float alpha = 1.0f;
+    protected float opacity = 1.0f;
 
     protected List<TextureSurfaceTile> thisList = Collections.singletonList( this );
 
@@ -77,9 +77,9 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         this.initializeGeometry( corners );
     }
 
-    public void setAlpha( float alpha )
+    public void setOpacity( double opacity )
     {
-        this.alpha = alpha;
+        this.opacity = (float) opacity;
     }
     
     public void setSurfaceTileRenderer( SurfaceTileRenderer renderer )
@@ -133,11 +133,11 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 
         SurfaceTileRenderer r = renderer != null ? renderer : dc.getGeographicSurfaceTileRenderer( );
 
-        if ( alpha != 1.0f )
+        if ( opacity != 1.0f )
         {
             gl.glEnable( GL2.GL_BLEND );
             gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glColor4f( 1.0f, 1.0f, 1.0f, alpha );
+            gl.glColor4f( 1.0f, 1.0f, 1.0f, opacity );
         }
         else
         {

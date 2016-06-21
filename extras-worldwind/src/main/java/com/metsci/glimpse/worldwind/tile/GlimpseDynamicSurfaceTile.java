@@ -89,8 +89,6 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     protected FBOGlimpseCanvas offscreenCanvas;
     protected TextureSurfaceTile tile;
 
-    protected float alpha = 1.0f;
-
     public GlimpseDynamicSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int width, int height, double minLat, double maxLat, double minLon, double maxLon )
     {
         this( layout, axes, projection, width, height, getCorners( new LatLonBounds( minLat, maxLat, minLon, maxLon ) ) );
@@ -115,11 +113,21 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.background.addLayout( mask );
     }
+    
+    @Override
+    public void setOpacity( double opacity )
+    {
+        super.setOpacity( opacity );
+        if ( this.tile != null ) this.tile.setOpacity( opacity );
+    }
 
+    /**
+     * @deprecated use {@link #setOpacity(double)} instead
+     */
+    @Deprecated
     public void setAlpha( float alpha )
     {
-        this.alpha = alpha;
-        if ( this.tile != null ) this.tile.setAlpha( alpha );
+        this.setOpacity( alpha );
     }
 
     public void updateMaxCorners( List<LatLon> corners )
@@ -230,7 +238,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
     {
         TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
-        tile.setAlpha( alpha );
+        tile.setOpacity( getOpacity( ) );
         return tile;
     }
 
