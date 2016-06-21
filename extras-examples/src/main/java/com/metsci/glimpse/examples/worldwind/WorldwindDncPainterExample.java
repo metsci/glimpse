@@ -28,6 +28,7 @@ import com.metsci.glimpse.worldwind.tile.GlimpseResizingSurfaceTile;
 
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
@@ -43,8 +44,8 @@ public class WorldwindDncPainterExample
 
         // setup RenderCacheConfig which points to DNC data files
         RenderCacheConfig dncCacheConfig = new RenderCacheConfig( );
-        dncCacheConfig.flatParentDir = new File( "/path/to/DNC_FLAT" );
-        dncCacheConfig.renderParentDir = new File( "/path/to/DNC_RENDER" );
+        dncCacheConfig.flatParentDir = new File( "/dnc/DNC_FLAT" );
+        dncCacheConfig.renderParentDir = new File( "/dnc/DNC_RENDER" );
 
         // setup projection for transforming DNC_FLAT lat/lon coordinates into flat map coordinates
         // here we choose the identity transform (plate carree) because that is what WorldWind
@@ -71,7 +72,7 @@ public class WorldwindDncPainterExample
         panel.setLayout( new BorderLayout( ) );
         worldwindFrame.add( panel );
 
-        final WorldWindowGLCanvas wwc = new WorldWindowGLCanvas( );
+        final WorldWindowGLJPanel wwc = new WorldWindowGLJPanel( );
         wwc.setModel( new BasicModel( ) );
 
         panel.add( wwc, BorderLayout.CENTER );
@@ -112,7 +113,7 @@ public class WorldwindDncPainterExample
             public void componentResized( ComponentEvent e )
             {
                 Dimension dim = e.getComponent( ).getSize( );
-                glimpseLayer.setPreferredDimensions( ( int ) dim.getWidth( ) * 2, ( int ) dim.getHeight( ) * 2 );
+                glimpseLayer.setPreferredDimensions( ( int ) dim.getWidth( ) * 3, ( int ) dim.getHeight( ) * 3 );
                 axis.setSizePixels( new GlimpseBounds( dim ) );
             }
         } );

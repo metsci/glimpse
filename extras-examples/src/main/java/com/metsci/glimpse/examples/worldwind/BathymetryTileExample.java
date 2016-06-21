@@ -135,7 +135,7 @@ public class BathymetryTileExample
         worldwindFrame.setSize( 800, 800 );
         worldwindFrame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         worldwindFrame.setVisible( true );
-
+        
         // create a Glimpse Frame
         NewtSwingGlimpseCanvas glimpseCanvas = new NewtSwingGlimpseCanvas( wwc.getContext( ) );
         glimpseCanvas.addLayout( plot );
@@ -154,7 +154,7 @@ public class BathymetryTileExample
         glimpseFrame.setVisible( true );
 
         // pass mouse events from WorldWind back to Glimpse
-        linkMouseEvents( wwc, projection, glimpseLayer );
+        //linkMouseEvents( wwc, projection, glimpseLayer );
 
         // force the WorldWind and Glimpse windows to pan together
         //linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
