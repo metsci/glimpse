@@ -520,11 +520,12 @@ public class DockingGroup
                 if ( dockerRoot != null )
                 {
                     DockingFrame frame = addNewFrame( );
-                    frame.docker.restore( dockerRoot );
                     frame.setLocation( frameArr.x, frameArr.y );
                     frame.setSize( frameArr.width, frameArr.height );
                     frame.setExtendedState( getFrameExtendedState( frameArr ) );
                     frame.setVisible( true );
+
+                    frame.docker.restore( dockerRoot );
                 }
             }
         }
