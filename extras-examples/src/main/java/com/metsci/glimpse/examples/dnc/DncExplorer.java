@@ -331,9 +331,9 @@ public class DncExplorer
                 new View( "prefsView", prefsPanel,    "Prefs",    false, null, requireIcon( "icons/fugue/equalizer.png"  ) ),
             };
 
-            String appName = "dnc-query-example";
+            String appName = "dnc-explorer";
             DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
-            dockingGroup.addListener( createDefaultFrameTitler( "DNC Query Example" ) );
+            dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
 
             TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
