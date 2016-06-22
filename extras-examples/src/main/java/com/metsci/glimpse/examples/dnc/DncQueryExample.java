@@ -265,21 +265,22 @@ public class DncQueryExample
 
         BlockingQueue<DncQuery> queries = new SingletonEvictingBlockingQueue<>( );
 
-        // XXX: Need to run the query when activeChunkKeys changes -- e.g. when a coverage is activated/deactivated
-        plot.addAxisListener( ( axis ) ->
+        Runnable submitQuery = ( ) ->
         {
             Collection<DncChunkKey> chunkKeys = dncPainter.activeChunkKeys( );
 
-            Axis1D xAxis = axis.getAxisX( );
+            Axis1D xAxis = plot.getAxisX( );
             float xMin = ( float ) ( xAxis.getSelectionCenter( ) - 0.5*xAxis.getSelectionSize( ) );
             float xMax = ( float ) ( xAxis.getSelectionCenter( ) + 0.5*xAxis.getSelectionSize( ) );
 
-            Axis1D yAxis = axis.getAxisY( );
+            Axis1D yAxis = plot.getAxisY( );
             float yMin = ( float ) ( yAxis.getSelectionCenter( ) - 0.5*yAxis.getSelectionSize( ) );
             float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5*yAxis.getSelectionSize( ) );
 
             queries.add( new DncQuery( chunkKeys, xMin, xMax, yMin, yMax ) );
-        } );
+        };
+        dncPainter.addActiveChunksListener( submitQuery );
+        plot.addAxisListener( ( axis ) -> submitQuery.run( ) );
 
         startThread( "DncQuery", true, new ThrowingRunnable( )
         {
