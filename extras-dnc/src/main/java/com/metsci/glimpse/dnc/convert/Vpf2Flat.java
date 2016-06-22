@@ -66,6 +66,7 @@ import static com.metsci.glimpse.dnc.convert.Vpf.vpfLineVertices;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfPointVertex;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createAndMemmapReadWrite;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.isFilesystemCaseSensitive;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.packBytesIntoLong;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.writeIdsMapFile;
@@ -216,31 +217,34 @@ public class Vpf2Flat
         try
         {
             // Create lowercase symlinks, so Worldwind's VPF reader can find them
-            walkFileTree( databaseDir.toPath( ), EnumSet.of( FOLLOW_LINKS ), Integer.MAX_VALUE, new SimpleFileVisitor<Path>( )
+            if ( isFilesystemCaseSensitive( databaseDir, true ) )
             {
-                public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs ) throws IOException
+                walkFileTree( databaseDir.toPath( ), EnumSet.of( FOLLOW_LINKS ), Integer.MAX_VALUE, new SimpleFileVisitor<Path>( )
                 {
-                    createLowercaseSymlink( dir );
-                    return CONTINUE;
-                }
-
-                public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException
-                {
-                    createLowercaseSymlink( file );
-                    return CONTINUE;
-                }
-
-                private void createLowercaseSymlink( Path path ) throws IOException
-                {
-                    Path filename = path.getFileName( );
-                    Path lowercase = path.resolveSibling( filename.toString( ).toLowerCase( ) );
-                    if ( !exists( lowercase ) )
+                    public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs ) throws IOException
                     {
-                        Path symlink = createSymbolicLink( lowercase, filename );
-                        symlinks.add( symlink );
+                        createLowercaseSymlink( dir );
+                        return CONTINUE;
                     }
-                }
-            } );
+
+                    public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException
+                    {
+                        createLowercaseSymlink( file );
+                        return CONTINUE;
+                    }
+
+                    private void createLowercaseSymlink( Path path ) throws IOException
+                    {
+                        Path filename = path.getFileName( );
+                        Path lowercase = path.resolveSibling( filename.toString( ).toLowerCase( ) );
+                        if ( !exists( lowercase ) )
+                        {
+                            Path symlink = createSymbolicLink( lowercase, filename );
+                            symlinks.add( symlink );
+                        }
+                    }
+                } );
+            }
 
             // Read the VPF files
             File dhtFile = findDhtFile( databaseDir );
