@@ -110,7 +110,7 @@ import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.miginfocom.swing.MigLayout;
 
-public class DncQueryExample
+public class DncExplorer
 {
 
     public static void main( String[] args ) throws IOException
@@ -180,7 +180,7 @@ public class DncQueryExample
 
         Map<String,FaccFeature> faccFeatures = readFaccFeatures( );
         Map<String,FaccAttr> faccAttrs = readFaccAttrs( );
-        DncQueryExampleTreeTableModel attrsTableModel = new DncQueryExampleTreeTableModel( faccFeatures, faccAttrs );
+        DncExplorerTreeTableModel attrsTableModel = new DncExplorerTreeTableModel( faccFeatures, faccAttrs );
         JXTreeTable attrsTable = new JXTreeTable( attrsTableModel );
         attrsTable.getTableHeader( ).setReorderingAllowed( false );
         JScrollPane attrsScroller = new JScrollPane( attrsTable );
@@ -337,7 +337,7 @@ public class DncQueryExample
 
             TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
-            GroupArrangement groupArr = loadDockingArrangement( appName, DncQueryExample.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
+            GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
             dockingGroup.restoreArrangement( groupArr, tileFactory, views );
             dockingGroup.addListener( new DockingGroupAdapter( )
             {

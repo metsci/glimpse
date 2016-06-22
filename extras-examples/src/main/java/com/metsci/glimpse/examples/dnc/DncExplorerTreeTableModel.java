@@ -53,7 +53,7 @@ import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.facc.FaccAttr;
 import com.metsci.glimpse.dnc.facc.FaccFeature;
 
-public class DncQueryExampleTreeTableModel extends AbstractTreeTableModel
+public class DncExplorerTreeTableModel extends AbstractTreeTableModel
 {
 
     protected static class Feature
@@ -101,7 +101,7 @@ public class DncQueryExampleTreeTableModel extends AbstractTreeTableModel
     protected final Runnable stopCommitTimer;
 
 
-    protected DncQueryExampleTreeTableModel( Map<String,FaccFeature> faccFeatures, Map<String,FaccAttr> faccAttrs )
+    protected DncExplorerTreeTableModel( Map<String,FaccFeature> faccFeatures, Map<String,FaccAttr> faccAttrs )
     {
         super( emptyList( ) );
 
