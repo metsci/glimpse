@@ -1,13 +1,14 @@
 package com.metsci.glimpse.examples.worldwind;
 
-import static com.metsci.glimpse.util.io.StreamOpener.resourceOpener;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static com.metsci.glimpse.dnc.DncDataPaths.*;
+import static com.metsci.glimpse.util.GlimpseDataPaths.*;
+import static com.metsci.glimpse.util.io.StreamOpener.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,7 +28,6 @@ import com.metsci.glimpse.worldwind.projection.PlateCarreeProjection;
 import com.metsci.glimpse.worldwind.tile.GlimpseResizingSurfaceTile;
 
 import gov.nasa.worldwind.BasicModel;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.awt.WorldWindowGLJPanel;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
@@ -44,8 +44,7 @@ public class WorldwindDncPainterExample
 
         // setup RenderCacheConfig which points to DNC data files
         RenderCacheConfig dncCacheConfig = new RenderCacheConfig( );
-        dncCacheConfig.flatParentDir = new File( "/dnc/DNC_FLAT" );
-        dncCacheConfig.renderParentDir = new File( "/dnc/DNC_RENDER" );
+        dncCacheConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
 
         // setup projection for transforming DNC_FLAT lat/lon coordinates into flat map coordinates
         // here we choose the identity transform (plate carree) because that is what WorldWind
@@ -98,8 +97,8 @@ public class WorldwindDncPainterExample
                 layout.setVisible( false );
             }
         };
-        
-        glimpseLayer.setAlpha( 0.4f );
+
+        glimpseLayer.setOpacity( 0.4f );
 
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );
 
