@@ -1,7 +1,8 @@
 package com.metsci.glimpse.charts.slippy;
 
+import static com.metsci.glimpse.charts.slippy.SlippyDataPaths.slippyCacheRoot;
+
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -26,15 +27,13 @@ public class SlippyPainterFactory
     {
     }
 
-    public static final Path CACHE_ROOT = Paths.get( System.getProperty( "user.home" ) ).resolve( ".glimpse-slippy-cache" );
-
     private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder( ).setDaemon( true ).setNameFormat( "slippy-tile-fetcher-%d" ).build( );
 
     private static final ExecutorService EXEC = Executors.newFixedThreadPool( 4, THREAD_FACTORY );
 
     public static SlippyMapPainter getOpenStreetMaps( GeoProjection geoProj )
     {
-        return getOpenStreetMaps( geoProj, CACHE_ROOT.resolve( "osm-maps" ) );
+        return getOpenStreetMaps( geoProj, slippyCacheRoot.resolve( "osm-maps" ) );
     }
 
     public static SlippyMapPainter getOpenStreetMaps( GeoProjection geoProj, Path cacheDir )
@@ -49,7 +48,7 @@ public class SlippyPainterFactory
 
     public static SlippyMapPainter getMapQuestMaps( GeoProjection geoProj )
     {
-        return getMapQuestMaps( geoProj, CACHE_ROOT.resolve( "mapquest-map" ) );
+        return getMapQuestMaps( geoProj, slippyCacheRoot.resolve( "mapquest-map" ) );
     }
 
     public static SlippyMapPainter getMapQuestMaps( GeoProjection geoProj, Path cacheDir )
@@ -65,7 +64,7 @@ public class SlippyPainterFactory
 
     public static SlippyMapPainter getMapQuestImagery( GeoProjection geoProj, boolean inUS )
     {
-        return getMapQuestImagery( geoProj, CACHE_ROOT.resolve( "mapquest-sat" ), inUS );
+        return getMapQuestImagery( geoProj, slippyCacheRoot.resolve( "mapquest-sat" ), inUS );
     }
 
     public static SlippyMapPainter getMapQuestImagery( GeoProjection geoProj, Path cacheDir, boolean inUS )
@@ -82,7 +81,7 @@ public class SlippyPainterFactory
     public static SlippyMapPainter getCartoMap( GeoProjection geoProj, boolean light, boolean labels )
     {
         String cacheStr = "cartodb-" + ( light ? "light" : "dark" ) + ( labels ? "-all" : "-nolabels" );
-        return getCartoMap( geoProj, CACHE_ROOT.resolve( cacheStr ), light, labels );
+        return getCartoMap( geoProj, slippyCacheRoot.resolve( cacheStr ), light, labels );
     }
 
     public static SlippyMapPainter getCartoMap( GeoProjection geoProj, Path cacheDir, boolean light, boolean labels )
