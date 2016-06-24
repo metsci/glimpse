@@ -31,8 +31,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.metsci.glimpse.axis.Axis1D;
 
@@ -58,6 +60,8 @@ public class TaggedAxis1D extends Axis1D
     // Collections.unmodifiableCollection( this.tagMap.values( ) )
     protected List<Tag> tags;
     protected Collection<Constraint> constraints;
+
+    protected boolean linkTags = true;
 
     protected Comparator<Tag> valueComparator = new Comparator<Tag>( )
     {
@@ -108,6 +112,16 @@ public class TaggedAxis1D extends Axis1D
         }
 
         return axis;
+    }
+
+    public boolean isLinkTags( )
+    {
+        return linkTags;
+    }
+
+    public void setLinkTags( boolean link )
+    {
+        this.linkTags = link;
     }
 
     public void validateTags( )
@@ -199,14 +213,85 @@ public class TaggedAxis1D extends Axis1D
     }
 
     @Override
-    protected void axisUpdated0( Axis1D axis )
+    protected void broadcastAxisUpdateUp( Axis1D source, Set<Axis1D> visited )
     {
-        super.axisUpdated0( axis );
+        HashSet<Axis1D> visitedCopy = new HashSet<>( visited );
 
-        if ( axis instanceof TaggedAxis1D )
+        super.broadcastAxisUpdateUp( source, visited );
+
+        if ( source instanceof TaggedAxis1D )
         {
-            TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
+            broadcastTaggedAxisUpdateUp( ( TaggedAxis1D ) source, visitedCopy );
+        }
 
+    }
+
+    protected void broadcastTaggedAxisUpdateUp( TaggedAxis1D source, Set<Axis1D> visited )
+    {
+        broadcastTaggedAxisUpdateUp0( source, visited );
+    }
+
+    protected void broadcastTaggedAxisUpdateUp0( TaggedAxis1D source, Set<Axis1D> visited )
+    {
+        TaggedAxis1D parentTaggedAxis = getLinkedParentAxis( );
+        
+        if ( parentTaggedAxis != null )
+        {
+            parentTaggedAxis.broadcastTaggedAxisUpdateUp0( source, visited );
+        }
+        else
+        {
+            taggedAxisUpdated( source, visited );
+        }
+    }
+    
+    protected TaggedAxis1D getLinkedParentAxis( )
+    {
+        if ( this.parentAxis != null && this.parentAxis instanceof TaggedAxis1D )
+        {
+            TaggedAxis1D parentTaggedAxis = ( TaggedAxis1D ) this.parentAxis;
+            if ( parentTaggedAxis.isLinkTags( ) )
+            {
+                return parentTaggedAxis;
+            }
+        }
+        
+        return null;
+    }
+
+    // recursively apply the update to all linked children
+    protected void taggedAxisUpdated( TaggedAxis1D source, Set<Axis1D> visited )
+    {
+        // if we've already been visited, don't revisit and cause a loop
+        if ( !visited.add( this ) )
+        {
+            return;
+        }
+
+        // update ourself
+        this.taggedAxisUpdated0( source );
+
+        // updated our children
+        if ( this.linkChildren )
+        {
+            for ( Axis1D axis : this.children )
+            {
+                if ( axis instanceof TaggedAxis1D )
+                {
+                    ( ( TaggedAxis1D ) axis ).taggedAxisUpdated( source, visited );
+                }
+            }
+        }
+
+        //XXX should axis listeners be fired here like axisUpdated( )?
+    }
+
+    protected void taggedAxisUpdated0( TaggedAxis1D axis )
+    {
+        TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
+
+        if ( taggedAxis.isLinkTags( ) )
+        {
             for ( Tag tag : taggedAxis.getSortedTags( ) )
             {
                 Tag myTag = this.getTag( tag.getName( ) );

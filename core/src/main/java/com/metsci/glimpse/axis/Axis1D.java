@@ -1100,12 +1100,17 @@ public class Axis1D
         broadcastAxisUpdateUp( this, new HashSet<Axis1D>( ) );
     }
 
-    // walk up the chain of parents until we reach the top level
     protected void broadcastAxisUpdateUp( Axis1D source, Set<Axis1D> visited )
+    {
+        broadcastAxisUpdateUp0( source, visited );
+    }
+    
+    // walk up the chain of parents until we reach the top level
+    protected void broadcastAxisUpdateUp0( Axis1D source, Set<Axis1D> visited )
     {
         if ( this.parentAxis != null && this.parentAxis.linkChildren )
         {
-            parentAxis.broadcastAxisUpdateUp( source, visited );
+            parentAxis.broadcastAxisUpdateUp0( source, visited );
         }
         else
         {
