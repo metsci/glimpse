@@ -29,11 +29,10 @@ package com.metsci.glimpse.dnc.convert;
 import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.filenameToLowercase;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.last;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.toArrayList;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
-import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
-import static com.metsci.glimpse.util.GeneralUtils.newHashMap;
-import static com.metsci.glimpse.util.GeneralUtils.newHashSet;
+import static gov.nasa.worldwind.formats.vpf.VPFConstants.DATABASE_HEADER_TABLE;
 import static gov.nasa.worldwind.formats.vpf.VPFConstants.EDGE_PRIMITIVE_TABLE;
 import static java.util.Arrays.sort;
 import static java.util.Collections.reverse;
@@ -46,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +53,6 @@ import java.util.Stack;
 
 import gov.nasa.worldwind.formats.vpf.VPFBasicPrimitiveDataFactory;
 import gov.nasa.worldwind.formats.vpf.VPFBufferedRecordData;
-import gov.nasa.worldwind.formats.vpf.VPFConstants;
 import gov.nasa.worldwind.formats.vpf.VPFCoverage;
 import gov.nasa.worldwind.formats.vpf.VPFFeature;
 import gov.nasa.worldwind.formats.vpf.VPFFeatureClass;
@@ -76,7 +75,29 @@ import gov.nasa.worldwind.util.VecBufferSequence;
 public class Vpf
 {
 
-    public static final Comparator<VPFFeatureClass> featureClassNameComparator = new Comparator<VPFFeatureClass>()
+    public static final Comparator<VPFLibrary> vpfLibraryNameComparator = new Comparator<VPFLibrary>()
+    {
+        public int compare(VPFLibrary a, VPFLibrary b)
+        {
+            String aName = a.getName();
+            String bName = b.getName();
+            return aName.compareTo(bName);
+        }
+    };
+
+
+    public static final Comparator<VPFCoverage> vpfCoverageNameComparator = new Comparator<VPFCoverage>()
+    {
+        public int compare(VPFCoverage a, VPFCoverage b)
+        {
+            String aName = a.getName();
+            String bName = b.getName();
+            return aName.compareTo(bName);
+        }
+    };
+
+
+    public static final Comparator<VPFFeatureClass> vpfFeatureClassNameComparator = new Comparator<VPFFeatureClass>()
     {
         public int compare(VPFFeatureClass a, VPFFeatureClass b)
         {
@@ -110,7 +131,7 @@ public class Vpf
             }
         };
 
-        Set<VPFFeatureClass> featureClasses = newHashSet();
+        Set<VPFFeatureClass> featureClasses = new LinkedHashSet<>();
         for (VPFCoverage cov : lib.getCoverages())
         {
             if (cov.isReferenceCoverage()) continue;
@@ -124,7 +145,7 @@ public class Vpf
         }
 
         VPFFeatureClass[] featureClassesArray = featureClasses.toArray(new VPFFeatureClass[0]);
-        sort( featureClassesArray, featureClassNameComparator);
+        sort( featureClassesArray, vpfFeatureClassNameComparator);
         return featureClassesArray;
     }
 
@@ -133,24 +154,13 @@ public class Vpf
     {
         VPFPrimitiveDataFactory factory = new VPFBasicPrimitiveDataFactory(tile);
 
-        Map<VPFCoverage,VPFPrimitiveData> primitiveDatas = newHashMap();
-        for (VPFCoverage cov : lib.getCoverages())
+        Map<VPFCoverage,VPFPrimitiveData> primitiveDatas = new LinkedHashMap<>();
+        for (VPFCoverage cov : sorted(lib.getCoverages(), vpfCoverageNameComparator))
         {
             primitiveDatas.put(cov, factory.createPrimitiveData(cov));
         }
         return primitiveDatas;
     }
-
-
-    public static final Comparator<VPFLibrary> vpfLibraryNameComparator = new Comparator<VPFLibrary>()
-    {
-        public int compare(VPFLibrary a, VPFLibrary b)
-        {
-            String aName = a.getName();
-            String bName = b.getName();
-            return aName.compareTo(bName);
-        }
-    };
 
 
     /**
@@ -186,11 +196,14 @@ public class Vpf
     {
         File fileOrSymlink = null;
         File fileActual = null;
-        if (dbDir.isDirectory())
+
+        File[] children = dbDir.listFiles();
+        if (children != null)
         {
-            for (File f : dbDir.listFiles())
+            sort(children);
+            for (File f : children)
             {
-                if (f.getName().equalsIgnoreCase(VPFConstants.DATABASE_HEADER_TABLE) && f.isFile())
+                if (f.getName().equalsIgnoreCase(DATABASE_HEADER_TABLE) && f.isFile())
                 {
                     fileOrSymlink = f;
                     if (!Files.isSymbolicLink(f.toPath()))
@@ -200,6 +213,7 @@ public class Vpf
                 }
             }
         }
+
         return (fileActual == null ? fileOrSymlink : fileActual);
     }
 
@@ -257,7 +271,7 @@ public class Vpf
 
     public static List<Edge> extractRingEdges(VPFPrimitiveData primitiveData, VecBufferSequence edgeTableData, Ring ring)
     {
-        List<Edge> edges = newArrayList();
+        List<Edge> edges = new ArrayList<>();
         for (int i = 0; i < ring.getNumEdges(); i++)
         {
             int id = ring.getEdgeId(i);
@@ -318,7 +332,7 @@ public class Vpf
 
     public static List<Edge> regularizeRingEdges(List<Edge> extractedRingEdges)
     {
-        List<Edge> regularized = newArrayList();
+        List<Edge> regularized = new ArrayList<>();
         Stack<Edge> stack = new Stack<Edge>();
 
         for (int i = 0; i < extractedRingEdges.size(); i++)
@@ -351,7 +365,7 @@ public class Vpf
 
     public static List<LatLon> locations(List<Edge> edges)
     {
-        List<LatLon> locations = newArrayList();
+        List<LatLon> locations = new ArrayList<>();
         for (Edge edge : edges) locations.addAll(edge.locations);
         return locations;
     }
@@ -365,7 +379,7 @@ public class Vpf
 
     public static List<List<LatLon>> vpfAreaRings(VPFFeature areaFeature, VPFPrimitiveData primitiveData)
     {
-        List<List<LatLon>> vertices = newArrayList();
+        List<List<LatLon>> vertices = new ArrayList<>();
         VecBufferSequence edgeTableData = primitiveData.getPrimitiveCoords(EDGE_PRIMITIVE_TABLE);
         String primitiveName = areaFeature.getFeatureClass().getPrimitiveTableName();
         for (int id : areaFeature.getPrimitiveIds())
@@ -387,7 +401,7 @@ public class Vpf
     {
         VPFSurfaceLine line = new VPFSurfaceLine(lineFeature, primitiveData);
 
-        List<LatLon> lines = newArrayList();
+        List<LatLon> lines = new ArrayList<>();
 
         LatLon vStart = null;
         for (LatLon vEnd : line.getLocations())
@@ -406,7 +420,7 @@ public class Vpf
 
     public static LatLon vpfPointVertex(VPFFeature pointFeature, VPFPrimitiveData primitiveData)
     {
-        List<LatLon> points = newArrayList();
+        List<LatLon> points = new ArrayList<>();
 
         String primitiveName = pointFeature.getFeatureClass().getPrimitiveTableName();
         CompoundVecBuffer combinedCoords = primitiveData.getPrimitiveCoords(primitiveName);
