@@ -228,23 +228,25 @@ public class DncMiscUtils
         return list.get( list.size( ) - 1 );
     }
 
-    /**
-     * Returns {@code defaultValue} if case-sensitivity cannot be determined.
-     */
-    public static boolean isFilesystemCaseSensitive( File file, boolean defaultValue )
+    public static boolean isFilenameCaseSensitive( File file )
     {
-        String lowercaseName = file.getName( ).toLowerCase( );
-        String uppercaseName = file.getName( ).toUpperCase( );
-        if ( equal( lowercaseName, uppercaseName ) )
-        {
-            return defaultValue;
-        }
-        else
-        {
-            File lowercaseFile = new File( file.getParent( ), lowercaseName );
-            File uppercaseFile = new File( file.getParent( ), uppercaseName );
-            return !equal( lowercaseFile, uppercaseFile );
-        }
+        return !equal( filenameToLowercase( file ), filenameToUppercase( file ) );
+    }
+
+    /**
+     * Lowercases the last segment of the specified path.
+     */
+    public static File filenameToLowercase( File file )
+    {
+        return new File( file.getParent( ), file.getName( ).toLowerCase( ) );
+    }
+
+    /**
+     * Uppercases the last segment of the specified path.
+     */
+    public static File filenameToUppercase( File file )
+    {
+        return new File( file.getParent( ), file.getName( ).toUpperCase( ) );
     }
 
     public static MappedByteBuffer memmapReadOnly( File file ) throws IOException

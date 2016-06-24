@@ -66,7 +66,7 @@ import static com.metsci.glimpse.dnc.convert.Vpf.vpfLineVertices;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfPointVertex;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createAndMemmapReadWrite;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.isFilesystemCaseSensitive;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.isFilenameCaseSensitive;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.packBytesIntoLong;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.writeIdsMapFile;
@@ -217,7 +217,7 @@ public class Vpf2Flat
         try
         {
             // Create lowercase symlinks, so Worldwind's VPF reader can find them
-            if ( isFilesystemCaseSensitive( databaseDir, true ) )
+            if ( isFilenameCaseSensitive( new File( databaseDir, "test" ) ) )
             {
                 walkFileTree( databaseDir.toPath( ), EnumSet.of( FOLLOW_LINKS ), Integer.MAX_VALUE, new SimpleFileVisitor<Path>( )
                 {

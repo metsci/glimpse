@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.dnc.convert;
 
+import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.filenameToLowercase;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.last;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.toArrayList;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
@@ -96,30 +98,24 @@ public class Vpf
         EnumSet<VPFFeatureType> typeSet = EnumSet.noneOf(VPFFeatureType.class);
         for (VPFFeatureType t : types) typeSet.add(t);
 
+        // WW's VPF reader breaks (by silently skipping data!) if filenames are case-
+        // sensitive and contain uppercase characters. In such a case, assume that the
+        // necessary lowercase symlinks have already been created (which is reasonable,
+        // because that's the only way the reader will work).
+        FileFilter featureTableFilter = new VPFFeatureTableFilter()
+        {
+            public boolean accept(File file)
+            {
+                return ( super.accept(file) && equal(file, filenameToLowercase(file)) );
+            }
+        };
+
         Set<VPFFeatureClass> featureClasses = newHashSet();
         for (VPFCoverage cov : lib.getCoverages())
         {
             if (cov.isReferenceCoverage()) continue;
 
-            // Some copies of the DNCs have uppercase symlinks to lowercase files,
-            // or vice versa, to allow case-insensitive code to work on case-sensitive
-            // file systems.
-            //
-            // We don't want to process the uppercase and the lowercase as if they were
-            // two separate items, so keep track of which names we've seen so far (in a
-            // consistent case), and don't process them again.
-            //
-            FileFilter filter = new VPFFeatureTableFilter()
-            {
-                Set<String> namesSeen = newHashSet();
-                public boolean accept(File file)
-                {
-                    String name = file.getName().toLowerCase();
-                    return namesSeen.add(name) && super.accept(file);
-                }
-            };
-
-            VPFFeatureClass[] fcs = VPFUtils.readFeatureClasses(cov, filter);
+            VPFFeatureClass[] fcs = VPFUtils.readFeatureClasses(cov, featureTableFilter);
             for (VPFFeatureClass fc : fcs)
             {
                 VPFFeatureType type = fc.getType();
