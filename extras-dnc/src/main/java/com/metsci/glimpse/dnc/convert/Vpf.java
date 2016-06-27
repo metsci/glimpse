@@ -79,9 +79,7 @@ public class Vpf
     {
         public int compare(VPFLibrary a, VPFLibrary b)
         {
-            String aName = a.getName();
-            String bName = b.getName();
-            return aName.compareTo(bName);
+            return compareStringsCaseSecondary(a.getName(), b.getName());
         }
     };
 
@@ -90,9 +88,7 @@ public class Vpf
     {
         public int compare(VPFCoverage a, VPFCoverage b)
         {
-            String aName = a.getName();
-            String bName = b.getName();
-            return aName.compareTo(bName);
+            return compareStringsCaseSecondary(a.getName(), b.getName());
         }
     };
 
@@ -101,11 +97,22 @@ public class Vpf
     {
         public int compare(VPFFeatureClass a, VPFFeatureClass b)
         {
-            String aName = a.getClassName();
-            String bName = b.getClassName();
-            return aName.compareTo(bName);
+            return compareStringsCaseSecondary(a.getClassName(), b.getClassName());
         }
     };
+
+
+    /**
+     * Like case-insensitive comparison, but uses case-sensitive comparison as a tie-breaker.
+     */
+    public static int compareStringsCaseSecondary(String a, String b)
+    {
+        int caseInsensitiveComparison = a.compareToIgnoreCase( b );
+        if ( caseInsensitiveComparison != 0 ) return caseInsensitiveComparison;
+
+        int caseSensitiveComparison = a.compareTo( b );
+        return caseSensitiveComparison;
+    }
 
 
     public static VPFFeatureClass[] readAllFeatureClasses(VPFLibrary lib)
