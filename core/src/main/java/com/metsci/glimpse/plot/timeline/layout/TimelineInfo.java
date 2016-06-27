@@ -35,6 +35,7 @@ import java.util.TimeZone;
 import com.metsci.glimpse.axis.painter.TimeAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeXAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
+import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
@@ -197,11 +198,11 @@ public class TimelineInfo extends PlotInfoWrapper
         TimeAxisPainter painter;
         if ( plot.isTimeAxisHorizontal( ) )
         {
-            painter = new TimeXAxisPainter( plot.getEpoch( ) );
+            painter = new TimeXAxisPainter( plot.getTimeAxisLabelHandler( ) );
         }
         else
         {
-            painter = new TimeYAxisPainter( plot.getEpoch( ) );
+            painter = new TimeYAxisPainter( plot.getTimeAxisLabelHandler( ) );
         }
 
         painter.setFont( getDefaultPlain( 12 ), false );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,57 +24,61 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.axis.painter.label;
+package com.metsci.glimpse.charts.slippy;
 
-import com.metsci.glimpse.axis.painter.ColorXAxisPainter;
+import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.geo.projection.KinematicVector2d;
+import com.metsci.glimpse.util.vector.Vector2d;
 
-public class ColorTopXAxisPainter extends ColorXAxisPainter
+import static java.lang.Math.PI;
+
+/**
+ * See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Java
+ * @author oren
+ */
+public class SlippyProjection implements GeoProjection
 {
-    public ColorTopXAxisPainter( AxisLabelHandler ticks )
+
+    @SuppressWarnings( "unused" )
+    private final int zoom;
+    private final double zoomFac;
+
+    public SlippyProjection( int zoom )
     {
-        super( ticks );
+        this.zoom = zoom;
+        this.zoomFac = 1 << zoom;
     }
 
     @Override
-    public int getAxisLabelPositionY( int height, int textHeight )
+    public Vector2d project( LatLonGeo llg )
     {
-        if ( packLabel )
-        {
-            return tickBufferSize + tickSize + textBufferSize + textHeight + labelBufferSize;
-        }
-        else
-        {
-            return height - 1 - labelBufferSize - textHeight;
-        }
+        double lonDeg = llg.getLonDeg( );
+        double latRad = llg.getLatRad( );
+        double x = ( lonDeg + 180 ) / 360 * zoomFac;
+        double y = ( 1 - Math.log( Math.tan( latRad ) + 1 / Math.cos( latRad ) ) / PI ) / 2 * zoomFac;
+        return new Vector2d( x, y );
     }
 
     @Override
-    public int getTickTextPositionY( int height, int textHeight )
+    public LatLonGeo unproject( double x, double y )
     {
-        return tickBufferSize + tickSize + textBufferSize;
+        double lon = x / zoomFac * 360.0 - 180;
+        double n = PI - ( 2.0 * PI * y ) / zoomFac;
+        double lat = Math.toDegrees( Math.atan( Math.sinh( n ) ) );
+        return LatLonGeo.fromDeg( lat, lon );
     }
 
     @Override
-    public int getTickTopY( int height, int size )
+    public Vector2d reprojectFrom( double x, double y, GeoProjection fromProjection )
     {
-        return tickBufferSize + size;
+        return project( fromProjection.unproject( x, y ) );
     }
 
     @Override
-    public int getTickBottomY( int height, int size )
+    public KinematicVector2d reprojectPosVelFrom( double x, double y, double vx, double vy, GeoProjection fromProjection )
     {
-        return tickBufferSize;
+        throw new UnsupportedOperationException( );
     }
 
-    @Override
-    public int getColorBarMinY( int height )
-    {
-        return tickBufferSize;
-    }
-
-    @Override
-    public int getColorBarMaxY( int height )
-    {
-        return tickBufferSize + colorBarSize;
-    }
 }

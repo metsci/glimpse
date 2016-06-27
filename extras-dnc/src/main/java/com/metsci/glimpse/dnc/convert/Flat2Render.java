@@ -32,8 +32,11 @@ import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
 import static com.jogamp.common.nio.Buffers.SIZEOF_LONG;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncRenderDir;
 import static com.metsci.glimpse.dnc.DncPainterUtils.coverageSignificanceComparator;
 import static com.metsci.glimpse.dnc.DncPainterUtils.libraryRenderingOrder;
+import static com.metsci.glimpse.dnc.DncProjections.dncPlateCarree;
 import static com.metsci.glimpse.dnc.convert.Flat.doublesPerFlatVertex;
 import static com.metsci.glimpse.dnc.convert.Flat.flatChildDirs;
 import static com.metsci.glimpse.dnc.convert.Flat.flatDatabaseNum;
@@ -179,10 +182,10 @@ public class Flat2Render
 
     public static class RenderCacheConfig
     {
-        public File flatParentDir = null;
-        public File renderParentDir = null;
+        public File flatParentDir = glimpseDncFlatDir;
+        public File renderParentDir = glimpseDncRenderDir;
 
-        public DncProjection proj = null;
+        public DncProjection proj = dncPlateCarree;
         public int projPointsPerBoundsEdge = 2;
 
         public String geosymAssignmentsFilename = geosymFullAssignmentsFile;

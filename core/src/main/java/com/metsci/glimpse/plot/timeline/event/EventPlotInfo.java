@@ -311,20 +311,29 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
             Set<EventSelection> newHoveredEvents = Collections.unmodifiableSet( Sets.newHashSet( eventManager.getNearestEvents( e ) ) );
 
             SetView<EventSelection> eventsExited = Sets.difference( hoveredEvents, newHoveredEvents );
-            for ( EventPlotListener listener : eventListeners )
+            if ( eventsExited.size( ) > 0 )
             {
-                listener.eventsExited( e, eventsExited, time );
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsExited( e, eventsExited, time );
+                }
             }
 
             SetView<EventSelection> eventsEntered = Sets.difference( newHoveredEvents, hoveredEvents );
-            for ( EventPlotListener listener : eventListeners )
+            if ( eventsEntered.size( ) > 0 )
             {
-                listener.eventsEntered( e, eventsEntered, time );
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsEntered( e, eventsEntered, time );
+                }
             }
 
-            for ( EventPlotListener listener : eventListeners )
+            if ( newHoveredEvents.size( ) > 0 )
             {
-                listener.eventsHovered( e, newHoveredEvents, time );
+                for ( EventPlotListener listener : eventListeners )
+                {
+                    listener.eventsHovered( e, newHoveredEvents, time );
+                }
             }
 
             hoveredEvents = newHoveredEvents;
@@ -659,6 +668,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         return this.eventPainterManager.getBackgroundColor( );
     }
 
+    @Override
     public void setDefaultEventBorderColor( float[] borderColor )
     {
         this.eventPainterManager.setBorderColor( borderColor );

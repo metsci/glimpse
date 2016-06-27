@@ -29,13 +29,12 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.createAppDir;
+import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
-import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -45,11 +44,8 @@ import static java.awt.Color.magenta;
 import static java.awt.Color.red;
 import static java.awt.Color.white;
 import static java.awt.Color.yellow;
-import static java.util.logging.Level.WARNING;
 
 import java.awt.Color;
-import java.io.File;
-import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -70,87 +66,95 @@ import net.sf.tinylaf.TinyLookAndFeel;
 
 public class SimpleDockingExample
 {
-    protected static final Logger logger = Logger.getLogger( SimpleDockingExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
     {
         fixPlatformQuirks( );
-
         Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
         UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        DockingTheme dockingTheme = tinyLafDockingTheme( );
+        final DockingTheme dockingTheme = tinyLafDockingTheme( );
 
-        final String appName = "simple-docking-example";
-        final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
-        dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
-        final TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
-
-        // View Components
-        //
-
-        JPanel aPanel = newSolidPanel( red );
-        JPanel bPanel = newSolidPanel( green );
-        JPanel cPanel = newSolidPanel( blue );
-        JPanel dPanel = newSolidPanel( cyan );
-        JPanel ePanel = newSolidPanel( magenta );
-        JPanel fPanel = newSolidPanel( yellow );
-        JPanel gPanel = newSolidPanel( gray );
-        JPanel hPanel = newSolidPanel( white );
-
-        // View Toolbars
-        //
-
-        JToolBar aToolbar = newToolbar( true );
-        aToolbar.add( new JButton( "A1" ) );
-        aToolbar.add( new JButton( "A2" ) );
-        aToolbar.add( new JButton( "A3" ) );
-
-        JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-        JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
-        aOptionsPopup.add( new JMenuItem( "Option 1" ) );
-        aToolbar.add( aOptionsButton );
-
-        JToolBar bToolbar = newToolbar( true );
-        bToolbar.add( new JButton( "B1" ) );
-
-        JToolBar cToolbar = null;
-
-        JToolBar dToolbar = newToolbar( true );
-        dToolbar.add( new JButton( "D1" ) );
-        dToolbar.add( new JButton( "D2" ) );
-        dToolbar.add( new JButton( "D3" ) );
-        dToolbar.add( new JButton( "D4" ) );
-        dToolbar.add( new JButton( "D5" ) );
-
-        JToolBar eToolbar = newToolbar( true );
-        eToolbar.add( new JButton( "E1" ) );
-        eToolbar.add( new JButton( "E2" ) );
-
-        JToolBar fToolbar = newToolbar( true );
-        fToolbar.add( new JButton( "F1" ) );
-        fToolbar.add( new JButton( "F2" ) );
-        fToolbar.add( new JButton( "F3" ) );
-
-        JToolBar gToolbar = newToolbar( true );
-
-        JToolBar hToolbar = newToolbar( true );
-        hToolbar.add( new JButton( "H1" ) );
-
-        // Views
-        //
-
-        final View[] views = { new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ), new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ), new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ), new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ), new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ), new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ), new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ), new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar ) };
-
-        // Certain components are picky about being added to a frame from the Swing thread
-        // (e.g. NewtCanvasAWT, which otherwise crashes the JVM when removed). It's a good
-        // idea to call dockingGroup.restoreArrangement() on the Swing thread, whether you
-        // are using such picky components or not.
-        //
+        // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
             public void run( )
             {
-                GroupArrangement groupArr = loadDockingArrangement( appName );
+
+                // Create view components
+                //
+
+                JPanel aPanel = newSolidPanel( red );
+                JPanel bPanel = newSolidPanel( green );
+                JPanel cPanel = newSolidPanel( blue );
+                JPanel dPanel = newSolidPanel( cyan );
+                JPanel ePanel = newSolidPanel( magenta );
+                JPanel fPanel = newSolidPanel( yellow );
+                JPanel gPanel = newSolidPanel( gray );
+                JPanel hPanel = newSolidPanel( white );
+
+
+                // Create view toolbars
+                //
+
+                JToolBar aToolbar = newToolbar( true );
+                aToolbar.add( new JButton( "A1" ) );
+                aToolbar.add( new JButton( "A2" ) );
+                aToolbar.add( new JButton( "A3" ) );
+
+                JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
+                JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
+                aOptionsPopup.add( new JMenuItem( "Option 1" ) );
+                aToolbar.add( aOptionsButton );
+
+                JToolBar bToolbar = newToolbar( true );
+                bToolbar.add( new JButton( "B1" ) );
+
+                JToolBar cToolbar = null;
+
+                JToolBar dToolbar = newToolbar( true );
+                dToolbar.add( new JButton( "D1" ) );
+                dToolbar.add( new JButton( "D2" ) );
+                dToolbar.add( new JButton( "D3" ) );
+                dToolbar.add( new JButton( "D4" ) );
+                dToolbar.add( new JButton( "D5" ) );
+
+                JToolBar eToolbar = newToolbar( true );
+                eToolbar.add( new JButton( "E1" ) );
+                eToolbar.add( new JButton( "E2" ) );
+
+                JToolBar fToolbar = newToolbar( true );
+                fToolbar.add( new JButton( "F1" ) );
+                fToolbar.add( new JButton( "F2" ) );
+                fToolbar.add( new JButton( "F3" ) );
+
+                JToolBar gToolbar = newToolbar( true );
+
+                JToolBar hToolbar = newToolbar( true );
+                hToolbar.add( new JButton( "H1" ) );
+
+
+                // Create views
+                //
+
+                View[] views = { new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
+                                 new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
+                                 new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
+                                 new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
+                                 new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
+                                 new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
+                                 new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
+                                 new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar ) };
+
+
+                // Create and show the docking group
+                //
+
+                final String appName = "simple-docking-example";
+                final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+                dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
+                TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+
+                GroupArrangement groupArr = loadDockingArrangement( appName, SimpleDockingExample.class.getClassLoader( ).getResource( "docking/simple-arrangement-default.xml" ) );
                 dockingGroup.restoreArrangement( groupArr, tileFactory, views );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
@@ -159,6 +163,7 @@ public class SimpleDockingExample
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                     }
                 } );
+
             }
         } );
     }
@@ -168,46 +173,6 @@ public class SimpleDockingExample
         JPanel panel = new JPanel( );
         panel.setBackground( color );
         return panel;
-    }
-
-    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeArrangementXml( groupArr, arrFile );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to write docking arrangement to file", e );
-        }
-    }
-
-    public static GroupArrangement loadDockingArrangement( String appName )
-    {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            if ( arrFile.exists( ) )
-            {
-                return readArrangementXml( arrFile );
-            }
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load docking arrangement from file", e );
-        }
-
-        try
-        {
-            return readArrangementXml( SimpleDockingExample.class.getClassLoader( ).getResourceAsStream( "docking/simple-arrangement-default.xml" ) );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load default docking arrangement from resource", e );
-        }
-
-        return null;
     }
 
 }

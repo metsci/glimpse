@@ -26,26 +26,29 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccFeatures;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_NIGHT;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
+import static com.metsci.glimpse.examples.dnc.DncExampleUtils.newLabel;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static java.awt.Font.BOLD;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -56,11 +59,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.media.opengl.GLAnimatorControl;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
+import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
@@ -68,6 +73,7 @@ import org.jdesktop.swingx.JXTreeTable;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
+import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.DncLineFeature;
 import com.metsci.glimpse.dnc.DncPainter;
@@ -81,7 +87,6 @@ import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 import com.metsci.glimpse.dnc.facc.FaccAttr;
 import com.metsci.glimpse.dnc.facc.FaccFeature;
-import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
@@ -91,18 +96,21 @@ import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.plot.Plot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import net.miginfocom.swing.MigLayout;
 
-public class DncQueryExample
+public class DncExplorer
 {
 
     public static void main( String[] args ) throws IOException
@@ -120,11 +128,7 @@ public class DncQueryExample
         //
 
         RenderCacheConfig renderConfig = new RenderCacheConfig( );
-        renderConfig.flatParentDir = new File( "/path/to/DNC_FLAT" );
-        renderConfig.renderParentDir = new File( "/path/to/DNC_RENDER" );
-
-        //renderConfig.proj = dncPlateCarree;
-        //renderConfig.proj = dncTangentPlane( 32.7150, -117.1625 ); // San Diego
+        renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
         renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
         RenderCache renderCache = new RenderCache( renderConfig, 4 );
@@ -136,7 +140,6 @@ public class DncQueryExample
 
         QueryCacheConfig queryConfig = new QueryCacheConfig( );
         queryConfig.flatParentDir = renderConfig.flatParentDir;
-        queryConfig.queryParentDir = new File( "/path/to/DNC_QUERY" );
         queryConfig.proj = renderConfig.proj;
 
         QueryCache queryCache = new QueryCache( queryConfig, 4 );
@@ -153,13 +156,20 @@ public class DncQueryExample
         plot.setAxisSizeZ( 0 );
         plot.setTitleHeight( 0 );
 
+        plot.getAxis( ).set( -200, 200, -200, 200 );
+        plot.setSelectionSize( 30 );
+
+        BackgroundPainter backgroundPainter = new BackgroundPainter( );
+
         DncPainterSettings dncPainterSettings = new DncPainterSettingsImpl( renderConfig.proj );
-        DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings, DNC_THEME_STANDARD );
-        dncPainter.activateCoverages( "lim", "nav", "cul", "iwy", "obs", "hyd", "por", "ecr", "lcr", "env", "rel", "coa" );
+        DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings );
         dncPainter.addAxis( plot.getAxis( ) );
 
+        CrosshairPainter crosshairPainter = new CrosshairPainter( );
+
+        plot.getLayoutCenter( ).addPainter( backgroundPainter );
         plot.getLayoutCenter( ).addPainter( dncPainter );
-        plot.getLayoutCenter( ).addPainter( new CrosshairPainter( ) );
+        plot.getLayoutCenter( ).addPainter( crosshairPainter );
         plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
         plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
@@ -170,10 +180,66 @@ public class DncQueryExample
 
         Map<String,FaccFeature> faccFeatures = readFaccFeatures( );
         Map<String,FaccAttr> faccAttrs = readFaccAttrs( );
-        DncQueryExampleTreeTableModel attrsTableModel = new DncQueryExampleTreeTableModel( faccFeatures, faccAttrs );
+        DncExplorerTreeTableModel attrsTableModel = new DncExplorerTreeTableModel( faccFeatures, faccAttrs );
         JXTreeTable attrsTable = new JXTreeTable( attrsTableModel );
         attrsTable.getTableHeader( ).setReorderingAllowed( false );
         JScrollPane attrsScroller = new JScrollPane( attrsTable );
+
+
+
+        // Create prefs panel
+        //
+
+        JPanel prefsPanel = new JPanel( new MigLayout( "fillx, wrap 1", "[fill,grow]" ) );
+
+
+        prefsPanel.add( newLabel( "Color Theme", BOLD ), "gapy 12" );
+
+        JRadioButton standardThemeRadio = new JRadioButton( "Standard" );
+        standardThemeRadio.addItemListener( ( ev ) ->
+        {
+            if ( standardThemeRadio.isSelected( ) )
+            {
+                dncPainter.setTheme( DNC_THEME_STANDARD );
+                backgroundPainter.setColor( floats( 0.5f, 0.5f, 0.5f, 1 ) );
+                crosshairPainter.setCursorColor( GlimpseColor.getBlack( ) );
+            }
+        } );
+        prefsPanel.add( standardThemeRadio, "gapleft 8" );
+
+        JRadioButton nightThemeRadio = new JRadioButton( "Night" );
+        nightThemeRadio.addItemListener( ( ev ) ->
+        {
+            if ( nightThemeRadio.isSelected( ) )
+            {
+                dncPainter.setTheme( DNC_THEME_NIGHT );
+                backgroundPainter.setColor( floats( 0.1f, 0.1f, 0.1f, 1 ) );
+                crosshairPainter.setCursorColor( GlimpseColor.getWhite( ) );
+            }
+        } );
+        prefsPanel.add( nightThemeRadio, "gapleft 8" );
+
+        ButtonGroup themeRadioGroup = new ButtonGroup( );
+        themeRadioGroup.add( standardThemeRadio );
+        themeRadioGroup.add( nightThemeRadio );
+
+        standardThemeRadio.setSelected( true );
+
+
+        prefsPanel.add( new JSeparator( ), "gapy 12, growx" );
+        prefsPanel.add( newLabel( "Coverages", BOLD ) );
+
+        List<DncCoverage> coverages = sorted( renderCache.coverages, ( a, b ) -> ( a.coverageName ).compareToIgnoreCase( b.coverageName ) );
+        for ( DncCoverage coverage : coverages )
+        {
+            JCheckBox coverageCheckbox = new JCheckBox( coverage.coverageName );
+            coverageCheckbox.addItemListener( ( ev ) ->
+            {
+                dncPainter.setCoverageActive( coverage, coverageCheckbox.isSelected( ) );
+            } );
+            coverageCheckbox.setSelected( true );
+            prefsPanel.add( coverageCheckbox, "gapleft 8" );
+        }
 
 
 
@@ -199,20 +265,22 @@ public class DncQueryExample
 
         BlockingQueue<DncQuery> queries = new SingletonEvictingBlockingQueue<>( );
 
-        plot.addAxisListener( ( axis ) ->
+        Runnable submitQuery = ( ) ->
         {
             Collection<DncChunkKey> chunkKeys = dncPainter.activeChunkKeys( );
 
-            Axis1D xAxis = axis.getAxisX( );
+            Axis1D xAxis = plot.getAxisX( );
             float xMin = ( float ) ( xAxis.getSelectionCenter( ) - 0.5*xAxis.getSelectionSize( ) );
             float xMax = ( float ) ( xAxis.getSelectionCenter( ) + 0.5*xAxis.getSelectionSize( ) );
 
-            Axis1D yAxis = axis.getAxisY( );
+            Axis1D yAxis = plot.getAxisY( );
             float yMin = ( float ) ( yAxis.getSelectionCenter( ) - 0.5*yAxis.getSelectionSize( ) );
             float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5*yAxis.getSelectionSize( ) );
 
             queries.add( new DncQuery( chunkKeys, xMin, xMax, yMin, yMax ) );
-        } );
+        };
+        dncPainter.addActiveChunksListener( submitQuery );
+        plot.addAxisListener( ( axis ) -> submitQuery.run( ) );
 
         startThread( "DncQuery", true, new ThrowingRunnable( )
         {
@@ -256,33 +324,20 @@ public class DncQueryExample
             animator.add( geoCanvas.getGLDrawable( ) );
             animator.start( );
 
-            JCheckBoxMenuItem nightModeCheckbox = new JCheckBoxMenuItem( "Night mode" );
-            nightModeCheckbox.addItemListener( ( ev ) ->
-            {
-                DncGeosymTheme theme = ( nightModeCheckbox.isSelected( ) ? DNC_THEME_NIGHT : DNC_THEME_STANDARD );
-                dncPainter.setTheme( theme );
-            } );
-
-            JToolBar geoToolbar = newToolbar( true );
-            JToggleButton geoOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-            JPopupMenu geoOptionsPopup = newButtonPopup( geoOptionsButton );
-            geoOptionsPopup.add( nightModeCheckbox );
-            geoToolbar.add( geoOptionsButton );
-
-
             View[] views =
             {
-                new View( "geoView",   geoCanvas,     "Geo",      false, null, requireIcon( "icons/fugue/map.png"        ), geoToolbar ),
+                new View( "geoView",   geoCanvas,     "Geo",      false, null, requireIcon( "icons/fugue/map.png"        ) ),
                 new View( "attrsView", attrsScroller, "Features", false, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
+                new View( "prefsView", prefsPanel,    "Prefs",    false, null, requireIcon( "icons/fugue/equalizer.png"  ) ),
             };
 
-            String appName = "dnc-query-example";
+            String appName = "dnc-explorer";
             DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
-            dockingGroup.addListener( createDefaultFrameTitler( "DNC Query Example" ) );
+            dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
 
             TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
-            GroupArrangement groupArr = loadDockingArrangement( appName, DncQueryExample.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
+            GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
             dockingGroup.restoreArrangement( groupArr, tileFactory, views );
             dockingGroup.addListener( new DockingGroupAdapter( )
             {

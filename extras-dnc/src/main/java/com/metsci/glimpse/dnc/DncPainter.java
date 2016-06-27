@@ -80,6 +80,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -196,6 +197,7 @@ public class DncPainter extends GlimpsePainter2D
     protected final AxisListener1D axisListener;
     protected final Set<DncLibrary> activeLibraries;
     protected final Set<DncCoverage> activeCoverages;
+    protected final CopyOnWriteArrayList<Runnable> activeChunksListeners;
     public final Function<DncChunkKey,DncChunkPriority> chunkPriorityFunc;
 
     // Accessed while holding mutex
@@ -255,6 +257,7 @@ public class DncPainter extends GlimpsePainter2D
         };
         this.activeLibraries = new HashSet<>( );
         this.activeCoverages = new HashSet<>( );
+        this.activeChunksListeners = new CopyOnWriteArrayList<>( );
         this.chunkPriorityFunc = new Function<DncChunkKey,DncChunkPriority>( )
         {
             public DncChunkPriority apply( DncChunkKey chunkKey )
@@ -306,6 +309,27 @@ public class DncPainter extends GlimpsePainter2D
                 axis.getAxisY( ).removeAxisListener( axisListener );
                 updateActiveLibraries( allLibraries );
             }
+        }
+    }
+
+    public void addActiveChunksListener( Runnable listener )
+    {
+        // Thread-safe because listeners list is a CopyOnWriteArrayList
+        activeChunksListeners.add( listener );
+    }
+
+    public void removeActiveChunksListener( Runnable listener )
+    {
+        // Thread-safe because listeners list is a CopyOnWriteArrayList
+        activeChunksListeners.remove( listener );
+    }
+
+    protected void notifyActiveChunksListeners( )
+    {
+        // Thread-safe because listeners list is a CopyOnWriteArrayList
+        for ( Runnable listener : activeChunksListeners )
+        {
+            listener.run( );
         }
     }
 
@@ -385,6 +409,23 @@ public class DncPainter extends GlimpsePainter2D
         }
     }
 
+    public void setCoverageActive( DncCoverage coverage, boolean active )
+    {
+        setCoveragesActive( singleton( coverage ), active );
+    }
+
+    public void setCoveragesActive( Collection<DncCoverage> coverages, boolean active )
+    {
+        if ( active )
+        {
+            activateCoverages( coverages );
+        }
+        else
+        {
+            deactivateCoverages( coverages );
+        }
+    }
+
     public void activateCoverages( String... coverageNames )
     {
         Collection<DncCoverage> coverages = new ArrayList<>( );
@@ -402,6 +443,8 @@ public class DncPainter extends GlimpsePainter2D
 
     public void activateCoverages( Collection<DncCoverage> coverages )
     {
+        boolean activeChunksChanged = false;
+
         synchronized ( mutex )
         {
             // Don't allow coverages to be re-activated after disposal
@@ -410,7 +453,13 @@ public class DncPainter extends GlimpsePainter2D
             if ( activeCoverages.addAll( coverages ) )
             {
                 activateChunks( activeLibraries, coverages );
+                activeChunksChanged = true;
             }
+        }
+
+        if ( activeChunksChanged )
+        {
+            notifyActiveChunksListeners( );
         }
     }
 
@@ -421,6 +470,8 @@ public class DncPainter extends GlimpsePainter2D
 
     public void deactivateCoverages( Collection<DncCoverage> coverages )
     {
+        boolean activeChunksChanged = false;
+
         synchronized ( mutex )
         {
             // Not necessary, since activeCoverages would already be empty
@@ -429,12 +480,20 @@ public class DncPainter extends GlimpsePainter2D
             if ( activeCoverages.removeAll( coverages ) )
             {
                 deactivateChunks( activeLibraries, coverages );
+                activeChunksChanged = true;
             }
+        }
+
+        if ( activeChunksChanged )
+        {
+            notifyActiveChunksListeners( );
         }
     }
 
     protected void updateActiveLibraries( Collection<DncLibrary> librariesToUpdate )
     {
+        boolean activeChunksChanged = false;
+
         synchronized ( mutex )
         {
             // Not usually necessary, since axes would be empty, but guards against strange impls of isLibraryActive
@@ -450,6 +509,7 @@ public class DncPainter extends GlimpsePainter2D
                     if ( activeLibraries.add( library ) )
                     {
                         librariesToActivate.add( library );
+                        activeChunksChanged = true;
                     }
                 }
                 else
@@ -457,12 +517,18 @@ public class DncPainter extends GlimpsePainter2D
                     if ( activeLibraries.remove( library ) )
                     {
                         librariesToDeactivate.add( library );
+                        activeChunksChanged = true;
                     }
                 }
             }
 
             deactivateChunks( librariesToDeactivate, activeCoverages );
             activateChunks( librariesToActivate, activeCoverages );
+        }
+
+        if ( activeChunksChanged )
+        {
+            notifyActiveChunksListeners( );
         }
     }
 
@@ -1004,9 +1070,9 @@ public class DncPainter extends GlimpsePainter2D
                                 gl.glUniform1f( lineProgram.HIGHLIGHT_EXTRA_THICKNESS_PX, lineHighlightExtraThickness_PX );
                                 gl.glUniform4fv( lineProgram.RGBA, 1, style.lineRgba, 0 );
 
-                                gl.glUniform1ui( lineProgram.STIPPLE_ENABLE, style.hasLineStipple ? 1 : 0 );
+                                gl.glUniform1i( lineProgram.STIPPLE_ENABLE, style.hasLineStipple ? 1 : 0 );
                                 gl.glUniform1f( lineProgram.STIPPLE_FACTOR, style.lineStippleFactor );
-                                gl.glUniform1ui( lineProgram.STIPPLE_PATTERN, style.lineStipplePattern );
+                                gl.glUniform1i( lineProgram.STIPPLE_PATTERN, style.lineStipplePattern );
 
                                 gl.glBindBuffer( GL_ARRAY_BUFFER, dChunk.verticesHandle );
                                 gl.glVertexPointer( coordsPerRenderLineVertex, GL_FLOAT, 0, group.linesCoordFirst * SIZEOF_FLOAT );

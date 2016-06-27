@@ -228,6 +228,27 @@ public class DncMiscUtils
         return list.get( list.size( ) - 1 );
     }
 
+    public static boolean isFilenameCaseSensitive( File file )
+    {
+        return !equal( filenameToLowercase( file ), filenameToUppercase( file ) );
+    }
+
+    /**
+     * Lowercases the last segment of the specified path.
+     */
+    public static File filenameToLowercase( File file )
+    {
+        return new File( file.getParent( ), file.getName( ).toLowerCase( ) );
+    }
+
+    /**
+     * Uppercases the last segment of the specified path.
+     */
+    public static File filenameToUppercase( File file )
+    {
+        return new File( file.getParent( ), file.getName( ).toUpperCase( ) );
+    }
+
     public static MappedByteBuffer memmapReadOnly( File file ) throws IOException
     {
         RandomAccessFile raf = null;
@@ -430,7 +451,14 @@ public class DncMiscUtils
     {
         if ( !dir.mkdirs( ) )
         {
-            throw new RuntimeException( "Failed to create directory (maybe it already exists?): path = " + dir.getAbsolutePath( ) );
+            if ( dir.exists( ) )
+            {
+                throw new RuntimeException( "Directory already exists: path = " + dir.getAbsolutePath( ) );
+            }
+            else
+            {
+                throw new RuntimeException( "Failed to create directory: path = " + dir.getAbsolutePath( ) );
+            }
         }
         return dir;
     }

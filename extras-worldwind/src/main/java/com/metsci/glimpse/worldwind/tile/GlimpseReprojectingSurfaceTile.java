@@ -26,9 +26,8 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
-import java.awt.Dimension;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -37,7 +36,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -47,7 +46,6 @@ import com.metsci.glimpse.support.projection.GeoReprojection;
 import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
 
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.util.OGLStackHandler;
@@ -58,7 +56,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 
     private static double REPROJECT_DISCRETIZE_FRACTION = 0.01;
 
-    protected SimpleOffscreenCanvas reprojectCanvas;
+    protected FBOGlimpseCanvas reprojectCanvas;
     protected ShadedTexturePainter texturePainter;
     protected GlimpseAxisLayout2D reprojectLayout;
 
@@ -73,46 +71,47 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
     {
         super( layout, axes, from, 8192, 8192, preferredWidth, preferredHeight, minLat, maxLat, minLon, maxLon );
 
-        init( to );
+        this.projectionTo = to;
     }
 
     public GlimpseReprojectingSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection from, GeoProjection to, int preferredWidth, int preferredHeight, List<LatLon> corners )
     {
         super( layout, axes, from, 8192, 8192, preferredWidth, preferredHeight, corners );
 
-        init( to );
+        this.projectionTo = to;
     }
 
     public GlimpseReprojectingSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection from, GeoProjection to, int maxWidth, int maxHeight, int preferredWidth, int preferredHeight, double minLat, double maxLat, double minLon, double maxLon )
     {
         super( layout, axes, from, maxWidth, maxHeight, preferredWidth, preferredHeight, minLat, maxLat, minLon, maxLon );
 
-        init( to );
+        this.projectionTo = to;
     }
 
     public GlimpseReprojectingSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection from, GeoProjection to, int maxWidth, int maxHeight, int preferredWidth, int preferredHeight, List<LatLon> corners )
     {
         super( layout, axes, from, maxWidth, maxHeight, preferredWidth, preferredHeight, corners );
 
-        init( to );
+        this.projectionTo = to;
     }
 
-    protected void init( GeoProjection to )
+    protected void init( GLContext context )
     {
-        this.projectionTo = to;
-        this.reprojectCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
+        this.reprojectCanvas = new FBOGlimpseCanvas( context, width, height );
         this.texturePainter = new ShadedTexturePainter( );
-        this.reprojectLayout = new GlimpseAxisLayout2D( new Axis2D( ) );
 
+        this.reprojectLayout = new GlimpseAxisLayout2D( new Axis2D( ) );
         this.reprojectLayout.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.reprojectLayout.addPainter( this.texturePainter );
+
+        this.reprojectCanvas.addLayout( this.reprojectLayout );
 
     }
 
     @Override
     protected int getTextureHandle( )
     {
-        return reprojectCanvas.getFrameBuffer( ).getTextureId( );
+        return reprojectCanvas.getTextureUnit( );
     }
 
     @Override
@@ -167,15 +166,13 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         // get a handle to the texture offscreenCanvas drew into
         if ( texture == null )
         {
-            reprojectCanvas.initialize( context );
+            init( glContext );
+            
+            int width = offscreenCanvas.getTargetBounds( ).getWidth( );
+            int height = offscreenCanvas.getTargetBounds( ).getHeight( );
+            int texHandle = offscreenCanvas.getTextureUnit( );
 
-            GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
-            Dimension dim = fbo.getDimension( );
-            int width = ( int ) dim.getWidth( );
-            int height = ( int ) dim.getHeight( );
-            int texHandle = fbo.getTextureId( );
-
-            texture = new ExternalTextureProjected2D( texHandle, width, height, false )
+            texture = new ExternalTextureProjected2D( texHandle, width, height, false)
             {
                 @Override
                 protected void putVertexCoords( int texIndex, double texFracX, double texFracY, float[] temp )
@@ -212,7 +209,6 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
             updateProjection( currentWidth, currentHeight );
         }
 
-        GLSimpleFrameBufferObject fbo = reprojectCanvas.getFrameBuffer( );
         OGLStackHandler stack = new OGLStackHandler( );
         GL2 gl = glContext.getGL( ).getGL2( );
 
@@ -223,19 +219,24 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         stack.pushModelview( gl );
         stack.pushProjection( gl );
 
-        fbo.bind( glContext );
-        try
+        GLContext c = offscreenCanvas.getGLContext( );
+
+        if ( c != null )
         {
-            reprojectLayout.paintTo( reprojectCanvas.getGlimpseContext( ) );
-        }
-        catch ( Exception e )
-        {
-            logWarning( logger, "Trouble drawing to offscreen buffer", e );
-        }
-        finally
-        {
-            fbo.unbind( glContext );
-            stack.pop( gl );
+            c.makeCurrent( );
+            try
+            {
+                reprojectCanvas.paint( );
+            }
+            catch ( Exception e )
+            {
+                logWarning( logger, "Trouble drawing to offscreen buffer", e );
+            }
+            finally
+            {
+                glContext.makeCurrent( );
+                stack.pop( gl );
+            }
         }
     }
 

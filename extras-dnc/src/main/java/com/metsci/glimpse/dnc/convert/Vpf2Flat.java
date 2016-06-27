@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.dnc.convert;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
 import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
 import static com.jogamp.common.nio.Buffers.SIZEOF_LONG;
@@ -58,19 +57,55 @@ import static com.metsci.glimpse.dnc.convert.Flat.FlatFeatureType.FLAT_AREA_FEAT
 import static com.metsci.glimpse.dnc.convert.Flat.FlatFeatureType.FLAT_LINE_FEATURE;
 import static com.metsci.glimpse.dnc.convert.Flat.FlatFeatureType.FLAT_POINT_FEATURE;
 import static com.metsci.glimpse.dnc.convert.Vpf.createPrimitiveDatas;
+import static com.metsci.glimpse.dnc.convert.Vpf.findDhtFile;
 import static com.metsci.glimpse.dnc.convert.Vpf.readAllFeatureClasses;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfAreaRings;
-import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabases;
+import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabaseDirsByName;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfLibraryNameComparator;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfLineVertices;
 import static com.metsci.glimpse.dnc.convert.Vpf.vpfPointVertex;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createAndMemmapReadWrite;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.isFilenameCaseSensitive;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.packBytesIntoLong;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.writeIdsMapFile;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static java.lang.Double.doubleToLongBits;
+import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.Files.createSymbolicLink;
+import static java.nio.file.Files.delete;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.walkFileTree;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import com.google.common.io.Files;
+
 import gov.nasa.worldwind.formats.vpf.VPFBasicFeatureFactory;
 import gov.nasa.worldwind.formats.vpf.VPFCoverage;
 import gov.nasa.worldwind.formats.vpf.VPFDatabase;
@@ -84,26 +119,6 @@ import gov.nasa.worldwind.geom.LatLon;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
-
-import com.google.common.io.Files;
-
 public class Vpf2Flat
 {
 
@@ -111,23 +126,13 @@ public class Vpf2Flat
 
 
 
-    public static void convertVpfToFlat( String vpfParentDir, String flatParentDir ) throws IOException
-    {
-        convertVpfToFlat( vpfParentDir, flatParentDir, UTF_8 );
-    }
-
-    public static void convertVpfToFlat( String vpfParentDir, String flatParentDir, Charset charset ) throws IOException
-    {
-        convertVpfToFlat( new File( vpfParentDir ), new File( flatParentDir ), charset );
-    }
-
     public static void convertVpfToFlat( File vpfParentDir, File flatParentDir, Charset charset ) throws IOException
     {
         flatParentDir.mkdirs( );
-        for ( VPFDatabase vpfDatabase : vpfDatabases( vpfParentDir, null ) )
+        for ( File vpfDir : vpfDatabaseDirsByName( vpfParentDir ).values( ) )
         {
-            Database database = readVpfDatabase( vpfDatabase );
-            String dirname = vpfDatabase.getName( ).toLowerCase( ).replace( "dnc", "dncflat" );
+            Database database = readVpfDatabase( vpfDir );
+            String dirname = database.name.toLowerCase( ).replace( "dnc", "dncflat" );
             File flatDir = createNewDir( flatParentDir, dirname );
             writeFlatDatabase( database, flatDir, charset );
         }
@@ -205,6 +210,76 @@ public class Vpf2Flat
 
     // Read VPF
     //
+
+    public static Database readVpfDatabase( File databaseDir ) throws IOException
+    {
+        Set<Path> symlinks = new LinkedHashSet<>( );
+        try
+        {
+            // Create lowercase symlinks, so Worldwind's VPF reader can find them
+            if ( isFilenameCaseSensitive( new File( databaseDir, "test" ) ) )
+            {
+                walkFileTree( databaseDir.toPath( ), EnumSet.of( FOLLOW_LINKS ), Integer.MAX_VALUE, new SimpleFileVisitor<Path>( )
+                {
+                    public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs ) throws IOException
+                    {
+                        createLowercaseSymlink( dir );
+                        return CONTINUE;
+                    }
+
+                    public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException
+                    {
+                        createLowercaseSymlink( file );
+                        return CONTINUE;
+                    }
+
+                    private void createLowercaseSymlink( Path path ) throws IOException
+                    {
+                        Path filename = path.getFileName( );
+                        Path lowercase = path.resolveSibling( filename.toString( ).toLowerCase( ) );
+                        if ( !exists( lowercase ) )
+                        {
+                            Path symlink = createSymbolicLink( lowercase, filename );
+                            symlinks.add( symlink );
+                        }
+                    }
+                } );
+            }
+
+            // Read the VPF files
+            File dhtFile = findDhtFile( databaseDir );
+            VPFDatabase vpfDatabase = VPFDatabase.fromFile( dhtFile.getPath( ) );
+            return readVpfDatabase( vpfDatabase );
+        }
+        finally
+        {
+            // Delete the symlinks we created
+            IOException firstException = null;
+            for ( Path symlink : symlinks )
+            {
+                try
+                {
+                    delete( symlink );
+                }
+                catch ( IOException e )
+                {
+                    if ( firstException == null )
+                    {
+                        firstException = e;
+                    }
+                    else
+                    {
+                        firstException.addSuppressed( e );
+                    }
+                }
+            }
+            if ( firstException != null )
+            {
+                throw firstException;
+            }
+        }
+
+    }
 
     public static Database readVpfDatabase( VPFDatabase database )
     {

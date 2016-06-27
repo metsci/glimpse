@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -37,10 +37,10 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
-import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -48,7 +48,6 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.vector.Vector2d;
-import com.metsci.glimpse.worldwind.canvas.SimpleOffscreenCanvas;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.LatLon;
@@ -85,10 +84,10 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected LatLonBounds bounds;
     protected List<LatLon> corners;
+    protected boolean isMax = true;
 
-    protected SimpleOffscreenCanvas offscreenCanvas;
+    protected FBOGlimpseCanvas offscreenCanvas;
     protected TextureSurfaceTile tile;
-    protected GLContext context;
 
     public GlimpseDynamicSurfaceTile( GlimpseLayout layout, Axis2D axes, GeoProjection projection, int width, int height, double minLat, double maxLat, double minLon, double maxLon )
     {
@@ -113,9 +112,22 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.background = new GlimpseLayout( );
         this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.background.addLayout( mask );
+    }
+    
+    @Override
+    public void setOpacity( double opacity )
+    {
+        super.setOpacity( opacity );
+        if ( this.tile != null ) this.tile.setOpacity( opacity );
+    }
 
-        this.offscreenCanvas = new SimpleOffscreenCanvas( width, height, false, false, context );
-        this.offscreenCanvas.addLayout( this.background );
+    /**
+     * @deprecated use {@link #setOpacity(double)} instead
+     */
+    @Deprecated
+    public void setAlpha( float alpha )
+    {
+        this.setOpacity( alpha );
     }
 
     public void updateMaxCorners( List<LatLon> corners )
@@ -139,60 +151,103 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     @Override
     public GlimpseTargetStack getTargetStack( )
     {
-        return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );
+        if ( this.offscreenCanvas != null )
+        {
+            return TargetStackUtil.newTargetStack( this.offscreenCanvas, this.layout );
+        }
+        else
+        {
+            return null;
+        }
     }
 
     @Override
     public void preRender( DrawContext dc )
     {
-        if ( tile == null )
+        if ( tile == null && offscreenCanvas == null )
         {
-
-            if ( context == null )
-            {
-                GLContext oldcontext = dc.getGLContext( );
-                context = dc.getGLDrawable( ).createContext( oldcontext );
-            }
-
-            offscreenCanvas.initialize( context );
+            offscreenCanvas = new FBOGlimpseCanvas( dc.getGLContext( ), width, height );
+            offscreenCanvas.addLayout( background );
         }
 
-        updateGeometry( dc );
-
-        drawOffscreen( dc );
-
-        if ( tile == null )
+        if ( offscreenCanvas.getGLContext( ) != null )
         {
-            int textureHandle = getTextureHandle( );
-            tile = newTextureSurfaceTile( textureHandle, corners );
+            updateGeometry( dc );
+
+            drawOffscreen( dc );
+
+            if ( tile == null && corners != null )
+            {
+                int textureHandle = getTextureHandle( );
+                tile = newTextureSurfaceTile( textureHandle, corners );
+            }
+        }
+    }
+
+    @Override
+    protected void doRender( DrawContext dc )
+    {
+        if ( tile != null )
+        {
+            tile.render( dc );
+        }
+    }
+
+    protected void drawOffscreen( DrawContext dc )
+    {
+        drawOffscreen( dc.getGLContext( ) );
+    }
+
+    protected void drawOffscreen( GLContext glContext )
+    {
+        OGLStackHandler stack = new OGLStackHandler( );
+        GL2 gl = glContext.getGL( ).getGL2( );
+
+        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
+        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
+        stack.pushTexture( gl );
+        stack.pushModelview( gl );
+        stack.pushProjection( gl );
+
+        GLContext c = offscreenCanvas.getGLContext( );
+
+        if ( c != null )
+        {
+            c.makeCurrent( );
+            try
+            {
+                offscreenCanvas.paint( );
+            }
+            catch ( Exception e )
+            {
+                logWarning( logger, "Trouble drawing to offscreen buffer", e );
+            }
+            finally
+            {
+                glContext.makeCurrent( );
+                stack.pop( gl );
+            }
         }
     }
 
     protected int getTextureHandle( )
     {
-        return offscreenCanvas.getFrameBuffer( ).getTextureId( );
+        return offscreenCanvas.getTextureUnit( );
     }
 
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
     {
-        return new TextureSurfaceTile( textureHandle, corners );
+        TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
+        tile.setOpacity( getOpacity( ) );
+        return tile;
     }
 
     protected void updateGeometry( DrawContext dc )
     {
-        // two heuristic methods of calculating the screen corners
-        // heuristic 1 is basically never actually used to updateGeometry(),
-        // but it is a good indicator of whether heuristic 2 will provide
-        // good results (if heuristic 1 is not valid, heuristic 2 is likely
-        // to provide bad results, so updateGeometryDefault() is used)
         List<LatLon> screenCorners1 = getCornersHeuristic1( dc );
         List<LatLon> screenCorners2 = getCornersHeuristic2( dc );
 
-        if ( !isValid( screenCorners1 ) )
-        {
-            updateGeometryDefault( );
-        }
-        else if ( isValid( screenCorners2 ) )
+        if ( isValid( screenCorners1 ) && isValid( screenCorners2 ) )
         {
             updateGeometry( screenCorners2 );
         }
@@ -206,17 +261,32 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     {
         corners = maxCorners;
         bounds = maxBounds;
+        isMax = true;
 
         updateTile( );
     }
 
     protected void updateGeometry( List<LatLon> screenCorners )
     {
-        LatLonBounds screenBounds = bufferCorners( getCorners( screenCorners ), 0.5 );
-        bounds = getIntersectedCorners( maxBounds, screenBounds );
-        corners = getCorners( bounds );
+        LatLonBounds outerBounds = getBoundsFromCorners( screenCorners, 0.9 );
+        LatLonBounds innerBounds = getBoundsFromCorners( screenCorners, 0.4 );
 
-        updateTile( );
+        // Update the geometry if:
+        //
+        // 1) we were previously showing the max tile
+        // 2) the view has been panned to near the edge of the current tile
+        // 3) the view has been zoomed in by 10% or more (in visible area)
+        //
+        // This is done (instead of updating every time the bounds change by any amount
+        // to make slight numerical differences which cause jitter in the on map position
+        // of elements in the glimpse generated image.
+        if ( isMax || !contains( bounds, innerBounds ) || getArea( bounds ) > getArea( outerBounds ) * 1.1 )
+        {
+            bounds = outerBounds;
+            corners = getCorners( bounds );
+            isMax = false;
+            updateTile( );
+        }
     }
 
     protected void updateTile( )
@@ -226,6 +296,29 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
             setAxes( axes, bounds, projection );
             tile.setCorners( corners );
         }
+    }
+
+    protected LatLonBounds getBoundsFromCorners( List<LatLon> screenCorners, double bufferFactor )
+    {
+        LatLonBounds bounds = getCorners( screenCorners );
+        LatLonBounds bufferedBounds = bufferCorners( bounds, bufferFactor );
+        LatLonBounds intersectedBounds = getIntersectedCorners( maxBounds, bufferedBounds );
+
+        return intersectedBounds;
+    }
+
+    protected double getArea( LatLonBounds outerBounds )
+    {
+        return ( outerBounds.maxLat - outerBounds.minLat ) * ( outerBounds.maxLon - outerBounds.minLon );
+
+    }
+
+    protected boolean contains( LatLonBounds outerBounds, LatLonBounds innerBounds )
+    {
+        return outerBounds.maxLat > innerBounds.maxLat &&
+                outerBounds.minLat < innerBounds.minLat &&
+                outerBounds.maxLon > innerBounds.maxLon &&
+                outerBounds.minLon < innerBounds.minLon;
     }
 
     protected void setAxes( Axis2D axes, LatLonBounds bounds, GeoProjection projection )
@@ -381,12 +474,14 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
     // inspired by: gov.nasa.worldwind.layers.ScalebarLayer
     public static List<LatLon> getCornersHeuristic2( DrawContext dc )
     {
-        // Compute scale size in real world
-        Position referencePosition = dc.getViewportCenterPosition( );
-        if ( referencePosition == null ) return null;
+        double x = dc.getView( ).getViewport( ).getWidth( ) / 2;
+        double y = dc.getView( ).getViewport( ).getHeight( ) / 2;
 
-        Vec4 groundTarget = dc.getGlobe( ).computePointFromPosition( referencePosition );
-        Double distance = dc.getView( ).getEyePoint( ).distanceTo3( groundTarget );
+        Position centerPosition = dc.getView( ).computePositionFromScreenPoint( x, y );
+        Vec4 center = dc.getGlobe( ).computePointFromPosition( centerPosition );
+        Vec4 eye = dc.getView( ).getEyePoint( );
+
+        Double distance = center.distanceTo3( eye );
         double metersPerPixel = dc.getView( ).computePixelSizeAtDistance( distance );
 
         // now assume this size roughly holds across the whole screen
@@ -400,7 +495,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         // (which direction is north) just take the largest dimension
         double viewportSizeMeters = Math.max( viewportHeightMeters, viewportWidthMeters );
 
-        LatLonGeo centerLatLon = LatLonGeo.fromDeg( referencePosition.latitude.getDegrees( ), referencePosition.longitude.getDegrees( ) );
+        LatLonGeo centerLatLon = LatLonGeo.fromDeg( centerPosition.latitude.getDegrees( ), centerPosition.longitude.getDegrees( ) );
         LatLonGeo swLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southwest );
         LatLonGeo seLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.southeast );
         LatLonGeo nwLatLon = centerLatLon.displacedBy( Length.fromMeters( viewportSizeMeters ), Azimuth.northwest );
@@ -418,54 +513,6 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         corners.add( nePos );
 
         return corners;
-    }
-
-    @Override
-    protected void doRender( DrawContext dc )
-    {
-        tile.render( dc );
-
-    }
-
-    protected void drawOffscreen( DrawContext dc )
-    {
-        context.makeCurrent( );
-        try
-        {
-            drawOffscreen( dc.getGLContext( ) );
-        }
-        finally
-        {
-            dc.getGLContext( ).makeCurrent( );
-        }
-    }
-
-    protected void drawOffscreen( GLContext glContext )
-    {
-        GLSimpleFrameBufferObject fbo = offscreenCanvas.getFrameBuffer( );
-        OGLStackHandler stack = new OGLStackHandler( );
-        GL2 gl = glContext.getGL( ).getGL2( );
-
-        stack.pushAttrib( gl, GL2.GL_ALL_ATTRIB_BITS );
-        stack.pushClientAttrib( gl, ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
-        stack.pushTexture( gl );
-        stack.pushModelview( gl );
-        stack.pushProjection( gl );
-
-        fbo.bind( glContext );
-        try
-        {
-            background.paintTo( offscreenCanvas.getGlimpseContext( ) );
-        }
-        catch ( Exception e )
-        {
-            logWarning( logger, "Trouble drawing to offscreen buffer", e );
-        }
-        finally
-        {
-            fbo.unbind( glContext );
-            stack.pop( gl );
-        }
     }
 
     public static class LatLonBounds

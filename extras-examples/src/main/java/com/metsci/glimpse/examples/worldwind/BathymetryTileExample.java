@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.worldwind;
 
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.*;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
@@ -157,8 +157,8 @@ public class BathymetryTileExample
         linkMouseEvents( wwc, projection, glimpseLayer );
 
         // force the WorldWind and Glimpse windows to pan together
-        //linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
-        //linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
+        linkAxisToWorldWind( wwc, projection, plot.getAxis( ) );
+        linkWorldWindToAxis( wwc, projection, plot.getAxis( ) );
 
         // add a thread to constantly repaint the WorldWind window
         // this isn't an ideal solution, but because Glimpse currently

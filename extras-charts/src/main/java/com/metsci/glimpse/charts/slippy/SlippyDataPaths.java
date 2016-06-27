@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,18 +24,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.dnc;
+package com.metsci.glimpse.charts.slippy;
 
-import static com.metsci.glimpse.dnc.convert.Vpf2Flat.convertVpfToFlat;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import java.io.IOException;
+import com.metsci.glimpse.util.GlimpseDataPaths;
 
-public class Vpf2FlatExample
+public class SlippyDataPaths
 {
 
-    public static void main( String[] args ) throws IOException
+    private SlippyDataPaths( )
     {
-        convertVpfToFlat( "/path/to/archive-pp", "/path/to/DNC_FLAT" );
     }
 
+    /**
+     * Standard dir for slippy tile cache. Contains a folder for each tile source.
+     * <ol>
+     * <li>JVM prop (if defined): {@code glimpse.slippy.cacheDir}
+     * <li>Env var (if defined): {@code GLIMPSE_SLIPPY_CACHE}
+     * <li>Default: subdir slippy-cache of {@link GlimpseDataPaths#glimpseUserCacheDir}
+     * </ol>
+     */
+    public static final Path slippyCacheRoot = slippyCacheRootDir( );
+    private static Path slippyCacheRootDir( )
+    {
+        String jvmProp = System.getProperty( "glimpse.slippy.cacheDir" );
+        if ( jvmProp != null )
+        {
+            return Paths.get( jvmProp );
+        }
+
+        String envVar = System.getenv( "GLIMPSE_SLIPPY_CACHE" );
+        if ( envVar != null )
+        {
+            return Paths.get( envVar );
+        }
+        Path parent = GlimpseDataPaths.glimpseUserCacheDir.toPath( );
+        return parent.resolve("slippy-cache");
+    }
 }

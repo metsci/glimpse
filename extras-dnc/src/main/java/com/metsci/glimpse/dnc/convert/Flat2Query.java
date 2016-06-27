@@ -31,6 +31,9 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
 import static com.jogamp.common.nio.Buffers.SIZEOF_LONG;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncQueryDir;
+import static com.metsci.glimpse.dnc.DncProjections.dncPlateCarree;
 import static com.metsci.glimpse.dnc.convert.Flat.flatChildDirs;
 import static com.metsci.glimpse.dnc.convert.Flat.flatDatabaseNum;
 import static com.metsci.glimpse.dnc.convert.Flat.intsPerFlatFeature;
@@ -175,10 +178,10 @@ public class Flat2Query
 
     public static class QueryCacheConfig
     {
-        public File flatParentDir = null;
-        public File queryParentDir = null;
+        public File flatParentDir = glimpseDncFlatDir;
+        public File queryParentDir = glimpseDncQueryDir;
 
-        public DncProjection proj = null;
+        public DncProjection proj = dncPlateCarree;
         public int projPointsPerBoundsEdge = 2;
 
         public long chunksFileSize = 25 * MiB;

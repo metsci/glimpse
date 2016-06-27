@@ -26,20 +26,34 @@
  */
 package com.metsci.glimpse.dnc.convert;
 
+import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.filenameToLowercase;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.last;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.toArrayList;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
-import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
-import static com.metsci.glimpse.util.GeneralUtils.newHashMap;
-import static com.metsci.glimpse.util.GeneralUtils.newHashSet;
+import static gov.nasa.worldwind.formats.vpf.VPFConstants.DATABASE_HEADER_TABLE;
 import static gov.nasa.worldwind.formats.vpf.VPFConstants.EDGE_PRIMITIVE_TABLE;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+
 import gov.nasa.worldwind.formats.vpf.VPFBasicPrimitiveDataFactory;
+import gov.nasa.worldwind.formats.vpf.VPFBufferedRecordData;
 import gov.nasa.worldwind.formats.vpf.VPFCoverage;
-import gov.nasa.worldwind.formats.vpf.VPFDatabase;
 import gov.nasa.worldwind.formats.vpf.VPFFeature;
 import gov.nasa.worldwind.formats.vpf.VPFFeatureClass;
 import gov.nasa.worldwind.formats.vpf.VPFFeatureTableFilter;
@@ -58,21 +72,32 @@ import gov.nasa.worldwind.util.CompoundVecBuffer;
 import gov.nasa.worldwind.util.VecBuffer;
 import gov.nasa.worldwind.util.VecBufferSequence;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
 public class Vpf
 {
 
-    public static final Comparator<VPFFeatureClass> featureClassNameComparator = new Comparator<VPFFeatureClass>()
+    public static final Comparator<VPFLibrary> vpfLibraryNameComparator = new Comparator<VPFLibrary>()
+    {
+        public int compare(VPFLibrary a, VPFLibrary b)
+        {
+            String aName = a.getName();
+            String bName = b.getName();
+            return aName.compareTo(bName);
+        }
+    };
+
+
+    public static final Comparator<VPFCoverage> vpfCoverageNameComparator = new Comparator<VPFCoverage>()
+    {
+        public int compare(VPFCoverage a, VPFCoverage b)
+        {
+            String aName = a.getName();
+            String bName = b.getName();
+            return aName.compareTo(bName);
+        }
+    };
+
+
+    public static final Comparator<VPFFeatureClass> vpfFeatureClassNameComparator = new Comparator<VPFFeatureClass>()
     {
         public int compare(VPFFeatureClass a, VPFFeatureClass b)
         {
@@ -94,30 +119,24 @@ public class Vpf
         EnumSet<VPFFeatureType> typeSet = EnumSet.noneOf(VPFFeatureType.class);
         for (VPFFeatureType t : types) typeSet.add(t);
 
-        Set<VPFFeatureClass> featureClasses = newHashSet();
+        // WW's VPF reader breaks (by silently skipping data!) if filenames are case-
+        // sensitive and contain uppercase characters. In such a case, assume that the
+        // necessary lowercase symlinks have already been created (which is reasonable,
+        // because that's the only way the reader will work).
+        FileFilter featureTableFilter = new VPFFeatureTableFilter()
+        {
+            public boolean accept(File file)
+            {
+                return ( super.accept(file) && equal(file, filenameToLowercase(file)) );
+            }
+        };
+
+        Set<VPFFeatureClass> featureClasses = new LinkedHashSet<>();
         for (VPFCoverage cov : lib.getCoverages())
         {
             if (cov.isReferenceCoverage()) continue;
 
-            // Some copies of the DNCs have uppercase symlinks to lowercase files,
-            // or vice versa, to allow case-insensitive code to work on case-sensitive
-            // file systems.
-            //
-            // We don't want to process the uppercase and the lowercase as if they were
-            // two separate items, so keep track of which names we've seen so far (in a
-            // consistent case), and don't process them again.
-            //
-            FileFilter filter = new VPFFeatureTableFilter()
-            {
-                Set<String> namesSeen = newHashSet();
-                public boolean accept(File file)
-                {
-                    String name = file.getName().toLowerCase();
-                    return namesSeen.add(name) && super.accept(file);
-                }
-            };
-
-            VPFFeatureClass[] fcs = VPFUtils.readFeatureClasses(cov, filter);
+            VPFFeatureClass[] fcs = VPFUtils.readFeatureClasses(cov, featureTableFilter);
             for (VPFFeatureClass fc : fcs)
             {
                 VPFFeatureType type = fc.getType();
@@ -126,7 +145,7 @@ public class Vpf
         }
 
         VPFFeatureClass[] featureClassesArray = featureClasses.toArray(new VPFFeatureClass[0]);
-        sort( featureClassesArray, featureClassNameComparator);
+        sort( featureClassesArray, vpfFeatureClassNameComparator);
         return featureClassesArray;
     }
 
@@ -135,8 +154,8 @@ public class Vpf
     {
         VPFPrimitiveDataFactory factory = new VPFBasicPrimitiveDataFactory(tile);
 
-        Map<VPFCoverage,VPFPrimitiveData> primitiveDatas = newHashMap();
-        for (VPFCoverage cov : lib.getCoverages())
+        Map<VPFCoverage,VPFPrimitiveData> primitiveDatas = new LinkedHashMap<>();
+        for (VPFCoverage cov : sorted(lib.getCoverages(), vpfCoverageNameComparator))
         {
             primitiveDatas.put(cov, factory.createPrimitiveData(cov));
         }
@@ -144,78 +163,76 @@ public class Vpf
     }
 
 
-    public static final Comparator<VPFLibrary> vpfLibraryNameComparator = new Comparator<VPFLibrary>()
+    /**
+     * Returns a map from database name to database dir
+     */
+    public static Map<String,File> vpfDatabaseDirsByName(File parentDir)
     {
-        public int compare(VPFLibrary a, VPFLibrary b)
+        Map<String,File> dbDirs = new LinkedHashMap<>();
+
+        File[] children = parentDir.listFiles();
+        if (children != null)
         {
-            String aName = a.getName();
-            String bName = b.getName();
-            return aName.compareTo(bName);
+            sort(children);
+            for (File dbDir : children)
+            {
+                File dhtFile = findDhtFile(dbDir);
+                if (dhtFile != null)
+                {
+                    String dbName = readDatabaseName(dhtFile);
+                    if (dbName != null && !dbDirs.containsKey(dbName))
+                    {
+                        dbDirs.put(dbName, dhtFile.getParentFile().getAbsoluteFile());
+                    }
+                }
+            }
         }
-    };
 
-
-    public static Iterable<VPFDatabase> vpfDatabases(File parentDir)
-    {
-        return vpfDatabases(parentDir, null);
+        return dbDirs;
     }
 
 
-    public static Iterable<VPFDatabase> vpfDatabases(File parentDir, int[] dbNums)
+    public static File findDhtFile(File dbDir)
     {
-        final boolean filterOnDbNum = (dbNums != null);
-        final Set<String> includedNames = newHashSet();
-        if (filterOnDbNum)
+        File fileOrSymlink = null;
+        File fileActual = null;
+
+        File[] children = dbDir.listFiles();
+        if (children != null)
         {
-            for (int dbNum : dbNums) includedNames.add(String.format("dnc%02d", dbNum));
+            sort(children);
+            for (File f : children)
+            {
+                if (f.getName().equalsIgnoreCase(DATABASE_HEADER_TABLE) && f.isFile())
+                {
+                    fileOrSymlink = f;
+                    if (!Files.isSymbolicLink(f.toPath()))
+                    {
+                        fileActual = f;
+                    }
+                }
+            }
         }
 
-        // Some copies of the DNCs have uppercase symlinks to lowercase files,
-        // or vice versa, to allow case-insensitive code to work on case-sensitive
-        // file systems.
-        //
-        // We don't want to process the uppercase and the lowercase as if they were
-        // two separate items, so keep track of which names we've seen so far (in a
-        // consistent case), and don't process them again.
-        //
-        final List<File> dbDirs = asList( parentDir.listFiles( new FileFilter()
-        {
-            Set<String> namesSeen = newHashSet();
-            public boolean accept(File f)
-            {
-                String name = f.getName().toLowerCase();
-                return namesSeen.add(name) && f.isDirectory() && name.matches("^dnc[0-9][0-9]$") && (!filterOnDbNum || includedNames.contains(name));
-            }
-        } ) );
+        return (fileActual == null ? fileOrSymlink : fileActual);
+    }
 
-        return new Iterable<VPFDatabase>()
-        {
-            public Iterator<VPFDatabase> iterator()
-            {
-                final Iterator<File> dbDirsIterator = dbDirs.iterator();
 
-                return new Iterator<VPFDatabase>()
+    public static String readDatabaseName(File dhtFile)
+    {
+        if (dhtFile != null)
+        {
+            VPFBufferedRecordData dht = VPFUtils.readTable(dhtFile);
+            if (dht != null && dht.getNumRecords() >= 1)
+            {
+                Object o = dht.getRecord(1).getValue("database_name");
+                if (o instanceof String)
                 {
-                    public boolean hasNext()
-                    {
-                        return dbDirsIterator.hasNext();
-                    }
-
-                    public VPFDatabase next()
-                    {
-                        File dbDir = dbDirsIterator.next();
-                        File dht = new File(dbDir, "dht");
-                        if (!dht.exists()) dht = new File(dbDir, "DHT");
-                        return VPFDatabase.fromFile(dht.getPath());
-                    }
-
-                    public void remove()
-                    {
-                        throw new UnsupportedOperationException();
-                    }
-                };
+                    return ((String) o);
+                }
             }
-        };
+        }
+        return null;
     }
 
 
@@ -254,7 +271,7 @@ public class Vpf
 
     public static List<Edge> extractRingEdges(VPFPrimitiveData primitiveData, VecBufferSequence edgeTableData, Ring ring)
     {
-        List<Edge> edges = newArrayList();
+        List<Edge> edges = new ArrayList<>();
         for (int i = 0; i < ring.getNumEdges(); i++)
         {
             int id = ring.getEdgeId(i);
@@ -315,7 +332,7 @@ public class Vpf
 
     public static List<Edge> regularizeRingEdges(List<Edge> extractedRingEdges)
     {
-        List<Edge> regularized = newArrayList();
+        List<Edge> regularized = new ArrayList<>();
         Stack<Edge> stack = new Stack<Edge>();
 
         for (int i = 0; i < extractedRingEdges.size(); i++)
@@ -348,7 +365,7 @@ public class Vpf
 
     public static List<LatLon> locations(List<Edge> edges)
     {
-        List<LatLon> locations = newArrayList();
+        List<LatLon> locations = new ArrayList<>();
         for (Edge edge : edges) locations.addAll(edge.locations);
         return locations;
     }
@@ -362,7 +379,7 @@ public class Vpf
 
     public static List<List<LatLon>> vpfAreaRings(VPFFeature areaFeature, VPFPrimitiveData primitiveData)
     {
-        List<List<LatLon>> vertices = newArrayList();
+        List<List<LatLon>> vertices = new ArrayList<>();
         VecBufferSequence edgeTableData = primitiveData.getPrimitiveCoords(EDGE_PRIMITIVE_TABLE);
         String primitiveName = areaFeature.getFeatureClass().getPrimitiveTableName();
         for (int id : areaFeature.getPrimitiveIds())
@@ -384,7 +401,7 @@ public class Vpf
     {
         VPFSurfaceLine line = new VPFSurfaceLine(lineFeature, primitiveData);
 
-        List<LatLon> lines = newArrayList();
+        List<LatLon> lines = new ArrayList<>();
 
         LatLon vStart = null;
         for (LatLon vEnd : line.getLocations())
@@ -403,7 +420,7 @@ public class Vpf
 
     public static LatLon vpfPointVertex(VPFFeature pointFeature, VPFPrimitiveData primitiveData)
     {
-        List<LatLon> points = newArrayList();
+        List<LatLon> points = new ArrayList<>();
 
         String primitiveName = pointFeature.getFeatureClass().getPrimitiveTableName();
         CompoundVecBuffer combinedCoords = primitiveData.getPrimitiveCoords(primitiveName);

@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.axis;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -42,11 +45,15 @@ public class Axis2D
 {
     protected Axis1D x;
     protected Axis1D y;
+    
+    protected Map<AxisListener2D,AxisListener1D> listeners;
 
     public Axis2D( final Axis1D x, final Axis1D y )
     {
         this.x = x;
         this.y = y;
+        
+        this.listeners = new HashMap<>( );
     }
 
     public Axis2D( )
@@ -72,26 +79,30 @@ public class Axis2D
 
         return new Axis2D( newX, newY );
     }
-
-    public void addAxisListener( final AxisListener2D listener )
+    
+    // synchronize to maintain thread safe access to listeners map
+    public synchronized void removeAxisListener( final AxisListener2D listener )
     {
-        x.addAxisListener( new AxisListener1D( )
+        AxisListener1D listener1D = listeners.remove( listener );
+        x.removeAxisListener( listener1D );
+        y.removeAxisListener( listener1D );
+    }
+    
+    // synchronize to maintain thread safe access to listeners map
+    public synchronized void addAxisListener( final AxisListener2D listener )
+    {
+        AxisListener1D listener1D = new AxisListener1D( )
         {
             @Override
             public void axisUpdated( Axis1D axis )
             {
                 listener.axisUpdated( Axis2D.this );
             }
-        } );
-
-        y.addAxisListener( new AxisListener1D( )
-        {
-            @Override
-            public void axisUpdated( Axis1D axis )
-            {
-                listener.axisUpdated( Axis2D.this );
-            }
-        } );
+        };
+        
+        listeners.put( listener, listener1D );
+        x.addAxisListener( listener1D );
+        y.addAxisListener( listener1D );
     }
 
     public void lockAspectRatioXY( double x_to_y_ratio )
