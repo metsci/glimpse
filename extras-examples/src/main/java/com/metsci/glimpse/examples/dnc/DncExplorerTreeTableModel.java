@@ -48,8 +48,8 @@ import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
+import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.facc.FaccAttr;
 import com.metsci.glimpse.dnc.facc.FaccFeature;
 
@@ -149,7 +149,24 @@ public class DncExplorerTreeTableModel extends AbstractTreeTableModel
             workingMap.values( ).forEach( newWorkingList::addAll );
             newWorkingList.sort( ( a, b ) ->
             {
-                return ( a.faccName ).compareTo( b.faccName );
+                String aFaccName = a.faccName;
+                String bFaccName = b.faccName;
+                if ( aFaccName == null && bFaccName == null )
+                {
+                    return 0;
+                }
+                else if ( aFaccName == null )
+                {
+                    return +1;
+                }
+                else if ( bFaccName == null )
+                {
+                    return -1;
+                }
+                else
+                {
+                    return ( aFaccName ).compareTo( bFaccName );
+                }
             } );
 
             // Volatile write -- will get picked up later by the commit timer
