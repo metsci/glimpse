@@ -126,14 +126,22 @@ public class Vpf
         EnumSet<VPFFeatureType> typeSet = EnumSet.noneOf(VPFFeatureType.class);
         for (VPFFeatureType t : types) typeSet.add(t);
 
-        // WW's VPF reader breaks (by silently skipping data!) if filenames are case-
-        // sensitive and contain uppercase characters. In such a case, assume that the
-        // necessary lowercase symlinks have already been created (which is reasonable,
-        // because that's the only way the reader will work).
         FileFilter featureTableFilter = new VPFFeatureTableFilter()
         {
             public boolean accept(File file)
             {
+                // On a case-insensitive filesystem, java.io.File equality is case-insensitive,
+                // so the file-equality test here always returns true.
+                //
+                // On a case-sensitive filesystem, Worldwind's VPF reader only works right with
+                // lowercase filenames. In such a case, lowercase symlinks have been created for
+                // any files with names containing uppercase chars. Consequently:
+                //
+                //   1. Every file is accessible using the lowercase version of its filename
+                //   2. Files with uppercase chars should be ignored, to avoid duplicates
+                //
+                // Therefore, only accept files whose names have no uppercase chars.
+                //
                 return ( super.accept(file) && equal(file, filenameToLowercase(file)) );
             }
         };
