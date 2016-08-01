@@ -95,15 +95,15 @@ public class DragListener implements EventPlotListener, GlimpseMouseAllListener
             if ( dragType == Location.Center )
             {
                 double diff = time.durationAfter( anchorTime );
-                dragEvent.setTimes( eventStart.add( diff ), eventEnd.add( diff ) );
+                dragEvent.setTimes( eventStart.add( diff ), eventEnd.add( diff ), false );
             }
             else if ( dragType == Location.End && eventStart.isBefore( time ) )
             {
-                dragEvent.setTimes( eventStart, time );
+                dragEvent.setTimes( eventStart, time, false );
             }
             else if ( dragType == Location.Start && eventEnd.isAfter( time ) )
             {
-                dragEvent.setTimes( time, eventEnd );
+                dragEvent.setTimes( time, eventEnd, false );
             }
 
             e.setHandled( true );
