@@ -520,8 +520,8 @@ public class DockingGroup
                 if ( dockerRoot != null )
                 {
                     DockingFrame frame = addNewFrame( );
-                    frame.setLocation( frameArr.x, frameArr.y );
-                    frame.setSize( frameArr.width, frameArr.height );
+                    frame.setBounds( frameArr.x, frameArr.y, frameArr.width, frameArr.height );
+                    frame.setNormalBounds( frameArr.x, frameArr.y, frameArr.width, frameArr.height );
                     frame.setExtendedState( getFrameExtendedState( frameArr ) );
                     frame.setVisible( true );
 

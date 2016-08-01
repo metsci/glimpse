@@ -26,25 +26,23 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingXmlUtils.readArrangementXml;
-import static com.metsci.glimpse.docking.DockingXmlUtils.writeArrangementXml;
+import static com.metsci.glimpse.docking.AppConfigUtils.loadAppConfig;
+import static com.metsci.glimpse.docking.AppConfigUtils.saveAppConfig;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
-import static java.util.logging.Level.WARNING;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -56,12 +54,14 @@ import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import com.metsci.glimpse.docking.xml.DockerArrangementNode;
+import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
+import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingUtils
 {
-    private static final Logger logger = Logger.getLogger( DockingUtils.class.getName( ) );
 
     public static void requireSwingThread( )
     {
@@ -229,78 +229,16 @@ public class DockingUtils
         }
     }
 
-    public static File createAppDir( String appName )
-    {
-        String homePath = System.getProperty( "user.home" );
-        if ( homePath == null ) throw new RuntimeException( "Property user.home is not defined" );
-
-        File appDir = new File( homePath, "." + appName );
-        appDir.mkdirs( );
-
-        if ( !appDir.isDirectory( ) ) throw new RuntimeException( "Failed to create app dir: " + appDir.getAbsolutePath( ) );
-        if ( !appDir.canRead( ) ) throw new RuntimeException( "Do not have read permission on app dir: " + appDir.getAbsolutePath( ) );
-        if ( !appDir.canWrite( ) ) throw new RuntimeException( "Do not have write permission on app dir: " + appDir.getAbsolutePath( ) );
-
-        return appDir;
-    }
+    public static final Collection<Class<?>> dockingXmlClasses = unmodifiableCollection( asList( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ) );
 
     public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
     {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            writeArrangementXml( groupArr, arrFile );
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to write docking arrangement to file: app-name = " + appName, e );
-        }
+        saveAppConfig( appName, "arrangement.xml", groupArr, dockingXmlClasses );
     }
 
-    public static GroupArrangement loadDockingArrangement( String appName, URL fallback )
+    public static GroupArrangement loadDockingArrangement( String appName, URL fallbackUrl )
     {
-        try
-        {
-            File arrFile = new File( createAppDir( appName ), "arrangement.xml" );
-            if ( arrFile.exists( ) )
-            {
-                return readArrangementXml( arrFile );
-            }
-        }
-        catch ( Exception e )
-        {
-            logger.log( WARNING, "Failed to load docking arrangement from file: app-name = " + appName, e );
-        }
-
-        if ( fallback != null )
-        {
-            InputStream fallbackStream = null;
-            try
-            {
-                fallbackStream = fallback.openStream( );
-                return readArrangementXml( fallbackStream );
-            }
-            catch ( Exception e )
-            {
-                logger.log( WARNING, "Failed to load default docking arrangement from resource: resource = " + fallback.toString( ), e );
-            }
-            finally
-            {
-                if ( fallbackStream != null )
-                {
-                    try
-                    {
-                        fallbackStream.close( );
-                    }
-                    catch ( IOException e )
-                    {
-                        logger.log( WARNING, "Failed to close default docking arrangement resource: resource = " + fallback.toString( ), e );
-                    }
-                }
-            }
-        }
-
-        return null;
+        return loadAppConfig( appName, "arrangement.xml", fallbackUrl, GroupArrangement.class, dockingXmlClasses );
     }
 
     public static <C extends Component> C findLargestComponent( Collection<C> components )

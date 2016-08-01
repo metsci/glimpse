@@ -67,6 +67,11 @@ public class DockingFrame extends JFrame
         }
     }
 
+    public void setNormalBounds( int x, int y, int width, int height )
+    {
+        this.normalBounds = new Rectangle( x, y, width, height );
+    }
+
     public Rectangle getNormalBounds( )
     {
         return new Rectangle( normalBounds );

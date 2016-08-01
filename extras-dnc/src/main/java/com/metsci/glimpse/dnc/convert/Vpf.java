@@ -79,9 +79,7 @@ public class Vpf
     {
         public int compare(VPFLibrary a, VPFLibrary b)
         {
-            String aName = a.getName();
-            String bName = b.getName();
-            return aName.compareTo(bName);
+            return compareStringsCaseSecondary(a.getName(), b.getName());
         }
     };
 
@@ -90,9 +88,7 @@ public class Vpf
     {
         public int compare(VPFCoverage a, VPFCoverage b)
         {
-            String aName = a.getName();
-            String bName = b.getName();
-            return aName.compareTo(bName);
+            return compareStringsCaseSecondary(a.getName(), b.getName());
         }
     };
 
@@ -101,11 +97,22 @@ public class Vpf
     {
         public int compare(VPFFeatureClass a, VPFFeatureClass b)
         {
-            String aName = a.getClassName();
-            String bName = b.getClassName();
-            return aName.compareTo(bName);
+            return compareStringsCaseSecondary(a.getClassName(), b.getClassName());
         }
     };
+
+
+    /**
+     * Like case-insensitive comparison, but uses case-sensitive comparison as a tie-breaker.
+     */
+    public static int compareStringsCaseSecondary(String a, String b)
+    {
+        int caseInsensitiveComparison = a.compareToIgnoreCase( b );
+        if ( caseInsensitiveComparison != 0 ) return caseInsensitiveComparison;
+
+        int caseSensitiveComparison = a.compareTo( b );
+        return caseSensitiveComparison;
+    }
 
 
     public static VPFFeatureClass[] readAllFeatureClasses(VPFLibrary lib)
@@ -119,14 +126,22 @@ public class Vpf
         EnumSet<VPFFeatureType> typeSet = EnumSet.noneOf(VPFFeatureType.class);
         for (VPFFeatureType t : types) typeSet.add(t);
 
-        // WW's VPF reader breaks (by silently skipping data!) if filenames are case-
-        // sensitive and contain uppercase characters. In such a case, assume that the
-        // necessary lowercase symlinks have already been created (which is reasonable,
-        // because that's the only way the reader will work).
         FileFilter featureTableFilter = new VPFFeatureTableFilter()
         {
             public boolean accept(File file)
             {
+                // On a case-insensitive filesystem, java.io.File equality is case-insensitive,
+                // so the file-equality test here always returns true.
+                //
+                // On a case-sensitive filesystem, Worldwind's VPF reader only works right with
+                // lowercase filenames. In such a case, lowercase symlinks have been created for
+                // any files with names containing uppercase chars. Consequently:
+                //
+                //   1. Every file is accessible using the lowercase version of its filename
+                //   2. Files with uppercase chars should be ignored, to avoid duplicates
+                //
+                // Therefore, only accept files whose names have no uppercase chars.
+                //
                 return ( super.accept(file) && equal(file, filenameToLowercase(file)) );
             }
         };
