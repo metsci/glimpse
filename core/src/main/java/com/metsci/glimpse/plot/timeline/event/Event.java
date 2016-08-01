@@ -150,7 +150,13 @@ public class Event implements Iterable<Event>
         @Override
         public TimeSpan applyConstraint( Event event, TimeSpan proposedTimeSpan )
         {
-            if ( !isEditable ) return event.getTimeSpan( );
+            // if the timeline is not editable, don't allow the change
+            // if the timeline is not resizable and one or both of the endpoints are fixed,
+            //    then it is effectively not editable, don't allow the change
+            if ( !isEditable || ( !isResizeable && ( !isEndTimeMoveable || !isStartTimeMoveable ) ) )
+            {
+                return event.getTimeSpan( );
+            }
 
             TimeStamp oldStart = event.getStartTime( );
             TimeStamp oldEnd = event.getEndTime( );
