@@ -593,31 +593,32 @@ public class IconPainter extends GlimpseDataPainter2D
             //XXX debugging code which paints the offscreen pick buffer
             //XXX this is useful to have around, stash it somewhere else
 
+            /*
             if ( this.pickFrameBuffer != null && this.pickFrameBuffer.isInitialized( ) )
             {
                 com.jogamp.opengl.util.texture.Texture tex = this.pickFrameBuffer.getOpenGLTexture( );
-
+            
                 gl.glEnable( GL2.GL_TEXTURE_2D );
                 gl.glBindTexture( GL2.GL_TEXTURE_2D, tex.getTarget( ) );
-
+            
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
-
+            
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
                 gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
-
+            
                 gl.glBegin( GL2.GL_TRIANGLE_STRIP );
                 try
                 {
                     gl.glTexCoord2d( 0.0, 0.0 );
                     gl.glVertex2d( 0.0, 0.0 );
-
+            
                     gl.glTexCoord2d( 0.0, 1.0 );
                     gl.glVertex2d( 0.0, 5.0 );
-
+            
                     gl.glTexCoord2d( 1.0, 0.0 );
                     gl.glVertex2d( 5.0, 0.0 );
-
+            
                     gl.glTexCoord2d( 1.0, 1.0 );
                     gl.glVertex2d( 5.0, 5.0 );
                 }
@@ -626,6 +627,7 @@ public class IconPainter extends GlimpseDataPainter2D
                     gl.glEnd( );
                 }
             }
+            */
         }
         finally
         {
