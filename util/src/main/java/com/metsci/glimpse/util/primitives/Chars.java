@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.CharBuffer;
+
 /**
  * @author hogye
  */
@@ -35,30 +37,31 @@ public interface Chars
     /**
      * Value at index i
      */
-    char v(int i);
+    char v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, char[] dest, int iDest, int c);
+    boolean isEmpty( );
 
-    String string(int i, int c);
+    char first( );
 
+    char last( );
 
-    // Convenience Methods
+    void copyTo( int i, char[] dest, int iDest, int c );
 
-    boolean isEmpty();
+    void copyTo( int i, CharBuffer dest, int c );
 
-    char first();
+    void copyTo( CharBuffer dest );
 
-    char last();
+    char[] copyOf( int i, int c );
 
-    char[] copyOf(int i, int c);
+    char[] copyOf( );
 
-    char[] copyOf();
+    String string( int i, int c );
 
-    String string();
+    String string( );
 
 }

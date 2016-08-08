@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.worldwind.projection;
 
+import com.metsci.glimpse.util.geo.LatLonGeo;
+
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
-
-import com.metsci.glimpse.util.geo.LatLonGeo;
 
 public class LatLonGeoUtil
 {
@@ -37,22 +37,22 @@ public class LatLonGeoUtil
     {
         return LatLonGeo.fromDeg( position.getLatitude( ).getDegrees( ), position.getLongitude( ).getDegrees( ) );
     }
-    
+
     public static Position toPosition( LatLonGeo latlongeo, double elevation )
     {
         return Position.fromDegrees( latlongeo.getLatDeg( ), latlongeo.getLonDeg( ), elevation );
     }
-    
+
     public static Position toPosition( LatLonGeo latlongeo )
     {
         return Position.fromDegrees( latlongeo.getLatDeg( ), latlongeo.getLonDeg( ) );
     }
-    
+
     public static LatLonGeo fromLatLon( LatLon latlon )
     {
         return LatLonGeo.fromDeg( latlon.latitude.getDegrees( ), latlon.longitude.getDegrees( ) );
     }
-    
+
     public static LatLon toLatLon( LatLonGeo latlongeo )
     {
         return LatLon.fromDegrees( latlongeo.getLatDeg( ), latlongeo.getLonDeg( ) );

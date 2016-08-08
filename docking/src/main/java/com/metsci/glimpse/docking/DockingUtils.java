@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,20 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.AppConfigUtils.loadAppConfig;
+import static com.metsci.glimpse.docking.AppConfigUtils.saveAppConfig;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
+import static java.awt.Frame.MAXIMIZED_HORIZ;
+import static java.awt.Frame.MAXIMIZED_VERT;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +53,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+
+import com.metsci.glimpse.docking.xml.DockerArrangementNode;
+import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
+import com.metsci.glimpse.docking.xml.DockerArrangementTile;
+import com.metsci.glimpse.docking.xml.FrameArrangement;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingUtils
 {
@@ -137,8 +149,11 @@ public class DockingUtils
                 } );
             }
 
-            public void popupMenuWillBecomeVisible( PopupMenuEvent ev ) { }
-            public void popupMenuCanceled( PopupMenuEvent ev ) { }
+            public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
+            { }
+
+            public void popupMenuCanceled( PopupMenuEvent ev )
+            { }
         } );
 
         return popup;
@@ -188,6 +203,14 @@ public class DockingUtils
         return toolbar;
     }
 
+    public static int getFrameExtendedState( FrameArrangement frameArr )
+    {
+        int state = 0;
+        if ( frameArr.isMaximizedHoriz ) state |= MAXIMIZED_HORIZ;
+        if ( frameArr.isMaximizedVert ) state |= MAXIMIZED_VERT;
+        return state;
+    }
+
     public static Color getUiColor( Object key, Color fallback )
     {
         Color color = UIManager.getColor( key );
@@ -206,19 +229,16 @@ public class DockingUtils
         }
     }
 
-    public static File createAppDir( String appName )
+    public static final Collection<Class<?>> dockingXmlClasses = unmodifiableCollection( asList( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ) );
+
+    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
     {
-        String homePath = System.getProperty( "user.home" );
-        if ( homePath == null ) throw new RuntimeException( "Property user.home is not defined" );
+        saveAppConfig( appName, "arrangement.xml", groupArr, dockingXmlClasses );
+    }
 
-        File appDir = new File( homePath, "." + appName );
-        appDir.mkdirs( );
-
-        if ( !appDir.isDirectory( ) ) throw new RuntimeException( "Failed to create app dir: " + appDir.getAbsolutePath( ) );
-        if ( !appDir.canRead( ) ) throw new RuntimeException( "Do not have read permission on app dir: " + appDir.getAbsolutePath( ) );
-        if ( !appDir.canWrite( ) ) throw new RuntimeException( "Do not have write permission on app dir: " + appDir.getAbsolutePath( ) );
-
-        return appDir;
+    public static GroupArrangement loadDockingArrangement( String appName, URL fallbackUrl )
+    {
+        return loadAppConfig( appName, "arrangement.xml", fallbackUrl, GroupArrangement.class, dockingXmlClasses );
     }
 
     public static <C extends Component> C findLargestComponent( Collection<C> components )

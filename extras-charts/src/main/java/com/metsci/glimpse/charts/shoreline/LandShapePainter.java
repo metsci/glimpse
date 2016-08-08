@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,6 @@ import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-
 /**
  * Originally designed to display shoreline data available from the NOAA/NGDC Coastline Extractor
  * tool at http://www.ngdc.noaa.gov/mgg_coastline/</p>
@@ -95,14 +94,14 @@ public class LandShapePainter extends GlimpsePainter2D
     @Deprecated
     public void loadLandFile( InputStream in, GeoProjection geoProjection ) throws IOException
     {
-    	loadNdgcLandFile( in, geoProjection );
+        loadNdgcLandFile( in, geoProjection );
     }
-    
+
     public void loadNdgcLandFile( InputStream in, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile0( in, geoProjection );
+        loadNgdcLandFile0( in, geoProjection );
     }
-    
+
     /**
      * Deprecated in favor of loadNgdcLandFile( String file, GeoProjection geoProjection )
      * 
@@ -113,12 +112,12 @@ public class LandShapePainter extends GlimpsePainter2D
     @Deprecated
     public void loadLandFile( String file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile( file, geoProjection );
+        loadNgdcLandFile( file, geoProjection );
     }
-    
+
     public void loadNgdcLandFile( String file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile0( new FileInputStream( file ), geoProjection );
+        loadNgdcLandFile0( new FileInputStream( file ), geoProjection );
     }
 
     /**
@@ -130,12 +129,12 @@ public class LandShapePainter extends GlimpsePainter2D
     @Deprecated
     public void loadLandFile( File file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile( file, geoProjection );
+        loadNgdcLandFile( file, geoProjection );
     }
-    
+
     public void loadNgdcLandFile( File file, GeoProjection geoProjection ) throws IOException
     {
-    	loadNgdcLandFile0( new FileInputStream( file ), geoProjection );
+        loadNgdcLandFile0( new FileInputStream( file ), geoProjection );
     }
 
     /**
@@ -148,25 +147,25 @@ public class LandShapePainter extends GlimpsePainter2D
     @Deprecated
     public void loadLandFileAndCenterAxis( File file, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
-    	loadNgdcLandFileAndCenterAxis( file, geoProjection, axis );
+        loadNgdcLandFileAndCenterAxis( file, geoProjection, axis );
     }
-    
+
     public void loadNgdcLandFileAndCenterAxis( InputStream in, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
         NgdcFile2 ngdcFile = new NgdcFile2( in );
         Shape shape = loadLandFile0( ngdcFile.toShape( ), geoProjection );
         centerAxesOnShape( shape, axis );
     }
-    
+
     public void loadNgdcLandFileAndCenterAxis( File file, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
-        NgdcFile2 ngdcFile = new NgdcFile2(  new FileInputStream( file ) );
+        NgdcFile2 ngdcFile = new NgdcFile2( new FileInputStream( file ) );
         loadLandFileAndCenterAxis( ngdcFile, geoProjection, axis );
     }
 
     public void loadLandFileAndCenterAxis( LandShapeCapable landFile, GeoProjection geoProjection, Axis2D axis ) throws IOException
     {
-    	loadLandFileAndCenterAxis(landFile.toShape( ), geoProjection, axis);
+        loadLandFileAndCenterAxis( landFile.toShape( ), geoProjection, axis );
     }
 
     public void loadLandFileAndCenterAxis( LandShape landShape, GeoProjection geoProjection, Axis2D axis ) throws IOException
@@ -174,18 +173,21 @@ public class LandShapePainter extends GlimpsePainter2D
         Shape shape = loadLandFile0( landShape, geoProjection );
         centerAxesOnShape( shape, axis );
     }
-    
+
     public void centerAxesOnShape( Shape shape, Axis2D axis )
     {
         Rectangle2D localBounds = shape.getBounds2D( );
-        
-        if (bounds == null) {
-            bounds = new Rectangle2D.Double();
-            bounds.setRect(localBounds);
-        } else { 
-            bounds.add(localBounds);
+
+        if ( bounds == null )
+        {
+            bounds = new Rectangle2D.Double( );
+            bounds.setRect( localBounds );
         }
-        
+        else
+        {
+            bounds.add( localBounds );
+        }
+
         axis.getAxisX( ).setMin( bounds.getMinX( ) );
         axis.getAxisX( ).setMax( bounds.getMaxX( ) );
         axis.getAxisY( ).setMin( bounds.getMinY( ) );
@@ -194,16 +196,16 @@ public class LandShapePainter extends GlimpsePainter2D
 
     protected Shape loadNgdcLandFile0( InputStream in, final GeoProjection geoProjection ) throws IOException
     {
-    	NgdcFile2 ngdcFile = new NgdcFile2( in );
-    	return loadLandFile0( ngdcFile.toShape(), geoProjection );
+        NgdcFile2 ngdcFile = new NgdcFile2( in );
+        return loadLandFile0( ngdcFile.toShape( ), geoProjection );
     }
-    
-    protected Shape loadLandFile0( LandFile landFile, final GeoProjection geoProjection ) throws IOException 
+
+    protected Shape loadLandFile0( LandFile landFile, final GeoProjection geoProjection ) throws IOException
     {
-    	return loadLandFile0( landFile.toShape( ), geoProjection);
+        return loadLandFile0( landFile.toShape( ), geoProjection );
     }
-    
-    protected Shape loadLandFile0( LandShape landShape, final GeoProjection geoProjection ) 
+
+    protected Shape loadLandFile0( LandShape landShape, final GeoProjection geoProjection )
     {
         Shape shape = landShape.getFillShape( new VertexConverter( )
         {

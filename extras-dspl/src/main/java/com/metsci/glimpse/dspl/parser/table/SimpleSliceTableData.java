@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,14 +29,13 @@ package com.metsci.glimpse.dspl.parser.table;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.metsci.glimpse.dspl.parser.column.TableColumn;
 import com.metsci.glimpse.dspl.parser.util.ParserUtils;
 import com.metsci.glimpse.dspl.schema.Concept;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.util.DsplException;
-
-import java.util.logging.Logger;
 
 public class SimpleSliceTableData implements SliceTableData
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.queryGLBoolean;
+import static com.metsci.glimpse.gl.util.GLUtils.queryGLInteger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.log;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,7 +37,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
-
 
 /**
  * @author osborn
@@ -56,10 +56,9 @@ public class GLCapabilityUtils
 
     public static void logGLBufferProperties( Logger logger, Level level, GLContext context, String prefix )
     {
-        GL gl = context.getGL();
+        GL gl = context.getGL( );
 
-        if( prefix == null )
-            prefix = "";
+        if ( prefix == null ) prefix = "";
 
         int rBits = queryGLInteger( GL2.GL_RED_BITS, gl );
         int gBits = queryGLInteger( GL2.GL_GREEN_BITS, gl );
@@ -74,24 +73,24 @@ public class GLCapabilityUtils
         int aaBits = queryGLInteger( GL2.GL_ACCUM_ALPHA_BITS, gl );
         int totalBits = iBits + rBits + gBits + bBits + aBits + arBits + agBits + abBits + aaBits + dBits + sBits;
 
-        log(logger, level, "%sbuffer-properties: %2d bits depth", prefix, dBits );
-        log(logger, level, "%sbuffer-properties: %2d bits stencil", prefix, sBits );
-        log(logger, level, "%sbuffer-properties: %2d bits color-index", prefix, iBits );
-        log(logger, level, "%sbuffer-properties: %2d bits red", prefix, rBits );
-        log(logger, level, "%sbuffer-properties: %2d bits green", prefix, gBits );
-        log(logger, level, "%sbuffer-properties: %2d bits blue", prefix, bBits );
-        log(logger, level, "%sbuffer-properties: %2d bits alpha", prefix, aBits );
-        log(logger, level, "%sbuffer-properties: %2d bits accum red", prefix, arBits );
-        log(logger, level, "%sbuffer-properties: %2d bits accum green", prefix, agBits );
-        log(logger, level, "%sbuffer-properties: %2d bits accum blue", prefix, abBits );
-        log(logger, level, "%sbuffer-properties: %2d bits accum alpha", prefix, aaBits );
-        log(logger, level, "%sbuffer-properties: %d bits TOTAL", prefix, totalBits );
+        log( logger, level, "%sbuffer-properties: %2d bits depth", prefix, dBits );
+        log( logger, level, "%sbuffer-properties: %2d bits stencil", prefix, sBits );
+        log( logger, level, "%sbuffer-properties: %2d bits color-index", prefix, iBits );
+        log( logger, level, "%sbuffer-properties: %2d bits red", prefix, rBits );
+        log( logger, level, "%sbuffer-properties: %2d bits green", prefix, gBits );
+        log( logger, level, "%sbuffer-properties: %2d bits blue", prefix, bBits );
+        log( logger, level, "%sbuffer-properties: %2d bits alpha", prefix, aBits );
+        log( logger, level, "%sbuffer-properties: %2d bits accum red", prefix, arBits );
+        log( logger, level, "%sbuffer-properties: %2d bits accum green", prefix, agBits );
+        log( logger, level, "%sbuffer-properties: %2d bits accum blue", prefix, abBits );
+        log( logger, level, "%sbuffer-properties: %2d bits accum alpha", prefix, aaBits );
+        log( logger, level, "%sbuffer-properties: %d bits TOTAL", prefix, totalBits );
 
         boolean isDoubleBuffered = queryGLBoolean( GL2.GL_DOUBLEBUFFER, gl );
-        log(logger, level, "%sbuffer-properties: %s double buffered", prefix, isDoubleBuffered ? "is" : "is NOT" );
+        log( logger, level, "%sbuffer-properties: %s double buffered", prefix, isDoubleBuffered ? "is" : "is NOT" );
 
         boolean isStereo = queryGLBoolean( GL2.GL_STEREO, gl );
-        log(logger, level, "%sbuffer-properties: %s stereo", prefix, isStereo ? "is" : "is NOT" );
+        log( logger, level, "%sbuffer-properties: %s stereo", prefix, isStereo ? "is" : "is NOT" );
     }
 
     public static void logGLVersionInfo( Logger logger, Level level, GLContext context )
@@ -101,63 +100,54 @@ public class GLCapabilityUtils
 
     public static void logGLVersionInfo( Logger logger, Level level, GLContext context, boolean includeDocumentations )
     {
-        GL gl = context.getGL();
+        GL gl = context.getGL( );
 
         String vendor = getGLVendorString( gl );
-        if( vendor == null )
-            vendor = "unavailable";
+        if ( vendor == null ) vendor = "unavailable";
 
         String renderer = getGLRendererString( gl );
-        if( renderer == null )
-            renderer = "unavailable";
+        if ( renderer == null ) renderer = "unavailable";
 
         String glVersion = getGLVersionString( gl );
-        if( glVersion == null )
-            glVersion = "unavailable";
+        if ( glVersion == null ) glVersion = "unavailable";
 
         String shaderVersion = getGLShaderVersionString( gl );
-        if( shaderVersion == null )
-            shaderVersion = "unavailable";
+        if ( shaderVersion == null ) shaderVersion = "unavailable";
 
+        log( logger, level, "OpenGL Vendor: %s", vendor );
+        if ( includeDocumentations ) log( logger, level, "OpenGL Vendor Documentation: %s", glVendorDocumentation );
 
-        log(logger, level, "OpenGL Vendor: %s", vendor );
-        if( includeDocumentations )
-            log(logger, level, "OpenGL Vendor Documentation: %s", glVendorDocumentation );
+        log( logger, level, "OpenGL Renderer: %s", renderer );
+        if ( includeDocumentations ) log( logger, level, "OpenGL Renderer Documentation: %s", glRendererDocumentation );
 
-        log(logger, level, "OpenGL Renderer: %s", renderer );
-        if( includeDocumentations )
-            log(logger, level, "OpenGL Renderer Documentation: %s", glRendererDocumentation );
+        log( logger, level, "OpenGL Version: %s", glVersion );
+        if ( includeDocumentations ) log( logger, level, "OpenGL Version Documentation: %s", glVersionDocumentation );
 
-        log(logger, level, "OpenGL Version: %s", glVersion );
-        if( includeDocumentations )
-            log(logger, level, "OpenGL Version Documentation: %s", glVersionDocumentation );
-
-        log(logger, level, "OpenGL Shader Version: %s", shaderVersion );
-        if( includeDocumentations )
-            log(logger, level, "OpenGL Shader Version Documentation: %s", glShaderVersionDocumentation );
+        log( logger, level, "OpenGL Shader Version: %s", shaderVersion );
+        if ( includeDocumentations ) log( logger, level, "OpenGL Shader Version Documentation: %s", glShaderVersionDocumentation );
     }
 
     public static void logGLExtensions( Logger logger, Level level, GLContext context, boolean separateLines )
     {
-        GL gl = context.getGL();
+        GL gl = context.getGL( );
 
         String extString = getGLExtensions( gl );
-        if( extString == null )
+        if ( extString == null )
         {
-            log(logger, level, "No OpenGL extensions found." );
+            log( logger, level, "No OpenGL extensions found." );
         }
         else
         {
             String[] exts = extString.split( " " );
-            if( separateLines )
+            if ( separateLines )
             {
-                log(logger, level, "%d OpenGL extenstions found.", exts.length );
-                for( int i = 0; i < exts.length; i++ )
-                    log(logger, level, "OpenGL extension found: %s", exts[i] );
+                log( logger, level, "%d OpenGL extenstions found.", exts.length );
+                for ( int i = 0; i < exts.length; i++ )
+                    log( logger, level, "OpenGL extension found: %s", exts[i] );
             }
             else
             {
-                log(logger, level, "%d OpenGL extenstions found: %s", exts.length, extString.trim() );
+                log( logger, level, "%d OpenGL extenstions found: %s", exts.length, extString.trim( ) );
             }
         }
     }
@@ -167,7 +157,7 @@ public class GLCapabilityUtils
      */
     public static void logGLMaximumValues( Logger logger, Level level, GLContext context )
     {
-        GL gl = context.getGL();
+        GL gl = context.getGL( );
 
         int maxVertexAttributes = getGLMaxVertexAttributes( gl );
         int maxGeomShaderOutput = getGLMaxGeometryShaderOutput( gl );
@@ -176,12 +166,12 @@ public class GLCapabilityUtils
         int maxIndices = GLCapabilityUtils.getGLMaxElementsIndices( gl );
         int maxVertices = GLCapabilityUtils.getGLMaxElementsVertices( gl );
 
-        log(logger, level, "OpenGL Max Vertex Attributes: %d", maxVertexAttributes );
-        log(logger, level, "OpenGL Max Geometry Outputs: %d", maxGeomShaderOutput );
-        log(logger, level, "OpenGL Max Texture Edge Length: %d", maxTexEdge );
-        log(logger, level, "OpenGL Max Texture Buffer Size: %d", maxTexBuffer );
-        log(logger, level, "OpenGL Max Element Indices: %d", maxIndices );
-        log(logger, level, "OpenGL Max Element Vertices: %d", maxVertices );
+        log( logger, level, "OpenGL Max Vertex Attributes: %d", maxVertexAttributes );
+        log( logger, level, "OpenGL Max Geometry Outputs: %d", maxGeomShaderOutput );
+        log( logger, level, "OpenGL Max Texture Edge Length: %d", maxTexEdge );
+        log( logger, level, "OpenGL Max Texture Buffer Size: %d", maxTexBuffer );
+        log( logger, level, "OpenGL Max Element Indices: %d", maxIndices );
+        log( logger, level, "OpenGL Max Element Vertices: %d", maxVertices );
     }
 
     /**
@@ -199,7 +189,7 @@ public class GLCapabilityUtils
      */
     public static int getGLMaxGeometryShaderOutput( GL gl )
     {
-    	// TODO: Figure out this GLProfile business -- ttran17
+        // TODO: Figure out this GLProfile business -- ttran17
         return queryGLInteger( GL3.GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, gl );
     }
 
@@ -232,7 +222,6 @@ public class GLCapabilityUtils
     {
         return queryGLInteger( GL2.GL_MAX_ELEMENTS_VERTICES, gl );
     }
-
 
     /**
      * @return The company responsible for this GL implementation. This name

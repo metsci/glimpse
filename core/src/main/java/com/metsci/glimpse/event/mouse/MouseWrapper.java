@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,17 +59,27 @@ public abstract class MouseWrapper<I>
 
     public List<GlimpseTargetStack> getContainingTargets( I e )
     {
-        // create a new context using the context associated with this mouse wrapper
-        // GlimpseTargets will be popped on and off the context as we search through
-        // the hierarchy in order to determine which GlimpseTargets to dispatch
-        // GlimpseMouseEvents to
-        GlimpseContext context = new GlimpseContextImpl( canvas );
+        GlimpseContext context = getContext( );
 
         List<GlimpseTargetStack> result = new LinkedList<GlimpseTargetStack>( );
 
         getContainingTargets( e, context, result );
 
         return result;
+    }
+    
+    protected GlimpseCanvas getCanvas( )
+    {
+        return this.canvas;
+    }
+    
+    protected GlimpseContext getContext( )
+    {
+        // create a new context using the context associated with this mouse wrapper
+        // GlimpseTargets will be popped on and off the context as we search through
+        // the hierarchy in order to determine which GlimpseTargets to dispatch
+        // GlimpseMouseEvents to
+        return new GlimpseContextImpl( getCanvas( ) );
     }
 
     // perform a depth first search of the hierarchy of GlimpseLayouts in order
@@ -89,17 +99,17 @@ public abstract class MouseWrapper<I>
         for ( int i = size - 1; i >= 0; i-- )
         {
             GlimpseTarget childLayout = list.get( i );
-            
+
             if ( childLayout.isVisible( ) )
             {
                 GlimpseBounds childBounds = childLayout.getTargetBounds( context.getTargetStack( ) );
-    
+
                 stack.push( childLayout, childBounds );
-    
+
                 boolean consumeEvent = getContainingTargets( e, context, accumulator );
-    
+
                 if ( consumeEvent ) return true;
-    
+
                 stack.pop( );
             }
         }

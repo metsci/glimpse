@@ -4,4 +4,3 @@
  * and swipes).
  */
 package com.metsci.glimpse.event.touch;
-

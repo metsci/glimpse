@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,11 @@
  */
 package com.metsci.glimpse.gl;
 
-import static com.metsci.glimpse.gl.util.GLCapabilityUtils.*;
-import static java.util.logging.Level.*;
+import static com.metsci.glimpse.gl.util.GLCapabilityUtils.logGLBufferProperties;
+import static com.metsci.glimpse.gl.util.GLCapabilityUtils.logGLExtensions;
+import static com.metsci.glimpse.gl.util.GLCapabilityUtils.logGLMaximumValues;
+import static com.metsci.glimpse.gl.util.GLCapabilityUtils.logGLVersionInfo;
+import static java.util.logging.Level.INFO;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

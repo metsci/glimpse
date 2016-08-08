@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ public class LinePlotExample implements GlimpseLayoutProvider
         // add a painter to display the x and y position of the cursor
         CursorTextPainter cursorPainter = new CursorTextPainter( );
         plot.addPainter( cursorPainter );
-        
+
         // don't offset the text by the size of the selection box, since we aren't showing it
         cursorPainter.setOffsetBySelectionSize( false );
 

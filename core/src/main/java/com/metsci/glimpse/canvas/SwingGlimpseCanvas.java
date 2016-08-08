@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -432,14 +432,14 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -452,16 +452,16 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -474,5 +474,11 @@ public class SwingGlimpseCanvas extends JPanel implements GlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return this.glCanvas.getCurrentSurfaceScale( new int[2] );
     }
 }

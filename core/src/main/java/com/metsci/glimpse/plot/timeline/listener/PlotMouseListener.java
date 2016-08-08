@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,18 @@ public interface PlotMouseListener
 {
     public static enum PlotLocation
     {
-        Label,
-        Plot;
+        Label, Plot;
     }
-    
+
     public void mousePressed( GlimpseMouseEvent event, PlotInfo info, PlotLocation location );
+
     public void mouseReleased( GlimpseMouseEvent event, PlotInfo info, PlotLocation location );
-    
+
     public void mouseExited( GlimpseMouseEvent event, PlotInfo info, PlotLocation location );
+
     public void mouseEntered( GlimpseMouseEvent event, PlotInfo info, PlotLocation location );
-    
+
     public void mouseWheelMoved( GlimpseMouseEvent event, PlotInfo info, PlotLocation location );
+
     public void mouseMoved( GlimpseMouseEvent event, PlotInfo info, PlotLocation location );
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ public class TextureAtlasIconShaderVertex extends Shader
     public boolean preLink( GL gl, int glProgramHandle )
     {
         GL2 gl2 = gl.getGL2( );
-        
+
         gl2.glBindAttribLocation( glProgramHandle, pixelCoordsAttributeIndex, "pixelCoords" );
         gl2.glBindAttribLocation( glProgramHandle, texCoordsAttributeIndex, "texCoords" );
         gl2.glBindAttribLocation( glProgramHandle, colorCoordsAttributeIndex, "pickColor" );

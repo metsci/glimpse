@@ -21,7 +21,9 @@ public class GenericSorting extends Object
     private static final int SMALL = 7;
     private static final int MEDIUM = 40;
 
-    private GenericSorting() { }
+    private GenericSorting( )
+    {
+    }
 
     /**
      * Sorts the specified range of elements according to the order induced by
@@ -53,7 +55,8 @@ public class GenericSorting extends Object
      * @see Comparator
      * @see Swapper
      */
-    public static void mergesort(int fromIndex, int toIndex, Comparator c, Swapper s) {
+    public static void mergesort( int fromIndex, int toIndex, Comparator c, Swapper s )
+    {
         /*
          * We retain the same method signature as quickSort. Given only a
          * comparator and swapper we do not know how to copy and move elements
@@ -65,27 +68,29 @@ public class GenericSorting extends Object
         int length = toIndex - fromIndex;
 
         // Insertion sort on smallest arrays
-        if (length < SMALL) {
-            for (int i = fromIndex; i < toIndex; i++) {
-                for (int j = i; j > fromIndex && (c.compare(j - 1, j) > 0); j--) {
-                    s.swap(j, j - 1);
+        if ( length < SMALL )
+        {
+            for ( int i = fromIndex; i < toIndex; i++ )
+            {
+                for ( int j = i; j > fromIndex && ( c.compare( j - 1, j ) > 0 ); j-- )
+                {
+                    s.swap( j, j - 1 );
                 }
             }
             return;
         }
 
         // Recursively sort halves
-        int mid = (fromIndex + toIndex) / 2;
-        mergesort(fromIndex, mid, c, s);
-        mergesort(mid, toIndex, c, s);
+        int mid = ( fromIndex + toIndex ) / 2;
+        mergesort( fromIndex, mid, c, s );
+        mergesort( mid, toIndex, c, s );
 
         // If list is already sorted, nothing left to do. This is an
         // optimization that results in faster sorts for nearly ordered lists.
-        if (c.compare(mid - 1, mid) <= 0)
-            return;
+        if ( c.compare( mid - 1, mid ) <= 0 ) return;
 
         // Merge sorted halves
-        inplace_merge(fromIndex, mid, toIndex, c, s);
+        inplace_merge( fromIndex, mid, toIndex, c, s );
     }
 
     /**
@@ -115,11 +120,10 @@ public class GenericSorting extends Object
      * @see Comparator
      * @see Swapper
      */
-    public static void quicksort(int fromIndex, int toIndex, Comparator c, Swapper s)
+    public static void quicksort( int fromIndex, int toIndex, Comparator c, Swapper s )
     {
-        quickSort1(fromIndex, toIndex - fromIndex, c, s);
+        quickSort1( fromIndex, toIndex - fromIndex, c, s );
     }
-
 
     ////////////
     ////////////
@@ -132,24 +136,28 @@ public class GenericSorting extends Object
      * <code>[first, last)</code>. Elements in the first input range will
      * precede equal elements in the second.
      */
-    private static void inplace_merge(int first, int middle, int last, Comparator c, Swapper s)
+    private static void inplace_merge( int first, int middle, int last, Comparator c, Swapper s )
     {
-        if (first >= middle || middle >= last)
-            return;
-        if (last - first == 2) {
-            if (c.compare(middle, first) < 0) {
-                s.swap(first, middle);
+        if ( first >= middle || middle >= last ) return;
+        if ( last - first == 2 )
+        {
+            if ( c.compare( middle, first ) < 0 )
+            {
+                s.swap( first, middle );
             }
             return;
         }
         int firstCut;
         int secondCut;
-        if (middle - first > last - middle) {
-            firstCut = first + (middle - first) / 2;
-            secondCut = lower_bound(middle, last, firstCut, c);
-        } else {
-            secondCut = middle + (last - middle) / 2;
-            firstCut = upper_bound(first, middle, secondCut, c);
+        if ( middle - first > last - middle )
+        {
+            firstCut = first + ( middle - first ) / 2;
+            secondCut = lower_bound( middle, last, firstCut, c );
+        }
+        else
+        {
+            secondCut = middle + ( last - middle ) / 2;
+            firstCut = upper_bound( first, middle, secondCut, c );
         }
 
         // rotate(firstCut, middle, secondCut, swapper);
@@ -158,36 +166,41 @@ public class GenericSorting extends Object
         int first2 = firstCut;
         int middle2 = middle;
         int last2 = secondCut;
-        if (middle2 != first2 && middle2 != last2) {
+        if ( middle2 != first2 && middle2 != last2 )
+        {
             int first1 = first2;
             int last1 = middle2;
-            while (first1 < --last1)
-                s.swap(first1++, last1);
+            while ( first1 < --last1 )
+                s.swap( first1++, last1 );
             first1 = middle2;
             last1 = last2;
-            while (first1 < --last1)
-                s.swap(first1++, last1);
+            while ( first1 < --last1 )
+                s.swap( first1++, last1 );
             first1 = first2;
             last1 = last2;
-            while (first1 < --last1)
-                s.swap(first1++, last1);
+            while ( first1 < --last1 )
+                s.swap( first1++, last1 );
         }
         // end inline
 
-        middle = firstCut + (secondCut - middle);
-        inplace_merge(first, firstCut, middle, c, s);
-        inplace_merge(middle, secondCut, last, c, s);
+        middle = firstCut + ( secondCut - middle );
+        inplace_merge( first, firstCut, middle, c, s );
+        inplace_merge( middle, secondCut, last, c, s );
     }
 
-    private static int upper_bound(int first, int last, int x, Comparator c)
+    private static int upper_bound( int first, int last, int x, Comparator c )
     {
         int len = last - first;
-        while (len > 0) {
+        while ( len > 0 )
+        {
             int half = len / 2;
             int middle = first + half;
-            if (c.compare(x, middle) < 0) {
+            if ( c.compare( x, middle ) < 0 )
+            {
                 len = half;
-            } else {
+            }
+            else
+            {
                 first = middle + 1;
                 len -= half + 1;
             }
@@ -195,98 +208,108 @@ public class GenericSorting extends Object
         return first;
     }
 
-    private static int lower_bound(int first, int last, int x, Comparator c) {
+    private static int lower_bound( int first, int last, int x, Comparator c )
+    {
         int len = last - first;
-        while (len > 0) {
+        while ( len > 0 )
+        {
             int half = len / 2;
             int middle = first + half;
-            if (c.compare(middle, x) < 0) {
+            if ( c.compare( middle, x ) < 0 )
+            {
                 first = middle + 1;
                 len -= half + 1;
-            } else {
+            }
+            else
+            {
                 len = half;
             }
         }
         return first;
     }
 
-    private static void quickSort1(int off, int len, Comparator comp, Swapper sw) {
+    private static void quickSort1( int off, int len, Comparator comp, Swapper sw )
+    {
         // Insertion sort on smallest arrays
-        if (len < SMALL) {
-            for (int i = off; i < len + off; i++)
-                for (int j = i; j > off && (comp.compare(j - 1, j) > 0); j--) {
-                    sw.swap(j, j - 1);
+        if ( len < SMALL )
+        {
+            for ( int i = off; i < len + off; i++ )
+                for ( int j = i; j > off && ( comp.compare( j - 1, j ) > 0 ); j-- )
+                {
+                    sw.swap( j, j - 1 );
                 }
             return;
         }
 
         // Choose a partition element, v
         int m = off + len / 2; // Small arrays, middle element
-        if (len > SMALL) {
+        if ( len > SMALL )
+        {
             int l = off;
             int n = off + len - 1;
-            if (len > MEDIUM) { // Big arrays, pseudomedian of 9
+            if ( len > MEDIUM )
+            { // Big arrays, pseudomedian of 9
                 int s = len / 8;
-                l = med3(l, l + s, l + 2 * s, comp);
-                m = med3(m - s, m, m + s, comp);
-                n = med3(n - 2 * s, n - s, n, comp);
+                l = med3( l, l + s, l + 2 * s, comp );
+                m = med3( m - s, m, m + s, comp );
+                n = med3( n - 2 * s, n - s, n, comp );
             }
-            m = med3(l, m, n, comp); // Mid-size, med of 3
+            m = med3( l, m, n, comp ); // Mid-size, med of 3
         }
         // long v = x[m];
 
         // Establish Invariant: v* (<v)* (>v)* v*
         int a = off, b = a, c = off + len - 1, d = c;
-        while (true) {
+        while ( true )
+        {
             int comparison;
-            while (b <= c && ((comparison = comp.compare(b, m)) <= 0)) {
-                if (comparison == 0) {
-                    if (a == m)
+            while ( b <= c && ( ( comparison = comp.compare( b, m ) ) <= 0 ) )
+            {
+                if ( comparison == 0 )
+                {
+                    if ( a == m )
                         m = b; // moving target; DELTA to JDK !!!
-                    else if (b == m)
-                        m = a; // moving target; DELTA to JDK !!!
-                    sw.swap(a++, b);
+                    else if ( b == m ) m = a; // moving target; DELTA to JDK !!!
+                    sw.swap( a++, b );
                 }
                 b++;
             }
-            while (c >= b && ((comparison = comp.compare(c, m)) >= 0)) {
-                if (comparison == 0) {
-                    if (c == m)
+            while ( c >= b && ( ( comparison = comp.compare( c, m ) ) >= 0 ) )
+            {
+                if ( comparison == 0 )
+                {
+                    if ( c == m )
                         m = d; // moving target; DELTA to JDK !!!
-                    else if (d == m)
-                        m = c; // moving target; DELTA to JDK !!!
-                    sw.swap(c, d--);
+                    else if ( d == m ) m = c; // moving target; DELTA to JDK !!!
+                    sw.swap( c, d-- );
                 }
                 c--;
             }
-            if (b > c)
-                break;
-            if (b == m)
+            if ( b > c ) break;
+            if ( b == m )
                 m = d; // moving target; DELTA to JDK !!!
-            else if (c == m)
-                m = c; // moving target; DELTA to JDK !!!
-            sw.swap(b++, c--);
+            else if ( c == m ) m = c; // moving target; DELTA to JDK !!!
+            sw.swap( b++, c-- );
         }
 
         // Swap partition elements back to middle
         int s, n = off + len;
-        s = Math.min(a - off, b - a);
-        sw.vecswap(off, b - s, s);
-        s = Math.min(d - c, n - d - 1);
-        sw.vecswap(b, n - s, s);
+        s = Math.min( a - off, b - a );
+        sw.vecswap( off, b - s, s );
+        s = Math.min( d - c, n - d - 1 );
+        sw.vecswap( b, n - s, s );
 
         // Recursively sort non-partition-elements
-        if ((s = b - a) > 1)
-            quickSort1(off, s, comp, sw);
-        if ((s = d - c) > 1)
-            quickSort1(n - s, s, comp, sw);
+        if ( ( s = b - a ) > 1 ) quickSort1( off, s, comp, sw );
+        if ( ( s = d - c ) > 1 ) quickSort1( n - s, s, comp, sw );
     }
 
-    private static int med3(int a, int b, int c, Comparator comp) {
-        int ab = comp.compare(a, b);
-        int ac = comp.compare(a, c);
-        int bc = comp.compare(b, c);
-        return (ab < 0 ? (bc < 0 ? b : ac < 0 ? c : a) : (bc > 0 ? b : ac > 0 ? c : a));
+    private static int med3( int a, int b, int c, Comparator comp )
+    {
+        int ab = comp.compare( a, b );
+        int ac = comp.compare( a, c );
+        int bc = comp.compare( b, c );
+        return ( ab < 0 ? ( bc < 0 ? b : ac < 0 ? c : a ) : ( bc > 0 ? b : ac > 0 ? c : a ) );
     }
 
     ////////////
@@ -295,17 +318,16 @@ public class GenericSorting extends Object
 
     public static abstract class Swapper
     {
-        abstract void swap( int a, int b );
+        public abstract void swap( int a, int b );
 
         protected void vecswap( int a, int b, int n )
         {
-            for (int i = 0; i < n; i++, a++, b++)
+            for ( int i = 0; i < n; i++, a++, b++ )
             {
-                swap(a, b);
+                swap( a, b );
             }
         }
     }
-
 
     ////////////
     ////////////

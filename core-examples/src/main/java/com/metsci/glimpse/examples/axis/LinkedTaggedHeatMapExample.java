@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -44,16 +46,21 @@ public class LinkedTaggedHeatMapExample
     public static void main( String[] args ) throws Exception
     {
         final TaggedHeatMapExample example = new TaggedHeatMapExample( );
-        
+
         final ColorAxisPlot2D layout1 = example.getLayout( ColorGradients.greenBone );
         final ColorAxisPlot2D layout2 = example.getLayout( ColorGradients.jet );
+
+        // create a parent TaggedAxis1D and set it not to link the tags of its children
+        TaggedAxis1D parent = new TaggedAxis1D( );
+        parent.setLinkTags( false );
         
+        // link the z (color) axis of the two plots
+        layout1.getAxisZ( ).setParent( parent, true );
+        layout2.getAxisZ( ).setParent( parent, true );
+
         // link x and y axes of the two plots
         layout1.getAxis( ).setParent( layout2.getAxis( ) );
-        
-        // link z (color) axes of the two plots
-        layout1.getAxisZ( ).setParent( layout2.getAxisZ( ) );
-        
+
         Example.showWithSwing( new GlimpseLayoutProvider( )
         {
             @Override

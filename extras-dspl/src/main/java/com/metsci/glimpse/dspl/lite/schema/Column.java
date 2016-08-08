@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,12 @@
 // Generated on: 2011.12.06 at 04:31:59 PM EST
 //
 
-
 package com.metsci.glimpse.dspl.lite.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  *
@@ -70,27 +68,28 @@ import javax.xml.bind.annotation.XmlType;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Column")
-public class Column {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Column" )
+public class Column
+{
 
-    @XmlAttribute(name = "id", required = true)
+    @XmlAttribute( name = "id", required = true )
     protected String id;
-    @XmlAttribute(name = "type", required = true)
+    @XmlAttribute( name = "type", required = true )
     protected String type;
-    @XmlAttribute(name = "key", required = true)
+    @XmlAttribute( name = "key", required = true )
     protected boolean key;
-    @XmlAttribute(name = "name")
+    @XmlAttribute( name = "name" )
     protected String name;
-    @XmlAttribute(name = "unit")
+    @XmlAttribute( name = "unit" )
     protected String unit;
-    @XmlAttribute(name = "description")
+    @XmlAttribute( name = "description" )
     protected String description;
-    @XmlAttribute(name = "url")
+    @XmlAttribute( name = "url" )
     protected String url;
-    @XmlAttribute(name = "parent")
+    @XmlAttribute( name = "parent" )
     protected String parent;
-    @XmlAttribute(name = "format")
+    @XmlAttribute( name = "format" )
     protected String format;
 
     /**
@@ -101,7 +100,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -113,7 +113,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
 
@@ -125,7 +126,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getType() {
+    public String getType( )
+    {
         return type;
     }
 
@@ -137,7 +139,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setType(String value) {
+    public void setType( String value )
+    {
         this.type = value;
     }
 
@@ -145,7 +148,8 @@ public class Column {
      * Gets the value of the key property.
      *
      */
-    public boolean isKey() {
+    public boolean isKey( )
+    {
         return key;
     }
 
@@ -153,7 +157,8 @@ public class Column {
      * Sets the value of the key property.
      *
      */
-    public void setKey(boolean value) {
+    public void setKey( boolean value )
+    {
         this.key = value;
     }
 
@@ -165,7 +170,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getName() {
+    public String getName( )
+    {
         return name;
     }
 
@@ -177,7 +183,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setName(String value) {
+    public void setName( String value )
+    {
         this.name = value;
     }
 
@@ -189,7 +196,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getUnit() {
+    public String getUnit( )
+    {
         return unit;
     }
 
@@ -201,7 +209,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setUnit(String value) {
+    public void setUnit( String value )
+    {
         this.unit = value;
     }
 
@@ -213,7 +222,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getDescription() {
+    public String getDescription( )
+    {
         return description;
     }
 
@@ -225,7 +235,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setDescription(String value) {
+    public void setDescription( String value )
+    {
         this.description = value;
     }
 
@@ -237,7 +248,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getUrl() {
+    public String getUrl( )
+    {
         return url;
     }
 
@@ -249,7 +261,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setUrl(String value) {
+    public void setUrl( String value )
+    {
         this.url = value;
     }
 
@@ -261,7 +274,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getParent() {
+    public String getParent( )
+    {
         return parent;
     }
 
@@ -273,7 +287,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setParent(String value) {
+    public void setParent( String value )
+    {
         this.parent = value;
     }
 
@@ -285,7 +300,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public String getFormat() {
+    public String getFormat( )
+    {
         return format;
     }
 
@@ -297,7 +313,8 @@ public class Column {
      *     {@link String }
      *
      */
-    public void setFormat(String value) {
+    public void setFormat( String value )
+    {
         this.format = value;
     }
 

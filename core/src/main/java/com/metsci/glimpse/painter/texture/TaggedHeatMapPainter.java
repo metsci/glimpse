@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,6 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     protected FloatTexture1D vertexCoordTex;
     protected FloatTexture1D textureCoordTex;
 
-    protected TaggedColorScaleShader fragShader;
     protected TaggedAxis1D taggedAxis;
 
     public TaggedHeatMapPainter( TaggedAxis1D taggedAxis )
@@ -68,21 +67,26 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         this.taggedAxis.addAxisListener( this );
     }
 
-
     @Override
     protected void loadDefaultPipeline( Axis1D axis ) throws IOException
     {
-        this.fragShader = new TaggedColorScaleShader( (TaggedAxis1D) axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, DEFAULT_DATA_COORD_UNIT, DEFAULT_TEX_COORD_UNIT );
+        this.fragShader = new TaggedColorScaleShader( ( TaggedAxis1D ) axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, DEFAULT_DATA_COORD_UNIT, DEFAULT_TEX_COORD_UNIT );
 
         this.setShaderProgram( this.fragShader );
     }
 
+    public TaggedColorScaleShader getShader( )
+    {
+        return ( TaggedColorScaleShader ) this.fragShader;
+    }
+
+    @Override
     public void setAlpha( float alpha )
     {
         lock.lock( );
         try
         {
-            this.fragShader.setAlpha( alpha );
+            getShader( ).setAlpha( alpha );
         }
         finally
         {
@@ -95,7 +99,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         lock.lock( );
         try
         {
-            fragShader.setDiscardNaN( discard );
+            getShader( ).setDiscardNaN( discard );
         }
         finally
         {
@@ -108,7 +112,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         lock.lock( );
         try
         {
-            fragShader.setDiscardAbove( discard );
+            getShader( ).setDiscardAbove( discard );
         }
         finally
         {
@@ -121,7 +125,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
         lock.lock( );
         try
         {
-            fragShader.setDiscardBelow( discard );
+            getShader( ).setDiscardBelow( discard );
         }
         finally
         {
@@ -188,7 +192,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
                 for ( int i = size - 1; i >= 0; i-- )
                 {
                     Tag tag = tags.get( i );
-                    
+
                     if ( tag.hasAttribute( TEX_COORD_ATTR ) )
                     {
                         data.put( tag.getAttributeFloat( TEX_COORD_ATTR ) );
@@ -197,7 +201,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
             }
         } );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

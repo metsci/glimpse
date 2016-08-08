@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -41,7 +40,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-
 
 /**
  *
@@ -80,25 +78,23 @@ import javax.xml.namespace.QName;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ConceptProperty", propOrder = {
-    "info",
-    "type"
-})
-public class ConceptProperty {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "ConceptProperty", propOrder = { "info", "type" } )
+public class ConceptProperty
+{
 
     protected Info info;
     protected ConceptProperty.Type type;
-    @XmlAttribute(name = "id")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "id" )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     protected String id;
-    @XmlAttribute(name = "concept")
+    @XmlAttribute( name = "concept" )
     protected QName conceptRef;
-    @XmlAttribute(name = "isParent")
+    @XmlAttribute( name = "isParent" )
     protected Boolean isParent;
-    @XmlAttribute(name = "isMapping")
+    @XmlAttribute( name = "isMapping" )
     protected Boolean isMapping;
-    @XmlAttribute(name = "isRequired")
+    @XmlAttribute( name = "isRequired" )
     protected Boolean isRequired;
 
     /**
@@ -109,7 +105,8 @@ public class ConceptProperty {
      *     {@link Info }
      *
      */
-    public Info getInfo() {
+    public Info getInfo( )
+    {
         return info;
     }
 
@@ -121,7 +118,8 @@ public class ConceptProperty {
      *     {@link Info }
      *
      */
-    public void setInfo(Info value) {
+    public void setInfo( Info value )
+    {
         this.info = value;
     }
 
@@ -133,7 +131,8 @@ public class ConceptProperty {
      *     {@link ConceptProperty.Type }
      *
      */
-    public ConceptProperty.Type getType() {
+    public ConceptProperty.Type getType( )
+    {
         return type;
     }
 
@@ -145,7 +144,8 @@ public class ConceptProperty {
      *     {@link ConceptProperty.Type }
      *
      */
-    public void setType(ConceptProperty.Type value) {
+    public void setType( ConceptProperty.Type value )
+    {
         this.type = value;
     }
 
@@ -157,7 +157,8 @@ public class ConceptProperty {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -169,7 +170,8 @@ public class ConceptProperty {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
 
@@ -181,7 +183,8 @@ public class ConceptProperty {
      *     {@link QName }
      *
      */
-    public QName getConceptRef() {
+    public QName getConceptRef( )
+    {
         return conceptRef;
     }
 
@@ -193,7 +196,8 @@ public class ConceptProperty {
      *     {@link QName }
      *
      */
-    public void setConceptRef(QName value) {
+    public void setConceptRef( QName value )
+    {
         this.conceptRef = value;
     }
 
@@ -205,10 +209,14 @@ public class ConceptProperty {
      *     {@link Boolean }
      *
      */
-    public boolean isIsParent() {
-        if (isParent == null) {
+    public boolean isIsParent( )
+    {
+        if ( isParent == null )
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return isParent;
         }
     }
@@ -221,7 +229,8 @@ public class ConceptProperty {
      *     {@link Boolean }
      *
      */
-    public void setIsParent(Boolean value) {
+    public void setIsParent( Boolean value )
+    {
         this.isParent = value;
     }
 
@@ -233,10 +242,14 @@ public class ConceptProperty {
      *     {@link Boolean }
      *
      */
-    public boolean isIsMapping() {
-        if (isMapping == null) {
+    public boolean isIsMapping( )
+    {
+        if ( isMapping == null )
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return isMapping;
         }
     }
@@ -249,7 +262,8 @@ public class ConceptProperty {
      *     {@link Boolean }
      *
      */
-    public void setIsMapping(Boolean value) {
+    public void setIsMapping( Boolean value )
+    {
         this.isMapping = value;
     }
 
@@ -261,10 +275,14 @@ public class ConceptProperty {
      *     {@link Boolean }
      *
      */
-    public boolean isIsRequired() {
-        if (isRequired == null) {
+    public boolean isIsRequired( )
+    {
+        if ( isRequired == null )
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return isRequired;
         }
     }
@@ -277,10 +295,10 @@ public class ConceptProperty {
      *     {@link Boolean }
      *
      */
-    public void setIsRequired(Boolean value) {
+    public void setIsRequired( Boolean value )
+    {
         this.isRequired = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -299,11 +317,12 @@ public class ConceptProperty {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "")
-    public static class Type {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "" )
+    public static class Type
+    {
 
-        @XmlAttribute(name = "ref", required = true)
+        @XmlAttribute( name = "ref", required = true )
         protected DataType ref;
 
         /**
@@ -314,7 +333,8 @@ public class ConceptProperty {
          *     {@link DataType }
          *
          */
-        public DataType getRef() {
+        public DataType getRef( )
+        {
             return ref;
         }
 
@@ -326,12 +346,12 @@ public class ConceptProperty {
          *     {@link DataType }
          *
          */
-        public void setRef(DataType value) {
+        public void setRef( DataType value )
+        {
             this.ref = value;
         }
 
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected Concept parentConcept;
@@ -351,6 +371,5 @@ public class ConceptProperty {
         DataSet dataset = this.parentConcept.getDataSet( );
         return dataset.getConcept( this.conceptRef );
     }
-
 
 }

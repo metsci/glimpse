@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -44,7 +44,6 @@ import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 
 /**
  *
@@ -102,26 +101,21 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Slice", propOrder = {
-    "info",
-    "dimension",
-    "metric",
-    "tableMapping",
-    "data"
-})
-public class Slice {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Slice", propOrder = { "info", "dimension", "metric", "tableMapping", "data" } )
+public class Slice
+{
 
     protected Info info;
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected List<SliceConceptRef> dimension;
-    @XmlElement(required = true)
+    @XmlElement( required = true )
     protected List<SliceConceptRef> metric;
-    @XmlElement(name = "table")
+    @XmlElement( name = "table" )
     protected SliceTableMapping tableMapping;
     protected Slice.Data data;
-    @XmlAttribute(name = "id", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlAttribute( name = "id", required = true )
+    @XmlJavaTypeAdapter( CollapsedStringAdapter.class )
     @XmlID
     protected String id;
 
@@ -133,7 +127,8 @@ public class Slice {
      *     {@link Info }
      *
      */
-    public Info getInfo() {
+    public Info getInfo( )
+    {
         return info;
     }
 
@@ -145,7 +140,8 @@ public class Slice {
      *     {@link Info }
      *
      */
-    public void setInfo(Info value) {
+    public void setInfo( Info value )
+    {
         this.info = value;
     }
 
@@ -171,9 +167,11 @@ public class Slice {
      *
      *
      */
-    public List<SliceConceptRef> getDimension() {
-        if (dimension == null) {
-            dimension = new ArrayList<SliceConceptRef>();
+    public List<SliceConceptRef> getDimension( )
+    {
+        if ( dimension == null )
+        {
+            dimension = new ArrayList<SliceConceptRef>( );
         }
         return this.dimension;
     }
@@ -200,9 +198,11 @@ public class Slice {
      *
      *
      */
-    public List<SliceConceptRef> getMetric() {
-        if (metric == null) {
-            metric = new ArrayList<SliceConceptRef>();
+    public List<SliceConceptRef> getMetric( )
+    {
+        if ( metric == null )
+        {
+            metric = new ArrayList<SliceConceptRef>( );
         }
         return this.metric;
     }
@@ -215,7 +215,8 @@ public class Slice {
      *     {@link SliceTableMapping }
      *
      */
-    public SliceTableMapping getTableMapping() {
+    public SliceTableMapping getTableMapping( )
+    {
         return tableMapping;
     }
 
@@ -227,7 +228,8 @@ public class Slice {
      *     {@link SliceTableMapping }
      *
      */
-    public void setTableMapping(SliceTableMapping value) {
+    public void setTableMapping( SliceTableMapping value )
+    {
         this.tableMapping = value;
     }
 
@@ -239,7 +241,8 @@ public class Slice {
      *     {@link Slice.Data }
      *
      */
-    public Slice.Data getData() {
+    public Slice.Data getData( )
+    {
         return data;
     }
 
@@ -251,7 +254,8 @@ public class Slice {
      *     {@link Slice.Data }
      *
      */
-    public void setData(Slice.Data value) {
+    public void setData( Slice.Data value )
+    {
         this.data = value;
     }
 
@@ -263,7 +267,8 @@ public class Slice {
      *     {@link String }
      *
      */
-    public String getId() {
+    public String getId( )
+    {
         return id;
     }
 
@@ -275,10 +280,10 @@ public class Slice {
      *     {@link String }
      *
      */
-    public void setId(String value) {
+    public void setId( String value )
+    {
         this.id = value;
     }
-
 
     /**
      * <p>Java class for anonymous complex type.
@@ -299,13 +304,12 @@ public class Slice {
      *
      *
      */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "table"
-    })
-    public static class Data {
+    @XmlAccessorType( XmlAccessType.FIELD )
+    @XmlType( name = "", propOrder = { "table" } )
+    public static class Data
+    {
 
-        @XmlElement(required = true)
+        @XmlElement( required = true )
         protected SliceTableMapping table;
 
         /**
@@ -316,7 +320,8 @@ public class Slice {
          *     {@link SliceTableMapping }
          *
          */
-        public SliceTableMapping getTable() {
+        public SliceTableMapping getTable( )
+        {
             return table;
         }
 
@@ -328,12 +333,12 @@ public class Slice {
          *     {@link SliceTableMapping }
          *
          */
-        public void setTable(SliceTableMapping value) {
+        public void setTable( SliceTableMapping value )
+        {
             this.table = value;
         }
 
     }
-
 
     @javax.xml.bind.annotation.XmlTransient
     protected DataSet parentDataset;
@@ -358,8 +363,7 @@ public class Slice {
 
     public com.metsci.glimpse.dspl.parser.table.SliceTableData getTableData( ) throws javax.xml.bind.JAXBException, java.io.IOException, com.metsci.glimpse.dspl.util.DsplException
     {
-        if ( tableData != null )
-            return tableData;
+        if ( tableData != null ) return tableData;
 
         tableData = com.metsci.glimpse.dspl.util.DsplHelper.getTableData( this );
 
@@ -375,6 +379,5 @@ public class Slice {
     {
         return com.metsci.glimpse.dspl.util.DsplHelper.getCompatibleConceptRef( this, superConcept, getMetric( ) );
     }
-
 
 }

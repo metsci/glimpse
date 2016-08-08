@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,10 +55,8 @@ public class SplitPane extends JPanel
         void movedDivider( );
     }
 
-
     protected static final String CHILD_A = "A";
     protected static final String CHILD_B = "B";
-
 
     public final boolean arrangeVertically;
     public final int gapSize;
@@ -71,7 +69,6 @@ public class SplitPane extends JPanel
     protected JPanel divider;
 
     protected final Set<SplitPaneListener> listeners;
-
 
     public SplitPane( boolean arrangeVertically, double splitFrac, int gapSize )
     {
@@ -214,7 +211,7 @@ public class SplitPane extends JPanel
             Component c = childA;
             while ( true )
             {
-                if ( !( c instanceof SplitPane ) ) break;
+                if ( ! ( c instanceof SplitPane ) ) break;
                 SplitPane split = ( SplitPane ) c;
 
                 if ( split.arrangeVertically != this.arrangeVertically ) break;
@@ -242,7 +239,7 @@ public class SplitPane extends JPanel
             Component c = childB;
             while ( true )
             {
-                if ( !( c instanceof SplitPane ) ) break;
+                if ( ! ( c instanceof SplitPane ) ) break;
                 SplitPane split = ( SplitPane ) c;
 
                 if ( split.arrangeVertically != this.arrangeVertically ) break;
@@ -300,7 +297,7 @@ public class SplitPane extends JPanel
 
         // Keep dividers fixed for childA and its descendants
         //
-        int splitSizeA = childSizes[ 0 ];
+        int splitSizeA = childSizes[0];
         for ( int i = 0; i < fixedSizesA.size( ); i++ )
         {
             SplitPane split = splitsToTweakA.get( i );
@@ -309,12 +306,12 @@ public class SplitPane extends JPanel
 
             double tweakedFrac = ( ( double ) sizeA ) / ( ( double ) ( sizeA + sizeB ) );
             split._setSplitFrac( tweakedFrac );
-            splitSizeA = computeChildSizes( splitSizeA, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[ 1 ];
+            splitSizeA = computeChildSizes( splitSizeA, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[1];
         }
 
         // Keep dividers fixed for childB and its descendants
         //
-        int splitSizeB = childSizes[ 1 ];
+        int splitSizeB = childSizes[1];
         for ( int i = 0; i < fixedSizesB.size( ); i++ )
         {
             SplitPane split = splitsToTweakB.get( i );
@@ -323,7 +320,7 @@ public class SplitPane extends JPanel
 
             double tweakedFrac = ( ( double ) sizeA ) / ( ( double ) ( sizeA + sizeB ) );
             split._setSplitFrac( tweakedFrac );
-            splitSizeB = computeChildSizes( splitSizeB, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[ 0 ];
+            splitSizeB = computeChildSizes( splitSizeB, split.gapSize, split.minChildSize, split.getSplitFrac( ) )[0];
         }
 
         // Notify listeners
@@ -350,7 +347,6 @@ public class SplitPane extends JPanel
 
         return new int[] { sizeA, sizeB };
     }
-
 
     // Layout Manager
     //
@@ -442,8 +438,8 @@ public class SplitPane extends JPanel
                 if ( arrangeVertically )
                 {
                     int[] heights = computeChildSizes( heightContainer, gapSize, minChildSize, splitFrac );
-                    int heightA = heights[ 0 ];
-                    int heightB = heights[ 1 ];
+                    int heightA = heights[0];
+                    int heightB = heights[1];
 
                     childA.setBounds( 0, 0, widthContainer, heightA );
                     childB.setBounds( 0, heightA + gapSize, widthContainer, heightB );
@@ -452,8 +448,8 @@ public class SplitPane extends JPanel
                 else
                 {
                     int[] widths = computeChildSizes( widthContainer, gapSize, minChildSize, splitFrac );
-                    int widthA = widths[ 0 ];
-                    int widthB = widths[ 1 ];
+                    int widthA = widths[0];
+                    int widthB = widths[1];
 
                     childA.setBounds( 0, 0, widthA, heightContainer );
                     childB.setBounds( widthA + gapSize, 0, widthB, heightContainer );

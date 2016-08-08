@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.event.touch;
 
-
 public interface GlimpseTouchListener
 {
     public void touchesBegan( GlimpseTouchEvent event );
+
     public void touchesMoved( GlimpseTouchEvent event );
+
     public void touchesEnded( GlimpseTouchEvent event );
 }

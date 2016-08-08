@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     {
         init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height, true );
     }
-    
+
     public FBOGlimpseCanvas( GLContext glContext, int width, int height, boolean isBackgroundOpaque )
     {
         init( glContext.getGLDrawable( ).getGLProfile( ), glContext, width, height, isBackgroundOpaque );
@@ -99,6 +99,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
         this.glProfile = glProfile;
         GLCapabilities caps = new GLCapabilities( glProfile );
         caps.setBackgroundOpaque( isbackgroundOpaque );
+        caps.setDoubleBuffered( false );
         this.drawable = ( GLOffscreenAutoDrawable.FBO ) GLUtils.newOffscreenDrawable( caps, glProfile, glContext );
         this.drawable.addGLEventListener( createGLEventListener( ) );
         this.drawable.setSurfaceSize( width, height );
@@ -251,5 +252,11 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     public boolean isVisible( )
     {
         return true;
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return new int[] { 1, 1 };
     }
 }

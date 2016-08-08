@@ -1,0 +1,29 @@
+textchar.txt,Text Label Characteristics File:
+id=N,1,Row Identifier,-,:
+tfont=N,1,Text Font,code.txt,:
+tstyle=N,1,Text Style,code.txt,:
+tsize=N,1,Text Size (pt),-,:
+tcolor=N,1,Foreign Key to Color Assignment File,-,:
+tprepend=T,*,Characters to prepend to label attribute,-,:
+tappend=T,*,Characters to append to label attribute,-,:
+abindexid=N,1,Index Key to Abbreviations File,-,:
+;
+1|0|0|10|17|||
+2|0|0|10|76|||
+3|0|0|10|77|||
+4|0|0|10|62|||
+5|0|0|10|17|0020|0073|
+6|0|0|10|17|0020|006D|
+7|0|0|10|17|0020|004D|
+8|0|0|10|17||0073|
+9|0|0|10|17||006D|
+10|0|0|10|17||004D|
+11|0|0|10|17|||2
+12|0|0|10|17|0020||3
+13|0|0|10|17|0028|0029|1
+14|0|0|10|17|0022|0022|
+15|0|0|10|17|||3
+16|0|3|14|7|||
+17|0|1|14|7|0028|0029|
+18|0|0|10|17|||4
+19|0|1|10|25|||

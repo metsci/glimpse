@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,11 @@
  */
 package com.metsci.glimpse.dspl.parser;
 
-import static com.metsci.glimpse.dspl.parser.util.ParserUtils.*;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.buildPropertyTableData;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.buildSliceTableData;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getColumns;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getConcepts;
+import static com.metsci.glimpse.dspl.parser.util.ParserUtils.getTypes;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -551,26 +555,26 @@ public class SimpleBinaryParser implements TableParser, TableWriter
     {
         switch ( column.getType( ) )
         {
-        case STRING:
-            writeString( column.getStringData( row ), out );
-            break;
-        case FLOAT:
-            out.writeFloat( column.getFloatData( row ) );
-            break;
-        case INTEGER:
-            out.writeInt( column.getIntegerData( row ) );
-            break;
-        case BOOLEAN:
-            out.writeBoolean( column.getBooleanData( row ) );
-            break;
-        case DATE:
-            out.writeLong( column.getDateData( row ) );
-            break;
-        case CONCEPT:
-            writeString( column.getStringData( row ), out );
-            break;
-        default:
-            throw new DsplException( "Unknown Type %s provided.", column.getType( ) );
+            case STRING:
+                writeString( column.getStringData( row ), out );
+                break;
+            case FLOAT:
+                out.writeFloat( column.getFloatData( row ) );
+                break;
+            case INTEGER:
+                out.writeInt( column.getIntegerData( row ) );
+                break;
+            case BOOLEAN:
+                out.writeBoolean( column.getBooleanData( row ) );
+                break;
+            case DATE:
+                out.writeLong( column.getDateData( row ) );
+                break;
+            case CONCEPT:
+                writeString( column.getStringData( row ), out );
+                break;
+            default:
+                throw new DsplException( "Unknown Type %s provided.", column.getType( ) );
         }
     }
 

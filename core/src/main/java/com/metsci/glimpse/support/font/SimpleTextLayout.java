@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,6 @@ package com.metsci.glimpse.support.font;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 
 import java.awt.Font;
 import java.awt.Shape;
@@ -40,6 +38,9 @@ import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 /**
  * Performs simple text layout so text can be wrapped in small areas or broken
@@ -66,6 +67,7 @@ public class SimpleTextLayout
     protected Font font;
     protected FontRenderContext frc;
     protected BreakIterator breaker;
+    protected double lineHeight;
 
     /**
      * The maximum ascent of any character in the font.
@@ -115,9 +117,15 @@ public class SimpleTextLayout
         Rectangle2D rect = font.getMaxCharBounds( frc );
         ascent = ( float ) ( rect.getMaxY( ) - rect.getY( ) );
         descent = ( float ) -rect.getY( );
+        lineHeight = font.getSize( );
 
         setLineSpacing( 0 );
         setBreakOnEol( true );
+    }
+
+    public double getLineHeight( )
+    {
+        return lineHeight;
     }
 
     public double getDescent( )
@@ -125,9 +133,14 @@ public class SimpleTextLayout
         return descent;
     }
 
-    public double getAscent( )
+    public synchronized double getAscent( )
     {
         return ascent;
+    }
+
+    public synchronized void setAscent( float ascent )
+    {
+        this.ascent = ascent;
     }
 
     public void setBreakOnEol( boolean breakOnEol )
@@ -275,7 +288,7 @@ public class SimpleTextLayout
             firstIdx = trimLeft( text, firstIdx );
             lastIdx = trimRight( text, lastIdx );
 
-            if ( lastIdx <= firstIdx )
+            if ( lastIdx < firstIdx )
             {
                 continue;
             }

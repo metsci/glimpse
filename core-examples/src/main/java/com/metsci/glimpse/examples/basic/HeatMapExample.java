@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,7 +113,7 @@ public class HeatMapExample implements GlimpseLayoutProvider
 
         return plot;
     }
-    
+
     protected ColorAxisPlot2D newPlot( )
     {
         return new ColorAxisPlot2D( );
@@ -148,7 +148,7 @@ public class HeatMapExample implements GlimpseLayoutProvider
     {
         // setup the color map for the painter
         ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
+        colors.setColorGradient( ColorGradients.accent );
 
         return colors;
     }

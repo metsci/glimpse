@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,6 @@
  */
 package com.metsci.glimpse.worldwind.event;
 
-import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.geom.Position;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -37,6 +34,7 @@ import java.awt.event.MouseWheelListener;
 import java.util.EnumSet;
 
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -49,6 +47,9 @@ import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 import com.metsci.glimpse.worldwind.tile.GlimpseSurfaceTile;
+
+import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Position;
 
 /**
  * A mouse event handler which listens for java.awt mouse events from a WorldWind
@@ -66,7 +67,6 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
     protected GlimpseSurfaceTile tile;
 
     protected GlimpseAxisLayout2D layout;
-    protected GlimpseTargetStack stack;
 
     protected static class GlimpsePosition
     {
@@ -99,12 +99,17 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
         if ( tile.getGlimpseLayout( ) instanceof GlimpseAxisLayout2D )
         {
             this.layout = ( GlimpseAxisLayout2D ) tile.getGlimpseLayout( );
-            this.stack = tile.getTargetStack( );
         }
         else
         {
             throw new IllegalArgumentException( "GlimpseSurfaceTile must use a GlimpseAxisLayout2D for delivery of GlimpseMouseEvents." );
         }
+    }
+    
+    @Override
+    protected GlimpseCanvas getCanvas( )
+    {
+        return tile.getGlimpseCanvas( );
     }
 
     @Override
@@ -139,6 +144,9 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
 
     protected GlimpsePosition getGlimpsePosition( MouseEvent mouseEvent )
     {
+        GlimpseTargetStack stack = tile.getTargetStack( );
+        if ( stack == null ) return null;
+        
         Position worldwindPosition = this.wwd.getCurrentPosition( );
         if ( worldwindPosition == null ) return null;
 
@@ -151,7 +159,7 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
         Vector2d glimpsePosition = this.projection.project( latlon );
 
         // calculate the x/y position in pixels of the mouse click relative to the GlimpseLayout
-        Axis2D axis = this.layout.getAxis( this.stack );
+        Axis2D axis = this.layout.getAxis( stack );
         int posX = axis.getAxisX( ).valueToScreenPixel( glimpsePosition.getX( ) );
         int posY = axis.getAxisY( ).getSizePixels( ) - axis.getAxisY( ).valueToScreenPixel( glimpsePosition.getY( ) );
 
@@ -165,6 +173,8 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
 
     protected GlimpseMouseEvent fromWorldwindMouseEvent( MouseEvent mouseEvent, GlimpsePosition position )
     {
+        GlimpseTargetStack stack = tile.getTargetStack( );
+        if ( stack == null ) return null;
         if ( position == null ) return null;
 
         EnumSet<MouseButton> buttons = GlimpseMouseWrapper.getMouseButtons( mouseEvent );
@@ -181,6 +191,8 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
 
     protected GlimpseMouseEvent fromWorldwindMouseWheelEvent( MouseWheelEvent mouseEvent, GlimpsePosition position )
     {
+        GlimpseTargetStack stack = tile.getTargetStack( );
+        if ( stack == null ) return null;
         if ( position == null ) return null;
 
         EnumSet<MouseButton> buttons = GlimpseMouseWrapper.getMouseButtons( mouseEvent );
@@ -200,57 +212,84 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
     @Override
     public void mouseEntered( MouseEvent e )
     {
-        mouseEntered0( fromWorldwindMouseEvent( e ) );
+        GlimpseMouseEvent e0 = fromWorldwindMouseEvent( e );
+        if ( e0 != null ) mouseEntered0( e0 );
     }
 
     @Override
     public void mouseExited( MouseEvent e )
     {
-        mouseExited0( fromWorldwindMouseEvent( e ) );
+        GlimpseMouseEvent e0 = fromWorldwindMouseEvent( e );
+        if ( e0 != null ) mouseExited0( e0 );
     }
 
     @Override
     public void mousePressed( MouseEvent e )
     {
-        boolean handled = mousePressed0( fromWorldwindMouseEvent( e ) );
-
-        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
-        if ( handled ) e.consume( );
+        GlimpseMouseEvent e0 = fromWorldwindMouseEvent( e );
+        
+        if ( e0 != null )
+        {
+            boolean handled = mousePressed0( e0 );
+    
+            // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+            if ( handled ) e.consume( );
+        }
     }
 
     @Override
     public void mouseReleased( MouseEvent e )
     {
-        boolean handled = mouseReleased0( fromWorldwindMouseEvent( e ) );
-
-        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
-        if ( handled ) e.consume( );
+        GlimpseMouseEvent e0 = fromWorldwindMouseEvent( e );
+        
+        if ( e0 != null )
+        {
+            boolean handled = mouseReleased0( e0 );
+    
+            // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+            if ( handled ) e.consume( );
+        }
     }
 
     @Override
     public void mouseDragged( MouseEvent e )
     {
-        boolean handled = mouseDragged0( fromWorldwindMouseEvent( e ) );
-
-        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
-        if ( handled ) e.consume( );
+        GlimpseMouseEvent e0 = fromWorldwindMouseEvent( e );
+        
+        if ( e0 != null )
+        {
+            boolean handled = mouseDragged0( e0 );
+    
+            // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+            if ( handled ) e.consume( );
+        }
     }
 
     @Override
     public void mouseMoved( MouseEvent e )
     {
-        boolean handled = mouseMoved0( fromWorldwindMouseEvent( e ) );
-
-        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
-        if ( handled ) e.consume( );
+        GlimpseMouseEvent e0 = fromWorldwindMouseEvent( e );
+        
+        if ( e0 != null )
+        {
+            boolean handled = mouseMoved0( e0 );
+    
+            // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+            if ( handled ) e.consume( );
+        }
     }
 
     @Override
     public void mouseWheelMoved( MouseWheelEvent e )
     {
-        boolean handled = mouseWheelMoved0( fromWorldwindMouseWheelEvent( e ) );
-
-        // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
-        if ( handled ) e.consume( );
+        GlimpseMouseEvent e0 = fromWorldwindMouseWheelEvent( e );
+        
+        if ( e0 != null )
+        {
+            boolean handled = mouseWheelMoved0( e0 );
+    
+            // if Glimpse handled the MouseEvent, consume it so that WorldWind does not see it
+            if ( handled ) e.consume( );
+        }
     }
 }

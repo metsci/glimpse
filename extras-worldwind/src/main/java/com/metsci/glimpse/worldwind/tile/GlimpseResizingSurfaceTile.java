@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,6 @@ package com.metsci.glimpse.worldwind.tile;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.render.DrawContext;
-
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -38,10 +35,13 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.render.DrawContext;
+
 public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
 {
     private static final Logger logger = Logger.getLogger( GlimpseResizingSurfaceTile.class.getName( ) );
-    
+
     // the maximum allowed size for the offscreen canvas
     protected int maxWidth;
     protected int maxHeight;
@@ -54,7 +54,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     // invariant: maxWidth >= currentWidth >= requestedWidth 
     protected int calculatedWidth;
     protected int calculatedHeight;
-    
+
     // the percentage of the offscreen buffer filled by the texture
     protected float scaleX = 1.0f;
     protected float scaleY = 1.0f;
@@ -88,6 +88,13 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         this.maxHeight = maxHeight;
         this.preferredPixelCount = width * height;
     }
+    
+    public void setPreferredDimensions( int width, int height )
+    {
+        this.width = width;
+        this.height = height;
+        this.preferredPixelCount = width * height;
+    }
 
     // modify the pixel dimensions of the canvas so that they approximately match the
     // dimensions of the tile which the texture will be drawn onto
@@ -98,61 +105,65 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     {
         super.updateGeometry( dc );
 
-        double latSpan = bounds.maxLat - bounds.minLat;
-        double lonSpan = bounds.maxLon - bounds.minLon;
-
-        double ratio = ( latSpan / lonSpan );
-
-        double fcalculatedHeight = Math.sqrt( preferredPixelCount * ratio );
-        double fcalculatedWidth = preferredPixelCount / fcalculatedHeight;
-
-        calculatedHeight = ( int ) fcalculatedHeight;
-        calculatedWidth = ( int ) fcalculatedWidth;
-
-        if ( calculatedHeight > maxHeight )
+        if ( bounds != null && tile != null )
         {
-            calculatedHeight = maxHeight;
-            calculatedWidth = ( int ) Math.min( maxWidth, calculatedHeight * ratio );
-        }
-        else if ( calculatedWidth > maxWidth )
-        {
-            calculatedWidth = maxWidth;
-            calculatedHeight = ( int ) Math.min( maxHeight, calculatedWidth * ( 1 / ratio ) );
-        }
-
-        if ( currentWidth < calculatedWidth || currentHeight < calculatedHeight )
-        {
-            // when we have to resize the canvas, do a bit more than necessary
-            // to leave room for possible future growth
-            int bufferedWidth = ( int ) ( Math.max( currentWidth, calculatedWidth ) * 1.1 );
-            int bufferedHeight = ( int ) ( Math.max( currentHeight, calculatedHeight ) * 1.1 );
-
-            currentWidth = Math.min( maxWidth, bufferedWidth );
-            currentHeight = Math.min( maxHeight, bufferedHeight );
-            resizeCanvas( currentWidth, currentHeight );
-        }
-
-        resizeLayout( calculatedWidth, calculatedHeight );
-        
-        scaleX = (float) calculatedWidth / (float) currentWidth;
-        scaleY = (float) calculatedHeight / (float) currentHeight;
-        
-        setTextureScale( tile );
-    }
+            double latSpan = bounds.maxLat - bounds.minLat;
+            double lonSpan = bounds.maxLon - bounds.minLon;
     
+            double ratio = ( latSpan / lonSpan );
+    
+            double fcalculatedHeight = Math.sqrt( preferredPixelCount * ratio );
+            double fcalculatedWidth = preferredPixelCount / fcalculatedHeight;
+    
+            calculatedHeight = ( int ) fcalculatedHeight;
+            calculatedWidth = ( int ) fcalculatedWidth;
+    
+            if ( calculatedHeight > maxHeight )
+            {
+                calculatedHeight = maxHeight;
+                calculatedWidth = ( int ) Math.min( maxWidth, calculatedHeight * ratio );
+            }
+            else if ( calculatedWidth > maxWidth )
+            {
+                calculatedWidth = maxWidth;
+                calculatedHeight = ( int ) Math.min( maxHeight, calculatedWidth * ( 1 / ratio ) );
+            }
+    
+            if ( currentWidth < calculatedWidth || currentHeight < calculatedHeight )
+            {
+                // when we have to resize the canvas, do a bit more than necessary
+                // to leave room for possible future growth
+                int bufferedWidth = ( int ) ( Math.max( currentWidth, calculatedWidth ) * 1.1 );
+                int bufferedHeight = ( int ) ( Math.max( currentHeight, calculatedHeight ) * 1.1 );
+    
+                currentWidth = Math.min( maxWidth, bufferedWidth );
+                currentHeight = Math.min( maxHeight, bufferedHeight );
+                resizeCanvas( currentWidth, currentHeight );
+            }
+    
+            resizeLayout( calculatedWidth, calculatedHeight );
+    
+            scaleX = ( float ) calculatedWidth / ( float ) currentWidth;
+            scaleY = ( float ) calculatedHeight / ( float ) currentHeight;
+    
+            setTextureScale( tile );
+        }
+    }
+
     @Override
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
     {
         TextureSurfaceTile tile = new TextureSurfaceTile( textureHandle, corners );
         setTextureScale( tile );
+        tile.setOpacity( getOpacity( ) );
         return tile;
     }
-    
+
     protected void setTextureScale( TextureSurfaceTile tile )
     {
         setTextureScale( tile, scaleX, scaleY );
     }
-    
+
     protected void setTextureScale( TextureSurfaceTile tile, float scaleX, float scaleY )
     {
         if ( tile != null ) tile.setTextureScale( scaleX, scaleY );
@@ -167,7 +178,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     protected void resizeCanvas( int width, int height )
     {
         logInfo( logger, "Resizing Offscreen Renderbuffer (%d x %d)", width, height );
-        
+
         offscreenCanvas.resize( width, height );
     }
 }

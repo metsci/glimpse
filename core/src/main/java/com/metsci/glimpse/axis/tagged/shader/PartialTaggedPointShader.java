@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,28 +48,20 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
 
     private ShaderArg sizeArg;
 
-    public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
-                                     int vertexTexUnit, int textureTexUnit,
-                                     int colorAttributeIndex, int sizeAttributeIndex,
-                                     TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis,  ShaderSource... source ) throws IOException
+    public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis, ShaderSource... source ) throws IOException
     {
-        super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex,
-                   sizeAttributeIndex, colorAxis, sizeAxis, source );
+        super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, source );
 
-            this.vertexCoordTexUnit.setValue( vertexTexUnit );
-            this.textureCoordTexUnit.setValue( textureTexUnit );
-            this.setSizeArgValue( );
+        this.vertexCoordTexUnit.setValue( vertexTexUnit );
+        this.textureCoordTexUnit.setValue( textureTexUnit );
+        this.setSizeArgValue( );
 
-            sizeAxis.addAxisListener( this );
+        sizeAxis.addAxisListener( this );
     }
 
-    public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit,
-                                     int vertexTexUnit, int textureTexUnit,
-                                     int colorAttributeIndex, int sizeAttributeIndex,
-                                     TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
+    public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
-        this( colorTextureUnit, sizeTextureUnit, vertexTexUnit, textureTexUnit, colorAttributeIndex,
-              sizeAttributeIndex, colorAxis, sizeAxis, readSource( ) );
+        this( colorTextureUnit, sizeTextureUnit, vertexTexUnit, textureTexUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, readSource( ) );
     }
 
     @Override
@@ -99,17 +91,16 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
         int size = tags.size( );
 
         int count = 0;
-        for ( int i = size-1 ; i >= 0 ; i-- )
+        for ( int i = size - 1; i >= 0; i-- )
         {
             Tag tag = tags.get( i );
 
-            if ( tag.hasAttribute( TEX_COORD_ATTR ) )
-                count++;
+            if ( tag.hasAttribute( TEX_COORD_ATTR ) ) count++;
         }
 
         this.sizeArg.setValue( count );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

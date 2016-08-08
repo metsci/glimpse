@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,6 @@ package com.metsci.glimpse.util.quadtree;
 public interface FilterLong2
 {
 
-    boolean include(long v1, long v2);
+    boolean include( long v1, long v2 );
 
 }

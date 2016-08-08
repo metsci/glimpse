@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,15 +36,15 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import net.miginfocom.layout.ComponentWrapper;
-import net.miginfocom.layout.ContainerWrapper;
-
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+
+import net.miginfocom.layout.ComponentWrapper;
+import net.miginfocom.layout.ContainerWrapper;
 
 public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 {
@@ -150,6 +150,9 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void paintTo( GlimpseContext context )
     {
+        final int[] scale = context.getSurfaceScale( );
+        final int scaleX = scale[0];
+        final int scaleY = scale[1];
         GL gl = context.getGL( );
 
         GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
@@ -165,24 +168,24 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
                 // if it is not visible, but is a GlimpseLayout (GlimpseLayout implements GlimpsePainter, which it
                 // arguably should not) then GlimpseLayout still needs to layout its children or odd behavior may
                 // result if the GlimpseLayout is resized while not visible (but nothing further should be painted)
-                
+
                 boolean isLayout = m.painter instanceof GlimpseLayout;
                 boolean isVisible = layout.isVisible;
-                
+
                 if ( isVisible )
                 {
                     gl.glEnable( GL2.GL_SCISSOR_TEST );
-    
-                    gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
-                    gl.glScissor( clippedBounds.getX( ), clippedBounds.getY( ), clippedBounds.getWidth( ), clippedBounds.getHeight( ) );
-    
+
+                    gl.glViewport( bounds.getX( ) * scaleX, bounds.getY( ) * scaleY, bounds.getWidth( ) * scaleX, bounds.getHeight( ) * scaleY );
+                    gl.glScissor( clippedBounds.getX( ) * scaleX, clippedBounds.getY( ) * scaleY, clippedBounds.getWidth( ) * scaleX, clippedBounds.getHeight( ) * scaleY );
+
                     if ( m.callback != null ) m.callback.prePaint( m.painter, context );
                     m.painter.paintTo( context );
                     if ( m.callback != null ) m.callback.postPaint( m.painter, context );
                 }
                 else if ( isLayout )
                 {
-                    ((GlimpseLayout)m.painter).layoutTo( context );
+                    ( ( GlimpseLayout ) m.painter ).layoutTo( context );
                 }
             }
             finally

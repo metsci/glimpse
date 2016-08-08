@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
 {
     protected float[] selectionFillColor = GlimpseColor.fromColorRgba( 0, 153, 204, 40 );
     protected float[] selectionBorderColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 );
-    protected float[] currentTimeMarkerColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 ); 
-    
+    protected float[] currentTimeMarkerColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 );
+
     protected boolean showCurrenTimeMarker = true;
     protected float currentTimeMarkerWidth = 3.0f;
-    
+
     protected TextRenderer textRenderer;
     protected Font font;
 
@@ -75,18 +75,18 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
     {
         this.selectionBorderColor = color;
     }
-    
+
     public void setCurrenTimeMarkerColor( float[] color )
     {
         this.currentTimeMarkerColor = color;
     }
-    
+
     public void setShowCurrentTimeMarker( boolean show )
     {
         this.showCurrenTimeMarker = show;
     }
-    
-    public void setCurrenTimeMarkerWidth( float width )
+
+    public void setCurrentTimeMarkerWidth( float width )
     {
         this.currentTimeMarkerWidth = width;
     }
@@ -101,8 +101,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
             if ( orientation == Orientation.VERTICAL )
             {
                 gl.glVertex2f( min, 0 );
-                gl.glVertex2f( min, height-1 );
-                gl.glVertex2f( max, height-1 );
+                gl.glVertex2f( min, height - 1 );
+                gl.glVertex2f( max, height - 1 );
                 gl.glVertex2f( max, 0 );
             }
             else
@@ -123,11 +123,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
         gl.glBegin( GL2.GL_LINE_LOOP );
         try
         {
-            if ( orientation == Orientation.VERTICAL)
+            if ( orientation == Orientation.VERTICAL )
             {
                 gl.glVertex2f( min, 0 );
-                gl.glVertex2f( min, height-1 );
-                gl.glVertex2f( max, height-1 );
+                gl.glVertex2f( min, height - 1 );
+                gl.glVertex2f( max, height - 1 );
                 gl.glVertex2f( max, 0 );
             }
             else
@@ -147,7 +147,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
         {
             GlimpseColor.glColor( gl, currentTimeMarkerColor );
             gl.glLineWidth( currentTimeMarkerWidth );
-    
+
             gl.glBegin( GL2.GL_LINES );
             try
             {
@@ -173,8 +173,8 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainter1D
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
     {
         if ( textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 

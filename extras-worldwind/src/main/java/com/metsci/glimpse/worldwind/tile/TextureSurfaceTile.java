@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,14 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
+
 import gov.nasa.worldwind.geom.Extent;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
@@ -35,14 +43,6 @@ import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.render.SurfaceTile;
 import gov.nasa.worldwind.render.SurfaceTileRenderer;
 import gov.nasa.worldwind.util.Logging;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
 
 /**
  * A SurfaceTile which renders imagery from an OpenGL texture handle.
@@ -58,6 +58,7 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 
     protected float scaleX = 1.0f;
     protected float scaleY = 1.0f;
+    protected float opacity = 1.0f;
 
     protected List<TextureSurfaceTile> thisList = Collections.singletonList( this );
 
@@ -76,6 +77,11 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         this.initializeGeometry( corners );
     }
 
+    public void setOpacity( double opacity )
+    {
+        this.opacity = (float) opacity;
+    }
+    
     public void setSurfaceTileRenderer( SurfaceTileRenderer renderer )
     {
         this.renderer = renderer;
@@ -127,6 +133,17 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
 
         SurfaceTileRenderer r = renderer != null ? renderer : dc.getGeographicSurfaceTileRenderer( );
 
+        if ( opacity != 1.0f )
+        {
+            gl.glEnable( GL2.GL_BLEND );
+            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
+            gl.glColor4f( 1.0f, 1.0f, 1.0f, opacity );
+        }
+        else
+        {
+            gl.glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+        }
+        
         try
         {
             r.renderTiles( dc, this.thisList );
@@ -149,14 +166,14 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         // these settings make fine line drawing against a transparent background appear much more natural
         // but can make other rendering look too jagged/crisp
 
-        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
-        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_BORDER );
-        //gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_BORDER );
-        //
-        //gl.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        //gl.glEnable( GL2.GL_BLEND );
-        //
+        gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR );
+        gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR );
+        gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE );
+        gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE );
+        
+        gl.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL2.GL_BLEND );
+        
         //GlimpseColor.glColor( gl, GlimpseColor.getWhite( 0.5f ) );
 
         return true;

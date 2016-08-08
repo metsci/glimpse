@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,115 +40,115 @@ public class LittleEndianDataInput implements DataInput
 {
     private final DataInput in;
 
-    public LittleEndianDataInput(DataInput in)
+    public LittleEndianDataInput( DataInput in )
     {
         this.in = in;
     }
 
     @Override
-    public void readFully(byte[] arg0) throws IOException
+    public void readFully( byte[] arg0 ) throws IOException
     {
-        in.readFully(arg0);
+        in.readFully( arg0 );
     }
 
     @Override
-    public void readFully(byte[] arg0, int arg1, int arg2) throws IOException
+    public void readFully( byte[] arg0, int arg1, int arg2 ) throws IOException
     {
-        in.readFully(arg0, arg1, arg2);
+        in.readFully( arg0, arg1, arg2 );
     }
 
     @Override
-    public int skipBytes(int arg0) throws IOException
+    public int skipBytes( int arg0 ) throws IOException
     {
-        return in.skipBytes(arg0);
+        return in.skipBytes( arg0 );
     }
 
     @Override
-    public boolean readBoolean() throws IOException
+    public boolean readBoolean( ) throws IOException
     {
-        return in.readBoolean();
+        return in.readBoolean( );
     }
 
     @Override
-    public byte readByte() throws IOException
+    public byte readByte( ) throws IOException
     {
-        return in.readByte();
+        return in.readByte( );
     }
 
     @Override
-    public int readUnsignedByte() throws IOException
+    public int readUnsignedByte( ) throws IOException
     {
-        return in.readUnsignedByte();
+        return in.readUnsignedByte( );
     }
 
     @Override
-    public short readShort() throws IOException
+    public short readShort( ) throws IOException
     {
-        int a = in.readUnsignedByte();
-        int b = in.readByte();
-        return (short) ((b << 8) | a);
+        int a = in.readUnsignedByte( );
+        int b = in.readByte( );
+        return ( short ) ( ( b << 8 ) | a );
     }
 
     @Override
-    public int readUnsignedShort() throws IOException
+    public int readUnsignedShort( ) throws IOException
     {
-        int a = in.readUnsignedByte();
-        int b = in.readUnsignedByte();
-        return ((b << 8) | a);
+        int a = in.readUnsignedByte( );
+        int b = in.readUnsignedByte( );
+        return ( ( b << 8 ) | a );
     }
 
     @Override
-    public char readChar() throws IOException
+    public char readChar( ) throws IOException
     {
-        return in.readChar();
+        return in.readChar( );
     }
 
     @Override
-    public int readInt() throws IOException
+    public int readInt( ) throws IOException
     {
-        int a = in.readUnsignedByte();
-        int b = in.readUnsignedByte();
-        int c = in.readUnsignedByte();
-        int d = in.readByte();
-        return ((d << 24) | (c << 16) | (b << 8) | a);
+        int a = in.readUnsignedByte( );
+        int b = in.readUnsignedByte( );
+        int c = in.readUnsignedByte( );
+        int d = in.readByte( );
+        return ( ( d << 24 ) | ( c << 16 ) | ( b << 8 ) | a );
     }
 
     @Override
-    public long readLong() throws IOException
+    public long readLong( ) throws IOException
     {
-        long a = in.readUnsignedByte();
-        long b = in.readUnsignedByte();
-        long c = in.readUnsignedByte();
-        long d = in.readUnsignedByte();
-        long e = in.readUnsignedByte();
-        long f = in.readUnsignedByte();
-        long g = in.readUnsignedByte();
-        long h = in.readByte();
-        return ((h << 56) | (g << 48) | (f << 40) | (e << 32) | (d << 24) | (c << 16) | (b << 8) | a);
+        long a = in.readUnsignedByte( );
+        long b = in.readUnsignedByte( );
+        long c = in.readUnsignedByte( );
+        long d = in.readUnsignedByte( );
+        long e = in.readUnsignedByte( );
+        long f = in.readUnsignedByte( );
+        long g = in.readUnsignedByte( );
+        long h = in.readByte( );
+        return ( ( h << 56 ) | ( g << 48 ) | ( f << 40 ) | ( e << 32 ) | ( d << 24 ) | ( c << 16 ) | ( b << 8 ) | a );
     }
 
     @Override
-    public float readFloat() throws IOException
+    public float readFloat( ) throws IOException
     {
-        return Float.intBitsToFloat(readInt());
+        return Float.intBitsToFloat( readInt( ) );
     }
 
     @Override
-    public double readDouble() throws IOException
+    public double readDouble( ) throws IOException
     {
-        return Double.longBitsToDouble(readLong());
+        return Double.longBitsToDouble( readLong( ) );
     }
 
     @Override
-    public String readLine() throws IOException
+    public String readLine( ) throws IOException
     {
-        return in.readLine();
+        return in.readLine( );
     }
 
     @Override
-    public String readUTF() throws IOException
+    public String readUTF( ) throws IOException
     {
-        return in.readUTF();
+        return in.readUTF( );
     }
 
 }

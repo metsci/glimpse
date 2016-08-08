@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,6 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import it.unimi.dsi.fastutil.floats.Float2IntMap;
-import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -39,6 +36,9 @@ import com.metsci.glimpse.painter.plot.HistogramPainter;
 import com.metsci.glimpse.painter.plot.StackedHistogramPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+
+import it.unimi.dsi.fastutil.floats.Float2IntMap;
+import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
 
 /**
  * A basic histogram plot.

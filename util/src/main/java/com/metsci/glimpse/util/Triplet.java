@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,13 +31,13 @@ package com.metsci.glimpse.util;
  *
  * @author hogye
  */
-public class Triplet<A,B,C>
+public class Triplet<A, B, C>
 {
     private final A _first;
     private final B _second;
     private final C _third;
 
-    public Triplet(A first, B second, C third)
+    public Triplet( A first, B second, C third )
     {
         _first = first;
         _second = second;
@@ -47,7 +47,7 @@ public class Triplet<A,B,C>
     /**
      * Returns the first element.
      */
-    public A first()
+    public A first( )
     {
         return _first;
     }
@@ -55,7 +55,7 @@ public class Triplet<A,B,C>
     /**
      * Returns the second element.
      */
-    public B second()
+    public B second( )
     {
         return _second;
     }
@@ -63,58 +63,61 @@ public class Triplet<A,B,C>
     /**
      * Returns the third element.
      */
-    public C third()
+    public C third( )
     {
         return _third;
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
-        return Triplet.class.getSimpleName() + "[" + _first + "," + _second + "," + _third + "]";
+        return Triplet.class.getSimpleName( ) + "[" + _first + "," + _second + "," + _third + "]";
     }
 
-    private static boolean equals(Object x, Object y)
+    private static boolean equals( Object x, Object y )
     {
-        return (x == null && y == null) || (x != null && x.equals(y));
+        return ( x == null && y == null ) || ( x != null && x.equals( y ) );
     }
 
     @Override
-    public boolean equals(Object other)
+    public boolean equals( Object other )
     {
-        if (other instanceof Triplet<?,?,?>) {
-            Triplet<?,?,?> t = (Triplet<?,?,?>) other;
-            return equals(_first, t._first) && equals(_second, t._second) && equals(_third, t._third);
-        } else {
+        if ( other instanceof Triplet<?, ?, ?> )
+        {
+            Triplet<?, ?, ?> t = ( Triplet<?, ?, ?> ) other;
+            return equals( _first, t._first ) && equals( _second, t._second ) && equals( _third, t._third );
+        }
+        else
+        {
             return false;
         }
     }
 
     @Override
-    public int hashCode()
+    public int hashCode( )
     {
         int hashcode = 0;
 
-        if( _first != null )
+        if ( _first != null )
         {
-            hashcode += _first.hashCode();
+            hashcode += _first.hashCode( );
         }
 
-        if( _second != null )
+        if ( _second != null )
         {
-            hashcode += _second.hashCode() * 17;
+            hashcode += _second.hashCode( ) * 17;
         }
 
-        if( _third != null )
+        if ( _third != null )
         {
-            hashcode += _third.hashCode() * 29;
+            hashcode += _third.hashCode( ) * 29;
         }
 
         return hashcode;
     }
 
-    public static final <A,B,C> Triplet<A,B,C> make( A a, B b, C c )
+    public static final <A, B, C> Triplet<A, B, C> make( A a, B b, C c )
     {
-        return new Triplet<A,B,C>( a, b, c );
+        return new Triplet<A, B, C>( a, b, c );
     }
 }

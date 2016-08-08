@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -52,12 +53,12 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class SimpleTextPainter extends GlimpsePainterImpl
 {
-    public enum HorizontalPosition
+    public static enum HorizontalPosition
     {
         Left, Center, Right;
     }
 
-    public enum VerticalPosition
+    public static enum VerticalPosition
     {
         Bottom, Center, Top;
     }

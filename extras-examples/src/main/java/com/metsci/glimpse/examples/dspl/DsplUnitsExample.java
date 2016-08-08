@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.examples.dspl;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
 
@@ -39,12 +40,10 @@ import com.metsci.glimpse.dspl.canonical.Physical;
 import com.metsci.glimpse.dspl.parser.column.TableColumn;
 import com.metsci.glimpse.dspl.schema.Concept;
 import com.metsci.glimpse.dspl.schema.DataSet;
-import com.metsci.glimpse.dspl.schema.Info;
 import com.metsci.glimpse.dspl.schema.DataSet.Import;
+import com.metsci.glimpse.dspl.schema.Info;
 import com.metsci.glimpse.dspl.util.DsplException;
 import com.metsci.glimpse.util.logging.LoggerUtils;
-
-import java.util.logging.Logger;
 
 /**
  * XXX: Needs cleanup.
@@ -78,19 +77,19 @@ public class DsplUnitsExample
         Info info = dataset.getInfo( );
 
         // print out some values from the xml metadata
-        logInfo( logger,  "Dataset Name: %s", info.getNameEnglish( ) );
-        logInfo( logger,  "Dataset Description: %s", info.getDescriptionEnglish( ) );
-        logInfo( logger,  "Dataset Url: %s", info.getUrlEnglish( ) );
+        logInfo( logger, "Dataset Name: %s", info.getNameEnglish( ) );
+        logInfo( logger, "Dataset Description: %s", info.getDescriptionEnglish( ) );
+        logInfo( logger, "Dataset Url: %s", info.getUrlEnglish( ) );
 
         // iterate through the imports in the DataSet
         List<Import> imports = dataset.getImport( );
         for ( Import importTag : imports )
         {
-            logInfo( logger,  "Import: %s %s", importTag.getLocation( ), importTag.getNamespace( ) );
+            logInfo( logger, "Import: %s %s", importTag.getLocation( ), importTag.getNamespace( ) );
 
             DataSet importedDataset = dataset.getDataSet( importTag );
 
-            if ( importedDataset != null ) logInfo( logger,  "Imported Dataset Name: %s", importedDataset.getInfo( ).getNameEnglish( ) );
+            if ( importedDataset != null ) logInfo( logger, "Imported Dataset Name: %s", importedDataset.getInfo( ).getNameEnglish( ) );
         }
 
         printPhysicalUnitSystems( dataset );

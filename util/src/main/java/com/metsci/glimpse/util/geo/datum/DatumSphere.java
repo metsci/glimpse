@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ public class DatumSphere extends Datum
     @Override
     public LatLonGeo toLatLonGeo( LatLonRect from )
     {
-        return toLatLonGeo( from.getX( ), from.getY(), from.getZ() );
+        return toLatLonGeo( from.getX( ), from.getY( ), from.getZ( ) );
     }
 
     @Override
@@ -90,13 +90,13 @@ public class DatumSphere extends Datum
     }
 
     @Override
-    public boolean isSpherical()
+    public boolean isSpherical( )
     {
         return true;
     }
 
     @Override
-    public DatumSphere getSphereApproximation()
+    public DatumSphere getSphereApproximation( )
     {
         return this;
     }
@@ -110,12 +110,12 @@ public class DatumSphere extends Datum
      * </p>
      */
     @Override
-    public LatLonGeo toWgs84(LatLonGeo llg)
+    public LatLonGeo toWgs84( LatLonGeo llg )
     {
         return Datum.wgs84.toGeodeticLatitude( llg );
     }
 
-    public double getRadius()
+    public double getRadius( )
     {
         return getEquatorialRadius( );
     }

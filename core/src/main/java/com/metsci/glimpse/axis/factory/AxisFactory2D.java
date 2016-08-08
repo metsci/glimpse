@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.axis.factory;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 
@@ -40,6 +41,8 @@ public interface AxisFactory2D
      * @see com.metsci.glimpse.axis.factory.AxisFactory1D#newAxis( GlimpseTargetStack, Axis1D )
      */
     public Axis2D newAxis( GlimpseTargetStack stack, Axis2D axis );
+
     public AxisFactory1D getAxisFactoryX( GlimpseTargetStack stack );
+
     public AxisFactory1D getAxisFactoryY( GlimpseTargetStack stack );
 }

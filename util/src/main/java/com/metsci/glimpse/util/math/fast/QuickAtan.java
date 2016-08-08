@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ public class QuickAtan
     private static final double TWO_MINUS_ROOT_THREE = 2.0 - Math.sqrt( 3.0 );
     private static final double TWO_PLUS_ROOT_THREE = 2.0 + Math.sqrt( 3.0 );
 
-    private QuickAtan()
+    private QuickAtan( )
     {
     }
 
@@ -78,39 +78,39 @@ public class QuickAtan
             return eval0( x );
         }
     }
-    
+
     public static double eval2( double y, double x )
     {
-    	if ( x > 0 )
-    	{
-    		return eval( y / x);
-    	}
-    	else if ( x < 0 )
-    	{
-    		if ( y >= 0 )
-    		{
-    			return Math.PI + eval( y / x );
-    		}
-    		else
-    		{
-    			return -Math.PI + eval( y / x );
-    		}
-    	}
-    	else
-    	{
-    		if ( y > 0 )
-    		{
-    			return Math.PI / 2;
-    		}
-    		else if ( y < 0 )
-    		{
-    			return -Math.PI / 2;
-    		}
-    		else
-    		{
-    			return 0;  // undefined
-    		}
-    	}
+        if ( x > 0 )
+        {
+            return eval( y / x );
+        }
+        else if ( x < 0 )
+        {
+            if ( y >= 0 )
+            {
+                return Math.PI + eval( y / x );
+            }
+            else
+            {
+                return -Math.PI + eval( y / x );
+            }
+        }
+        else
+        {
+            if ( y > 0 )
+            {
+                return Math.PI / 2;
+            }
+            else if ( y < 0 )
+            {
+                return -Math.PI / 2;
+            }
+            else
+            {
+                return 0; // undefined
+            }
+        }
     }
 
     /**

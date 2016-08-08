@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.colormap;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -273,44 +273,28 @@ public class ColorGradients
         }
     };
 
-    public static final ColorGradient parula = fromCSV( "colormap/parula.csv" );
-
-    public static final ColorGradient hsv = fromCSV( "colormap/hsv.csv" );
-
-    public static final ColorGradient hot = fromCSV( "colormap/hot.csv" );
-
-    public static final ColorGradient cool = fromCSV( "colormap/cool.csv" );
-
-    public static final ColorGradient spring = fromCSV( "colormap/spring.csv" );
-
-    public static final ColorGradient summer = fromCSV( "colormap/summer.csv" );
-
-    public static final ColorGradient autumn = fromCSV( "colormap/autumn.csv" );
-
-    public static final ColorGradient winter = fromCSV( "colormap/winter.csv" );
-
-    public static final ColorGradient bone = fromCSV( "colormap/bone.csv" );
-
-    public static final ColorGradient copper = fromCSV( "colormap/copper.csv" );
-
-    public static final ColorGradient pink = fromCSV( "colormap/pink.csv" );
-
-    public static final ColorGradient lines = fromCSV( "colormap/lines.csv" ); //diff color??
-
-    public static final ColorGradient colorcube = fromCSV( "colormap/colorcube.csv" );
-
-    public static final ColorGradient prism = fromCSV( "colormap/prism.csv" );
-
-    public static final ColorGradient flag = fromCSV( "colormap/flag.csv" ); //diff color??
-
-    public static final ColorGradient white = fromCSV( "colormap/white.csv" );
-
-    // see: https://mycarta.wordpress.com/2013/02/21/perceptual-rainbow-palette-the-method/
-    public static final ColorGradient perceptualRainbow = fromCSV( "colormap/cubeyf1.csv" );
-
-    // see: http://www.cs.utah.edu/~gk/papers/vis02/FaceLumin.pdf
-    // see: https://mycarta.wordpress.com/2012/12/06/the-rainbow-is-deadlong-live-the-rainbow-part-5-cie-lab-linear-l-rainbow/
-    public static final ColorGradient linearLuminance = fromCSV( "colormap/linearl_face_based.csv" );
+    // matplotlib colormaps: http://matplotlib.org/examples/color/colormaps_reference.html
+    public static final ColorGradient wistia = fromCSV( "colormap/matplotlib/wistia.csv" );
+    public static final ColorGradient viridis = fromCSV( "colormap/matplotlib/viridis.csv" );
+    public static final ColorGradient terrain = fromCSV( "colormap/matplotlib/terrain.csv" );
+    public static final ColorGradient summer = fromCSV( "colormap/matplotlib/summer.csv" );
+    public static final ColorGradient spring = fromCSV( "colormap/matplotlib/spring.csv" );
+    public static final ColorGradient spectral = fromCSV( "colormap/matplotlib/spectral.csv" );
+    public static final ColorGradient seismic = fromCSV( "colormap/matplotlib/seismic.csv" );
+    public static final ColorGradient rainbow = fromCSV( "colormap/matplotlib/rainbow.csv" );
+    public static final ColorGradient prism = fromCSV( "colormap/matplotlib/prism.csv" );
+    public static final ColorGradient plasma = fromCSV( "colormap/matplotlib/plasma.csv" );
+    public static final ColorGradient oranges = fromCSV( "colormap/matplotlib/oranges.csv" );
+    public static final ColorGradient ocean = fromCSV( "colormap/matplotlib/ocean.csv" );
+    public static final ColorGradient magma = fromCSV( "colormap/matplotlib/magma.csv" );
+    public static final ColorGradient inferno = fromCSV( "colormap/matplotlib/inferno.csv" );
+    public static final ColorGradient hot = fromCSV( "colormap/matplotlib/hot.csv" );
+    public static final ColorGradient flag = fromCSV( "colormap/matplotlib/flag.csv" );
+    public static final ColorGradient copper = fromCSV( "colormap/matplotlib/copper.csv" );
+    public static final ColorGradient coolwarm = fromCSV( "colormap/matplotlib/coolwarm.csv" );
+    public static final ColorGradient cool = fromCSV( "colormap/matplotlib/cool.csv" );
+    public static final ColorGradient autumn = fromCSV( "colormap/matplotlib/autumn.csv" );
+    public static final ColorGradient accent = fromCSV( "colormap/matplotlib/accent.csv" );
 
     public static ColorGradient nColorFade( final List<float[]> colors )
     {
@@ -383,7 +367,7 @@ public class ColorGradients
                 float xMax = Math.max( Math.max( rgba[0], rgba[1] ), rgba[2] );
                 float xMin = Math.min( Math.min( rgba[0], rgba[1] ), rgba[2] );
                 float light = ( xMax + xMin ) / 2, sat = 0, hue = 0, temp2 = 0;
-                
+
                 if ( xMin == xMax )
                 {
                     sat = hue = 0;
@@ -396,7 +380,7 @@ public class ColorGradients
                 {
                     sat = ( xMax - xMin ) / ( 2 - xMax - xMin );
                 }
-                
+
                 if ( rgba[0] == xMax ) hue = ( rgba[1] - rgba[2] ) / ( xMax - xMin );
                 if ( rgba[1] == xMax ) hue = 2 + ( rgba[2] - rgba[0] ) / ( xMax - xMin );
                 if ( rgba[2] == xMax ) hue = 4 + ( rgba[0] - rgba[1] ) / ( xMax - xMin );
@@ -418,10 +402,10 @@ public class ColorGradients
                 {
                     temp2 = light + sat - light * sat;
                 }
-                
+
                 float temp1 = 2 * light - temp2;
                 hue = hue / 6;
-                
+
                 for ( int k = 0; k < 3; k++ )
                 {
                     float temp3;
@@ -439,7 +423,7 @@ public class ColorGradients
                         temp3 = ( float ) ( hue - 1.0 / 3 );
                         if ( temp3 < 0 ) temp3 = temp3 + 1;
                     }
-                    
+
                     if ( temp3 < 1.0 / 6 )
                     {
                         rgba[k] = temp1 + ( temp2 - temp1 ) * 6 * temp3;
@@ -488,7 +472,7 @@ public class ColorGradients
     {
         FloatsArray f = new FloatsArray( );
         String line = null;
-        try (BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ))
+        try ( BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ) )
         {
             while ( ( line = reader.readLine( ) ) != null )
             {

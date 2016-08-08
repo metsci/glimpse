@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,16 +59,15 @@ public abstract class PrimitiveVector
      */
     private static final int maxGrowth = 50000;
 
-
     /**
      * Returns the number of elements stored in this array.
      */
-    abstract int size();
+    abstract int size( );
 
     /**
      * Returns the size of the underlying array.
      */
-    abstract int capacity();
+    abstract int capacity( );
 
     /**
      * Removes all elements from the vector.
@@ -86,7 +85,7 @@ public abstract class PrimitiveVector
      * <b>NOTE:</b> For large arrays, calling this method will temporarily
      * double its memory footprint for the the purpose of copying.
      */
-    abstract void trimToSize();
+    abstract void trimToSize( );
 
     abstract double getAsDouble( int i );
 
@@ -95,7 +94,7 @@ public abstract class PrimitiveVector
         private int[] data;
         private int size;
 
-        public Integer()
+        public Integer( )
         {
             this( defaultInitialCapacity );
         }
@@ -131,22 +130,22 @@ public abstract class PrimitiveVector
 
         private final void ensureAdditionalCapacity( int n )
         {
-            if( size + n > data.length )
+            if ( size + n > data.length )
             {
-                int newSize = Math.min( (int) (growthRate*size), size+maxGrowth );
-                newSize = Math.max( data.length+n, newSize );
-                int[] newData = new int[ newSize ];
+                int newSize = Math.min( ( int ) ( growthRate * size ), size + maxGrowth );
+                newSize = Math.max( data.length + n, newSize );
+                int[] newData = new int[newSize];
                 System.arraycopy( data, 0, newData, 0, size );
                 data = newData;
             }
         }
 
-        public final int[] getUnderlyingData()
+        public final int[] getUnderlyingData( )
         {
             return data;
         }
 
-        public final int[] getCopiedData()
+        public final int[] getCopiedData( )
         {
             int[] r = new int[size];
             System.arraycopy( data, 0, r, 0, size );
@@ -159,13 +158,13 @@ public abstract class PrimitiveVector
         }
 
         @Override
-        public final int size()
+        public final int size( )
         {
             return size;
         }
 
         @Override
-        public final int capacity()
+        public final int capacity( )
         {
             return data.length;
         }
@@ -194,7 +193,7 @@ public abstract class PrimitiveVector
         private long[] data;
         private int size;
 
-        public Long()
+        public Long( )
         {
             this( defaultInitialCapacity );
         }
@@ -230,22 +229,22 @@ public abstract class PrimitiveVector
 
         private final void ensureAdditionalCapacity( int n )
         {
-            if( size + n > data.length )
+            if ( size + n > data.length )
             {
-                int newSize = Math.min( (int) (growthRate*size), size+maxGrowth );
-                newSize = Math.max( data.length+n, newSize );
-                long[] newData = new long[ newSize ];
+                int newSize = Math.min( ( int ) ( growthRate * size ), size + maxGrowth );
+                newSize = Math.max( data.length + n, newSize );
+                long[] newData = new long[newSize];
                 System.arraycopy( data, 0, newData, 0, size );
                 data = newData;
             }
         }
 
-        public final long[] getUnderlyingData()
+        public final long[] getUnderlyingData( )
         {
             return data;
         }
 
-        public final long[] getCopiedData()
+        public final long[] getCopiedData( )
         {
             long[] r = new long[size];
             System.arraycopy( data, 0, r, 0, size );
@@ -258,13 +257,13 @@ public abstract class PrimitiveVector
         }
 
         @Override
-        public final int size()
+        public final int size( )
         {
             return size;
         }
 
         @Override
-        public final int capacity()
+        public final int capacity( )
         {
             return data.length;
         }
@@ -293,7 +292,7 @@ public abstract class PrimitiveVector
         private float[] data;
         private int size;
 
-        public Float()
+        public Float( )
         {
             this( defaultInitialCapacity );
         }
@@ -345,28 +344,28 @@ public abstract class PrimitiveVector
         public final void add( double[] x, int start, int len )
         {
             ensureAdditionalCapacity( len );
-            for( int i = start; i < start + len; i++ )
-                data[size++] = (float) x[i];
+            for ( int i = start; i < start + len; i++ )
+                data[size++] = ( float ) x[i];
         }
 
         private final void ensureAdditionalCapacity( int n )
         {
-            if( size + n > data.length )
+            if ( size + n > data.length )
             {
-                int newSize = Math.min( (int) (growthRate*size), size+maxGrowth );
-                newSize = Math.max( data.length+n, newSize );
-                float[] newData = new float[ newSize ];
+                int newSize = Math.min( ( int ) ( growthRate * size ), size + maxGrowth );
+                newSize = Math.max( data.length + n, newSize );
+                float[] newData = new float[newSize];
                 System.arraycopy( data, 0, newData, 0, size );
                 data = newData;
             }
         }
 
-        public final float[] getUnderlyingData()
+        public final float[] getUnderlyingData( )
         {
             return data;
         }
 
-        public final float[] getCopiedData()
+        public final float[] getCopiedData( )
         {
             float[] r = new float[size];
             System.arraycopy( data, 0, r, 0, size );
@@ -379,13 +378,13 @@ public abstract class PrimitiveVector
         }
 
         @Override
-        public final int size()
+        public final int size( )
         {
             return size;
         }
 
         @Override
-        public final int capacity()
+        public final int capacity( )
         {
             return data.length;
         }
@@ -414,7 +413,7 @@ public abstract class PrimitiveVector
         private double[] data;
         private int size;
 
-        public Double()
+        public Double( )
         {
             this( defaultInitialCapacity );
         }
@@ -466,28 +465,28 @@ public abstract class PrimitiveVector
         public final void add( float[] x, int start, int len )
         {
             ensureAdditionalCapacity( len );
-            for( int i = start; i < start + len; i++ )
-                data[size++] = (float) x[i];
+            for ( int i = start; i < start + len; i++ )
+                data[size++] = ( float ) x[i];
         }
 
         private final void ensureAdditionalCapacity( int n )
         {
-            if( size + n > data.length )
+            if ( size + n > data.length )
             {
-                int newSize = Math.min( (int) (growthRate*size), size+maxGrowth );
-                newSize = Math.max( data.length+n, newSize );
-                double[] newData = new double[ newSize ];
+                int newSize = Math.min( ( int ) ( growthRate * size ), size + maxGrowth );
+                newSize = Math.max( data.length + n, newSize );
+                double[] newData = new double[newSize];
                 System.arraycopy( data, 0, newData, 0, size );
                 data = newData;
             }
         }
 
-        public final double[] getUnderlyingData()
+        public final double[] getUnderlyingData( )
         {
             return data;
         }
 
-        public final double[] getCopiedData()
+        public final double[] getCopiedData( )
         {
             double[] r = new double[size];
             System.arraycopy( data, 0, r, 0, size );
@@ -500,13 +499,13 @@ public abstract class PrimitiveVector
         }
 
         @Override
-        public final int size()
+        public final int size( )
         {
             return size;
         }
 
         @Override
-        public final int capacity()
+        public final int capacity( )
         {
             return data.length;
         }
@@ -518,7 +517,7 @@ public abstract class PrimitiveVector
         }
 
         @Override
-        public void removeAll()
+        public void removeAll( )
         {
             size = 0;
         }

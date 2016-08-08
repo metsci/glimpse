@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,8 +73,8 @@ public class SwingMoveCanvasTest
             {
                 frame.add( canvas );
             }
-        });
-        
+        } );
+
         // periodically switch the canvas between the frames
         // Swing actions must be called on the EventDispatch thread
         new Timer( 1000, new ActionListener( )

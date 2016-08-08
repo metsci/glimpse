@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ public class SampledIntensityScaleShader extends GlimpseShaderProgram implements
     private GLUniformData hueTexUnit;
 
     private Axis1D colorAxis;
-    
+
     /**
      * @param colorAxis color axis producing events
      * @param targetTexUnit 2D texture unit which is the target of color-mapping
@@ -108,7 +108,7 @@ public class SampledIntensityScaleShader extends GlimpseShaderProgram implements
     {
         return axis.getMax( );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

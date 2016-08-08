@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -282,8 +282,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         textPosY = max( textPosY, axis.getAxisY( ).valueToScreenPixel( nodeBounds.getMinY( ) ) );
 
         // don't draw if the area is too small
-        if ( nodeBounds.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) ||
-                nodeBounds.getHeight( ) - paddingTopPx < rect.getHeight( ) / axis.getAxisY( ).getPixelsPerValue( ) )
+        if ( nodeBounds.getWidth( ) < rect.getWidth( ) / axis.getAxisX( ).getPixelsPerValue( ) || nodeBounds.getHeight( ) - paddingTopPx < rect.getHeight( ) / axis.getAxisY( ).getPixelsPerValue( ) )
         {
             return;
         }

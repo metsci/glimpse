@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,8 @@ import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.data.EventSelection;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.EventPlotListener;
-import com.metsci.glimpse.plot.timeline.event.EventSelectionListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -94,6 +94,11 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
+
+        plot.setIndentSize( 140 );
+        plot.setIndentSubplots( true );
+
+        plot.setShowLabels( true );
 
         for ( TimePlotInfo row : plot.getAllTimePlots( ) )
         {
@@ -145,6 +150,15 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         events1.setLabelText( "Snail Schedule" );
         events2.setLabelText( "Holidays" );
         events3.setLabelText( "Weather" );
+
+        // set the event1 row to contain fixed height events (15 pixels tall)
+        events1.setGrow( false );
+        events1.setRowSize( 35 );
+
+        // set the event2 row to contain variable size events which grow with available space
+        events2.setGrow( true );
+
+        events3.setGrow( false );
 
         // set additional display options on each plot
         setPlotLookAndFeel( events1 );
@@ -318,7 +332,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
                 if ( s != null && m != null && s.getValue( ) != m.getValue( ) )
                 {
                     s.setValue( m.getValue( ) );
-                    axis.validateTags( );
+                    plot.getTimeAxis( ).validateTags( );
                 }
             }
         } );

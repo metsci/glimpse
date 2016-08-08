@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,29 +36,42 @@ import java.io.IOException;
  */
 public interface WritableDataPipe
 {
-    void writeBoolean(boolean value) throws IOException;
-    void writeByte(byte value) throws IOException;
-    void writeShort(short value) throws IOException;
-    void writeInt(int value) throws IOException;
-    void writeLong(long value) throws IOException;
-    void writeFloat(float value) throws IOException;
-    void writeDouble(double value) throws IOException;
+    void writeBoolean( boolean value ) throws IOException;
+
+    void writeByte( byte value ) throws IOException;
+
+    void writeShort( short value ) throws IOException;
+
+    void writeInt( int value ) throws IOException;
+
+    void writeLong( long value ) throws IOException;
+
+    void writeFloat( float value ) throws IOException;
+
+    void writeDouble( double value ) throws IOException;
 
     /**
      * Writes a string encoded in true UTF-8 format (not Java's modified UTF).
      */
-    void writeString(String value) throws IOException;
+    void writeString( String value ) throws IOException;
 
-    void writeBooleanArray(boolean[] values) throws IOException;
-    void writeByteArray(byte[] values) throws IOException;
-    void writeShortArray(short[] values) throws IOException;
-    void writeIntArray(int[] values) throws IOException;
-    void writeLongArray(long[] values) throws IOException;
-    void writeFloatArray(float[] values) throws IOException;
-    void writeDoubleArray(double[] values) throws IOException;
+    void writeBooleanArray( boolean[] values ) throws IOException;
 
-    void close() throws IOException;
-    void flush() throws IOException;
+    void writeByteArray( byte[] values ) throws IOException;
 
-    DataOutputStream getOutputStream();
+    void writeShortArray( short[] values ) throws IOException;
+
+    void writeIntArray( int[] values ) throws IOException;
+
+    void writeLongArray( long[] values ) throws IOException;
+
+    void writeFloatArray( float[] values ) throws IOException;
+
+    void writeDoubleArray( double[] values ) throws IOException;
+
+    void close( ) throws IOException;
+
+    void flush( ) throws IOException;
+
+    DataOutputStream getOutputStream( );
 }

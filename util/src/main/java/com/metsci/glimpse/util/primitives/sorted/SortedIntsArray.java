@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,13 @@
  */
 package com.metsci.glimpse.util.primitives.sorted;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import java.util.Arrays;
 
 import com.metsci.glimpse.util.primitives.Ints;
 import com.metsci.glimpse.util.primitives.IntsArray;
-
-import static java.lang.Math.*;
 
 /**
  * @author hogye
@@ -47,19 +48,19 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      *
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public SortedIntsArray(int[] a)
+    public SortedIntsArray( int[] a )
     {
-        super(a);
+        super( a );
     }
 
-    public SortedIntsArray(int n)
+    public SortedIntsArray( int n )
     {
-        super(n);
+        super( n );
     }
 
-    public SortedIntsArray()
+    public SortedIntsArray( )
     {
-        super();
+        super( );
     }
 
     /**
@@ -68,9 +69,9 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      *
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public SortedIntsArray(int[] a, int n)
+    public SortedIntsArray( int[] a, int n )
     {
-        super(a, n);
+        super( a, n );
     }
 
     /**
@@ -79,118 +80,115 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      *
      * Clones the sequence arg.
      */
-    public SortedIntsArray(Ints xs)
+    public SortedIntsArray( Ints xs )
     {
-        super(xs);
+        super( xs );
     }
-
-
-
 
     // Search
 
     @Override
-    public int indexOf(int x)
+    public int indexOf( int x )
     {
-        return Arrays.binarySearch(a, 0, n, x);
+        return Arrays.binarySearch( a, 0, n, x );
     }
 
     @Override
-    public int indexNearest(int x)
+    public int indexNearest( int x )
     {
-        int i = indexOf(x);
+        int i = indexOf( x );
 
         // Exact value found
-        if (i >= 0) return i;
+        if ( i >= 0 ) return i;
 
         // Find the closer of the adjacent values
         int iAfter = -i - 1;
         int iBefore = iAfter - 1;
 
-        if (iAfter >= this.n) return iBefore;
-        if (iBefore < 0) return iAfter;
+        if ( iAfter >= this.n ) return iBefore;
+        if ( iBefore < 0 ) return iAfter;
 
         int[] a = this.a;
         int diffAfter = a[iAfter] - x;
         int diffBefore = x - a[iBefore];
 
-        return (diffAfter <= diffBefore ? iAfter : iBefore);
+        return ( diffAfter <= diffBefore ? iAfter : iBefore );
     }
 
     @Override
-    public int indexAfter(int x)
+    public int indexAfter( int x )
     {
-        int i = indexOf(x);
+        int i = indexOf( x );
 
         // Exact value not found
-        if (i < 0) return (-i - 1);
+        if ( i < 0 ) return ( -i - 1 );
 
         // If the exact value was found, find the value's
         // last occurrence
         int[] a = this.a;
         int n = this.n;
-        for (int j = i + 1; j < n; j++)
+        for ( int j = i + 1; j < n; j++ )
         {
-            if (a[j] > x) return j;
+            if ( a[j] > x ) return j;
         }
         return n;
     }
 
     @Override
-    public int indexAtOrAfter(int x)
+    public int indexAtOrAfter( int x )
     {
-        int i = indexOf(x);
+        int i = indexOf( x );
 
         // Exact value not found
-        if (i < 0) return (-i - 1);
+        if ( i < 0 ) return ( -i - 1 );
 
         // If the exact value was found, find the value's
         // first occurrence
         int[] a = this.a;
-        for (int j = i; j > 0; j--)
+        for ( int j = i; j > 0; j-- )
         {
-            if (a[j - 1] < x) return j;
+            if ( a[j - 1] < x ) return j;
         }
         return 0;
     }
 
     @Override
-    public int indexBefore(int x)
+    public int indexBefore( int x )
     {
-        return indexAtOrAfter(x) - 1;
+        return indexAtOrAfter( x ) - 1;
     }
 
     @Override
-    public int indexAtOrBefore(int x)
+    public int indexAtOrBefore( int x )
     {
-        return indexAfter(x) - 1;
+        return indexAfter( x ) - 1;
     }
 
     /**
      * @throws RuntimeException if n is less than 2 and the exact value is not found
      */
     @Override
-    public void continuousIndexOf(int x, ContinuousIndex result)
+    public void continuousIndexOf( int x, ContinuousIndex result )
     {
-        int i = indexOf(x);
-        if (i >= 0)
+        int i = indexOf( x );
+        if ( i >= 0 )
         {
             // Exact value found
-            result.set(i, 0);
+            result.set( i, 0 );
         }
         else
         {
             // Find the continuous index between values
             int n = this.n;
-            int iAfter = max( 1, min( n-1, (-i - 1) ) );
+            int iAfter = max( 1, min( n - 1, ( -i - 1 ) ) );
             int iBefore = iAfter - 1;
 
             int[] a = this.a;
             int vBefore = a[iBefore];
             int vAfter = a[iAfter];
-            float f = ((float) (x - vBefore)) / ((float) (vAfter - vBefore));
+            float f = ( ( float ) ( x - vBefore ) ) / ( ( float ) ( vAfter - vBefore ) );
 
-            result.set(iBefore, f);
+            result.set( iBefore, f );
         }
     }
 
@@ -198,10 +196,10 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      * @throws RuntimeException if n is less than 2 and the exact value is not found
      */
     @Override
-    public ContinuousIndex continuousIndexOf(int x)
+    public ContinuousIndex continuousIndexOf( int x )
     {
-        ContinuousIndex h = new ContinuousIndex();
-        continuousIndexOf(x, h);
+        ContinuousIndex h = new ContinuousIndex( );
+        continuousIndexOf( x, h );
         return h;
     }
 
@@ -209,19 +207,19 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public void continuousIndicesOf(Ints xs, ContinuousIndexArray result)
+    public void continuousIndicesOf( Ints xs, ContinuousIndexArray result )
     {
         int n = this.n;
-        if (n < 2) throw new RuntimeException();
+        if ( n < 2 ) throw new RuntimeException( );
 
-        int nx = xs.n();
+        int nx = xs.n( );
 
-        ContinuousIndex h = new ContinuousIndex();
-        for (int ix = 0; ix < nx; ix++)
+        ContinuousIndex h = new ContinuousIndex( );
+        for ( int ix = 0; ix < nx; ix++ )
         {
-            int x = xs.v(ix);
-            continuousIndexOf(x, h);
-            result.put(ix, h);
+            int x = xs.v( ix );
+            continuousIndexOf( x, h );
+            result.put( ix, h );
         }
     }
 
@@ -229,10 +227,10 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public ContinuousIndexArray continuousIndicesOf(Ints xs)
+    public ContinuousIndexArray continuousIndicesOf( Ints xs )
     {
-        ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
-        continuousIndicesOf(xs, hs);
+        ContinuousIndexArray hs = new ContinuousIndexArray( xs.n( ) );
+        continuousIndicesOf( xs, hs );
         return hs;
     }
 
@@ -240,40 +238,39 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public void continuousIndicesOf(SortedInts xs, ContinuousIndexArray result)
+    public void continuousIndicesOf( SortedInts xs, ContinuousIndexArray result )
     {
         int[] a = this.a;
         int n = this.n;
-        if (n < 2) throw new RuntimeException();
+        if ( n < 2 ) throw new RuntimeException( );
 
-        int nx = xs.n();
+        int nx = xs.n( );
         int ix = 0;
-
 
         // Zip through any xs smaller than v(1)
         int v0 = a[0];
         int v1 = a[1];
-        float oneOverDenom1 = 1f / ((float) (v1 - v0));
-        for (; ix < nx; ix++)
+        float oneOverDenom1 = 1f / ( ( float ) ( v1 - v0 ) );
+        for ( ; ix < nx; ix++ )
         {
-            int x = xs.v(ix);
-            if (x >= v1) break;
+            int x = xs.v( ix );
+            if ( x >= v1 ) break;
 
-            float f = ((float) (x - v0)) * oneOverDenom1;
-            result.put(ix, 0, f);
+            float f = ( ( float ) ( x - v0 ) ) * oneOverDenom1;
+            result.put( ix, 0, f );
         }
 
-
         // Walk through the window where xs and vs overlap
-        if (ix >= nx) return;
-        int i = indexAtOrAfter(xs.v(ix));
-        int vNextToLast = a[n-2];
-        for (; ix < nx; ix++)
+        if ( ix >= nx ) return;
+        int i = indexAtOrAfter( xs.v( ix ) );
+        int vNextToLast = a[n - 2];
+        for ( ; ix < nx; ix++ )
         {
-            int x = xs.v(ix);
-            if (x >= vNextToLast) break;
+            int x = xs.v( ix );
+            if ( x >= vNextToLast ) break;
 
-            while (a[i] < x) i++;
+            while ( a[i] < x )
+                i++;
 
             int v = a[i];
 
@@ -283,20 +280,19 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
 
             int iBefore = i - 1;
             int vBefore = a[iBefore];
-            float f = ((float) (x - vBefore)) / ((float) (v - vBefore));
-            result.put(ix, iBefore, f);
+            float f = ( ( float ) ( x - vBefore ) ) / ( ( float ) ( v - vBefore ) );
+            result.put( ix, iBefore, f );
         }
 
-
         // Zip through any xs larger than or equal to v(n-2)
-        int vLast = a[n-1];
-        float oneOverDenom2 = 1f / ((float) (vLast - vNextToLast));
-        for (; ix < nx; ix++)
+        int vLast = a[n - 1];
+        float oneOverDenom2 = 1f / ( ( float ) ( vLast - vNextToLast ) );
+        for ( ; ix < nx; ix++ )
         {
-            int x = xs.v(ix);
+            int x = xs.v( ix );
 
-            float f = ((float) (x - vNextToLast)) * oneOverDenom2;
-            result.put(ix, n-2, f);
+            float f = ( ( float ) ( x - vNextToLast ) ) * oneOverDenom2;
+            result.put( ix, n - 2, f );
         }
     }
 
@@ -304,23 +300,20 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
      * @throws RuntimeException if n is less than 2
      */
     @Override
-    public ContinuousIndexArray continuousIndicesOf(SortedInts xs)
+    public ContinuousIndexArray continuousIndicesOf( SortedInts xs )
     {
-        ContinuousIndexArray hs = new ContinuousIndexArray(xs.n());
-        continuousIndicesOf(xs, hs);
+        ContinuousIndexArray hs = new ContinuousIndexArray( xs.n( ) );
+        continuousIndicesOf( xs, hs );
         return hs;
     }
-
-
-
 
     // Mutators
 
     @Override
-    public int add(int v)
+    public int add( int v )
     {
-        int i = indexAfter(v);
-        insert(i, v);
+        int i = indexAfter( v );
+        insert( i, v );
         return i;
     }
 

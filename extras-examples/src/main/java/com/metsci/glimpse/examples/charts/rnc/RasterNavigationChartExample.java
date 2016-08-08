@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,12 +120,12 @@ public class RasterNavigationChartExample implements GlimpseLayoutProvider
 
         plot.setMinZ( 0.0 );
         plot.setMaxZ( colorTexture.getDimensionSize( 0 ) );
-        
+
         CursorTextZPainter z = new CursorTextZPainter( );
         z.setOffsetBySelectionSize( false );
         z.setTexture( dataTexture );
         plot.addPainter( z );
-        
+
         float[] xy00 = new float[2];
         float[] xy11 = new float[2];
         textureProjection.getVertexXY( 0, 0, xy00 );

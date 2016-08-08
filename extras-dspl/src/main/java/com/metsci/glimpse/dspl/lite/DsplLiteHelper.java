@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.dspl.lite;
 
-import static com.metsci.glimpse.dspl.util.DataSetFactory.*;
-import static com.metsci.glimpse.dspl.util.DsplHelper.*;
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newDataset;
+import static com.metsci.glimpse.dspl.util.DataSetFactory.newValues;
+import static com.metsci.glimpse.dspl.util.DsplHelper.linkDataset;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,15 +54,15 @@ import com.metsci.glimpse.dspl.schema.Attribute;
 import com.metsci.glimpse.dspl.schema.Concept;
 import com.metsci.glimpse.dspl.schema.ConceptInfo;
 import com.metsci.glimpse.dspl.schema.Data;
+import com.metsci.glimpse.dspl.schema.Data.File;
 import com.metsci.glimpse.dspl.schema.DataSet;
+import com.metsci.glimpse.dspl.schema.DataSet.Tables;
 import com.metsci.glimpse.dspl.schema.DataType;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.schema.SliceConceptRef;
 import com.metsci.glimpse.dspl.schema.SliceTableMapping;
 import com.metsci.glimpse.dspl.schema.Table;
 import com.metsci.glimpse.dspl.schema.Value;
-import com.metsci.glimpse.dspl.schema.Data.File;
-import com.metsci.glimpse.dspl.schema.DataSet.Tables;
 import com.metsci.glimpse.dspl.util.DsplException;
 import com.metsci.glimpse.dspl.util.DsplHelper;
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -197,8 +198,10 @@ public class DsplLiteHelper
                     // if no parent is specified, automatically assign one for certain types
                     switch ( type )
                     {
-                        case INTEGER: concept.setExtends( new QName( "http://www.google.com/publicdata/dataset/google/quantity", "amount" ) );
-                        case FLOAT: concept.setExtends( new QName( "http://www.google.com/publicdata/dataset/google/quantity", "magnitude" ) );
+                        case INTEGER:
+                            concept.setExtends( new QName( "http://www.google.com/publicdata/dataset/google/quantity", "amount" ) );
+                        case FLOAT:
+                            concept.setExtends( new QName( "http://www.google.com/publicdata/dataset/google/quantity", "magnitude" ) );
                         default: // do nothing
                     }
                 }
@@ -277,7 +280,7 @@ public class DsplLiteHelper
             String[] types = inferTypesFromData( data );
 
             // add a new Concept for each header line
-            for ( int i = 0 ; i < size ; i++ )
+            for ( int i = 0; i < size; i++ )
             {
                 String header = headers[i];
                 String type = types[i];
@@ -303,7 +306,7 @@ public class DsplLiteHelper
         int size = data.length;
         String[] types = new String[size];
 
-        for ( int i = 0 ; i < size ; i++ )
+        for ( int i = 0; i < size; i++ )
         {
             types[i] = inferTypeFromData( data[i] );
         }
@@ -313,22 +316,25 @@ public class DsplLiteHelper
 
     protected static String inferTypeFromData( String data )
     {
-        if ( data == null || data.isEmpty( ) )
-            return "string";
+        if ( data == null || data.isEmpty( ) ) return "string";
 
         try
         {
             Float.parseFloat( data );
             return "float";
         }
-        catch ( NumberFormatException e ) { }
+        catch ( NumberFormatException e )
+        {
+        }
 
         try
         {
             Integer.parseInt( data );
             return "integer";
         }
-        catch ( NumberFormatException e ) { }
+        catch ( NumberFormatException e )
+        {
+        }
 
         // can't use Boolean.parseBoolean( data ) here because
         // it interprets everything which is not "true" as false
@@ -342,7 +348,9 @@ public class DsplLiteHelper
             defaultFormatter.parseMillis( data );
             return "date";
         }
-        catch ( IllegalArgumentException e ) { }
+        catch ( IllegalArgumentException e )
+        {
+        }
 
         return "string";
     }

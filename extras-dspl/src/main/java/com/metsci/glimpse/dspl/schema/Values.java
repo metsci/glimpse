@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,15 +31,14 @@
 // Generated on: 2011.12.05 at 11:09:09 AM EST
 //
 
-
 package com.metsci.glimpse.dspl.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
-
 
 /**
  * <p>Java class for Values complex type.
@@ -58,12 +57,10 @@ import javax.xml.bind.annotation.XmlType;
  *
  *
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Values", propOrder = {
-    "value",
-    "conceptValue"
-})
-public class Values {
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "Values", propOrder = { "value", "conceptValue" } )
+public class Values
+{
 
     protected List<Value> value;
     protected com.metsci.glimpse.dspl.schema.Attribute.ConceptValue conceptValue;
@@ -90,9 +87,11 @@ public class Values {
      *
      *
      */
-    public List<Value> getValue() {
-        if (value == null) {
-            value = new ArrayList<Value>();
+    public List<Value> getValue( )
+    {
+        if ( value == null )
+        {
+            value = new ArrayList<Value>( );
         }
         return this.value;
     }
@@ -105,7 +104,8 @@ public class Values {
      *     {@link com.metsci.glimpse.dspl.schema.Attribute.ConceptValue }
      *
      */
-    public com.metsci.glimpse.dspl.schema.Attribute.ConceptValue getConceptValue() {
+    public com.metsci.glimpse.dspl.schema.Attribute.ConceptValue getConceptValue( )
+    {
         return conceptValue;
     }
 
@@ -117,15 +117,14 @@ public class Values {
      *     {@link com.metsci.glimpse.dspl.schema.Attribute.ConceptValue }
      *
      */
-    public void setConceptValue(com.metsci.glimpse.dspl.schema.Attribute.ConceptValue value) {
+    public void setConceptValue( com.metsci.glimpse.dspl.schema.Attribute.ConceptValue value )
+    {
         this.conceptValue = value;
     }
-
 
     public String getValueEnglish( )
     {
         return com.metsci.glimpse.dspl.util.DsplHelper.getValueEnglish( getValue( ) );
     }
-
 
 }

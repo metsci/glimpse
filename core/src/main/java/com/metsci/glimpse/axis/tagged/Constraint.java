@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,5 +35,6 @@ package com.metsci.glimpse.axis.tagged;
 public interface Constraint
 {
     public String getName( );
+
     public void applyConstraint( TaggedAxis1D axis );
 }

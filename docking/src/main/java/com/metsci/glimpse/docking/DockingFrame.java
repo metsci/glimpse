@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,12 @@
  */
 package com.metsci.glimpse.docking;
 
+import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
+
 import javax.swing.JFrame;
 
 public class DockingFrame extends JFrame
@@ -33,11 +39,42 @@ public class DockingFrame extends JFrame
 
     public final MultiSplitPane docker;
 
+    protected Rectangle normalBounds;
+
 
     public DockingFrame( MultiSplitPane docker )
     {
         this.docker = docker;
         setContentPane( docker );
+
+        this.normalBounds = getBounds( );
+        addWindowStateListener( new WindowStateListener( )
+        {
+            public void windowStateChanged( WindowEvent ev ) { updateNormalBounds( ); }
+        } );
+        addComponentListener( new ComponentAdapter( )
+        {
+            public void componentMoved( ComponentEvent ev ) { updateNormalBounds( ); }
+            public void componentResized( ComponentEvent ev ) { updateNormalBounds( ); }
+        } );
+    }
+
+    protected void updateNormalBounds( )
+    {
+        if ( getExtendedState( ) == NORMAL )
+        {
+            this.normalBounds = getBounds( );
+        }
+    }
+
+    public void setNormalBounds( int x, int y, int width, int height )
+    {
+        this.normalBounds = new Rectangle( x, y, width, height );
+    }
+
+    public Rectangle getNormalBounds( )
+    {
+        return new Rectangle( normalBounds );
     }
 
 }

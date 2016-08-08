@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,11 @@ public class DelegatePainter implements GlimpsePainter
         this.painters.add( painter );
     }
 
+    public void addPainter( GlimpsePainter painter, int index )
+    {
+        this.painters.add( index, painter );
+    }
+
     public void removePainter( GlimpsePainter painter )
     {
         this.painters.remove( painter );
@@ -66,6 +71,16 @@ public class DelegatePainter implements GlimpsePainter
     public void removeAll( )
     {
         this.painters.clear( );
+    }
+
+    public int getNumPainters( )
+    {
+        return painters.size( );
+    }
+
+    public int indexOf( GlimpsePainter painter )
+    {
+        return painters.indexOf( painter );
     }
 
     public boolean isVisible( )

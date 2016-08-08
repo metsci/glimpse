@@ -3,4 +3,3 @@
  * spherical or WGS 84 coordinate systems.
  */
 package com.metsci.glimpse.util.geo;
-

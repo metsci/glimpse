@@ -1,0 +1,26 @@
+textloc.txt,Text Label Location File:
+id=N,1,Row Identifier,-,:
+tjust=N,1,Text Justification,code.txt,:
+tdist=N,1,Distance from base Feature (mm),-,:
+tdir=N,2,Direction from base Feature (az degrees),-,:
+;
+1|5|0|0
+2|10|0|0
+3|3|11|250
+4|3|10|270
+5|3|11|300
+6|4|4|90
+7|1|6|45
+8|6|6|270
+9|6|0|0
+10|4|2|90
+11|1|4|90
+12|1|2|90
+13|1|3|90
+14|1|5|90
+15|1|6|90
+16|1|7|90
+17|1|8|90
+18|1|9|90
+19|1|10|90
+20|1|6|40

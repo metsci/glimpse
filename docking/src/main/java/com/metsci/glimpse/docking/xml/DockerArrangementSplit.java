@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking.xml;
 
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType( name="Split" )
+@XmlType( name = "Split" )
 public class DockerArrangementSplit extends DockerArrangementNode
 {
 

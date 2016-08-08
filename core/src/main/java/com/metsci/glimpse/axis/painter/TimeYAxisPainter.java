@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
     {
         super( new TimeAxisLabelHandler( timeZone, epoch ) );
     }
-    
+
     public TimeYAxisPainter( Epoch epoch )
     {
         super( new TimeAxisLabelHandler( epoch ) );
@@ -75,8 +75,8 @@ public class TimeYAxisPainter extends TimeAxisPainter
         super.paintTo( context, bounds, axis );
 
         if ( textRenderer == null ) return;
-        
-        GL2 gl = context.getGL( ).getGL2();
+
+        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );

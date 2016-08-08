@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.axis.tagged.shader;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.gl.shader.ShaderType.fragment;
 
 import java.io.IOException;
 import java.util.List;
@@ -129,7 +130,7 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
     public void postDisplay( GL gl )
     {
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {

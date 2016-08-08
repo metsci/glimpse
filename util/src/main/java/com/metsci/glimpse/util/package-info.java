@@ -3,4 +3,3 @@
  * indexing, unit conversions, fast data loading and math calculations.
  */
 package com.metsci.glimpse.util;
-

@@ -9,17 +9,17 @@ options
 
 @lexer::header
 {
-package com.metsci.util.graphics.gl.shader.grammar;
+package com.metsci.glimpse.gl.shader.grammar;
 }
 
 @parser::header
 {
-package com.metsci.util.graphics.gl.shader.grammar;
+package com.metsci.glimpse.gl.shader.grammar;
 
-import com.metsci.util.graphics.gl.shader.ShaderArg;
-import com.metsci.util.graphics.gl.shader.ShaderArgType;
-import com.metsci.util.graphics.gl.shader.ShaderArgInOut;
-import com.metsci.util.graphics.gl.shader.ShaderArgQualifier;
+import com.metsci.glimpse.gl.shader.ShaderArg;
+import com.metsci.glimpse.gl.shader.ShaderArgType;
+import com.metsci.glimpse.gl.shader.ShaderArgInOut;
+import com.metsci.glimpse.gl.shader.ShaderArgQualifier;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -48,6 +48,7 @@ parameter returns [ShaderArg result]
     pinout=inout? { inout = $pinout.result; }
     ptype=type { type = $ptype.result; }
     pname=identifier { name = $pname.text; }
+    (LBRACKET RBRACKET)?
     SEMI!
   {
     $result = new ShaderArg( name, type, qual, inout );
@@ -104,6 +105,8 @@ LCURLY           : '{';
 RCURLY           : '}';
 LPAREN           : '(';
 RPAREN           : ')';
+LBRACKET         : '[';
+RBRACKET         : ']';
 SEMI             : ';';
 
 ATTRIBUTE        : 'attribute';

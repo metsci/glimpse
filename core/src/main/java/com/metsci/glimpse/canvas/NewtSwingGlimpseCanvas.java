@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,7 +120,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
 
-        this.glWindow = GLWindow.create( glCapabilities );
+        this.glWindow = createGLWindow( glCapabilities );
         if ( context != null ) this.glWindow.setSharedContext( context );
         this.glWindow.addGLEventListener( createGLEventListener( ) );
 
@@ -141,7 +141,12 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
-    
+
+    protected GLWindow createGLWindow( GLCapabilities glCapabilities )
+    {
+        return GLWindow.create( glCapabilities );
+    }
+
     protected MouseWrapperNewt createMouseWrapper( )
     {
         return new MouseWrapperNewt( this );
@@ -363,14 +368,14 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         this.disposeListeners.add( runnable );
     }
-    
+
     @Override
     public void dispose( )
     {
         disposeAttached( );
         destroy( );
     }
-    
+
     @Override
     public void disposeAttached( )
     {
@@ -383,16 +388,16 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 {
                     layout.dispose( getGlimpseContext( ) );
                 }
-                
+
                 // after layouts are disposed they should not be painted
                 // so remove them from the canvas
                 removeAllLayouts( );
-                
+
                 return true;
             }
         } );
     }
-    
+
     @Override
     public void disposePainter( final GlimpsePainter painter )
     {
@@ -405,5 +410,11 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 return true;
             }
         } );
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return this.glWindow.getNativeSurfaceScale( new int[2] );
     }
 }

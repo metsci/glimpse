@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,9 @@
 // Generated on: 2011.12.06 at 04:31:59 PM EST
 //
 
-
 package com.metsci.glimpse.dspl.lite.schema;
 
 import javax.xml.bind.annotation.XmlRegistry;
-
 
 /**
  * This object contains factory methods for each
@@ -52,46 +50,51 @@ import javax.xml.bind.annotation.XmlRegistry;
  *
  */
 @XmlRegistry
-public class ObjectFactory {
-
+public class ObjectFactory
+{
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.metsci.glimpse.support.dspl.lite.schema
      *
      */
-    public ObjectFactory() {
+    public ObjectFactory( )
+    {
     }
 
     /**
      * Create an instance of {@link DsplLite }
      *
      */
-    public DsplLite createDsplLite() {
-        return new DsplLite();
+    public DsplLite createDsplLite( )
+    {
+        return new DsplLite( );
     }
 
     /**
      * Create an instance of {@link File }
      *
      */
-    public File createFile() {
-        return new File();
+    public File createFile( )
+    {
+        return new File( );
     }
 
     /**
      * Create an instance of {@link DsplLite.Columns }
      *
      */
-    public DsplLite.Columns createDsplLiteColumns() {
-        return new DsplLite.Columns();
+    public DsplLite.Columns createDsplLiteColumns( )
+    {
+        return new DsplLite.Columns( );
     }
 
     /**
      * Create an instance of {@link Column }
      *
      */
-    public Column createColumn() {
-        return new Column();
+    public Column createColumn( )
+    {
+        return new Column( );
     }
 
 }

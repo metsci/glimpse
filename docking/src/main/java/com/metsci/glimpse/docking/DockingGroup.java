@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +31,12 @@ import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
+import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.LEFT;
+import static java.awt.Frame.MAXIMIZED_HORIZ;
+import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -66,56 +69,105 @@ public class DockingGroup
 
     private static final Logger logger = Logger.getLogger( DockingGroup.class.getName( ) );
 
-
     public static enum DockingFrameCloseOperation
     {
         DO_NOTHING, DISPOSE_CLOSED_FRAME, DISPOSE_ALL_FRAMES, EXIT_JVM
     }
 
-
     public static interface DockingGroupListener
     {
         void addedView( Tile tile, View view );
+
         void removedView( Tile tile, View view );
+
         void selectedView( Tile tile, View view );
 
         void addedLeaf( MultiSplitPane docker, Component leaf );
+
         void removedLeaf( MultiSplitPane docker, Component leaf );
+
         void movedDivider( MultiSplitPane docker, SplitPane splitPane );
+
         void maximizedLeaf( MultiSplitPane docker, Component leaf );
+
         void unmaximizedLeaf( MultiSplitPane docker, Component leaf );
+
         void restoredTree( MultiSplitPane docker );
 
         void addedFrame( DockingGroup group, DockingFrame frame );
+
         void disposingAllFrames( DockingGroup group );
+
         void disposingFrame( DockingGroup group, DockingFrame frame );
+
         void disposedFrame( DockingGroup group, DockingFrame frame );
 
         void closingView( DockingGroup group, View view );
+
         void closedView( DockingGroup group, View view );
     }
 
-
     public static class DockingGroupAdapter implements DockingGroupListener
     {
-        public void addedView( Tile tile, View view ) { }
-        public void removedView( Tile tile, View view ) { }
-        public void selectedView( Tile tile, View view ) { }
+        public void addedView( Tile tile, View view )
+        {
+        }
 
-        public void addedLeaf( MultiSplitPane docker, Component leaf ) { }
-        public void removedLeaf( MultiSplitPane docker, Component leaf ) { }
-        public void movedDivider( MultiSplitPane docker, SplitPane splitPane ) { }
-        public void maximizedLeaf( MultiSplitPane docker, Component leaf ) { }
-        public void unmaximizedLeaf( MultiSplitPane docker, Component leaf ) { }
-        public void restoredTree( MultiSplitPane docker ) { }
+        public void removedView( Tile tile, View view )
+        {
+        }
 
-        public void addedFrame( DockingGroup group, DockingFrame frame ) { }
-        public void disposingAllFrames( DockingGroup group ) { }
-        public void disposingFrame( DockingGroup group, DockingFrame frame ) { }
-        public void disposedFrame( DockingGroup group, DockingFrame frame ) { }
+        public void selectedView( Tile tile, View view )
+        {
+        }
 
-        public void closingView( DockingGroup group, View view ) { }
-        public void closedView( DockingGroup group, View view ) { }
+        public void addedLeaf( MultiSplitPane docker, Component leaf )
+        {
+        }
+
+        public void removedLeaf( MultiSplitPane docker, Component leaf )
+        {
+        }
+
+        public void movedDivider( MultiSplitPane docker, SplitPane splitPane )
+        {
+        }
+
+        public void maximizedLeaf( MultiSplitPane docker, Component leaf )
+        {
+        }
+
+        public void unmaximizedLeaf( MultiSplitPane docker, Component leaf )
+        {
+        }
+
+        public void restoredTree( MultiSplitPane docker )
+        {
+        }
+
+        public void addedFrame( DockingGroup group, DockingFrame frame )
+        {
+        }
+
+        public void disposingAllFrames( DockingGroup group )
+        {
+        }
+
+        public void disposingFrame( DockingGroup group, DockingFrame frame )
+        {
+        }
+
+        public void disposedFrame( DockingGroup group, DockingFrame frame )
+        {
+        }
+
+        public void closingView( DockingGroup group, View view )
+        {
+        }
+
+        public void closedView( DockingGroup group, View view )
+        {
+        }
     }
 
     public static void pruneEmptyTileAndFrame( DockingGroup dockingGroup, Tile tile )
@@ -136,8 +188,6 @@ public class DockingGroup
         }
     }
 
-
-
     public final DockingTheme theme;
     public final DockingFrameCloseOperation frameCloseOperation;
 
@@ -147,7 +197,6 @@ public class DockingGroup
     protected final LandingIndicator landingIndicator;
 
     protected final Set<DockingGroupListener> listeners;
-
 
     public DockingGroup( DockingTheme theme, DockingFrameCloseOperation frameCloseOperation )
     {
@@ -195,7 +244,7 @@ public class DockingGroup
                     {
                         // Do nothing
                     }
-                    break;
+                        break;
 
                     case DISPOSE_CLOSED_FRAME:
                     {
@@ -230,7 +279,7 @@ public class DockingGroup
                             logger.warning( "Refusing to dispose frame, because it contains uncloseable views" );
                         }
                     }
-                    break;
+                        break;
 
                     case DISPOSE_ALL_FRAMES:
                     {
@@ -247,7 +296,7 @@ public class DockingGroup
                             frame.dispose( );
                         }
                     }
-                    break;
+                        break;
 
                     case EXIT_JVM:
                     {
@@ -266,7 +315,7 @@ public class DockingGroup
                         // XXX: Can we keep this from interrupting the dispose calls? Should we?
                         System.exit( 0 );
                     }
-                    break;
+                        break;
                 }
             }
 
@@ -415,6 +464,37 @@ public class DockingGroup
         }
     }
 
+    // update all Tiles containing a View with view.viewId to
+    // reflect the content of the provided view
+    public void updateView( View view )
+    {
+        for ( DockingFrame frame : frames )
+        {
+            for ( Tile tile : findTiles( frame.docker ) )
+            {
+                if ( tile.hasView( view ) )
+                {
+                    tile.updateView( view );
+                }
+            }
+        }
+    }
+
+    // find all Tiles in the provied MultiSplitPane
+    // helper function for {@code #updateView( View )}
+    protected static Set<Tile> findTiles( MultiSplitPane docker )
+    {
+        Set<Tile> tiles = new LinkedHashSet<>( );
+        for ( Component c : docker.leaves( ) )
+        {
+            if ( c instanceof Tile )
+            {
+                Tile tile = ( Tile ) c;
+                tiles.add( tile );
+            }
+        }
+        return tiles;
+    }
 
     // Snapshots
     //
@@ -428,8 +508,9 @@ public class DockingGroup
     {
         if ( !frames.isEmpty( ) ) throw new RuntimeException( "At least one frame already exists" );
 
-        Map<String,View> remainingViews = new LinkedHashMap<>( );
-        for ( View v : views ) remainingViews.put( v.viewId, v );
+        Map<String, View> remainingViews = new LinkedHashMap<>( );
+        for ( View v : views )
+            remainingViews.put( v.viewId, v );
 
         if ( groupArr != null )
         {
@@ -439,10 +520,12 @@ public class DockingGroup
                 if ( dockerRoot != null )
                 {
                     DockingFrame frame = addNewFrame( );
-                    frame.docker.restore( dockerRoot );
-                    frame.setLocation( frameArr.x, frameArr.y );
-                    frame.setSize( frameArr.width, frameArr.height );
+                    frame.setBounds( frameArr.x, frameArr.y, frameArr.width, frameArr.height );
+                    frame.setNormalBounds( frameArr.x, frameArr.y, frameArr.width, frameArr.height );
+                    frame.setExtendedState( getFrameExtendedState( frameArr ) );
                     frame.setVisible( true );
+
+                    frame.docker.restore( dockerRoot );
                 }
             }
         }
@@ -484,24 +567,31 @@ public class DockingGroup
         for ( DockingFrame frame : frames )
         {
             FrameArrangement frameArr = new FrameArrangement( );
+
+            Rectangle bounds = frame.getNormalBounds( );
+            frameArr.x = bounds.x;
+            frameArr.y = bounds.y;
+            frameArr.width = bounds.width;
+            frameArr.height = bounds.height;
+
+            int state = frame.getExtendedState( );
+            frameArr.isMaximizedHoriz = ( ( state & MAXIMIZED_HORIZ ) != 0 );
+            frameArr.isMaximizedVert = ( ( state & MAXIMIZED_VERT ) != 0 );
+
             frameArr.dockerArr = toDockerArrNode( frame.docker.snapshot( ) );
-            frameArr.x = frame.getX( );
-            frameArr.y = frame.getY( );
-            frameArr.width = frame.getWidth( );
-            frameArr.height = frame.getHeight( );
 
             groupArr.frameArrs.add( frameArr );
         }
         return groupArr;
     }
 
-    protected static MultiSplitPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
+    protected static MultiSplitPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String, View> remainingViews_INOUT, TileFactory tileFactory )
     {
         if ( arrNode instanceof DockerArrangementTile )
         {
             DockerArrangementTile arrTile = ( DockerArrangementTile ) arrNode;
 
-            Map<String,View> views = new LinkedHashMap<>( );
+            Map<String, View> views = new LinkedHashMap<>( );
             for ( String viewId : arrTile.viewIds )
             {
                 View view = remainingViews_INOUT.remove( viewId );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,4 +128,13 @@ public interface GlimpseCanvas extends GlimpseTarget
      * GlimpseLayouts attached to this GlimpseCanvas should generally not be disposed when this callback occurs.
      */
     public void addDisposeListener( GLRunnable runnable );
+
+    /**
+     * Returns the scale factors needed to convert the _native_ pixel coordinates to
+     * the _window_ pixel coordinates. This only really matters on displays like like
+     * Macbook Retina.
+     * 
+     * @return the scale factors as {scaleX, scaleY}
+     */
+    public int[] getSurfaceScale( );
 }

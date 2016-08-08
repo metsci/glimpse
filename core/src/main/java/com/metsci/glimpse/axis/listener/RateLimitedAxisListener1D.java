@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ public abstract class RateLimitedAxisListener1D extends RateLimitedEventDispatch
     {
         super( _idleTimeMillis );
     }
-    
+
     public abstract void axisUpdatedRateLimited( Axis1D axis );
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@ package com.metsci.glimpse.docking.xml;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType( name="Frame" )
+@XmlType( name = "Frame" )
 public class FrameArrangement
 {
 
@@ -37,8 +37,10 @@ public class FrameArrangement
     public int y = 50;
     public int width = 800;
     public int height = 600;
+    public boolean isMaximizedHoriz = false;
+    public boolean isMaximizedVert = false;
 
-    @XmlElement( name="docker" )
+    @XmlElement( name = "docker" )
     public DockerArrangementNode dockerArr = null;
 
 }

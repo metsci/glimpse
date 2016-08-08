@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,6 @@ public class DockingMouseAdapter extends MouseAdapter
     protected boolean dragging = false;
     protected View draggedView = null;
     protected int draggedViewNum = -1;
-
 
     public DockingMouseAdapter( Tile tile, DockingGroup dockingGroup, TileFactory tileFactory )
     {

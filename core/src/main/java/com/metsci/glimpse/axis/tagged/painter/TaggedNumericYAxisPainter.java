@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,23 +99,23 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
     {
         updateTextRenderer( );
         if ( textRenderer == null ) return;
-        
+
         if ( axis instanceof TaggedAxis1D )
         {
             TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
 
-            GL2 gl = context.getGL( ).getGL2();
+            GL2 gl = context.getGL( ).getGL2( );
 
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
             gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
             gl.glEnable( GL2.GL_BLEND );
-            
+
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
-            
+
             paintTicks( gl, taggedAxis, width, height );
             paintAxisLabel( gl, taggedAxis, width, height );
             paintSelectionLine( gl, taggedAxis, width, height );
@@ -123,7 +123,7 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
             gl.glMatrixMode( GL2.GL_PROJECTION );
             gl.glLoadIdentity( );
             gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-            
+
             paintTags( gl, taggedAxis, width, height );
         }
     }
@@ -143,7 +143,14 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
         int xMid = getTagPointerMaxX( width );
         int xMax = getTagMaxX( width );
 
-        GlimpseColor.glColor( gl, tagColor );
+        float[] color = tagColor;
+        Object colorValue = tag.getAttribute( Tag.TAG_COLOR_ATTR );
+        if ( colorValue != null && colorValue instanceof float[] )
+        {
+            color = ( float[] ) colorValue;
+        }
+
+        GlimpseColor.glColor( gl, color, 0.2f );
         gl.glBegin( GL2.GL_TRIANGLES );
         try
         {
@@ -169,7 +176,7 @@ public class TaggedNumericYAxisPainter extends NumericYAxisPainter
             gl.glEnd( );
         }
 
-        GlimpseColor.glColor( gl, tagColor, 1f );
+        GlimpseColor.glColor( gl, color, 1f );
         gl.glLineWidth( tagPointerOutlineWidth );
         gl.glEnable( GL2.GL_LINE_SMOOTH );
         gl.glBegin( GL2.GL_LINE_LOOP );

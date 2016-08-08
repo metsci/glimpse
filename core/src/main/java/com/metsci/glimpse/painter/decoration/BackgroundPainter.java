@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.*;
+import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.FRAME_BACKGROUND_COLOR;
+import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.PLOT_BACKGROUND_COLOR;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;

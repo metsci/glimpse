@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,222 +39,223 @@ public abstract class LongQuadTreeObjects<V> extends LongQuadTree<Collection<V>>
 {
     protected final int maxBucketSize;
 
-    public LongQuadTreeObjects(int maxBucketSize)
+    public LongQuadTreeObjects( int maxBucketSize )
     {
-        super(new ArrayList<V>());
+        super( new ArrayList<V>( ) );
         this.maxBucketSize = maxBucketSize;
     }
 
-    public abstract long x(V v);
+    public abstract long x( V v );
 
-    public abstract long y(V v);
+    public abstract long y( V v );
 
-    public Collection<V> search(long xMin, long xMax, long yMin, long yMax)
+    public Collection<V> search( long xMin, long xMax, long yMin, long yMax )
     {
-        Collection<V> results = new ArrayList<V>();
-        search(xMin, xMax, yMin, yMax, results);
+        Collection<V> results = new ArrayList<V>( );
+        search( xMin, xMax, yMin, yMax, results );
         return results;
     }
 
     /**
      * @return The number of elements appended to {@code results}.
      */
-    public int search(final long xMin, final long xMax, final long yMin, final long yMax, final Collection<V> results)
+    public int search( final long xMin, final long xMax, final long yMin, final long yMax, final Collection<V> results )
     {
-        int nBefore = results.size();
+        int nBefore = results.size( );
 
-        accumulate(xMin, xMax, yMin, yMax, new Accumulator<Collection<V>>()
+        accumulate( xMin, xMax, yMin, yMax, new Accumulator<Collection<V>>( )
         {
-            public void accumulate(Collection<V> bucket, long xMinBucket, long xMaxBucket, long yMinBucket, long yMaxBucket)
+            public void accumulate( Collection<V> bucket, long xMinBucket, long xMaxBucket, long yMinBucket, long yMaxBucket )
             {
-                boolean xAll = (xMin <= xMinBucket && xMaxBucket <= xMax);
-                boolean yAll = (yMin <= yMinBucket && yMaxBucket <= yMax);
+                boolean xAll = ( xMin <= xMinBucket && xMaxBucket <= xMax );
+                boolean yAll = ( yMin <= yMinBucket && yMaxBucket <= yMax );
 
-                if (xAll && yAll)
+                if ( xAll && yAll )
                 {
-                    results.addAll(bucket);
+                    results.addAll( bucket );
                 }
-                else if (xAll)
+                else if ( xAll )
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        long y = y(v);
-                        if (y < yMin || y > yMax) continue;
+                        long y = y( v );
+                        if ( y < yMin || y > yMax ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
-                else if (yAll)
+                else if ( yAll )
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        long x = x(v);
-                        if (x < xMin || x > xMax) continue;
+                        long x = x( v );
+                        if ( x < xMin || x > xMax ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
                 else
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        long x = x(v);
-                        if (x < xMin || x > xMax) continue;
+                        long x = x( v );
+                        if ( x < xMin || x > xMax ) continue;
 
-                        long y = y(v);
-                        if (y < yMin || y > yMax) continue;
+                        long y = y( v );
+                        if ( y < yMin || y > yMax ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
             }
-        });
+        } );
 
-        return results.size() - nBefore;
+        return results.size( ) - nBefore;
     }
 
-    public Collection<V> search(long xMin, long xMax, long yMin, long yMax, FilterObject<V> vFilter)
+    public Collection<V> search( long xMin, long xMax, long yMin, long yMax, FilterObject<V> vFilter )
     {
-        Collection<V> results = new ArrayList<V>();
-        search(xMin, xMax, yMin, yMax, vFilter, results);
+        Collection<V> results = new ArrayList<V>( );
+        search( xMin, xMax, yMin, yMax, vFilter, results );
         return results;
     }
 
     /**
      * @return The number of elements appended to {@code results}.
      */
-    public int search(final long xMin, final long xMax, final long yMin, final long yMax, final FilterObject<V> vFilter, final Collection<V> results)
+    public int search( final long xMin, final long xMax, final long yMin, final long yMax, final FilterObject<V> vFilter, final Collection<V> results )
     {
-        int nBefore = results.size();
+        int nBefore = results.size( );
 
-        accumulate(xMin, xMax, yMin, yMax, new Accumulator<Collection<V>>()
+        accumulate( xMin, xMax, yMin, yMax, new Accumulator<Collection<V>>( )
         {
-            public void accumulate(Collection<V> bucket, long xMinBucket, long xMaxBucket, long yMinBucket, long yMaxBucket)
+            public void accumulate( Collection<V> bucket, long xMinBucket, long xMaxBucket, long yMinBucket, long yMaxBucket )
             {
-                boolean xAll = (xMin <= xMinBucket && xMaxBucket <= xMax);
-                boolean yAll = (yMin <= yMinBucket && yMaxBucket <= yMax);
+                boolean xAll = ( xMin <= xMinBucket && xMaxBucket <= xMax );
+                boolean yAll = ( yMin <= yMinBucket && yMaxBucket <= yMax );
 
-                if (xAll && yAll)
+                if ( xAll && yAll )
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        if (!vFilter.include(v)) continue;
+                        if ( !vFilter.include( v ) ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
-                else if (xAll)
+                else if ( xAll )
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        if (!vFilter.include(v)) continue;
+                        if ( !vFilter.include( v ) ) continue;
 
-                        long y = y(v);
-                        if (y < yMin || y > yMax) continue;
+                        long y = y( v );
+                        if ( y < yMin || y > yMax ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
-                else if (yAll)
+                else if ( yAll )
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        if (!vFilter.include(v)) continue;
+                        if ( !vFilter.include( v ) ) continue;
 
-                        long x = x(v);
-                        if (x < xMin || x > xMax) continue;
+                        long x = x( v );
+                        if ( x < xMin || x > xMax ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
                 else
                 {
-                    for (V v : bucket)
+                    for ( V v : bucket )
                     {
-                        if (!vFilter.include(v)) continue;
+                        if ( !vFilter.include( v ) ) continue;
 
-                        long x = x(v);
-                        if (x < xMin || x > xMax) continue;
+                        long x = x( v );
+                        if ( x < xMin || x > xMax ) continue;
 
-                        long y = y(v);
-                        if (y < yMin || y > yMax) continue;
+                        long y = y( v );
+                        if ( y < yMin || y > yMax ) continue;
 
-                        results.add(v);
+                        results.add( v );
                     }
                 }
             }
-        });
+        } );
 
-        return results.size() - nBefore;
+        return results.size( ) - nBefore;
     }
 
     /**
      * If {@code x(v)} or {@code y(v)} returns {@code NaN}, this method returns
      * immediately without adding {@code v} to the tree.
      */
-    public void add(V v)
+    public void add( V v )
     {
-        long x = x(v);
-        long y = y(v);
+        long x = x( v );
+        long y = y( v );
 
-        LeafNode<Collection<V>> leaf = leaf(x, y);
+        LeafNode<Collection<V>> leaf = leaf( x, y );
         Collection<V> bucket = leaf.bucket;
 
-        bucket.add(v);
+        bucket.add( v );
 
-        if (bucket.size() > maxBucketSize) splitLeaf(leaf);
+        if ( bucket.size( ) > maxBucketSize ) splitLeaf( leaf );
     }
 
     @Override
-    protected void chooseDividers(long xMin, long xMax, long yMin, long yMax, Collection<V> bucket, long[] result)
+    protected void chooseDividers( long xMin, long xMax, long yMin, long yMax, Collection<V> bucket, long[] result )
     {
-        double oneOverSize = 1.0 / bucket.size();
+        double oneOverSize = 1.0 / bucket.size( );
         double xMean = 0;
         double yMean = 0;
-        for (V v : bucket)
+        for ( V v : bucket )
         {
-            xMean += x(v) * oneOverSize;
-            yMean += y(v) * oneOverSize;
+            xMean += x( v ) * oneOverSize;
+            yMean += y( v ) * oneOverSize;
         }
-        result[0] = (long) xMean;
-        result[1] = (long) yMean;
+        result[0] = ( long ) xMean;
+        result[1] = ( long ) yMean;
     }
 
     @Override
-    protected Collection<V>[] splitBucket(Collection<V> bucket, long xDivider, long yDivider)
+    protected Collection<V>[] splitBucket( Collection<V> bucket, long xDivider, long yDivider )
     {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings( "unchecked" )
         Collection<V>[] newBuckets = new Collection[4];
-        for (int q = 0; q < 4; q++) newBuckets[q] = new ArrayList<V>();
+        for ( int q = 0; q < 4; q++ )
+            newBuckets[q] = new ArrayList<V>( );
 
-        for (V v : bucket)
+        for ( V v : bucket )
         {
-            int q = quadrant(xDivider, yDivider, x(v), y(v));
-            newBuckets[q].add(v);
+            int q = quadrant( xDivider, yDivider, x( v ), y( v ) );
+            newBuckets[q].add( v );
         }
 
         return newBuckets;
     }
 
     @Override
-    protected int bucketSize(Collection<V> bucket)
+    protected int bucketSize( Collection<V> bucket )
     {
-        return bucket.size();
+        return bucket.size( );
     }
 
-    public void remove(V v)
+    public void remove( V v )
     {
-        long x = x(v);
-        long y = y(v);
-        leaf(x, y).bucket.remove(v);
+        long x = x( v );
+        long y = y( v );
+        leaf( x, y ).bucket.remove( v );
     }
-    
+
     public static class Event
     {
         public long start;
         public long end;
         public String id;
-        
+
         public Event( long start, long end, String id )
         {
             this.start = start;
@@ -285,14 +286,14 @@ public abstract class LongQuadTreeObjects<V> extends LongQuadTree<Collection<V>>
             else if ( !id.equals( other.id ) ) return false;
             return true;
         }
-        
+
         @Override
         public String toString( )
         {
             return id;
         }
     }
-    
+
     public static void main( String[] args )
     {
         LongQuadTreeObjects<Event> tree = new LongQuadTreeObjects<Event>( 10 )
@@ -309,9 +310,9 @@ public abstract class LongQuadTreeObjects<V> extends LongQuadTree<Collection<V>>
             {
                 return v.end;
             }
-    
+
         };
-        
+
         tree.add( new Event( 1, 2, "a" ) );
         tree.add( new Event( 1, 10, "b" ) );
         tree.add( new Event( 2, 22, "c" ) );
@@ -325,11 +326,11 @@ public abstract class LongQuadTreeObjects<V> extends LongQuadTree<Collection<V>>
         tree.add( new Event( 8, 13, "k" ) );
         tree.add( new Event( 10, 17, "l" ) );
         tree.add( new Event( 13, 22, "m" ) );
-        
+
         // find events overlapping [6,12]
         // expect: [b, c, d, e, f, g, h, i, j, k, l]
         System.out.println( tree.search( Long.MIN_VALUE, 12, 6, Long.MAX_VALUE ) );
-        
+
         // find events contained in [6,12]
         // expect: [j]
         System.out.println( tree.search( 6, 12, 6, 12 ) );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,16 +27,19 @@
 package com.metsci.glimpse.layout;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.layout.matcher.TargetStackMatcher;
 import com.metsci.glimpse.util.Pair;
 
 /**
@@ -55,6 +58,25 @@ public class GlimpseLayoutCache<D>
     public GlimpseLayoutCache( )
     {
         this.map = new HashMap<List<GlimpseTarget>, Pair<List<GlimpseBounds>, D>>( );
+    }
+
+    public int size( )
+    {
+        return map.size( );
+    }
+
+    public List<D> getValues( )
+    {
+        Collection<Pair<List<GlimpseBounds>, D>> pairs = map.values( );
+
+        List<D> values = Lists.newArrayList( );
+
+        for ( Pair<List<GlimpseBounds>, D> pair : pairs )
+        {
+            values.add( pair.second( ) );
+        }
+
+        return values;
     }
 
     public D getValue( GlimpseContext context )
@@ -138,5 +160,23 @@ public class GlimpseLayoutCache<D>
         }
 
         return true;
+    }
+
+    /**
+     * @return all keys in the cache which match the provided predicate
+     */
+    public Collection<D> getMatching( TargetStackMatcher matcher )
+    {
+        ArrayList<D> acum = Lists.newArrayList( );
+
+        for ( List<GlimpseTarget> key : map.keySet( ) )
+        {
+            if ( matcher.matches( key ) )
+            {
+                acum.add( map.get( key ).second( ) );
+            }
+        }
+
+        return acum;
     }
 }

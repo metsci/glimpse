@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     {
         this.keepLabelsForExtremaFullyVisible = keepFullyVisible;
     }
-    
+
     public void setShowTickLabels( boolean show )
     {
         this.showTickLabels = show;
@@ -200,28 +200,28 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
 
     public void setTickCalculator( AxisLabelHandler ticks )
     {
-    	this.ticks = ticks;
+        this.ticks = ticks;
     }
-    
+
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
         if ( laf == null ) return;
-        
+
         // ignore the look and feel if a font has been manually set
         if ( !fontSet )
         {
             setFont( laf.getFont( AbstractLookAndFeel.AXIS_FONT ), false );
             fontSet = false;
         }
-        
+
         if ( !labelColorSet )
         {
             setAxisLabelColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
             setTickLabelColor( laf.getColor( AbstractLookAndFeel.AXIS_TEXT_COLOR ) );
             labelColorSet = false;
         }
-        
+
         if ( !tickColorSet )
         {
             setTickColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );

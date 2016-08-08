@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 
 /**
@@ -45,25 +44,30 @@ import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
  * 
  * @author oren
  */
-public class RGBTextureProjected2D extends TextureProjected2D {
+public class RGBTextureProjected2D extends TextureProjected2D
+{
 
     public static final int BYTES_PER_PIXEL = 3;
-    
-    public RGBTextureProjected2D(BufferedImage img) {
-        this(img.getWidth(), img.getHeight(), false);
-        setData(img);
+
+    public RGBTextureProjected2D( BufferedImage img )
+    {
+        this( img.getWidth( ), img.getHeight( ), false );
+        setData( img );
     }
-    
-    public RGBTextureProjected2D(int dataSizeX, int dataSizeY) {
-        this(dataSizeX, dataSizeY, false);
+
+    public RGBTextureProjected2D( int dataSizeX, int dataSizeY )
+    {
+        this( dataSizeX, dataSizeY, false );
     }
-    
-    public RGBTextureProjected2D(int dataSizeX, int dataSizeY, boolean useVertexZCoord) {
-        super(dataSizeX, dataSizeY, useVertexZCoord);
+
+    public RGBTextureProjected2D( int dataSizeX, int dataSizeY, boolean useVertexZCoord )
+    {
+        super( dataSizeX, dataSizeY, useVertexZCoord );
     }
 
     @Override
-    protected void prepare_setData(GL2 gl) {
+    protected void prepare_setData( GL2 gl )
+    {
 
         for ( int i = 0; i < numTextures; i++ )
         {
@@ -92,17 +96,19 @@ public class RGBTextureProjected2D extends TextureProjected2D {
     }
 
     @Override
-    protected int getRequiredCapacityBytes() {
+    protected int getRequiredCapacityBytes( )
+    {
         return BYTES_PER_PIXEL * dataSizeX * dataSizeY;
     }
 
     @Override
-    protected float getData(int index) {
-        int offset = index*BYTES_PER_PIXEL;
-        byte r = data.get(offset);
-        byte g = data.get(offset+1);
-        byte b = data.get(offset+2);
-        return (r << 16) | (g << 8) | b;
+    protected float getData( int index )
+    {
+        int offset = index * BYTES_PER_PIXEL;
+        byte r = data.get( offset );
+        byte g = data.get( offset + 1 );
+        byte b = data.get( offset + 2 );
+        return ( r << 16 ) | ( g << 8 ) | b;
     }
 
     public void setData( InputStream in ) throws IOException
@@ -112,33 +118,38 @@ public class RGBTextureProjected2D extends TextureProjected2D {
 
     public void setData( final BufferedImage image )
     {
-        setData0(image);
+        setData0( image );
     }
 
-    protected void setData0( final BufferedImage image)
+    protected void setData0( final BufferedImage image )
     {
         resize( image.getWidth( ), image.getHeight( ) );
-        
-        lock.lock();
-        try {
-            data.rewind();
+
+        lock.lock( );
+        try
+        {
+            data.rewind( );
             final byte[] rgb = new byte[3];
             //Note: x and y here are in java image space, not texture space.
-            for ( int y = dataSizeY-1; y >= 0; y-- ) {
-                for ( int x = 0; x < dataSizeX; x++ ) {
-                    int argb = image.getRGB(x, y);
-                    rgb[0] = (byte) ((0x00ff0000 & argb) >> 16);
-                    rgb[1] = (byte) ((0x0000ff00 & argb) >> 8);
-                    rgb[2] = (byte) ((0x000000ff & argb));
-                    data.put(rgb);
+            for ( int y = dataSizeY - 1; y >= 0; y-- )
+            {
+                for ( int x = 0; x < dataSizeX; x++ )
+                {
+                    int argb = image.getRGB( x, y );
+                    rgb[0] = ( byte ) ( ( 0x00ff0000 & argb ) >> 16 );
+                    rgb[1] = ( byte ) ( ( 0x0000ff00 & argb ) >> 8 );
+                    rgb[2] = ( byte ) ( ( 0x000000ff & argb ) );
+                    data.put( rgb );
                 }
             }
-            makeDirty();
-        } finally {
-            lock.unlock();
+            makeDirty( );
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
-    
+
     /**
      * For modifying the byte buffer directly, pixels should be packed as RGB.
      * @param mutator
@@ -157,5 +168,5 @@ public class RGBTextureProjected2D extends TextureProjected2D {
             lock.unlock( );
         }
     }
-    
+
 }

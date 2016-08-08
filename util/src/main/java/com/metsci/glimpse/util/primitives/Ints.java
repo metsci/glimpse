@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.IntBuffer;
+
 /**
  * @author hogye
  */
@@ -35,26 +37,27 @@ public interface Ints
     /**
      * Value at index i
      */
-    int v(int i);
+    int v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, int[] dest, int iDest, int c);
+    boolean isEmpty( );
 
+    int first( );
 
-    // Convenience Methods
+    int last( );
 
-    boolean isEmpty();
+    void copyTo( int i, int[] dest, int iDest, int c );
 
-    int first();
+    void copyTo( int i, IntBuffer dest, int c );
 
-    int last();
+    void copyTo( IntBuffer dest );
 
-    int[] copyOf(int i, int c);
+    int[] copyOf( int i, int c );
 
-    int[] copyOf();
+    int[] copyOf( );
 
 }

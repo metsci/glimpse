@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ public abstract class GlimpseDataPainter1D extends GlimpsePainter1D
     {
         if ( axis == null || !bounds.isValid( ) ) return;
 
-        GL2 gl = context.getGL( ).getGL2();
+        GL2 gl = context.getGL( ).getGL2( );
         gl.glMatrixMode( GL2.GL_PROJECTION );
         gl.glLoadIdentity( );
 
@@ -66,7 +66,7 @@ public abstract class GlimpseDataPainter1D extends GlimpsePainter1D
         gl.glEnable( GL2.GL_LINE_SMOOTH );
         gl.glEnable( GL2.GL_POINT_SMOOTH );
 
-        paintTo( context.getGL( ).getGL2(), bounds, axis );
+        paintTo( context.getGL( ).getGL2( ), bounds, axis );
     }
 
 }

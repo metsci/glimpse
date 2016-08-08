@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,47 +45,47 @@ public interface SortedInts extends Ints
      *
      * @see Arrays#binarySearch(int[], int)
      */
-    int indexOf(int x);
+    int indexOf( int x );
 
     /**
      * Index of the value closest to x. If the two closest values are x-C
      * and x+C, returns the index of x+C. If ints is empty, returns -1.
      */
-    int indexNearest(int x);
+    int indexNearest( int x );
 
     /**
      * Largest index whose value is less than x
      */
-    int indexBefore(int x);
+    int indexBefore( int x );
 
     /**
      * Smallest index whose value is greater than x
      */
-    int indexAfter(int x);
+    int indexAfter( int x );
 
     /**
      * Largest index whose value is less than or equal to x
      */
-    int indexAtOrBefore(int x);
+    int indexAtOrBefore( int x );
 
     /**
      * Smallest index whose value is greater than or equal to x
      */
-    int indexAtOrAfter(int x);
+    int indexAtOrAfter( int x );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    void continuousIndexOf(int x, ContinuousIndex result);
+    void continuousIndexOf( int x, ContinuousIndex result );
 
     /**
      * The continuous index at which x falls in this sequence.
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndex
      */
-    ContinuousIndex continuousIndexOf(int x);
+    ContinuousIndex continuousIndexOf( int x );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -93,7 +93,7 @@ public interface SortedInts extends Ints
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(Ints xs, ContinuousIndexArray result);
+    void continuousIndicesOf( Ints xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -101,7 +101,7 @@ public interface SortedInts extends Ints
      *
      * @see com.metsci.tracks.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(Ints xs);
+    ContinuousIndexArray continuousIndicesOf( Ints xs );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -112,7 +112,7 @@ public interface SortedInts extends Ints
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    void continuousIndicesOf(SortedInts xs, ContinuousIndexArray result);
+    void continuousIndicesOf( SortedInts xs, ContinuousIndexArray result );
 
     /**
      * For each x in xs, the continuous index at which x falls in this
@@ -123,6 +123,6 @@ public interface SortedInts extends Ints
      *
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
-    ContinuousIndexArray continuousIndicesOf(SortedInts xs);
+    ContinuousIndexArray continuousIndicesOf( SortedInts xs );
 
 }

@@ -60,6 +60,7 @@
                             <maxmemory>2056m</maxmemory>
                             <sourcepath>${project.build.directory}/sources</sourcepath>
                             <doctitle>Glimpse Data Visualization Library</doctitle>
+                            <failOnError>false</failOnError>
                         </configuration>
                     </execution>
                 </executions>

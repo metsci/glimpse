@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@ package com.metsci.glimpse.platformFixes;
 public class PlatformFixes
 {
 
-
     public static void fixPlatformQuirks( )
     {
         // Call the platform-specific function for each platform ... only
@@ -38,7 +37,6 @@ public class PlatformFixes
         WindowsFixes.fixWindowsQuirks( );
     }
 
-
     public static void applyPlatformFixes( )
     {
         // Call the platform-specific function for each platform ... only
@@ -46,6 +44,5 @@ public class PlatformFixes
 
         WindowsFixes.applyWindowsFixes( );
     }
-
 
 }

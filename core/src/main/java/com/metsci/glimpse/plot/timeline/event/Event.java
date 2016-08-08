@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@ import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.
 import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
 import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
-import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -39,11 +38,13 @@ import java.util.List;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
+import com.metsci.glimpse.plot.timeline.event.paint.EventPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -86,13 +87,6 @@ public class Event implements Iterable<Event>
 
     protected TextRenderingMode textRenderingMode = Ellipsis;
     protected OverlapRenderingMode overlapRenderingMode = Overfull;
-
-    protected boolean isIconVisible;
-    protected boolean isTextVisible;
-    protected TimeStamp iconStartTime;
-    protected TimeStamp iconEndTime;
-    protected TimeStamp textStartTime;
-    protected TimeStamp textEndTime;
 
     protected boolean isSelectable = true;
     protected boolean isEditable = true;
@@ -156,7 +150,13 @@ public class Event implements Iterable<Event>
         @Override
         public TimeSpan applyConstraint( Event event, TimeSpan proposedTimeSpan )
         {
-            if ( !isEditable ) return event.getTimeSpan( );
+            // if the timeline is not editable, don't allow the change
+            // if the timeline is not resizable and one or both of the endpoints are fixed,
+            //    then it is effectively not editable, don't allow the change
+            if ( !isEditable || ( !isResizeable && ( !isEndTimeMoveable || !isStartTimeMoveable ) ) )
+            {
+                return event.getTimeSpan( );
+            }
 
             TimeStamp oldStart = event.getStartTime( );
             TimeStamp oldEnd = event.getEndTime( );
@@ -234,13 +234,13 @@ public class Event implements Iterable<Event>
     }
 
     /**
-     * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, int, int)
+     * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, Axis1D, int, int)
      */
-    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, int posMin, int posMax )
+    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, int posMin, int posMax )
     {
         EventPainter eventPainter = painter != null ? painter : defaultPainter;
 
-        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, posMin, posMax );
+        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, timeAxis, posMin, posMax );
     }
 
     /**
@@ -820,15 +820,6 @@ public class Event implements Iterable<Event>
     }
 
     /**
-     * @return if false, the label is not visible, either because there is no room to show it,
-     *         or {@link #isShowLabel()} is set to false.
-     */
-    public boolean isLabelVisible( )
-    {
-        return isTextVisible;
-    }
-
-    /**
      * @param showName whether to show the label text in this Event's box on the timeline.
      */
     public void setShowLabel( boolean showName )
@@ -883,15 +874,6 @@ public class Event implements Iterable<Event>
     }
 
     /**
-     * @return if false, the icon is not visible, either because there is no room to show it,
-     *         or {@link #isShowIcon()} is set to false.
-     */
-    public boolean isIconVisible( )
-    {
-        return isIconVisible;
-    }
-
-    /**
      * @param showIcon whether to show the icon associated with this event.
      */
     public void setShowIcon( boolean showIcon )
@@ -943,46 +925,6 @@ public class Event implements Iterable<Event>
     public Object getId( )
     {
         return id;
-    }
-
-    /**
-     * Returns the timestamp associated with the left hand side of the icon. Because the icon
-     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
-     * in and out. This method is intended mainly for use by display routines.
-     */
-    public TimeStamp getIconStartTime( )
-    {
-        return iconStartTime;
-    }
-
-    /**
-     * Returns the timestamp associated with the right hand side of the icon. Because the icon
-     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
-     * in and out. This method is intended mainly for use by display routines.
-     */
-    public TimeStamp getIconEndTime( )
-    {
-        return iconEndTime;
-    }
-
-    /**
-     * Returns the timestamp associated with the left hand side of the label. Because the label
-     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
-     * in and out. This method is intended mainly for use by display routines.
-     */
-    public TimeStamp getLabelStartTime( )
-    {
-        return textStartTime;
-    }
-
-    /**
-     * Returns the timestamp associated with the right hand side of the label. Because the label
-     * is drawn at a fixed pixel size, this value will change as the timeline scale is zoomed
-     * in and out. This method is intended mainly for use by display routines.
-     */
-    public TimeStamp getLabelEndTime( )
-    {
-        return textEndTime;
     }
 
     /**
@@ -1130,107 +1072,5 @@ public class Event implements Iterable<Event>
                 return o1.getEndTime( ).compareTo( o2.getEndTime( ) );
             }
         };
-    }
-
-    protected float[] getBackgroundColor( EventPlotInfo info, boolean isSelected )
-    {
-        float[] defaultColor = info.getDefaultEventBackgroundColor( );
-        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBackgroundColor( );
-
-        if ( isSelected )
-        {
-            if ( selectedColor != null )
-                return selectedColor;
-            else if ( backgroundColor != null )
-                return backgroundColor;
-            else
-                return defaultColor;
-        }
-        else
-        {
-            if ( backgroundColor != null )
-                return backgroundColor;
-            else
-                return defaultColor;
-        }
-    }
-
-    protected float[] getBorderColor( EventPlotInfo info, boolean isSelected )
-    {
-        float[] defaultColor = info.getDefaultEventBorderColor( );
-        float[] selectedColor = info.getEventSelectionHandler( ).getSelectedEventBorderColor( );
-
-        if ( isSelected )
-        {
-            if ( selectedColor != null )
-                return selectedColor;
-            else if ( borderColor != null )
-                return borderColor;
-            else
-                return defaultColor;
-        }
-        else
-        {
-            if ( borderColor != null )
-                return borderColor;
-            else
-                return defaultColor;
-        }
-    }
-
-    protected float getBorderThickness( EventPlotInfo info, boolean isSelected )
-    {
-        if ( isSelected )
-        {
-            return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
-        }
-        else
-        {
-            return borderThickness;
-        }
-    }
-
-    protected String calculateDisplayText( TextRenderer textRenderer, String fullText, double availableSpace )
-    {
-        for ( int endIndex = fullText.length( ); endIndex >= 0; endIndex-- )
-        {
-            String subText = fullText.substring( 0, endIndex ) + "...";
-            Rectangle2D bounds = textRenderer.getBounds( subText );
-            if ( bounds.getWidth( ) < availableSpace ) return subText;
-        }
-
-        return "";
-    }
-
-    protected double getTextAvailableSpace( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
-    {
-        double insideBoxSpace = remainingSpaceX - buffer;
-        double outsideBoxSpace = nextStartPixel - pixelX - buffer;
-
-        switch ( getOverlapRenderingMode( ) )
-        {
-            case Overfull:
-                return insideBoxSpace;
-            case Intersecting:
-                return outsideBoxSpace;
-            case None:
-            default:
-                return Double.MAX_VALUE;
-        }
-    }
-
-    protected boolean isTextOverfull( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
-    {
-        return bounds.getWidth( ) + buffer > remainingSpaceX && getOverlapRenderingMode( ) == Overfull;
-    }
-
-    protected boolean isTextIntersecting( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel, Rectangle2D bounds )
-    {
-        return pixelX + bounds.getWidth( ) + buffer > nextStartPixel && getOverlapRenderingMode( ) == Intersecting;
-    }
-
-    protected boolean isIconOverlapping( int size, int buffer, double remainingSpaceX, int pixelX, int nextStartPixel )
-    {
-        return ( size + buffer > remainingSpaceX && getOverlapRenderingMode( ) == Overfull ) || ( pixelX + size + buffer > nextStartPixel && getOverlapRenderingMode( ) == Intersecting );
     }
 }

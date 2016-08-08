@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.FloatBuffer;
+
 /**
  * @author hogye
  */
@@ -35,26 +37,27 @@ public interface Floats
     /**
      * Value at index i
      */
-    float v(int i);
+    float v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, float[] dest, int iDest, int c);
+    boolean isEmpty( );
 
+    float first( );
 
-    // Convenience Methods
+    float last( );
 
-    boolean isEmpty();
+    void copyTo( int i, float[] dest, int iDest, int c );
 
-    float first();
+    void copyTo( int i, FloatBuffer dest, int c );
 
-    float last();
+    void copyTo( FloatBuffer dest );
 
-    float[] copyOf(int i, int c);
+    float[] copyOf( int i, int c );
 
-    float[] copyOf();
+    float[] copyOf( );
 
 }

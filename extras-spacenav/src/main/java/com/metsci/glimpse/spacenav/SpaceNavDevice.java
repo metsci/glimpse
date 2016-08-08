@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ public class SpaceNavDevice
     public static final int NUM_BUTTONS = 2;
 
     private static final Logger logger = Logger.getLogger( SpaceNavDevice.class.getName( ) );
-    
+
     private int xAxisIdx, yAxisIdx, zAxisIdx, rxAxisIdx, ryAxisIdx, rzAxisIdx;
     private int buttonsIdx[];
 

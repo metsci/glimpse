@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,40 +39,35 @@ import java.nio.charset.CharsetEncoder;
 public class BytesArray implements BytesModifiable
 {
 
-    public static final CharsetEncoder encoder = utf8.newEncoder();
-
-
+    public static final CharsetEncoder encoder = utf8.newEncoder( );
 
     public byte[] a;
     public int n;
-
-
-
 
     // Instantiation
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public BytesArray(byte[] a)
+    public BytesArray( byte[] a )
     {
-        this(a, a.length);
+        this( a, a.length );
     }
 
-    public BytesArray(int n)
+    public BytesArray( int n )
     {
-        this(new byte[n], 0);
+        this( new byte[n], 0 );
     }
 
-    public BytesArray()
+    public BytesArray( )
     {
-        this(new byte[0], 0);
+        this( new byte[0], 0 );
     }
 
     /**
      * For efficiency, does <em>not</em> clone the array arg.
      */
-    public BytesArray(byte[] a, int n)
+    public BytesArray( byte[] a, int n )
     {
         this.a = a;
         this.n = n;
@@ -81,30 +76,27 @@ public class BytesArray implements BytesModifiable
     /**
      * Clones the sequence arg.
      */
-    public BytesArray(Bytes xs)
+    public BytesArray( Bytes xs )
     {
-        n = xs.n();
+        n = xs.n( );
         a = new byte[n];
-        xs.copyTo(0, a, 0, n);
+        xs.copyTo( 0, a, 0, n );
     }
 
-    public BytesArray(String s)
+    public BytesArray( String s )
     {
-        n = s.length();
+        n = s.length( );
         a = new byte[n];
 
-        CharBuffer s2 = CharBuffer.wrap(s, 0, n);
-        ByteBuffer a2 = ByteBuffer.wrap(a, 0, n);
-        encoder.encode(s2, a2, false);
+        CharBuffer s2 = CharBuffer.wrap( s, 0, n );
+        ByteBuffer a2 = ByteBuffer.wrap( a, 0, n );
+        encoder.encode( s2, a2, false );
     }
-
-
-
 
     // Accessors
 
     @Override
-    public byte v(int i)
+    public byte v( int i )
     {
         // Skip bounds check for speed
         //if (i >= n) throw new ArrayIndexOutOfBoundsException("Array index out of range: index = " + i + ", length = " + n);
@@ -113,82 +105,91 @@ public class BytesArray implements BytesModifiable
     }
 
     @Override
-    public int n()
+    public int n( )
     {
         return n;
     }
 
     @Override
-    public void copyTo(int i, byte[] dest, int iDest, int c)
+    public void copyTo( int i, byte[] dest, int iDest, int c )
     {
-        System.arraycopy(a, i, dest, iDest, c);
+        System.arraycopy( a, i, dest, iDest, c );
     }
 
     @Override
-    public byte[] copyOf(int i, int c)
+    public void copyTo( int i, ByteBuffer dest, int c )
+    {
+        dest.put( a, i, c );
+    }
+
+    @Override
+    public void copyTo( ByteBuffer dest )
+    {
+        dest.put( a, 0, n );
+    }
+
+    @Override
+    public byte[] copyOf( int i, int c )
     {
         byte[] copy = new byte[c];
-        System.arraycopy(a, i, copy, 0, c);
+        System.arraycopy( a, i, copy, 0, c );
         return copy;
     }
 
     @Override
-    public byte[] copyOf()
+    public byte[] copyOf( )
     {
         byte[] copy = new byte[n];
-        System.arraycopy(a, 0, copy, 0, n);
+        System.arraycopy( a, 0, copy, 0, n );
         return copy;
     }
 
     @Override
-    public String string()
+    public String string( )
     {
-        return new String(a, 0, n, utf8);
+        return new String( a, 0, n, utf8 );
     }
 
     @Override
-    public String string(int i, int c)
+    public String string( int i, int c )
     {
-        return new String(a, i, c, utf8);
+        return new String( a, i, c, utf8 );
     }
 
     @Override
-    public boolean isEmpty()
+    public boolean isEmpty( )
     {
-        return (n == 0);
+        return ( n == 0 );
     }
 
     @Override
-    public byte first()
+    public byte first( )
     {
         return a[0];
     }
 
     @Override
-    public byte last()
+    public byte last( )
     {
         return a[n - 1];
     }
 
-
-
-
     // Mutators
 
     @Override
-    public void set(int i, byte v)
+    public void set( int i, byte v )
     {
         a[i] = v;
     }
-    
+
     @Override
-    public void set(int i, byte[] vs)
+    public void set( int i, byte[] vs )
     {
         set( i, vs, 0, vs.length );
     }
-    
+
     @Override
-    public void set(int i, byte[] vs, int from, int to)
+    public void set( int i, byte[] vs, int from, int to )
     {
         int c = to - from;
         ensureCapacity( i + c );
@@ -197,70 +198,70 @@ public class BytesArray implements BytesModifiable
     }
 
     @Override
-    public void insert(int i, byte v)
+    public void insert( int i, byte v )
     {
-        prepForInsert(i, 1);
+        prepForInsert( i, 1 );
         a[i] = v;
     }
 
     @Override
-    public void insert(int i, Bytes vs)
+    public void insert( int i, Bytes vs )
     {
-        insert(i, vs, 0, vs.n());
+        insert( i, vs, 0, vs.n( ) );
     }
 
     @Override
-    public void insert(int i, Bytes vs, int from, int to)
+    public void insert( int i, Bytes vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        vs.copyTo(from, a, i, c);
+        prepForInsert( i, c );
+        vs.copyTo( from, a, i, c );
     }
 
     @Override
-    public void insert(int i, String s)
+    public void insert( int i, String s )
     {
-        insert(i, s, 0, s.length());
+        insert( i, s, 0, s.length( ) );
     }
 
     // XXX: Test me!
     @Override
-    public void insert(int i, String s, int from, int to)
+    public void insert( int i, String s, int from, int to )
     {
-        CharBuffer s2 = CharBuffer.wrap(s, from, to);
+        CharBuffer s2 = CharBuffer.wrap( s, from, to );
 
         int c = to - from;
-        prepForInsert(i, c);
-        ByteBuffer a2 = ByteBuffer.wrap(a, i, c);
+        prepForInsert( i, c );
+        ByteBuffer a2 = ByteBuffer.wrap( a, i, c );
 
-        encoder.encode(s2, a2, false);
+        encoder.encode( s2, a2, false );
     }
 
     @Override
-    public void insert(int i, byte[] vs)
+    public void insert( int i, byte[] vs )
     {
-        insert(i, vs, 0, vs.length);
+        insert( i, vs, 0, vs.length );
     }
 
     @Override
-    public void insert(int i, byte[] vs, int from, int to)
+    public void insert( int i, byte[] vs, int from, int to )
     {
         int c = to - from;
-        prepForInsert(i, c);
-        System.arraycopy(vs, from, a, i, c);
+        prepForInsert( i, c );
+        System.arraycopy( vs, from, a, i, c );
     }
 
     @Override
-    public void insert(int i, ByteBuffer vs)
+    public void insert( int i, ByteBuffer vs )
     {
-        insert(i, vs, vs.remaining());
+        insert( i, vs, vs.remaining( ) );
     }
 
     @Override
-    public void insert(int i, ByteBuffer vs, int c)
+    public void insert( int i, ByteBuffer vs, int c )
     {
-        prepForInsert(i, c);
-        vs.get(a, i, c);
+        prepForInsert( i, c );
+        vs.get( a, i, c );
     }
 
     /**
@@ -273,108 +274,105 @@ public class BytesArray implements BytesModifiable
      * @param i The index at which new values will be inserted
      * @param c The count of new values that will be inserted
      */
-    public void prepForInsert(int i, int c)
+    public void prepForInsert( int i, int c )
     {
         byte[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew;
-        if (i >= n)
+        if ( i >= n )
         {
             nNew = i + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                byte[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, n);
+                byte[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, n );
                 this.a = aNew;
             }
         }
         else
         {
             nNew = n + c;
-            if (nNew > capacity)
+            if ( nNew > capacity )
             {
-                byte[] aNew = newArray(capacity, nNew);
-                System.arraycopy(a, 0, aNew, 0, i);
-                System.arraycopy(a, i, aNew, i+c, n-i);
+                byte[] aNew = newArray( capacity, nNew );
+                System.arraycopy( a, 0, aNew, 0, i );
+                System.arraycopy( a, i, aNew, i + c, n - i );
                 this.a = aNew;
             }
             else
             {
-                System.arraycopy(a, i, a, i+c, n-i);
+                System.arraycopy( a, i, a, i + c, n - i );
             }
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void prepend(byte v)
+    public void prepend( byte v )
     {
-        prepForPrepend(1);
+        prepForPrepend( 1 );
         a[0] = v;
     }
 
     @Override
-    public void prepend(Bytes vs)
+    public void prepend( Bytes vs )
     {
-        prepend(vs, 0, vs.n());
+        prepend( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void prepend(Bytes vs, int from, int to)
+    public void prepend( Bytes vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        vs.copyTo(from, a, 0, c);
+        prepForPrepend( c );
+        vs.copyTo( from, a, 0, c );
     }
 
     @Override
-    public void prepend(String s)
+    public void prepend( String s )
     {
-        prepend(s, 0, s.length());
+        prepend( s, 0, s.length( ) );
     }
 
     @Override
-    public void prepend(String s, int from, int to)
+    public void prepend( String s, int from, int to )
     {
-        CharBuffer s2 = CharBuffer.wrap(s, from, to);
+        CharBuffer s2 = CharBuffer.wrap( s, from, to );
 
         int c = to - from;
-        prepForPrepend(c);
-        ByteBuffer a2 = ByteBuffer.wrap(a, 0, c);
+        prepForPrepend( c );
+        ByteBuffer a2 = ByteBuffer.wrap( a, 0, c );
 
-        encoder.encode(s2, a2, false);
+        encoder.encode( s2, a2, false );
     }
 
     @Override
-    public void prepend(byte[] vs)
+    public void prepend( byte[] vs )
     {
-        prepend(vs, 0, vs.length);
+        prepend( vs, 0, vs.length );
     }
 
     @Override
-    public void prepend(byte[] vs, int from, int to)
+    public void prepend( byte[] vs, int from, int to )
     {
         int c = to - from;
-        prepForPrepend(c);
-        System.arraycopy(vs, from, a, 0, c);
+        prepForPrepend( c );
+        System.arraycopy( vs, from, a, 0, c );
     }
 
     @Override
-    public void prepend(ByteBuffer vs)
+    public void prepend( ByteBuffer vs )
     {
-        prepend(vs, vs.remaining());
+        prepend( vs, vs.remaining( ) );
     }
 
     @Override
-    public void prepend(ByteBuffer vs, int c)
+    public void prepend( ByteBuffer vs, int c )
     {
-        prepForPrepend(c);
-        vs.get(a, 0, c);
+        prepForPrepend( c );
+        vs.get( a, 0, c );
     }
 
     /**
@@ -386,93 +384,90 @@ public class BytesArray implements BytesModifiable
      *
      * @param c The count of new values that will be inserted
      */
-    public void prepForPrepend(int c)
+    public void prepForPrepend( int c )
     {
         byte[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            byte[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, c, n);
+            byte[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, c, n );
             this.a = aNew;
         }
         else
         {
-            System.arraycopy(a, 0, a, c, n);
+            System.arraycopy( a, 0, a, c, n );
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void append(byte v)
+    public void append( byte v )
     {
-        prepForAppend(1);
-        a[n-1] = v;
+        prepForAppend( 1 );
+        a[n - 1] = v;
     }
 
     @Override
-    public void append(Bytes vs)
+    public void append( Bytes vs )
     {
-        append(vs, 0, vs.n());
+        append( vs, 0, vs.n( ) );
     }
 
     @Override
-    public void append(Bytes vs, int from, int to)
+    public void append( Bytes vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        vs.copyTo(from, a, n-c, c);
+        prepForAppend( c );
+        vs.copyTo( from, a, n - c, c );
     }
 
     @Override
-    public void append(String s)
+    public void append( String s )
     {
-        append(s, 0, s.length());
+        append( s, 0, s.length( ) );
     }
 
     @Override
-    public void append(String s, int from, int to)
+    public void append( String s, int from, int to )
     {
-        CharBuffer s2 = CharBuffer.wrap(s, from, to);
+        CharBuffer s2 = CharBuffer.wrap( s, from, to );
 
         int c = to - from;
-        prepForAppend(c);
-        ByteBuffer a2 = ByteBuffer.wrap(a, n-c, c);
+        prepForAppend( c );
+        ByteBuffer a2 = ByteBuffer.wrap( a, n - c, c );
 
-        encoder.encode(s2, a2, false);
+        encoder.encode( s2, a2, false );
     }
 
     @Override
-    public void append(byte[] vs)
+    public void append( byte[] vs )
     {
-        append(vs, 0, vs.length);
+        append( vs, 0, vs.length );
     }
 
     @Override
-    public void append(byte[] vs, int from, int to)
+    public void append( byte[] vs, int from, int to )
     {
         int c = to - from;
-        prepForAppend(c);
-        System.arraycopy(vs, from, a, n-c, c);
+        prepForAppend( c );
+        System.arraycopy( vs, from, a, n - c, c );
     }
 
     @Override
-    public void append(ByteBuffer vs)
+    public void append( ByteBuffer vs )
     {
-        append(vs, vs.remaining());
+        append( vs, vs.remaining( ) );
     }
 
     @Override
-    public void append(ByteBuffer vs, int c)
+    public void append( ByteBuffer vs, int c )
     {
-        prepForAppend(c);
-        vs.get(a, n-c, c);
+        prepForAppend( c );
+        vs.get( a, n - c, c );
     }
 
     /**
@@ -484,33 +479,30 @@ public class BytesArray implements BytesModifiable
      *
      * @param c The count of new values that will be appended
      */
-    public void prepForAppend(int c)
+    public void prepForAppend( int c )
     {
         byte[] a = this.a;
         int capacity = a.length;
         int n = this.n;
 
         int nNew = n + c;
-        if (nNew > capacity)
+        if ( nNew > capacity )
         {
-            byte[] aNew = newArray(capacity, nNew);
-            System.arraycopy(a, 0, aNew, 0, n);
+            byte[] aNew = newArray( capacity, nNew );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
         this.n = nNew;
     }
 
-
-
-
     @Override
-    public void remove(byte v)
+    public void remove( byte v )
     {
-        for (int i = 0; i < n; i++)
+        for ( int i = 0; i < n; i++ )
         {
-            if (a[i] == v)
+            if ( a[i] == v )
             {
-                System.arraycopy(a, i+1, a, i, n-(i+1));
+                System.arraycopy( a, i + 1, a, i, n - ( i + 1 ) );
                 n--;
                 return;
             }
@@ -520,15 +512,15 @@ public class BytesArray implements BytesModifiable
     @Override
     public void removeRange( int from, int to )
     {
-        int length = n-to;
+        int length = n - to;
         System.arraycopy( a, to, a, from, length );
-        n -= to-from;
+        n -= to - from;
     }
-    
+
     @Override
     public void removeIndex( int index )
     {
-        removeRange( index, index+1 );
+        removeRange( index, index + 1 );
     }
 
     @Override
@@ -537,37 +529,33 @@ public class BytesArray implements BytesModifiable
         n = 0;
     }
 
-
     @Override
-    public void ensureCapacity(int minCapacity)
+    public void ensureCapacity( int minCapacity )
     {
         int capacity = a.length;
-        if (minCapacity > capacity)
+        if ( minCapacity > capacity )
         {
-            byte[] aNew = newArray(capacity, minCapacity);
-            System.arraycopy(a, 0, aNew, 0, n);
+            byte[] aNew = newArray( capacity, minCapacity );
+            System.arraycopy( a, 0, aNew, 0, n );
             this.a = aNew;
         }
     }
 
     @Override
-    public void compact()
+    public void compact( )
     {
         byte[] compact = new byte[n];
-        System.arraycopy(a, 0, compact, 0, n);
+        System.arraycopy( a, 0, compact, 0, n );
         a = compact;
     }
-
-
-
 
     /**
      * Creates a new array whose capacity is at least minNewCapacity, and at least
      * 1.618 * oldCapacity, up to Integer.MAX_VALUE.
      */
-    public static byte[] newArray(int oldCapacity, int minNewCapacity)
+    public static byte[] newArray( int oldCapacity, int minNewCapacity )
     {
-        int newCapacity = (int) max(minNewCapacity, min(Integer.MAX_VALUE, (106039L * oldCapacity) >>> 16));
+        int newCapacity = ( int ) max( minNewCapacity, min( Integer.MAX_VALUE, ( 106039L * oldCapacity ) >>> 16 ) );
         return new byte[newCapacity];
     }
 

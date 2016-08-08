@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.util.Pair;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
-
 /**
  * An axis factory which acts as a different AxisFactory depending on what
  * context (defined by a GlimpseTargetStack) it is used under.
@@ -45,14 +43,14 @@ import static com.metsci.glimpse.context.TargetStackUtil.*;
  * @see com.metsci.glimpse.context.GlimpseTargetStack
  *
  */
-public class ConditionalAxisFactory2D implements AxisFactory2D
+public abstract class ConditionalAxisFactory2D implements AxisFactory2D
 {
-    protected List<Pair<GlimpseTargetStack,AxisFactory2D>> delegateList;
+    protected List<Pair<GlimpseTargetStack, AxisFactory2D>> delegateList;
     protected AxisFactory2D defaultFactory;
 
     public ConditionalAxisFactory2D( )
     {
-        delegateList = new ArrayList<Pair<GlimpseTargetStack,AxisFactory2D>>( );
+        delegateList = new ArrayList<Pair<GlimpseTargetStack, AxisFactory2D>>( );
         defaultFactory = new DefaultAxisFactory2D( );
     }
 
@@ -65,7 +63,7 @@ public class ConditionalAxisFactory2D implements AxisFactory2D
 
     public void addFactory( GlimpseTargetStack stack, AxisFactory2D factory )
     {
-        delegateList.add( new Pair<GlimpseTargetStack,AxisFactory2D>( stack, factory ) );
+        delegateList.add( new Pair<GlimpseTargetStack, AxisFactory2D>( stack, factory ) );
     }
 
     @Override
@@ -88,12 +86,12 @@ public class ConditionalAxisFactory2D implements AxisFactory2D
 
     protected AxisFactory2D getAxisFactory( GlimpseTargetStack stack )
     {
-        for ( Pair<GlimpseTargetStack,AxisFactory2D> pair : delegateList )
+        for ( Pair<GlimpseTargetStack, AxisFactory2D> pair : delegateList )
         {
             GlimpseTargetStack candidateStack = pair.first( );
             AxisFactory2D candidateFactory = pair.second( );
 
-            if ( endsWith( stack, candidateStack ) )
+            if ( isConditionMet( stack, candidateStack ) )
             {
                 return candidateFactory;
             }
@@ -101,5 +99,7 @@ public class ConditionalAxisFactory2D implements AxisFactory2D
 
         return defaultFactory;
     }
+
+    protected abstract boolean isConditionMet( GlimpseTargetStack stack, GlimpseTargetStack candidate );
 
 }

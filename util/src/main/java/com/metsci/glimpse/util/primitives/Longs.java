@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.primitives;
 
+import java.nio.LongBuffer;
+
 /**
  * @author hogye
  */
@@ -35,26 +37,27 @@ public interface Longs
     /**
      * Value at index i
      */
-    long v(int i);
+    long v( int i );
 
     /**
      * Length of the sequence
      */
-    int n();
+    int n( );
 
-    void copyTo(int i, long[] dest, int iDest, int c);
+    boolean isEmpty( );
 
+    long first( );
 
-    // Convenience Methods
+    long last( );
 
-    boolean isEmpty();
+    void copyTo( int i, long[] dest, int iDest, int c );
 
-    long first();
+    void copyTo( int i, LongBuffer dest, int c );
 
-    long last();
+    void copyTo( LongBuffer dest );
 
-    long[] copyOf(int i, int c);
+    long[] copyOf( int i, int c );
 
-    long[] copyOf();
+    long[] copyOf( );
 
 }

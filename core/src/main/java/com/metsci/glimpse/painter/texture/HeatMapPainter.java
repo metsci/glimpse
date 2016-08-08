@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.metsci.glimpse.painter.texture;
+
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -60,7 +62,7 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         catch ( IOException e )
         {
-            logger.warning( "Unable to load HeatMapPainter shader." );
+            logWarning( logger, "Unable to load HeatMapPainter shader.", e );
         }
     }
 
@@ -68,6 +70,19 @@ public class HeatMapPainter extends ShadedTexturePainter
     {
         this.program = new SampledColorScaleShader( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
         this.setShaderProgram( this.program );
+    }
+
+    public void setDiscardNaN( boolean discard )
+    {
+        lock.lock( );
+        try
+        {
+            ( ( SampledColorScaleShader ) this.fragShader ).setDiscardNaN( discard );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
     }
 
     public void setAlpha( float alpha )

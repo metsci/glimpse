@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,14 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static java.awt.BasicStroke.*;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.BorderLayout.NORTH;
-import static java.lang.Math.max;
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createMatteBorder;
-import static javax.swing.SwingConstants.LEFT;
+import static java.lang.Math.*;
+import static javax.swing.BorderFactory.*;
+import static javax.swing.SwingConstants.*;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -62,6 +58,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.JLabel;
@@ -76,13 +73,10 @@ import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 public class TileImpl extends Tile
 {
 
-
     public static interface TabComponentFactory
     {
         Component createComponent( Tile tile, View view );
     }
-
-
 
     protected class CustomTab extends JPanel
     {
@@ -171,7 +165,6 @@ public class TileImpl extends Tile
             int wBox = ( rightmost ? getWidth( ) : getWidth( ) + lineThickness );
             int hBox = getHeight( );
 
-
             // Fill
             if ( selected )
             {
@@ -179,58 +172,52 @@ public class TileImpl extends Tile
                 Color topColor = ( viewNum == selectedViewNum ? highlightColor : bottomColor );
                 g.setPaint( new GradientPaint( 0, 0, topColor, 0, getHeight( ) - 1, bottomColor ) );
 
-                g.fillRoundRect( lineThickness/2, lineThickness/2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
+                g.fillRoundRect( lineThickness / 2, lineThickness / 2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
             }
-
 
             // Edge lines
             g.setPaint( lineColor );
             g.setStroke( new BasicStroke( lineThickness ) );
 
-
             // Top edge
             if ( leftmost )
             {
-                g.drawLine( cornerRadius, lineThickness/2, wBox - 1, lineThickness/2 );
+                g.drawLine( cornerRadius, lineThickness / 2, wBox - 1, lineThickness / 2 );
             }
             else
             {
-                g.drawLine( 0, lineThickness/2, wBox - 1, lineThickness/2 );
+                g.drawLine( 0, lineThickness / 2, wBox - 1, lineThickness / 2 );
             }
-
 
             // Side edges
             if ( selected )
             {
-                g.drawRoundRect( lineThickness/2, lineThickness/2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( lineThickness / 2, lineThickness / 2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
             }
             else
             {
                 // Left edge
                 if ( leftmost )
                 {
-                    g.drawRoundRect( lineThickness/2, lineThickness/2, wBox + cornerRadius, hBox + cornerRadius, cornerRadius, cornerRadius );
+                    g.drawRoundRect( lineThickness / 2, lineThickness / 2, wBox + cornerRadius, hBox + cornerRadius, cornerRadius, cornerRadius );
                 }
                 else if ( viewNum == selectedViewNum + 1 )
                 {
-                    g.drawRoundRect( lineThickness/2 - ( wBox - lineThickness ), lineThickness/2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
+                    g.drawRoundRect( lineThickness / 2 - ( wBox - lineThickness ), lineThickness / 2, wBox - lineThickness, hBox + cornerRadius, cornerRadius, cornerRadius );
                 }
                 else
                 {
-                    g.drawLine( lineThickness/2, 0, lineThickness/2, hBox - 1 );
+                    g.drawLine( lineThickness / 2, 0, lineThickness / 2, hBox - 1 );
                 }
 
                 // Right edge
                 if ( rightmost )
                 {
-                    g.drawLine( wBox - 1 - lineThickness/2, 0, wBox - 1 - lineThickness/2, hBox - 1 );
+                    g.drawLine( wBox - 1 - lineThickness / 2, 0, wBox - 1 - lineThickness / 2, hBox - 1 );
                 }
             }
         }
     }
-
-
-
 
     protected final DockingTheme theme;
     protected final TabComponentFactory tabCornerComponentFactory;
@@ -252,12 +239,11 @@ public class TileImpl extends Tile
 
     protected final List<MouseAdapter> dockingMouseAdapters;
 
-    protected final Map<String,ViewEntry> viewMap;
+    protected final Map<String, ViewEntry> viewMap;
     protected final List<View> views;
     protected View selectedView;
 
     protected final Set<TileListener> listeners;
-
 
     public TileImpl( DockingTheme theme, TabComponentFactory tabCornerComponentFactory, Component[] tileCornerComponents )
     {
@@ -275,25 +261,25 @@ public class TileImpl extends Tile
         this.overflowBar = newToolbar( true );
         this.overflowPopupButton = new JToggleButton( "\u00BB" );
         this.overflowPopup = newButtonPopup( overflowPopupButton );
-        overflowBar.add( overflowPopupButton );
+        this.overflowBar.add( overflowPopupButton );
 
         this.cornerBar = newToolbar( true );
-        for ( Component c : tileCornerComponents ) cornerBar.add( c );
+        for ( Component c : tileCornerComponents )
+        {
+            cornerBar.add( c );
+        }
 
         this.viewBarHolder = new JPanel( new GridLayout( 1, 1 ) );
 
         this.cardLayout = new CardLayout( );
         this.cardPanel = new JPanel( cardLayout );
-        cardPanel.setBorder( createCompoundBorder( createMatteBorder( 0, lineThickness, lineThickness, lineThickness, lineColor ),
-                                                   createEmptyBorder( cardPadding, cardPadding, cardPadding, cardPadding ) ) );
+        cardPanel.setBorder( createCompoundBorder( createMatteBorder( 0, lineThickness, lineThickness, lineThickness, lineColor ), createEmptyBorder( cardPadding, cardPadding, cardPadding, cardPadding ) ) );
 
         this.dockingMouseAdapters = new ArrayList<>( );
-
 
         this.viewMap = new HashMap<>( );
         this.views = new ArrayList<>( );
         this.selectedView = null;
-
 
         this.topBar = new JPanel( )
         {
@@ -307,7 +293,7 @@ public class TileImpl extends Tile
 
                 g.setColor( lineColor );
                 g.setStroke( new BasicStroke( lineThickness, CAP_BUTT, JOIN_MITER ) );
-                g.drawRoundRect( lineThickness/2, lineThickness/2, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
+                g.drawRoundRect( lineThickness / 2, lineThickness / 2, getWidth( ) - lineThickness, getHeight( ) + cornerRadius, cornerRadius, cornerRadius );
 
                 for ( View view : views )
                 {
@@ -318,11 +304,11 @@ public class TileImpl extends Tile
                         // CAP_BUTT behaves differently when line-width is 1
                         int wExtra = ( lineThickness > 1 ? lineThickness : 0 );
 
-                        g.drawLine( tab.getX( ), getHeight( ) - 1 - lineThickness/2, tab.getX( ) + tab.getWidth( ) + wExtra, getHeight( ) - 1 - lineThickness/2 );
+                        g.drawLine( tab.getX( ), getHeight( ) - 1 - lineThickness / 2, tab.getX( ) + tab.getWidth( ) + wExtra, getHeight( ) - 1 - lineThickness / 2 );
                     }
                 }
 
-                g.drawLine( tabBar.getWidth( ) - lineThickness, getHeight( ) - 1 - lineThickness/2, getWidth( ) - 1, getHeight( ) - 1 - lineThickness/2 );
+                g.drawLine( tabBar.getWidth( ) - lineThickness, getHeight( ) - 1 - lineThickness / 2, getWidth( ) - 1, getHeight( ) - 1 - lineThickness / 2 );
 
                 g.setStroke( origStroke );
             }
@@ -350,7 +336,6 @@ public class TileImpl extends Tile
                     viewEntry.tab.setVisible( true );
                 }
                 overflowBar.setVisible( false );
-
 
                 boolean needsOverflow = false;
                 while ( true )
@@ -381,7 +366,6 @@ public class TileImpl extends Tile
                     needsOverflow = true;
                 }
 
-
                 int y = 0;
                 int hTotal = topBar.getHeight( ) - lineThickness;
 
@@ -399,10 +383,9 @@ public class TileImpl extends Tile
                 int xCornerBar = wTotal - wCornerBar;
                 cornerBar.setBounds( xCornerBar, y + lineThickness, wCornerBar, hTotal - lineThickness );
 
-
                 viewBarHolder.removeAll( );
 
-                if ( selectedView == null || selectedView.toolbar == null )
+                if ( selectedView == null || selectedView.toolbar == null || !viewMap.containsKey( selectedView.viewId ) )
                 {
                     viewBarHolder.setVisible( false );
                 }
@@ -431,10 +414,12 @@ public class TileImpl extends Tile
             }
 
             public void addLayoutComponent( String name, Component comp )
-            { }
+            {
+            }
 
             public void removeLayoutComponent( Component comp )
-            { }
+            {
+            }
 
             public Dimension preferredLayoutSize( Container parent )
             {
@@ -456,7 +441,6 @@ public class TileImpl extends Tile
                 return new Dimension( wBars, hBars );
             }
         } );
-
 
         setLayout( new BorderLayout( ) );
         add( topBar, NORTH );
@@ -507,7 +491,7 @@ public class TileImpl extends Tile
         {
             public void mousePressed( MouseEvent ev )
             {
-                selectView( view );
+                selectViewById( view.viewId );
             }
         } );
         for ( MouseAdapter mouseAdapter : dockingMouseAdapters )
@@ -522,7 +506,7 @@ public class TileImpl extends Tile
         {
             public void actionPerformed( ActionEvent ev )
             {
-                selectView( view );
+                selectViewById( view.viewId );
             }
         } );
         overflowPopup.add( overflowMenuItem );
@@ -538,6 +522,46 @@ public class TileImpl extends Tile
         if ( selectedView == null )
         {
             selectView( view );
+        }
+    }
+
+    @Override
+    public void updateView( View view )
+    {
+        int index = views.indexOf( view );
+        ViewEntry entry = viewMap.get( view.viewId );
+
+        if ( entry == null || index < 0 )
+        {
+            throw new IllegalArgumentException( String.format( "View %s does not exist. addView( ) must be called prior to updateView( ).", view.viewId ) );
+        }
+
+        // only replace the component if it has changed (avoids flicker under some circumstances)
+        if ( view.component != entry.view.component )
+        {
+            entry.card.remove( entry.view.component );
+            entry.card.add( view.component, BorderLayout.CENTER );
+        }
+
+        entry.tab.label.setText( view.title );
+        entry.tab.label.setIcon( view.icon );
+        entry.tab.setToolTipText( view.tooltip );
+        entry.overflowMenuItem.setText( view.title );
+        entry.overflowMenuItem.setIcon( view.icon );
+        entry.overflowMenuItem.setToolTipText( view.tooltip );
+
+        views.set( index, view );
+        viewMap.put( view.viewId, new ViewEntry( view, entry.card, entry.tab, entry.overflowMenuItem ) );
+
+        // if the view being updated is the selectedView:
+        // 1) set selectedView to point to the new view
+        // 2) update the toolbar, which may have changed
+        if ( Objects.equals( selectedView, view ) )
+        {
+            selectedView = view;
+
+            topBar.doLayout( );
+            topBar.repaint( );
         }
     }
 
@@ -577,12 +601,17 @@ public class TileImpl extends Tile
         return ( view != null && viewMap.containsKey( view.viewId ) );
     }
 
+    protected void selectViewById( String viewId )
+    {
+        selectView( viewMap.get( viewId ).view );
+    }
+
     @Override
     public void selectView( View view )
     {
         if ( view == selectedView ) return;
 
-        if ( selectedView != null )
+        if ( selectedView != null && viewMap.containsKey( selectedView.viewId ) )
         {
             ViewEntry viewEntry = viewMap.get( selectedView.viewId );
             viewEntry.tab.setSelected( false );
@@ -702,8 +731,6 @@ public class TileImpl extends Tile
         return viewMap.get( views.get( viewNum ).viewId );
     }
 
-
-
     protected static class ViewEntry
     {
         public final View view;
@@ -719,5 +746,4 @@ public class TileImpl extends Tile
             this.overflowMenuItem = overflowMenuItem;
         }
     }
-
 }

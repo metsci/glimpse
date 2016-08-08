@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ public class GlimpseMouseWrapper
 
         if ( event.data instanceof GlimpseTargetStack )
         {
-            stack = (GlimpseTargetStack) event.data;
+            stack = ( GlimpseTargetStack ) event.data;
         }
 
         return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, 0, clickCount );
@@ -69,7 +69,7 @@ public class GlimpseMouseWrapper
         // three clicks on most platforms, this brings it in line with Swing
         // mouse wheel reporting. It also flips the sign
         // (extra logic avoids rounding signed 1 or 2 to 0)
-        double c = - event.count / 3.0;
+        double c = -event.count / 3.0;
         int clickCount = ( int ) ( c < 0 ? Math.floor( c ) : Math.ceil( c ) );
         EnumSet<MouseButton> buttons = getMouseButtons( event );
         EnumSet<ModifierKey> modifiers = getModifierKeys( event );
@@ -78,7 +78,7 @@ public class GlimpseMouseWrapper
 
         if ( event.data instanceof GlimpseTargetStack )
         {
-            stack = (GlimpseTargetStack) event.data;
+            stack = ( GlimpseTargetStack ) event.data;
         }
 
         return new GlimpseMouseEvent( stack, modifiers, buttons, x, y, clickCount, 0 );
@@ -92,12 +92,20 @@ public class GlimpseMouseWrapper
         // than it reports the buttons held down during a move or drag.
         // However, GlimpseMouseEvent treats these two cases the same.
 
-        switch( event.button )
+        switch ( event.button )
         {
-            case 1: buttons = EnumSet.of( MouseButton.Button1 ); break;
-            case 2: buttons = EnumSet.of( MouseButton.Button2 ); break;
-            case 3: buttons = EnumSet.of( MouseButton.Button3 ); break;
-            default: buttons = EnumSet.noneOf( MouseButton.class ); break;
+            case 1:
+                buttons = EnumSet.of( MouseButton.Button1 );
+                break;
+            case 2:
+                buttons = EnumSet.of( MouseButton.Button2 );
+                break;
+            case 3:
+                buttons = EnumSet.of( MouseButton.Button3 );
+                break;
+            default:
+                buttons = EnumSet.noneOf( MouseButton.class );
+                break;
         }
 
         if ( ( event.stateMask & SWT.BUTTON1 ) != 0 ) buttons.add( MouseButton.Button1 );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,16 @@ public class ContinuousIndex
     public int i;
     public float f;
 
-    public ContinuousIndex()
-    { }
-
-    public ContinuousIndex(int i, float f)
+    public ContinuousIndex( )
     {
-        set(i, f);
     }
 
-    public void set(int i, float f)
+    public ContinuousIndex( int i, float f )
+    {
+        set( i, f );
+    }
+
+    public void set( int i, float f )
     {
         this.i = i;
         this.f = f;

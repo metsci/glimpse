@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ public class FastAsin extends FastFunc
 {
     private static final FastAsin _instance = new FastAsin( ( float ) -1.0, ( float ) 1.0, 100 );
 
-    public static FastAsin getInstance()
+    public static FastAsin getInstance( )
     {
         return _instance;
     }

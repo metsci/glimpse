@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,14 @@ public class GlimpseContextImpl implements GlimpseContext
     private GLContext glContext;
     private GlimpseTargetStack targetStack;
     private int dpi;
+    private final int[] scale;
 
-    public GlimpseContextImpl( GLContext context )
+    public GlimpseContextImpl( GLContext context, int[] scale )
     {
         this.glContext = context;
         this.targetStack = new GlimpseTargetStackImpl( );
         this.dpi = defaultDpiValue; //TODO fix this
+        this.scale = scale;
     }
 
     public GlimpseContextImpl( GlimpseCanvas canvas )
@@ -52,6 +54,7 @@ public class GlimpseContextImpl implements GlimpseContext
         this.glContext = canvas.getGLContext( );
         this.targetStack = new GlimpseTargetStackImpl( canvas );
         this.dpi = defaultDpiValue; //TODO fix this
+        this.scale = canvas.getSurfaceScale( );
     }
 
     @Override
@@ -82,5 +85,11 @@ public class GlimpseContextImpl implements GlimpseContext
     public String toString( )
     {
         return String.format( "[stack: %s dpi: %d]", targetStack, dpi );
+    }
+
+    @Override
+    public int[] getSurfaceScale( )
+    {
+        return scale;
     }
 }

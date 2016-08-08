@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,28 +51,47 @@ public class MultiSplitPane extends JPanel
     public static interface MultiSplitPaneListener
     {
         void addedLeaf( Component leaf );
+
         void removedLeaf( Component leaf );
+
         void movedDivider( SplitPane splitPane );
+
         void maximizedLeaf( Component leaf );
+
         void unmaximizedLeaf( Component leaf );
+
         void restoredTree( );
     }
 
-
     public static class MultiSplitPaneAdapter implements MultiSplitPaneListener
     {
-        public void addedLeaf( Component leaf ) { }
-        public void removedLeaf( Component leaf ) { }
-        public void movedDivider( SplitPane splitPane ) { }
-        public void maximizedLeaf( Component leaf ) { }
-        public void unmaximizedLeaf( Component leaf ) { }
-        public void restoredTree( ) { }
-    }
+        public void addedLeaf( Component leaf )
+        {
+        }
 
+        public void removedLeaf( Component leaf )
+        {
+        }
+
+        public void movedDivider( SplitPane splitPane )
+        {
+        }
+
+        public void maximizedLeaf( Component leaf )
+        {
+        }
+
+        public void unmaximizedLeaf( Component leaf )
+        {
+        }
+
+        public void restoredTree( )
+        {
+        }
+    }
 
     protected static final String MAXIMIZED_LEAF_CARD = "maximizedLeaf";
     protected static final String ALL_LEAVES_CARD = "allLeaves";
-
 
     protected final CardLayout layout;
     protected final JPanel maximizedLeafCard;
@@ -88,12 +107,11 @@ public class MultiSplitPane extends JPanel
 
     protected final Set<MultiSplitPaneListener> listeners;
 
-
     public MultiSplitPane( int gapSize )
     {
         this.layout = new CardLayout( );
         setLayout( layout );
-        setBorder( createEmptyBorder( gapSize/2 ) );
+        setBorder( createEmptyBorder( gapSize / 2 ) );
 
         this.maximizedLeafCard = new JPanel( new BorderLayout( ) );
         add( maximizedLeafCard, MAXIMIZED_LEAF_CARD );
@@ -388,10 +406,8 @@ public class MultiSplitPane extends JPanel
         }
     }
 
-
     // Snapshots
     //
-
 
     protected void attachSplitPaneListeners( Component c )
     {
@@ -413,7 +429,6 @@ public class MultiSplitPane extends JPanel
             attachSplitPaneListeners( splitPane.getChildB( ) );
         }
     }
-
 
     public void restore( Node rootNode )
     {
@@ -554,7 +569,8 @@ public class MultiSplitPane extends JPanel
     }
 
     public static abstract class Node
-    { }
+    {
+    }
 
     public static class Split extends Node
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,8 @@ import com.metsci.glimpse.util.StringUtils;
  *
  * @author UNKNOWN
  */
-public class LinearInterpolator {
+public class LinearInterpolator
+{
     private Point2D[] _points;
 
     /**
@@ -45,69 +46,87 @@ public class LinearInterpolator {
      *                  be in increasing values of x but must have distinct x
      *                  values.
      */
-    public LinearInterpolator(Point2D[] points) {
+    public LinearInterpolator( Point2D[] points )
+    {
         _points = points;
         // Order points based on their x value.
-        Comparator<Point2D> comparator = new Comparator<Point2D>() {
-            public int compare(Point2D p1, Point2D p2) {
-                double x1 = p1.getX();
-                double x2 = p2.getX();
+        Comparator<Point2D> comparator = new Comparator<Point2D>( )
+        {
+            public int compare( Point2D p1, Point2D p2 )
+            {
+                double x1 = p1.getX( );
+                double x2 = p2.getX( );
 
-                if (x1 < x2) {
+                if ( x1 < x2 )
+                {
                     return -1;
-                } else if (x1 > x2) {
+                }
+                else if ( x1 > x2 )
+                {
                     return 1;
-                } else {
+                }
+                else
+                {
                     return 0;
                 }
             }
         };
-        Arrays.sort(points, comparator);
+        Arrays.sort( points, comparator );
     }
 
     /**
      * Returns the interpolated y value for the given x value.
      */
-    public double evaluate(double x) {
+    public double evaluate( double x )
+    {
         int numPoints = _points.length;
         double y;
-        if (numPoints <= 1) {
-            y = _points[0].getY();
-        } else if (x <= _points[0].getX()) {
-            y = _points[0].getY();
-        } else if (x >= _points[numPoints - 1].getX()) {
-            y = _points[numPoints - 1].getY();
-        } else {
+        if ( numPoints <= 1 )
+        {
+            y = _points[0].getY( );
+        }
+        else if ( x <= _points[0].getX( ) )
+        {
+            y = _points[0].getY( );
+        }
+        else if ( x >= _points[numPoints - 1].getX( ) )
+        {
+            y = _points[numPoints - 1].getY( );
+        }
+        else
+        {
             int i;
-            for (i = 0; i < numPoints; ++i) {
-                if (_points[i].getX() >= x) {
+            for ( i = 0; i < numPoints; ++i )
+            {
+                if ( _points[i].getX( ) >= x )
+                {
                     break;
                 }
             }
-            double x1 = _points[i - 1].getX();
-            double y1 = _points[i - 1].getY();
-            double x2 = _points[i].getX();
-            double y2 = _points[i].getY();
-            y = (y2 - y1) / (x2 - x1) * (x - x1) + y1;
+            double x1 = _points[i - 1].getX( );
+            double y1 = _points[i - 1].getY( );
+            double x2 = _points[i].getX( );
+            double y2 = _points[i].getY( );
+            y = ( y2 - y1 ) / ( x2 - x1 ) * ( x - x1 ) + y1;
         }
         return y;
     }
+
     /**
      * Arrays should be arranged so that x[k] corresponds to y[k] for all k.
      */
-    public static LinearInterpolator createFromArrays(double[] x, double[] y)
-    throws IllegalArgumentException {
-        if (x == null || y == null)
-            throw new IllegalArgumentException();
-        if (x.length != y.length || x.length < 1 || y.length < 1)
-            throw new IllegalArgumentException();
+    public static LinearInterpolator createFromArrays( double[] x, double[] y ) throws IllegalArgumentException
+    {
+        if ( x == null || y == null ) throw new IllegalArgumentException( );
+        if ( x.length != y.length || x.length < 1 || y.length < 1 ) throw new IllegalArgumentException( );
 
         Point2D[] points = new Point2D[x.length];
-        for (int k = 0; k < x.length; ++k) {
-            points[k] = new Point2D.Double();
-            points[k].setLocation(x[k], y[k]);
+        for ( int k = 0; k < x.length; ++k )
+        {
+            points[k] = new Point2D.Double( );
+            points[k].setLocation( x[k], y[k] );
         }
-        return new LinearInterpolator(points);
+        return new LinearInterpolator( points );
     }
 
     /**
@@ -116,16 +135,17 @@ public class LinearInterpolator {
      *
      * @param function  a string in the format of "x1,y1;x2,y2;x3,y3;...".
      */
-    public static LinearInterpolator parseLinearInterpolator(String function)
-    throws IllegalArgumentException {
-        String[] pointsString = StringUtils.split(function, ';');
+    public static LinearInterpolator parseLinearInterpolator( String function ) throws IllegalArgumentException
+    {
+        String[] pointsString = StringUtils.split( function, ';' );
         Point2D[] points = new Point2D.Double[pointsString.length];
-        for (int i = 0, ni = points.length; i < ni; ++i) {
-            String[] xyString = StringUtils.split(pointsString[i], ',');
-            double x = Double.parseDouble(xyString[0]);
-            double y = Double.parseDouble(xyString[1]);
-            points[i] = new Point2D.Double(x,y);
+        for ( int i = 0, ni = points.length; i < ni; ++i )
+        {
+            String[] xyString = StringUtils.split( pointsString[i], ',' );
+            double x = Double.parseDouble( xyString[0] );
+            double y = Double.parseDouble( xyString[1] );
+            points[i] = new Point2D.Double( x, y );
         }
-        return new LinearInterpolator(points);
+        return new LinearInterpolator( points );
     }
 }

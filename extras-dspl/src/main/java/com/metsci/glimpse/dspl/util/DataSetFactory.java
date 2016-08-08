@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,14 @@ import javax.xml.namespace.QName;
 
 import com.metsci.glimpse.dspl.DsplParser;
 import com.metsci.glimpse.dspl.schema.Concept;
+import com.metsci.glimpse.dspl.schema.Concept.Type;
 import com.metsci.glimpse.dspl.schema.ConceptInfo;
 import com.metsci.glimpse.dspl.schema.DataSet;
+import com.metsci.glimpse.dspl.schema.DataSet.Concepts;
+import com.metsci.glimpse.dspl.schema.DataSet.Import;
+import com.metsci.glimpse.dspl.schema.DataSet.Slices;
+import com.metsci.glimpse.dspl.schema.DataSet.Tables;
+import com.metsci.glimpse.dspl.schema.DataSet.Topics;
 import com.metsci.glimpse.dspl.schema.DataType;
 import com.metsci.glimpse.dspl.schema.Info;
 import com.metsci.glimpse.dspl.schema.Slice;
@@ -43,12 +49,6 @@ import com.metsci.glimpse.dspl.schema.SliceConceptRef;
 import com.metsci.glimpse.dspl.schema.Table;
 import com.metsci.glimpse.dspl.schema.Value;
 import com.metsci.glimpse.dspl.schema.Values;
-import com.metsci.glimpse.dspl.schema.Concept.Type;
-import com.metsci.glimpse.dspl.schema.DataSet.Concepts;
-import com.metsci.glimpse.dspl.schema.DataSet.Import;
-import com.metsci.glimpse.dspl.schema.DataSet.Slices;
-import com.metsci.glimpse.dspl.schema.DataSet.Tables;
-import com.metsci.glimpse.dspl.schema.DataSet.Topics;
 
 public class DataSetFactory
 {

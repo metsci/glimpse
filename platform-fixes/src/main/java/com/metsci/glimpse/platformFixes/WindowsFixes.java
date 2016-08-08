@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,20 @@ import java.util.TimerTask;
 
 import javax.swing.SwingUtilities;
 
+import com.metsci.glimpse.util.jnlu.LibraryList;
+
 public class WindowsFixes
 {
 
     public static final LibraryList libs = getLibs( );
+
     private static LibraryList getLibs( )
     {
-        if ( onPlatform( "win", "amd64"  ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
+        if ( onPlatform( "win", "amd64" ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
         if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86"    ) ) return new LibraryList( "platformFixes/windows32", "libgcc_s_dw2-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
+        if ( onPlatform( "win", "x86" ) ) return new LibraryList( "platformFixes/windows32", "libwinpthread-1.dll", "libgcc_s_dw2-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
         return null;
     }
-
 
     public static final boolean shouldApplyFixes = ( libs != null );
 
@@ -62,7 +64,6 @@ public class WindowsFixes
         }
     }
 
-
     private static boolean pollingNeedsInit = shouldApplyFixes;
     public static final long defaultPollingInterval_MILLIS = 1000;
 
@@ -76,7 +77,6 @@ public class WindowsFixes
         if ( pollingNeedsInit )
         {
             initLibs( );
-
 
             TimerTask applyFixesTask = new TimerTask( )
             {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Metron, Inc.
+ * Copyright (c) 2016, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.support.shader;
 
+<<<<<<< HEAD
+=======
+import static com.metsci.glimpse.gl.shader.ShaderType.fragment;
+
+>>>>>>> master
 import java.io.IOException;
 
 import javax.media.opengl.GLUniformData;
@@ -53,6 +58,8 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
     private GLUniformData colorTexUnit;
 
     private Axis1D colorAxis;
+
+    private ShaderArg discardNaN;
 
     /**
      * @param colorAxis color axis producing events
@@ -82,6 +89,11 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
 
         this.colorAxis = colorAxis;
         this.colorAxis.addAxisListener( this );
+    }
+
+    public void setDiscardNaN( boolean discard )
+    {
+        discardNaN.setValue( discard );
     }
 
     public void setAlpha( float alpha )
@@ -115,7 +127,7 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
     {
         return ( float ) axis.getMax( );
     }
-    
+
     @Override
     public void dispose( GLContext context )
     {
