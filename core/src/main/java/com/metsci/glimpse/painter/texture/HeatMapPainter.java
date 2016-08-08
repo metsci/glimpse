@@ -77,7 +77,7 @@ public class HeatMapPainter extends ShadedTexturePainter
         lock.lock( );
         try
         {
-            ( ( SampledColorScaleShader ) this.fragShader ).setDiscardNaN( discard );
+            this.program.setDiscardNaN( discard );
         }
         finally
         {

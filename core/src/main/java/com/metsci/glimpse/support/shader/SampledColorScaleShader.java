@@ -26,15 +26,9 @@
  */
 package com.metsci.glimpse.support.shader;
 
-<<<<<<< HEAD
-=======
-import static com.metsci.glimpse.gl.shader.ShaderType.fragment;
-
->>>>>>> master
 import java.io.IOException;
 
 import javax.media.opengl.GLUniformData;
-import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -59,7 +53,7 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
 
     private Axis1D colorAxis;
 
-    private ShaderArg discardNaN;
+    private GLUniformData discardNaN;
 
     /**
      * @param colorAxis color axis producing events
@@ -84,6 +78,8 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
         this.dataMin = this.addUniformData( new GLUniformData( "dataMin", getMin( colorAxis ) ) );
         this.dataMax = this.addUniformData( new GLUniformData( "dataMax", getMax( colorAxis ) ) );
         this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
+        this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
+
         this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", targetTexUnit ) );
         this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
 
@@ -93,7 +89,7 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
 
     public void setDiscardNaN( boolean discard )
     {
-        discardNaN.setValue( discard );
+        this.discardNaN.setData( discard ? 1 : 0 );
     }
 
     public void setAlpha( float alpha )

@@ -56,6 +56,7 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     protected FloatTexture1D vertexCoordTex;
     protected FloatTexture1D textureCoordTex;
 
+    protected TaggedColorScaleShader fragShader;
     protected TaggedAxis1D taggedAxis;
 
     public TaggedHeatMapPainter( TaggedAxis1D taggedAxis )
