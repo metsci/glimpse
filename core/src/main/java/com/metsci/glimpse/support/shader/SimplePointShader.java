@@ -62,7 +62,7 @@ public class SimplePointShader extends GlimpseShaderProgram
 
     public SimplePointShader( int colorTextureUnit, int sizeTextureUnit, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        this.addVertexShader( "shaders/point/point_shader.vs" );
+        this.addDefaultVertexShader( );
 
         this.colorTexUnit = this.addUniformData( new GLUniformData( "valTexture_color", colorTextureUnit ) );
         this.colorMin = this.addUniformData( new GLUniformData( "valMin_color", ( float ) colorAxis.getMin( ) ) );
@@ -103,6 +103,11 @@ public class SimplePointShader extends GlimpseShaderProgram
                 sizeMax.setData( ( float ) handler.getMax( ) );
             }
         } );
+    }
+    
+    protected void addDefaultVertexShader( )
+    {
+        this.addVertexShader( "shaders/point/point_shader.vs" );
     }
 
     public void setSizeData( Buffer b )

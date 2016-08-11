@@ -32,60 +32,49 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.gl.shader.ShaderArg;
-import com.metsci.glimpse.gl.shader.ShaderSource;
-import com.metsci.glimpse.util.io.StreamOpener;
 
+/**
+ * A point shader attached to a TaggedAxis1D which allows adjusting of the color
+ * scale at multiple tag points (as opposed to TaggedPointShader which only
+ * reads the lowest and highest tags and spreads the color scale between those).
+ * 
+ * @author ulman
+ *
+ */
 public class PartialTaggedPointShader extends TaggedPointShader implements AxisListener1D
 {
-    private ShaderArg vertexCoordTexUnit;
-    private ShaderArg textureCoordTexUnit;
-
-    private ShaderArg sizeArg;
-
-    public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis, ShaderSource... source ) throws IOException
-    {
-        super( colorTextureUnit, sizeTextureUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, source );
-
-        this.vertexCoordTexUnit.setValue( vertexTexUnit );
-        this.textureCoordTexUnit.setValue( textureTexUnit );
-        this.setSizeArgValue( );
-
-        sizeAxis.addAxisListener( this );
-    }
+    private GLUniformData sizeArg;
 
     public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
-        this( colorTextureUnit, sizeTextureUnit, vertexTexUnit, textureTexUnit, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis, readSource( ) );
+        super( colorTextureUnit, sizeTextureUnit, colorAxis, sizeAxis );
+
+        this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
+        this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
+        this.sizeArg = this.addUniformData( new GLUniformData( "size", getSizeArgValue( ) ) );
+        
+        sizeAxis.addAxisListener( this );
     }
 
     @Override
-    protected void initializeShaderArgs( )
+    protected void addDefaultVertexShader( )
     {
-        super.initializeShaderArgs( );
-
-        this.vertexCoordTexUnit = getArg( "vcoordtex" );
-        this.textureCoordTexUnit = getArg( "tcoordtex" );
-        this.sizeArg = getArg( "size" );
+        this.addVertexShader( "shaders/point/tagged_point_shader.vs" );
     }
-
-    private final static ShaderSource readSource( ) throws IOException
-    {
-        return new ShaderSource( "shaders/point/tagged_point_shader.vs", StreamOpener.fileThenResource );
-    }
-
+    
     @Override
     public void axisUpdated( Axis1D axis )
     {
-        setSizeArgValue( );
+        this.sizeArg.setData( getSizeArgValue( ) );
     }
 
-    protected void setSizeArgValue( )
+    protected int getSizeArgValue( )
     {
         List<Tag> tags = taggedColorAxis.getSortedTags( );
         int size = tags.size( );
@@ -98,7 +87,7 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
             if ( tag.hasAttribute( TEX_COORD_ATTR ) ) count++;
         }
 
-        this.sizeArg.setValue( count );
+        return count;
     }
 
     @Override

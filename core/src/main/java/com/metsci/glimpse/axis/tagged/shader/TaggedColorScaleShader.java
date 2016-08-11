@@ -42,12 +42,6 @@ import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 
 public class TaggedColorScaleShader extends GlimpseShaderProgram implements AxisListener1D
 {
-    private GLUniformData dataTexUnit;
-    private GLUniformData colorTexUnit;
-
-    private GLUniformData vertexCoordTexUnit;
-    private GLUniformData textureCoordTexUnit;
-
     private GLUniformData sizeArg;
     private GLUniformData alphaArg;
 
@@ -63,10 +57,10 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
 
         this.taggedAxis = axis;
 
-        this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", dataTexUnit ) );
-        this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
-        this.vertexCoordTexUnit = this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
-        this.textureCoordTexUnit = this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
+        this.addUniformData( new GLUniformData( "datatex", dataTexUnit ) );
+        this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
+        this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
+        this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
         this.alphaArg = this.addUniformData( new GLUniformData( "alpha", 1.0f ) );
         this.sizeArg = this.addUniformData( new GLUniformData( "size", 0 ) );
         this.setSizeArgValue( );

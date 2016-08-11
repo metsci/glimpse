@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.support.atlas.painter;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -64,10 +65,10 @@ import com.metsci.glimpse.gl.attribute.GLByteBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
+import com.metsci.glimpse.support.atlas.shader.IconShader;
 import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderFragment;
 import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderGeometry;
 import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderVertex;
@@ -108,15 +109,7 @@ public class IconPainter extends GlimpseDataPainter2D
     protected int initialGroupSize;
 
     // shader fields
-    protected TextureAtlasIconShaderVertex vertexShader;
-    protected TextureAtlasIconShaderFragment fragmentShader;
-    protected TextureAtlasIconShaderGeometry geometryShader;
-    protected Pipeline pipeline;
-
-    // gl attribute arrays used to pass information to shader
-    protected int pixelCoordsAttributeIndex = 1;
-    protected int texCoordsAttributeIndex = 2;
-    protected int colorCoordsAttributeIndex = 3;
+    protected IconShader shader;
 
     // map from group key (which can be anything) to internal icon group data
     protected Map<Object, IconGroup> iconGroupMap;
@@ -125,7 +118,7 @@ public class IconPainter extends GlimpseDataPainter2D
     protected Map<TextureAtlas, TextureAtlasUpdateListener> atlasListeners;
 
     // buffers ready to be disposed of next time we're in paintTo()
-    protected Collection<GLBuffer> oldBuffers;
+    protected Collection<Buffer> oldBuffers;
 
     // fields related to picking support
     protected ByteBuffer pickResultBuffer;
@@ -143,16 +136,13 @@ public class IconPainter extends GlimpseDataPainter2D
     //@formatter:off
     public IconPainter( int initialGroupSize, boolean enablePicking )
     {
-        this.vertexShader = new TextureAtlasIconShaderVertex( pixelCoordsAttributeIndex, texCoordsAttributeIndex, colorCoordsAttributeIndex );
-        this.fragmentShader = new TextureAtlasIconShaderFragment( 0, enablePicking );
-        this.geometryShader = new TextureAtlasIconShaderGeometry( );
-        this.pipeline = new Pipeline( "Pipeline", geometryShader, vertexShader, fragmentShader );
+        this.shader = new IconShader( 0, enablePicking );
 
         this.lock = new ReentrantLock( );
-        this.iconGroupMap = new HashMap<Object,IconGroup>( );
-        this.iconGroupsByAtlas = new LinkedHashMap<TextureAtlas,Set<IconGroup>>( );
-        this.atlasListeners = new HashMap<TextureAtlas,TextureAtlasUpdateListener>( );
-        this.oldBuffers = new LinkedList<GLBuffer>( );
+        this.iconGroupMap = new HashMap<>( );
+        this.iconGroupsByAtlas = new LinkedHashMap<>( );
+        this.atlasListeners = new HashMap<>( );
+        this.oldBuffers = new LinkedList<>( );
 
         this.pickSupportEnabled = enablePicking;
         this.pickResultBuffer = Buffers.newDirectByteBuffer( Buffers.SIZEOF_BYTE * COMPONENTS_PER_COLOR * ( WIDTH_BUFFER * 2 + 1 ) * ( HEIGHT_BUFFER * 2 + 1 ) );
@@ -265,7 +255,7 @@ public class IconPainter extends GlimpseDataPainter2D
      */
     public void setGlobalScale( float scale )
     {
-        this.geometryShader.setGlobalScale( scale );
+        this.shader.setGlobalScale( scale );
     }
 
     /**
@@ -568,12 +558,6 @@ public class IconPainter extends GlimpseDataPainter2D
         {
             GL2 gl = context.getGL( ).getGL2( );
 
-            if ( !this.pipeline.isLinked( gl ) )
-            {
-                this.pipeline.beginUse( gl );
-                this.pipeline.endUse( gl );
-            }
-
             // dispose of any buffers queued for deletion
             disposeOldBuffers( gl );
 
@@ -638,19 +622,13 @@ public class IconPainter extends GlimpseDataPainter2D
     @Override
     public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
-        if ( !this.pipeline.isLinked( gl ) )
-        {
-            this.pipeline.beginUse( gl );
-            this.pipeline.endUse( gl );
-        }
-
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
-        this.fragmentShader.setPickMode( false );
+        this.shader.setPickMode( false );
 
         // update geometry shader uniform variables
-        this.geometryShader.updateViewport( bounds );
+        this.shader.updateViewport( bounds );
 
-        this.pipeline.beginUse( gl );
+        this.shader.useProgram( gl, true );
         try
         {
             for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
@@ -672,10 +650,12 @@ public class IconPainter extends GlimpseDataPainter2D
 
                         if ( !group.isVisible( ) ) continue;
 
-                        group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
-                        group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
-                        group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                        group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
+                        shader.setTexCoordData( group.getBufferTexCoords( ) );
+                        
+                        //group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
+                        //group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
+                        //group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
+                        //group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
 
                         gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
                     }
@@ -688,7 +668,7 @@ public class IconPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.pipeline.endUse( gl );
+            this.shader.useProgram( gl, false );
         }
     }
 
@@ -705,13 +685,13 @@ public class IconPainter extends GlimpseDataPainter2D
         this.setPickOrthoProjection( gl, bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
-        this.fragmentShader.setPickMode( true );
+        this.shader.setPickMode( true );
 
         // update geometry shader uniform variables
-        this.geometryShader.updateViewport( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
+        this.shader.updateViewport( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
 
         this.pickFrameBuffer.bind( glContext );
-        this.pipeline.beginUse( gl );
+        this.shader.useProgram( gl, true );
         try
         {
             for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
@@ -728,10 +708,15 @@ public class IconPainter extends GlimpseDataPainter2D
                     {
                         if ( !group.isVisible( ) ) continue;
 
-                        group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
-                        group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
-                        group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                        group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
+                        this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                        this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                        this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                        
+                        //XXX Delete These
+                        //group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
+                        //group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
+                        //group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
+                        //group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
 
                         resetPickFrameBuffer( glContext );
 
@@ -748,7 +733,7 @@ public class IconPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.pipeline.endUse( gl );
+            this.shader.useProgram( gl, false );
             this.pickFrameBuffer.unbind( glContext );
             // restore the scissor and viewport
             gl.glEnable( GL2.GL_SCISSOR_TEST );
@@ -866,16 +851,6 @@ public class IconPainter extends GlimpseDataPainter2D
         } );
     }
 
-    protected void disposeOldBuffers( GL gl )
-    {
-        for ( GLBuffer oldBuffer : this.oldBuffers )
-        {
-            oldBuffer.dispose( gl );
-        }
-
-        this.oldBuffers.clear( );
-    }
-
     @Override
     public void dispose( GLContext context )
     {
@@ -886,8 +861,6 @@ public class IconPainter extends GlimpseDataPainter2D
         {
             group.dispose( );
         }
-
-        disposeOldBuffers( context.getGL( ) );
 
         if ( pickFrameBuffer != null ) pickFrameBuffer.dispose( context );
     }
@@ -1005,72 +978,65 @@ public class IconPainter extends GlimpseDataPainter2D
                 group.iconIds.add( iconId );
             }
 
-            group.pixelCoordsValues.mutate( new Mutator( )
             {
-                @Override
-                public void mutate( FloatBuffer data, int length )
+                FloatBuffer data = group.pixelCoordsValues;
+                int length = 4;
+
+                data.limit( currentSize * length );
+                data.position( ( currentSize - size ) * length );
+
+                float width = ( imageData.getWidth( ) + imageData.getBufferX( ) * 2 );
+                float height = ( imageData.getHeight( ) + imageData.getBufferY( ) * 2 );
+                float offsetX = ( imageData.getCenterX( ) + imageData.getBufferX( ) );
+                float offsetY = ( imageData.getCenterY( ) + imageData.getBufferY( ) );
+
+                for ( int i = 0; i < size; i++ )
                 {
-                    data.limit( currentSize * length );
-                    data.position( ( currentSize - size ) * length );
-
-                    float width = ( imageData.getWidth( ) + imageData.getBufferX( ) * 2 );
-                    float height = ( imageData.getHeight( ) + imageData.getBufferY( ) * 2 );
-                    float offsetX = ( imageData.getCenterX( ) + imageData.getBufferX( ) );
-                    float offsetY = ( imageData.getCenterY( ) + imageData.getBufferY( ) );
-
-                    for ( int i = 0; i < size; i++ )
-                    {
-                        data.put( width );
-                        data.put( height );
-                        data.put( offsetX );
-                        data.put( offsetY );
-                    }
+                    data.put( width );
+                    data.put( height );
+                    data.put( offsetX );
+                    data.put( offsetY );
                 }
-            } );
+            }
 
-            group.texCoordsValues.mutate( new Mutator( )
             {
-                @Override
-                public void mutate( FloatBuffer data, int length )
+                FloatBuffer data = group.texCoordsValues;
+                int length = 4;
+                
+                data.limit( currentSize * length );
+                data.position( ( currentSize - size ) * length );
+                for ( int i = 0; i < size; i++ )
                 {
-                    data.limit( currentSize * length );
-                    data.position( ( currentSize - size ) * length );
-                    for ( int i = 0; i < size; i++ )
-                    {
-                        data.put( texData.left( ) );
-                        data.put( texData.right( ) );
-                        data.put( texData.top( ) );
-                        data.put( texData.bottom( ) );
-                    }
+                    data.put( texData.left( ) );
+                    data.put( texData.right( ) );
+                    data.put( texData.top( ) );
+                    data.put( texData.bottom( ) );
                 }
-            } );
+            }
 
-            group.pickColorValues.mutate( new GLByteBuffer.Mutator( )
             {
-                @Override
-                public void mutate( ByteBuffer data, int length )
+                ByteBuffer data = group.pickColorValues;
+                int length = 3;
+                // encode the index as r/g/b color components
+                // this provides a maximum of 2^24 = 16 million
+                // pickable icons per group (which is more than
+                // we can display without performance degradation
+                // anyway, so should be no problem)
+                data.limit( currentSize * length );
+                data.position( ( currentSize - size ) * length );
+                for ( int i = 0; i < size; i++ )
                 {
-                    // encode the index as r/g/b color components
-                    // this provides a maximum of 2^24 = 16 million
-                    // pickable icons per group (which is more than
-                    // we can display without performance degradation
-                    // anyway, so should be no problem)
-                    data.limit( currentSize * length );
-                    data.position( ( currentSize - size ) * length );
-                    for ( int i = 0; i < size; i++ )
-                    {
-                        int index = currentSize - size + i;
-
-                        byte r = ( byte ) ( ( index & 0x00ff0000 ) >> 16 );
-                        byte g = ( byte ) ( ( index & 0x0000ff00 ) >> 8 );
-                        byte b = ( byte ) ( ( index & 0x000000ff ) );
-
-                        //System.out.printf( "%d %d %d%n", r, g, b );
-
-                        data.put( r ).put( g ).put( b );
-                    }
+                    int index = currentSize - size + i;
+    
+                    byte r = ( byte ) ( ( index & 0x00ff0000 ) >> 16 );
+                    byte g = ( byte ) ( ( index & 0x0000ff00 ) >> 8 );
+                    byte b = ( byte ) ( ( index & 0x000000ff ) );
+    
+                    //System.out.printf( "%d %d %d%n", r, g, b );
+    
+                    data.put( r ).put( g ).put( b );
                 }
-            } );
+            }
         }
     }
 
@@ -1103,24 +1069,19 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void addPlacementValues( final IconGroup group )
         {
-            group.iconPlacementValues.mutate( new Mutator( )
-            {
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    int currentSize = group.getCurrentSize( );
+            FloatBuffer data = group.iconPlacementValues;
+            int length = 4;
+            int currentSize = group.getCurrentSize( );
 
-                    data.limit( currentSize * length );
-                    data.position( ( currentSize - size ) * length );
-                    for ( int i = 0; i < size; i++ )
-                    {
-                        data.put( positionX[i] );
-                        data.put( positionY[i] );
-                        data.put( rotation[i] );
-                        data.put( scale[i] );
-                    }
-                }
-            } );
+            data.limit( currentSize * length );
+            data.position( ( currentSize - size ) * length );
+            for ( int i = 0; i < size; i++ )
+            {
+                data.put( positionX[i] );
+                data.put( positionY[i] );
+                data.put( rotation[i] );
+                data.put( scale[i] );
+            }
         }
     }
 
@@ -1146,18 +1107,13 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void addPlacementValues( final IconGroup group )
         {
-            group.iconPlacementValues.mutate( new Mutator( )
-            {
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    int currentSize = group.getCurrentSize( );
+            FloatBuffer data = group.iconPlacementValues;
+            int length = 4;
+            int currentSize = group.getCurrentSize( );
 
-                    data.limit( currentSize * length );
-                    data.position( ( currentSize - size ) * length );
-                    data.put( positions, 0, size * length );
-                }
-            } );
+            data.limit( currentSize * length );
+            data.position( ( currentSize - size ) * length );
+            data.put( positions, 0, size * length );
         }
     }
 
@@ -1182,23 +1138,18 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void addPlacementValues( final IconGroup group )
         {
-            group.iconPlacementValues.mutate( new Mutator( )
-            {
-                @Override
-                public void mutate( FloatBuffer data, int length )
-                {
-                    int currentSize = group.getCurrentSize( );
+            FloatBuffer data = group.iconPlacementValues;
+            int length = 4;
+            int currentSize = group.getCurrentSize( );
 
-                    data.limit( currentSize * length );
-                    data.position( ( currentSize - vertexCount ) * length );
+            data.limit( currentSize * length );
+            data.position( ( currentSize - vertexCount ) * length );
 
-                    int limit = positions.limit( );
-                    positions.limit( offset + vertexCount * length );
-                    positions.position( offset );
-                    data.put( positions );
-                    positions.limit( limit );
-                }
-            } );
+            int limit = positions.limit( );
+            positions.limit( offset + vertexCount * length );
+            positions.position( offset );
+            data.put( positions );
+            positions.limit( limit );
         }
     }
 
@@ -1214,11 +1165,10 @@ public class IconPainter extends GlimpseDataPainter2D
         private TextureAtlas atlas;
         private List<Object> iconIds;
 
-        private GLFloatBuffer iconPlacementValues;
-        private GLFloatBuffer pixelCoordsValues;
-        private GLFloatBuffer texCoordsValues;
-
-        private GLByteBuffer pickColorValues;
+        private FloatBuffer iconPlacementValues;
+        private FloatBuffer pixelCoordsValues;
+        private FloatBuffer texCoordsValues;
+        private ByteBuffer pickColorValues;
 
         private Collection<AddIcons> addQueue;
 
@@ -1231,10 +1181,10 @@ public class IconPainter extends GlimpseDataPainter2D
             this.atlas = atlas;
             this.iconIds = new ArrayList<Object>( );
 
-            this.iconPlacementValues = new GLFloatBuffer( initialIconSpace, 4 );
-            this.pixelCoordsValues = new GLFloatBuffer( initialIconSpace, 4 );
-            this.texCoordsValues = new GLFloatBuffer( initialIconSpace, 4 );
-            this.pickColorValues = new GLByteBuffer( initialIconSpace, 3 );
+            this.iconPlacementValues = FloatBuffer.allocate( initialIconSpace * 4 );
+            this.pixelCoordsValues = FloatBuffer.allocate( initialIconSpace * 4 );
+            this.texCoordsValues = FloatBuffer.allocate( initialIconSpace * 4 );
+            this.pickColorValues = ByteBuffer.allocate( initialIconSpace * 3 );
 
             this.addQueue = new LinkedList<AddIcons>( );
 
@@ -1272,22 +1222,22 @@ public class IconPainter extends GlimpseDataPainter2D
             return this.iconIds.get( index );
         }
 
-        public final GLFloatBuffer getBufferIconPlacement( )
+        public final FloatBuffer getBufferIconPlacement( )
         {
             return this.iconPlacementValues;
         }
 
-        public final GLFloatBuffer getBufferPixelCoords( )
+        public final FloatBuffer getBufferPixelCoords( )
         {
             return this.pixelCoordsValues;
         }
 
-        public final GLFloatBuffer getBufferTexCoords( )
+        public final FloatBuffer getBufferTexCoords( )
         {
             return this.texCoordsValues;
         }
 
-        public final GLByteBuffer getPickColorCoords( )
+        public final ByteBuffer getPickColorCoords( )
         {
             return this.pickColorValues;
         }
@@ -1342,16 +1292,20 @@ public class IconPainter extends GlimpseDataPainter2D
             }
 
             // create new buffers of the new size
-            GLFloatBuffer placementValues_temp = new GLFloatBuffer( newSize, 4 );
-            GLFloatBuffer pixelCoordsValues_temp = new GLFloatBuffer( newSize, 4 );
-            GLFloatBuffer texCoordsValues_temp = new GLFloatBuffer( newSize, 4 );
-            GLByteBuffer pickColorValues_temp = new GLByteBuffer( newSize, 3 );
+            FloatBuffer placementValues_temp = FloatBuffer.allocate( newSize * 4 );
+            FloatBuffer pixelCoordsValues_temp = FloatBuffer.allocate( newSize * 4 );
+            FloatBuffer texCoordsValues_temp = FloatBuffer.allocate( newSize * 4 );
+            ByteBuffer pickColorValues_temp = ByteBuffer.allocate( newSize * 3 );
 
             // copy existing data to the new buffers
-            copy( this.iconPlacementValues, placementValues_temp );
-            copy( this.pixelCoordsValues, pixelCoordsValues_temp );
-            copy( this.texCoordsValues, texCoordsValues_temp );
-            copy( this.pickColorValues, pickColorValues_temp );
+            this.iconPlacementValues.rewind( );
+            placementValues_temp.put( this.iconPlacementValues );
+            this.pixelCoordsValues.rewind( );
+            pixelCoordsValues_temp.put( this.pixelCoordsValues );
+            this.texCoordsValues.rewind( );
+            texCoordsValues_temp.put( this.texCoordsValues );
+            this.pickColorValues.rewind( );
+            pickColorValues_temp.put( this.pickColorValues );
 
             // delete the old buffers
             this.dispose( );
@@ -1367,39 +1321,32 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void reloadTextureCoordinates( )
         {
-            texCoordsValues.mutate( new Mutator( )
+            texCoordsValues.limit( currentSize * 4 );
+            texCoordsValues.position( 0 );
+
+            Object prevIconId = null;
+            TextureCoords texData = null;
+
+            for ( int i = 0; i < currentSize; i++ )
             {
-                @Override
-                public void mutate( FloatBuffer data, int length )
+                Object iconId = iconIds.get( i );
+
+                // since looking up texture coordinates in the atlas involves acquiring
+                // a lock, and often the same icon occurs multiple times in a row,
+                // remember the coordinates of the last icon we added
+                if ( !iconId.equals( prevIconId ) )
                 {
-                    data.limit( currentSize * length );
-                    data.position( 0 );
-
-                    Object prevIconId = null;
-                    TextureCoords texData = null;
-
-                    for ( int i = 0; i < currentSize; i++ )
-                    {
-                        Object iconId = iconIds.get( i );
-
-                        // since looking up texture coordinates in the atlas involves acquiring
-                        // a lock, and often the same icon occurs multiple times in a row,
-                        // remember the coordinates of the last icon we added
-                        if ( !iconId.equals( prevIconId ) )
-                        {
-                            ImageData imageData = atlas.getImageData( iconId );
-                            texData = imageData.getTextureCoordinates( );
-                        }
-
-                        data.put( texData.left( ) );
-                        data.put( texData.right( ) );
-                        data.put( texData.top( ) );
-                        data.put( texData.bottom( ) );
-
-                        prevIconId = iconId;
-                    }
+                    ImageData imageData = atlas.getImageData( iconId );
+                    texData = imageData.getTextureCoordinates( );
                 }
-            } );
+
+                texCoordsValues.put( texData.left( ) );
+                texCoordsValues.put( texData.right( ) );
+                texCoordsValues.put( texData.top( ) );
+                texCoordsValues.put( texData.bottom( ) );
+
+                prevIconId = iconId;
+            }
         }
 
         public void dispose( )

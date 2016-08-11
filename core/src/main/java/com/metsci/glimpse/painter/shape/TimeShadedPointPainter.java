@@ -32,9 +32,7 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
 import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -53,11 +51,6 @@ public class TimeShadedPointPainter extends ShadedPointPainter
 
     protected int startIndex;
     protected int endIndex;
-
-    public TimeShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis, Pipeline pipeline ) throws IOException
-    {
-        super( colorAxis, sizeAxis, pipeline );
-    }
 
     public TimeShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
@@ -127,13 +120,13 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
     }
 
-    public void useColorAttribData( GLFloatBuffer attributeBuffer )
+    public void useColorAttribData( FloatBuffer attributeBuffer )
     {
         lock.lock( );
         try
         {
-            super.useColorAttribData( attributeBuffer );
-            updateSelectedTime( );
+            this.program.setColorData( attributeBuffer );
+            this.setVariablePointColor0( );
         }
         finally
         {
@@ -141,13 +134,13 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
     }
 
-    public void useSizeAttribData( GLFloatBuffer attributeBuffer )
+    public void useSizeAttribData( FloatBuffer attributeBuffer )
     {
         lock.lock( );
         try
         {
-            super.useSizeAttribData( attributeBuffer );
-            updateSelectedTime( );
+            this.program.setSizeData( attributeBuffer );
+            this.setVariablePointColor0( );
         }
         finally
         {
