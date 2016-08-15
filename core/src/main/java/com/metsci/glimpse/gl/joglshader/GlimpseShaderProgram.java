@@ -43,7 +43,6 @@ public class GlimpseShaderProgram
 
         for ( GLArrayDataClient array : arrays )
         {
-            array.seal( on );
             array.enableBuffer( gl, on );
         }
     }

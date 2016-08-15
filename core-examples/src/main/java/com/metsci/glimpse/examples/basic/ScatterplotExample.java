@@ -38,8 +38,6 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D.MutatorColor1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
@@ -74,8 +72,9 @@ public class ScatterplotExample implements GlimpseLayoutProvider
     protected ColorTexture1D colorMapTexture;
     protected ColorTexture1D sizeTexture;
     protected FloatTexture1D sizeMapTexture;
-    protected GLFloatBuffer2D xyValues;
+    protected FloatBuffer xyValues;
     protected FloatBuffer colorValues;
+    protected FloatBuffer sizeValues;
 
     @Override
     public MultiAxisPlot2D getLayout( ) throws IOException
@@ -229,27 +228,19 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         final Random r = new Random( );
 
         // setup the x y position data for the points
-        xyValues = new GLFloatBuffer2D( NUM_POINTS );
-        xyValues.mutate( new Mutator( )
+        xyValues = FloatBuffer.allocate( NUM_POINTS * 2 );
+        for ( int i = 0; i < NUM_POINTS; i++ )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NUM_POINTS; i++ )
-                {
-                    float x = 6.0f * i / ( float ) NUM_POINTS;
-                    float y = ( float ) ( Math.exp( x ) * 10.0 + 15 + 20 * r.nextGaussian( ) * x );
+            float x = 6.0f * i / ( float ) NUM_POINTS;
+            float y = ( float ) ( Math.exp( x ) * 10.0 + 15 + 20 * r.nextGaussian( ) * x );
 
-                    data.put( x );
-                    data.put( y );
-                }
-            }
-        } );
+            xyValues.put( x );
+            xyValues.put( y );
+        }
+        xyValues.rewind( );
 
         // setup the color value data for the points
         colorValues = FloatBuffer.allocate( NUM_POINTS );
-
         for ( int i = 0; i < NUM_POINTS; i++ )
         {
             float x = 6.0f * i / ( float ) NUM_POINTS;
@@ -257,14 +248,15 @@ public class ScatterplotExample implements GlimpseLayoutProvider
 
             colorValues.put( ( float ) ( x * ( y + r.nextDouble( ) * 500 ) ) );
         }
+        colorValues.rewind( );
 
         // setup the size value data for the points
-        FloatBuffer sizeValues = FloatBuffer.allocate( NUM_POINTS );
-
+        sizeValues = FloatBuffer.allocate( NUM_POINTS );
         for ( int i = 0; i < NUM_POINTS; i++ )
         {
             sizeValues.put( r.nextFloat( ) );
         }
+        sizeValues.rewind( );
 
         // add the data arrays for xy position, color, and size attributes to the painter
         painter.useVertexPositionData( xyValues );

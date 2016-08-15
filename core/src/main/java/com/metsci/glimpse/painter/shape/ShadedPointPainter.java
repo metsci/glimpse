@@ -37,8 +37,6 @@ import javax.media.opengl.GLContext;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
@@ -65,8 +63,6 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     protected FloatTexture1D sizeTexture;
     protected ColorTexture1D colorTexture;
 
-    protected GLFloatBuffer2D positionBuffer;
-
     protected SimplePointShader program;
 
     protected boolean constantSize = true;
@@ -75,18 +71,21 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     protected float constantPointSize = 5.0f;
     protected float[] constantPointColor = GlimpseColor.getBlack( );
 
+    protected int vertexCount = 0;
+
     public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
         this.lock = new ReentrantLock( );
         this.program = newShader( colorAxis, sizeAxis );
     }
 
-    public void useVertexPositionData( GLFloatBuffer2D positionBuffer )
+    public void useVertexPositionData( FloatBuffer positionBuffer )
     {
         lock.lock( );
         try
         {
-            this.positionBuffer = positionBuffer;
+            this.program.setVertexData( positionBuffer );
+            this.vertexCount = positionBuffer.limit( ) / 2;
         }
         finally
         {
@@ -311,7 +310,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             this.program.setConstantSize( false );
         }
     }
-    
+
     protected SimplePointShader newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
         return new SimplePointShader( 0, 1, colorAxis, sizeAxis );
@@ -323,7 +322,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            if ( positionBuffer == null ) return;
+            if ( vertexCount == 0 ) return;
 
             if ( !constantSize && ( sizeTexture == null ) ) return;
 
@@ -349,7 +348,8 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
                 colorTexture.prepare( gl, 0 );
             }
 
-            positionBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
+            program.setProjectionMatrix( axis );
+
             program.useProgram( gl, true );
 
             gl.glEnable( GL2.GL_POINT_SMOOTH );
@@ -363,7 +363,6 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
             try
             {
                 if ( program != null ) program.useProgram( gl, false );
-                if ( positionBuffer != null ) positionBuffer.unbind( gl );
             }
             finally
             {
@@ -374,7 +373,7 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
 
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL2.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
+        gl.glDrawArrays( GL2.GL_POINTS, 0, vertexCount );
     }
 
     @Override

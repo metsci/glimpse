@@ -28,13 +28,16 @@ package com.metsci.glimpse.support.shader;
 
 import java.io.IOException;
 import java.nio.Buffer;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLUniformData;
 
+import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.GLArrayDataServer;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 
@@ -56,7 +59,10 @@ public class SimplePointShader extends GlimpseShaderProgram
 
     protected GLUniformData constantSize;
     protected GLUniformData constantColor;
+    
+    protected GLUniformData mvpMatrix;
 
+    protected GLArrayDataClient vertexAttribute;
     protected GLArrayDataClient colorAttribute;
     protected GLArrayDataClient sizeAttribute;
 
@@ -81,6 +87,9 @@ public class SimplePointShader extends GlimpseShaderProgram
         this.constantSize = this.addUniformData( new GLUniformData( "constant_color", 1 ) );
         this.constantColor = this.addUniformData( new GLUniformData( "constant_size", 1 ) );
 
+        this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
+        
+        this.vertexAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "a_position", 2, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
         this.colorAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valColor", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
         this.sizeAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valSize", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
 
@@ -109,17 +118,33 @@ public class SimplePointShader extends GlimpseShaderProgram
     {
         this.addVertexShader( "shaders/point/point_shader.vs" );
     }
+    
+    public void setProjectionMatrix( Axis2D axis )
+    {
+        Matrix4 m = new Matrix4( );
+        m.makeOrtho( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ), -1, 1 );
+        this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
+    }
+    
+    public void setVertexData( Buffer b )
+    {
+        this.vertexAttribute.reset( );
+        this.vertexAttribute.put( b );
+        this.vertexAttribute.seal( true );
+    }
 
     public void setSizeData( Buffer b )
     {
         this.sizeAttribute.reset( );
         this.sizeAttribute.put( b.rewind( ) );
+        this.sizeAttribute.seal( true );
     }
 
     public void setColorData( Buffer b )
     {
         this.colorAttribute.reset( );
         this.colorAttribute.put( b.rewind( ) );
+        this.colorAttribute.seal( true );
     }
 
     public void setConstantColor( boolean constant )

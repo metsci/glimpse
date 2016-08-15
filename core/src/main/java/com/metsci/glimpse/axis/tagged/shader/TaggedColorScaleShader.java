@@ -61,9 +61,9 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
         this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
         this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
         this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
+        
         this.alphaArg = this.addUniformData( new GLUniformData( "alpha", 1.0f ) );
-        this.sizeArg = this.addUniformData( new GLUniformData( "size", 0 ) );
-        this.setSizeArgValue( );
+        this.sizeArg = this.addUniformData( new GLUniformData( "size", getSizeArgValue( ) ) );
         this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
         this.discardAbove = this.addUniformData( new GLUniformData( "discardAbove", 0 ) );
         this.discardBelow = this.addUniformData( new GLUniformData( "discardBelow", 0 ) );
@@ -74,10 +74,10 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
     @Override
     public void axisUpdated( Axis1D axis )
     {
-        setSizeArgValue( );
+        this.sizeArg.setData( getSizeArgValue( ) );
     }
 
-    protected void setSizeArgValue( )
+    protected int getSizeArgValue( )
     {
         List<Tag> tags = taggedAxis.getSortedTags( );
         int size = tags.size( );
@@ -90,7 +90,7 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
             if ( tag.hasAttribute( TEX_COORD_ATTR ) ) count++;
         }
 
-        this.sizeArg.setData( count );
+        return count;
     }
 
     public void setAlpha( float alpha )

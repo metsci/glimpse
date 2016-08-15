@@ -17,9 +17,12 @@ uniform bool discardAbove_size;
 uniform bool constant_color;
 uniform bool constant_size;
 
+uniform mat4 mvpMatrix;
+
  // the attribute
 attribute float valColor;
 attribute float valSize;
+attribute vec2 a_position;
 
 void main()
 {
@@ -53,5 +56,5 @@ void main()
         }
     }
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = mvpMatrix * vec4( a_position, 0, 1 );
 }
