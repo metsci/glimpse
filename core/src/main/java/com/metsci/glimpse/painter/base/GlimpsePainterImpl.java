@@ -27,7 +27,6 @@
 package com.metsci.glimpse.painter.base;
 
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -166,6 +165,6 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
     protected boolean glHandleError( GL gl, String prefix )
     {
-        return GLErrorUtils.logGLError( logger, Level.WARNING, gl, prefix );
+        return GLErrorUtils.logGLError( logger, gl, prefix );
     }
 }

@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.support.atlas.painter;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -61,17 +60,10 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.attribute.GLBuffer;
-import com.metsci.glimpse.gl.attribute.GLByteBuffer;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.shader.IconShader;
-import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderFragment;
-import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderGeometry;
-import com.metsci.glimpse.support.atlas.shader.TextureAtlasIconShaderVertex;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.atlas.support.TextureAtlasUpdateListener;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
@@ -117,9 +109,6 @@ public class IconPainter extends GlimpseDataPainter2D
     protected Map<TextureAtlas, Set<IconGroup>> iconGroupsByAtlas;
     protected Map<TextureAtlas, TextureAtlasUpdateListener> atlasListeners;
 
-    // buffers ready to be disposed of next time we're in paintTo()
-    protected Collection<Buffer> oldBuffers;
-
     // fields related to picking support
     protected ByteBuffer pickResultBuffer;
     protected GLSimpleFrameBufferObject pickFrameBuffer;
@@ -142,7 +131,6 @@ public class IconPainter extends GlimpseDataPainter2D
         this.iconGroupMap = new HashMap<>( );
         this.iconGroupsByAtlas = new LinkedHashMap<>( );
         this.atlasListeners = new HashMap<>( );
-        this.oldBuffers = new LinkedList<>( );
 
         this.pickSupportEnabled = enablePicking;
         this.pickResultBuffer = Buffers.newDirectByteBuffer( Buffers.SIZEOF_BYTE * COMPONENTS_PER_COLOR * ( WIDTH_BUFFER * 2 + 1 ) * ( HEIGHT_BUFFER * 2 + 1 ) );
@@ -558,9 +546,6 @@ public class IconPainter extends GlimpseDataPainter2D
         {
             GL2 gl = context.getGL( ).getGL2( );
 
-            // dispose of any buffers queued for deletion
-            disposeOldBuffers( gl );
-
             if ( this.pickSupportEnabled )
             {
                 // allocate the offscreen pick buffer if it does not exist
@@ -628,47 +613,51 @@ public class IconPainter extends GlimpseDataPainter2D
         // update geometry shader uniform variables
         this.shader.updateViewport( bounds );
 
-        this.shader.useProgram( gl, true );
-        try
+        this.shader.setProjectionMatrix( axis );
+
+        
+        for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
         {
-            for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
+            Set<IconGroup> groups = entry.getValue( );
+            if ( groups.isEmpty( ) ) continue;
+
+            TextureAtlas atlas = entry.getKey( );
+            atlas.beginRendering( );
+            
+            try
             {
-                Set<IconGroup> groups = entry.getValue( );
-                if ( groups.isEmpty( ) ) continue;
-
-                TextureAtlas atlas = entry.getKey( );
-                atlas.beginRendering( );
-                try
+                // draw each icon group, if it is visible
+                for ( IconGroup group : groups )
                 {
-                    // draw each icon group, if it is visible
-                    for ( IconGroup group : groups )
+                    // add any icons waiting to be added to the group
+                    // we do this here because texture coordinates might not
+                    // be known until the atlas.beginRendering( ) call
+                    group.addQueuedIcons( );
+                    
+                    this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                    this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                    this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                    this.shader.setVertexData( group.getBufferIconPlacement( ) );
+    
+                    System.out.println( group.getBufferIconPlacement( ).limit( ) + " " + group.getBufferTexCoords( ) + " " + group.getCurrentSize( ) );
+
+                    this.shader.useProgram( gl, true );
+                    try
                     {
-                        // add any icons waiting to be added to the group
-                        // we do this here because texture coordinates might not
-                        // be known until the atlas.beginRendering( ) call
-                        group.addQueuedIcons( );
-
-                        if ( !group.isVisible( ) ) continue;
-
-                        shader.setTexCoordData( group.getBufferTexCoords( ) );
+                        if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
                         
-                        //group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
-                        //group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
-                        //group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                        //group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
-
                         gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
                     }
-                }
-                finally
-                {
-                    atlas.endRendering( );
+                    finally
+                    {
+                        this.shader.useProgram( gl, false );
+                    }
                 }
             }
-        }
-        finally
-        {
-            this.shader.useProgram( gl, false );
+            finally
+            {
+               atlas.endRendering( );
+            }
         }
     }
 
@@ -689,6 +678,8 @@ public class IconPainter extends GlimpseDataPainter2D
 
         // update geometry shader uniform variables
         this.shader.updateViewport( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
+
+        this.shader.setProjectionMatrix( axis );
 
         this.pickFrameBuffer.bind( glContext );
         this.shader.useProgram( gl, true );
@@ -711,12 +702,7 @@ public class IconPainter extends GlimpseDataPainter2D
                         this.shader.setTexCoordData( group.getBufferTexCoords( ) );
                         this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
                         this.shader.setColorCoordData( group.getPickColorCoords( ) );
-                        
-                        //XXX Delete These
-                        //group.getBufferTexCoords( ).bind( texCoordsAttributeIndex, gl );
-                        //group.getBufferPixelCoords( ).bind( pixelCoordsAttributeIndex, gl );
-                        //group.getPickColorCoords( ).bind( colorCoordsAttributeIndex, gl );
-                        //group.getBufferIconPlacement( ).bind( GLVertexAttribute.ATTRIB_POSITION_4D, gl );
+                        this.shader.setVertexData( group.getBufferIconPlacement( ) );
 
                         resetPickFrameBuffer( glContext );
 
@@ -1002,7 +988,7 @@ public class IconPainter extends GlimpseDataPainter2D
             {
                 FloatBuffer data = group.texCoordsValues;
                 int length = 4;
-                
+
                 data.limit( currentSize * length );
                 data.position( ( currentSize - size ) * length );
                 for ( int i = 0; i < size; i++ )
@@ -1027,13 +1013,13 @@ public class IconPainter extends GlimpseDataPainter2D
                 for ( int i = 0; i < size; i++ )
                 {
                     int index = currentSize - size + i;
-    
+
                     byte r = ( byte ) ( ( index & 0x00ff0000 ) >> 16 );
                     byte g = ( byte ) ( ( index & 0x0000ff00 ) >> 8 );
                     byte b = ( byte ) ( ( index & 0x000000ff ) );
-    
+
                     //System.out.printf( "%d %d %d%n", r, g, b );
-    
+
                     data.put( r ).put( g ).put( b );
                 }
             }
@@ -1351,10 +1337,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
         public void dispose( )
         {
-            oldBuffers.add( this.iconPlacementValues );
-            oldBuffers.add( this.pixelCoordsValues );
-            oldBuffers.add( this.texCoordsValues );
-            oldBuffers.add( this.pickColorValues );
+            // does nothing after GL 3.0 refactoring
         }
     }
 }

@@ -32,7 +32,6 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -106,7 +105,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
     }
 
-    public void useVertexPositionData( GLFloatBuffer2D positionBuffer )
+    public void useVertexPositionData( FloatBuffer positionBuffer )
     {
         lock.lock( );
         try
@@ -186,10 +185,10 @@ public class TimeShadedPointPainter extends ShadedPointPainter
                 endIndex = lastIndex0( timeAttributeBuffer, endIndex, endTime ) + 1;
             }
         }
-        else if ( positionBuffer != null )
+        else
         {
             startIndex = 0;
-            endIndex = positionBuffer.getNumVertices( );
+            endIndex = vertexCount;
         }
     }
 

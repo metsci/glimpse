@@ -33,10 +33,8 @@ void main()
     float scale = gl_PositionIn[0].w;
 
     // http://stackoverflow.com/questions/4202456/how-do-you-get-the-modelview-and-projection-matrices-in-opengl
-    // apparently at this point, the vertex shader has already run
-    // and coordinates have been transformed on -1 to 1
-    // so we need to transform our desired pixelWidth/pixelHeight
-    // into that space
+    // at this point, the vertex shader has already run and coordinates have been transformed on -1 to 1
+    // so we need to transform our desired pixelWidth/pixelHeight into that space
     float scaleX = globalScale * scale * 2.0 / viewportWidth;
     float scaleY = globalScale * scale * 2.0 / viewportHeight;
     

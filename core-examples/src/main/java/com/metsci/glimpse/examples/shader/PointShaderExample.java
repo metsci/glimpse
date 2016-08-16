@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.shader;
 
-import static java.lang.Math.sqrt;
+import static java.lang.Math.*;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -34,9 +34,6 @@ import java.util.Random;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.GLCapabilityEventListener;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D.ColorGradientBuilder;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
@@ -99,7 +96,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         plot.lockAspectRatioXY( 1 );
 
         // add a painter that will use our new shader for color-mapping
-        ShadedPointPainter dp;
+        final ShadedPointPainter dp;
         try
         {
             dp = new ShadedPointPainter( plot.getAxisZ( ), plot.getAxisZ( ) );
@@ -162,83 +159,25 @@ public class PointShaderExample implements GlimpseLayoutProvider
         dp.useSizeScale( sizes );
 
         // setup the position data for the points
-        final GLFloatBuffer2D positions = new GLFloatBuffer2D( NPOINTS );
-        positions.mutate( new Mutator( )
+        final FloatBuffer positions = FloatBuffer.allocate( NPOINTS * 2 );
+        for ( int i = 0; i < NPOINTS; i++ )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NPOINTS; i++ )
-                {
-                    data.put( ( float ) r.nextGaussian( ) ); // x
-                    data.put( ( float ) r.nextGaussian( ) ); // y
-                }
-            }
-        } );
-
-        // create an mutator that "wiggles" the points around
-        final Mutator positionMutator = new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NPOINTS; i++ )
-                {
-                    data.put( ( float ) ( data.get( 2 * i ) + .001 * r.nextGaussian( ) ) );
-                    data.put( ( float ) ( data.get( 2 * i + 1 ) + .001 * r.nextGaussian( ) ) );
-                }
-            }
-        };
+            positions.put( ( float ) r.nextGaussian( ) ); // x
+            positions.put( ( float ) r.nextGaussian( ) ); // y
+        }
+        positions.rewind( );
         dp.useVertexPositionData( positions );
 
         // setup the color value data for the points
-        final GLFloatBuffer colorValues = new GLFloatBuffer( NPOINTS, 1 );
-        final Mutator colorValueMutator = new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NPOINTS; i++ )
-                {
-                    if ( r.nextDouble( ) > 0.999 )
-                    {
-                        data.put( ( float ) ( 10 * r.nextFloat( ) ) );
-                    }
-                    else
-                    {
-                        data.put( ( float ) 0.99 * data.get( i ) );
-                    }
-                }
-            }
-        };
-        colorValues.mutate( colorValueMutator );
+        final FloatBuffer colorValues = FloatBuffer.allocate( NPOINTS );
+        updateColors( colorValues, r );
+        colorValues.rewind( );
         dp.useColorAttribData( colorValues );
 
         // setup the size value data for the points
-        final GLFloatBuffer sizeValues = new GLFloatBuffer( NPOINTS, 1 );
-        final Mutator sizeValueMutator = new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.clear( );
-                for ( int i = 0; i < NPOINTS; i++ )
-                {
-                    if ( r.nextDouble( ) > 0.999 )
-                    {
-                        data.put( ( float ) 10 * r.nextFloat( ) );
-                    }
-                    else
-                    {
-                        data.put( ( float ) 0.99 * data.get( i ) );
-                    }
-                }
-            }
-        };
-        sizeValues.mutate( sizeValueMutator );
+        final FloatBuffer sizeValues = FloatBuffer.allocate( NPOINTS );
+        updateSizes( sizeValues, r );
+        sizeValues.rewind( );
         dp.useSizeAttribData( sizeValues );
 
         // setup a thread that will mutate the points at regular intervals
@@ -249,16 +188,25 @@ public class PointShaderExample implements GlimpseLayoutProvider
             {
                 while ( true )
                 {
-                    try
-                    {
-                        positions.mutate( positionMutator );
-                        colorValues.mutate( colorValueMutator );
-                        sizeValues.mutate( sizeValueMutator );
-                        Thread.sleep( 10 );
-                    }
-                    catch ( InterruptedException e )
-                    {
-                    }
+//                    try
+//                    {
+                        updatePositions( positions, r );
+                        positions.rewind( );
+                        dp.useVertexPositionData( positions );
+
+                        updateColors( colorValues, r );
+                        colorValues.rewind( );
+                        dp.useColorAttribData( colorValues );
+                        
+                        updateSizes( sizeValues, r );
+                        sizeValues.rewind( );
+                        dp.useSizeAttribData( sizeValues );
+                        
+                        //Thread.sleep( 10 );
+//                    }
+//                    catch ( InterruptedException e )
+//                    {
+//                    }
                 }
             }
         } ).start( );
@@ -270,5 +218,47 @@ public class PointShaderExample implements GlimpseLayoutProvider
         plot.addPainter( new FpsPainter( ) );
 
         return plot;
+    }
+
+    protected void updatePositions( FloatBuffer data, Random r )
+    {
+        data.clear( );
+        for ( int i = 0; i < NPOINTS; i++ )
+        {
+            data.put( ( float ) ( data.get( 2 * i ) + .001 * r.nextGaussian( ) ) );
+            data.put( ( float ) ( data.get( 2 * i + 1 ) + .001 * r.nextGaussian( ) ) );
+        }
+    }
+
+    protected void updateColors( FloatBuffer data, Random r )
+    {
+        data.clear( );
+        for ( int i = 0; i < NPOINTS; i++ )
+        {
+            if ( r.nextDouble( ) > 0.999 )
+            {
+                data.put( ( float ) ( 10 * r.nextFloat( ) ) );
+            }
+            else
+            {
+                data.put( ( float ) 0.99 * data.get( i ) );
+            }
+        }
+    }
+
+    protected void updateSizes( FloatBuffer data, Random r )
+    {
+        data.clear( );
+        for ( int i = 0; i < NPOINTS; i++ )
+        {
+            if ( r.nextDouble( ) > 0.999 )
+            {
+                data.put( ( float ) 10 * r.nextFloat( ) );
+            }
+            else
+            {
+                data.put( ( float ) 0.99 * data.get( i ) );
+            }
+        }
     }
 }

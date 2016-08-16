@@ -26,9 +26,11 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static jogamp.opengl.glu.error.Error.gluErrorString;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static jogamp.opengl.glu.error.Error.*;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +43,45 @@ public class GLErrorUtils
     {
     };
 
-    public static boolean logGLError( Logger logger, Level level, GL gl, String prefix )
+    public static void logGLShaderInfoLog( Logger logger, GL gl, int programObject, String prefix )
+    {
+        String log = getGLShaderInfoLog( gl, programObject );
+        
+        if ( log != null && !log.isEmpty( ) )
+        {
+            logWarning( logger, "%s: %s", prefix, log );
+        }
+    }
+    
+    public static String getGLShaderInfoLog( GL gl, int programObject )
+    {
+        IntBuffer intValue = IntBuffer.allocate( 1 );
+
+        GL2 gl2 = gl.getGL2( );
+
+        gl2.glGetObjectParameterivARB( programObject, GL2.GL_OBJECT_INFO_LOG_LENGTH_ARB, intValue );
+
+        int lengthWithNull = intValue.get( );
+        if ( lengthWithNull <= 1 )
+        {
+            // just use a default length
+            lengthWithNull = 1000;
+        }
+
+        ByteBuffer infoLog = ByteBuffer.allocate( lengthWithNull );
+
+        intValue.flip( );
+        gl2.glGetShaderInfoLog( programObject, lengthWithNull, intValue, infoLog );
+
+        int actualLength = intValue.get( );
+
+        byte[] infoBytes = new byte[actualLength];
+        infoLog.get( infoBytes );
+
+        return new String( infoBytes );
+    }
+
+    public static boolean logGLError( Logger logger, GL gl, String prefix )
     {
         int error = gl.glGetError( );
         if ( error != GL2.GL_NO_ERROR )

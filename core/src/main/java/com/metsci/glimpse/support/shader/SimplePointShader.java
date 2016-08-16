@@ -129,7 +129,7 @@ public class SimplePointShader extends GlimpseShaderProgram
     public void setVertexData( Buffer b )
     {
         this.vertexAttribute.reset( );
-        this.vertexAttribute.put( b );
+        this.vertexAttribute.put( b.rewind( ) );
         this.vertexAttribute.seal( true );
     }
 

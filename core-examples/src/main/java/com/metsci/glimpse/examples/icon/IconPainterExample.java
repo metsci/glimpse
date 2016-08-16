@@ -31,6 +31,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import com.jogamp.opengl.util.glsl.ShaderState;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
@@ -68,7 +69,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
     private static final Logger logger = Logger.getLogger( IconPainterExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
-    {
+    {   
         Example.showWithSwing( new IconPainterExample( ) );
     }
 
@@ -91,6 +92,7 @@ public class IconPainterExample implements GlimpseLayoutProvider
         // picking support is currently limited to a single GlimpseLayout
         // here that's fine because we're only adding the IconPainter to
         // a single GlimpseLayout
+        /*
         iconPainter.setPickingEnabled( layout );
         iconPainter.addSpatialSelectionListener( new SpatialSelectionListener<PickResult>( )
         {
@@ -100,7 +102,8 @@ public class IconPainterExample implements GlimpseLayoutProvider
                 logInfo( logger, "Selection: %s", newSelectedPoints );
             }
         } );
-
+        */
+        
         // load some icons into the TextureAtlas
         TextureAtlasExample.loadTextureAtlas( atlas );
 

@@ -1,13 +1,16 @@
 package com.metsci.glimpse.support.atlas.shader;
 
 import java.nio.Buffer;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLUniformData;
 
+import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.GLArrayDataServer;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
 
@@ -26,6 +29,9 @@ public class IconShader extends GlimpseShaderProgram
     protected GLArrayDataClient texCoordAttribute;
     protected GLArrayDataClient colorCoordAttribute;
 
+    protected GLUniformData mvpMatrix;
+    protected GLArrayDataClient vertexAttribute;
+    
     // Geometry Shader
 
     protected GLUniformData viewportWidth;
@@ -34,9 +40,9 @@ public class IconShader extends GlimpseShaderProgram
     
     public IconShader( int textureUnit, boolean enablePicking )
     {
-        this.addFragmentShader( "shaders/atlas/texture_atlas_icon_shader.fs" );
         this.addVertexShader( "shaders/atlas/texture_atlas_icon_shader.vs" );
         this.addGeometryShader( "shaders/atlas/texture_atlas_icon_shader.gs" );
+        this.addFragmentShader( "shaders/atlas/texture_atlas_icon_shader.fs" );
         
         // Fragment Shader
         
@@ -47,11 +53,14 @@ public class IconShader extends GlimpseShaderProgram
         this.isPickModeArg = this.addUniformData( new GLUniformData( "isPickMode", enablePicking ? 1 : 0 ) );
     
         // Vertex Shader
-        
-        this.pixelCoordAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "pixelCoords", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
-        this.texCoordAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "texCoords", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
-        this.colorCoordAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "pickColor", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
 
+        this.vertexAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "a_position", 4, GL.GL_FLOAT, false, 0, GL.GL_DYNAMIC_DRAW ) );
+        this.pixelCoordAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "pixelCoords", 4, GL.GL_FLOAT, false, 0, GL.GL_DYNAMIC_DRAW ) );
+        this.texCoordAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "texCoords", 4, GL.GL_FLOAT, false, 0, GL.GL_DYNAMIC_DRAW ) );
+        this.colorCoordAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "pickColor", 3, GL.GL_BYTE, false, 0, GL.GL_DYNAMIC_DRAW ) );
+
+        this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
+        
         // Geometry Shader
         
         this.viewportWidth = this.addUniformData( new GLUniformData( "viewportWidth", 1 ) );
@@ -68,8 +77,15 @@ public class IconShader extends GlimpseShaderProgram
         {
             gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL3.GL_POINTS );
             gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, GL3.GL_TRIANGLE_STRIP );
-            gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_INPUT_TYPE_ARB, 4 );
+            gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_VERTICES_OUT_ARB, 4 );
         }
+    }
+    
+    public void setProjectionMatrix( Axis2D axis )
+    {
+        Matrix4 m = new Matrix4( );
+        m.makeOrtho( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ), -1, 1 );
+        this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
     }
     
     public void setPickMode( boolean pickMode )
@@ -82,18 +98,28 @@ public class IconShader extends GlimpseShaderProgram
     {
         this.pixelCoordAttribute.reset( );
         this.pixelCoordAttribute.put( b.rewind( ) );
+        this.pixelCoordAttribute.seal( true );
     }
     
     public void setTexCoordData( Buffer b )
     {
         this.texCoordAttribute.reset( );
         this.texCoordAttribute.put( b.rewind( ) );
+        this.texCoordAttribute.seal( true );
     }
     
     public void setColorCoordData( Buffer b )
     {
         this.colorCoordAttribute.reset( );
         this.colorCoordAttribute.put( b.rewind( ) );
+        this.colorCoordAttribute.seal( true );
+    }
+    
+    public void setVertexData( Buffer b )
+    {
+        this.vertexAttribute.reset( );
+        this.vertexAttribute.put( b.rewind( ) );
+        this.vertexAttribute.seal( true );
     }
     
     public void updateViewport( GlimpseBounds bounds )
