@@ -129,7 +129,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         colorAxis.setMax( 6000.0 );
 
         // set the label and size of the color axis
-        colorAxisInfo.getAxisPainter( ).setAxisLabel( "Color Axis" );
+        colorTickHandler.setAxisLabel( "Color Axis" );
         colorAxisInfo.setSize( 80 );
 
         // create another tagged axis for the size axis (controls the size of the points)
@@ -153,7 +153,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         sizeAxis.setMax( 1.0 );
 
         // set the label and size of the size axis
-        as.getAxisPainter( ).setAxisLabel( "Size Axis" );
+        as.getTickHandler( ).setAxisLabel( "Size Axis" );
         as.setSize( 65 );
 
         // setup the color map for the painter and axis

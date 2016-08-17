@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.util.units.time.TimeStamp.currentTime;
+import static com.metsci.glimpse.util.units.time.TimeStamp.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -35,16 +35,14 @@ import java.util.TimeZone;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler.TimeStruct;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler.TimeStructFactory;
+import com.metsci.glimpse.axis.painter.label.time.AbsoluteTimeAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.time.TimeStruct;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
-import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
 
 /**
  * A horizontal (x) time axis painter.
@@ -56,12 +54,12 @@ public class TimeXAxisPainter extends TimeAxisPainter
 {
     public TimeXAxisPainter( TimeZone timeZone, Epoch epoch )
     {
-        super( new TimeAxisLabelHandler( timeZone, epoch ) );
+        super( new AbsoluteTimeAxisLabelHandler( timeZone, epoch ) );
     }
 
     public TimeXAxisPainter( Epoch epoch )
     {
-        super( new TimeAxisLabelHandler( epoch ) );
+        super( new AbsoluteTimeAxisLabelHandler( epoch ) );
     }
 
     public TimeXAxisPainter( TimeAxisLabelHandler handler )
@@ -92,8 +90,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
         gl.glColor4fv( tickColor, 0 );
 
-        List<TimeStamp> tickTimes = handler.tickTimes( axis, width );
-        double tickInterval = handler.tickInterval( tickTimes );
+        List<TimeStamp> tickTimes = handler.getTickPositions( axis, width );
 
         // Tick marks
         gl.glBegin( GL2.GL_LINES );
@@ -107,47 +104,14 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
         if ( showCurrentTimeLabel ) drawCurrentTimeTick( gl, axis, width, height );
 
+        List<String> tickLabels = handler.getTickLabels( axis, tickTimes );
+
         GlimpseColor.setColor( textRenderer, textColor );
         textRenderer.beginRendering( width, height );
         try
         {
-            if ( tickInterval <= Time.fromMinutes( 1 ) )
-            {
-                // Time labels
-                double jTimeText = printTickLabels( tickTimes, axis, handler.getSecondMinuteFormat( ), width, height );
-
-                // Date labels
-                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
-            }
-            else if ( tickInterval <= Time.fromHours( 12 ) )
-            {
-                // Time labels
-                double jTimeText = printTickLabels( tickTimes, axis, handler.getHourMinuteFormat( ), width, height );
-
-                // Date labels
-                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
-            }
-            else if ( tickInterval <= Time.fromDays( 10 ) )
-            {
-                // Date labels
-                double jTimeText = printTickLabels( tickTimes, axis, handler.getDayFormat( ), width, height );
-
-                // Year labels
-                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
-            }
-            else if ( tickInterval <= Time.fromDays( 60 ) )
-            {
-                // Date labels
-                double jTimeText = printTickLabels( tickTimes, axis, handler.getMonthFormat( ), width, height );
-
-                // Year labels
-                if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
-            }
-            else
-            {
-                // Date labels
-                printTickLabels( tickTimes, axis, handler.getYearFormat( ), width, height );
-            }
+            double jTimeText = printTickLabels( tickLabels, tickTimes, axis, width, height );
+            if ( isShowDateLabels( ) ) printHoverLabels( tickTimes, axis, jTimeText, width, height );
         }
         finally
         {
@@ -160,7 +124,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
         return currentTime( );
     }
 
-    protected void printHoverLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, TimeStructFactory factory, double jTimeText, int width, int height )
+    protected void printHoverLabels( List<TimeStamp> tickTimes, Axis1D axis, double jTimeText, int width, int height )
     {
         // text heights vary slightly, making the labels appear unevenly spaced in height
         // just use the height of a fixed sample character
@@ -168,11 +132,10 @@ public class TimeXAxisPainter extends TimeAxisPainter
         double textHeight = fixedBounds.getHeight( );
 
         // Date labels
-        List<TimeStruct> timeStructs = handler.timeStructs( axis, tickTimes, factory );
+        List<TimeStruct> timeStructs = handler.getTimeStructs( axis, tickTimes );
         for ( TimeStruct time : timeStructs )
         {
-            String text = time.textCenter.toString( format );
-            Rectangle2D textBounds = textRenderer.getBounds( text );
+            Rectangle2D textBounds = textRenderer.getBounds( time.text );
             double textWidth = textBounds.getWidth( );
 
             int iMin = axis.valueToScreenPixel( fromTimeStamp( time.start ) );
@@ -183,11 +146,11 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
             int j = ( int ) Math.floor( jTimeText - textHeight - hoverLabelOffset );
 
-            textRenderer.draw( text, i, j );
+            textRenderer.draw( time.text, i, j );
         }
     }
 
-    protected double printTickLabels( List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, int width, int height )
+    protected double printTickLabels( List<String> tickLabels, List<TimeStamp> tickTimes, Axis1D axis, int width, int height )
     {
         // text heights vary slightly, making the labels appear unevenly spaced in height
         // just use the height of a fixed sample character
@@ -196,9 +159,11 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
         // Time labels
         int jTimeText = Integer.MAX_VALUE;
-        for ( TimeStamp t : tickTimes )
+        for ( int index = 0; index < tickLabels.size( ); index++ )
         {
-            String string = t.toString( format );
+            TimeStamp t = tickTimes.get( index );
+            String string = tickLabels.get( index );
+
             Rectangle2D textBounds = textRenderer.getBounds( string );
 
             double textWidth = textBounds.getWidth( );

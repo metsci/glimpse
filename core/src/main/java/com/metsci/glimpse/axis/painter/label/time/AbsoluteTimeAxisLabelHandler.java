@@ -24,21 +24,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.axis.painter.label;
+package com.metsci.glimpse.axis.painter.label.time;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
 import com.metsci.glimpse.util.units.time.format.TimeStampFormatStandard;
 
-public class TimeAxisLabelHandler implements AxisLabelHandler
+public class AbsoluteTimeAxisLabelHandler implements TimeAxisLabelHandler
 {
     protected static final TimeZone defaultTimeZone = TimeZone.getTimeZone( "UTC" );
 
@@ -85,18 +88,18 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
     protected AxisUnitConverter converter;
 
-    public TimeAxisLabelHandler( Epoch epoch )
+    public AbsoluteTimeAxisLabelHandler( Epoch epoch )
     {
         this( defaultTimeZone, epoch );
     }
 
-    public TimeAxisLabelHandler( TimeZone timeZone, Epoch epoch )
+    public AbsoluteTimeAxisLabelHandler( TimeZone timeZone, Epoch epoch )
     {
         this( defaultMinuteSecondFormat, defaultHourDayMonthFormat, defaultHourMinuteFormat, defaultDayMonthYearFormat, defaultDayFormat, defaultMonthFormat, defaultMonthYearFormat, defaultYearFormat, defaultTimeZone, epoch );
     }
 
     //@formatter:off
-    public TimeAxisLabelHandler(
+    public AbsoluteTimeAxisLabelHandler(
             String minuteSecondString,
             String hourDayMonthString,
             String hourMinuteString,
@@ -250,20 +253,6 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         return epoch.fromTimeStamp( time );
     }
 
-    public double tickInterval( List<TimeStamp> list )
-    {
-        if ( list == null || list.size( ) < 2 )
-        {
-            return Time.fromSeconds( 1 );
-        }
-        else
-        {
-            TimeStamp t1 = list.get( 0 );
-            TimeStamp t2 = list.get( 1 );
-            return t2.durationAfter( t1 );
-        }
-    }
-
     public static int getYearStep( double spanYears )
     {
         double log10 = Math.log10( spanYears );
@@ -278,8 +267,91 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         int numSteps = currentYear / yearStep;
         return numSteps * yearStep;
     }
+    
+    @Override
+    public List<String> getTickLabels( Axis1D axis, List<TimeStamp> tickPositions )
+    {
+        double tickInterval = getTickInterval( tickPositions );
+        TimeStampFormat format = getTickFormat( tickInterval );
+        
+        List<String> labels = Lists.newArrayList( );
+        for ( TimeStamp tick : tickPositions )
+        {
+            String label = tick.toString( format );
+            labels.add( label );
+        }
+        
+        return labels;
+    }
 
-    public List<TimeStamp> tickTimes( Axis1D axis, double axisLengthPixels )
+    @Override
+    public List<TimeStruct> getTimeStructs( Axis1D axis, List<TimeStamp> tickTimes )
+    {
+        double tickInterval = getTickInterval( tickTimes );
+        
+        if ( tickInterval <= Time.fromMinutes( 1 ) )
+        {
+            return timeStructs( axis, tickTimes, getHourStructFactory( ), getHourDayMonthFormat( ) );
+        }
+        else if ( tickInterval <= Time.fromHours( 12 ) )
+        {
+            return timeStructs( axis, tickTimes, getDayStructFactory( ), getDayMonthYearFormat( ) );
+        }
+        else if ( tickInterval <= Time.fromDays( 10 ) )
+        {
+            return timeStructs( axis, tickTimes, getMonthStructFactory( ), getMonthYearFormat( ) );
+        }
+        else if ( tickInterval <= Time.fromDays( 60 ) )
+        {
+            return timeStructs( axis, tickTimes, getYearStructFactory( ), getYearFormat( ) );
+        }
+        else
+        {
+            return Collections.emptyList( );
+        }
+    }
+    
+    protected TimeStampFormat getTickFormat( double tickInterval )
+    {
+        if ( tickInterval <= Time.fromMinutes( 1 ) )
+        {
+            return getSecondMinuteFormat( );
+        }
+        else if ( tickInterval <= Time.fromHours( 12 ) )
+        {
+            return getHourMinuteFormat( );
+        }
+        else if ( tickInterval <= Time.fromDays( 10 ) )
+        {
+            return getDayFormat( );
+        }
+        else if ( tickInterval <= Time.fromDays( 60 ) )
+        {
+            return getMonthFormat( );
+        }
+        else
+        {
+            return getYearFormat( );
+        }
+    }
+
+    @Override
+    public double getTickInterval( List<TimeStamp> list )
+    {
+        if ( list == null || list.size( ) < 2 )
+        {
+            return Time.fromSeconds( 1 );
+        }
+        else
+        {
+            TimeStamp t1 = list.get( 0 );
+            TimeStamp t2 = list.get( 1 );
+            return t2.durationAfter( t1 );
+        }
+    }
+    
+    @Override
+    public List<TimeStamp> getTickPositions( Axis1D axis, double axisLengthPixels )
     {
         TimeStamp t0 = toTimeStamp( axis.getMin( ) );
         TimeStamp t1 = toTimeStamp( axis.getMax( ) );
@@ -453,19 +525,6 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         return Time.fromDays( 1 );
     }
 
-    public static abstract class TimeStruct
-    {
-        public TimeStamp start;
-        public TimeStamp end;
-        public TimeStamp viewStart;
-        public TimeStamp viewEnd;
-        public TimeStamp textCenter;
-
-        public abstract void setCalendar( TimeStamp time, Calendar cal );
-
-        public abstract void incrementCalendar( Calendar cal );
-    }
-
     public static class YearStruct extends TimeStruct
     {
 
@@ -599,7 +658,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
         return ( a.compareTo( b ) > 0 ? a : b );
     }
 
-    public List<TimeStruct> timeStructs( Axis1D axis, List<TimeStamp> tickTimes, TimeStructFactory factory )
+    protected List<TimeStruct> timeStructs( Axis1D axis, List<TimeStamp> tickTimes, TimeStructFactory factory, TimeStampFormat format )
     {
         TimeStamp viewStart = toTimeStamp( axis.getMin( ) );
         TimeStamp viewEnd = toTimeStamp( axis.getMax( ) );
@@ -638,7 +697,11 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
             TimeStamp edge = ( day.viewStart.equals( day.start ) ? day.viewEnd : day.viewStart );
             double edginess = 1 - Math.max( 0, Math.min( 1, duration / maxDayViewDuration ) );
             day.textCenter = midpoint.add( edginess * edge.durationAfter( midpoint ) );
-
+        }
+        
+        for ( TimeStruct day : days )
+        {
+            day.text = day.textCenter.toString( format );
         }
 
         return days;
@@ -647,7 +710,7 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
     @Override
     public double[] getTickPositions( Axis1D axis )
     {
-        List<TimeStamp> tickList = tickTimes( axis, axis.getSizePixels( ) );
+        List<TimeStamp> tickList = getTickPositions( axis, axis.getSizePixels( ) );
         double[] tickArray = new double[tickList.size( )];
 
         for ( int i = 0; i < tickList.size( ); i++ )

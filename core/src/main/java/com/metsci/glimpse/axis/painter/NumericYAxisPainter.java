@@ -44,7 +44,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class NumericYAxisPainter extends NumericAxisPainter
+public class NumericYAxisPainter extends NumericLabelHandlerAxisPainter
 {
     public NumericYAxisPainter( AxisLabelHandler ticks )
     {

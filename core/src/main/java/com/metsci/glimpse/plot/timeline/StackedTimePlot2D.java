@@ -44,7 +44,8 @@ import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.time.AbsoluteTimeAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -193,7 +194,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.plotMouseListeners = new CopyOnWriteArrayList<PlotMouseListener>( );
 
         this.setBorderSize( 0 );
-        this.timeTickHandler = new TimeAxisLabelHandler( TimeZone.getTimeZone( "GMT-0:00" ), epoch );
+        this.timeTickHandler = new AbsoluteTimeAxisLabelHandler( TimeZone.getTimeZone( "GMT-0:00" ), epoch );
 
         this.initializeTimeAxis( );
         this.defaultTimelineInfo = this.createTimeline( );

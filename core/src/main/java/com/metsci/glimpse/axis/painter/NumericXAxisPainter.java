@@ -44,7 +44,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class NumericXAxisPainter extends NumericAxisPainter
+public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
 {
     protected boolean packLabel = false;
 

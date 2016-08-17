@@ -26,15 +26,14 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.color.GlimpseColor.*;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 
 import javax.media.opengl.GLContext;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.painter.base.GlimpsePainter1D;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -70,23 +69,16 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected float[] tickLabelColor;
     protected float[] axisLabelColor;
 
-    protected AxisLabelHandler ticks;
-
     protected boolean fontSet = false;
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
 
-    public NumericAxisPainter( AxisLabelHandler ticks )
+    public NumericAxisPainter( )
     {
-        this.ticks = ticks;
+
         resetFont( );
         resetLabelColors( );
         resetTickColor( );
-    }
-
-    public void setAxisLabel( String label )
-    {
-        this.ticks.setAxisLabel( label );
     }
 
     public void setShowLabelsForOffscreenTicks( boolean show )
@@ -191,16 +183,6 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     public void setShowMinorTicks( boolean show )
     {
         this.showMinorTicks = show;
-    }
-
-    public AxisLabelHandler getTickCalculator( )
-    {
-        return ticks;
-    }
-
-    public void setTickCalculator( AxisLabelHandler ticks )
-    {
-        this.ticks = ticks;
     }
 
     @Override
