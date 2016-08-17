@@ -204,6 +204,15 @@ public class StackedTimePlot2D extends StackedPlot2D
     public void setTimeAxisLabelHandler( TimeAxisLabelHandler handler )
     {
         this.timeTickHandler = handler;
+        this.timeTickHandler.setEpoch( this.epoch );
+        
+        for ( PlotInfo info : getAllPlots( ) )
+        {
+            if ( info instanceof TimelineInfo )
+            {
+                ( (TimelineInfo) info ).getAxisPainter( ).setLabelHandler( handler );
+            }
+        }
     }
 
     public TimeAxisLabelHandler getTimeAxisLabelHandler( )

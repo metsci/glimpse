@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.stacked;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -66,6 +67,9 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     {
         StackedTimePlot2D plot = super.getLayout( );
 
+        //plot.setTimeAxisLabelHandler( new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ) ) );
+
+        
         plot.setPlotSpacing( 20 );
 
         // display horizontal labels

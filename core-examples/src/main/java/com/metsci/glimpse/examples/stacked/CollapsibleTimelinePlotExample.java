@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
@@ -87,6 +88,8 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     {
         final CollapsibleTimePlot2D plot = ( CollapsibleTimePlot2D ) super.getLayout( );
 
+        //plot.setTimeAxisLabelHandler( new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ) ) );
+        
         // provide extra space for left hand side row labels
         plot.setLabelSize( 120 );
 
@@ -302,7 +305,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
                 }
             }
         } );
-
+        
         return plot;
     }
 

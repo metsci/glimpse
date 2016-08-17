@@ -102,6 +102,11 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
         return this.handler;
     }
 
+    public void setLabelHandler( TimeAxisLabelHandler handler )
+    {
+        this.handler = handler;
+    }
+    
     public void setTickLineLength( int pixels )
     {
         this.tickLineLength = pixels;

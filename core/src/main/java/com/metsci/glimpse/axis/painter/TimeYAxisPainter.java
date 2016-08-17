@@ -90,7 +90,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
 
         gl.glColor4fv( tickColor, 0 );
 
-        List<TimeStamp> tickTimes = handler.getTickPositions( axis, width );
+        List<TimeStamp> tickTimes = handler.getTickPositions( axis, height );
 
         // Tick marks
         gl.glBegin( GL2.GL_LINES );

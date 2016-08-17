@@ -29,6 +29,7 @@ package com.metsci.glimpse.examples.stacked;
 import java.util.TimeZone;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -78,6 +79,8 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // create a timeline with plot areas arranged in a vertical line
         StackedTimePlot2D plot = createPlot( );
 
+        plot.setTimeAxisLabelHandler( new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ).subtract( Time.fromDays( 20 ) ) ) );
+        
         // set the time zone for the timeline to local time
         plot.getDefaultTimeline( ).setTimeZone( TimeZone.getDefault( ) );
 
