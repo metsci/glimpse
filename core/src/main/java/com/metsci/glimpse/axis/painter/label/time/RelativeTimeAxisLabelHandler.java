@@ -37,6 +37,16 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
         this.epoch = new Epoch( this.referenceTime );
     }
     
+    public void setFuturePositive( boolean isFuturePositive )
+    {
+        this.isFuturePositive = isFuturePositive;
+    }
+    
+    public boolean setFuturePositive( )
+    {
+        return this.isFuturePositive;
+    }
+    
     public void setReferenceTime( TimeStamp referenceTime )
     {
         this.referenceTime = referenceTime;
@@ -263,8 +273,13 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
                 public String format( BigDecimal posixSeconds )
                 {
                     double elapsedTime_SU = posixSeconds.doubleValue( ) - referenceTime.toPosixSeconds( );
+                    
+                    boolean negative = ( elapsedTime_SU < 0 );
+                    String signString = negative ^ !isFuturePositive ? "-" : "";
+                    elapsedTime_SU = Math.abs( elapsedTime_SU );
+
                     int elapsedTime_DAYS = (int) Math.floor( Time.toDays( elapsedTime_SU ) );
-                    return "" + elapsedTime_DAYS;
+                    return elapsedTime_DAYS == 0 ? String.valueOf( elapsedTime_DAYS ) : signString + elapsedTime_DAYS;
                 }
             };
         }
@@ -305,8 +320,8 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
         {
             double elapsedTime_SU = tickTimes.get( n ).toPosixSeconds( ) - referenceTime_su;
             
-            boolean negative = ( elapsedTime_SU < 0 ); //^ !isFuturePositive;
-            String signString = negative ? "-" : "";
+            boolean negative = ( elapsedTime_SU < 0 );
+            String signString = negative ^ !isFuturePositive ? "-" : "";
             
             elapsedTime_SU = Math.abs( elapsedTime_SU );
             double elapsedTime_DAYS = Time.toDays( elapsedTime_SU );
@@ -363,8 +378,8 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
         {
             double elapsedTime_SU = tickTimes.get( n ).toPosixSeconds( ) - referenceTime_su;
             
-            boolean negative = ( elapsedTime_SU < 0 ); //^ !isFuturePositive;
-            String signString = negative ? "-" : "";
+            boolean negative = ( elapsedTime_SU < 0 );
+            String signString = negative ^ !isFuturePositive ? "-" : "";
 
             elapsedTime_SU = Math.abs( elapsedTime_SU );
             
