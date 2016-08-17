@@ -29,7 +29,6 @@ package com.metsci.glimpse.examples.stacked;
 import java.util.TimeZone;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -84,10 +83,10 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
         // calculate some TimeStamps representing the selected time range and initial extents of the timeline
         Epoch epoch = plot.getEpoch( );
-        TimeStamp selectionMaxTime = epoch.getTimeStamp( );
-        TimeStamp selectionMinTime = selectionMaxTime.subtract( Time.fromHours( 3 ) );
-        TimeStamp axisMaxTime = selectionMaxTime.add( Time.fromHours( 1 ) );
-        TimeStamp axisMinTime = selectionMaxTime.subtract( Time.fromHours( 20 ) );
+        TimeStamp selectionMinTime = epoch.getTimeStamp( );
+        TimeStamp selectionMaxTime = selectionMinTime.add( Time.fromHours( 3 ) );
+        TimeStamp axisMinTime = selectionMinTime;
+        TimeStamp axisMaxTime = selectionMaxTime.add( Time.fromHours( 20 ) );
 
         // set the selected time range
         plot.setTimeSelection( selectionMinTime, selectionMaxTime );

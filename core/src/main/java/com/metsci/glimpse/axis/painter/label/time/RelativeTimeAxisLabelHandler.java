@@ -22,9 +22,17 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
 
     protected Epoch epoch;
     protected int pixelsBetweenTicks = 60;
+    protected boolean isFuturePositive;
+
 
     public RelativeTimeAxisLabelHandler( TimeStamp referenceTime )
     {
+        this( referenceTime, true );
+    }
+    
+    public RelativeTimeAxisLabelHandler( TimeStamp referenceTime, boolean isFuturePositive )
+    {
+        this.isFuturePositive = isFuturePositive;
         this.referenceTime = referenceTime;
         this.epoch = new Epoch( this.referenceTime );
     }
@@ -170,7 +178,7 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
                 @Override
                 public String format( BigDecimal posixSeconds )
                 {
-                    double elapsedTime_SU = posixSeconds.doubleValue( ) - referenceTime.toPosixSeconds( );
+                    double elapsedTime_SU = Math.abs( posixSeconds.doubleValue( ) - referenceTime.toPosixSeconds( ) );
                     double elapsedTime_DAYS = Time.toDays( elapsedTime_SU );
                     int elapsedTime_DAYS_WHOLE = (int) Math.floor( elapsedTime_DAYS );
                     double elapsedTime_HOURS = ( elapsedTime_DAYS - elapsedTime_DAYS_WHOLE ) * 24;
@@ -188,7 +196,11 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
                         elapsedTime_SEC_WHOLE -= 60;
                         elapsedTime_MIN_WHOLE += 1;
                     }
-
+                    if ( elapsedTime_MIN_WHOLE >= 60 )
+                    {
+                        elapsedTime_HOURS_WHOLE = 0;
+                    }
+                    
                     String min = elapsedTime_MIN_WHOLE < 10 ? "0" + elapsedTime_MIN_WHOLE : "" + elapsedTime_MIN_WHOLE;
                     String sec = elapsedTime_SEC_WHOLE < 10 ? "0" + elapsedTime_SEC_WHOLE : "" + elapsedTime_SEC_WHOLE;
 
@@ -209,7 +221,7 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
                 @Override
                 public String format( BigDecimal posixSeconds )
                 {
-                    double elapsedTime_SU = posixSeconds.doubleValue( ) - referenceTime.toPosixSeconds( );
+                    double elapsedTime_SU = Math.abs( posixSeconds.doubleValue( ) - referenceTime.toPosixSeconds( ) );
                     double elapsedTime_DAYS = Time.toDays( elapsedTime_SU );
                     int elapsedTime_DAYS_WHOLE = (int) Math.floor( elapsedTime_DAYS );
                     double elapsedTime_HOURS = ( elapsedTime_DAYS - elapsedTime_DAYS_WHOLE ) * 24;
@@ -224,6 +236,10 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
                     {
                         elapsedTime_MIN_WHOLE -= 60;
                         elapsedTime_HOURS_WHOLE += 1;
+                    }
+                    if ( elapsedTime_HOURS_WHOLE >= 24 )
+                    {
+                        elapsedTime_HOURS_WHOLE = 0;
                     }
 
                     String hour = elapsedTime_HOURS_WHOLE < 10 ? "0" + elapsedTime_HOURS_WHOLE : "" + elapsedTime_HOURS_WHOLE;
@@ -283,27 +299,42 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
 
         double maxViewDuration_SU = Double.NEGATIVE_INFINITY;
         Integer previous_HOURS = null;
+        Boolean previous_SIGN = null;
 
         for ( int n = 0; n < tickTimes.size( ); n++ )
         {
-
             double elapsedTime_SU = tickTimes.get( n ).toPosixSeconds( ) - referenceTime_su;
+            
+            boolean negative = ( elapsedTime_SU < 0 ); //^ !isFuturePositive;
+            String signString = negative ? "-" : "";
+            
+            elapsedTime_SU = Math.abs( elapsedTime_SU );
             double elapsedTime_DAYS = Time.toDays( elapsedTime_SU );
             int elapsedTime_DAYS_WHOLE = (int) Math.floor( elapsedTime_DAYS );
             double elapsedTime_HOURS = ( elapsedTime_DAYS - elapsedTime_DAYS_WHOLE ) * 24;
             int elapsedTime_HOURS_WHOLE = (int) Math.floor( elapsedTime_HOURS );
             int elapsedTime_HOURS_TOTAL = elapsedTime_DAYS_WHOLE * 24 + elapsedTime_HOURS_WHOLE;
             
-            if ( previous_HOURS != null && elapsedTime_HOURS_TOTAL == previous_HOURS ) continue;
+            if ( previous_HOURS != null && elapsedTime_HOURS_TOTAL == previous_HOURS && negative == previous_SIGN ) continue;
             previous_HOURS = elapsedTime_HOURS_TOTAL;
+            previous_SIGN = negative;
 
             TimeStruct timeStruct = new TimeStructRelative( );
 
-            timeStruct.start = TimeStamp.fromPosixSeconds( Time.fromHours( elapsedTime_HOURS_TOTAL ) + referenceTime_su );
-            timeStruct.end = timeStruct.start.add( Time.fromHours( 1 ) );
+            if ( negative )
+            {
+                timeStruct.end = TimeStamp.fromPosixSeconds( Time.fromHours( -elapsedTime_HOURS_TOTAL ) + referenceTime_su );
+                timeStruct.start = timeStruct.end.subtract( Time.fromHours( 1 ) );    
+            }
+            else
+            {
+                timeStruct.start = TimeStamp.fromPosixSeconds( Time.fromHours( elapsedTime_HOURS_TOTAL ) + referenceTime_su );
+                timeStruct.end = timeStruct.start.add( Time.fromHours( 1 ) );                   
+            }
+            
             timeStruct.viewStart = clamp( timeStruct.start, timeStruct.end, minTime );
             timeStruct.viewEnd = clamp( timeStruct.start, timeStruct.end, maxTime );
-            timeStruct.text = "Day " + elapsedTime_DAYS_WHOLE + " Hour " + elapsedTime_HOURS_WHOLE;
+            timeStruct.text = "Day " + signString + elapsedTime_DAYS_WHOLE + " Hour " + signString + elapsedTime_HOURS_WHOLE;
 
             maxViewDuration_SU = Math.max( maxViewDuration_SU, timeStruct.viewEnd.durationAfter( timeStruct.viewStart ) );
 
@@ -326,24 +357,40 @@ public class RelativeTimeAxisLabelHandler implements TimeAxisLabelHandler
 
         double maxViewDuration_SU = Double.NEGATIVE_INFINITY;
         Integer previous_DAYS = null;
+        Boolean previous_SIGN = null;
 
         for ( int n = 0; n < tickTimes.size( ); n++ )
         {
-
             double elapsedTime_SU = tickTimes.get( n ).toPosixSeconds( ) - referenceTime_su;
-            double elapsedTime_DAYS = Time.toDays( elapsedTime_SU );
-            int elapsedTime_DAYS_WHOLE = ( int ) Math.floor( elapsedTime_DAYS );
+            
+            boolean negative = ( elapsedTime_SU < 0 ); //^ !isFuturePositive;
+            String signString = negative ? "-" : "";
 
-            if ( previous_DAYS != null && elapsedTime_DAYS_WHOLE == previous_DAYS ) continue;
+            elapsedTime_SU = Math.abs( elapsedTime_SU );
+            
+            double elapsedTime_DAYS = Time.toDays( elapsedTime_SU );
+            int elapsedTime_DAYS_WHOLE = (int) Math.floor( elapsedTime_DAYS );
+
+            if ( previous_DAYS != null && elapsedTime_DAYS_WHOLE == previous_DAYS && negative == previous_SIGN ) continue;
             previous_DAYS = elapsedTime_DAYS_WHOLE;
+            previous_SIGN = negative;
 
             TimeStruct timeStruct = new TimeStructRelative( );
 
-            timeStruct.start = TimeStamp.fromPosixSeconds( Time.fromDays( elapsedTime_DAYS_WHOLE ) + referenceTime_su );
-            timeStruct.end = timeStruct.start.add( Time.fromDays( 1 ) );
+            if ( negative )
+            {
+                timeStruct.end = TimeStamp.fromPosixSeconds( Time.fromDays( -elapsedTime_DAYS_WHOLE ) + referenceTime_su );
+                timeStruct.start = timeStruct.end.subtract( Time.fromDays( 1 ) );    
+            }
+            else
+            {
+                timeStruct.start = TimeStamp.fromPosixSeconds( Time.fromDays( elapsedTime_DAYS_WHOLE ) + referenceTime_su );
+                timeStruct.end = timeStruct.start.add( Time.fromDays( 1 ) );                   
+            }
+
             timeStruct.viewStart = clamp( timeStruct.start, timeStruct.end, minTime );
             timeStruct.viewEnd = clamp( timeStruct.start, timeStruct.end, maxTime );
-            timeStruct.text = "Day " + elapsedTime_DAYS_WHOLE;
+            timeStruct.text = "Day " + signString + elapsedTime_DAYS_WHOLE;
             
             maxViewDuration_SU = Math.max( maxViewDuration_SU, timeStruct.viewEnd.durationAfter( timeStruct.viewStart ) );
 

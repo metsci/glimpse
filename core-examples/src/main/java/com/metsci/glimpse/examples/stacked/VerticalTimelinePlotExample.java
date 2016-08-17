@@ -69,22 +69,22 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
         StackedTimePlot2D plot = super.getLayout( );
 
         // Set a tick labeler which labels timeline tick marks by the hours/days elapsed since a reference date
-        final RelativeTimeAxisLabelHandler handler = new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ).subtract( Time.fromDays( 20 ) ) );
+        final RelativeTimeAxisLabelHandler handler = new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ).add( -Time.fromHours( 100 ) ) );
         plot.setTimeAxisLabelHandler( handler );
         
         // Update the reference time in a loop to animate the time labels
-        new Thread( )
-        {
-            @Override
-            public void run( )
-            {
-                while( true )
-                {
-                    handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) );
-                    try { Thread.sleep( 10 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
-                }
-            }
-        }.start( );
+//        new Thread( )
+//        {
+//            @Override
+//            public void run( )
+//            {
+//                while( true )
+//                {
+//                    handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) );
+//                    try { Thread.sleep( 10 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
+//                }
+//            }
+//        }.start( );
         
         plot.setPlotSpacing( 20 );
 
