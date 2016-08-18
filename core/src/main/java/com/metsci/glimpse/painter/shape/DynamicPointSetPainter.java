@@ -45,13 +45,10 @@ import javax.media.opengl.GL2;
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D.IndexedMutator;
 import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.selection.QuadTreeFloatBuffer;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
@@ -73,8 +70,10 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected float pointSize;
 
-    protected GLFloatBuffer colorBuffer;
-    protected GLFloatBuffer2D pointBuffer;
+    protected QuadTreeFloatBuffer quadTree;
+    
+    protected FloatBuffer colorBuffer;
+    protected FloatBuffer pointBuffer;
 
     protected FloatBuffer tempBuffer;
 
@@ -104,9 +103,10 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.idMap = new LinkedHashMap<Object, Integer>( );
         this.indexMap = new LinkedHashMap<Integer, Object>( );
 
-        this.pointBuffer = new GLFloatBuffer2D( initialSize, true );
-        this.colorBuffer = new GLFloatBuffer( initialSize, 4 );
-
+        this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
+        this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
+        this.quadTree = new QuadTreeFloatBuffer( this.pointBuffer );
+        
         this.searchResults = new IntsArray( );
     }
 
@@ -116,7 +116,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         try
         {
             this.searchResults.n = 0; // clear the search results
-            this.pointBuffer.search( ( float ) minX, ( float ) maxX, ( float ) minY, ( float ) maxY, searchResults );
+            this.quadTree.getIndex( ).search( ( float ) minX, ( float ) maxX, ( float ) minY, ( float ) maxY, searchResults );
 
             final List<Object> resultList = new LinkedList<Object>( );
             for ( int i = 0; i < this.searchResults.n; i++ )
@@ -232,8 +232,9 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         {
             this.idMap.clear( );
             this.indexMap.clear( );
-            this.pointBuffer = new GLFloatBuffer2D( initialSize, true );
-            this.colorBuffer = new GLFloatBuffer( initialSize, 4 );
+            this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
+            this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
+            this.quadTree.setBuffer( this.pointBuffer );
         }
         finally
         {
@@ -259,6 +260,8 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     @Override
     public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
     {
+        //XXX shader needs to be written to replace this
+        //XXX it's a good very basic use case (draw a bunch of points with a specified size)
         lock.lock( );
         try
         {
@@ -288,7 +291,9 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected int getCapacity( )
     {
-        return this.pointBuffer.getMaxVertices( );
+        // divide by 2 in order to count points, not vertices
+        // ( 2 vertices per point )
+        return this.pointBuffer.limit( ) / 2;
     }
 
     protected void deletePositions( final Set<Integer> indices )
@@ -300,29 +305,11 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
         shiftMaps( idMap, indexMap, indices, size );
 
-        this.colorBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                shift( data, tempBuffer, length, size, indices );
-            }
-        } );
+        shift( this.colorBuffer, tempBuffer, 4, size, indices );
 
-        this.pointBuffer.mutateIndexed( new IndexedMutator( )
-        {
-            @Override
-            public int getUpdateIndex( )
-            {
-                return first;
-            }
-
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                shift( data, tempBuffer, length, size, indices );
-            }
-        } );
+        this.quadTree.removeIndex( first );
+        shift( this.pointBuffer, tempBuffer, 2, size, indices );
+        this.quadTree.addIndex( first );
     }
 
     protected void deletePositions( BulkPointAccumulator accum )
@@ -348,38 +335,20 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected void mutateColor( final int index, final float[] color )
     {
-        this.colorBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.position( index * length );
-                data.put( color[0] );
-                data.put( color[1] );
-                data.put( color[2] );
-                data.put( color.length == 4 ? color[3] : 1.0f );
-            }
-        } );
+        this.colorBuffer.position( index * 4 );
+        this.colorBuffer.put( color[0] );
+        this.colorBuffer.put( color[1] );
+        this.colorBuffer.put( color[2] );
+        this.colorBuffer.put( color.length == 4 ? color[3] : 1.0f );
     }
 
     protected void mutatePosition( final int index, final float posX, final float posY )
     {
-        this.pointBuffer.mutateIndexed( new IndexedMutator( )
-        {
-            @Override
-            public int getUpdateIndex( )
-            {
-                return index;
-            }
-
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.position( index * length );
-                data.put( posX );
-                data.put( posY );
-            }
-        } );
+        this.quadTree.removeIndex( index, index+1 );
+        this.pointBuffer.position( index * 2 );
+        this.pointBuffer.put( posX );
+        this.pointBuffer.put( posY );
+        this.quadTree.addIndex( index, index+1 );
     }
 
     protected int getIndexArray( List<Object> ids, boolean grow, int[] listIndex )
@@ -405,39 +374,21 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         final int size = accumulator.getAddedSize( );
 
         final int[] indexList = new int[size];
-        final int minIndex = getIndexArray( ids, true, indexList );
+        getIndexArray( ids, true, indexList );
 
-        this.pointBuffer.mutateIndexed( new IndexedMutator( )
+        this.quadTree.removeIndices( indexList );
+        for ( int i = 0; i < size; i++ )
         {
-            @Override
-            public int getUpdateIndex( )
-            {
-                return minIndex;
-            }
+            this.pointBuffer.position( indexList[i] * 2 );
+            this.pointBuffer.put( v, i * stride, 2 );
+        }
+        this.quadTree.addIndices( indexList );
 
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0; i < size; i++ )
-                {
-                    data.position( indexList[i] * length );
-                    data.put( v, i * stride, length );
-                }
-            }
-        } );
-
-        this.colorBuffer.mutate( new Mutator( )
+        for ( int i = 0; i < size; i++ )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0; i < size; i++ )
-                {
-                    data.position( indexList[i] * length );
-                    data.put( v, i * stride + 2, length );
-                }
-            }
-        } );
+            this.colorBuffer.position( indexList[i] * 4 );
+            this.colorBuffer.put( v, i * stride + 2, 4 );
+        }
     }
 
     protected void mutateColors( BulkColorAccumulator accumulator )
@@ -450,18 +401,11 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         final int[] indexList = new int[size];
         getIndexArray( ids, false, indexList );
 
-        this.colorBuffer.mutate( new Mutator( )
+        for ( int i = 0; i < size; i++ )
         {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                for ( int i = 0; i < size; i++ )
-                {
-                    data.position( indexList[i] * length );
-                    data.put( v, i * stride, length );
-                }
-            }
-        } );
+            this.colorBuffer.position( indexList[i] * 4 );
+            this.colorBuffer.put( v, i * stride, 4 );
+        }
     }
 
     protected int getIndex( Object id, boolean grow )
@@ -488,8 +432,8 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     {
         minSize = Math.max( ( int ) ( getCapacity( ) * GROWTH_FACTOR ), minSize );
 
-        this.pointBuffer.ensureCapacity( minSize );
-        this.colorBuffer.ensureCapacity( minSize );
+        this.pointBuffer = DynamicLineSetPainter.growBuffer( this.pointBuffer, minSize * 2 * 2 );
+        this.colorBuffer = DynamicLineSetPainter.growBuffer( this.colorBuffer, minSize * 4 * 2 );
     }
 
     public static class BulkColorAccumulator

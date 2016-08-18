@@ -59,7 +59,6 @@ import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
-import com.metsci.glimpse.gl.attribute.GLBuffer;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -615,7 +614,6 @@ public class IconPainter extends GlimpseDataPainter2D
 
         this.shader.setProjectionMatrix( axis );
 
-        
         for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
         {
             Set<IconGroup> groups = entry.getValue( );
@@ -623,7 +621,7 @@ public class IconPainter extends GlimpseDataPainter2D
 
             TextureAtlas atlas = entry.getKey( );
             atlas.beginRendering( );
-            
+
             try
             {
                 // draw each icon group, if it is visible
@@ -633,19 +631,19 @@ public class IconPainter extends GlimpseDataPainter2D
                     // we do this here because texture coordinates might not
                     // be known until the atlas.beginRendering( ) call
                     group.addQueuedIcons( );
-                    
+
                     this.shader.setTexCoordData( group.getBufferTexCoords( ) );
                     this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
                     this.shader.setColorCoordData( group.getPickColorCoords( ) );
                     this.shader.setVertexData( group.getBufferIconPlacement( ) );
-    
+
                     System.out.println( group.getBufferIconPlacement( ).limit( ) + " " + group.getBufferTexCoords( ) + " " + group.getCurrentSize( ) );
 
                     this.shader.useProgram( gl, true );
                     try
                     {
                         if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
-                        
+
                         gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
                     }
                     finally
@@ -656,7 +654,7 @@ public class IconPainter extends GlimpseDataPainter2D
             }
             finally
             {
-               atlas.endRendering( );
+                atlas.endRendering( );
             }
         }
     }
@@ -811,28 +809,6 @@ public class IconPainter extends GlimpseDataPainter2D
                 {
                     listener.selectionChanged( resultSet );
                 }
-            }
-        } );
-    }
-
-    protected void copy( final GLBuffer from, final GLBuffer to )
-    {
-        from.mutate( new GLBuffer.Mutator( )
-        {
-            @Override
-            public void mutate( final ByteBuffer fromData, int length )
-            {
-                to.mutate( new GLBuffer.Mutator( )
-                {
-                    @Override
-                    public void mutate( ByteBuffer toData, int length )
-                    {
-                        fromData.rewind( );
-                        toData.rewind( );
-
-                        toData.put( fromData );
-                    }
-                } );
             }
         } );
     }
