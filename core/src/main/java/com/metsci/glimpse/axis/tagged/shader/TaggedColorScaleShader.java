@@ -38,7 +38,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 
 public class TaggedColorScaleShader extends GlimpseShaderProgram implements AxisListener1D
 {

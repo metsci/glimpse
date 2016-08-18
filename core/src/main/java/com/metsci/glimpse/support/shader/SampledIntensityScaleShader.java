@@ -34,7 +34,7 @@ import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 
 public class SampledIntensityScaleShader extends GlimpseShaderProgram implements AxisListener1D
 {

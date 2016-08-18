@@ -33,7 +33,7 @@ import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 
 /**
  * A shader which colors a 2D data texture using values sampled from a color

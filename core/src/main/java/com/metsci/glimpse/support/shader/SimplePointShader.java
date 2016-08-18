@@ -39,7 +39,7 @@ import com.jogamp.opengl.util.GLArrayDataServer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 
 public class SimplePointShader extends GlimpseShaderProgram
 {

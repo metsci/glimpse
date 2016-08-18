@@ -12,7 +12,7 @@ import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.GLArrayDataServer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 
 public class IconShader extends GlimpseShaderProgram
 {

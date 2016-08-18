@@ -39,7 +39,7 @@ import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.joglshader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.gl.texture.Texture;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;

@@ -1,4 +1,4 @@
-package com.metsci.glimpse.gl.joglshader;
+package com.metsci.glimpse.gl.shader;
 
 import java.util.Collection;
 import java.util.logging.Logger;
