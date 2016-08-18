@@ -1,9 +1,5 @@
 package com.metsci.glimpse.gl.joglshader;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -75,6 +71,17 @@ public class GlimpseShaderProgram
         return addShader( GL3.GL_GEOMETRY_SHADER, path );
     }
 
+    public ShaderCode addShader( int type, String path )
+    {
+        return this.addShader( ShaderCode.create( null, type, 1, getClass( ), new String[] { path }, true ) );
+    }
+
+    public ShaderCode addShader( ShaderCode code )
+    {
+        codes.add( code );
+        return code;
+    }
+
     public GLArrayDataClient addArrayData( GLArrayDataClient array )
     {
         this.arrays.add( array );
@@ -85,13 +92,6 @@ public class GlimpseShaderProgram
     {
         this.uniforms.add( uniform );
         return uniform;
-    }
-
-    public ShaderCode addShader( int type, String path )
-    {
-        ShaderCode code = ShaderCode.create( null, type, 1, getClass( ), new String[] { path }, true );
-        codes.add( code );
-        return code;
     }
 
     public void dispose( GLContext context )
