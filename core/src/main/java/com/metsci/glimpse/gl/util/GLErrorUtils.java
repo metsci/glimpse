@@ -31,7 +31,6 @@ import static jogamp.opengl.glu.error.Error.*;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -46,13 +45,13 @@ public class GLErrorUtils
     public static void logGLShaderInfoLog( Logger logger, GL gl, int programObject, String prefix )
     {
         String log = getGLShaderInfoLog( gl, programObject );
-        
+
         if ( log != null && !log.isEmpty( ) )
         {
             logWarning( logger, "%s: %s", prefix, log );
         }
     }
-    
+
     public static String getGLShaderInfoLog( GL gl, int programObject )
     {
         IntBuffer intValue = IntBuffer.allocate( 1 );

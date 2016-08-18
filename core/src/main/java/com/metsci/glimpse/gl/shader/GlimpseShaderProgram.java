@@ -17,6 +17,11 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.glsl.ShaderState;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 
+/**
+ * Simple Glimpse-specific convenience wrapper around {@link ShaderProgram}.
+ * 
+ * @author ulman
+ */
 public class GlimpseShaderProgram
 {
     private static final Logger logger = Logger.getLogger( GlimpseShaderProgram.class.getName( ) );
