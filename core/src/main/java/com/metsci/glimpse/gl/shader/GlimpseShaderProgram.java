@@ -19,7 +19,7 @@ import com.metsci.glimpse.gl.util.GLErrorUtils;
 
 /**
  * Simple Glimpse-specific convenience wrapper around {@link ShaderProgram}.
- * 
+ *
  * @author ulman
  */
 public class GlimpseShaderProgram
@@ -119,11 +119,9 @@ public class GlimpseShaderProgram
         }
     }
 
-    protected boolean load( GL gl, Collection<ShaderCode> codes )
+    protected boolean load( GL2ES2 gl, Collection<ShaderCode> codes )
     {
         if ( this.loaded ) return true;
-
-        GL2ES2 gl2es2 = gl.getGL2ES2( );
 
         this.state = new ShaderState( );
         this.state.setVerbose( true );
@@ -131,7 +129,7 @@ public class GlimpseShaderProgram
 
         for ( ShaderCode code : codes )
         {
-            boolean success = this.program.add( gl2es2, code, System.err );
+            boolean success = this.program.add( gl, code, System.err );
             GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ): " + code );
             GLErrorUtils.logGLShaderInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ) Log:" );
 
@@ -141,7 +139,7 @@ public class GlimpseShaderProgram
             }
         }
 
-        this.state.attachShaderProgram( gl2es2, this.program, true );
+        this.state.attachShaderProgram( gl, this.program, true );
         GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( )" );
         GLErrorUtils.logGLShaderInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( ) Log:" );
 

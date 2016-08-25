@@ -26,15 +26,16 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static jogamp.opengl.glu.error.Error.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static javax.media.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
+import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 
 public class GLErrorUtils
 {
@@ -42,7 +43,7 @@ public class GLErrorUtils
     {
     };
 
-    public static void logGLShaderInfoLog( Logger logger, GL gl, int programObject, String prefix )
+    public static void logGLShaderInfoLog( Logger logger, GL2ES2 gl, int programObject, String prefix )
     {
         String log = getGLShaderInfoLog( gl, programObject );
 
@@ -52,13 +53,11 @@ public class GLErrorUtils
         }
     }
 
-    public static String getGLShaderInfoLog( GL gl, int programObject )
+    public static String getGLShaderInfoLog( GL2ES2 gl, int programObject )
     {
         IntBuffer intValue = IntBuffer.allocate( 1 );
 
-        GL2 gl2 = gl.getGL2( );
-
-        gl2.glGetObjectParameterivARB( programObject, GL2.GL_OBJECT_INFO_LOG_LENGTH_ARB, intValue );
+        gl.glGetShaderiv( programObject, GL_INFO_LOG_LENGTH, intValue );
 
         int lengthWithNull = intValue.get( );
         if ( lengthWithNull <= 1 )
@@ -70,7 +69,7 @@ public class GLErrorUtils
         ByteBuffer infoLog = ByteBuffer.allocate( lengthWithNull );
 
         intValue.flip( );
-        gl2.glGetShaderInfoLog( programObject, lengthWithNull, intValue, infoLog );
+        gl.glGetShaderInfoLog( programObject, lengthWithNull, intValue, infoLog );
 
         int actualLength = intValue.get( );
 
@@ -83,7 +82,7 @@ public class GLErrorUtils
     public static boolean logGLError( Logger logger, GL gl, String prefix )
     {
         int error = gl.glGetError( );
-        if ( error != GL2.GL_NO_ERROR )
+        if ( error != GL.GL_NO_ERROR )
         {
             StackTraceElement[] traceArray = Thread.currentThread( ).getStackTrace( );
             StringBuilder traceString = new StringBuilder( );
