@@ -30,7 +30,6 @@ import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.FRAME_BACK
 import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.PLOT_BACKGROUND_COLOR;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -108,7 +107,7 @@ public class BackgroundPainter implements GlimpsePainter
 
         GL gl = context.getGL( );
         gl.glClearColor( backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3] );
-        gl.glClear( GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT );
+        gl.glClear( GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT );
     }
 
     @Override
