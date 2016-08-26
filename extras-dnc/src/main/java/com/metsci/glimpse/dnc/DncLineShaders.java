@@ -59,7 +59,7 @@ public class DncLineShaders
         "                                                                                                   ",
         "  vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )                                                  ",
         "  {                                                                                                ",
-        "      return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );                                                 ",
+        "      return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );                         ",
         "  }                                                                                                ",
         "                                                                                                   ",
         "  bool setContains( isampler2D setTexture, float index )                                           ",
