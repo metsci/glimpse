@@ -31,9 +31,9 @@ import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 
 /**
  * An abstract {@link Texture} implementation which wraps an OpenGL

@@ -30,10 +30,10 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.logGLProgramInfoLog;
 
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLException;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLException;
 
 /**
  * A structure wrapping a set of three OpenGL shaders (a geometry

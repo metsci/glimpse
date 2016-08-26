@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.base;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

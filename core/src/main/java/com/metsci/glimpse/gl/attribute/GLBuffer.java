@@ -31,8 +31,8 @@ import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
 

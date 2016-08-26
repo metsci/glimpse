@@ -32,8 +32,8 @@ import static jogamp.opengl.glu.error.Error.gluErrorString;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.shader.ShaderSource;

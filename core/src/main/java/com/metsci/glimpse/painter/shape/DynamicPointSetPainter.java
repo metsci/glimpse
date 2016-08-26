@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;

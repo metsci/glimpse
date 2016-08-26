@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.atlas.shader;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.gl.shader.Shader;
 import com.metsci.glimpse.gl.shader.ShaderArg;

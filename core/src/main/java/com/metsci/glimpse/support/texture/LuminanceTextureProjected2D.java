@@ -28,7 +28,7 @@ package com.metsci.glimpse.support.texture;
 
 import java.nio.Buffer;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 /**
  * A texture class which stores 16 bit fixed point greyscale values (capped from 0 to 1).

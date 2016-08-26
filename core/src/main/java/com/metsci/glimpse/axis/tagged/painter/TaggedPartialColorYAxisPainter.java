@@ -31,7 +31,7 @@ import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import java.nio.FloatBuffer;
 import java.util.List;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis1D;

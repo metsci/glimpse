@@ -28,7 +28,7 @@ package com.metsci.glimpse.gl.texture;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.painter.texture.TextureUnit;
 

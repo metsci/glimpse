@@ -36,10 +36,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLException;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLException;
 
 import com.metsci.glimpse.util.io.StreamOpener;
 

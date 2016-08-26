@@ -26,25 +26,23 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLRunnable;
-import javax.swing.JPanel;
-
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLRunnable;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
@@ -415,6 +413,10 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     @Override
     public int[] getSurfaceScale( )
     {
-        return this.glWindow.getNativeSurfaceScale( new int[2] );
+        float[] fArray = this.glWindow.getCurrentSurfaceScale(new float[2]);
+        int[] iArray = new int[2];
+        iArray[0] = (int) fArray[0];
+        iArray[1] = (int) fArray[1];
+        return iArray;
     }
 }

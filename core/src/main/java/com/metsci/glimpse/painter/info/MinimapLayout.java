@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.info;
 
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.factory.DefaultAxisFactory2D;
