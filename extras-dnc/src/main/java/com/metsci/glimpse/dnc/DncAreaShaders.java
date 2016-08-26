@@ -34,8 +34,10 @@ import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static javax.media.opengl.GL2ES2.GL_LINK_STATUS;
 import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
 public class DncAreaShaders
@@ -43,9 +45,23 @@ public class DncAreaShaders
 
     public static final String areaVertShader_GLSL = join( "\n",
         "                                                                                    ",
-        "  #version 120                                                                      ",
-        "  #extension GL_EXT_gpu_shader4 : enable                                            ",
+        "  #version 150                                                                      ",
         "                                                                                    ",
+        "  vec2 axisMin( vec4 axisRect )                                                                    ",
+        "  {                                                                                                ",
+        "      return axisRect.xy;                                                                          ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
+        "  vec2 axisSize( vec4 axisRect )                                                                   ",
+        "  {                                                                                                ",
+        "      return axisRect.zw;                                                                          ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
+        "  vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )                                                  ",
+        "  {                                                                                                ",
+        "      return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );                                                 ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
         "  bool setContains( isampler2D setTexture, float index )                            ",
         "  {                                                                                 ",
         "      ivec2 textureSize = textureSize2D( setTexture, 0 );                           ",
@@ -63,34 +79,44 @@ public class DncAreaShaders
         "      }                                                                             ",
         "  }                                                                                 ",
         "                                                                                    ",
+        "  uniform vec4 AXIS_RECT;                                                           ",
         "  uniform isampler2D HIGHLIGHT_SET;                                                 ",
         "                                                                                    ",
-        "  varying float vHighlight;                                                         ",
+        "  in vec3 inAreaVertex;                                                             ",
+        "                                                                                    ",
+        "  out float vHighlight;                                                             ",
         "                                                                                    ",
         "  void main( )                                                                      ",
         "  {                                                                                 ",
-        "      float featureNum = gl_Vertex.z;                                               ",
+        "      float featureNum = inAreaVertex.z;                                            ",
         "      vHighlight = ( setContains( HIGHLIGHT_SET, featureNum ) ? 1.0 : 0.0 );        ",
         "                                                                                    ",
-        "      gl_Position = gl_ModelViewProjectionMatrix * vec4( gl_Vertex.xy, 0.0, 1.0 );  ",
+        "      vec2 xy_AXIS = inAreaVertex.xy;                                               ",
+        "      gl_Position.xy = axisXyToNdc( xy_AXIS, AXIS_RECT );                           ",
+        "      gl_Position.zw = vec2( 0.0, 1.0 );                                            ",
         "  }                                                                                 ",
         "                                                                                    " );
 
     public static final String areaFragShader_GLSL = join( "\n",
         "                                                               ",
-        "  #version 120                                                 ",
+        "  #version 150                                                 ",
         "                                                               ",
         "  uniform vec4 RGBA;                                           ",
         "                                                               ",
+        "  out vec4 outRgba;                                            ",
+        "                                                               ",
         "  void main( )                                                 ",
         "  {                                                            ",
-        "      gl_FragColor.rgb = RGBA.rgb * RGBA.a;                    ",
-        "      gl_FragColor.a = RGBA.a;                                 ",
+        "      outRgba.rgb = RGBA.rgb * RGBA.a;                         ",
+        "      outRgba.a = RGBA.a;                                      ",
         "  }                                                            ",
         "                                                               " );
 
 
-    public static int buildAreaProgram( GL2 gl )
+    protected static final int inAreaVertex = 1;
+
+
+    public static int buildAreaProgram( GL2ES2 gl )
     {
         IntsArray shaders = new IntsArray( );
         try
@@ -102,6 +128,8 @@ public class DncAreaShaders
             for ( int s : shaders.a ) gl.glAttachShader( program, s );
             try
             {
+                gl.glBindAttribLocation( program, inAreaVertex, "inAreaVertex" );
+
                 gl.glLinkProgram( program );
                 int[] linkStatus = new int[ 1 ];
                 gl.glGetProgramiv( program, GL_LINK_STATUS, linkStatus, 0 );
@@ -124,19 +152,41 @@ public class DncAreaShaders
     }
 
 
+    public static void setUniformAxisRect( GL2ES2 gl, int location, Axis2D axis )
+    {
+        Axis1D xAxis = axis.getAxisX( );
+        float xMin = ( float ) xAxis.getMin( );
+        float xSize = ( float ) ( xAxis.getMax( ) - xAxis.getMin( ) );
+
+        Axis1D yAxis = axis.getAxisY( );
+        float yMin = ( float ) yAxis.getMin( );
+        float ySize = ( float ) ( yAxis.getMax( ) - yAxis.getMin( ) );
+
+        gl.glUniform4f( location, xMin, yMin, xSize, ySize );
+    }
+
+
     public static class DncAreaProgram
     {
         public final int programHandle;
 
-        public final int HIGHLIGHT_SET;
+        public final int AXIS_RECT;
         public final int RGBA;
+        public final int HIGHLIGHT_SET;
 
-        public DncAreaProgram( GL2 gl )
+        public final int inAreaVertex;
+
+        public DncAreaProgram( GL2ES2 gl )
         {
             this.programHandle = buildAreaProgram( gl );
 
-            this.HIGHLIGHT_SET = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SET" );
+            this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
+
             this.RGBA = gl.glGetUniformLocation( programHandle, "RGBA" );
+
+            this.HIGHLIGHT_SET = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SET" );
+
+            this.inAreaVertex = DncAreaShaders.inAreaVertex;
         }
     }
 

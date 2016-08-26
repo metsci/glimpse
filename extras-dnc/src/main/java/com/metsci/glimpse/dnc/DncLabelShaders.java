@@ -28,20 +28,13 @@ package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.dnc.util.Shaders.compileShader;
 import static com.metsci.glimpse.dnc.util.Shaders.getProgramInfoLog;
-import static com.metsci.glimpse.dnc.util.Shaders.requireNoErrors;
 import static com.metsci.glimpse.util.StringUtils.join;
-import static javax.media.opengl.GL.GL_POINTS;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 import static javax.media.opengl.GL.GL_TRUE;
 import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static javax.media.opengl.GL2ES2.GL_LINK_STATUS;
 import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static javax.media.opengl.GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB;
-import static javax.media.opengl.GL2GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB;
-import static javax.media.opengl.GL2GL3.GL_GEOMETRY_VERTICES_OUT_ARB;
 import static javax.media.opengl.GL3.GL_GEOMETRY_SHADER;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.util.primitives.IntsArray;
@@ -51,9 +44,23 @@ public class DncLabelShaders
 
     public static final String labelVertShader_GLSL = join( "\n",
         "                                                                                    ",
-        "  #version 120                                                                      ",
-        "  #extension GL_EXT_gpu_shader4 : enable                                            ",
+        "  #version 150                                                                      ",
         "                                                                                    ",
+        "  vec2 axisMin( vec4 axisRect )                                                                    ",
+        "  {                                                                                                ",
+        "      return axisRect.xy;                                                                          ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
+        "  vec2 axisSize( vec4 axisRect )                                                                   ",
+        "  {                                                                                                ",
+        "      return axisRect.zw;                                                                          ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
+        "  vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )                                                  ",
+        "  {                                                                                                ",
+        "      return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );                                                 ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
         "  bool setContains( isampler2D setTexture, float index )                            ",
         "  {                                                                                 ",
         "      ivec2 textureSize = textureSize2D( setTexture, 0 );                           ",
@@ -71,46 +78,52 @@ public class DncLabelShaders
         "      }                                                                             ",
         "  }                                                                                 ",
         "                                                                                    ",
+        "  uniform vec4 AXIS_RECT;                                                           ",
         "  uniform isampler2D HIGHLIGHT_SET;                                                 ",
         "                                                                                    ",
-        "  attribute vec2 aImageAlign;                                                       ",
-        "  attribute vec4 aImageBounds;                                                      ",
+        "  in vec3 inLabelVertex;                                                            ",
+        "  in vec2 inImageAlign;                                                             ",
+        "  in vec4 inImageBounds;                                                            ",
         "                                                                                    ",
-        "  varying float vHighlight;                                                         ",
-        "  varying vec2 vImageAlign;                                                         ",
-        "  varying vec4 vImageBounds;                                                        ",
+        "  out float vHighlight;                                                             ",
+        "  out vec2 vImageAlign;                                                             ",
+        "  out vec4 vImageBounds;                                                            ",
         "                                                                                    ",
         "  void main( )                                                                      ",
         "  {                                                                                 ",
-        "      float featureNum = gl_Vertex.z;                                               ",
+        "      float featureNum = inLabelVertex.z;                                           ",
         "      vHighlight = ( setContains( HIGHLIGHT_SET, featureNum ) ? 1.0 : 0.0 );        ",
         "                                                                                    ",
-        "      vImageAlign = aImageAlign;                                                    ",
-        "      vImageBounds = aImageBounds;                                                  ",
+        "      vImageAlign = inImageAlign;                                                   ",
+        "      vImageBounds = inImageBounds;                                                 ",
         "                                                                                    ",
-        "      gl_Position = gl_ModelViewProjectionMatrix * vec4( gl_Vertex.xy, 0.0, 1.0 );  ",
+        "      vec2 xy_AXIS = inLabelVertex.xy;                                              ",
+        "      gl_Position.xy = axisXyToNdc( xy_AXIS, AXIS_RECT );                           ",
+        "      gl_Position.zw = vec2( 0.0, 1.0 );                                            ",
         "  }                                                                                 ",
         "                                                                                    " );
 
     public static final String labelGeomShader_GLSL = join( "\n",
         "                                                                                    ",
-        "  #version 120                                                                      ",
-        "  #extension GL_EXT_geometry_shader4 : enable                                       ",
+        "  #version 150                                                                      ",
+        "                                                                                    ",
+        "  layout( points ) in;                                                              ",
+        "  layout( triangle_strip, max_vertices = 4 ) out;                                   ",
         "                                                                                    ",
         "  uniform vec2 VIEWPORT_SIZE_PX;                                                    ",
         "  uniform vec2 ATLAS_SIZE_PX;                                                       ",
         "  uniform float HIGHLIGHT_SCALE;                                                    ",
         "                                                                                    ",
-        "  varying in float vHighlight[];                                                    ",
-        "  varying in vec2 vImageAlign[];                                                    ",
-        "  varying in vec4 vImageBounds[];                                                   ",
+        "  in float vHighlight[];                                                            ",
+        "  in vec2 vImageAlign[];                                                            ",
+        "  in vec4 vImageBounds[];                                                           ",
         "                                                                                    ",
-        "  varying out vec2 gAtlasCoords;                                                    ",
-        "  varying out float gHighlight;                                                     ",
+        "  out vec2 gAtlasCoords;                                                            ",
+        "  out float gHighlight;                                                             ",
         "                                                                                    ",
         "  void main( )                                                                      ",
         "  {                                                                                 ",
-        "      vec2 p = gl_PositionIn[ 0 ].xy;                                               ",
+        "      vec2 p = gl_in[ 0 ].gl_Position.xy;                                           ",
         "                                                                                    ",
         "      vec2 imageAlign = vImageAlign[ 0 ];                                           ",
         "                                                                                    ",
@@ -166,13 +179,14 @@ public class DncLabelShaders
 
     public static final String labelFragShader_GLSL = join( "\n",
         "                                                                      ",
-        "  #version 120                                                        ",
-        "  #extension GL_EXT_gpu_shader4 : enable                              ",
+        "  #version 150                                                        ",
         "                                                                      ",
         "  uniform sampler2D ATLAS;                                            ",
         "                                                                      ",
-        "  varying vec2 gAtlasCoords;                                          ",
-        "  varying float gHighlight;                                           ",
+        "  in vec2 gAtlasCoords;                                               ",
+        "  in float gHighlight;                                                ",
+        "                                                                      ",
+        "  out vec4 outRgba;                                                   ",
         "                                                                      ",
         "  void main( )                                                        ",
         "  {                                                                   ",
@@ -192,16 +206,17 @@ public class DncLabelShaders
         "          st = ( st_PX + 0.5 ) / atlasSize_PX;                        ",
         "      }                                                               ",
         "                                                                      ",
-        "      gl_FragColor = texture2D( ATLAS, st );                          ",
+        "      outRgba = texture2D( ATLAS, st );                               ",
         "  }                                                                   ",
         "                                                                      " );
 
 
-    protected static final int aImageAlign = 1;
-    protected static final int aImageBounds = 2;
+    protected static final int inLabelVertex = 1;
+    protected static final int inImageAlign = 2;
+    protected static final int inImageBounds = 3;
 
 
-    public static int buildLabelProgram( GL2 gl )
+    public static int buildLabelProgram( GL3 gl )
     {
         IntsArray shaders = new IntsArray( );
         try
@@ -214,21 +229,9 @@ public class DncLabelShaders
             for ( int s : shaders.a ) gl.glAttachShader( program, s );
             try
             {
-                gl.glBindAttribLocation( program, aImageAlign, "aImageAlign" );
-                gl.glBindAttribLocation( program, aImageBounds, "aImageBounds" );
-
-
-                GL3 gl3 = gl.getGL3( );
-
-                gl3.glProgramParameteriARB( program, GL_GEOMETRY_INPUT_TYPE_ARB, GL_POINTS );
-                requireNoErrors( gl3 );
-
-                gl3.glProgramParameteriARB( program, GL_GEOMETRY_OUTPUT_TYPE_ARB, GL_TRIANGLE_STRIP );
-                requireNoErrors( gl3 );
-
-                gl3.glProgramParameteriARB( program, GL_GEOMETRY_VERTICES_OUT_ARB, 4 );
-                requireNoErrors( gl3 );
-
+                gl.glBindAttribLocation( program, inLabelVertex, "inLabelVertex" );
+                gl.glBindAttribLocation( program, inImageAlign, "inImageAlign" );
+                gl.glBindAttribLocation( program, inImageBounds, "inImageBounds" );
 
                 gl.glLinkProgram( program );
                 int[] linkStatus = new int[ 1 ];
@@ -256,33 +259,35 @@ public class DncLabelShaders
     {
         public final int programHandle;
 
-        public final int HIGHLIGHT_SET;
-
+        public final int AXIS_RECT;
         public final int VIEWPORT_SIZE_PX;
-
-        public final int HIGHLIGHT_SCALE;
 
         public final int ATLAS;
         public final int ATLAS_SIZE_PX;
 
-        public final int aImageAlign;
-        public final int aImageBounds;
+        public final int HIGHLIGHT_SET;
+        public final int HIGHLIGHT_SCALE;
 
-        public DncLabelProgram( GL2 gl )
+        public final int inLabelVertex;
+        public final int inImageAlign;
+        public final int inImageBounds;
+
+        public DncLabelProgram( GL3 gl )
         {
             this.programHandle = buildLabelProgram( gl );
 
-            this.HIGHLIGHT_SET = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SET" );
-
+            this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
             this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( programHandle, "VIEWPORT_SIZE_PX" );
-
-            this.HIGHLIGHT_SCALE = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SCALE" );
 
             this.ATLAS = gl.glGetUniformLocation( programHandle, "ATLAS" );
             this.ATLAS_SIZE_PX = gl.glGetUniformLocation( programHandle, "ATLAS_SIZE_PX" );
 
-            this.aImageAlign = DncLabelShaders.aImageAlign;
-            this.aImageBounds = DncLabelShaders.aImageBounds;
+            this.HIGHLIGHT_SET = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SET" );
+            this.HIGHLIGHT_SCALE = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SCALE" );
+
+            this.inLabelVertex = DncLabelShaders.inLabelVertex;
+            this.inImageAlign = DncLabelShaders.inImageAlign;
+            this.inImageBounds = DncLabelShaders.inImageBounds;
         }
     }
 

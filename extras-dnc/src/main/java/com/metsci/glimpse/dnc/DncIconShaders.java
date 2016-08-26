@@ -28,20 +28,13 @@ package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.dnc.util.Shaders.compileShader;
 import static com.metsci.glimpse.dnc.util.Shaders.getProgramInfoLog;
-import static com.metsci.glimpse.dnc.util.Shaders.requireNoErrors;
 import static com.metsci.glimpse.util.StringUtils.join;
-import static javax.media.opengl.GL.GL_POINTS;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 import static javax.media.opengl.GL.GL_TRUE;
 import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static javax.media.opengl.GL2ES2.GL_LINK_STATUS;
 import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static javax.media.opengl.GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB;
-import static javax.media.opengl.GL2GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB;
-import static javax.media.opengl.GL2GL3.GL_GEOMETRY_VERTICES_OUT_ARB;
 import static javax.media.opengl.GL3.GL_GEOMETRY_SHADER;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.util.primitives.IntsArray;
@@ -51,9 +44,23 @@ public class DncIconShaders
 
     public static final String iconVertShader_GLSL = join( "\n",
         "                                                                                    ",
-        "  #version 120                                                                      ",
-        "  #extension GL_EXT_gpu_shader4 : enable                                            ",
+        "  #version 150                                                                      ",
         "                                                                                    ",
+        "  vec2 axisMin( vec4 axisRect )                                                                    ",
+        "  {                                                                                                ",
+        "      return axisRect.xy;                                                                          ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
+        "  vec2 axisSize( vec4 axisRect )                                                                   ",
+        "  {                                                                                                ",
+        "      return axisRect.zw;                                                                          ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
+        "  vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )                                                  ",
+        "  {                                                                                                ",
+        "      return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );                                                 ",
+        "  }                                                                                                ",
+        "                                                                                                   ",
         "  bool setContains( isampler2D setTexture, float index )                            ",
         "  {                                                                                 ",
         "      ivec2 textureSize = textureSize2D( setTexture, 0 );                           ",
@@ -71,24 +78,33 @@ public class DncIconShaders
         "      }                                                                             ",
         "  }                                                                                 ",
         "                                                                                    ",
+        "  uniform vec4 AXIS_RECT;                                                           ",
         "  uniform isampler2D HIGHLIGHT_SET;                                                 ",
         "                                                                                    ",
-        "  varying float vHighlight;                                                         ",
+        "  in vec4 inIconVertex;                                                             ",
+        "                                                                                    ",
+        "  out float vHighlight;                                                             ",
+        "  out float vRotation_CCWRAD;                                                       ",
         "                                                                                    ",
         "  void main( )                                                                      ",
         "  {                                                                                 ",
-        "      float featureNum = gl_Vertex.z;                                               ",
+        "      float featureNum = inIconVertex.z;                                            ",
         "      vHighlight = ( setContains( HIGHLIGHT_SET, featureNum ) ? 1.0 : 0.0 );        ",
         "                                                                                    ",
-        "      gl_Position = gl_ModelViewProjectionMatrix * vec4( gl_Vertex.xy, 0.0, 1.0 );  ",
-        "      gl_Position.w = gl_Vertex.w;                                                  ",
+        "      vRotation_CCWRAD = inIconVertex.w;                                            ",
+        "                                                                                    ",
+        "      vec2 xy_AXIS = inIconVertex.xy;                                               ",
+        "      gl_Position.xy = axisXyToNdc( xy_AXIS, AXIS_RECT );                           ",
+        "      gl_Position.zw = vec2( 0.0, 1.0 );                                            ",
         "  }                                                                                 ",
         "                                                                                    " );
 
     public static final String iconGeomShader_GLSL = join( "\n",
         "                                                                                      ",
-        "  #version 120                                                                        ",
-        "  #extension GL_EXT_geometry_shader4 : enable                                         ",
+        "  #version 150                                                                        ",
+        "                                                                                      ",
+        "  layout( points ) in;                                                                ",
+        "  layout( triangle_strip, max_vertices = 4 ) out;                                     ",
         "                                                                                      ",
         "  vec2 rotate( float x, float y, float cosR, float sinR )                             ",
         "  {                                                                                   ",
@@ -101,15 +117,15 @@ public class DncIconShaders
         "  uniform vec4 IMAGE_BOUNDS;                                                          ",
         "  uniform float HIGHLIGHT_SCALE;                                                      ",
         "                                                                                      ",
-        "  varying in float vHighlight[];                                                      ",
+        "  in float vHighlight[];                                                              ",
         "                                                                                      ",
-        "  varying out vec2 gAtlasCoords;                                                      ",
+        "  out vec2 gAtlasCoords;                                                              ",
         "                                                                                      ",
         "  void main( )                                                                        ",
         "  {                                                                                   ",
-        "      vec2 p = gl_PositionIn[ 0 ].xy;                                                 ",
+        "      vec2 p = gl_in[ 0 ].gl_Position.xy;                                             ",
         "                                                                                      ",
-        "      float rotation_CCWRAD = gl_PositionIn[ 0 ].w;                                   ",
+        "      float rotation_CCWRAD = vRotation_CCWRAD[ 0 ];                                  ",
         "      float cosR = cos( rotation_CCWRAD );                                            ",
         "      float sinR = sin( rotation_CCWRAD );                                            ",
         "                                                                                      ",
@@ -157,20 +173,25 @@ public class DncIconShaders
 
     public static final String iconFragShader_GLSL = join( "\n",
         "                                                               ",
-        "  #version 120                                                 ",
+        "  #version 150                                                 ",
         "                                                               ",
         "  uniform sampler2D ATLAS;                                     ",
         "                                                               ",
-        "  varying vec2 gAtlasCoords;                                   ",
+        "  in vec2 gAtlasCoords;                                        ",
+        "                                                               ",
+        "  out vec4 outRgba;                                            ",
         "                                                               ",
         "  void main( )                                                 ",
         "  {                                                            ",
-        "      gl_FragColor = texture2D( ATLAS, gAtlasCoords );         ",
+        "      outRgba = texture2D( ATLAS, gAtlasCoords );              ",
         "  }                                                            ",
         "                                                               " );
 
 
-    public static int buildIconProgram( GL2 gl )
+    protected static final int inIconVertex = 1;
+
+
+    public static int buildIconProgram( GL3 gl )
     {
         IntsArray shaders = new IntsArray( );
         try
@@ -183,16 +204,7 @@ public class DncIconShaders
             for ( int s : shaders.a ) gl.glAttachShader( program, s );
             try
             {
-                GL3 gl3 = gl.getGL3( );
-
-                gl3.glProgramParameteriARB( program, GL_GEOMETRY_INPUT_TYPE_ARB, GL_POINTS );
-                requireNoErrors( gl3 );
-
-                gl3.glProgramParameteriARB( program, GL_GEOMETRY_OUTPUT_TYPE_ARB, GL_TRIANGLE_STRIP );
-                requireNoErrors( gl3 );
-
-                gl3.glProgramParameteriARB( program, GL_GEOMETRY_VERTICES_OUT_ARB, 4 );
-                requireNoErrors( gl3 );
+                gl.glBindAttribLocation( program, inIconVertex, "inIconVertex" );
 
                 gl.glLinkProgram( program );
                 int[] linkStatus = new int[ 1 ];
@@ -220,31 +232,35 @@ public class DncIconShaders
     {
         public final int programHandle;
 
-        public final int HIGHLIGHT_SET;
-
+        public final int AXIS_RECT;
         public final int VIEWPORT_SIZE_PX;
 
+        public final int ATLAS;
+        public final int IMAGE_BOUNDS;
         public final int IMAGE_SIZE_PX;
         public final int IMAGE_ALIGN;
-        public final int IMAGE_BOUNDS;
+
+        public final int HIGHLIGHT_SET;
         public final int HIGHLIGHT_SCALE;
 
-        public final int ATLAS;
+        public final int inIconVertex;
 
-        public DncIconProgram( GL2 gl )
+        public DncIconProgram( GL3 gl )
         {
             this.programHandle = buildIconProgram( gl );
 
-            this.HIGHLIGHT_SET = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SET" );
-
+            this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
             this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( programHandle, "VIEWPORT_SIZE_PX" );
 
+            this.ATLAS = gl.glGetUniformLocation( programHandle, "ATLAS" );
+            this.IMAGE_BOUNDS = gl.glGetUniformLocation( programHandle, "IMAGE_BOUNDS" );
             this.IMAGE_SIZE_PX = gl.glGetUniformLocation( programHandle, "IMAGE_SIZE_PX" );
             this.IMAGE_ALIGN = gl.glGetUniformLocation( programHandle, "IMAGE_ALIGN" );
-            this.IMAGE_BOUNDS = gl.glGetUniformLocation( programHandle, "IMAGE_BOUNDS" );
+
+            this.HIGHLIGHT_SET = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SET" );
             this.HIGHLIGHT_SCALE = gl.glGetUniformLocation( programHandle, "HIGHLIGHT_SCALE" );
 
-            this.ATLAS = gl.glGetUniformLocation( programHandle, "ATLAS" );
+            this.inIconVertex = DncIconShaders.inIconVertex;
         }
     }
 
