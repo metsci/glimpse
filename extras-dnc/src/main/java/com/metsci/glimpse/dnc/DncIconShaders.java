@@ -119,6 +119,7 @@ public class DncIconShaders
         "  uniform float HIGHLIGHT_SCALE;                                                      ",
         "                                                                                      ",
         "  in float vHighlight[];                                                              ",
+        "  in float vRotation_CCWRAD[];                                                        ",
         "                                                                                      ",
         "  out vec2 gAtlasCoords;                                                              ",
         "                                                                                      ",
