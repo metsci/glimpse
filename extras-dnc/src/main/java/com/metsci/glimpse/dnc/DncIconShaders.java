@@ -45,7 +45,7 @@ public class DncIconShaders
     public static final String iconVertShader_GLSL = join( "\n",
         "                                                                                    ",
         "  #version 150                                                                      ",
-        "  #extension GL_EXT_geometry_shader4 : enable                                       ",
+        "  #extension GL_EXT_gpu_shader4 : enable                                       ",
         "                                                                                    ",
         "  vec2 axisMin( vec4 axisRect )                                                     ",
         "  {                                                                                 ",
