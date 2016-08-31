@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLArrayData;
 import javax.media.opengl.GLContext;
@@ -44,14 +43,18 @@ public class GlimpseShaderProgram
 
     public void loadProgram( GL gl )
     {
-        load( gl.getGL2ES2( ), this.codes );
+        load( gl.getGL3( ), this.codes );
     }
 
     public void useProgram( GL gl, boolean on )
     {
-        if ( !load( gl.getGL2ES2( ), this.codes ) ) return;
+        if ( !load( gl.getGL3( ), this.codes ) ) return;
 
-        this.state.useProgram( gl.getGL2ES2( ), on );
+        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.useProgram( )." );
+
+        this.state.useProgram( gl.getGL3( ), on );
+
+        GLErrorUtils.logGLError( logger, gl, "Trouble after GlimpseShaderProgram.useProgram( )." );
 
         if ( on ) this.updateUniformData( gl );
 
@@ -63,12 +66,12 @@ public class GlimpseShaderProgram
 
     public ShaderCode addFragmentShader( String path )
     {
-        return addShader( GL2ES2.GL_FRAGMENT_SHADER, path );
+        return addShader( GL3.GL_FRAGMENT_SHADER, path );
     }
 
     public ShaderCode addVertexShader( String path )
     {
-        return addShader( GL2ES2.GL_VERTEX_SHADER, path );
+        return addShader( GL3.GL_VERTEX_SHADER, path );
     }
 
     public ShaderCode addGeometryShader( String path )
@@ -103,18 +106,20 @@ public class GlimpseShaderProgram
     {
         if ( this.loaded )
         {
-            this.state.destroy( context.getGL( ).getGL2ES2( ) );
+            this.state.destroy( context.getGL( ).getGL3( ) );
             this.loaded = false;
         }
     }
 
     protected void updateUniformData( GL gl )
     {
-        GL2ES2 gl2es2 = gl.getGL2ES2( );
+        GL3 gl3 = gl.getGL3( );
+
+        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( )." );
 
         for ( GLUniformData uniform : uniforms )
         {
-            this.state.uniform( gl2es2, uniform );
+            this.state.uniform( gl3, uniform );
             GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.uniform( ): " + uniform.getName( ) );
         }
     }
@@ -123,27 +128,28 @@ public class GlimpseShaderProgram
     {
         if ( this.loaded ) return true;
 
-        GL2ES2 gl2es2 = gl.getGL2ES2( );
+        GL3 gl3 = gl.getGL3( );
 
         this.state = new ShaderState( );
         this.state.setVerbose( true );
         this.program = new ShaderProgram( );
 
+        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( )." );
+        
         for ( ShaderCode code : codes )
         {
-            boolean success = this.program.add( gl2es2, code, System.err );
+            boolean success = this.program.add( gl3, code, System.err );
             GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ): " + code );
-            GLErrorUtils.logGLShaderInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ) Log:" );
 
             if ( !success )
             {
                 return false;
             }
         }
-
-        this.state.attachShaderProgram( gl2es2, this.program, true );
+        
+        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( )" );
+        this.state.attachShaderProgram( gl3, this.program, true );
         GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( )" );
-        GLErrorUtils.logGLShaderInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( ) Log:" );
 
         for ( GLArrayData array : arrays )
         {

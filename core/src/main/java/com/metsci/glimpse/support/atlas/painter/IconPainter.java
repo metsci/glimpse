@@ -59,6 +59,7 @@ import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -608,59 +609,55 @@ public class IconPainter extends GlimpseDataPainter2D
     {
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( false );
-
-        // update geometry shader uniform variables
         this.shader.updateViewport( bounds );
-
         this.shader.setProjectionMatrix( axis );
 
         for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
         {
+            TextureAtlas atlas = entry.getKey( );
             Set<IconGroup> groups = entry.getValue( );
             if ( groups.isEmpty( ) ) continue;
 
-            TextureAtlas atlas = entry.getKey( );
-            atlas.beginRendering( );
-
-            try
+            atlas.beginRendering( gl );
+            atlas.endRendering( gl );
+            
+            // draw each icon group, if it is visible
+            for ( IconGroup group : groups )
             {
-                // draw each icon group, if it is visible
-                for ( IconGroup group : groups )
+                // add any icons waiting to be added to the group
+                // we do this here because texture coordinates might not
+                // be known until the atlas.beginRendering( ) call
+                group.addQueuedIcons( );
+
+
+                this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                this.shader.setVertexData( group.getBufferIconPlacement( ) );
+                
+                atlas.beginRendering( gl );
+                this.shader.useProgram( gl, true );
+                try
                 {
-                    // add any icons waiting to be added to the group
-                    // we do this here because texture coordinates might not
-                    // be known until the atlas.beginRendering( ) call
-                    group.addQueuedIcons( );
+                    //System.out.println( group.getCurrentSize( ) );
+                    
+                    if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
 
-                    this.shader.setTexCoordData( group.getBufferTexCoords( ) );
-                    this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
-                    this.shader.setColorCoordData( group.getPickColorCoords( ) );
-                    this.shader.setVertexData( group.getBufferIconPlacement( ) );
-
-                    System.out.println( group.getBufferIconPlacement( ).limit( ) + " " + group.getBufferTexCoords( ) + " " + group.getCurrentSize( ) );
-
-                    this.shader.useProgram( gl, true );
-                    try
-                    {
-                        if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
-
-                        gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
-                    }
-                    finally
-                    {
-                        this.shader.useProgram( gl, false );
-                    }
+                    gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
+                    GLErrorUtils.logGLError( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
                 }
-            }
-            finally
-            {
-                atlas.endRendering( );
+                finally
+                {
+                    this.shader.useProgram( gl, false );
+                    atlas.endRendering( gl );
+                }
             }
         }
     }
 
     protected void pickTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
+        /*
         // check whether mouse has moved since last draw
         if ( this.pickMouseEvent == null ) return;
 
@@ -725,6 +722,7 @@ public class IconPainter extends GlimpseDataPainter2D
         }
 
         notifySpatialSelectionListeners( pickedIcons );
+        */
     }
 
     // set the frame buffer background to transparent (which we will interpret
