@@ -68,11 +68,16 @@ public class IconShader extends GlimpseShaderProgram
         this.globalScale = this.addUniformData( new GLUniformData( "globalScale", (float) 1 ) );
     }
     
-    public void setProjectionMatrix( Axis2D axis )
+    public void setProjectionMatrix( float minX, float maxX, float minY, float maxY )
     {
         Matrix4 m = new Matrix4( );
-        m.makeOrtho( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ), -1, 1 );
+        m.makeOrtho( minX, maxX, minY, maxY, -1, 1 );
         this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
+    }
+    
+    public void setProjectionMatrix( Axis2D axis )
+    {
+        setProjectionMatrix( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ) );
     }
     
     public void setPickMode( boolean pickMode )

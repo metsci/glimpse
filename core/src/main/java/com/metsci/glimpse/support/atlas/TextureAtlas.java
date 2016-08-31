@@ -565,6 +565,9 @@ public class TextureAtlas
 
         inBeginEndPair = true;
 
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+        
         final Texture texture = getBackingStore( ).getTexture( );
         gl.getGL3( ).glActiveTexture( GL2.GL_TEXTURE0 );
         texture.enable( gl );

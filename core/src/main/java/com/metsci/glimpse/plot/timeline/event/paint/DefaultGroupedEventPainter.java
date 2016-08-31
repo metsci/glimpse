@@ -484,7 +484,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
             if ( !iconDrawList.isEmpty( ) )
             {
-                atlas.beginRendering( );
+                atlas.beginRendering( gl );
                 try
                 {
                     for ( IconDrawInfo iconInfo : iconDrawList )
@@ -501,7 +501,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 }
                 finally
                 {
-                    atlas.endRendering( );
+                    atlas.endRendering( gl );
                 }
             }
 

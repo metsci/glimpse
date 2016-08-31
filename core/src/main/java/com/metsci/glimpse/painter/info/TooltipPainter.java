@@ -33,6 +33,7 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.google.common.collect.Lists;
@@ -358,7 +359,7 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( icons == null )
         {
-            loadIcons( );
+            loadIcons( context.getGL( ) );
         }
 
         if ( newFont != null )
@@ -522,7 +523,7 @@ public class TooltipPainter extends SimpleTextPainter
         // draw icons
         if ( iconIds != null && !iconIds.isEmpty( ) )
         {
-            atlas.beginRendering( );
+            atlas.beginRendering( gl );
             try
             {
                 double posY = y - borderSize - iconSize;
@@ -551,7 +552,7 @@ public class TooltipPainter extends SimpleTextPainter
             }
             finally
             {
-                atlas.endRendering( );
+                atlas.endRendering( gl );
             }
         }
     }
@@ -571,15 +572,15 @@ public class TooltipPainter extends SimpleTextPainter
         lines = textLayout.getLines( );
     }
 
-    protected void loadIcons( )
+    protected void loadIcons( GL gl )
     {
         // looks strange, but causes atlas to load pending icons
         // this is necessary to do here because calls to atlas.getImageData( )
         // will fail if we do not
         if ( iconIds != null )
         {
-            atlas.beginRendering( );
-            atlas.endRendering( );
+            atlas.beginRendering( gl );
+            atlas.endRendering( gl );
         }
 
         int size = iconIds == null ? 0 : iconIds.size( );
