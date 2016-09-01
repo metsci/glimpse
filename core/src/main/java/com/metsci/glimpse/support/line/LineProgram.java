@@ -100,13 +100,13 @@ public class LineProgram extends GlimpseShaderProgram
 
     public void setPixelOrtho( GlimpseBounds bounds )
     {
-        setOrtho( bounds.getX( ),
-                  bounds.getY( ),
-                  bounds.getX( ) + bounds.getWidth( ),
-                  bounds.getY( ) + bounds.getHeight( ) );
+        setOrtho( 0,
+                  0,
+                  bounds.getWidth( ),
+                  bounds.getHeight( ) );
     }
 
-    public void setOrtho( float xMin, float xMax, float yMin, float yMax )
+    public void setOrtho( float xMin, float yMin, float xMax, float yMax )
     {
         FloatBuffer axisRect = ( FloatBuffer ) this.AXIS_RECT.getBuffer( );
         axisRect.put( 0, xMin );

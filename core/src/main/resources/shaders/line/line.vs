@@ -10,9 +10,14 @@ vec2 axisSize( vec4 axisRect )
     return axisRect.zw;
 }
 
+vec2 fracToNdc( vec2 frac )
+{
+    return ( -1.0 + 2.0*frac );
+}
+
 vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 {
-    return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );
+    return fracToNdc( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );
 }
 
 

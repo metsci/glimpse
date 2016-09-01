@@ -72,7 +72,7 @@ public class LineExample
 
                 GL gl = context.getGL( );
                 prog.useProgram( gl, true );
-                gl.glDrawArrays( GL_LINES, 0, 5 );
+                gl.glDrawArrays( GL_LINES, 0, 8 );
                 prog.useProgram( gl, false );
             }
         } );
