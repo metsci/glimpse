@@ -71,6 +71,10 @@ public class LineExample
                 prog.vertices.seal( true );
 
                 GL gl = context.getGL( );
+
+                gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
+                gl.glEnable( GL.GL_BLEND );
+
                 prog.useProgram( gl, true );
                 gl.glDrawArrays( GL_LINES, 0, 8 );
                 prog.useProgram( gl, false );

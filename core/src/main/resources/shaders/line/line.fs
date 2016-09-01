@@ -27,7 +27,6 @@ void main( )
         }
     }
 
-    float alpha = ( 1.0 - fade ) * RGBA.a;
-    outRgba.rgb = RGBA.rgb * alpha;
-    outRgba.a = alpha;
+    outRgba.rgb = RGBA.rgb;
+    outRgba.a = ( 1.0 - fade ) * RGBA.a;
 }
