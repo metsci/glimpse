@@ -43,9 +43,9 @@ public class GLErrorUtils
     {
     };
 
-    public static void logGLShaderInfoLog( Logger logger, GL2ES2 gl, int programObject, String prefix )
+    public static void logGLShaderInfoLog( Logger logger, GL2ES2 gl, int shaderObject, String prefix )
     {
-        String log = getGLShaderInfoLog( gl, programObject );
+        String log = getGLShaderInfoLog( gl, shaderObject );
 
         if ( log != null && !log.isEmpty( ) )
         {
@@ -53,11 +53,11 @@ public class GLErrorUtils
         }
     }
 
-    public static String getGLShaderInfoLog( GL2ES2 gl, int programObject )
+    public static String getGLShaderInfoLog( GL2ES2 gl, int shaderObject )
     {
         IntBuffer intValue = IntBuffer.allocate( 1 );
 
-        gl.glGetShaderiv( programObject, GL_INFO_LOG_LENGTH, intValue );
+        gl.glGetShaderiv( shaderObject, GL_INFO_LOG_LENGTH, intValue );
 
         int lengthWithNull = intValue.get( );
         if ( lengthWithNull <= 1 )
@@ -69,7 +69,43 @@ public class GLErrorUtils
         ByteBuffer infoLog = ByteBuffer.allocate( lengthWithNull );
 
         intValue.flip( );
-        gl.glGetShaderInfoLog( programObject, lengthWithNull, intValue, infoLog );
+        gl.glGetShaderInfoLog( shaderObject, lengthWithNull, intValue, infoLog );
+
+        int actualLength = intValue.get( );
+
+        byte[] infoBytes = new byte[actualLength];
+        infoLog.get( infoBytes );
+
+        return new String( infoBytes );
+    }
+
+    public static void logGLProgramInfoLog( Logger logger, GL2ES2 gl, int programObject, String prefix )
+    {
+        String log = getGLProgramInfoLog( gl, programObject );
+
+        if ( log != null && !log.isEmpty( ) )
+        {
+            logWarning( logger, "%s: %s", prefix, log );
+        }
+    }
+
+    public static String getGLProgramInfoLog( GL2ES2 gl, int programObject )
+    {
+        IntBuffer intValue = IntBuffer.allocate( 1 );
+
+        gl.glGetProgramiv( programObject, GL_INFO_LOG_LENGTH, intValue );
+
+        int lengthWithNull = intValue.get( );
+        if ( lengthWithNull <= 1 )
+        {
+            // just use a default length
+            lengthWithNull = 1000;
+        }
+
+        ByteBuffer infoLog = ByteBuffer.allocate( lengthWithNull );
+
+        intValue.flip( );
+        gl.glGetProgramInfoLog( programObject, lengthWithNull, intValue, infoLog );
 
         int actualLength = intValue.get( );
 

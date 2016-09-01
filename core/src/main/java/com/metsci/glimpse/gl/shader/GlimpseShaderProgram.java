@@ -131,7 +131,7 @@ public class GlimpseShaderProgram
         {
             boolean success = this.program.add( gl, code, System.err );
             GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ): " + code );
-            GLErrorUtils.logGLShaderInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ) Log:" );
+            GLErrorUtils.logGLShaderInfoLog( logger, gl, code.shader( ).get( 0 ), "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ) Log:" );
 
             if ( !success )
             {
@@ -141,7 +141,7 @@ public class GlimpseShaderProgram
 
         this.state.attachShaderProgram( gl, this.program, true );
         GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( )" );
-        GLErrorUtils.logGLShaderInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( ) Log:" );
+        GLErrorUtils.logGLProgramInfoLog( logger, gl, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( ) Log:" );
 
         for ( GLArrayData array : arrays )
         {
