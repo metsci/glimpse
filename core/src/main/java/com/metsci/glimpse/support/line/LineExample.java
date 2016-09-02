@@ -60,13 +60,25 @@ public class LineExample
                 float yTop_PX = ( float ) ( bounds.getHeight( ) - 0.5*lineThickness_PX );
 
                 prog.vertices.seal( false );
-
                 prog.vertices.clear( );
-                prog.vertices.addVertex( xLeft_PX,  yBottom_PX );
+
+                prog.vertices.addVertex( xLeft_PX, yBottom_PX );
                 prog.vertices.addVertex( xRight_PX, yBottom_PX );
-                prog.vertices.addVertex( xRight_PX, yTop_PX    );
-                prog.vertices.addVertex( xLeft_PX,  yTop_PX    );
-                prog.vertices.addVertex( xLeft_PX,  yBottom_PX );
+
+                prog.vertices.breakLine( );
+
+                prog.vertices.addVertex( xRight_PX, yBottom_PX );
+                prog.vertices.addVertex( xRight_PX, yTop_PX );
+
+                prog.vertices.breakLine( );
+
+                prog.vertices.addVertex( xLeft_PX, yBottom_PX );
+                prog.vertices.addVertex( xLeft_PX, yTop_PX );
+
+                prog.vertices.breakLine( );
+
+                prog.vertices.addVertex( xLeft_PX, yTop_PX );
+                prog.vertices.addVertex( xRight_PX, yTop_PX );
 
                 prog.vertices.seal( true );
 
