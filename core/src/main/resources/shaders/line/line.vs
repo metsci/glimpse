@@ -15,16 +15,11 @@ vec2 axisSize( vec4 axisRect )
     return ( axisMax( axisRect ) - axisMin( axisRect ) );
 }
 
-vec2 fracToNdc( vec2 frac )
+vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
 {
-    return ( -1.0 + 2.0*frac );
+    vec2 xy_FRAC = ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect );
+    return ( xy_FRAC * viewportSize_PX );
 }
-
-vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
-{
-    return fracToNdc( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );
-}
-
 
 uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
@@ -41,6 +36,5 @@ void main( )
     vCumulativeDistance_PX = cumulativeDistance_AXIS * ppv.x;
 
     vec2 xy_AXIS = inXy;
-    gl_Position.xy = axisXyToNdc( xy_AXIS, AXIS_RECT );
-    gl_Position.zw = vec2( 0.0, 1.0 );
+    gl_Position.xy = axisXyToPx( xy_AXIS, AXIS_RECT, VIEWPORT_SIZE_PX );
 }

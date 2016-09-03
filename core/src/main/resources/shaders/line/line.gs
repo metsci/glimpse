@@ -3,6 +3,12 @@
 layout( lines ) in;
 layout( triangle_strip, max_vertices = 4 ) out;
 
+vec2 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
+{
+    vec2 xy_FRAC = xy_PX / viewportSize_PX;
+    return ( -1.0 + 2.0*xy_FRAC );
+}
+
 uniform vec2 VIEWPORT_SIZE_PX;
 uniform float LINE_THICKNESS_PX;
 uniform float FEATHER_THICKNESS_PX;
@@ -15,11 +21,10 @@ out float gQuadLength_PX;
 
 void main( )
 {
-    vec2 posA = gl_in[ 0 ].gl_Position.xy;
-    vec2 posB = gl_in[ 1 ].gl_Position.xy;
+    vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
+    vec2 posB_PX = gl_in[ 1 ].gl_Position.xy;
 
-    vec2 ndcToPx = 0.5 * VIEWPORT_SIZE_PX;
-    vec2 lineDelta_PX = ( posB - posA ) * ndcToPx;
+    vec2 lineDelta_PX = posB_PX - posA_PX;
     float lineLength_PX = length( lineDelta_PX );
 
     float cumulativeDistanceA_PX = vCumulativeDistance_PX[ 0 ];
@@ -27,40 +32,38 @@ void main( )
 
     if ( lineLength_PX > 0.0 && cumulativeDistanceB_PX >= cumulativeDistanceA_PX )
     {
-        vec2 pxToNdc = 2.0 / VIEWPORT_SIZE_PX;
         float halfFeather_PX = 0.5 * FEATHER_THICKNESS_PX;
 
-        vec2 lineDir_PX = lineDelta_PX / lineLength_PX;
-        vec2 parallelOffset = lineDir_PX * halfFeather_PX * pxToNdc;
+        vec2 parallelDir = lineDelta_PX / lineLength_PX;
+        vec2 parallelOffset_PX = halfFeather_PX * parallelDir;
 
-        // Rotation from parallel to normal must be done in pixel-space
-        vec2 lineNormal_PX = vec2( -lineDir_PX.y, lineDir_PX.x );
+        vec2 normalDir = vec2( -parallelDir.y, parallelDir.x );
         float halfNormal_PX = 0.5*LINE_THICKNESS_PX + halfFeather_PX;
-        vec2 normalOffset = lineNormal_PX * halfNormal_PX * pxToNdc;
+        vec2 normalOffset_PX = halfNormal_PX * normalDir;
 
 
-        gl_Position.xy = posA - parallelOffset + normalOffset;
+        gl_Position.xy = pxToNdc( posA_PX - parallelOffset_PX + normalOffset_PX, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
         gPosInQuad_PX = vec2( -halfFeather_PX, halfNormal_PX );
         gCumulativeDistance_PX = cumulativeDistanceA_PX - halfFeather_PX;
         gQuadLength_PX = lineLength_PX;
         EmitVertex( );
 
-        gl_Position.xy = posA - parallelOffset - normalOffset;
+        gl_Position.xy = pxToNdc( posA_PX - parallelOffset_PX - normalOffset_PX, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
         gPosInQuad_PX = vec2( -halfFeather_PX, -halfNormal_PX );
         gCumulativeDistance_PX = cumulativeDistanceA_PX - halfFeather_PX;
         gQuadLength_PX = lineLength_PX;
         EmitVertex( );
 
-        gl_Position.xy = posB + parallelOffset + normalOffset;
+        gl_Position.xy = pxToNdc( posB_PX + parallelOffset_PX + normalOffset_PX, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
         gPosInQuad_PX = vec2( lineLength_PX + halfFeather_PX, halfNormal_PX );
         gCumulativeDistance_PX = cumulativeDistanceB_PX + halfFeather_PX;
         gQuadLength_PX = lineLength_PX;
         EmitVertex( );
 
-        gl_Position.xy = posB + parallelOffset - normalOffset;
+        gl_Position.xy = pxToNdc( posB_PX + parallelOffset_PX - normalOffset_PX, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
         gPosInQuad_PX = vec2( lineLength_PX + halfFeather_PX, -halfNormal_PX );
         gCumulativeDistance_PX = cumulativeDistanceB_PX + halfFeather_PX;
