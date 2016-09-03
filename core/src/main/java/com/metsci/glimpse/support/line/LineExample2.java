@@ -90,15 +90,21 @@ public class LineExample2
                         double x2 = x1 + ( -1 + 2*r.nextDouble( ) );
                         double y2 = y1 + ( -1 + 2*r.nextDouble( ) );
 
+                        double cumulativeDistance = 0;
+
                         put2f( xyBuffer, x0, y0 );
                         put2f( xyBuffer, x1, y1 );
-                        put1f( cumulativeDistanceBuffer, 0 );
-                        put1f( cumulativeDistanceBuffer, distance( x0, y0, x1, y1 ) );
+
+                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
+                        cumulativeDistance += distance( x0, y0, x1, y1 );
+                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
 
                         put2f( xyBuffer, x1, y1 );
                         put2f( xyBuffer, x2, y2 );
-                        put1f( cumulativeDistanceBuffer, distance( x0, y0, x1, y1 ) );
-                        put1f( cumulativeDistanceBuffer, distance( x0, y0, x1, y1 ) + distance( x1, y1, x2, y2 ) );
+
+                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
+                        cumulativeDistance += distance( x1, y1, x2, y2 );
+                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
                     }
 
                     this.numVertices = xyBuffer.position( ) / 2;
