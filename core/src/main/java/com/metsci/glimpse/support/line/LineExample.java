@@ -137,7 +137,7 @@ public class LineExample
                     FloatBuffer cumulativeDistanceBuffer = gl.glMapBufferRange( GL_ARRAY_BUFFER, 0, cumulativeDistanceMaxBytes, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT ).asFloatBuffer( );
 
 
-                    Random r = new Random( currentTimeMillis( ) / 1500 );
+                    Random r = new Random( currentTimeMillis( ) / 750 );
                     for ( int i = 0; i < 20; i++ )
                     {
                         double x0 = 2 + 6*r.nextDouble( );
@@ -192,9 +192,6 @@ public class LineExample
             {
                 style.rgba = GlimpseColor.getBlack( );
                 style.thickness_PX = 1;
-                style.stippleEnable = true;
-                style.stippleScale = 20;
-                style.stipplePattern = 0b0101010101010101;
             }
 
             public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
