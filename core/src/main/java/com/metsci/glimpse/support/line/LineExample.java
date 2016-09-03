@@ -59,7 +59,7 @@ public class LineExample
 
             {
                 style.rgba = floats( 0.7f, 0, 0, 1 );
-                style.thickness_PX = 1;
+                style.thickness_PX = 4;
                 style.stippleEnable = true;
                 style.stippleScale = 2;
                 style.stipplePattern = 0b0001010111111111;
@@ -83,7 +83,7 @@ public class LineExample
                     FloatBuffer cumulativeDistanceBuffer = reallocFloatVbo( gl, cumulativeDistanceVbo, 1*maxVertices, GL_STREAM_DRAW );
 
                     Random r = new Random( 0 );
-                    for ( int i = 0; i < 250000; i++ )
+                    for ( int i = 0; i < 25; i++ )
                     {
                         double x0 = 2 + 6*r.nextDouble( );
                         double y0 = 2 + 6*r.nextDouble( );
