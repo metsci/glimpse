@@ -110,6 +110,17 @@ public class LineProgram
         gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
     }
 
+    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer cumulativeDistanceVbo, int first, int count )
+    {
+        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+        gl.glBindBuffer( cumulativeDistanceVbo.target, cumulativeDistanceVbo.buffer( ) );
+        gl.glVertexAttribPointer( inCumulativeDistance, 1, GL_FLOAT, false, 0, cumulativeDistanceVbo.sealedOffset( ) );
+
+        gl.glDrawArrays( GL_LINES, first, count );
+    }
+
     public void draw( GL2ES2 gl, int xyVbo, int cumulativeDistanceVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
