@@ -1,118 +1,131 @@
 package com.metsci.glimpse.support.line;
 
-import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
+import static com.metsci.glimpse.support.line.ShaderUtils.createProgram;
+import static com.metsci.glimpse.support.line.ShaderUtils.requireResourceText;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_LINES;
 
-import java.nio.FloatBuffer;
-
-import javax.media.opengl.GLUniformData;
+import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 
-public class LineProgram extends GlimpseShaderProgram
+public class LineProgram
 {
 
-    protected final GLUniformData AXIS_RECT;
-    protected final GLUniformData VIEWPORT_SIZE_PX;
-
-    protected final GLUniformData RGBA;
-    protected final GLUniformData STIPPLE_ENABLE;
-    protected final GLUniformData STIPPLE_SCALE;
-    protected final GLUniformData STIPPLE_PATTERN;
-    protected final GLUniformData LINE_THICKNESS_PX;
-    protected final GLUniformData FEATHER_THICKNESS_PX;
-
-    public final LineVertexData vertices;
+    public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/line.vs" );
+    public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/line.gs" );
+    public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/line.fs" );
 
 
-    public LineProgram( )
+    public final int programHandle;
+
+
+    // Uniforms
+
+    public final int AXIS_RECT;
+    public final int VIEWPORT_SIZE_PX;
+
+    public final int RGBA;
+    public final int STIPPLE_ENABLE;
+    public final int STIPPLE_SCALE;
+    public final int STIPPLE_PATTERN;
+    public final int LINE_THICKNESS_PX;
+    public final int FEATHER_THICKNESS_PX;
+
+
+    // Vertex attributes
+
+    public final int inXy;
+    public final int inCumulativeDistance;
+
+
+    public LineProgram( GL2ES2 gl )
     {
-        this.addVertexShader( "shaders/line/line.vs" );
-        this.addGeometryShader( "shaders/line/line.gs" );
-        this.addFragmentShader( "shaders/line/line.fs" );
+        this.programHandle = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
 
-        this.AXIS_RECT = this.addUniformData( new GLUniformData( "AXIS_RECT", 4, newDirectFloatBuffer( 4 ) ) );
-        this.VIEWPORT_SIZE_PX = this.addUniformData( new GLUniformData( "VIEWPORT_SIZE_PX", 2, newDirectFloatBuffer( 2 ) ) );
+        this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
+        this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( programHandle, "VIEWPORT_SIZE_PX" );
 
-        this.RGBA = this.addUniformData( new GLUniformData( "RGBA", 4, newDirectFloatBuffer( 4 ) ) );
-        this.STIPPLE_ENABLE = this.addUniformData( new GLUniformData( "STIPPLE_ENABLE", Integer.valueOf( 0 ) ) );
-        this.STIPPLE_SCALE = this.addUniformData( new GLUniformData( "STIPPLE_SCALE", Float.valueOf( 1.0f ) ) );
-        this.STIPPLE_PATTERN = this.addUniformData( new GLUniformData( "STIPPLE_PATTERN", Integer.valueOf( 0xFF ) ) );
-        this.LINE_THICKNESS_PX = this.addUniformData( new GLUniformData( "LINE_THICKNESS_PX", Float.valueOf( 1.0f ) ) );
-        this.FEATHER_THICKNESS_PX = this.addUniformData( new GLUniformData( "FEATHER_THICKNESS_PX", Float.valueOf( 1.0f ) ) );
+        this.RGBA = gl.glGetUniformLocation( programHandle, "RGBA" );
+        this.STIPPLE_ENABLE = gl.glGetUniformLocation( programHandle, "STIPPLE_ENABLE" );
+        this.STIPPLE_SCALE = gl.glGetUniformLocation( programHandle, "STIPPLE_SCALE" );
+        this.STIPPLE_PATTERN = gl.glGetUniformLocation( programHandle, "STIPPLE_PATTERN" );
+        this.LINE_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "LINE_THICKNESS_PX" );
+        this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
 
-        this.vertices = new LineVertexData( );
-        this.addArrayData( vertices.xyArray );
-        this.addArrayData( vertices.cumulativeDistanceArray );
+        this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
+        this.inCumulativeDistance = gl.glGetAttribLocation( programHandle, "inCumulativeDistance" );
     }
 
-    public void setColor( float[] color )
+    public void begin( GL2ES2 gl )
     {
-        FloatBuffer rgba = ( FloatBuffer ) this.RGBA.getBuffer( );
-        rgba.put( 0, color[ 0 ] );
-        rgba.put( 1, color[ 1 ] );
-        rgba.put( 2, color[ 2 ] );
-        rgba.put( 3, color[ 3 ] );
+        gl.glUseProgram( programHandle );
+        gl.glEnableVertexAttribArray( inXy );
+        gl.glEnableVertexAttribArray( inCumulativeDistance );
     }
 
-    public void enableStipple( float scale, int pattern )
+    public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
     {
-        this.STIPPLE_ENABLE.setData( 1 );
-        this.STIPPLE_SCALE.setData( scale );
-        this.STIPPLE_PATTERN.setData( pattern );
+        setViewport( gl, bounds.getWidth( ), bounds.getHeight( ) );
     }
 
-    public void disableStipple( )
+    public void setViewport( GL2ES2 gl, int viewportWidth, int viewportHeight )
     {
-        this.STIPPLE_ENABLE.setData( 0 );
+        gl.glUniform2f( VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
     }
 
-    public void setLineThickness( float thickness_PX )
+    public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
     {
-        this.LINE_THICKNESS_PX.setData( thickness_PX );
+        setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxX( ), ( float ) axis.getMaxY( ) );
     }
 
-    public void setFeatherThickness( float feather_PX )
+    public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds )
     {
-        this.FEATHER_THICKNESS_PX.setData( feather_PX );
+        setOrtho( gl, 0, 0, bounds.getWidth( ), bounds.getHeight( ) );
     }
 
-    public void setViewport( GlimpseBounds bounds )
+    public void setOrtho( GL2ES2 gl, float xMin, float yMin, float xMax, float yMax )
     {
-        setViewport( bounds.getWidth( ), bounds.getHeight( ) );
+        gl.glUniform4f( AXIS_RECT, xMin, yMin, xMax, yMax );
     }
 
-    public void setViewport( int viewportWidth, int viewportHeight )
+    public void setStyle( GL2ES2 gl, LineStyle style )
     {
-        FloatBuffer viewportSize_PX = ( FloatBuffer ) this.VIEWPORT_SIZE_PX.getBuffer( );
-        viewportSize_PX.put( 0, viewportWidth );
-        viewportSize_PX.put( 1, viewportHeight );
+        gl.glUniform4fv( RGBA, 1, style.rgba, 0 );
+
+        if ( style.stippleEnable )
+        {
+            gl.glUniform1i( STIPPLE_ENABLE, 1 );
+            gl.glUniform1f( STIPPLE_SCALE, style.stippleScale );
+            gl.glUniform1i( STIPPLE_PATTERN, style.stipplePattern );
+        }
+        else
+        {
+            gl.glUniform1i( STIPPLE_ENABLE, 0 );
+        }
+
+        gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
+        gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
     }
 
-    public void setAxisOrtho( Axis2D axis )
+    public void draw( GL2ES2 gl, int xyVbo, int cumulativeDistanceVbo, int first, int count )
     {
-        setOrtho( ( float ) axis.getMinX( ),
-                  ( float ) axis.getMinY( ),
-                  ( float ) axis.getMaxX( ),
-                  ( float ) axis.getMaxY( ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
+        gl.glVertexAttribPointer( inCumulativeDistance, 1, GL_FLOAT, false, 0, 0 );
+
+        gl.glDrawArrays( GL_LINES, first, count );
     }
 
-    public void setPixelOrtho( GlimpseBounds bounds )
+    public void end( GL2ES2 gl )
     {
-        setOrtho( 0,
-                  0,
-                  bounds.getWidth( ),
-                  bounds.getHeight( ) );
-    }
-
-    public void setOrtho( float xMin, float yMin, float xMax, float yMax )
-    {
-        FloatBuffer axisRect = ( FloatBuffer ) this.AXIS_RECT.getBuffer( );
-        axisRect.put( 0, xMin );
-        axisRect.put( 1, yMin );
-        axisRect.put( 2, xMax );
-        axisRect.put( 3, yMax );
+        gl.glDisableVertexAttribArray( inXy );
+        gl.glDisableVertexAttribArray( inCumulativeDistance );
+        gl.glUseProgram( 0 );
     }
 
 }

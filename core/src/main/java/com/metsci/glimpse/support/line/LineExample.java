@@ -1,13 +1,24 @@
 package com.metsci.glimpse.support.line;
 
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
 import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
 import static com.metsci.glimpse.support.FrameUtils.newFrame;
 import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
-import static javax.media.opengl.GL.GL_LINES;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
+import static javax.media.opengl.GL.GL_MAP_WRITE_BIT;
+import static javax.media.opengl.GL.GL_ONE;
+import static javax.media.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
+import static javax.media.opengl.GL.GL_SRC_ALPHA;
+import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
-import javax.media.opengl.GL;
+import java.nio.FloatBuffer;
+
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -38,58 +49,115 @@ public class LineExample
 
         plot.getLayoutCenter( ).addPainter( new GlimpsePainter2D( )
         {
-            float lineThickness_PX = 5;
+            LineStyle style = new LineStyle( );
+            LineProgram prog = null;
 
-            LineProgram prog;
+            int xyVbo = 0;
+            int cumulativeDistanceVbo = 0;
 
             {
-                this.prog = new LineProgram( );
-                prog.setLineThickness( lineThickness_PX );
-                prog.setFeatherThickness( 1f );
-                prog.setColor( GlimpseColor.getBlack( ) );
+                style.rgba = GlimpseColor.getBlack( );
+                style.thickness_PX = 5;
+                style.stippleEnable = true;
+                style.stippleScale = 5;
+                style.stipplePattern = 0b0001010101010101;
             }
 
             public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
             {
-                prog.setViewport( bounds );
-                prog.setPixelOrtho( bounds );
+                GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
-                float xLeft_PX = ( float ) ( 0.5*lineThickness_PX );
-                float xRight_PX = ( float ) ( bounds.getWidth( ) - 0.5*lineThickness_PX );
-                float yBottom_PX = ( float ) ( 0.5*lineThickness_PX );
-                float yTop_PX = ( float ) ( bounds.getHeight( ) - 0.5*lineThickness_PX );
 
-                prog.vertices.seal( false );
-                prog.vertices.clear( );
+                if ( prog == null )
+                {
+                    prog = new LineProgram( gl );
+                }
 
-                prog.vertices.addVertex( xLeft_PX, yBottom_PX );
-                prog.vertices.addVertex( xRight_PX, yBottom_PX );
+                if ( xyVbo == 0 )
+                {
+                    xyVbo = genBuffer( gl );
+                }
 
-                prog.vertices.breakLine( );
+                if ( cumulativeDistanceVbo == 0 )
+                {
+                    cumulativeDistanceVbo = genBuffer( gl );
+                }
 
-                prog.vertices.addVertex( xRight_PX, yBottom_PX );
-                prog.vertices.addVertex( xRight_PX, yTop_PX );
 
-                prog.vertices.breakLine( );
 
-                prog.vertices.addVertex( xLeft_PX, yBottom_PX );
-                prog.vertices.addVertex( xLeft_PX, yTop_PX );
+                gl.glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+                gl.glEnable( GL_BLEND );
 
-                prog.vertices.breakLine( );
 
-                prog.vertices.addVertex( xLeft_PX, yTop_PX );
-                prog.vertices.addVertex( xRight_PX, yTop_PX );
+                prog.begin( gl );
+                try
+                {
+                    prog.setViewport( gl, bounds );
+                    prog.setPixelOrtho( gl, bounds );
+                    prog.setStyle( gl, style );
 
-                prog.vertices.seal( true );
+                    float inset_PX = 0.5f * style.thickness_PX;
+                    float xLeft_PX = inset_PX;
+                    float xRight_PX = bounds.getWidth( ) - inset_PX;
+                    float yBottom_PX = inset_PX;
+                    float yTop_PX = bounds.getHeight( ) - inset_PX;
 
-                GL gl = context.getGL( );
 
-                gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
-                gl.glEnable( GL.GL_BLEND );
 
-                prog.useProgram( gl, true );
-                gl.glDrawArrays( GL_LINES, 0, 8 );
-                prog.useProgram( gl, false );
+                    int maxVertices = 100;
+
+
+                    int xyMaxBytes = maxVertices * 2 * SIZEOF_FLOAT;
+                    gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+                    gl.glBufferData( GL_ARRAY_BUFFER, xyMaxBytes, null, GL_STREAM_DRAW );
+                    FloatBuffer xyBuffer = gl.glMapBufferRange( GL_ARRAY_BUFFER, 0, xyMaxBytes, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT ).asFloatBuffer( );
+
+                    xyBuffer.put( xLeft_PX  ).put( yBottom_PX );
+                    xyBuffer.put( xRight_PX ).put( yBottom_PX );
+
+                    xyBuffer.put( xRight_PX ).put( yBottom_PX );
+                    xyBuffer.put( xRight_PX ).put( yTop_PX    );
+
+                    xyBuffer.put( xLeft_PX ).put( yBottom_PX );
+                    xyBuffer.put( xLeft_PX ).put( yTop_PX    );
+
+                    xyBuffer.put( xLeft_PX  ).put( yTop_PX );
+                    xyBuffer.put( xRight_PX ).put( yTop_PX );
+
+                    int numVertices = xyBuffer.duplicate( ).flip( ).remaining( ) / 2;
+                    gl.glUnmapBuffer( GL_ARRAY_BUFFER );
+
+
+
+
+                    int cumulativeDistanceMaxBytes = maxVertices * 1 * SIZEOF_FLOAT;
+                    gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
+                    gl.glBufferData( GL_ARRAY_BUFFER, cumulativeDistanceMaxBytes, null, GL_STREAM_DRAW );
+                    FloatBuffer cumulativeDistanceBuffer = gl.glMapBufferRange( GL_ARRAY_BUFFER, 0, cumulativeDistanceMaxBytes, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT ).asFloatBuffer( );
+
+                    cumulativeDistanceBuffer.put( 0 );
+                    cumulativeDistanceBuffer.put( xRight_PX - xLeft_PX );
+
+                    cumulativeDistanceBuffer.put( 0 );
+                    cumulativeDistanceBuffer.put( yTop_PX - yBottom_PX );
+
+                    cumulativeDistanceBuffer.put( 0 );
+                    cumulativeDistanceBuffer.put( yTop_PX - yBottom_PX );
+
+                    cumulativeDistanceBuffer.put( 0 );
+                    cumulativeDistanceBuffer.put( xRight_PX - xLeft_PX );
+
+                    gl.glUnmapBuffer( GL_ARRAY_BUFFER );
+
+
+
+
+                    prog.draw( gl, xyVbo, cumulativeDistanceVbo, 0, numVertices );
+                }
+                finally
+                {
+                    prog.end( gl );
+                }
             }
         } );
 
