@@ -11,6 +11,42 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
+/**
+ * Represents a buffer object, and provides methods that (should) allow the
+ * buffer to be mapped for convenient writing without incurring surprising
+ * performance penalties.
+ * <p>
+ * Follows advice from Rob Barris in March 2010 (which can be found
+ * <a href="https://www.opengl.org/discussion_boards/showthread.php/170118-VBOs-strangely-slow?p=1197780#post1197780">here</a>)
+ * on how to avoid driver-level synchronization. However, synchronization is
+ * ultimately up to the driver, and the approach taken here is not guaranteed
+ * to work on every driver.
+ * <p>
+ * Expected usage looks something like this:
+ * <pre>
+ *    // At init-time
+ *
+ *    MappableBuffer xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 100 );
+ *    ...
+ *
+ *    // At render-time
+ *
+ *    int maxVertices = 10000;
+ *    int floatsPerVertex = 2;
+ *    FloatBuffer xyBuffer = xyVbo.mapFloats( gl, floatsPerVertex * maxVertices );
+ *
+ *    xyBuffer.put( x0 ).put( y0 );
+ *    xyBuffer.put( x1 ).put( y1 );
+ *    ...
+ *
+ *    int numVertices = xyBuffer.position( ) / floatsPerVertex;
+ *    xyVbo.seal( gl );
+ *
+ *    gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+ *    gl.glVertexAttribPointer( ..., xyVbo.sealedOffset( ) );
+ *    gl.glDrawArrays( ... );
+ * </pre>
+ */
 public class MappableBuffer
 {
 
