@@ -44,7 +44,7 @@ import javax.media.opengl.GL;
  *
  *    gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
  *    gl.glVertexAttribPointer( ..., xyVbo.sealedOffset( ) );
- *    gl.glDrawArrays( ... );
+ *    gl.glDrawArrays( ..., 0, numVertices );
  * </pre>
  */
 public class MappableBuffer
@@ -59,8 +59,9 @@ public class MappableBuffer
     public final int usage;
 
     /**
-     * How many times larger than the map size to allocate, when we
-     * have to allocate new space for the buffer
+     * How many times larger than the mapped size to allocate, when
+     * we have to allocate new space for the buffer -- larger factors
+     * result in less frequent reallocs, but higher memory use
      */
     protected final int blockSizeFactor;
 
