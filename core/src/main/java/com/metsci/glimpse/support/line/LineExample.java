@@ -6,8 +6,10 @@ import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
 import static com.metsci.glimpse.support.FrameUtils.newFrame;
 import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.line.LineUtils.distance;
+import static com.metsci.glimpse.support.line.LineUtils.put1f;
+import static com.metsci.glimpse.support.line.LineUtils.put2f;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static java.lang.Math.sqrt;
 import static java.lang.System.currentTimeMillis;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_BLEND;
@@ -40,25 +42,6 @@ import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LineExample
 {
-
-    public static double distance( double x0, double y0, double x1, double y1 )
-    {
-        double dx = x1 - x0;
-        double dy = y1 - y0;
-        return sqrt( dx*dx + dy*dy );
-    }
-
-    public static void put1f( FloatBuffer buffer, double a )
-    {
-        buffer.put( ( float ) a );
-    }
-
-    public static void put2f( FloatBuffer buffer, double a, double b )
-    {
-        buffer.put( ( float ) a )
-              .put( ( float ) b );
-    }
-
 
     public static void main( String[] args )
     {
@@ -161,7 +144,7 @@ public class LineExample
                     }
 
 
-                    int numVertices = xyBuffer.duplicate( ).flip( ).remaining( ) / 2;
+                    int numVertices = xyBuffer.position( ) / 2;
 
                     gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
                     gl.glUnmapBuffer( GL_ARRAY_BUFFER );
@@ -248,6 +231,7 @@ public class LineExample
                     gl.glBufferData( GL_ARRAY_BUFFER, cumulativeDistanceMaxBytes, null, GL_STREAM_DRAW );
                     FloatBuffer cumulativeDistanceBuffer = gl.glMapBufferRange( GL_ARRAY_BUFFER, 0, cumulativeDistanceMaxBytes, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT ).asFloatBuffer( );
 
+
                     xyBuffer.put( xLeft_PX  ).put( yBottom_PX );
                     xyBuffer.put( xRight_PX ).put( yBottom_PX );
                     cumulativeDistanceBuffer.put( 0 );
@@ -268,7 +252,8 @@ public class LineExample
                     cumulativeDistanceBuffer.put( 0 );
                     cumulativeDistanceBuffer.put( xRight_PX - xLeft_PX );
 
-                    int numVertices = xyBuffer.duplicate( ).flip( ).remaining( ) / 2;
+
+                    int numVertices = xyBuffer.position( ) / 2;
 
                     gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
                     gl.glUnmapBuffer( GL_ARRAY_BUFFER );
