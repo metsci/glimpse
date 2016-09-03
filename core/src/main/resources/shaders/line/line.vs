@@ -5,9 +5,14 @@ vec2 axisMin( vec4 axisRect )
     return axisRect.xy;
 }
 
-vec2 axisSize( vec4 axisRect )
+vec2 axisMax( vec4 axisRect )
 {
     return axisRect.zw;
+}
+
+vec2 axisSize( vec4 axisRect )
+{
+    return ( axisMax( axisRect ) - axisMin( axisRect ) );
 }
 
 vec2 fracToNdc( vec2 frac )
