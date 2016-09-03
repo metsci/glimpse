@@ -43,15 +43,21 @@ public class LineUtils
               .put( ( float ) b );
     }
 
-    public static FloatBuffer orphanAndMapFloats( GL gl, int target, long numFloats, int usage )
+    public static FloatBuffer reallocFloatVbo( GL gl, int vbo, long numFloats, int usage )
     {
-        return orphanAndMapBytes( gl, target, numFloats * SIZEOF_FLOAT, usage ).asFloatBuffer( );
+        return reallocVbo( gl, vbo, numFloats * SIZEOF_FLOAT, usage ).asFloatBuffer( );
     }
 
-    public static ByteBuffer orphanAndMapBytes( GL gl, int target, long numBytes, int usage )
+    public static ByteBuffer reallocVbo( GL gl, int vbo, long numBytes, int usage )
     {
+        gl.glBindBuffer( GL_ARRAY_BUFFER, vbo );
         gl.glBufferData( GL_ARRAY_BUFFER, numBytes, null, GL_STREAM_DRAW );
         return gl.glMapBufferRange( GL_ARRAY_BUFFER, 0, numBytes, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
     }
 
+    public static void unmapVbo( GL gl, int vbo )
+    {
+        gl.glBindBuffer( GL_ARRAY_BUFFER, vbo );
+        gl.glUnmapBuffer( GL_ARRAY_BUFFER );
+    }
 }

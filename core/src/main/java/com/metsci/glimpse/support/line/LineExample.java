@@ -7,11 +7,11 @@ import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
 import static com.metsci.glimpse.support.line.LineUtils.distance;
 import static com.metsci.glimpse.support.line.LineUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.line.LineUtils.orphanAndMapFloats;
 import static com.metsci.glimpse.support.line.LineUtils.put1f;
 import static com.metsci.glimpse.support.line.LineUtils.put2f;
+import static com.metsci.glimpse.support.line.LineUtils.reallocFloatVbo;
+import static com.metsci.glimpse.support.line.LineUtils.unmapVbo;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
@@ -70,7 +70,7 @@ public class LineExample
                 GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
 
-                // Init
+                // Create & Populate
 
                 if ( prog == null || xyVbo == 0 || cumulativeDistanceVbo == 0 )
                 {
@@ -78,14 +78,9 @@ public class LineExample
                     this.xyVbo = genBuffer( gl );
                     this.cumulativeDistanceVbo = genBuffer( gl );
 
-
                     int maxVertices = 1000000;
-
-                    gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-                    FloatBuffer xyBuffer = orphanAndMapFloats( gl, GL_ARRAY_BUFFER, 2*maxVertices, GL_STREAM_DRAW );
-
-                    gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
-                    FloatBuffer cumulativeDistanceBuffer = orphanAndMapFloats( gl, GL_ARRAY_BUFFER, 1*maxVertices, GL_STREAM_DRAW );
+                    FloatBuffer xyBuffer = reallocFloatVbo( gl, xyVbo, 2*maxVertices, GL_STREAM_DRAW );
+                    FloatBuffer cumulativeDistanceBuffer = reallocFloatVbo( gl, cumulativeDistanceVbo, 1*maxVertices, GL_STREAM_DRAW );
 
                     Random r = new Random( 0 );
                     for ( int i = 0; i < 250000; i++ )
@@ -111,12 +106,8 @@ public class LineExample
                     }
 
                     this.numVertices = xyBuffer.position( ) / 2;
-
-                    gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-                    gl.glUnmapBuffer( GL_ARRAY_BUFFER );
-
-                    gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
-                    gl.glUnmapBuffer( GL_ARRAY_BUFFER );
+                    unmapVbo( gl, xyVbo );
+                    unmapVbo( gl, cumulativeDistanceVbo );
                 }
 
 
@@ -160,7 +151,7 @@ public class LineExample
                 GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
 
-                // Init
+                // Create
 
                 if ( prog == null || xyVbo == 0 || cumulativeDistanceVbo == 0 )
                 {
@@ -170,16 +161,11 @@ public class LineExample
                 }
 
 
-                // Update
+                // Populate
 
                 int maxVertices = 8;
-
-                gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-                FloatBuffer xyBuffer = orphanAndMapFloats( gl, GL_ARRAY_BUFFER, 2*maxVertices, GL_STREAM_DRAW );
-
-                gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
-                FloatBuffer cumulativeDistanceBuffer = orphanAndMapFloats( gl, GL_ARRAY_BUFFER, 1*maxVertices, GL_STREAM_DRAW );
-
+                FloatBuffer xyBuffer = reallocFloatVbo( gl, xyVbo, 2*maxVertices, GL_STREAM_DRAW );
+                FloatBuffer cumulativeDistanceBuffer = reallocFloatVbo( gl, cumulativeDistanceVbo, 1*maxVertices, GL_STREAM_DRAW );
 
                 float inset_PX = 0.5f * style.thickness_PX;
                 float xLeft_PX = inset_PX;
@@ -207,14 +193,9 @@ public class LineExample
                 cumulativeDistanceBuffer.put( 0 );
                 cumulativeDistanceBuffer.put( xRight_PX - xLeft_PX );
 
-
                 int numVertices = xyBuffer.position( ) / 2;
-
-                gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-                gl.glUnmapBuffer( GL_ARRAY_BUFFER );
-
-                gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
-                gl.glUnmapBuffer( GL_ARRAY_BUFFER );
+                unmapVbo( gl, xyVbo );
+                unmapVbo( gl, cumulativeDistanceVbo );
 
 
                 // Render
