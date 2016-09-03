@@ -32,7 +32,7 @@ out float vCumulativeDistance_PX;
 void main( )
 {
     float cumulativeDistance_AXIS = inCumulativeDistance;
-    vec2 ppv = axisSize( AXIS_RECT ) / VIEWPORT_SIZE_PX;
+    vec2 ppv = VIEWPORT_SIZE_PX / axisSize( AXIS_RECT );
     vCumulativeDistance_PX = cumulativeDistance_AXIS * ppv.x;
 
     vec2 xy_AXIS = inXy;
