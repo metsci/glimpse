@@ -4,7 +4,7 @@ import static com.metsci.glimpse.support.line.ShaderUtils.createProgram;
 import static com.metsci.glimpse.support.line.ShaderUtils.requireResourceText;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINES;
+import static javax.media.opengl.GL.GL_LINE_STRIP;
 
 import javax.media.opengl.GL2ES2;
 
@@ -118,7 +118,7 @@ public class LineProgram
         gl.glBindBuffer( cumulativeDistanceVbo.target, cumulativeDistanceVbo.buffer( ) );
         gl.glVertexAttribPointer( inCumulativeDistance, 1, GL_FLOAT, false, 0, cumulativeDistanceVbo.sealedOffset( ) );
 
-        gl.glDrawArrays( GL_LINES, first, count );
+        gl.glDrawArrays( GL_LINE_STRIP, first, count );
     }
 
     public void draw( GL2ES2 gl, int xyVbo, int cumulativeDistanceVbo, int first, int count )
@@ -129,7 +129,7 @@ public class LineProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
         gl.glVertexAttribPointer( inCumulativeDistance, 1, GL_FLOAT, false, 0, 0 );
 
-        gl.glDrawArrays( GL_LINES, first, count );
+        gl.glDrawArrays( GL_LINE_STRIP, first, count );
     }
 
     public void end( GL2ES2 gl )

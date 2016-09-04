@@ -16,6 +16,8 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
+import com.metsci.glimpse.axis.Axis2D;
+
 public class LineUtils
 {
 
@@ -30,6 +32,18 @@ public class LineUtils
         double dx = x1 - x0;
         double dy = y1 - y0;
         return sqrt( dx*dx + dy*dy );
+    }
+
+    public static double distance( double x0, double y0, double x1, double y1, double ppvAspectRatio )
+    {
+        double dx = x1 - x0;
+        double dy = ( y1 - y0 ) / ppvAspectRatio;
+        return sqrt( dx*dx + dy*dy );
+    }
+
+    public static double ppvAspectRatio( Axis2D axis )
+    {
+        return ( axis.getAxisX( ).getPixelsPerValue( ) / axis.getAxisY( ).getPixelsPerValue( ) );
     }
 
     public static void put1f( FloatBuffer buffer, double a )

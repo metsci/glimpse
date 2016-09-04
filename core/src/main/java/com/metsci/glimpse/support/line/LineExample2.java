@@ -6,6 +6,7 @@ import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
 import static com.metsci.glimpse.support.line.LineUtils.distance;
 import static com.metsci.glimpse.support.line.LineUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.line.LineUtils.ppvAspectRatio;
 import static com.metsci.glimpse.support.line.LineUtils.put1f;
 import static com.metsci.glimpse.support.line.LineUtils.put2f;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
@@ -40,7 +41,6 @@ public class LineExample2
         final Plot2D plot = new Plot2D( "" );
         plot.setAxisSizeZ( 0 );
         plot.setTitleHeight( 0 );
-        plot.lockAspectRatioXY( 1.0 );
 
         plot.getLayoutCenter( ).addPainter( new BackgroundPainter( ) );
 
@@ -68,49 +68,48 @@ public class LineExample2
                 GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
 
-                // Create & Populate
+                // Create
 
                 if ( prog == null )
                 {
                     this.prog = new LineProgram( gl );
-
-                    int maxVertices = 1000000;
-                    FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
-                    FloatBuffer cumulativeDistanceBuffer = cumulativeDistanceVbo.mapFloats( gl, 1*maxVertices );
-
-                    Random r = new Random( 0 );
-                    for ( int i = 0; i < 25; i++ )
-                    {
-                        double x0 = 2 + 6*r.nextDouble( );
-                        double y0 = 2 + 6*r.nextDouble( );
-
-                        double x1 = x0 + ( -1 + 2*r.nextDouble( ) );
-                        double y1 = y0 + ( -1 + 2*r.nextDouble( ) );
-
-                        double x2 = x1 + ( -1 + 2*r.nextDouble( ) );
-                        double y2 = y1 + ( -1 + 2*r.nextDouble( ) );
-
-                        double cumulativeDistance = 0;
-
-                        put2f( xyBuffer, x0, y0 );
-                        put2f( xyBuffer, x1, y1 );
-
-                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
-                        cumulativeDistance += distance( x0, y0, x1, y1 );
-                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
-
-                        put2f( xyBuffer, x1, y1 );
-                        put2f( xyBuffer, x2, y2 );
-
-                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
-                        cumulativeDistance += distance( x1, y1, x2, y2 );
-                        put1f( cumulativeDistanceBuffer, cumulativeDistance );
-                    }
-
-                    this.numVertices = xyBuffer.position( ) / 2;
-                    xyVbo.seal( gl );
-                    cumulativeDistanceVbo.seal( gl );
                 }
+
+
+                // Populate
+
+                int maxVertices = 100;
+                FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
+                FloatBuffer cumulativeDistanceBuffer = cumulativeDistanceVbo.mapFloats( gl, 1*maxVertices );
+
+                Random r = new Random( 0 );
+                double ppvAspectRatio = ppvAspectRatio( axis );
+                for ( int i = 0; i < 25; i++ )
+                {
+                    double x0 = 2 + 6*r.nextDouble( );
+                    double y0 = 2 + 6*r.nextDouble( );
+
+                    double x1 = x0 + ( -1 + 2*r.nextDouble( ) );
+                    double y1 = y0 + ( -1 + 2*r.nextDouble( ) );
+
+                    double x2 = x1 + ( -1 + 2*r.nextDouble( ) );
+                    double y2 = y1 + ( -1 + 2*r.nextDouble( ) );
+
+                    put2f( xyBuffer, x0, y0 );
+                    put2f( xyBuffer, x1, y1 );
+                    put2f( xyBuffer, x2, y2 );
+
+                    double cumulativeDistance = 0;
+                    put1f( cumulativeDistanceBuffer, cumulativeDistance );
+                    cumulativeDistance += distance( x0, y0, x1, y1, ppvAspectRatio );
+                    put1f( cumulativeDistanceBuffer, cumulativeDistance );
+                    cumulativeDistance += distance( x1, y1, x2, y2, ppvAspectRatio );
+                    put1f( cumulativeDistanceBuffer, cumulativeDistance );
+                }
+
+                this.numVertices = xyBuffer.position( ) / 2;
+                xyVbo.seal( gl );
+                cumulativeDistanceVbo.seal( gl );
 
 
                 // Render
@@ -235,7 +234,7 @@ public class LineExample2
                 JFrame frame = newFrame( "Line Example", canvas, DISPOSE_ON_CLOSE );
                 stopOnWindowClosing( frame, animator );
                 disposeOnWindowClosing( frame, canvas );
-                showFrameCentered( frame );
+                showFrameCentered( frame, 2000, 800 );
             }
         } );
     }
