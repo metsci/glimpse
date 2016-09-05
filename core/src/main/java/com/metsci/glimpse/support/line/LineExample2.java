@@ -52,7 +52,7 @@ public class LineExample2
             LineProgram prog = null;
 
             MappableBuffer xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 10 );
-            MappableBuffer cumulativeDistanceVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 10 );
+            MappableBuffer mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 10 );
             int numVertices = 0;
 
             {
@@ -80,7 +80,7 @@ public class LineExample2
 
                 int maxVertices = 100;
                 FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
-                FloatBuffer cumulativeDistanceBuffer = cumulativeDistanceVbo.mapFloats( gl, 1*maxVertices );
+                FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1*maxVertices );
 
                 Random r = new Random( 0 );
                 double ppvAspectRatio = ppvAspectRatio( axis );
@@ -99,17 +99,17 @@ public class LineExample2
                     put2f( xyBuffer, x1, y1 );
                     put2f( xyBuffer, x2, y2 );
 
-                    double cumulativeDistance = 0;
-                    put1f( cumulativeDistanceBuffer, cumulativeDistance );
-                    cumulativeDistance += distance( x0, y0, x1, y1, ppvAspectRatio );
-                    put1f( cumulativeDistanceBuffer, cumulativeDistance );
-                    cumulativeDistance += distance( x1, y1, x2, y2, ppvAspectRatio );
-                    put1f( cumulativeDistanceBuffer, cumulativeDistance );
+                    double mileage = 0;
+                    put1f( mileageBuffer, mileage );
+                    mileage += distance( x0, y0, x1, y1, ppvAspectRatio );
+                    put1f( mileageBuffer, mileage );
+                    mileage += distance( x1, y1, x2, y2, ppvAspectRatio );
+                    put1f( mileageBuffer, mileage );
                 }
 
                 this.numVertices = xyBuffer.position( ) / 2;
                 xyVbo.seal( gl );
-                cumulativeDistanceVbo.seal( gl );
+                mileageVbo.seal( gl );
 
 
                 // Render
@@ -123,7 +123,7 @@ public class LineExample2
                     prog.setAxisOrtho( gl, axis );
                     prog.setStyle( gl, style );
 
-                    prog.draw( gl, xyVbo, cumulativeDistanceVbo, 0, numVertices );
+                    prog.draw( gl, xyVbo, mileageVbo, 0, numVertices );
                 }
                 finally
                 {
@@ -140,7 +140,7 @@ public class LineExample2
             LineProgram prog = null;
 
             MappableBuffer xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
-            MappableBuffer cumulativeDistanceVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
+            MappableBuffer mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
 
             {
                 style.rgba = GlimpseColor.getBlack( );
@@ -164,7 +164,7 @@ public class LineExample2
 
                 int maxVertices = 8;
                 FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
-                FloatBuffer cumulativeDistanceBuffer = cumulativeDistanceVbo.mapFloats( gl, 1*maxVertices );
+                FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1*maxVertices );
 
                 float inset_PX = 0.5f * style.thickness_PX;
                 float xLeft_PX = inset_PX;
@@ -174,27 +174,27 @@ public class LineExample2
 
                 xyBuffer.put( xLeft_PX  ).put( yBottom_PX );
                 xyBuffer.put( xRight_PX ).put( yBottom_PX );
-                cumulativeDistanceBuffer.put( 0 );
-                cumulativeDistanceBuffer.put( xRight_PX - xLeft_PX );
+                mileageBuffer.put( 0 );
+                mileageBuffer.put( xRight_PX - xLeft_PX );
 
                 xyBuffer.put( xRight_PX ).put( yBottom_PX );
                 xyBuffer.put( xRight_PX ).put( yTop_PX    );
-                cumulativeDistanceBuffer.put( 0 );
-                cumulativeDistanceBuffer.put( yTop_PX - yBottom_PX );
+                mileageBuffer.put( 0 );
+                mileageBuffer.put( yTop_PX - yBottom_PX );
 
                 xyBuffer.put( xLeft_PX ).put( yBottom_PX );
                 xyBuffer.put( xLeft_PX ).put( yTop_PX    );
-                cumulativeDistanceBuffer.put( 0 );
-                cumulativeDistanceBuffer.put( yTop_PX - yBottom_PX );
+                mileageBuffer.put( 0 );
+                mileageBuffer.put( yTop_PX - yBottom_PX );
 
                 xyBuffer.put( xLeft_PX  ).put( yTop_PX );
                 xyBuffer.put( xRight_PX ).put( yTop_PX );
-                cumulativeDistanceBuffer.put( 0 );
-                cumulativeDistanceBuffer.put( xRight_PX - xLeft_PX );
+                mileageBuffer.put( 0 );
+                mileageBuffer.put( xRight_PX - xLeft_PX );
 
                 int numVertices = xyBuffer.position( ) / 2;
                 xyVbo.seal( gl );
-                cumulativeDistanceVbo.seal( gl );
+                mileageVbo.seal( gl );
 
 
                 // Render
@@ -208,7 +208,7 @@ public class LineExample2
                     prog.setPixelOrtho( gl, bounds );
                     prog.setStyle( gl, style );
 
-                    prog.draw( gl, xyVbo, cumulativeDistanceVbo, 0, numVertices );
+                    prog.draw( gl, xyVbo, mileageVbo, 0, numVertices );
                 }
                 finally
                 {

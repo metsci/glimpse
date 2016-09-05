@@ -8,7 +8,7 @@ uniform float STIPPLE_SCALE;
 uniform int STIPPLE_PATTERN;
 
 in vec2 gPosInQuad_PX;
-in float gCumulativeDistance_PX;
+in float gMileage_PX;
 in float gQuadLength_PX;
 
 out vec4 outRgba;
@@ -50,7 +50,7 @@ void main( )
         // bit region. The alternative would be more complicated than useful.
 
         float bitWidth_PX = STIPPLE_SCALE;
-        float bitNum = mod( gCumulativeDistance_PX / bitWidth_PX, 16.0 );
+        float bitNum = mod( gMileage_PX / bitWidth_PX, 16.0 );
         float bitAlpha = float( sign( STIPPLE_PATTERN & ( 0x1 << int( bitNum ) ) ) );
 
         float posInBit_PX = bitWidth_PX*( bitNum - floor( bitNum ) );

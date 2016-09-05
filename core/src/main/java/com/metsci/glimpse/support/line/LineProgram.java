@@ -38,7 +38,7 @@ public class LineProgram
     // Vertex attributes
 
     public final int inXy;
-    public final int inCumulativeDistance;
+    public final int inMileage;
 
 
     public LineProgram( GL2ES2 gl )
@@ -56,14 +56,14 @@ public class LineProgram
         this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
 
         this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
-        this.inCumulativeDistance = gl.glGetAttribLocation( programHandle, "inCumulativeDistance" );
+        this.inMileage = gl.glGetAttribLocation( programHandle, "inMileage" );
     }
 
     public void begin( GL2ES2 gl )
     {
         gl.glUseProgram( programHandle );
         gl.glEnableVertexAttribArray( inXy );
-        gl.glEnableVertexAttribArray( inCumulativeDistance );
+        gl.glEnableVertexAttribArray( inMileage );
     }
 
     public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
@@ -110,24 +110,24 @@ public class LineProgram
         gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
     }
 
-    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer cumulativeDistanceVbo, int first, int count )
+    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer mileageVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( cumulativeDistanceVbo.target, cumulativeDistanceVbo.buffer( ) );
-        gl.glVertexAttribPointer( inCumulativeDistance, 1, GL_FLOAT, false, 0, cumulativeDistanceVbo.sealedOffset( ) );
+        gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
+        gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
 
         gl.glDrawArrays( GL_LINE_STRIP, first, count );
     }
 
-    public void draw( GL2ES2 gl, int xyVbo, int cumulativeDistanceVbo, int first, int count )
+    public void draw( GL2ES2 gl, int xyVbo, int mileageVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, cumulativeDistanceVbo );
-        gl.glVertexAttribPointer( inCumulativeDistance, 1, GL_FLOAT, false, 0, 0 );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
+        gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( GL_LINE_STRIP, first, count );
     }
@@ -135,7 +135,7 @@ public class LineProgram
     public void end( GL2ES2 gl )
     {
         gl.glDisableVertexAttribArray( inXy );
-        gl.glDisableVertexAttribArray( inCumulativeDistance );
+        gl.glDisableVertexAttribArray( inMileage );
         gl.glUseProgram( 0 );
     }
 

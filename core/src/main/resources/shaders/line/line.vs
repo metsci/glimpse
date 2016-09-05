@@ -25,15 +25,15 @@ uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
 
 in vec2 inXy;
-in float inCumulativeDistance;
+in float inMileage;
 
-out float vCumulativeDistance_PX;
+out float vMileage_PX;
 
 void main( )
 {
-    float cumulativeDistance_AXIS = inCumulativeDistance;
+    float mileage_AXIS = inMileage;
     vec2 ppv = VIEWPORT_SIZE_PX / axisSize( AXIS_RECT );
-    vCumulativeDistance_PX = cumulativeDistance_AXIS * ppv.x;
+    vMileage_PX = mileage_AXIS * ppv.x;
 
     vec2 xy_AXIS = inXy;
     gl_Position.xy = axisXyToPx( xy_AXIS, AXIS_RECT, VIEWPORT_SIZE_PX );
