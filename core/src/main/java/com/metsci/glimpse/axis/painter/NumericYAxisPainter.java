@@ -30,7 +30,9 @@ import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -38,6 +40,7 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineProgram;
 
 /**
  * A vertical (y) axis with labeled ticks along the left side.
@@ -52,27 +55,32 @@ public class NumericYAxisPainter extends NumericAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void paintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis1D axis = getAxis1D( context );
+        GL2 gl = context.getGL( ).getGL2( );
+
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl );
+        }
+
+        paintTicks( gl, axis, bounds );
+        paintAxisLabel( gl, axis, bounds );
+        paintSelectionLine( gl, axis, bounds );
+    }
+
+    protected void paintTicks( GL gl, Axis1D axis, GlimpseBounds bounds )
+    {
+        GL2ES2 gl2es2 = gl.getGL2ES2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
-
-        paintTicks( gl, axis, width, height );
-        paintAxisLabel( gl, axis, width, height );
-        paintSelectionLine( gl, axis, width, height );
-    }
-
-    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
-    {
+        
         double[] yTicks = ticks.getTickPositions( axis );
         String[] yLabels = ticks.getTickLabels( axis, yTicks );
 
@@ -84,11 +92,13 @@ public class NumericYAxisPainter extends NumericAxisPainter
         int min = -1;
         int max = yTicks.length;
 
-        // Tick marks
-        GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL2.GL_LINES );
+        prog.begin( gl2es2 );
         try
         {
+            path.clear( );
+            style.thickness_PX = tickLineWidth;
+            style.rgba = tickColor;
+
             for ( int i = 0; i < yTicks.length; i++ )
             {
                 double jTick = converter.fromAxisUnits( yTicks[i] );
@@ -106,8 +116,8 @@ public class NumericYAxisPainter extends NumericAxisPainter
                 }
                 else
                 {
-                    gl.glVertex2d( iTick0, jTick );
-                    gl.glVertex2d( iTick1, jTick );
+                    path.moveTo( ( float ) iTick0, ( float ) jTick );
+                    path.lineTo( ( float ) iTick1, ( float ) jTick );
                 }
             }
 
@@ -121,14 +131,19 @@ public class NumericYAxisPainter extends NumericAxisPainter
                 {
                     double jTick = converter.fromAxisUnits( xMinor[i] );
 
-                    gl.glVertex2d( iTick0, jTick );
-                    gl.glVertex2d( iTick1, jTick );
+                    path.moveTo( ( float ) iTick0, ( float ) jTick );
+                    path.lineTo( ( float ) iTick1, ( float ) jTick );
                 }
             }
+            
+            prog.setViewport( gl2es2, bounds );
+            prog.setOrtho( gl2es2, -0.5f, ( float ) axis.getMin( ), width - 0.5f, ( float ) axis.getMax( ) );
+
+            prog.draw( gl2es2, style, path, 1.0 );
         }
         finally
         {
-            gl.glEnd( );
+            prog.end( gl2es2 );
         }
 
         if ( showTickLabels )
@@ -169,11 +184,14 @@ public class NumericYAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintAxisLabel( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintAxisLabel( GL2 gl, Axis1D axis, GlimpseBounds bounds )
     {
         // Axis label
         if ( showLabel )
         {
+            int width = bounds.getWidth( );
+            int height = bounds.getHeight( );
+            
             GlimpseColor.setColor( textRenderer, axisLabelColor );
             textRenderer.beginRendering( width, height );
             try
@@ -196,26 +214,33 @@ public class NumericYAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintSelectionLine( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintSelectionLine( GL2 gl, Axis1D axis, GlimpseBounds bounds )
     {
         AxisUnitConverter converter = ticks.getAxisUnitConverter( );
 
         // Selection line
         if ( showSelectionLine )
         {
-            gl.glLineWidth( markerWidth );
+            GL2ES2 gl2es2 = gl.getGL2ES2( );
 
+            int width = bounds.getWidth( );
             double y0 = converter.fromAxisUnits( axis.getSelectionCenter( ) );
 
-            gl.glBegin( GL2.GL_LINES );
+            prog.begin( gl2es2 );
             try
             {
-                gl.glVertex2d( 0, y0 );
-                gl.glVertex2d( width, y0 );
+                path.clear( );
+                style.thickness_PX = markerWidth;
+                style.rgba = tickColor;
+
+                path.moveTo( 0, (float) y0 );
+                path.lineTo( width, (float) y0 );
+
+                prog.draw( gl2es2, style, path, 1.0 );
             }
             finally
             {
-                gl.glEnd( );
+                prog.end( gl2es2 );
             }
         }
     }

@@ -1,10 +1,10 @@
 package com.metsci.glimpse.examples.basic;
 
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.axis.painter.NumericXAxisPainter;
+import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.EmptyPlot2D;
@@ -21,13 +21,13 @@ public class TestExample implements GlimpseLayoutProvider
     {
         EmptyPlot2D plot = new EmptyPlot2D( );
 
-        GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
-        
-        AxisUtil.attachHorizontalMouseListener( layoutX );
+        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
 
-        plot.addLayout( layoutX );
+        AxisUtil.attachVerticalMouseListener( layoutY );
 
-        layoutX.addPainter( new NumericXAxisPainter( new GridAxisLabelHandler( ) ) );
+        plot.addLayout( layoutY );
+
+        layoutY.addPainter( new NumericYAxisPainter( new GridAxisLabelHandler( ) ) );
 
         return plot;
     }
