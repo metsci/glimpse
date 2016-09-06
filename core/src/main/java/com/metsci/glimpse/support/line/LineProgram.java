@@ -1,7 +1,7 @@
 package com.metsci.glimpse.support.line;
 
-import static com.metsci.glimpse.support.line.ShaderUtils.createProgram;
-import static com.metsci.glimpse.support.line.ShaderUtils.requireResourceText;
+import static com.metsci.glimpse.support.line.util.ShaderUtils.createProgram;
+import static com.metsci.glimpse.support.line.util.ShaderUtils.requireResourceText;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_LINE_STRIP;

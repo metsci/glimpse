@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.line.util;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.metsci.glimpse.util.GeneralUtils.array;

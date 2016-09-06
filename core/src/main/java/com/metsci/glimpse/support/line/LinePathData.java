@@ -1,9 +1,9 @@
 package com.metsci.glimpse.support.line;
 
 import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
-import static com.metsci.glimpse.support.line.LineUtils.distance;
-import static com.metsci.glimpse.support.line.LineUtils.ensureAdditionalCapacity;
-import static com.metsci.glimpse.support.line.LineUtils.flipped;
+import static com.metsci.glimpse.support.line.util.LineUtils.distance;
+import static com.metsci.glimpse.support.line.util.LineUtils.ensureAdditionalCapacity;
+import static com.metsci.glimpse.support.line.util.LineUtils.flipped;
 import static java.lang.Math.max;
 
 import java.nio.FloatBuffer;

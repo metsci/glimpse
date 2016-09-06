@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.line.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

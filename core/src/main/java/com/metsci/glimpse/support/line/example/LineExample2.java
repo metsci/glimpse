@@ -1,14 +1,12 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.line.example;
 
 import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
 import static com.metsci.glimpse.support.FrameUtils.newFrame;
 import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
 import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
-import static com.metsci.glimpse.support.line.LineUtils.distance;
-import static com.metsci.glimpse.support.line.LineUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.line.LineUtils.ppvAspectRatio;
-import static com.metsci.glimpse.support.line.LineUtils.put1f;
-import static com.metsci.glimpse.support.line.LineUtils.put2f;
+import static com.metsci.glimpse.support.line.util.LineUtils.distance;
+import static com.metsci.glimpse.support.line.util.LineUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.line.util.LineUtils.ppvAspectRatio;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
@@ -26,16 +24,28 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.Plot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.MappableBuffer;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LineExample2
 {
+
+    public static void put1f( FloatBuffer buffer, double a )
+    {
+        buffer.put( ( float ) a );
+    }
+
+    public static void put2f( FloatBuffer buffer, double a, double b )
+    {
+        buffer.put( ( float ) a )
+              .put( ( float ) b );
+    }
 
     public static void main( String[] args )
     {
@@ -135,89 +145,7 @@ public class LineExample2
 
 
 
-        plot.getLayoutCenter( ).addPainter( new GlimpsePainterImpl( )
-        {
-            LineStyle style = new LineStyle( );
-            LineProgram prog = null;
-
-            MappableBuffer xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
-            MappableBuffer mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
-
-            {
-                style.rgba = GlimpseColor.getBlack( );
-                style.thickness_PX = 1;
-            }
-
-            public void paintTo( GlimpseContext context, GlimpseBounds bounds )
-            {
-                GL2ES2 gl = context.getGL( ).getGL2ES2( );
-
-
-                // Create
-
-                if ( prog == null )
-                {
-                    this.prog = new LineProgram( gl );
-                }
-
-
-                // Populate
-
-                int maxVertices = 8;
-                FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
-                FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1*maxVertices );
-
-                float inset_PX = 0.5f * style.thickness_PX;
-                float xLeft_PX = inset_PX;
-                float xRight_PX = bounds.getWidth( ) - inset_PX;
-                float yBottom_PX = inset_PX;
-                float yTop_PX = bounds.getHeight( ) - inset_PX;
-
-                xyBuffer.put( xLeft_PX  ).put( yBottom_PX );
-                xyBuffer.put( xRight_PX ).put( yBottom_PX );
-                mileageBuffer.put( 0 );
-                mileageBuffer.put( xRight_PX - xLeft_PX );
-
-                xyBuffer.put( xRight_PX ).put( yBottom_PX );
-                xyBuffer.put( xRight_PX ).put( yTop_PX    );
-                mileageBuffer.put( 0 );
-                mileageBuffer.put( yTop_PX - yBottom_PX );
-
-                xyBuffer.put( xLeft_PX ).put( yBottom_PX );
-                xyBuffer.put( xLeft_PX ).put( yTop_PX    );
-                mileageBuffer.put( 0 );
-                mileageBuffer.put( yTop_PX - yBottom_PX );
-
-                xyBuffer.put( xLeft_PX  ).put( yTop_PX );
-                xyBuffer.put( xRight_PX ).put( yTop_PX );
-                mileageBuffer.put( 0 );
-                mileageBuffer.put( xRight_PX - xLeft_PX );
-
-                int numVertices = xyBuffer.position( ) / 2;
-                xyVbo.seal( gl );
-                mileageVbo.seal( gl );
-
-
-                // Render
-
-                enableStandardBlending( gl );
-
-                prog.begin( gl );
-                try
-                {
-                    prog.setViewport( gl, bounds );
-                    prog.setPixelOrtho( gl, bounds );
-                    prog.setStyle( gl, style );
-
-                    prog.draw( gl, xyVbo, mileageVbo, 0, numVertices );
-                }
-                finally
-                {
-                    prog.end( gl );
-                }
-            }
-        } );
-
+        plot.getLayoutCenter( ).addPainter( new ExampleBorderPainter( ) );
 
 
         SwingUtilities.invokeLater( new Runnable( )
