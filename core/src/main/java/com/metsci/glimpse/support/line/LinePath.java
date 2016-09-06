@@ -40,6 +40,13 @@ public class LinePath
         this.mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.mileageDirty = true;
     }
+    
+    public void clear( )
+    {
+        this.data.clear( );
+        xyDirty = true;
+        connectDirty = true;
+    }
 
     public void moveTo( float x, float y )
     {

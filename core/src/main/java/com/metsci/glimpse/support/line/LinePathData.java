@@ -49,6 +49,14 @@ public class LinePathData
         this.mileageBuffer = newDirectFloatBuffer( 1*initialNumVertices );
         this.mileagePpvAspectRatio = Double.NaN;
     }
+    
+    public void clear( )
+    {
+        this.xyBuffer.clear( );
+        this.connectBuffer.clear( );
+        this.mileageBuffer.clear( );
+        this.mileagePpvAspectRatio = Double.NaN;
+    }
 
     public void addVertex( float x, float y, boolean connect )
     {
