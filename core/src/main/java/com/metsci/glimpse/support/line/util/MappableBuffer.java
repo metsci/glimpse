@@ -129,11 +129,27 @@ public class MappableBuffer
         return sealedOffset;
     }
 
+    /**
+     * Convenience wrapper around {@link #mapBytes(GL, long)} -- converts {@code numFloats} to a
+     * byte count, and converts the returned buffer to a {@link FloatBuffer}.
+     */
     public FloatBuffer mapFloats( GL gl, long numFloats )
     {
         return mapBytes( gl, numFloats * SIZEOF_FLOAT ).asFloatBuffer( );
     }
 
+    /**
+     * Returns a buffer representing host memory owned by the graphics driver. The returned buffer
+     * should be treated as <em>write-only</em>. After writing to the buffer, call {@link #seal(GL)}
+     * to indicate to the driver that the newly written contents are ready to be pushed to the device.
+     *
+     * It is okay to request more bytes than will actually be written, as long as you then avoid
+     * actually trying to use the values in the unwritten region (e.g. by passing the appropriate
+     * number of vertices to {@link GL#glDrawArrays(int, int, int)}.
+     *
+     * Note, however, that the driver may push the entire mapped region to the device -- so while
+     * {@code numBytes} is just an upper bound, it should be a reasonably tight upper bound.
+     */
     public ByteBuffer mapBytes( GL gl, long numBytes )
     {
         if ( mappedSize != 0 )
