@@ -130,6 +130,32 @@ public class MappableBuffer
     }
 
     /**
+     * Convenience method that maps a region, copies data into it using {@link FloatBuffer#put(FloatBuffer)},
+     * and then seals the region.
+     *
+     * Note that this will modify the buffer's {@code position}.
+     */
+    public void setFloats( GL gl, FloatBuffer floats )
+    {
+        FloatBuffer mapped = mapFloats( gl, floats.remaining( ) );
+        mapped.put( floats );
+        seal( gl );
+    }
+
+    /**
+     * Convenience method that maps a region, copies data into it using {@link ByteBuffer#put(ByteBuffer)},
+     * and then seals the region.
+     *
+     * Note that this will modify the buffer's {@code position}.
+     */
+    public void setBytes( GL gl, ByteBuffer bytes )
+    {
+        ByteBuffer mapped = mapBytes( gl, bytes.remaining( ) );
+        mapped.put( bytes );
+        seal( gl );
+    }
+
+    /**
      * Convenience wrapper around {@link #mapBytes(GL, long)} -- converts {@code numFloats} to a
      * byte count, and converts the returned buffer to a {@link FloatBuffer}.
      */

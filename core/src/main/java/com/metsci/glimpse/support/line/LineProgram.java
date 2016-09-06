@@ -111,17 +111,6 @@ public class LineProgram
         gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
     }
 
-    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer mileageVbo, int first, int count )
-    {
-        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-        gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
-        gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
-
-        gl.glDrawArrays( GL_LINE_STRIP, first, count );
-    }
-
     public void draw( GL2ES2 gl, LineStyle style, LinePath path )
     {
         draw( gl, style, path, 1.0 );
@@ -131,9 +120,20 @@ public class LineProgram
     {
         setStyle( gl, style );
 
-        int xyVbo = path.xyVbo( gl );
-        int mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
+        MappableBuffer xyVbo = path.xyVbo( gl );
+        MappableBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
         draw( gl, xyVbo, mileageVbo, 0, path.numVertices( ) );
+    }
+
+    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer mileageVbo, int first, int count )
+    {
+        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+        gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
+        gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
+
+        gl.glDrawArrays( GL_LINE_STRIP, first, count );
     }
 
     public void draw( GL2ES2 gl, int xyVbo, int mileageVbo, int first, int count )

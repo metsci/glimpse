@@ -1,45 +1,43 @@
 package com.metsci.glimpse.support.line;
 
-import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_STATIC_DRAW;
 
-import java.nio.FloatBuffer;
-
 import javax.media.opengl.GL;
+
+import com.metsci.glimpse.support.line.util.MappableBuffer;
 
 public class LinePath
 {
 
     protected final LinePathData data;
 
-    protected int xyVbo;
+    protected MappableBuffer xyVbo;
     protected boolean xyDirty;
 
-    protected int connectVbo;
+    protected MappableBuffer connectVbo;
     protected boolean connectDirty;
 
-    protected int mileageVbo;
+    protected MappableBuffer mileageVbo;
     protected boolean mileageDirty;
 
 
     public LinePath( )
     {
-        this( 0 );
+        this( 0, 10 );
     }
 
-    public LinePath( int initialNumVertices )
+    public LinePath( int initialNumVertices, int vboBlockSizeFactor )
     {
         this.data = new LinePathData( initialNumVertices );
 
-        this.xyVbo = 0;
+        this.xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.xyDirty = true;
 
-        this.connectVbo = 0;
+        this.connectVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.connectDirty = true;
 
-        this.mileageVbo = 0;
+        this.mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.mileageDirty = true;
     }
 
@@ -65,68 +63,41 @@ public class LinePath
         return data.numVertices( );
     }
 
-    public int xyVbo( GL gl )
+    public MappableBuffer xyVbo( GL gl )
     {
-        if ( xyVbo == 0 )
-        {
-            this.xyVbo = genBuffer( gl );
-        }
-
         if ( xyDirty )
         {
-            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-
-            FloatBuffer xyBuffer = data.xyBuffer( );
-            gl.glBufferData( GL_ARRAY_BUFFER, xyBuffer.remaining( )*SIZEOF_FLOAT, xyBuffer, GL_STATIC_DRAW );
-
+            xyVbo.setFloats( gl, data.xyBuffer( ) );
             this.xyDirty = false;
         }
 
         return xyVbo;
     }
 
-    public int connectVbo( GL gl )
+    public MappableBuffer connectVbo( GL gl )
     {
-        if ( connectVbo == 0 )
-        {
-            this.connectVbo = genBuffer( gl );
-        }
-
         if ( connectDirty )
         {
-            gl.glBindBuffer( GL_ARRAY_BUFFER, connectVbo );
-
-            FloatBuffer connectBuffer = data.connectBuffer( );
-            gl.glBufferData( GL_ARRAY_BUFFER, connectBuffer.remaining( )*SIZEOF_FLOAT, connectBuffer, GL_STATIC_DRAW );
-
+            connectVbo.setFloats( gl, data.connectBuffer( ) );
             this.connectDirty = false;
         }
 
         return connectVbo;
     }
 
-    public int mileageVbo( GL gl, double ppvAspectRatio )
+    public MappableBuffer mileageVbo( GL gl, double ppvAspectRatio )
     {
         return mileageVbo( gl, ppvAspectRatio, 1.0000000001 );
     }
 
-    public int mileageVbo( GL gl, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
+    public MappableBuffer mileageVbo( GL gl, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
     {
         int mileageDirtyCount = data.updateMileage( ppvAspectRatio, ppvAspectRatioChangeThreshold );
         this.mileageDirty |= ( mileageDirtyCount > 0 );
 
-        if ( mileageVbo == 0 )
-        {
-            this.mileageVbo = genBuffer( gl );
-        }
-
         if ( mileageDirty )
         {
-            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
-
-            FloatBuffer mileageBuffer = data.mileageBuffer( );
-            gl.glBufferData( GL_ARRAY_BUFFER, mileageBuffer.remaining( )*SIZEOF_FLOAT, mileageBuffer, GL_STATIC_DRAW );
-
+            mileageVbo.setFloats( gl, data.mileageBuffer( ) );
             this.mileageDirty = false;
         }
 
