@@ -26,6 +26,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.Plot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -134,7 +135,7 @@ public class LineExample2
 
 
 
-        plot.getLayoutCenter( ).addPainter( new GlimpsePainter2D( )
+        plot.getLayoutCenter( ).addPainter( new GlimpsePainterImpl( )
         {
             LineStyle style = new LineStyle( );
             LineProgram prog = null;
@@ -147,7 +148,7 @@ public class LineExample2
                 style.thickness_PX = 1;
             }
 
-            public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+            public void paintTo( GlimpseContext context, GlimpseBounds bounds )
             {
                 GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
