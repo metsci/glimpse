@@ -54,7 +54,6 @@ public class RandomLinesPainter extends GlimpsePainter2D
         this.prog = null;
     }
 
-
     @Override
     public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
     {
