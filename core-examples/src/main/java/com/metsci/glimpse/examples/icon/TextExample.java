@@ -74,7 +74,7 @@ public class TextExample implements GlimpseLayoutProvider
                 PMVMatrix m = renderer.getMatrix( );
                 m.glMatrixMode( GLMatrixFunc.GL_MODELVIEW );
                 m.glLoadIdentity( );
-                m.glTranslatef( 5, 5, 0 );
+                m.glTranslatef( 5, 7, 0 );
 
                 m.glMatrixMode( GLMatrixFunc.GL_PROJECTION );
                 m.glLoadIdentity( );
@@ -84,6 +84,19 @@ public class TextExample implements GlimpseLayoutProvider
                 int[] samples = new int[1];
                 //String text = "Test";
                 String text = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+                util.drawString3D( gl, renderer, font, pixelSize, text, GlimpseColor.getRed( ), samples );
+                
+                
+                
+                m.glMatrixMode( GLMatrixFunc.GL_PROJECTION );
+                m.glLoadIdentity( );
+                m.glOrthof( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1f, 1f );
+
+                m.glMatrixMode( GLMatrixFunc.GL_MODELVIEW );
+                m.glLoadIdentity( );
+                m.glTranslatef( (float) axis.getAxisX( ).valueToScreenPixelUnits( 5 ), (float) axis.getAxisY( ).valueToScreenPixelUnits( 5 ), 0f );
+                
+                pixelSize = font.getPixelSize( 32, 96 );
                 util.drawString3D( gl, renderer, font, pixelSize, text, GlimpseColor.getRed( ), samples );
                 
                 renderer.enable( gl, false );
