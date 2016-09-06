@@ -1,8 +1,8 @@
 package com.metsci.glimpse.support.line.example;
 
-import static com.metsci.glimpse.support.line.util.LineUtils.enableStandardBlending;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
+import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL2ES2.*;
 
 import java.nio.FloatBuffer;
 
@@ -24,7 +24,6 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
     protected LineStyle style;
     protected LineProgram prog;
 
-
     public ExampleBorderPainter( )
     {
         this.xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
@@ -35,8 +34,9 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    public void paintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
         if ( prog == null )
@@ -44,10 +44,9 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
             this.prog = new LineProgram( gl );
         }
 
-
         int maxVertices = 8;
-        FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
-        FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1*maxVertices );
+        FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2 * maxVertices );
+        FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1 * maxVertices );
 
         float inset_PX = 0.5f * style.thickness_PX;
         float xLeft_PX = inset_PX;
@@ -55,22 +54,22 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
         float yBottom_PX = inset_PX;
         float yTop_PX = bounds.getHeight( ) - inset_PX;
 
-        xyBuffer.put( xLeft_PX  ).put( yBottom_PX );
+        xyBuffer.put( xLeft_PX ).put( yBottom_PX );
         xyBuffer.put( xRight_PX ).put( yBottom_PX );
         mileageBuffer.put( 0 );
         mileageBuffer.put( xRight_PX - xLeft_PX );
 
         xyBuffer.put( xRight_PX ).put( yBottom_PX );
-        xyBuffer.put( xRight_PX ).put( yTop_PX    );
+        xyBuffer.put( xRight_PX ).put( yTop_PX );
         mileageBuffer.put( 0 );
         mileageBuffer.put( yTop_PX - yBottom_PX );
 
         xyBuffer.put( xLeft_PX ).put( yBottom_PX );
-        xyBuffer.put( xLeft_PX ).put( yTop_PX    );
+        xyBuffer.put( xLeft_PX ).put( yTop_PX );
         mileageBuffer.put( 0 );
         mileageBuffer.put( yTop_PX - yBottom_PX );
 
-        xyBuffer.put( xLeft_PX  ).put( yTop_PX );
+        xyBuffer.put( xLeft_PX ).put( yTop_PX );
         xyBuffer.put( xRight_PX ).put( yTop_PX );
         mileageBuffer.put( 0 );
         mileageBuffer.put( xRight_PX - xLeft_PX );
@@ -78,7 +77,6 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
         int numVertices = xyBuffer.position( ) / 2;
         xyVbo.seal( gl );
         mileageVbo.seal( gl );
-
 
         enableStandardBlending( gl );
 
@@ -96,5 +94,10 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
             prog.end( gl );
         }
     }
-
+    
+    @Override
+    protected void disposeOnce( GlimpseContext context )
+    {
+        //XXX should LineProgram or MappableBuffer be disposed?
+    }
 }

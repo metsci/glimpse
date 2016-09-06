@@ -1,16 +1,11 @@
 package com.metsci.glimpse.support.line.example;
 
-import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
-import static com.metsci.glimpse.support.FrameUtils.newFrame;
-import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
-import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
-import static com.metsci.glimpse.support.line.util.LineUtils.distance;
-import static com.metsci.glimpse.support.line.util.LineUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.line.util.LineUtils.ppvAspectRatio;
-import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import static com.metsci.glimpse.support.FrameUtils.*;
+import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL2ES2.*;
+import static javax.swing.WindowConstants.*;
 
 import java.nio.FloatBuffer;
 import java.util.Random;
@@ -23,9 +18,9 @@ import javax.swing.SwingUtilities;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.plot.Plot2D;
+import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.line.util.MappableBuffer;
@@ -44,20 +39,16 @@ public class LineExample2
     public static void put2f( FloatBuffer buffer, double a, double b )
     {
         buffer.put( ( float ) a )
-              .put( ( float ) b );
+                .put( ( float ) b );
     }
 
     public static void main( String[] args )
     {
-        final Plot2D plot = new Plot2D( "" );
-        plot.setAxisSizeZ( 0 );
-        plot.setTitleHeight( 0 );
+        final EmptyPlot2D plot = new EmptyPlot2D( );
 
-        plot.getLayoutCenter( ).addPainter( new BackgroundPainter( ) );
+        plot.addPainter( new BackgroundPainter( ) );
 
-
-
-        plot.getLayoutCenter( ).addPainter( new GlimpsePainter2D( )
+        plot.addPainter( new GlimpsePainterImpl( )
         {
             LineStyle style = new LineStyle( );
             LineProgram prog = null;
@@ -74,10 +65,12 @@ public class LineExample2
                 style.stipplePattern = 0b0001010111111111;
             }
 
-            public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+            @Override
+            public void paintTo( GlimpseContext context )
             {
+                GlimpseBounds bounds = getBounds( context );
+                Axis2D axis = getAxis2D( context );
                 GL2ES2 gl = context.getGL( ).getGL2ES2( );
-
 
                 // Create
 
@@ -86,25 +79,24 @@ public class LineExample2
                     this.prog = new LineProgram( gl );
                 }
 
-
                 // Populate
 
                 int maxVertices = 100;
-                FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2*maxVertices );
-                FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1*maxVertices );
+                FloatBuffer xyBuffer = xyVbo.mapFloats( gl, 2 * maxVertices );
+                FloatBuffer mileageBuffer = mileageVbo.mapFloats( gl, 1 * maxVertices );
 
                 Random r = new Random( 0 );
                 double ppvAspectRatio = ppvAspectRatio( axis );
                 for ( int i = 0; i < 25; i++ )
                 {
-                    double x0 = 2 + 6*r.nextDouble( );
-                    double y0 = 2 + 6*r.nextDouble( );
+                    double x0 = 2 + 6 * r.nextDouble( );
+                    double y0 = 2 + 6 * r.nextDouble( );
 
-                    double x1 = x0 + ( -1 + 2*r.nextDouble( ) );
-                    double y1 = y0 + ( -1 + 2*r.nextDouble( ) );
+                    double x1 = x0 + ( -1 + 2 * r.nextDouble( ) );
+                    double y1 = y0 + ( -1 + 2 * r.nextDouble( ) );
 
-                    double x2 = x1 + ( -1 + 2*r.nextDouble( ) );
-                    double y2 = y1 + ( -1 + 2*r.nextDouble( ) );
+                    double x2 = x1 + ( -1 + 2 * r.nextDouble( ) );
+                    double y2 = y1 + ( -1 + 2 * r.nextDouble( ) );
 
                     put2f( xyBuffer, x0, y0 );
                     put2f( xyBuffer, x1, y1 );
@@ -121,7 +113,6 @@ public class LineExample2
                 this.numVertices = xyBuffer.position( ) / 2;
                 xyVbo.seal( gl );
                 mileageVbo.seal( gl );
-
 
                 // Render
 
@@ -141,12 +132,16 @@ public class LineExample2
                     prog.end( gl );
                 }
             }
+
+            @Override
+            protected void disposeOnce( GlimpseContext context )
+            {
+                // TODO Auto-generated method stub
+
+            }
         } );
 
-
-
-        plot.getLayoutCenter( ).addPainter( new ExampleBorderPainter( ) );
-
+        plot.addPainter( new ExampleBorderPainter( ) );
 
         SwingUtilities.invokeLater( new Runnable( )
         {
