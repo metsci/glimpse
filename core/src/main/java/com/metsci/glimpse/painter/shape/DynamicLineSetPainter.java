@@ -26,7 +26,12 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import java.nio.ByteBuffer;
+import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static com.metsci.glimpse.support.line.util.ShaderUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL2ES2.*;
+
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,15 +41,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkColorAccumulator;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
@@ -56,7 +64,7 @@ import com.metsci.glimpse.util.primitives.IntsArray;
  * @author ulman
  * @see com.metsci.glimpse.examples.misc.DynamicLinePainterExample
  */
-public class DynamicLineSetPainter extends GlimpseDataPainter2D
+public class DynamicLineSetPainter extends GlimpsePainterImpl
 {
     protected static final double GROWTH_FACTOR = 1.3;
 
@@ -64,15 +72,14 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     protected static final int DEFAULT_INITIAL_SIZE = 2000;
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
 
-    protected boolean lineStipple = false;
-    protected int stippleFactor = 1;
-    protected short stipplePattern = ( short ) 0x00FF;
+    protected boolean rgbaBufferDirty = false;
+    protected boolean xyBufferDirty = false;
 
-    protected float lineWidth;
+    protected FloatBuffer rgbaBuffer;
+    protected FloatBuffer xyBuffer;
 
-    protected FloatBuffer colorBuffer;
-    protected FloatBuffer pointBuffer;
-
+    protected MappableBuffer rgbaMappableBuffer;
+    protected MappableBuffer xyMappableBuffer;
     protected FloatBuffer tempBuffer;
 
     // point id (which can be any object) -> index into pointBuffer
@@ -86,6 +93,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     protected int initialSize;
 
+    protected LineStyle style;
+    protected LineProgram prog;
+
     public DynamicLineSetPainter( )
     {
         this( DEFAULT_INITIAL_SIZE );
@@ -94,17 +104,27 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     public DynamicLineSetPainter( int initialSize )
     {
         this.initialSize = initialSize;
-        this.lineWidth = DEFAULT_LINE_WIDTH;
 
         this.lock = new ReentrantLock( );
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
         this.indexMap = new LinkedHashMap<Integer, Object>( );
 
-        this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
-        this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
+        this.xyBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
+        this.rgbaBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
+
+        this.xyMappableBuffer = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
+        this.rgbaMappableBuffer = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
 
         this.searchResults = new IntsArray( );
+
+        this.style = new LineStyle( );
+
+        this.style.rgba = floats( 0.7f, 0, 0, 1 );
+        this.style.thickness_PX = DEFAULT_LINE_WIDTH;
+        this.style.stippleEnable = false;
+        this.style.stippleScale = 1;
+        this.style.stipplePattern = ( short ) 0x00FF;
     }
 
     public void setDotted( boolean dotted )
@@ -112,7 +132,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.lineStipple = dotted;
+            this.style.stippleEnable = dotted;
         }
         finally
         {
@@ -125,9 +145,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.lineStipple = true;
-            this.stippleFactor = stippleFactor;
-            this.stipplePattern = stipplePattern;
+            this.style.stippleEnable = true;
+            this.style.stippleScale = stippleFactor;
+            this.style.stipplePattern = stipplePattern;
         }
         finally
         {
@@ -140,7 +160,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         lock.lock( );
         try
         {
-            this.lineWidth = size;
+            this.style.thickness_PX = size;
         }
         finally
         {
@@ -163,6 +183,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             deletePositions( accumulator );
 
             mutatePositions( accumulator );
+
+            xyBufferDirty = true;
+            rgbaBufferDirty = true;
         }
         finally
         {
@@ -176,6 +199,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         try
         {
             mutateColors( accumulator );
+
+            rgbaBufferDirty = true;
         }
         finally
         {
@@ -202,6 +227,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             int index = getIndex( id, true );
             mutatePosition( index, posX1, posY1, posX2, posY2 );
             mutateColor( index, color );
+
+            xyBufferDirty = true;
+            rgbaBufferDirty = true;
         }
         finally
         {
@@ -216,23 +244,24 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         {
             int index = getIndex( id, false );
             mutateColor( index, color );
+
+            rgbaBufferDirty = true;
         }
         finally
         {
             lock.unlock( );
         }
     }
-    
+
     public void removeAll( )
     {
-        //XXX we probably also need to update/clear the GLArrayDataClient associated with these buffers
         lock.lock( );
         try
         {
             this.idMap.clear( );
             this.indexMap.clear( );
-            this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
-            this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
+            this.xyBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
+            this.rgbaBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
         }
         finally
         {
@@ -248,6 +277,9 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
             int index = getIndex( id, false );
             if ( index == -1 ) return; // nothing to remove, the point does not exist
             deletePosition( index );
+
+            xyBufferDirty = true;
+            rgbaBufferDirty = true;
         }
         finally
         {
@@ -256,37 +288,66 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GlimpseContext context )
     {
-        //XXX shader needs to be written to replace this
-        //XXX it's a good very basic use case (draw a bunch of lines
-        //XXX with a specified stipple and thickness)
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
         lock.lock( );
         try
         {
-            colorBuffer.bind( GLVertexAttribute.ATTRIB_COLOR_4D, gl );
-            pointBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
+            int lineCount = getSize( );
+
+            if ( lineCount == 0 ) return;
+
+            if ( prog == null )
+            {
+                prog = new LineProgram( gl );
+            }
+
+            if ( rgbaBufferDirty )
+            {
+                rgbaBuffer.position( 0 );
+                rgbaBuffer.limit( lineCount * 2 * 4 );
+                rgbaMappableBuffer.setFloats( gl, rgbaBuffer );
+                rgbaBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
+            }
+
+            if ( xyBufferDirty )
+            {
+                xyBuffer.position( 0 );
+                xyBuffer.limit( lineCount * 2 * 2 );
+                xyMappableBuffer.setFloats( gl, xyBuffer );
+                xyBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
+            }
+
+            enableStandardBlending( gl );
+
+            prog.begin( gl );
             try
             {
-                if ( lineStipple )
-                {
-                    gl.glEnable( GL2.GL_LINE_STIPPLE );
-                    gl.glLineStipple( stippleFactor, stipplePattern );
-                }
+                prog.setViewport( gl, bounds );
+                prog.setAxisOrtho( gl, axis );
+                prog.setStyle( gl, style );
 
-                gl.glLineWidth( lineWidth );
-                gl.glDrawArrays( GL2.GL_LINES, 0, idMap.size( ) * 2 );
+                prog.draw( gl, xyMappableBuffer, rgbaMappableBuffer, 0, lineCount * 2 );
             }
             finally
             {
-                colorBuffer.unbind( gl );
-                pointBuffer.unbind( gl );
+                prog.end( gl );
             }
         }
         finally
         {
             lock.unlock( );
         }
+    }
+
+    @Override
+    protected void disposeOnce( GlimpseContext context )
+    {
+        // TODO Auto-generated method stub
     }
 
     protected int getSize( )
@@ -298,7 +359,7 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     {
         // divide by ( 2 * 2 ) in order to count lines, not vertices
         // ( 2 vertices per line and 2 floats per vertex )
-        return this.pointBuffer.capacity( ) / ( 2 * 2 );
+        return this.xyBuffer.capacity( ) / ( 2 * 2 );
     }
 
     protected static void shiftMaps( Map<Object, Integer> idMap, Map<Integer, Object> indexMap, Set<Integer> indices, int size )
@@ -401,8 +462,8 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
         shiftMaps( idMap, indexMap, indices, size );
 
-        shift( this.colorBuffer, tempBuffer, 4 * 2, size, indices );
-        shift( this.pointBuffer, tempBuffer, 2 * 2, size, indices );
+        shift( this.rgbaBuffer, tempBuffer, 4 * 2, size, indices );
+        shift( this.xyBuffer, tempBuffer, 2 * 2, size, indices );
 
     }
 
@@ -429,24 +490,24 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
     protected void mutateColor( final int index, final float[] color )
     {
-        this.colorBuffer.position( index * 2 * 4 );
+        this.rgbaBuffer.position( index * 2 * 4 );
 
         for ( int i = 0; i < 2; i++ )
         {
-            this.colorBuffer.put( color[0] );
-            this.colorBuffer.put( color[1] );
-            this.colorBuffer.put( color[2] );
-            this.colorBuffer.put( color.length == 4 ? color[3] : 1.0f );
+            this.rgbaBuffer.put( color[0] );
+            this.rgbaBuffer.put( color[1] );
+            this.rgbaBuffer.put( color[2] );
+            this.rgbaBuffer.put( color.length == 4 ? color[3] : 1.0f );
         }
     }
 
     protected void mutatePosition( final int index, final float posX1, final float posY1, final float posX2, final float posY2 )
     {
-        this.pointBuffer.position( index * 2 * 2 );
-        this.pointBuffer.put( posX1 );
-        this.pointBuffer.put( posY1 );
-        this.pointBuffer.put( posX2 );
-        this.pointBuffer.put( posY2 );
+        this.xyBuffer.position( index * 2 * 2 );
+        this.xyBuffer.put( posX1 );
+        this.xyBuffer.put( posY1 );
+        this.xyBuffer.put( posX2 );
+        this.xyBuffer.put( posY2 );
     }
 
     protected int getIndexArray( List<Object> ids, int[] listIndex )
@@ -476,17 +537,17 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
         for ( int i = 0; i < size; i++ )
         {
-            this.pointBuffer.position( indexList[i] * 2 * 2 );
-            this.pointBuffer.put( v, i * stride, 2 * 2 );
+            this.xyBuffer.position( indexList[i] * 2 * 2 );
+            this.xyBuffer.put( v, i * stride, 2 * 2 );
         }
-        
+
         for ( int i = 0; i < size; i++ )
         {
-            this.colorBuffer.position( indexList[i] * 2 * 4 );
+            this.rgbaBuffer.position( indexList[i] * 2 * 4 );
 
             for ( int j = 0; j < 2; j++ )
             {
-                this.colorBuffer.put( v, i * stride + 4, 4 );
+                this.rgbaBuffer.put( v, i * stride + 4, 4 );
             }
         }
     }
@@ -503,11 +564,11 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
 
         for ( int i = 0; i < size; i++ )
         {
-            this.colorBuffer.position( indexList[i] * 2 * 4 );
+            this.rgbaBuffer.position( indexList[i] * 2 * 4 );
 
             for ( int j = 0; j < 2; j++ )
             {
-                this.colorBuffer.put( v, i * stride, 4 );
+                this.rgbaBuffer.put( v, i * stride, 4 );
             }
         }
     }
@@ -536,10 +597,10 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
     {
         minSize = Math.max( ( int ) ( getCapacity( ) * GROWTH_FACTOR ), minSize );
 
-        this.pointBuffer = growBuffer( this.pointBuffer, minSize * 2 * 2 );
-        this.colorBuffer = growBuffer( this.colorBuffer, minSize * 4 * 2 );
+        this.xyBuffer = growBuffer( this.xyBuffer, minSize * 2 * 2 );
+        this.rgbaBuffer = growBuffer( this.rgbaBuffer, minSize * 4 * 2 );
     }
-    
+
     static FloatBuffer growBuffer( FloatBuffer buffer, int size )
     {
         if ( buffer.capacity( ) < size )
@@ -625,6 +686,116 @@ public class DynamicLineSetPainter extends GlimpseDataPainter2D
         int getAddedSize( )
         {
             return addedIds.size( );
+        }
+    }
+
+    public static class LineProgram
+    {
+
+        public static final String lineVertShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.vs" );
+        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.gs" );
+        public static final String lineFragShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.fs" );
+
+        public final int programHandle;
+
+        // Uniforms
+
+        public final int AXIS_RECT;
+        public final int VIEWPORT_SIZE_PX;
+
+        public final int STIPPLE_ENABLE;
+        public final int STIPPLE_SCALE;
+        public final int STIPPLE_PATTERN;
+        public final int LINE_THICKNESS_PX;
+        public final int FEATHER_THICKNESS_PX;
+
+        // Vertex attributes
+
+        public final int inXy;
+        public final int inRgba;
+
+        public LineProgram( GL2ES2 gl )
+        {
+            this.programHandle = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
+
+            this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
+            this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( programHandle, "VIEWPORT_SIZE_PX" );
+
+            this.STIPPLE_ENABLE = gl.glGetUniformLocation( programHandle, "STIPPLE_ENABLE" );
+            this.STIPPLE_SCALE = gl.glGetUniformLocation( programHandle, "STIPPLE_SCALE" );
+            this.STIPPLE_PATTERN = gl.glGetUniformLocation( programHandle, "STIPPLE_PATTERN" );
+            this.LINE_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "LINE_THICKNESS_PX" );
+            this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
+
+            this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
+            this.inRgba = gl.glGetAttribLocation( programHandle, "inRgba" );
+        }
+
+        public void begin( GL2ES2 gl )
+        {
+            gl.glUseProgram( programHandle );
+            gl.glEnableVertexAttribArray( inXy );
+            gl.glEnableVertexAttribArray( inRgba );
+        }
+
+        public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
+        {
+            setViewport( gl, bounds.getWidth( ), bounds.getHeight( ) );
+        }
+
+        public void setViewport( GL2ES2 gl, int viewportWidth, int viewportHeight )
+        {
+            gl.glUniform2f( VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
+        }
+
+        public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
+        {
+            setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxX( ), ( float ) axis.getMaxY( ) );
+        }
+
+        public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds )
+        {
+            setOrtho( gl, 0, 0, bounds.getWidth( ), bounds.getHeight( ) );
+        }
+
+        public void setOrtho( GL2ES2 gl, float xMin, float yMin, float xMax, float yMax )
+        {
+            gl.glUniform4f( AXIS_RECT, xMin, yMin, xMax, yMax );
+        }
+
+        public void setStyle( GL2ES2 gl, LineStyle style )
+        {
+            if ( style.stippleEnable )
+            {
+                gl.glUniform1i( STIPPLE_ENABLE, 1 );
+                gl.glUniform1f( STIPPLE_SCALE, style.stippleScale );
+                gl.glUniform1i( STIPPLE_PATTERN, style.stipplePattern );
+            }
+            else
+            {
+                gl.glUniform1i( STIPPLE_ENABLE, 0 );
+            }
+
+            gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
+            gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
+        }
+
+        public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer rgbaVbo, int first, int count )
+        {
+            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+            gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+            gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( ) );
+            gl.glVertexAttribPointer( inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
+
+            gl.glDrawArrays( GL_LINE_STRIP, first, count );
+        }
+
+        public void end( GL2ES2 gl )
+        {
+            gl.glDisableVertexAttribArray( inXy );
+            gl.glDisableVertexAttribArray( inRgba );
+            gl.glUseProgram( 0 );
         }
     }
 }
