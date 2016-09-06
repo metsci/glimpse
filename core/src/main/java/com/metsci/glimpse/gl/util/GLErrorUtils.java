@@ -26,10 +26,12 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static javax.media.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
-import static jogamp.opengl.glu.error.Error.gluErrorString;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static javax.media.opengl.GL2ES2.*;
+import static jogamp.opengl.glu.error.Error.*;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
