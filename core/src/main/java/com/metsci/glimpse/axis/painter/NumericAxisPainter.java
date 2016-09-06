@@ -26,16 +26,18 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.color.GlimpseColor.*;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
-
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
-import com.metsci.glimpse.painter.base.GlimpsePainter1D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -46,7 +48,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  *
  * @author ulman
  */
-public abstract class NumericAxisPainter extends GlimpsePainter1D
+public abstract class NumericAxisPainter extends GlimpsePainterImpl
 {
     protected int tickBufferSize = 0;
     protected int tickSize = 8;
@@ -76,12 +78,28 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
 
+    protected LinePath path;
+    protected LineStyle style;
+    protected LineProgram prog;
+
     public NumericAxisPainter( AxisLabelHandler ticks )
     {
         this.ticks = ticks;
         resetFont( );
         resetLabelColors( );
         resetTickColor( );
+        initLineShader( );
+    }
+
+    protected void initLineShader( )
+    {
+        this.path = new LinePath( );
+
+        this.style = new LineStyle( );
+        style.feather_PX = 0;
+        this.style.stippleEnable = false;
+
+        this.prog = null;
     }
 
     public void setAxisLabel( String label )
@@ -230,7 +248,7 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     }
 
     @Override
-    public void dispose( GLContext context )
+    protected void disposeOnce( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
