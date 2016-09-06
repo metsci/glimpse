@@ -30,12 +30,17 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
+import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public abstract class GlimpsePainterImpl implements GlimpsePainter
@@ -52,11 +57,65 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
 
     protected final String errorPrefix = "GL ERROR: " + getClass( ).getName( );
 
-    protected abstract void paintTo( GlimpseContext context, GlimpseBounds bounds );
-
     public GlimpsePainterImpl( )
     {
         this.disposeLock = new ReentrantLock( );
+    }
+    
+    public static GL3 getGL3( GlimpseContext context )
+    {
+        return context.getGL( ).getGL3( );
+    }
+
+    public static Axis2D getAxis2D( GlimpseContext context )
+    {
+        GlimpseTarget target = context.getTargetStack( ).getTarget( );
+        if ( target instanceof GlimpseAxisLayout2D )
+        {
+            GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
+            Axis2D axis = layout.getAxis( context );
+
+            if ( axis == null )
+            {
+                // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
+                throw new AxisNotSetException( context );
+            }
+
+            return axis;
+        }
+        else
+        {
+            // GlimpsePainter2D instances must be painted to GlimpseAxisLayout2D instances
+            throw new AxisNotSetException( context );
+        }
+    }
+
+    public static Axis1D getAxis1D( GlimpseContext context )
+    {
+        GlimpseTarget target = context.getTargetStack( ).getTarget( );
+        if ( target instanceof GlimpseAxisLayout1D )
+        {
+            GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
+            Axis1D axis = layout.getAxis( context );
+
+            if ( axis == null )
+            {
+                // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
+                throw new AxisNotSetException( context );
+            }
+
+            return axis;
+        }
+        else
+        {
+            // GlimpsePainter2D instances must be painted to GlimpseAxisLayout2D instances
+            throw new AxisNotSetException( context );
+        }
+    }
+
+    public static GlimpseBounds getBounds( GlimpseContext context )
+    {
+        return context.getTargetStack( ).getBounds( );
     }
 
     public void setErrorHandling( boolean doErrorHandling )
@@ -83,49 +142,6 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
-    {
-        if ( !displayOn ) return;
-
-        GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
-
-        if ( bounds == null ) return;
-
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
-
-        if ( width <= 0 || height <= 0 ) return;
-
-        GL2 gl = context.getGL( ).getGL2( );
-
-        gl.glPushClientAttrib( ( int ) GL2.GL_CLIENT_ALL_ATTRIB_BITS );
-        gl.glPushAttrib( GL2.GL_ALL_ATTRIB_BITS );
-
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glPushMatrix( );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glPushMatrix( );
-
-        try
-        {
-            paintTo( context, bounds );
-            if ( doErrorHandling ) glHandleError( gl, errorPrefix );
-        }
-        finally
-        {
-            gl.glMatrixMode( GL2.GL_MODELVIEW );
-            gl.glPopMatrix( );
-
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glPopMatrix( );
-
-            gl.glPopAttrib( );
-            gl.glPopClientAttrib( );
-        }
-    }
-
-    @Override
     public void dispose( GlimpseContext context )
     {
         // Double-checked locking works fine with a volatile var (as of Java 5)
@@ -137,7 +153,7 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
                 if ( !this.disposed )
                 {
                     this.disposed = true;
-                    dispose( context.getGLContext( ) );
+                    this.disposeOnce( context );
                 }
             }
             finally
@@ -146,11 +162,8 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
             }
         }
     }
-
-    protected void dispose( GLContext context )
-    {
-        // don't require a dispose method (by default do nothing)
-    }
+    
+    protected abstract void disposeOnce( GlimpseContext context );
 
     @Override
     public boolean isDisposed( )

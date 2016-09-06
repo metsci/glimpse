@@ -45,7 +45,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 
@@ -62,7 +61,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.shader.IconShader;
 import com.metsci.glimpse.support.atlas.support.ImageData;
@@ -88,7 +87,7 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 //      picks at one location at a time (we could draw to a larger offscreen buffer,
 //      or draw multiple times for each pick/click, not sure which would be faster).
 //      Most of the complications spring from the possibility of painter retargeting.
-public class IconPainter extends GlimpseDataPainter2D
+public class IconPainter extends GlimpsePainterImpl
 {
     private static final Logger logger = Logger.getLogger( IconPainter.class.getName( ) );
 
@@ -540,8 +539,10 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GlimpseContext context )
     {
+        if ( !isVisible( ) ) return;
+        
         this.lock.lock( );
         try
         {
@@ -553,10 +554,10 @@ public class IconPainter extends GlimpseDataPainter2D
                     this.pickFrameBuffer = new GLSimpleFrameBufferObject( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1, context.getGLContext( ) );
                 }
 
-                pickTo( context, bounds, axis );
+                pickIcons( context );
             }
 
-            super.paintTo( context, bounds, axis );
+            paintIcons( context );
 
             //XXX debugging code which paints the offscreen pick buffer
             //XXX this is useful to have around, stash it somewhere else
@@ -603,9 +604,12 @@ public class IconPainter extends GlimpseDataPainter2D
         }
     }
 
-    @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintIcons( GlimpseContext context )
     {
+        GL3 gl = getGL3( context );
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( false );
         this.shader.updateViewport( bounds );
@@ -651,15 +655,17 @@ public class IconPainter extends GlimpseDataPainter2D
         }
     }
 
-    protected void pickTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    protected void pickIcons( GlimpseContext context )
     {
         // check whether mouse has moved since last draw
         if ( this.pickMouseEvent == null ) return;
 
-        Set<PickResult> pickedIcons = new HashSet<PickResult>( );
-
+        GL3 gl = getGL3( context );
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
         GLContext glContext = context.getGLContext( );
-        GL3 gl = context.getGL( ).getGL3( );
+        
+        Set<PickResult> pickedIcons = new HashSet<PickResult>( );
 
         this.setPickProjectionMatrix( bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
@@ -795,7 +801,7 @@ public class IconPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    protected void disposeOnce( GlimpseContext context )
     {
         //XXX who should dispose of the texture atlas?
         //XXX us if we created it, someone else if it was passed in...?
@@ -805,7 +811,7 @@ public class IconPainter extends GlimpseDataPainter2D
             group.dispose( );
         }
 
-        if ( pickFrameBuffer != null ) pickFrameBuffer.dispose( context );
+        if ( pickFrameBuffer != null ) pickFrameBuffer.dispose( context.getGLContext( ) );
     }
 
     public class PickResult
