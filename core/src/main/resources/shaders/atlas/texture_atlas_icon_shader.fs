@@ -1,22 +1,24 @@
-#version 120
+#version 150
 
 uniform sampler2D tex;
-
 uniform bool isPickMode;
 
-varying vec2 TexCoord;
+in VertexData {
+    vec2 texCoord;
+    vec3 pickColor;
+} VertexIn;
 
-varying vec3 pickColor;
+out vec4 outRgba;
 
 void main()
 {
-    vec4 texColor = texture2D( tex, TexCoord.st );
+    vec4 texColor = texture2D( tex, VertexIn.texCoord.st );
     
     if ( isPickMode )
     {
         if ( texColor.a != 0.0 )
         {
-            gl_FragColor = vec4( pickColor.r / 255., pickColor.g / 255., pickColor.b / 255., 1.0 );
+            outRgba = vec4( VertexIn.pickColor.r / 255., VertexIn.pickColor.g / 255., VertexIn.pickColor.b / 255., 1.0 );
         }
         else
         {
@@ -25,6 +27,6 @@ void main()
     }
     else
     {
-        gl_FragColor = texColor;
+        outRgba = texColor;
     }
 }

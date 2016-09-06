@@ -69,6 +69,7 @@ import com.jogamp.opengl.util.packrect.BackingStoreManager;
 import com.jogamp.opengl.util.packrect.Rect;
 import com.jogamp.opengl.util.packrect.RectVisitor;
 import com.jogamp.opengl.util.packrect.RectanglePacker;
+import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -124,10 +125,6 @@ public class TextureAtlas
     // endRendering() cycle so we can re-enter the exact same state if
     // we have to reallocate the backing store
     private boolean inBeginEndPair;
-    private boolean isOrthoMode;
-    private int beginRenderingWidth;
-    private int beginRenderingHeight;
-    private boolean beginRenderingDepthTestDisabled;
 
     // Whether GL_LINEAR filtering is enabled for the backing store
     private boolean smoothing;
@@ -561,12 +558,38 @@ public class TextureAtlas
      * Readies the TextureAtlas for drawing. The backing texture is bound and OpenGL
      * state is configured for textured quad rendering. {@link drawImage( GL, Object, Axis2D, float, float )}
      * must be called while between calls to {@beginRendering()} and {endRendering()}.
-     * 
-     * @see com.sun.opengl.util.j2d.TextRenderer#begin3DRendering( )
      */
-    public void beginRendering( ) throws GLException
+    public void beginRendering( GL gl ) throws GLException
     {
-        beginRendering( false, 0, 0, false );
+        updateImages( );
+
+        inBeginEndPair = true;
+
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+        
+        final Texture texture = getBackingStore( ).getTexture( );
+        gl.getGL3( ).glActiveTexture( GL2.GL_TEXTURE0 );
+        texture.enable( gl );
+        texture.bind( gl );
+
+        if ( !haveMaxSize )
+        {
+            // Query OpenGL for the maximum texture size and set it in the
+            // RectanglePacker to keep it from expanding too large
+            int[] sz = new int[1];
+            gl.glGetIntegerv( GL2.GL_MAX_TEXTURE_SIZE, sz, 0 );
+
+            packer.setMaxSize( sz[0], sz[0] );
+            haveMaxSize = true;
+        }
+
+        // Disable future attempts to use mipmapping if TextureRenderer
+        // doesn't support it
+        if ( mipmap && !getBackingStore( ).isUsingAutoMipmapGeneration( ) )
+        {
+            mipmap = false;
+        }
     }
 
     /**
@@ -575,9 +598,12 @@ public class TextureAtlas
      * 
      * @see com.sun.opengl.util.j2d.TextRenderer#end3DRendering( )
      */
-    public void endRendering( ) throws GLException
+    public void endRendering( GL gl ) throws GLException
     {
-        endRendering( false );
+        inBeginEndPair = false;
+
+        final Texture texture = getBackingStore( ).getTexture( );
+        texture.disable( gl );
     }
 
     /**
@@ -620,49 +646,6 @@ public class TextureAtlas
         }
 
         return cachedGraphics;
-    }
-
-    private void beginRendering( boolean ortho, int width, int height, boolean disableDepthTestForOrtho )
-    {
-        updateImages( );
-
-        inBeginEndPair = true;
-        isOrthoMode = ortho;
-        beginRenderingWidth = width;
-        beginRenderingHeight = height;
-        beginRenderingDepthTestDisabled = disableDepthTestForOrtho;
-
-        if ( ortho )
-        {
-            getBackingStore( ).beginOrthoRendering( width, height, disableDepthTestForOrtho );
-        }
-        else
-        {
-            getBackingStore( ).begin3DRendering( );
-        }
-
-        GL2 gl = GLU.getCurrentGL( ).getGL2( );
-
-        // Push client attrib bits used by the pipelined quad renderer
-        gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
-
-        if ( !haveMaxSize )
-        {
-            // Query OpenGL for the maximum texture size and set it in the
-            // RectanglePacker to keep it from expanding too large
-            int[] sz = new int[1];
-            gl.glGetIntegerv( GL2.GL_MAX_TEXTURE_SIZE, sz, 0 );
-
-            packer.setMaxSize( sz[0], sz[0] );
-            haveMaxSize = true;
-        }
-
-        // Disable future attempts to use mipmapping if TextureRenderer
-        // doesn't support it
-        if ( mipmap && !getBackingStore( ).isUsingAutoMipmapGeneration( ) )
-        {
-            mipmap = false;
-        }
     }
 
     // move the images which have been queued for addition into the texture atlas
@@ -785,47 +768,6 @@ public class TextureAtlas
         updateTextureCoordinates( backingStore, rect, imageData, width, height );
     }
 
-    /**
-    * emzic: here the call to glBindBuffer crashes on certain graphicscard/driver combinations
-    * this is why the ugly try-catch block has been added, which falls back to the old textrenderer
-    * 
-    * @param ortho
-    * @throws GLException
-    */
-    private void endRendering( boolean ortho ) throws GLException
-    {
-        inBeginEndPair = false;
-
-        GL2 gl = GLU.getCurrentGL( ).getGL2( );
-
-        // Pop client attrib bits used by the pipelined quad renderer
-        gl.glPopClientAttrib( );
-
-        // The OpenGL spec is unclear about whether this changes the
-        // buffer bindings, so preemptively zero out the GL_ARRAY_BUFFER
-        // binding
-        if ( is15Available( gl ) )
-        {
-            try
-            {
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
-            }
-            catch ( Exception e )
-            {
-                isExtensionAvailable_GL_VERSION_1_5 = false;
-            }
-        }
-
-        if ( ortho )
-        {
-            getBackingStore( ).endOrthoRendering( );
-        }
-        else
-        {
-            getBackingStore( ).end3DRendering( );
-        }
-    }
-
     private void clearUnusedEntries( )
     {
         final java.util.List<Rect> deadRects = new ArrayList<Rect>( );
@@ -878,16 +820,6 @@ public class TextureAtlas
         }
 
         return cachedBackingStore;
-    }
-
-    private boolean is15Available( GL gl )
-    {
-        if ( !checkFor_isExtensionAvailable_GL_VERSION_1_5 )
-        {
-            isExtensionAvailable_GL_VERSION_1_5 = gl.isExtensionAvailable( "GL_VERSION_1_5" );
-            checkFor_isExtensionAvailable_GL_VERSION_1_5 = true;
-        }
-        return isExtensionAvailable_GL_VERSION_1_5;
     }
 
     class Manager implements BackingStoreManager
@@ -951,34 +883,9 @@ public class TextureAtlas
             // Exit the begin / end pair if necessary
             if ( inBeginEndPair )
             {
-                GL2 gl = GLU.getCurrentGL( ).getGL2( );
+                endRendering( GLU.getCurrentGL( ) );
 
-                // Pop client attrib bits used by the pipelined quad renderer
-                gl.glPopClientAttrib( );
-
-                // The OpenGL spec is unclear about whether this changes the
-                // buffer bindings, so preemptively zero out the GL_ARRAY_BUFFER
-                // binding
-                if ( is15Available( gl ) )
-                {
-                    try
-                    {
-                        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
-                    }
-                    catch ( Exception e )
-                    {
-                        isExtensionAvailable_GL_VERSION_1_5 = false;
-                    }
-                }
-
-                if ( isOrthoMode )
-                {
-                    ( ( TextureRenderer ) oldBackingStore ).endOrthoRendering( );
-                }
-                else
-                {
-                    ( ( TextureRenderer ) oldBackingStore ).end3DRendering( );
-                }
+                inBeginEndPair = true;
             }
 
             TextureRenderer newRenderer = ( TextureRenderer ) newBackingStore;
@@ -1022,19 +929,7 @@ public class TextureAtlas
             // Re-enter the begin / end pair if necessary
             if ( inBeginEndPair )
             {
-                if ( isOrthoMode )
-                {
-                    ( ( TextureRenderer ) newBackingStore ).beginOrthoRendering( beginRenderingWidth, beginRenderingHeight, beginRenderingDepthTestDisabled );
-                }
-                else
-                {
-                    ( ( TextureRenderer ) newBackingStore ).begin3DRendering( );
-                }
-
-                //XXX is this necessary? we're not using pipelined quad renderer...
-                // Push client attrib bits used by the pipelined quad renderer
-                GL2 gl = GLU.getCurrentGL( ).getGL2( );
-                gl.glPushClientAttrib( ( int ) GL2.GL_ALL_CLIENT_ATTRIB_BITS );
+                beginRendering( GLU.getCurrentGL( ) );
             }
 
             // notify update listeners that the TextureAtlas was reorganized

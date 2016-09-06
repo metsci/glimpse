@@ -90,7 +90,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
         @Override
         public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
         {
-            this.atlas.beginRendering( );
+            this.atlas.beginRendering( gl );
             try
             {
                 this.atlas.drawImage( gl, "image1", axis, 0, 0, 0.5f, 1.0f );
@@ -99,7 +99,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
             }
             finally
             {
-                this.atlas.endRendering( );
+                this.atlas.endRendering( gl );
             }
 
         }

@@ -46,6 +46,7 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
@@ -59,6 +60,7 @@ import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -543,8 +545,6 @@ public class IconPainter extends GlimpseDataPainter2D
         this.lock.lock( );
         try
         {
-            GL2 gl = context.getGL( ).getGL2( );
-
             if ( this.pickSupportEnabled )
             {
                 // allocate the offscreen pick buffer if it does not exist
@@ -608,53 +608,45 @@ public class IconPainter extends GlimpseDataPainter2D
     {
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( false );
-
-        // update geometry shader uniform variables
         this.shader.updateViewport( bounds );
-
         this.shader.setProjectionMatrix( axis );
 
         for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
         {
+            TextureAtlas atlas = entry.getKey( );
             Set<IconGroup> groups = entry.getValue( );
             if ( groups.isEmpty( ) ) continue;
 
-            TextureAtlas atlas = entry.getKey( );
-            atlas.beginRendering( );
+            atlas.beginRendering( gl );
+            atlas.endRendering( gl );
 
-            try
+            // draw each icon group, if it is visible
+            for ( IconGroup group : groups )
             {
-                // draw each icon group, if it is visible
-                for ( IconGroup group : groups )
+                // add any icons waiting to be added to the group
+                // we do this here because texture coordinates might not
+                // be known until the atlas.beginRendering( ) call
+                group.addQueuedIcons( );
+
+                this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                this.shader.setVertexData( group.getBufferIconPlacement( ) );
+
+                atlas.beginRendering( gl );
+                this.shader.useProgram( gl, true );
+                try
                 {
-                    // add any icons waiting to be added to the group
-                    // we do this here because texture coordinates might not
-                    // be known until the atlas.beginRendering( ) call
-                    group.addQueuedIcons( );
+                    if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
 
-                    this.shader.setTexCoordData( group.getBufferTexCoords( ) );
-                    this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
-                    this.shader.setColorCoordData( group.getPickColorCoords( ) );
-                    this.shader.setVertexData( group.getBufferIconPlacement( ) );
-
-                    System.out.println( group.getBufferIconPlacement( ).limit( ) + " " + group.getBufferTexCoords( ) + " " + group.getCurrentSize( ) );
-
-                    this.shader.useProgram( gl, true );
-                    try
-                    {
-                        if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
-
-                        gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
-                    }
-                    finally
-                    {
-                        this.shader.useProgram( gl, false );
-                    }
+                    gl.glDrawArrays( GL3.GL_POINTS, 0, group.getCurrentSize( ) );
+                    GLErrorUtils.logGLError( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
                 }
-            }
-            finally
-            {
-                atlas.endRendering( );
+                finally
+                {
+                    this.shader.useProgram( gl, false );
+                    atlas.endRendering( gl );
+                }
             }
         }
     }
@@ -667,17 +659,14 @@ public class IconPainter extends GlimpseDataPainter2D
         Set<PickResult> pickedIcons = new HashSet<PickResult>( );
 
         GLContext glContext = context.getGLContext( );
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
 
-        this.setPickOrthoProjection( gl, bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
+        this.setPickProjectionMatrix( bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( true );
-
-        // update geometry shader uniform variables
         this.shader.updateViewport( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
-
-        this.shader.setProjectionMatrix( axis );
+        this.setPickProjectionMatrix( bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
         this.pickFrameBuffer.bind( glContext );
         this.shader.useProgram( gl, true );
@@ -685,33 +674,35 @@ public class IconPainter extends GlimpseDataPainter2D
         {
             for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
             {
+                TextureAtlas atlas = entry.getKey( );
                 Set<IconGroup> groups = entry.getValue( );
                 if ( groups.isEmpty( ) ) continue;
 
-                TextureAtlas atlas = entry.getKey( );
-                atlas.beginRendering( );
-                try
+                // draw each icon group, if it is visible
+                for ( IconGroup group : groups )
                 {
-                    // draw each icon group, if it is visible
-                    for ( IconGroup group : groups )
+                    if ( !group.isVisible( ) ) continue;
+
+                    this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                    this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                    this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                    this.shader.setVertexData( group.getBufferIconPlacement( ) );
+
+                    resetPickFrameBuffer( glContext );
+
+                    atlas.beginRendering( gl );
+                    this.shader.useProgram( gl, true );
+                    try
                     {
-                        if ( !group.isVisible( ) ) continue;
-
-                        this.shader.setTexCoordData( group.getBufferTexCoords( ) );
-                        this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
-                        this.shader.setColorCoordData( group.getPickColorCoords( ) );
-                        this.shader.setVertexData( group.getBufferIconPlacement( ) );
-
-                        resetPickFrameBuffer( glContext );
-
-                        gl.glDrawArrays( GL2.GL_POINTS, 0, group.getCurrentSize( ) );
-
-                        checkPickFrameBuffer( context, group, pickedIcons );
+                        gl.glDrawArrays( GL3.GL_POINTS, 0, group.getCurrentSize( ) );
                     }
-                }
-                finally
-                {
-                    atlas.endRendering( );
+                    finally
+                    {
+                        this.shader.useProgram( gl, false );
+                        atlas.endRendering( gl );
+                    }
+
+                    checkPickFrameBuffer( context, group, pickedIcons );
                 }
             }
         }
@@ -719,9 +710,6 @@ public class IconPainter extends GlimpseDataPainter2D
         {
             this.shader.useProgram( gl, false );
             this.pickFrameBuffer.unbind( glContext );
-            // restore the scissor and viewport
-            gl.glEnable( GL2.GL_SCISSOR_TEST );
-            gl.glViewport( bounds.getX( ), bounds.getY( ), bounds.getWidth( ), bounds.getHeight( ) );
         }
 
         notifySpatialSelectionListeners( pickedIcons );
@@ -734,32 +722,25 @@ public class IconPainter extends GlimpseDataPainter2D
         GL gl = glContext.getGL( );
 
         gl.glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-        gl.glClear( GL2.GL_COLOR_BUFFER_BIT );
+        gl.glClear( GL3.GL_COLOR_BUFFER_BIT );
 
     }
 
     // set the orthographic projection to center on the WIDTH_BUFFER x HEIGHT_BUFFER square of pixels
     // around the click location
     // these are the only pixels which will be rendered into the small, offscreen pick buffer
-    protected void setPickOrthoProjection( GL2 gl, GlimpseBounds bounds, Axis2D axis, int clickX, int clickY )
+    protected void setPickProjectionMatrix( GlimpseBounds bounds, Axis2D axis, int clickX, int clickY )
     {
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
 
-        double minX = axisX.screenPixelToValue( clickX - WIDTH_BUFFER );
-        double maxX = axisX.screenPixelToValue( clickX + WIDTH_BUFFER + 1 );
+        float minX = ( float ) axisX.screenPixelToValue( clickX - WIDTH_BUFFER );
+        float maxX = ( float ) axisX.screenPixelToValue( clickX + WIDTH_BUFFER + 1 );
 
-        double minY = axisY.screenPixelToValue( clickY - HEIGHT_BUFFER );
-        double maxY = axisY.screenPixelToValue( clickY + HEIGHT_BUFFER + 1 );
+        float minY = ( float ) axisY.screenPixelToValue( clickY - HEIGHT_BUFFER );
+        float maxY = ( float ) axisY.screenPixelToValue( clickY + HEIGHT_BUFFER + 1 );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( minX, maxX, minY, maxY, -1, 1 );
-
-        // reduce the size of the viewport to the pick buffer size
-        gl.glViewport( 0, 0, WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1 );
-        // no need to scissor, we want to paint to the whole pick buffer
-        gl.glDisable( GL2.GL_SCISSOR_TEST );
+        this.shader.setProjectionMatrix( minX, maxX, minY, maxY );
     }
 
     // look through the returned frame buffer and and append unique icons to the result set
@@ -770,7 +751,7 @@ public class IconPainter extends GlimpseDataPainter2D
         int width = WIDTH_BUFFER * 2 + 1;
         int height = HEIGHT_BUFFER * 2 + 1;
 
-        context.getGL( ).glReadPixels( 0, 0, width, height, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, pickResultBuffer.rewind( ) );
+        context.getGL( ).glReadPixels( 0, 0, width, height, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, pickResultBuffer.rewind( ) );
 
         for ( int i = 0; i < width * height; i++ )
         {

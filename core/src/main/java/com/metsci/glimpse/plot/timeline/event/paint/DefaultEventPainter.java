@@ -300,7 +300,7 @@ public class DefaultEventPainter implements EventPainter
                 eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
 
                 TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( );
+                atlas.beginRendering( gl );
                 try
                 {
                     Iterator<Event> iter = event.iterator( );
@@ -352,7 +352,7 @@ public class DefaultEventPainter implements EventPainter
                 }
                 finally
                 {
-                    atlas.endRendering( );
+                    atlas.endRendering( gl );
                 }
 
                 remainingSpace -= totalIconWidthPixels + buffer;
@@ -367,7 +367,7 @@ public class DefaultEventPainter implements EventPainter
             if ( eventBounds.isIconVisible( ) )
             {
                 TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( );
+                atlas.beginRendering( gl );
                 try
                 {
                     Object icon = event.getIconId( );
@@ -416,7 +416,7 @@ public class DefaultEventPainter implements EventPainter
                 }
                 finally
                 {
-                    atlas.endRendering( );
+                    atlas.endRendering( gl );
                 }
             }
         }

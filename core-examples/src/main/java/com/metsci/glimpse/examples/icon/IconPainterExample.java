@@ -92,7 +92,6 @@ public class IconPainterExample implements GlimpseLayoutProvider
         // picking support is currently limited to a single GlimpseLayout
         // here that's fine because we're only adding the IconPainter to
         // a single GlimpseLayout
-        /*
         iconPainter.setPickingEnabled( layout );
         iconPainter.addSpatialSelectionListener( new SpatialSelectionListener<PickResult>( )
         {
@@ -102,7 +101,6 @@ public class IconPainterExample implements GlimpseLayoutProvider
                 logInfo( logger, "Selection: %s", newSelectedPoints );
             }
         } );
-        */
         
         // load some icons into the TextureAtlas
         TextureAtlasExample.loadTextureAtlas( atlas );

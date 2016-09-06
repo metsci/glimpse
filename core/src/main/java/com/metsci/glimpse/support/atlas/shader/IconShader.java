@@ -63,29 +63,21 @@ public class IconShader extends GlimpseShaderProgram
         
         // Geometry Shader
         
-        this.viewportWidth = this.addUniformData( new GLUniformData( "viewportWidth", 1 ) );
-        this.viewportHeight = this.addUniformData( new GLUniformData( "viewportHeight", 1 ) );
-        this.globalScale = this.addUniformData( new GLUniformData( "globalScale", 1 ) );
+        this.viewportWidth = this.addUniformData( new GLUniformData( "viewportWidth", (float) 1 ) );
+        this.viewportHeight = this.addUniformData( new GLUniformData( "viewportHeight", (float) 1 ) );
+        this.globalScale = this.addUniformData( new GLUniformData( "globalScale", (float) 1 ) );
     }
     
-    @Override
-    public void useProgram( GL gl, boolean on )
+    public void setProjectionMatrix( float minX, float maxX, float minY, float maxY )
     {
-        super.useProgram( gl, on );
-        
-        if ( on )
-        {
-            gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL3.GL_POINTS );
-            gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, GL3.GL_TRIANGLE_STRIP );
-            gl.getGL3( ).glProgramParameteriARB( this.program.id( ), GL3.GL_GEOMETRY_VERTICES_OUT_ARB, 4 );
-        }
+        Matrix4 m = new Matrix4( );
+        m.makeOrtho( minX, maxX, minY, maxY, -1, 1 );
+        this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
     }
     
     public void setProjectionMatrix( Axis2D axis )
     {
-        Matrix4 m = new Matrix4( );
-        m.makeOrtho( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ), -1, 1 );
-        this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
+        setProjectionMatrix( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ) );
     }
     
     public void setPickMode( boolean pickMode )
@@ -129,8 +121,8 @@ public class IconShader extends GlimpseShaderProgram
 
     public void updateViewport( int width, int height )
     {
-        this.viewportWidth.setData( width );
-        this.viewportHeight.setData( height );
+        this.viewportWidth.setData( (float) width );
+        this.viewportHeight.setData( (float) height );
     }
 
     public void setGlobalScale( float scale )
