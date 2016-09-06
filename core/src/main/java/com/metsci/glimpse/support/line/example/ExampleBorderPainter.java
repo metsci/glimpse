@@ -13,7 +13,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.MappableBuffer;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
 
 public class ExampleBorderPainter extends GlimpsePainterImpl
 {

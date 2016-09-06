@@ -28,7 +28,7 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.Plot2D;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.MappableBuffer;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;

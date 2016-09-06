@@ -10,6 +10,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
 
 public class LineProgram
 {

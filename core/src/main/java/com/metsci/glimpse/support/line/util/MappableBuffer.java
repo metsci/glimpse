@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.line.util;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
