@@ -4,7 +4,7 @@ import static com.metsci.glimpse.support.line.util.ShaderUtils.createProgram;
 import static com.metsci.glimpse.support.line.util.ShaderUtils.requireResourceText;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINE_STRIP;
+import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import javax.media.opengl.GL2ES2;
 
@@ -133,7 +133,7 @@ public class LineProgram
         gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
         gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
 
-        gl.glDrawArrays( GL_LINE_STRIP, first, count );
+        gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
     }
 
     public void draw( GL2ES2 gl, int xyVbo, int mileageVbo, int first, int count )
@@ -144,7 +144,7 @@ public class LineProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
         gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, 0 );
 
-        gl.glDrawArrays( GL_LINE_STRIP, first, count );
+        gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
     }
 
     public void end( GL2ES2 gl )

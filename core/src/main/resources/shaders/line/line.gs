@@ -1,6 +1,6 @@
 #version 150
 
-layout( lines ) in;
+layout( lines_adjacency ) in;
 layout( triangle_strip, max_vertices = 4 ) out;
 
 vec2 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
@@ -21,53 +21,97 @@ out float gQuadLength_PX;
 
 void main( )
 {
-    vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
     vec2 posB_PX = gl_in[ 1 ].gl_Position.xy;
-
-    vec2 lineDelta_PX = posB_PX - posA_PX;
-    float lineLength_PX = length( lineDelta_PX );
-
-    float mileageA_PX = vMileage_PX[ 0 ];
     float mileageB_PX = vMileage_PX[ 1 ];
 
-    if ( lineLength_PX > 0.0 && mileageB_PX >= mileageA_PX )
+    vec2 posC_PX = gl_in[ 2 ].gl_Position.xy;
+    float mileageC_PX = vMileage_PX[ 2 ];
+
+    vec2 deltaBC_PX = posC_PX - posB_PX;
+    float lengthBC_PX = length( deltaBC_PX );
+
+    if ( lengthBC_PX > 0.0 && mileageC_PX >= mileageB_PX )
     {
-        float halfFeather_PX = 0.5 * FEATHER_THICKNESS_PX;
-
-        vec2 parallelDir = lineDelta_PX / lineLength_PX;
-        vec2 parallelOffset_PX = halfFeather_PX * parallelDir;
-
-        vec2 normalDir = vec2( -parallelDir.y, parallelDir.x );
-        float halfNormal_PX = 0.5*LINE_THICKNESS_PX + halfFeather_PX;
-        vec2 normalOffset_PX = halfNormal_PX * normalDir;
+        vec2 dirBC = deltaBC_PX / lengthBC_PX;
+        vec2 normalBC = vec2( -dirBC.y, dirBC.x );
 
 
-        gl_Position.xy = pxToNdc( posA_PX - parallelOffset_PX + normalOffset_PX, VIEWPORT_SIZE_PX );
+        vec2 extrudeB;
+        {
+            vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
+            float mileageA_PX = vMileage_PX[ 0 ];
+
+            vec2 deltaAB_PX = posB_PX - posA_PX;
+            float lengthAB_PX = length( deltaAB_PX );
+
+            if ( lengthAB_PX > 0.0 && mileageB_PX >= mileageA_PX )
+            {
+                vec2 dirAB = deltaAB_PX / lengthAB_PX;
+                vec2 normalAB = vec2( -dirAB.y, dirAB.x );
+
+                vec2 dirCB = -dirBC;
+                extrudeB = normalBC + dot( normalAB, dirCB )*dirCB;
+            }
+            else
+            {
+                extrudeB = normalBC;
+            }
+        }
+
+
+        vec2 extrudeC;
+        {
+            vec2 posD_PX = gl_in[ 3 ].gl_Position.xy;
+            float mileageD_PX = vMileage_PX[ 3 ];
+
+            vec2 deltaCD_PX = posD_PX - posC_PX;
+            float lengthCD_PX = length( deltaCD_PX );
+
+            if ( lengthCD_PX > 0.0 && mileageD_PX >= mileageC_PX )
+            {
+                vec2 dirCD = deltaCD_PX / lengthCD_PX;
+                vec2 normalCD = vec2( -dirCD.y, dirCD.x );
+
+                extrudeC = normalBC + dot( normalCD, dirBC )*dirBC;
+            }
+            else
+            {
+                extrudeC = normalBC;
+            }
+        }
+
+
+        //float halfFeather_PX = 0.5 * FEATHER_THICKNESS_PX;
+
+        float halfNormal_PX = 0.5*LINE_THICKNESS_PX;// + halfFeather_PX;
+
+
+        gl_Position.xy = pxToNdc( posB_PX + halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( -halfFeather_PX, halfNormal_PX );
-        gMileage_PX = mileageA_PX - halfFeather_PX;
-        gQuadLength_PX = lineLength_PX;
+        gPosInQuad_PX = vec2( 0.0, halfNormal_PX );
+        gMileage_PX = mileageB_PX;
+        gQuadLength_PX = lengthBC_PX;
         EmitVertex( );
 
-        gl_Position.xy = pxToNdc( posA_PX - parallelOffset_PX - normalOffset_PX, VIEWPORT_SIZE_PX );
+        gl_Position.xy = pxToNdc( posB_PX - halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( -halfFeather_PX, -halfNormal_PX );
-        gMileage_PX = mileageA_PX - halfFeather_PX;
-        gQuadLength_PX = lineLength_PX;
+        gPosInQuad_PX = vec2( 0.0, -halfNormal_PX );
+        gMileage_PX = mileageB_PX;
+        gQuadLength_PX = lengthBC_PX;
         EmitVertex( );
 
-        gl_Position.xy = pxToNdc( posB_PX + parallelOffset_PX + normalOffset_PX, VIEWPORT_SIZE_PX );
+        gl_Position.xy = pxToNdc( posC_PX + halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( lineLength_PX + halfFeather_PX, halfNormal_PX );
-        gMileage_PX = mileageB_PX + halfFeather_PX;
-        gQuadLength_PX = lineLength_PX;
+        gPosInQuad_PX = vec2( lengthBC_PX, halfNormal_PX );
+        gMileage_PX = mileageC_PX;
+        gQuadLength_PX = lengthBC_PX;
         EmitVertex( );
 
-        gl_Position.xy = pxToNdc( posB_PX + parallelOffset_PX - normalOffset_PX, VIEWPORT_SIZE_PX );
+        gl_Position.xy = pxToNdc( posC_PX - halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
         gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( lineLength_PX + halfFeather_PX, -halfNormal_PX );
-        gMileage_PX = mileageB_PX + halfFeather_PX;
-        gQuadLength_PX = lineLength_PX;
+        gPosInQuad_PX = vec2( lengthBC_PX, -halfNormal_PX );
+        gMileage_PX = mileageC_PX;
+        gQuadLength_PX = lengthBC_PX;
         EmitVertex( );
 
 
