@@ -1,17 +1,16 @@
 package com.metsci.glimpse.support.line;
 
-import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
+import static com.metsci.glimpse.support.line.DirectBufferDealloc.deallocateDirectBuffers;
+import static java.lang.Math.ceil;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_BLEND;
-import static javax.media.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
-import static javax.media.opengl.GL.GL_MAP_WRITE_BIT;
 import static javax.media.opengl.GL.GL_ONE;
 import static javax.media.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
 import static javax.media.opengl.GL.GL_SRC_ALPHA;
-import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
@@ -57,21 +56,44 @@ public class LineUtils
               .put( ( float ) b );
     }
 
-    public static FloatBuffer reallocFloatVbo( GL gl, int vbo, long numFloats, int usage )
+    public static FloatBuffer flipped( FloatBuffer buffer )
     {
-        return reallocVbo( gl, vbo, numFloats * SIZEOF_FLOAT, usage ).asFloatBuffer( );
+        FloatBuffer flipped = buffer.duplicate( );
+        flipped.flip( );
+        return flipped;
     }
 
-    public static ByteBuffer reallocVbo( GL gl, int vbo, long numBytes, int usage )
+    public static FloatBuffer ensureAdditionalCapacity( FloatBuffer buffer, int additionalFloats, boolean deallocOldBuffer )
     {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, vbo );
-        gl.glBufferData( GL_ARRAY_BUFFER, numBytes, null, GL_STREAM_DRAW );
-        return gl.glMapBufferRange( GL_ARRAY_BUFFER, 0, numBytes, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
+        int minCapacity = buffer.position( ) + additionalFloats;
+        if ( buffer.capacity( ) >= minCapacity )
+        {
+            return buffer;
+        }
+        else if ( minCapacity > Integer.MAX_VALUE )
+        {
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT: requested-capacity = " + minCapacity );
+        }
+        else
+        {
+            long newCapacity = min( Integer.MAX_VALUE, max( minCapacity, ( long ) ceil( 1.618 * buffer.capacity( ) ) ) );
+            FloatBuffer newBuffer = newDirectFloatBuffer( ( int ) newCapacity );
+
+            if ( deallocOldBuffer )
+            {
+                buffer.flip( );
+                newBuffer.put( buffer );
+                deallocateDirectBuffers( buffer );
+            }
+            else
+            {
+                FloatBuffer dupe = buffer.duplicate( );
+                dupe.flip( );
+                newBuffer.put( dupe );
+            }
+
+            return newBuffer;
+        }
     }
 
-    public static void unmapVbo( GL gl, int vbo )
-    {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, vbo );
-        gl.glUnmapBuffer( GL_ARRAY_BUFFER );
-    }
 }

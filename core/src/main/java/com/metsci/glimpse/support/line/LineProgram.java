@@ -121,6 +121,20 @@ public class LineProgram
         gl.glDrawArrays( GL_LINE_STRIP, first, count );
     }
 
+    public void draw( GL2ES2 gl, LineStyle style, LinePath path )
+    {
+        draw( gl, style, path, 1.0 );
+    }
+
+    public void draw( GL2ES2 gl, LineStyle style, LinePath path, double ppvAspectRatio )
+    {
+        setStyle( gl, style );
+
+        int xyVbo = path.xyVbo( gl );
+        int mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
+        draw( gl, xyVbo, mileageVbo, 0, path.numVertices( ) );
+    }
+
     public void draw( GL2ES2 gl, int xyVbo, int mileageVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
