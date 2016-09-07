@@ -61,7 +61,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.gl.GLSimpleFrameBufferObject;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.shader.IconShader;
 import com.metsci.glimpse.support.atlas.support.ImageData;
@@ -87,7 +87,7 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 //      picks at one location at a time (we could draw to a larger offscreen buffer,
 //      or draw multiple times for each pick/click, not sure which would be faster).
 //      Most of the complications spring from the possibility of painter retargeting.
-public class IconPainter extends GlimpsePainterImpl
+public class IconPainter extends GlimpsePainterBase
 {
     private static final Logger logger = Logger.getLogger( IconPainter.class.getName( ) );
 
@@ -801,7 +801,7 @@ public class IconPainter extends GlimpsePainterImpl
     }
 
     @Override
-    protected void disposeOnce( GlimpseContext context )
+    protected void doDispose( GlimpseContext context )
     {
         //XXX who should dispose of the texture atlas?
         //XXX us if we created it, someone else if it was passed in...?

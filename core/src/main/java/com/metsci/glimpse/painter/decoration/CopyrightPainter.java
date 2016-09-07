@@ -33,7 +33,7 @@ import javax.media.opengl.GLContext;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.font.FontUtils;
 
 /**
@@ -41,7 +41,7 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author osborn
  */
-public class CopyrightPainter extends GlimpsePainterImpl
+public class CopyrightPainter extends GlimpsePainterBase
 {
     private static final String copyrightSymbol = "\u00A9";
 

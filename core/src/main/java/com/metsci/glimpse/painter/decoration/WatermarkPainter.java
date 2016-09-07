@@ -67,10 +67,10 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureData;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-public class WatermarkPainter extends GlimpsePainterImpl
+public class WatermarkPainter extends GlimpsePainterBase
 {
     private static final Logger logger = getLogger( WatermarkPainter.class );
 

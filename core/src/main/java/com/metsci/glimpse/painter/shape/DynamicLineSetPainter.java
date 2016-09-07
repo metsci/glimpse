@@ -48,7 +48,7 @@ import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkColorAccumulator;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -64,7 +64,7 @@ import com.metsci.glimpse.util.primitives.IntsArray;
  * @author ulman
  * @see com.metsci.glimpse.examples.misc.DynamicLinePainterExample
  */
-public class DynamicLineSetPainter extends GlimpsePainterImpl
+public class DynamicLineSetPainter extends GlimpsePainterBase
 {
     protected static final double GROWTH_FACTOR = 1.3;
 
@@ -345,7 +345,7 @@ public class DynamicLineSetPainter extends GlimpsePainterImpl
     }
 
     @Override
-    protected void disposeOnce( GlimpseContext context )
+    protected void doDispose( GlimpseContext context )
     {
         // TODO Auto-generated method stub
     }

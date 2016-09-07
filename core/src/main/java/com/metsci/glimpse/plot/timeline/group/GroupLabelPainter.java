@@ -35,7 +35,7 @@ import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
@@ -44,7 +44,7 @@ import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-public class GroupLabelPainter extends GlimpsePainterImpl
+public class GroupLabelPainter extends GlimpsePainterBase
 {
     protected int buttonSize = 8;
     protected int padding = 5;

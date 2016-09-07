@@ -10,12 +10,12 @@ import javax.media.opengl.GL2ES2;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 
-public class RandomLinesPainter extends GlimpsePainterImpl
+public class RandomLinesPainter extends GlimpsePainterBase
 {
 
     protected LinePath path;
@@ -80,7 +80,7 @@ public class RandomLinesPainter extends GlimpsePainterImpl
     }
 
     @Override
-    protected void disposeOnce( GlimpseContext context )
+    protected void doDispose( GlimpseContext context )
     {
         //XXX should LineProgram or MappableBuffer be disposed?
     }

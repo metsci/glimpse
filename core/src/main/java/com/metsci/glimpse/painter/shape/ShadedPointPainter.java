@@ -38,7 +38,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.SimplePointShader;
 
@@ -55,7 +55,7 @@ import com.metsci.glimpse.support.shader.SimplePointShader;
  * @author ulman
  * @see com.metsci.glimpse.examples.basic.ScatterplotExample
  */
-public class ShadedPointPainter extends GlimpsePainterImpl
+public class ShadedPointPainter extends GlimpsePainterBase
 {
     protected ReentrantLock lock = new ReentrantLock( );
 
@@ -379,7 +379,7 @@ public class ShadedPointPainter extends GlimpsePainterImpl
     }
 
     @Override
-    protected void disposeOnce( GlimpseContext context )
+    protected void doDispose( GlimpseContext context )
     {
         if ( program != null )
         {

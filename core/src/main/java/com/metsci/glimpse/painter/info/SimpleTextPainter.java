@@ -40,7 +40,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -51,7 +51,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  *
  * @author ulman
  */
-public class SimpleTextPainter extends GlimpsePainterImpl
+public class SimpleTextPainter extends GlimpsePainterBase
 {
     public static enum HorizontalPosition
     {

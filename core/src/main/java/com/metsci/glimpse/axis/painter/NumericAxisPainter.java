@@ -34,7 +34,7 @@ import java.awt.Font;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -48,7 +48,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  *
  * @author ulman
  */
-public abstract class NumericAxisPainter extends GlimpsePainterImpl
+public abstract class NumericAxisPainter extends GlimpsePainterBase
 {
     protected int tickBufferSize = 0;
     protected int tickSize = 8;
@@ -248,7 +248,7 @@ public abstract class NumericAxisPainter extends GlimpsePainterImpl
     }
 
     @Override
-    protected void disposeOnce( GlimpseContext context )
+    protected void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
