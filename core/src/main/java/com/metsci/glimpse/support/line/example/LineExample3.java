@@ -2,6 +2,7 @@ package com.metsci.glimpse.support.line.example;
 
 import static com.metsci.glimpse.support.FrameUtils.*;
 import static javax.swing.WindowConstants.*;
+import static javax.media.opengl.GLProfile.GL3;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.JFrame;
@@ -28,7 +29,7 @@ public class LineExample3
         {
             public void run( )
             {
-                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( );
+                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GL3 );
                 canvas.addLayout( plot );
                 canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
