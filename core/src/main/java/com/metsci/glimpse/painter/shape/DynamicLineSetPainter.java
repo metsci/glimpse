@@ -39,7 +39,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
@@ -87,8 +86,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     protected Map<Object, Integer> idMap;
     protected Map<Integer, Object> indexMap;
 
-    protected ReentrantLock lock;
-
     protected IntsArray searchResults;
 
     protected int initialSize;
@@ -104,8 +101,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     public DynamicLineSetPainter( int initialSize )
     {
         this.initialSize = initialSize;
-
-        this.lock = new ReentrantLock( );
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
         this.indexMap = new LinkedHashMap<Integer, Object>( );
@@ -129,20 +124,20 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
     public void setDotted( boolean dotted )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.style.stippleEnable = dotted;
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setDotted( int stippleFactor, short stipplePattern )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.style.stippleEnable = true;
@@ -151,26 +146,26 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setLineWidth( float size )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.style.thickness_PX = size;
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void putLines( BulkLineAccumulator accumulator )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             int newPoints = accumulator.getAddedSize( );
@@ -189,13 +184,13 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void putColors( BulkColorAccumulator accumulator )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             mutateColors( accumulator );
@@ -204,7 +199,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -215,7 +210,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
     public void putLine( Object id, float posX1, float posY1, float posX2, float posY2, float[] color )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             int currentSize = getSize( );
@@ -233,13 +228,13 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void putColor( Object id, float[] color )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             int index = getIndex( id, false );
@@ -249,13 +244,13 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void removeAll( )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.idMap.clear( );
@@ -265,13 +260,13 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void removeLine( Object id )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             int index = getIndex( id, false );
@@ -283,18 +278,18 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = getAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             int lineCount = getSize( );
@@ -340,7 +335,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -458,7 +453,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         if ( indices.isEmpty( ) ) return;
 
         final int size = this.getSize( );
-        final int first = indices.iterator( ).next( );
 
         shiftMaps( idMap, indexMap, indices, size );
 
@@ -533,7 +527,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         final int size = accumulator.getAddedSize( );
 
         final int[] indexList = new int[size];
-        final int minIndex = getIndexArray( ids, indexList );
+        getIndexArray( ids, indexList );
 
         for ( int i = 0; i < size; i++ )
         {

@@ -57,7 +57,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
         Axis1D axis = getAxis1D( context );
