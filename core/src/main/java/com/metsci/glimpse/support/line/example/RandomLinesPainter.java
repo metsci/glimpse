@@ -53,7 +53,7 @@ public class RandomLinesPainter extends GlimpsePainterBase
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = getAxis2D( context );

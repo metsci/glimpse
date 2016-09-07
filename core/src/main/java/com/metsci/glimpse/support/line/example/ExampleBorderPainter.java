@@ -34,7 +34,7 @@ public class ExampleBorderPainter extends GlimpsePainterBase
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    protected void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
@@ -94,10 +94,11 @@ public class ExampleBorderPainter extends GlimpsePainterBase
             prog.end( gl );
         }
     }
-    
+
     @Override
     protected void doDispose( GlimpseContext context )
     {
         //XXX should LineProgram or MappableBuffer be disposed?
     }
+
 }
