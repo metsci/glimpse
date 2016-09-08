@@ -136,7 +136,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
             }
 
             prog.setViewport( gl2es2, bounds );
-            prog.setOrtho( gl2es2, ( float ) axis.getMin( ), -0.5f, ( float ) axis.getMax( ), height - 0.5f );
+            prog.setOrtho( gl2es2, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
 
             prog.draw( gl2es2, style, path, 1.0 );
         }

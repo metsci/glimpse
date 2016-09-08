@@ -2,12 +2,14 @@
 
 vec2 axisMin( vec4 axisRect )
 {
-    return axisRect.xy;
+    // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
+    return axisRect.xz;
 }
 
 vec2 axisMax( vec4 axisRect )
 {
-    return axisRect.zw;
+    // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
+    return axisRect.yw;
 }
 
 vec2 axisSize( vec4 axisRect )

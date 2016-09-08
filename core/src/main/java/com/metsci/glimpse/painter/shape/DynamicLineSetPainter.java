@@ -744,17 +744,17 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
         {
-            setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxX( ), ( float ) axis.getMaxY( ) );
+            setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         }
 
         public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds )
         {
-            setOrtho( gl, 0, 0, bounds.getWidth( ), bounds.getHeight( ) );
+            setOrtho( gl, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
         }
 
-        public void setOrtho( GL2ES2 gl, float xMin, float yMin, float xMax, float yMax )
+        public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
         {
-            gl.glUniform4f( AXIS_RECT, xMin, yMin, xMax, yMax );
+            gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, xMax );
         }
 
         public void setStyle( GL2ES2 gl, LineStyle style )
