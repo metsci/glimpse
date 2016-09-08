@@ -51,11 +51,11 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
     {
         this.painterLock = new ReentrantLock( );
     }
-    
+
     protected abstract void doDispose( GlimpseContext context );
 
     protected abstract void doPaintTo( GlimpseContext context );
-    
+
     public static GL3 getGL3( GlimpseContext context )
     {
         return context.getGL( ).getGL3( );
@@ -64,7 +64,7 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
     public static Axis2D requireAxis2D( GlimpseContext context )
     {
         Axis2D axis = getAxis2D( context );
-        
+
         if ( axis == null )
         {
             // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
@@ -75,7 +75,7 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
             return axis;
         }
     }
-    
+
     public static Axis2D getAxis2D( GlimpseContext context )
     {
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
@@ -94,7 +94,7 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
     public static Axis1D requireAxis1D( GlimpseContext context )
     {
         Axis1D axis = getAxis1D( context );
-        
+
         if ( axis == null )
         {
             // Some GlimpseAxisLayout1D in the GlimpseContext must define an Axis1D
@@ -105,7 +105,7 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
             return axis;
         }
     }
-    
+
     public static Axis1D getAxis1D( GlimpseContext context )
     {
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
@@ -165,18 +165,26 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
             }
         }
     }
-    
+
     @Override
     public boolean isDisposed( )
     {
         return this.disposed;
     }
-    
+
     @Override
     public void paintTo( GlimpseContext context )
     {
         if ( !this.isVisible( ) ) return;
-        
-        doPaintTo( context );
+
+        this.painterLock.lock( );
+        try
+        {
+            doPaintTo( context );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
     }
 }
