@@ -31,7 +31,7 @@ import static com.metsci.glimpse.support.font.FontUtils.*;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
@@ -44,6 +44,10 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -92,6 +96,11 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
 
+    protected LinePath pathTick;
+    protected LinePath pathLeader;
+    protected LineStyle style;
+    protected LineProgram prog;
+    
     public NumericXYAxisPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
@@ -101,11 +110,26 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
 
         this.textColor = GlimpseColor.getBlack( );
         this.lineColor = GlimpseColor.getBlack( );
+        
+        this.initLineShader( );
     }
 
     public NumericXYAxisPainter( )
     {
         this( new GridAxisExponentLabelHandler( ), new GridAxisExponentLabelHandler( ) );
+    }
+    
+    protected void initLineShader( )
+    {
+        this.pathTick = new LinePath( );
+        this.pathLeader = new LinePath( );
+
+        this.style = new LineStyle( );
+        style.feather_PX = 0.5f;
+        style.thickness_PX = 1;
+        this.style.stippleEnable = false;
+
+        this.prog = null;
     }
 
     public void setLabelHandlerX( AxisLabelHandler ticksX )
@@ -222,11 +246,13 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = getAxis2D( context );
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        
+        LineUtils.enableStandardBlending( gl );
 
         if ( this.newFont != null )
         {
@@ -395,18 +421,21 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
             textRenderer.endRendering( );
         }
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, 1, 0, 1, -1, 1 );
-
-        GlimpseColor.glColor( gl, lineColor );
-
         double labelBufferX = labelBuffer / ( double ) width;
         double labelBufferY = labelBuffer / ( double ) height;
 
-        gl.glBegin( GL2.GL_LINES );
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl );
+        }
+        
+        prog.begin( gl );
         try
         {
+            pathLeader.clear( );
+            pathTick.clear( );
+            style.rgba = lineColor;
+            
             if ( showHorizontal )
             {
                 double tickWidthY = tickWidth / ( double ) height;
@@ -417,18 +446,18 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
                     {
                         double valueX = axis.getAxisX( ).valueToScreenPixelUnits( convX.fromAxisUnits( positionsX[i] ) ) / ( double ) width;
 
-                        gl.glVertex2d( valueX, doriginY - tickWidthY );
-                        gl.glVertex2d( valueX, doriginY + tickWidthY );
-
+                        pathTick.moveTo( ( float ) valueX, ( float ) ( doriginY - tickWidthY ) );
+                        pathTick.lineTo( ( float ) valueX, ( float ) ( doriginY + tickWidthY ) );
+                        
                         if ( labelTop )
                         {
-                            gl.glVertex2d( valueX, doriginY + tickWidthY );
-                            gl.glVertex2d( valueX + labelBufferX, doriginY + tickWidthY + labelBufferY );
+                            pathLeader.moveTo( ( float ) valueX, ( float ) ( doriginY + tickWidthY ) );
+                            pathLeader.lineTo( ( float ) ( valueX + labelBufferX ), ( float ) ( doriginY + tickWidthY + labelBufferY ) );
                         }
                         else
                         {
-                            gl.glVertex2d( valueX, doriginY - tickWidthY );
-                            gl.glVertex2d( valueX + labelBufferX, doriginY - tickWidthY - labelBufferY );
+                            pathLeader.moveTo( ( float ) valueX, ( float ) ( doriginY - tickWidthY ) );
+                            pathLeader.lineTo( ( float ) ( valueX + labelBufferX ), ( float ) ( doriginY - tickWidthY - labelBufferY ) );
                         }
                     }
                 }
@@ -444,18 +473,18 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
                     {
                         double valueY = axis.getAxisY( ).valueToScreenPixelUnits( convY.fromAxisUnits( positionsY[i] ) ) / ( double ) height;
 
-                        gl.glVertex2d( doriginX - tickWidthX, valueY );
-                        gl.glVertex2d( doriginX + tickWidthX, valueY );
+                        pathTick.moveTo( ( float ) ( doriginX - tickWidthX ), ( float ) valueY );
+                        pathTick.lineTo( ( float ) ( doriginX + tickWidthX ), ( float ) valueY );
 
                         if ( labelRight )
                         {
-                            gl.glVertex2d( doriginX + tickWidthX, valueY );
-                            gl.glVertex2d( doriginX + tickWidthX + labelBufferX, valueY + labelBufferY );
+                            pathLeader.moveTo( ( float ) ( doriginX + tickWidthX ), ( float ) valueY );
+                            pathLeader.lineTo( ( float ) ( doriginX + tickWidthX + labelBufferX ), ( float ) ( valueY + labelBufferY ) );
                         }
                         else
                         {
-                            gl.glVertex2d( doriginX - tickWidthX, valueY );
-                            gl.glVertex2d( doriginX - tickWidthX - labelBufferX, valueY + labelBufferY );
+                            pathLeader.moveTo( ( float ) ( doriginX - tickWidthX ), ( float ) valueY );
+                            pathLeader.lineTo( ( float ) ( doriginX - tickWidthX - labelBufferX ), ( float ) ( valueY + labelBufferY ) );
                         }
                     }
                 }
@@ -463,19 +492,30 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
 
             if ( showHorizontal && showOrigin )
             {
-                gl.glVertex2d( 0, doriginY );
-                gl.glVertex2d( 1, doriginY );
+                pathTick.moveTo( 0f, ( float ) doriginY );
+                pathTick.lineTo( 1f, ( float ) doriginY );
             }
 
             if ( showVertical && showOrigin )
             {
-                gl.glVertex2d( doriginX, 0 );
-                gl.glVertex2d( doriginX, 1 );
+                pathTick.moveTo( ( float ) doriginX, 0f );
+                pathTick.lineTo( ( float ) doriginX, 1f );
             }
+            
+            prog.setViewport( gl, bounds );
+            prog.setOrtho( gl, 0, 0, 1, 1 );
+            
+            // feathering makes horizontal/vertical lines look bad, so draw them separately
+            
+            style.feather_PX = 0.6f;
+            prog.draw( gl, style, pathLeader, (double) width / (double) height );
+            
+            style.feather_PX = 0f;
+            prog.draw( gl, style, pathTick, (double) width / (double) height );
         }
         finally
         {
-            gl.glEnd( );
+            prog.end( gl );
         }
     }
 

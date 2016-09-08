@@ -1,6 +1,7 @@
 package com.metsci.glimpse.examples.basic;
 
 import com.metsci.glimpse.axis.AxisUtil;
+import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.examples.Example;
@@ -21,13 +22,15 @@ public class TestExample implements GlimpseLayoutProvider
     {
         EmptyPlot2D plot = new EmptyPlot2D( );
 
+        /*
         GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
-
         AxisUtil.attachVerticalMouseListener( layoutY );
-
         plot.addLayout( layoutY );
-
         layoutY.addPainter( new NumericYAxisPainter( new GridAxisLabelHandler( ) ) );
+        */
+        
+        plot.addPainter( new NumericXYAxisPainter( ) );
+        
 
         return plot;
     }
