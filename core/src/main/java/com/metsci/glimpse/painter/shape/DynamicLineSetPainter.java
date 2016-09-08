@@ -289,7 +289,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         Axis2D axis = getAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
-        this.painterLock.lock( );
+        enableStandardBlending( gl );
         try
         {
             int lineCount = getSize( );
@@ -317,8 +317,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
                 xyBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
             }
 
-            enableStandardBlending( gl );
-
             prog.begin( gl );
             try
             {
@@ -335,7 +333,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.painterLock.unlock( );
+            gl.glDisable( GL_BLEND );
         }
     }
 
