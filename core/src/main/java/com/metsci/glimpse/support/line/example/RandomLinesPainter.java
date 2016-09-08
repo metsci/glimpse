@@ -28,13 +28,15 @@ public class RandomLinesPainter extends GlimpsePainterBase
         Random r = new Random( 0 );
         for ( int i = 0; i < 25; i++ )
         {
+            boolean axisAlign = ( i % 2 == 0 );
+
             float x0 = 2 + 6 * r.nextFloat( );
             float y0 = 2 + 6 * r.nextFloat( );
 
             float x1 = x0 + ( -1 + 2 * r.nextFloat( ) );
-            float y1 = y0 + ( -1 + 2 * r.nextFloat( ) );
+            float y1 = ( axisAlign ? y0 : y0 + ( -1 + 2 * r.nextFloat( ) ) );
 
-            float x2 = x1 + ( -1 + 2 * r.nextFloat( ) );
+            float x2 = ( axisAlign ? x1 : x1 + ( -1 + 2 * r.nextFloat( ) ) );
             float y2 = y1 + ( -1 + 2 * r.nextFloat( ) );
 
             path.moveTo( x0, y0 );
