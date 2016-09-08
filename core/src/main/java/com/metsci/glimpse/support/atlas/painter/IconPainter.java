@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -120,14 +119,11 @@ public class IconPainter extends GlimpsePainterBase
     protected List<SpatialSelectionListener<PickResult>> pickListeners;
     protected Executor pickNotificationThread;
 
-    protected ReentrantLock lock;
-
     //@formatter:off
     public IconPainter( int initialGroupSize, boolean enablePicking )
     {
         this.shader = new IconShader( 0, enablePicking );
 
-        this.lock = new ReentrantLock( );
         this.iconGroupMap = new HashMap<>( );
         this.iconGroupsByAtlas = new LinkedHashMap<>( );
         this.atlasListeners = new HashMap<>( );
@@ -162,14 +158,14 @@ public class IconPainter extends GlimpsePainterBase
      */
     public boolean isPickingEnabled( )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             return this.pickSupportEnabled;
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -185,7 +181,7 @@ public class IconPainter extends GlimpsePainterBase
     //      workload/complexity of the pickTo() method.
     public void setPickingEnabled( GlimpseLayout layout )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             if ( this.pickMouseListener != null && this.pickTarget != null )
@@ -209,13 +205,13 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setPickingDisabled( )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.pickSupportEnabled = false;
@@ -231,7 +227,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -263,7 +259,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void addIconGroup( Object iconGroupId, TextureAtlas atlas, int initialSize )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -296,7 +292,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -306,7 +302,7 @@ public class IconPainter extends GlimpsePainterBase
         {
             public void reorganized( )
             {
-                lock.lock( );
+                painterLock.lock( );
                 try
                 {
                     logger.info( "Texture Atlas was reorganized. Adjusting IconPainter with new texture coordinates." );
@@ -322,7 +318,7 @@ public class IconPainter extends GlimpsePainterBase
                 }
                 finally
                 {
-                    lock.unlock( );
+                    painterLock.unlock( );
                 }
             }
         };
@@ -330,7 +326,7 @@ public class IconPainter extends GlimpsePainterBase
 
     public void ensureIconGroupSize( Object iconGroupId, int minSize )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -338,7 +334,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -372,7 +368,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void addIcon( Object iconGroupId, Object iconId, float positionX, float positionY, float rotation, float scale )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -380,7 +376,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -399,7 +395,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void addIcons( Object iconGroupId, Object iconId, float[] positionX, float[] positionY, float[] rotation, float[] scale )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -407,7 +403,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -418,7 +414,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void addIcons( Object iconGroupId, Object iconId, float[] positions )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -426,7 +422,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -438,7 +434,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void addIcons( Object iconGroupId, Object iconId, FloatBuffer positions, int offset, int vertexCount )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -446,7 +442,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -457,7 +453,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void removeIconGroup( Object iconGroupId )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.remove( iconGroupId );
@@ -479,7 +475,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -492,7 +488,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void showIconGroup( Object iconGroupId, boolean show )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             IconGroup group = this.iconGroupMap.get( iconGroupId );
@@ -500,7 +496,7 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -515,7 +511,7 @@ public class IconPainter extends GlimpsePainterBase
      */
     public void showOnlyIconGroups( Collection<? extends Object> iconGroupIds )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             for ( IconGroup group : iconGroupMap.values( ) )
@@ -534,74 +530,64 @@ public class IconPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( !isVisible( ) ) return;
+        if ( this.pickSupportEnabled )
+        {
+            // allocate the offscreen pick buffer if it does not exist
+            if ( this.pickFrameBuffer == null )
+            {
+                this.pickFrameBuffer = new GLSimpleFrameBufferObject( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1, context.getGLContext( ) );
+            }
+
+            pickIcons( context );
+        }
+
+        paintIcons( context );
+
+        //XXX debugging code which paints the offscreen pick buffer
+        //XXX this is useful to have around, stash it somewhere else
+
+        /*
+        if ( this.pickFrameBuffer != null && this.pickFrameBuffer.isInitialized( ) )
+        {
+            com.jogamp.opengl.util.texture.Texture tex = this.pickFrameBuffer.getOpenGLTexture( );
         
-        this.lock.lock( );
-        try
-        {
-            if ( this.pickSupportEnabled )
+            gl.glEnable( GL2.GL_TEXTURE_2D );
+            gl.glBindTexture( GL2.GL_TEXTURE_2D, tex.getTarget( ) );
+        
+            gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
+            gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+        
+            gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
+            gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
+        
+            gl.glBegin( GL2.GL_TRIANGLE_STRIP );
+            try
             {
-                // allocate the offscreen pick buffer if it does not exist
-                if ( this.pickFrameBuffer == null )
-                {
-                    this.pickFrameBuffer = new GLSimpleFrameBufferObject( WIDTH_BUFFER * 2 + 1, HEIGHT_BUFFER * 2 + 1, context.getGLContext( ) );
-                }
-
-                pickIcons( context );
+                gl.glTexCoord2d( 0.0, 0.0 );
+                gl.glVertex2d( 0.0, 0.0 );
+        
+                gl.glTexCoord2d( 0.0, 1.0 );
+                gl.glVertex2d( 0.0, 5.0 );
+        
+                gl.glTexCoord2d( 1.0, 0.0 );
+                gl.glVertex2d( 5.0, 0.0 );
+        
+                gl.glTexCoord2d( 1.0, 1.0 );
+                gl.glVertex2d( 5.0, 5.0 );
             }
-
-            paintIcons( context );
-
-            //XXX debugging code which paints the offscreen pick buffer
-            //XXX this is useful to have around, stash it somewhere else
-
-            /*
-            if ( this.pickFrameBuffer != null && this.pickFrameBuffer.isInitialized( ) )
+            finally
             {
-                com.jogamp.opengl.util.texture.Texture tex = this.pickFrameBuffer.getOpenGLTexture( );
-            
-                gl.glEnable( GL2.GL_TEXTURE_2D );
-                gl.glBindTexture( GL2.GL_TEXTURE_2D, tex.getTarget( ) );
-            
-                gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-                gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
-            
-                gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-                gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
-            
-                gl.glBegin( GL2.GL_TRIANGLE_STRIP );
-                try
-                {
-                    gl.glTexCoord2d( 0.0, 0.0 );
-                    gl.glVertex2d( 0.0, 0.0 );
-            
-                    gl.glTexCoord2d( 0.0, 1.0 );
-                    gl.glVertex2d( 0.0, 5.0 );
-            
-                    gl.glTexCoord2d( 1.0, 0.0 );
-                    gl.glVertex2d( 5.0, 0.0 );
-            
-                    gl.glTexCoord2d( 1.0, 1.0 );
-                    gl.glVertex2d( 5.0, 5.0 );
-                }
-                finally
-                {
-                    gl.glEnd( );
-                }
+                gl.glEnd( );
             }
-            */
         }
-        finally
-        {
-            this.lock.unlock( );
-        }
+        */
     }
 
     public void paintIcons( GlimpseContext context )
@@ -609,7 +595,7 @@ public class IconPainter extends GlimpsePainterBase
         GL3 gl = getGL3( context );
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = getAxis2D( context );
-        
+
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( false );
         this.shader.updateViewport( bounds );
@@ -664,7 +650,7 @@ public class IconPainter extends GlimpsePainterBase
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = getAxis2D( context );
         GLContext glContext = context.getGLContext( );
-        
+
         Set<PickResult> pickedIcons = new HashSet<PickResult>( );
 
         this.setPickProjectionMatrix( bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
