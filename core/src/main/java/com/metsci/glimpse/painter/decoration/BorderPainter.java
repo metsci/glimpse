@@ -30,7 +30,7 @@ import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -40,7 +40,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  *
  * @author ulman
  */
-public class BorderPainter extends GlimpsePainterImpl
+public class BorderPainter extends GlimpsePainterBase
 {
     protected float[] borderColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
     protected boolean colorSet = false;

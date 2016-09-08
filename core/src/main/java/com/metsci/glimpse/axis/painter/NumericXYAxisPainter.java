@@ -26,13 +26,12 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
@@ -43,7 +42,7 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisExponentLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -57,7 +56,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  * @author ulman
  * @see com.metsci.glimpse.examples.basic.FunctionPlotExample
  */
-public class NumericXYAxisPainter extends GlimpsePainter2D
+public class NumericXYAxisPainter extends GlimpsePainterBase
 {
     protected TextRenderer textRenderer;
     protected Font font;
@@ -223,8 +222,12 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        GL2 gl = context.getGL( ).getGL2( );
+
         if ( this.newFont != null )
         {
             if ( this.textRenderer != null ) this.textRenderer.dispose( );
@@ -233,8 +236,6 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
         }
 
         if ( this.textRenderer == null ) return;
-
-        GL2 gl = context.getGL( ).getGL2( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -507,7 +508,7 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;

@@ -44,7 +44,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.units.Length;
 
@@ -53,7 +53,7 @@ import com.metsci.glimpse.util.units.Length;
  *
  * @author ulman
  */
-public class ScalePainter extends GlimpsePainterImpl
+public class ScalePainter extends GlimpsePainterBase
 {
     protected float[] borderColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 1.0f );
     protected float[] primaryColor = GlimpseColor.fromColorRgba( 1.0f, 1.0f, 1.0f, 0.5f );

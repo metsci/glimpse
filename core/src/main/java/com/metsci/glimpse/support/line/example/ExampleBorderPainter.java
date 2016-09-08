@@ -10,12 +10,12 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.line.util.MappableBuffer;
 
-public class ExampleBorderPainter extends GlimpsePainterImpl
+public class ExampleBorderPainter extends GlimpsePainterBase
 {
 
     protected final MappableBuffer xyVbo;
@@ -34,7 +34,7 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    protected void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
@@ -94,10 +94,11 @@ public class ExampleBorderPainter extends GlimpsePainterImpl
             prog.end( gl );
         }
     }
-    
+
     @Override
-    protected void disposeOnce( GlimpseContext context )
+    protected void doDispose( GlimpseContext context )
     {
         //XXX should LineProgram or MappableBuffer be disposed?
     }
+
 }

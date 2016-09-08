@@ -30,6 +30,7 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
+import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
@@ -45,13 +46,10 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
     }
 
     @Override
-    public SimplePlot2D getLayout( )
+    public EmptyPlot2D getLayout( )
     {
         // create a simple pre-built Glimpse plot
-        SimplePlot2D plot = new SimplePlot2D( );
-
-        // hide the cursor crosshairs
-        plot.getCrosshairPainter( ).setVisible( false );
+        EmptyPlot2D plot = new EmptyPlot2D( );
 
         // set the x and y axis bounds
         plot.getAxis( ).set( -1, 2, -1, 2 );

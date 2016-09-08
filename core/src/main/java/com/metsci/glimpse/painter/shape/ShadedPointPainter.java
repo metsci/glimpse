@@ -32,14 +32,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.SimplePointShader;
 
@@ -56,7 +55,7 @@ import com.metsci.glimpse.support.shader.SimplePointShader;
  * @author ulman
  * @see com.metsci.glimpse.examples.basic.ScatterplotExample
  */
-public class ShadedPointPainter extends GlimpseDataPainter2D
+public class ShadedPointPainter extends GlimpsePainterBase
 {
     protected ReentrantLock lock = new ReentrantLock( );
 
@@ -317,8 +316,11 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void paintTo( GlimpseContext context )
     {
+        Axis2D axis = getAxis2D( context );
+        GL2 gl = context.getGL( ).getGL2( );
+
         lock.lock( );
         try
         {
@@ -377,11 +379,11 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    protected void doDispose( GlimpseContext context )
     {
         if ( program != null )
         {
-            program.dispose( context );
+            program.dispose( context.getGLContext( ) );
         }
     }
 }

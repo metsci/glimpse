@@ -27,9 +27,7 @@
 package com.metsci.glimpse.painter.base;
 
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -38,89 +36,94 @@ import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-public abstract class GlimpsePainterImpl implements GlimpsePainter
+public abstract class GlimpsePainterBase implements GlimpsePainter
 {
-    public static final Logger logger = Logger.getLogger( GlimpsePainterImpl.class.getName( ) );
-
-    public static final int BYTES_PER_FLOAT = 4;
-
     protected volatile boolean disposed = false;
-    protected final ReentrantLock disposeLock;
+    protected final ReentrantLock painterLock;
 
     protected volatile boolean displayOn = true;
-    protected volatile boolean doErrorHandling = true;
 
-    protected final String errorPrefix = "GL ERROR: " + getClass( ).getName( );
-
-    public GlimpsePainterImpl( )
+    public GlimpsePainterBase( )
     {
-        this.disposeLock = new ReentrantLock( );
+        this.painterLock = new ReentrantLock( );
     }
+    
+    protected abstract void doDispose( GlimpseContext context );
+
+    protected abstract void doPaintTo( GlimpseContext context );
     
     public static GL3 getGL3( GlimpseContext context )
     {
         return context.getGL( ).getGL3( );
     }
 
+    public static Axis2D requireAxis2D( GlimpseContext context )
+    {
+        Axis2D axis = getAxis2D( context );
+        
+        if ( axis == null )
+        {
+            // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
+            throw new AxisNotSetException( context );
+        }
+        else
+        {
+            return axis;
+        }
+    }
+    
     public static Axis2D getAxis2D( GlimpseContext context )
     {
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
         if ( target instanceof GlimpseAxisLayout2D )
         {
             GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
-            Axis2D axis = layout.getAxis( context );
-
-            if ( axis == null )
-            {
-                // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
-                throw new AxisNotSetException( context );
-            }
-
-            return axis;
+            return layout.getAxis( context );
         }
         else
         {
             // GlimpsePainter2D instances must be painted to GlimpseAxisLayout2D instances
-            throw new AxisNotSetException( context );
+            return null;
         }
     }
 
+    public static Axis1D requireAxis1D( GlimpseContext context )
+    {
+        Axis1D axis = getAxis1D( context );
+        
+        if ( axis == null )
+        {
+            // Some GlimpseAxisLayout1D in the GlimpseContext must define an Axis1D
+            throw new AxisNotSetException( context );
+        }
+        else
+        {
+            return axis;
+        }
+    }
+    
     public static Axis1D getAxis1D( GlimpseContext context )
     {
         GlimpseTarget target = context.getTargetStack( ).getTarget( );
         if ( target instanceof GlimpseAxisLayout1D )
         {
             GlimpseAxisLayout1D layout = ( GlimpseAxisLayout1D ) target;
-            Axis1D axis = layout.getAxis( context );
-
-            if ( axis == null )
-            {
-                // Some GlimpseAxisLayout2D in the GlimpseContext must define an Axis2D
-                throw new AxisNotSetException( context );
-            }
-
-            return axis;
+            return layout.getAxis( context );
         }
         else
         {
             // GlimpsePainter2D instances must be painted to GlimpseAxisLayout2D instances
-            throw new AxisNotSetException( context );
+            return null;
         }
     }
 
     public static GlimpseBounds getBounds( GlimpseContext context )
     {
         return context.getTargetStack( ).getBounds( );
-    }
-
-    public void setErrorHandling( boolean doErrorHandling )
-    {
-        this.doErrorHandling = doErrorHandling;
     }
 
     @Override
@@ -147,37 +150,33 @@ public abstract class GlimpsePainterImpl implements GlimpsePainter
         // Double-checked locking works fine with a volatile var (as of Java 5)
         if ( !this.disposed )
         {
-            this.disposeLock.lock( );
+            this.painterLock.lock( );
             try
             {
                 if ( !this.disposed )
                 {
                     this.disposed = true;
-                    this.disposeOnce( context );
+                    this.doDispose( context );
                 }
             }
             finally
             {
-                this.disposeLock.unlock( );
+                this.painterLock.unlock( );
             }
         }
     }
     
-    protected abstract void disposeOnce( GlimpseContext context );
-
     @Override
     public boolean isDisposed( )
     {
         return this.disposed;
     }
-
-    protected boolean glHandleError( GL gl )
+    
+    @Override
+    public void paintTo( GlimpseContext context )
     {
-        return glHandleError( gl, "GL ERROR" );
-    }
-
-    protected boolean glHandleError( GL gl, String prefix )
-    {
-        return GLErrorUtils.logGLError( logger, gl, prefix );
+        if ( !this.isVisible( ) ) return;
+        
+        doPaintTo( context );
     }
 }

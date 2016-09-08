@@ -27,16 +27,13 @@ uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
 
 in vec2 inXy;
-in float inMileage;
+in vec4 inRgba;
 
-out float vMileage_PX;
+out vec4 vRgba;
 
 void main( )
 {
-    float mileage_AXIS = inMileage;
-    vec2 ppv = VIEWPORT_SIZE_PX / axisSize( AXIS_RECT );
-    vMileage_PX = mileage_AXIS * ppv.x;
-
     vec2 xy_AXIS = inXy;
     gl_Position.xy = axisXyToPx( xy_AXIS, AXIS_RECT, VIEWPORT_SIZE_PX );
+    vRgba = inRgba;
 }
