@@ -1,12 +1,12 @@
 #version 150
 
 layout( lines_adjacency ) in;
-layout( triangle_strip, max_vertices = 4 ) out;
+layout( triangle_strip, max_vertices = 6 ) out;
 
-vec2 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
+vec4 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
 {
     vec2 xy_FRAC = xy_PX / viewportSize_PX;
-    return ( -1.0 + 2.0*xy_FRAC );
+    return vec4( -1.0 + 2.0*xy_FRAC, 0.0, 1.0 );
 }
 
 uniform vec2 VIEWPORT_SIZE_PX;
@@ -15,9 +15,9 @@ uniform float FEATHER_THICKNESS_PX;
 
 in float vMileage_PX[];
 
-out vec2 gPosInQuad_PX;
-out float gMileage_PX;
-out float gQuadLength_PX;
+// out vec2 gPosInQuad_PX;
+// out float gMileage_PX;
+// out float gQuadLength_PX;
 
 void main( )
 {
@@ -33,7 +33,10 @@ void main( )
         vec2 dirBC = deltaBC_PX / lengthBC_PX;
         vec2 normalBC = vec2( -dirBC.y, dirBC.x );
 
-        vec2 extrudeB;
+        //float halfFeather_PX = 0.5 * FEATHER_THICKNESS_PX;
+        float halfNormal_PX = 0.5*LINE_THICKNESS_PX;// + halfFeather_PX;
+
+        // B
         {
             vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
             vec2 deltaAB_PX = posB_PX - posA_PX;
@@ -44,16 +47,52 @@ void main( )
             {
                 vec2 dirAB = deltaAB_PX / lengthAB_PX;
                 vec2 dirCB = -dirBC;
-                float dirABxDirCB = dirAB.x*dirCB.y - dirAB.y*dirCB.x;
-                extrudeB = ( dirAB + dirCB ) / dirABxDirCB;
+                float dirAB_x_dirCB = dirAB.x*dirCB.y - dirAB.y*dirCB.x;
+                vec2 extrudeB = ( dirAB + dirCB ) / dirAB_x_dirCB;
+
+                bool isLeftTurnABC = ( dirAB_x_dirCB < 0.0 );
+                if ( isLeftTurnABC )
+                {
+                    // Join
+                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Below
+                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Above
+                    gl_Position = pxToNdc( posB_PX + halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+                }
+                else
+                {
+                    // Join
+                    gl_Position = pxToNdc( posB_PX + halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Below
+                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Above
+                    gl_Position = pxToNdc( posB_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+                }
             }
             else
             {
-                extrudeB = normalBC;
+                // Below
+                gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                EmitVertex( );
+
+                // Above
+                gl_Position = pxToNdc( posB_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                EmitVertex( );
             }
         }
 
-        vec2 extrudeC;
+        // C
         {
             vec2 posD_PX = gl_in[ 3 ].gl_Position.xy;
             vec2 deltaDC_PX = posC_PX - posD_PX;
@@ -63,49 +102,50 @@ void main( )
             if ( lengthDC_PX > 0.0 && mileageD_PX >= mileageC_PX )
             {
                 vec2 dirDC = deltaDC_PX / lengthDC_PX;
-                float dirBCxDirDC = dirBC.x*dirDC.y - dirBC.y*dirDC.x;
-                extrudeC = ( dirBC + dirDC ) / dirBCxDirDC;
+                float dirBC_x_dirDC = dirBC.x*dirDC.y - dirBC.y*dirDC.x;
+                vec2 extrudeC = ( dirBC + dirDC ) / dirBC_x_dirDC;
+
+                bool isLeftTurnBCD = ( dirBC_x_dirDC < 0.0 );
+                if ( isLeftTurnBCD )
+                {
+                    // Below
+                    gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Above
+                    gl_Position = pxToNdc( posC_PX + halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Join
+                    gl_Position = pxToNdc( posC_PX - halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+                }
+                else
+                {
+                    // Below
+                    gl_Position = pxToNdc( posC_PX - halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Above
+                    gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+
+                    // Join
+                    gl_Position = pxToNdc( posC_PX + halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
+                    EmitVertex( );
+                }
             }
             else
             {
-                extrudeC = normalBC;
+                // Below
+                gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                EmitVertex( );
+
+                // Above
+                gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                EmitVertex( );
             }
         }
-
-
-        //float halfFeather_PX = 0.5 * FEATHER_THICKNESS_PX;
-
-        float halfNormal_PX = 0.5*LINE_THICKNESS_PX;// + halfFeather_PX;
-
-
-        gl_Position.xy = pxToNdc( posB_PX + halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
-        gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( 0.0, halfNormal_PX );
-        gMileage_PX = mileageB_PX;
-        gQuadLength_PX = lengthBC_PX;
-        EmitVertex( );
-
-        gl_Position.xy = pxToNdc( posB_PX - halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
-        gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( 0.0, -halfNormal_PX );
-        gMileage_PX = mileageB_PX;
-        gQuadLength_PX = lengthBC_PX;
-        EmitVertex( );
-
-        gl_Position.xy = pxToNdc( posC_PX + halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
-        gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( lengthBC_PX, halfNormal_PX );
-        gMileage_PX = mileageC_PX;
-        gQuadLength_PX = lengthBC_PX;
-        EmitVertex( );
-
-        gl_Position.xy = pxToNdc( posC_PX - halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
-        gl_Position.zw = vec2( 0.0, 1.0 );
-        gPosInQuad_PX = vec2( lengthBC_PX, -halfNormal_PX );
-        gMileage_PX = mileageC_PX;
-        gQuadLength_PX = lengthBC_PX;
-        EmitVertex( );
-
 
         EndPrimitive( );
     }
