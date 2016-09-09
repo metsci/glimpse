@@ -2,8 +2,9 @@ package com.metsci.glimpse.examples.basic;
 
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.axis.painter.TimeXAxisPainter;
+import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.EmptyPlot2D;
@@ -55,12 +56,20 @@ public class TestExample implements GlimpseLayoutProvider
         layoutY.addPainter( new NumericRotatedYAxisPainter( new GridAxisLabelHandler( ) ) );
         */
 
+        /*
         GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
         AxisUtil.attachHorizontalMouseListener( layoutX );
         plot.addLayout( layoutX );
         TimeXAxisPainter painter = new TimeXAxisPainter( new Epoch( TimeStamp.currentTime( ) ) );
         painter.setTickSize( 10 );
         layoutX.addPainter( painter );
+        */
+
+        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
+        AxisUtil.attachVerticalMouseListener( layoutY );
+        plot.addLayout( layoutY );
+        TimeYAxisPainter painter = new TimeYAxisPainter( new Epoch( TimeStamp.currentTime( ) ) );
+        layoutY.addPainter( painter );
 
         /*
         plot.addPainter( new NumericXYAxisPainter( ) );

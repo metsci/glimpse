@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
@@ -70,40 +71,49 @@ public class TimeYAxisPainter extends TimeAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        super.paintTo( context, bounds, axis );
+        super.doPaintTo( context );
 
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
+        GL2 gl2 = context.getGL( ).getGL2( );
+        GL3 gl3 = context.getGL( ).getGL3( );
+        Axis1D axis = getAxis1D( context );
+        GlimpseBounds bounds = getBounds( context );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
         if ( width == 0 || height == 0 ) return;
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
-
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
-
-        gl.glColor4fv( tickColor, 0 );
-
         List<TimeStamp> tickTimes = handler.tickTimes( axis, height );
         double tickInterval = handler.tickInterval( tickTimes );
 
-        // Tick marks
-        gl.glBegin( GL2.GL_LINES );
-        for ( TimeStamp t : tickTimes )
+        prog.begin( gl3 );
+        try
         {
-            double y = fromTimeStamp( t );
-            gl.glVertex2d( width, y );
-            gl.glVertex2d( width - tickLineLength, y );
+            path.clear( );
+            for ( TimeStamp t : tickTimes )
+            {
+                float y = ( float ) fromTimeStamp( t );
+
+                path.moveTo( width, y );
+                path.lineTo( width - tickSize, y );
+            }
+
+            style.thickness_PX = tickLineWidth;
+            style.rgba = tickColor;
+
+            prog.setViewport( gl3, bounds );
+            prog.setOrtho( gl3, -0.5f, width - 0.5f, ( float ) axis.getMin( ), ( float ) axis.getMax( ) );
+            
+            prog.draw( gl3, style, path );
         }
-        gl.glEnd( );
+        finally
+        {
+            prog.end( gl3 );
+        }
 
         GlimpseColor.setColor( textRenderer, textColor );
 
@@ -113,7 +123,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
             double jTimeText = printTickLabels( tickTimes, axis, handler.getSecondMinuteFormat( ), width, height );
 
             // Date labels
-            printHoverLabels( gl, tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
+            printHoverLabels( gl2, tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
         }
         else if ( tickInterval <= Time.fromHours( 12 ) )
         {
@@ -121,7 +131,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
             double jTimeText = printTickLabels( tickTimes, axis, handler.getHourMinuteFormat( ), width, height );
 
             // Date labels
-            printHoverLabels( gl, tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
+            printHoverLabels( gl2, tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
         }
         else if ( tickInterval <= Time.fromDays( 10 ) )
         {
@@ -129,7 +139,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
             double jTimeText = printTickLabels( tickTimes, axis, handler.getDayFormat( ), width, height );
 
             // Year labels
-            printHoverLabels( gl, tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
+            printHoverLabels( gl2, tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
         }
         else if ( tickInterval <= Time.fromDays( 60 ) )
         {
@@ -137,7 +147,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
             double jTimeText = printTickLabels( tickTimes, axis, handler.getMonthFormat( ), width, height );
 
             // Year labels
-            printHoverLabels( gl, tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
+            printHoverLabels( gl2, tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
         }
         else
         {
@@ -207,7 +217,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
                 int j = ( int ) Math.round( axis.valueToScreenPixel( fromTimeStamp( t ) ) - 0.5 * Math.max( 1, textHeight - 2 ) );
                 if ( j < 0 || j + textHeight > height ) continue;
 
-                int i = ( int ) Math.round( width - tickLineLength - textBounds.getWidth( ) ) - 1;
+                int i = ( int ) Math.round( width - tickSize - textBounds.getWidth( ) ) - 1;
                 iTimeText = Math.min( iTimeText, i );
 
                 textRenderer.draw( string, i, j );
