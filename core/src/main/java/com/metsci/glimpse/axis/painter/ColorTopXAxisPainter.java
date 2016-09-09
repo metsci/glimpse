@@ -24,9 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.axis.painter.label;
+package com.metsci.glimpse.axis.painter;
 
-import com.metsci.glimpse.axis.painter.ColorXAxisPainter;
+import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 
 public class ColorTopXAxisPainter extends ColorXAxisPainter
 {
@@ -67,13 +67,13 @@ public class ColorTopXAxisPainter extends ColorXAxisPainter
     }
 
     @Override
-    public int getColorBarMinY( int height )
+    public float getColorBarMinY( int height )
     {
         return tickBufferSize;
     }
 
     @Override
-    public int getColorBarMaxY( int height )
+    public float getColorBarMaxY( int height )
     {
         return tickBufferSize + colorBarSize;
     }
