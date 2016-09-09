@@ -1,7 +1,7 @@
 package com.metsci.glimpse.examples.basic;
 
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.axis.painter.ColorYAxisPainter;
+import com.metsci.glimpse.axis.painter.ColorRightYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -27,7 +27,7 @@ public class TestExample implements GlimpseLayoutProvider
         AxisUtil.attachVerticalMouseListener( layoutY );
         plot.addLayout( layoutY );
 
-        ColorYAxisPainter painter = new ColorYAxisPainter( new GridAxisLabelHandler( ) );
+        ColorRightYAxisPainter painter = new ColorRightYAxisPainter( new GridAxisLabelHandler( ) );
         ColorTexture1D texture = new ColorTexture1D( 1024 );
         texture.setColorGradient( ColorGradients.autumn );
         painter.setColorScale( texture );
