@@ -184,11 +184,13 @@ public class NumericYAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintAxisLabel( GL2 gl, Axis1D axis, GlimpseBounds bounds )
+    protected void paintAxisLabel( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
         // Axis label
         if ( showLabel )
         {
+            GL2 gl2 = gl.getGL2( );
+            
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
             
@@ -201,9 +203,9 @@ public class NumericYAxisPainter extends NumericAxisPainter
                 int iAxisLabel = getAxisLabelPositionX( width, ( int ) labelSize.getHeight( ) );
                 int jAxisLabel = round( 0.5f * ( height - ( int ) labelSize.getWidth( ) ) );
 
-                gl.glMatrixMode( GL2.GL_PROJECTION );
-                gl.glTranslatef( iAxisLabel, jAxisLabel, 0 );
-                gl.glRotatef( 90, 0, 0, 1.0f );
+                gl2.glMatrixMode( GL2.GL_PROJECTION );
+                gl2.glTranslatef( iAxisLabel, jAxisLabel, 0 );
+                gl2.glRotatef( 90, 0, 0, 1.0f );
 
                 textRenderer.draw( label, 0, 0 );
             }
@@ -214,7 +216,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintSelectionLine( GL2 gl, Axis1D axis, GlimpseBounds bounds )
+    protected void paintSelectionLine( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
         AxisUnitConverter converter = ticks.getAxisUnitConverter( );
 

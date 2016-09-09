@@ -26,13 +26,11 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
 /**
@@ -105,28 +103,7 @@ public abstract class AbstractTexture implements Texture
     }
 
     @Override
-    // TODO: Figure out if this is expensive to call.
-    public boolean isResident( GL2 gl )
-    {
-        lock.lock( );
-        try
-        {
-            if ( !glAllocated ) return false;
-
-            int[] handle = new int[] { glHandle };
-            byte[] resident = new byte[1];
-            gl.glAreTexturesResident( 1, handle, 0, resident, 0 );
-
-            return resident[0] > 0;
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-
-    @Override
-    public boolean prepare( GL2 gl, int texUnit )
+    public boolean prepare( GL gl, int texUnit )
     {
         // should we check for dirtiness and allocation before lock to speed up?
         lock.lock( );
@@ -180,5 +157,5 @@ public abstract class AbstractTexture implements Texture
 
     protected abstract void prepare_setPixelStore( GL gl );
 
-    protected abstract void prepare_setData( GL2 gl );
+    protected abstract void prepare_setData( GL gl );
 }

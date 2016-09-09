@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
 
 /**
@@ -83,17 +83,6 @@ public interface Texture
     public int getDimensionSize( int n );
 
     /**
-     * OpenGL implementations may swap store a "working set" of textures
-     * in a very fast cache of texture memory. Other textures are swapped
-     * out and may take longer to access and display. Calling {@code isResident( GL )}
-     * indicates whether this texture is resident in texture memory.
-     *
-     * @param gl a GL handle for the active GLContext
-     * @return whether this texture is resident in texture memory
-     */
-    public boolean isResident( GL2 gl );
-
-    /**
      * Allocates space for the texture in GPU texture memory (once, if this is the
      * first time that {@code prepare( GL, int)} has been called), copies texture
      * data from the heap into GPU memory (if {@code isDirty()} is true). This texture
@@ -107,7 +96,7 @@ public interface Texture
      * @param texUnit the texture unit to bind to this texture
      * @return whether the preparation succeeded
      */
-    public boolean prepare( GL2 gl, int texUnit );
+    public boolean prepare( GL gl, int texUnit );
 
     /**
      * Disposes all Java heap and GPU resources associated with this texture.

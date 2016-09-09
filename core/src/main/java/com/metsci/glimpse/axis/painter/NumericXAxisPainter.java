@@ -189,7 +189,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintAxisLabel( GL2 gl, Axis1D axis, GlimpseBounds bounds )
+    protected void paintAxisLabel( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
         // Axis Label
         if ( showLabel )
@@ -215,7 +215,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintSelectionLine( GL2 gl, Axis1D axis, GlimpseBounds bounds )
+    protected void paintSelectionLine( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
         // Selection line
         if ( showSelectionLine )

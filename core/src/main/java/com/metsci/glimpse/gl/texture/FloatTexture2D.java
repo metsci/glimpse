@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 
 import java.nio.FloatBuffer;
 import java.util.Collection;
@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.painter.texture.TextureUnit;
@@ -66,7 +67,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     // multiTextureList is ignored because this type of texture does not currently support
     // multitexturing (but it would be easy to add)
-    public void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    public void draw( GL gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
         boolean ready = prepare( gl, texUnit );
 
@@ -76,8 +77,8 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
             return;
         }
 
-        gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-        gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+        gl.glTexEnvf( GL3.GL_TEXTURE_ENV, GL3.GL_TEXTURE_ENV_MODE, GL3.GL_REPLACE );
+        gl.glPolygonMode( GL3.GL_FRONT, GL3.GL_FILL );
 
         double tminmax[][] = computeDrawMinMax( );
         double tmin[] = tminmax[0];
@@ -128,17 +129,17 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST );
 
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_CLAMP_TO_EDGE );
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
-        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, data.rewind( ) );
+        gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_RED, dim[0], dim[1], 0, GL3.GL_RED, GL2.GL_FLOAT, data.rewind( ) );
     }
 
     @Override

@@ -214,7 +214,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     }
 
     @Override
-    public boolean prepare( GL2 gl, int texUnit )
+    public boolean prepare( GL gl, int texUnit )
     {
         // should we check for dirtiness and allocation before lock to speed up?
         lock.lock( );
@@ -250,13 +250,13 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
     }
 
-    public void draw( GL2 gl, int texUnit )
+    public void draw( GL gl, int texUnit )
     {
         draw( gl, texUnit, Collections.<TextureUnit<Texture>> emptyList( ) );
     }
 
     @Override
-    public void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    public void draw( GL gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
         // prepare our texture
         boolean ready = prepare( gl, texUnit );

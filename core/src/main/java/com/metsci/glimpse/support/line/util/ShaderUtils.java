@@ -59,6 +59,23 @@ public class ShaderUtils
         }
     }
 
+    
+    public static int createProgram( GL2ES2 gl, String[] vertSources, String[] geomSources, String[] fragSources )
+    {
+        IntsArray shaders = new IntsArray( );
+        try
+        {
+            if ( vertSources != null ) shaders.append( compileShader( gl, GL_VERTEX_SHADER,   vertSources ) );
+            if ( geomSources != null ) shaders.append( compileShader( gl, GL_GEOMETRY_SHADER, geomSources ) );
+            if ( fragSources != null ) shaders.append( compileShader( gl, GL_FRAGMENT_SHADER, fragSources ) );
+            return linkProgram( gl, shaders.a );
+        }
+        finally
+        {
+            deleteShaders( gl, shaders.a );
+        }
+    }
+    
     public static int createProgram( GL2ES2 gl, String vertSource, String geomSource, String fragSource )
     {
         IntsArray shaders = new IntsArray( );
