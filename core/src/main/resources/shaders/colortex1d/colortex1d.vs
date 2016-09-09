@@ -17,22 +17,21 @@ vec2 axisSize( vec4 axisRect )
     return ( axisMax( axisRect ) - axisMin( axisRect ) );
 }
 
-vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
+vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 {
     vec2 xy_FRAC = ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect );
-    return ( xy_FRAC * viewportSize_PX );
+    return 2 * xy_FRAC - 1;
 }
 
 uniform vec4 AXIS_RECT;
-uniform vec2 VIEWPORT_SIZE_PX;
 
 in vec2 inXy;
 in float inS;
 
 out float vS;
 
-main( )
+void main( )
 {
-      gl_Position.xy = axisXyToPx( inXy, AXIS_RECT, VIEWPORT_SIZE_PX );
+      gl_Position.xy = axisXyToNdc( inXy, AXIS_RECT );
       vS = inS;
 }

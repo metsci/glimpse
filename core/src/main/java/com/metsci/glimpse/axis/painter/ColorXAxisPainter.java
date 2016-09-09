@@ -53,9 +53,13 @@ import com.metsci.glimpse.support.shader.ColorTextureProgram1D;
 public class ColorXAxisPainter extends NumericXAxisPainter
 {
     protected ColorTextureProgram1D progTex;
+    protected LinePath pathTex;
+
     protected LineProgram progLine;
-    protected LinePath path;
+    protected LinePath pathLine;
+
     protected LineStyle style;
+
     protected MappableBuffer sVbo;
     protected ColorTexture1D colorTexture;
 
@@ -66,7 +70,9 @@ public class ColorXAxisPainter extends NumericXAxisPainter
     {
         super( ticks );
 
-        this.path = new LinePath( );
+        this.pathLine = new LinePath( );
+        this.pathTex = new LinePath( );
+
         this.sVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1 );
 
         this.style = new LineStyle( );
@@ -104,6 +110,11 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         Axis1D axis = getAxis1D( context );
         GlimpseBounds bounds = getBounds( context );
 
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl );
+        }
+
         if ( progTex == null )
         {
             progLine = new LineProgram( gl );
@@ -129,20 +140,27 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         if ( colorTexture != null )
         {
             GlimpseBounds bounds = getBounds( context );
-            Axis1D axis = getAxis1D( context );
             GL3 gl = context.getGL( ).getGL3( );
 
             int height = bounds.getHeight( );
             int width = bounds.getWidth( );
 
-            int y1 = getColorBarMinY( height );
-            int y2 = getColorBarMaxY( height );
+            float y1 = getColorBarMinY( height );
+            float y2 = getColorBarMaxY( height );
 
-            path.clear( );
-            path.moveTo( 0, y2 );
-            path.lineTo( 0, y1 );
-            path.lineTo( width - 1, y1 );
-            path.lineTo( width - 1, y2 );
+            pathLine.clear( );
+            pathLine.lineTo( 0.5f, y2 );
+            pathLine.lineTo( 0.5f, y1 );
+            pathLine.lineTo( width, y1 );
+            pathLine.lineTo( width, y2 );
+            pathLine.lineTo( 0.5f, y2 );
+
+            pathTex.clear( );
+            
+            pathTex.lineTo( 0.5f, y2 );
+            pathTex.lineTo( 0.5f, y1 );
+            pathTex.lineTo( width, y2 );
+            pathTex.lineTo( width, y1 );
 
             LineUtils.enableStandardBlending( gl );
             try
@@ -151,10 +169,9 @@ public class ColorXAxisPainter extends NumericXAxisPainter
                 progTex.begin( gl );
                 try
                 {
-                    progTex.setOrtho( gl, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, ( float ) height - 1f + 0.5f );
-                    progTex.setViewport( gl, bounds );
+                    progTex.setPixelOrtho( gl, bounds );
 
-                    progTex.draw( gl, colorTexture, path.xyVbo( gl ), sVbo, 0, 4 );
+                    progTex.draw( gl, colorTexture, pathTex.xyVbo( gl ), sVbo, 0, pathTex.numVertices( ) );
                 }
                 finally
                 {
@@ -165,10 +182,10 @@ public class ColorXAxisPainter extends NumericXAxisPainter
                 progLine.begin( gl );
                 try
                 {
-                    progLine.setOrtho( gl, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, ( float ) height - 1f + 0.5f );
+                    progLine.setPixelOrtho( gl, bounds );
                     progLine.setViewport( gl, bounds );
 
-                    progLine.draw( gl, style, path );
+                    progLine.draw( gl, style, pathLine );
                 }
                 finally
                 {
@@ -182,13 +199,13 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         }
     }
 
-    protected int getColorBarMinY( int height )
+    protected float getColorBarMinY( int height )
     {
-        return height - 1 - tickBufferSize - colorBarSize;
+        return height - tickBufferSize - colorBarSize - 0.5f;
     }
 
-    protected int getColorBarMaxY( int height )
+    protected float getColorBarMaxY( int height )
     {
-        return height - 1 - tickBufferSize;
+        return height - tickBufferSize - 0.5f;
     }
 }

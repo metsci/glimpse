@@ -2,9 +2,11 @@
 
 in float vS;
 
+out vec4 outRgba;
+
 uniform sampler1D TEXTURE1D;
 
-main( )
+void main( )
 {
-    gl_FragColor = texture1D( TEXTURE1D, vS );
+    outRgba = texture( TEXTURE1D, vS );
 }
