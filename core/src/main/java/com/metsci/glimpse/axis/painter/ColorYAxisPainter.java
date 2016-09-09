@@ -26,13 +26,23 @@
  */
 package com.metsci.glimpse.axis.painter;
 
+import static javax.media.opengl.GL.*;
+
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
+import com.metsci.glimpse.support.shader.ColorTextureProgram1D;
 
 /**
  * A vertical (y) axis with a color bar and labeled ticks along the right hand side.
@@ -42,6 +52,15 @@ import com.metsci.glimpse.gl.texture.ColorTexture1D;
  */
 public class ColorYAxisPainter extends NumericYAxisPainter
 {
+    protected ColorTextureProgram1D progTex;
+    protected LinePath pathTex;
+
+    protected LineProgram progLine;
+    protected LinePath pathLine;
+
+    protected LineStyle style;
+
+    protected MappableBuffer sVbo;
     protected ColorTexture1D colorTexture;
 
     protected int colorBarSize = 10;
@@ -50,7 +69,19 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     public ColorYAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
-        setTickSize( colorBarSize + 0 );
+        
+        this.pathLine = new LinePath( );
+        this.pathTex = new LinePath( );
+
+        this.sVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1 );
+
+        this.style = new LineStyle( );
+        this.style.stippleEnable = false;
+        this.style.thickness_PX = 1.0f;
+        this.style.feather_PX = 0.0f;
+        this.style.rgba = GlimpseColor.getBlack( );
+
+        setTickSize( this.colorBarSize + 0 );
     }
 
     public void setEnableOutline( boolean doOutline )
@@ -70,111 +101,111 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis1D axis = getAxis1D( context );
+        GlimpseBounds bounds = getBounds( context );
 
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl );
+        }
 
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
+        if ( progTex == null )
+        {
+            progLine = new LineProgram( gl );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
+            progTex = new ColorTextureProgram1D( gl );
+            progTex.setTexture( gl, 0 );
 
-        paintColorScale( gl, axis, width, height );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
-
-        paintTicks( gl, axis, width, height );
-        paintAxisLabel( gl, axis, width, height );
-        paintSelectionLine( gl, axis, width, height );
+            // although the vertex coordinates may change, the texture coordinates
+            // stay constant, so just set them up once here
+            sVbo.mapFloats( gl, 4 ).put( 0.0f ).put( 0.0f ).put( 1.0f ).put( 1.0f );
+            sVbo.seal( gl );
+        }
+        
+        paintColorScale( context );
+        
+        paintTicks( gl, axis, bounds );
+        paintAxisLabel( gl, axis, bounds );
+        paintSelectionLine( gl, axis, bounds );
     }
 
-    protected void paintColorScale( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintColorScale( GlimpseContext context )
     {
         if ( colorTexture != null )
         {
-            colorTexture.prepare( gl, 0 );
+            GlimpseBounds bounds = getBounds( context );
+            GL3 gl = context.getGL( ).getGL3( );
 
-            int x1 = getColorBarMinX( width );
-            int x2 = getColorBarMaxX( width );
+            int height = bounds.getHeight( );
+            int width = bounds.getWidth( );
 
-            gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-            gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
-            gl.glEnable( GL2.GL_TEXTURE_1D );
+            float x1 = getColorBarMinX( width );
+            float x2 = getColorBarMaxX( width );
 
-            gl.glBegin( GL2.GL_QUADS );
+            pathLine.clear( );
+            pathLine.lineTo( x2, 0.5f );
+            pathLine.lineTo( x1, 0.5f );
+            pathLine.lineTo( x1, height );
+            pathLine.lineTo( x2, height );
+            pathLine.lineTo( x2, 0.5f );
+
+            pathTex.clear( );
+            
+            pathTex.lineTo( x2, 0.5f );
+            pathTex.lineTo( x1, 0.5f );
+            pathTex.lineTo( x2, height );
+            pathTex.lineTo( x1, width );
+
+            LineUtils.enableStandardBlending( gl );
             try
             {
-                gl.glTexCoord1f( 0.0f );
-                gl.glVertex2f( x2, 0 );
+                // draw color scale
+                progTex.begin( gl );
+                try
+                {
+                    progTex.setPixelOrtho( gl, bounds );
 
-                gl.glTexCoord1f( 0.0f );
-                gl.glVertex2f( x1, 0 );
+                    progTex.draw( gl, colorTexture, pathTex.xyVbo( gl ), sVbo, 0, pathTex.numVertices( ) );
+                }
+                finally
+                {
+                    progTex.end( gl );
+                }
 
-                gl.glTexCoord1f( 1.0f );
-                gl.glVertex2f( x1, height - 1 );
+                // draw outline box
+                progLine.begin( gl );
+                try
+                {
+                    progLine.setPixelOrtho( gl, bounds );
+                    progLine.setViewport( gl, bounds );
 
-                gl.glTexCoord1f( 1.0f );
-                gl.glVertex2f( x2, height - 1 );
+                    progLine.draw( gl, style, pathLine );
+                }
+                finally
+                {
+                    progLine.end( gl );
+                }
             }
             finally
             {
-                gl.glEnd( );
+                gl.glDisable( GL2.GL_BLEND );
             }
-
-            gl.glDisable( GL2.GL_TEXTURE_1D );
-        }
-
-        if ( outline )
-        {
-            outlineColorQuad( gl, axis, width, height );
         }
     }
-
-    protected void outlineColorQuad( GL2 gl, Axis1D axis, int width, int height )
+    
+    public float getColorBarMinX( int width )
     {
-        float x1 = getColorBarMinX( width );
-        float x2 = getColorBarMaxX( width );
-
-        gl.glColor4fv( tickColor, 0 );
-
-        gl.glBegin( GL2.GL_LINES );
-        try
-        {
-            gl.glVertex2f( x2, 0 );
-            gl.glVertex2f( x1, 0 );
-
-            gl.glVertex2f( x1, 0 );
-            gl.glVertex2f( x1, height - 1 );
-
-            gl.glVertex2f( x1, height - 1 );
-            gl.glVertex2f( x2, height - 1 );
-
-            gl.glVertex2f( x2, height - 1 );
-            gl.glVertex2f( x2, 0 );
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
+        return width - tickBufferSize - colorBarSize - 0.5f;
     }
 
-    public int getColorBarMinX( int width )
+    public float getColorBarMaxX( int width )
     {
-        return width - 1 - tickBufferSize - colorBarSize;
-    }
-
-    public int getColorBarMaxX( int width )
-    {
-        return width - 1 - tickBufferSize;
+        return width - tickBufferSize - 0.5f;
     }
 }
