@@ -30,11 +30,13 @@ import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -55,76 +57,23 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
     }
 
     @Override
-    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintTickLabels( GL gl, Axis1D axis, GlimpseBounds bounds, TickInfo info )
     {
-        double[] yTicks = ticks.getTickPositions( axis );
-        String[] yLabels = ticks.getTickLabels( axis, yTicks );
+        int width = bounds.getWidth( );
+        int height = bounds.getHeight( );
 
-        AxisUnitConverter converter = ticks.getAxisUnitConverter( );
-
-        // Tick marks
-        double iTick0 = getTickRightX( width, tickSize );
-        double iTick1 = getTickLeftX( width, tickSize );
-        int min = -1;
-        int max = yTicks.length;
-
-        // Tick marks
-        GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL2.GL_LINES );
-        try
-        {
-            for ( int i = 0; i < yTicks.length; i++ )
-            {
-                double jTick = converter.fromAxisUnits( yTicks[i] );
-
-                // don't draw ticks off the screen
-                if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
-                {
-                    max = i;
-                    break;
-                }
-                else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
-                {
-                    min = i;
-                    continue;
-                }
-                else
-                {
-                    if ( jTick == height ) jTick = height - 1;
-
-                    gl.glVertex2d( iTick0, jTick );
-                    gl.glVertex2d( iTick1, jTick );
-                }
-            }
-
-            if ( showMinorTicks )
-            {
-                double[] xMinor = ticks.getMinorTickPositions( yTicks );
-                iTick0 = getTickRightX( width, tickSize / 2 );
-                iTick1 = getTickLeftX( width, tickSize / 2 );
-
-                for ( int i = 0; i < xMinor.length; i++ )
-                {
-                    double jTick = converter.fromAxisUnits( xMinor[i] );
-
-                    gl.glVertex2d( iTick0, jTick );
-                    gl.glVertex2d( iTick1, jTick );
-                }
-            }
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
-
+        GL2 gl2 = gl.getGL2( );
+        
         if ( showTickLabels )
         {
+            AxisUnitConverter converter = ticks.getAxisUnitConverter( );
+
             // Tick labels
             GlimpseColor.setColor( textRenderer, tickLabelColor );
-            for ( int i = min + 1; i < max; i++ )
+            for ( int i = info.minIndex + 1; i < info.maxIndex; i++ )
             {
-                double yTick = yTicks[i];
-                String yLabel = yLabels[i];
+                double yTick = info.ticks[i];
+                String yLabel = info.labels[i];
                 Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
 
                 int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getHeight( ) );
@@ -146,9 +95,9 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
                 textRenderer.beginRendering( width, height );
                 try
                 {
-                    gl.glMatrixMode( GL2.GL_PROJECTION );
-                    gl.glTranslatef( iTickText, jTickText, 0 );
-                    gl.glRotatef( -90, 0, 0, 1.0f );
+                    gl2.glMatrixMode( GL2.GL_PROJECTION );
+                    gl2.glTranslatef( iTickText, jTickText, 0 );
+                    gl2.glRotatef( -90, 0, 0, 1.0f );
 
                     textRenderer.draw( yLabel, 0, 0 );
                 }

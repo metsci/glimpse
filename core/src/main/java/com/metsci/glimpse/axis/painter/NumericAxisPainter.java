@@ -32,7 +32,10 @@ import static com.metsci.glimpse.support.font.FontUtils.*;
 import java.awt.Font;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
@@ -89,6 +92,51 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         resetLabelColors( );
         resetTickColor( );
         initLineShader( );
+    }
+
+    protected class TickInfo
+    {
+        public double[] ticks;
+        public String[] labels;
+        public int minIndex;
+        public int maxIndex;
+    }
+
+    public TickInfo getTickInfo( Axis1D axis, GlimpseBounds bounds )
+    {
+        double[] tickValues = ticks.getTickPositions( axis );
+        String[] tickLabels = ticks.getTickLabels( axis, tickValues );
+
+        AxisUnitConverter converter = ticks.getAxisUnitConverter( );
+
+        // Tick marks
+        int min = -1;
+        int max = tickValues.length;
+
+        for ( int i = 0; i < tickValues.length; i++ )
+        {
+            double jTick = converter.fromAxisUnits( tickValues[i] );
+
+            // don't draw ticks off the screen
+            if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
+            {
+                max = i;
+                break;
+            }
+            else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
+            {
+                min = i;
+                continue;
+            }
+        }
+
+        TickInfo info = new TickInfo( );
+        info.ticks = tickValues;
+        info.labels = tickLabels;
+        info.minIndex = min;
+        info.maxIndex = max;
+
+        return info;
     }
 
     protected void initLineShader( )

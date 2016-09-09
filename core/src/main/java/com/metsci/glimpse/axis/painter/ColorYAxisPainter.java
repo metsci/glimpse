@@ -69,7 +69,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     public ColorYAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
-        
+
         this.pathLine = new LinePath( );
         this.pathTex = new LinePath( );
 
@@ -127,10 +127,13 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             sVbo.mapFloats( gl, 4 ).put( 0.0f ).put( 0.0f ).put( 1.0f ).put( 1.0f );
             sVbo.seal( gl );
         }
-        
+
         paintColorScale( context );
-        
-        paintTicks( gl, axis, bounds );
+
+        TickInfo info = getTickInfo( axis, bounds );
+
+        paintTicks( gl, axis, bounds, info );
+        paintTickLabels( gl, axis, bounds, info );
         paintAxisLabel( gl, axis, bounds );
         paintSelectionLine( gl, axis, bounds );
     }
@@ -156,7 +159,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             pathLine.lineTo( x2, 0.5f );
 
             pathTex.clear( );
-            
+
             pathTex.lineTo( x2, 0.5f );
             pathTex.lineTo( x1, 0.5f );
             pathTex.lineTo( x2, height );
@@ -198,7 +201,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             }
         }
     }
-    
+
     public float getColorBarMinX( int width )
     {
         return width - tickBufferSize - colorBarSize - 0.5f;

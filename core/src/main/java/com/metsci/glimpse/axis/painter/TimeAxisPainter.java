@@ -28,16 +28,13 @@ package com.metsci.glimpse.axis.painter;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
-
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -67,7 +64,6 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
     protected float currentTimeLineThickness;
 
     protected int hoverLabelOffset = 4;
-    protected int tickLineLength = 4;
 
     protected boolean fontSet = false;
     protected boolean tickColorSet = false;
@@ -101,11 +97,6 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
     public TimeAxisLabelHandler getLabelHandler( )
     {
         return this.handler;
-    }
-
-    public void setTickLineLength( int pixels )
-    {
-        this.tickLineLength = pixels;
     }
 
     public void setPixelsBetweenTicks( int pixels )
@@ -198,14 +189,14 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
         if ( newFont != null )
         {
@@ -213,5 +204,11 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
             textRenderer = new TextRenderer( newFont, antialias, false );
             newFont = null;
         }
+
+        if ( prog == null )
+        {
+            prog = new LineProgram( context.getGL( ).getGL2ES2( ) );
+        }
+
     }
 }
