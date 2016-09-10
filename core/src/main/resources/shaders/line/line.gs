@@ -46,33 +46,47 @@ void main( )
             if ( lengthAB_PX > 0.0 && mileageB_PX >= mileageA_PX )
             {
                 vec2 dirAB = deltaAB_PX / lengthAB_PX;
-                vec2 dirCB = -dirBC;
-                float dirAB_x_dirCB = dirAB.x*dirCB.y - dirAB.y*dirCB.x;
-                vec2 extrudeB = ( dirAB + dirCB ) / dirAB_x_dirCB;
+                vec2 normalAB = vec2( -dirAB.y, dirAB.x );
 
-                bool isLeftTurnABC = ( dirAB_x_dirCB < 0.0 );
-                if ( isLeftTurnABC )
+                vec2 deltaM = normalAB + normalBC;
+                float lengthM = length( deltaM );
+                if ( lengthM > 0.25 )
                 {
-                    // Join
-                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
+                    vec2 miterDir = deltaM / lengthM;
+                    float miterLength_PX = halfNormal_PX / dot( miterDir, normalBC );
+                    if ( dot( miterDir, dirAB ) < 0.0 )
+                    {
+                        // Join
+                        gl_Position = pxToNdc( posB_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
 
-                    // Below
-                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
+                        // Below
+                        gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
 
-                    // Above
-                    gl_Position = pxToNdc( posB_PX + halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
+                        // Above
+                        gl_Position = pxToNdc( posB_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+                    }
+                    else
+                    {
+                        // Join
+                        gl_Position = pxToNdc( posB_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+
+                        // Below
+                        gl_Position = pxToNdc( posB_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+
+                        // Above
+                        gl_Position = pxToNdc( posB_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+                    }
                 }
                 else
                 {
-                    // Join
-                    gl_Position = pxToNdc( posB_PX + halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
-
                     // Below
-                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*extrudeB, VIEWPORT_SIZE_PX );
+                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
 
                     // Above
@@ -95,43 +109,58 @@ void main( )
         // C
         {
             vec2 posD_PX = gl_in[ 3 ].gl_Position.xy;
-            vec2 deltaDC_PX = posC_PX - posD_PX;
-            float lengthDC_PX = length( deltaDC_PX );
+            vec2 deltaCD_PX = posD_PX - posC_PX;
+            float lengthCD_PX = length( deltaCD_PX );
             float mileageD_PX = vMileage_PX[ 3 ];
 
-            if ( lengthDC_PX > 0.0 && mileageD_PX >= mileageC_PX )
+            if ( lengthCD_PX > 0.0 && mileageD_PX >= mileageC_PX )
             {
-                vec2 dirDC = deltaDC_PX / lengthDC_PX;
-                float dirBC_x_dirDC = dirBC.x*dirDC.y - dirBC.y*dirDC.x;
-                vec2 extrudeC = ( dirBC + dirDC ) / dirBC_x_dirDC;
+                vec2 dirCD = deltaCD_PX / lengthCD_PX;
+                vec2 normalCD = vec2( -dirCD.y, dirCD.x );
 
-                bool isLeftTurnBCD = ( dirBC_x_dirDC < 0.0 );
-                if ( isLeftTurnBCD )
+                vec2 deltaM = normalBC + normalCD;
+                float lengthM = length( deltaM );
+                if ( lengthM > 0.25 )
+                {
+                    vec2 miterDir = deltaM / lengthM;
+                    float miterLength_PX = halfNormal_PX / dot( miterDir, normalBC );
+                    if ( dot( miterDir, dirBC ) < 0.0 )
+                    {
+                        // Below
+                        gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+
+                        // Above
+                        gl_Position = pxToNdc( posC_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+
+                        // Join
+                        gl_Position = pxToNdc( posC_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+                    }
+                    else
+                    {
+                        // Below
+                        gl_Position = pxToNdc( posC_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+
+                        // Above
+                        gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+
+                        // Join
+                        gl_Position = pxToNdc( posC_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        EmitVertex( );
+                    }
+                }
+                else
                 {
                     // Below
                     gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
 
                     // Above
-                    gl_Position = pxToNdc( posC_PX + halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
-
-                    // Join
-                    gl_Position = pxToNdc( posC_PX - halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
-                }
-                else
-                {
-                    // Below
-                    gl_Position = pxToNdc( posC_PX - halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
-
-                    // Above
                     gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
-                    EmitVertex( );
-
-                    // Join
-                    gl_Position = pxToNdc( posC_PX + halfNormal_PX*extrudeC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
                 }
             }
