@@ -34,7 +34,7 @@ void main( )
         vec2 normalBC = vec2( -dirBC.y, dirBC.x );
 
         //float halfFeather_PX = 0.5 * FEATHER_THICKNESS_PX;
-        float halfNormal_PX = 0.5*LINE_THICKNESS_PX;// + halfFeather_PX;
+        float normal_PX = 0.5*LINE_THICKNESS_PX;// + halfFeather_PX;
 
         // B
         {
@@ -48,60 +48,64 @@ void main( )
                 vec2 dirAB = deltaAB_PX / lengthAB_PX;
                 vec2 normalAB = vec2( -dirAB.y, dirAB.x );
 
-                vec2 deltaM = normalAB + normalBC;
-                float lengthM = length( deltaM );
-                if ( lengthM > 0.25 )
+                vec2 deltaJoin = normalAB + normalBC;
+                float lengthJoin = length( deltaJoin );
+                if ( lengthJoin > 0.0 )
                 {
-                    vec2 miterDir = deltaM / lengthM;
-                    float miterLength_PX = halfNormal_PX / dot( miterDir, normalBC );
-                    if ( dot( miterDir, dirAB ) < 0.0 )
+                    vec2 dirJoin = deltaJoin / lengthJoin;
+                    float miter_PX = normal_PX / dot( dirJoin, normalBC );
+                    float bevel_PX = normal_PX * dot( dirJoin, normalBC );
+                    float extrude_PX = ( lengthJoin > 0.25 ? miter_PX : bevel_PX );
+                    float intrude_PX = min( miter_PX, abs( lengthBC_PX / dot( dirJoin, dirBC ) ) );
+
+                    if ( dot( dirJoin, dirAB ) < 0.0 )
                     {
                         // Join
-                        gl_Position = pxToNdc( posB_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posB_PX - extrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Below
-                        gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posB_PX - normal_PX*normalBC, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Above
-                        gl_Position = pxToNdc( posB_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posB_PX + intrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
                     }
                     else
                     {
                         // Join
-                        gl_Position = pxToNdc( posB_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posB_PX + extrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Below
-                        gl_Position = pxToNdc( posB_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posB_PX - intrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Above
-                        gl_Position = pxToNdc( posB_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posB_PX + normal_PX*normalBC, VIEWPORT_SIZE_PX );
                         EmitVertex( );
                     }
                 }
                 else
                 {
                     // Below
-                    gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    gl_Position = pxToNdc( posB_PX - normal_PX*normalBC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
 
                     // Above
-                    gl_Position = pxToNdc( posB_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    gl_Position = pxToNdc( posB_PX + normal_PX*normalBC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
                 }
             }
             else
             {
                 // Below
-                gl_Position = pxToNdc( posB_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                gl_Position = pxToNdc( posB_PX - normal_PX*normalBC, VIEWPORT_SIZE_PX );
                 EmitVertex( );
 
                 // Above
-                gl_Position = pxToNdc( posB_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                gl_Position = pxToNdc( posB_PX + normal_PX*normalBC, VIEWPORT_SIZE_PX );
                 EmitVertex( );
             }
         }
@@ -118,60 +122,64 @@ void main( )
                 vec2 dirCD = deltaCD_PX / lengthCD_PX;
                 vec2 normalCD = vec2( -dirCD.y, dirCD.x );
 
-                vec2 deltaM = normalBC + normalCD;
-                float lengthM = length( deltaM );
-                if ( lengthM > 0.25 )
+                vec2 deltaJoin = normalBC + normalCD;
+                float lengthJoin = length( deltaJoin );
+                if ( lengthJoin > 0.0 )
                 {
-                    vec2 miterDir = deltaM / lengthM;
-                    float miterLength_PX = halfNormal_PX / dot( miterDir, normalBC );
-                    if ( dot( miterDir, dirBC ) < 0.0 )
+                    vec2 dirJoin = deltaJoin / lengthJoin;
+                    float miter_PX = normal_PX / dot( dirJoin, normalBC );
+                    float bevel_PX = normal_PX * dot( dirJoin, normalBC );
+                    float extrude_PX = ( lengthJoin > 0.25 ? miter_PX : bevel_PX );
+                    float intrude_PX = min( miter_PX, abs( lengthBC_PX / dot( dirJoin, dirBC ) ) );
+
+                    if ( dot( dirJoin, dirBC ) < 0.0 )
                     {
                         // Below
-                        gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posC_PX - normal_PX*normalBC, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Above
-                        gl_Position = pxToNdc( posC_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posC_PX + intrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Join
-                        gl_Position = pxToNdc( posC_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posC_PX - extrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
                     }
                     else
                     {
                         // Below
-                        gl_Position = pxToNdc( posC_PX - miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posC_PX - intrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Above
-                        gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posC_PX + normal_PX*normalBC, VIEWPORT_SIZE_PX );
                         EmitVertex( );
 
                         // Join
-                        gl_Position = pxToNdc( posC_PX + miterLength_PX*miterDir, VIEWPORT_SIZE_PX );
+                        gl_Position = pxToNdc( posC_PX + extrude_PX*dirJoin, VIEWPORT_SIZE_PX );
                         EmitVertex( );
                     }
                 }
                 else
                 {
                     // Below
-                    gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    gl_Position = pxToNdc( posC_PX - normal_PX*normalBC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
 
                     // Above
-                    gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                    gl_Position = pxToNdc( posC_PX + normal_PX*normalBC, VIEWPORT_SIZE_PX );
                     EmitVertex( );
                 }
             }
             else
             {
                 // Below
-                gl_Position = pxToNdc( posC_PX - halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                gl_Position = pxToNdc( posC_PX - normal_PX*normalBC, VIEWPORT_SIZE_PX );
                 EmitVertex( );
 
                 // Above
-                gl_Position = pxToNdc( posC_PX + halfNormal_PX*normalBC, VIEWPORT_SIZE_PX );
+                gl_Position = pxToNdc( posC_PX + normal_PX*normalBC, VIEWPORT_SIZE_PX );
                 EmitVertex( );
             }
         }
