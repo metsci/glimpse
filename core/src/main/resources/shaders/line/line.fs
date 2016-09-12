@@ -10,6 +10,8 @@ uniform int STIPPLE_PATTERN;
 // in vec2 gPosInQuad_PX;
 // in float gMileage_PX;
 // in float gQuadLength_PX;
+in vec4 gRgba;
+in float gFeather;
 
 out vec4 outRgba;
 
@@ -79,5 +81,6 @@ void main( )
     // float minAlpha = min( min( startAlpha, endAlpha ), min( normalAlpha, stippleAlpha ) );
     // outRgba.a = RGBA.a * clamp( minAlpha, 0.0, 1.0 );
 
-    outRgba = RGBA;
+    outRgba.rgb = gRgba.rgb;
+    outRgba.a = gRgba.a * gFeather;
 }
