@@ -68,12 +68,18 @@ void main( )
                 float bevelScale = dot( dirJoin, normalBC );
                 float miterScale = 1.0 / bevelScale;
 
-                // float innerMiter_PX = innerNormal_PX * miterScale;
-                // float outerMiter_PX = outerNormal_PX * miterScale;
-                //
-                // float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
-                // float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
-                //
+                float innerMiter_PX = innerNormal_PX * miterScale;
+                float outerMiter_PX = outerNormal_PX * miterScale;
+
+                float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
+                float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
+
+                float innerExtrude_PX = innerBevel_PX;
+                float outerExtrude_PX = outerBevel_PX;
+
+                float innerIntrude_PX = innerMiter_PX;
+                float outerIntrude_PX = outerMiter_PX;
+
                 // float innerExtrude_PX = ( lengthJoin > 0.25 ? miter_PX : bevel_PX );
                 //
                 // float innerIntrude_PX;
@@ -90,22 +96,32 @@ void main( )
                 //     outerIntrude_PX = abs( ( lengthBC_PX + feather_PX ) * intrudeScale );
                 // }
                 //
-                // if ( dot( dirJoin, dirAB ) < 0.0 )
-                // {
-                //     innerJoinB_PX = posB_PX - innerExtrude_PX*dirJoin;
-                //     outerJoinB_PX = posB_PX - outerExtrude_PX*dirJoin;
-                //
-                //     innerBelowB_PX = asdf;
-                //     outerBelowB_PX = asdf;
-                //
-                //     innerAboveB_PX = asdf;
-                //     outerAboveB_PX = asdf;
-                // }
-                // else
-                // {
-                //     innerJoinB_PX = asdf;
-                //     innerBelowB_PX = asdf;
-                // }
+                if ( dot( dirJoin, dirAB ) < 0.0 )
+                {
+                    innerJoinB_PX = posB_PX - innerExtrude_PX*dirJoin;
+                    outerJoinB_PX = posB_PX - outerExtrude_PX*dirJoin;
+
+                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                    innerBelowB_PX = posB_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    outerBelowB_PX = posB_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+
+                    innerAboveB_PX = posB_PX + innerIntrude_PX*dirJoin;
+                    outerAboveB_PX = posB_PX + outerIntrude_PX*dirJoin;
+                }
+                else
+                {
+                    innerJoinB_PX = posB_PX + innerExtrude_PX*dirJoin;
+                    outerJoinB_PX = posB_PX + outerExtrude_PX*dirJoin;
+
+                    innerBelowB_PX = posB_PX - innerIntrude_PX*dirJoin;
+                    outerBelowB_PX = posB_PX - outerIntrude_PX*dirJoin;
+
+                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                    innerAboveB_PX = posB_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    outerAboveB_PX = posB_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                }
             }
         }
 
@@ -137,7 +153,44 @@ void main( )
                 float bevelScale = dot( dirJoin, normalBC );
                 float miterScale = 1.0 / bevelScale;
 
-                // XXX
+                float innerMiter_PX = innerNormal_PX * miterScale;
+                float outerMiter_PX = outerNormal_PX * miterScale;
+
+                float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
+                float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
+
+                float innerExtrude_PX = innerBevel_PX;
+                float outerExtrude_PX = outerBevel_PX;
+
+                float innerIntrude_PX = innerMiter_PX;
+                float outerIntrude_PX = outerMiter_PX;
+
+                if ( dot( dirJoin, dirBC ) < 0.0 )
+                {
+                    innerJoinC_PX = posC_PX - innerExtrude_PX*dirJoin;
+                    outerJoinC_PX = posC_PX - outerExtrude_PX*dirJoin;
+
+                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                    innerBelowC_PX = posC_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    outerBelowC_PX = posC_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+
+                    innerAboveC_PX = posC_PX + innerIntrude_PX*dirJoin;
+                    outerAboveC_PX = posC_PX + outerIntrude_PX*dirJoin;
+                }
+                else
+                {
+                    innerJoinC_PX = posC_PX + innerExtrude_PX*dirJoin;
+                    outerJoinC_PX = posC_PX + outerExtrude_PX*dirJoin;
+
+                    innerBelowC_PX = posC_PX - innerIntrude_PX*dirJoin;
+                    outerBelowC_PX = posC_PX - outerIntrude_PX*dirJoin;
+
+                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                    innerAboveC_PX = posC_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    outerAboveC_PX = posC_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                }
             }
         }
 
@@ -171,29 +224,24 @@ void main( )
 
         // Feather below
         gRgba = vec4( 0.4, 0.5, 0.7, 0.5 );
+        gFeather = 1.0;
 
         gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
-        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
-        gFeather = 0.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
-        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerBelowB_PX, VIEWPORT_SIZE_PX );
-        gFeather = 0.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( innerBelowC_PX, VIEWPORT_SIZE_PX );
-        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerBelowC_PX, VIEWPORT_SIZE_PX );
-        gFeather = 0.0;
         EmitVertex( );
 
         EndPrimitive( );
@@ -201,29 +249,24 @@ void main( )
 
         // Feather above
         gRgba = vec4( 0.4, 0.5, 0.7, 0.5 );
+        gFeather = 1.0;
 
         gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
-        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
-        gFeather = 0.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
-        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerAboveC_PX, VIEWPORT_SIZE_PX );
-        gFeather = 0.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( innerAboveB_PX, VIEWPORT_SIZE_PX );
-        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerAboveB_PX, VIEWPORT_SIZE_PX );
-        gFeather = 0.0;
         EmitVertex( );
 
         EndPrimitive( );
