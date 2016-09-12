@@ -15,10 +15,7 @@ uniform float FEATHER_THICKNESS_PX;
 
 in float vMileage_PX[];
 
-// out vec2 gPosInQuad_PX;
 // out float gMileage_PX;
-// out float gQuadLength_PX;
-out vec4 gRgba;
 out float gFeather;
 
 void main( )
@@ -196,7 +193,8 @@ void main( )
 
 
         // Line interior
-        gRgba = vec4( 0.7, 0.0, 0.0, 0.5 );
+        //
+
         gFeather = 1.0;
 
         gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
@@ -221,36 +219,43 @@ void main( )
 
 
         // Feather below
-        gRgba = vec4( 0.4, 0.5, 0.7, 0.5 );
-        gFeather = 1.0;
+        //
 
         if ( isLeftTurnB )
         {
             gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
+            gFeather = 1.0;
             EmitVertex( );
 
             gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
+            gFeather = 0.0;
             EmitVertex( );
         }
 
         gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
+        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerBelowB_PX, VIEWPORT_SIZE_PX );
+        gFeather = 0.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( innerBelowC_PX, VIEWPORT_SIZE_PX );
+        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerBelowC_PX, VIEWPORT_SIZE_PX );
+        gFeather = 0.0;
         EmitVertex( );
 
         if ( isLeftTurnC )
         {
             gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
+            gFeather = 1.0;
             EmitVertex( );
 
             gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
+            gFeather = 0.0;
             EmitVertex( );
         }
 
@@ -258,36 +263,43 @@ void main( )
 
 
         // Feather above
-        gRgba = vec4( 0.4, 0.5, 0.7, 0.5 );
-        gFeather = 1.0;
+        //
 
         if ( !isLeftTurnC )
         {
             gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
+            gFeather = 1.0;
             EmitVertex( );
 
             gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
+            gFeather = 0.0;
             EmitVertex( );
         }
 
         gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
+        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerAboveC_PX, VIEWPORT_SIZE_PX );
+        gFeather = 0.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( innerAboveB_PX, VIEWPORT_SIZE_PX );
+        gFeather = 1.0;
         EmitVertex( );
 
         gl_Position = pxToNdc( outerAboveB_PX, VIEWPORT_SIZE_PX );
+        gFeather = 0.0;
         EmitVertex( );
 
         if ( !isLeftTurnB )
         {
             gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
+            gFeather = 1.0;
             EmitVertex( );
 
             gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
+            gFeather = 0.0;
             EmitVertex( );
         }
 
