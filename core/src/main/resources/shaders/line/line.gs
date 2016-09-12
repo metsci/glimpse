@@ -79,23 +79,10 @@ void main( )
                 float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
                 float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
-                float innerIntrude_PX = innerMiter_PX;
-                float outerIntrude_PX = outerMiter_PX;
+                float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
+                float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
+                float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
-                // float innerIntrude_PX;
-                // float outerIntrude_PX;
-                // if ( )
-                // {
-                //     innerIntrude_PX = innerMiter_PX;
-                //     outerIntrude_PX = outerMiter_PX;
-                // }
-                // else
-                // {
-                //     float intrudeScale = 1.0 / dot( dirJoin, dirBC );
-                //     innerIntrude_PX = abs( ( lengthBC_PX - feather_PX ) * intrudeScale );
-                //     outerIntrude_PX = abs( ( lengthBC_PX + feather_PX ) * intrudeScale );
-                // }
-                //
                 if ( dot( dirJoin, dirAB ) < 0.0 )
                 {
                     isLeftTurnB = true;
@@ -168,8 +155,9 @@ void main( )
                 float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
                 float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
-                float innerIntrude_PX = innerMiter_PX;
-                float outerIntrude_PX = outerMiter_PX;
+                float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
+                float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
+                float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
                 if ( dot( dirJoin, dirBC ) < 0.0 )
                 {
