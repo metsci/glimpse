@@ -28,6 +28,7 @@ package com.metsci.glimpse.axis.painter;
 
 import static javax.media.opengl.GL.*;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
@@ -42,7 +43,7 @@ import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.line.util.MappableBuffer;
-import com.metsci.glimpse.support.shader.ColorTextureProgram1D;
+import com.metsci.glimpse.support.shader.ColorTexture1DProgram;
 
 /**
  * A horizontal (x) axis with a color bar and labeled ticks along the bottom.
@@ -52,7 +53,7 @@ import com.metsci.glimpse.support.shader.ColorTextureProgram1D;
  */
 public class ColorXAxisPainter extends NumericXAxisPainter
 {
-    protected ColorTextureProgram1D progTex;
+    protected ColorTexture1DProgram progTex;
     protected LinePath pathTex;
 
     protected LineProgram progLine;
@@ -103,36 +104,38 @@ public class ColorXAxisPainter extends NumericXAxisPainter
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        updateTextRenderer( );
-        if ( textRenderer == null ) return;
-
         GL3 gl = context.getGL( ).getGL3( );
         Axis1D axis = getAxis1D( context );
         GlimpseBounds bounds = getBounds( context );
 
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
+        updateTextRenderer( );
+        if ( textRenderer == null ) return;
+
+        initShaderPrograms( gl );
+
+        paintColorScale( context );
+        paintTicks( gl, axis, bounds );
+        paintAxisLabel( gl, axis, bounds );
+        paintSelectionLine( gl, axis, bounds );
+    }
+
+    @Override
+    protected void initShaderPrograms( GL gl )
+    {
+        super.initShaderPrograms( gl );
 
         if ( progTex == null )
         {
-            progLine = new LineProgram( gl );
+            progLine = new LineProgram( gl.getGL3( ) );
 
-            progTex = new ColorTextureProgram1D( gl );
-            progTex.setTexture( gl, 0 );
+            progTex = new ColorTexture1DProgram( gl.getGL3( ) );
+            progTex.setTexture( gl.getGL3( ), 0 );
 
             // although the vertex coordinates may change, the texture coordinates
             // stay constant, so just set them up once here
             sVbo.mapFloats( gl, 4 ).put( 0.0f ).put( 0.0f ).put( 1.0f ).put( 1.0f );
             sVbo.seal( gl );
         }
-
-        paintColorScale( context );
-
-        paintTicks( gl, axis, bounds );
-        paintAxisLabel( gl, axis, bounds );
-        paintSelectionLine( gl, axis, bounds );
     }
 
     protected void paintColorScale( GlimpseContext context )
@@ -156,7 +159,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             pathLine.lineTo( 0.5f, y2 );
 
             pathTex.clear( );
-            
+
             pathTex.lineTo( 0.5f, y2 );
             pathTex.lineTo( 0.5f, y1 );
             pathTex.lineTo( width, y2 );

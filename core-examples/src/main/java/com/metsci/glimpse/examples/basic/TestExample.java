@@ -1,15 +1,18 @@
 package com.metsci.glimpse.examples.basic;
 
 import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.axis.painter.TimeXAxisPainter;
-import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
+import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.axis.tagged.Tag;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.axis.tagged.painter.TaggedColorXAxisPainter;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
+import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.EmptyPlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.util.units.time.TimeStamp;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.colormap.ColorGradients;
 
 public class TestExample implements GlimpseLayoutProvider
 {
@@ -56,6 +59,24 @@ public class TestExample implements GlimpseLayoutProvider
         layoutY.addPainter( new NumericRotatedYAxisPainter( new GridAxisLabelHandler( ) ) );
         */
 
+        GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
+
+        TaggedColorXAxisPainter painter = new TaggedColorXAxisPainter( new GridAxisLabelHandler( ) );
+        
+        TaggedAxis1D axis = new TaggedAxis1D( );
+        axis.addTag( "T1", 0.0 );
+        axis.addTag( "T2", 1.0 );
+        axis.addTag( "T3", 0.0 ).setAttribute( Tag.TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
+        layoutX.setAxis( axis );
+
+        ColorTexture1D texture = new ColorTexture1D( 1024 );
+        texture.setColorGradient( ColorGradients.prism );
+        painter.setColorScale( texture );
+
+        AxisUtil.attachHorizontalMouseListener( layoutX );
+        plot.addLayout( layoutX );
+        layoutX.addPainter( painter );
+
         /*
         GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
         AxisUtil.attachHorizontalMouseListener( layoutX );
@@ -65,11 +86,13 @@ public class TestExample implements GlimpseLayoutProvider
         layoutX.addPainter( painter );
         */
 
+        /*
         GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
         AxisUtil.attachVerticalMouseListener( layoutY );
         plot.addLayout( layoutY );
         TimeYAxisPainter painter = new TimeYAxisPainter( new Epoch( TimeStamp.currentTime( ) ) );
         layoutY.addPainter( painter );
+        */
 
         /*
         plot.addPainter( new NumericXYAxisPainter( ) );

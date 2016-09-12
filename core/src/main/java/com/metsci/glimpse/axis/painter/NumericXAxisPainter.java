@@ -66,14 +66,19 @@ public class NumericXAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
-
+        initShaderPrograms( gl );
+        
         paintTicks( gl, axis, bounds );
         paintAxisLabel( gl, axis, bounds );
         paintSelectionLine( gl, axis, bounds );
+    }
+    
+    protected void initShaderPrograms( GL gl )
+    {
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl.getGL3( ) );
+        }
     }
 
     protected void paintTicks( GL gl, Axis1D axis, GlimpseBounds bounds )

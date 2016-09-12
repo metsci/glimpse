@@ -42,7 +42,7 @@ import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.line.util.MappableBuffer;
-import com.metsci.glimpse.support.shader.ColorTextureProgram1D;
+import com.metsci.glimpse.support.shader.ColorTexture1DProgram;
 
 /**
  * A vertical (y) axis with a color bar and labeled ticks along the right hand side.
@@ -52,7 +52,7 @@ import com.metsci.glimpse.support.shader.ColorTextureProgram1D;
  */
 public class ColorYAxisPainter extends NumericYAxisPainter
 {
-    protected ColorTextureProgram1D progTex;
+    protected ColorTexture1DProgram progTex;
     protected LinePath pathTex;
 
     protected LineProgram progLine;
@@ -119,7 +119,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         {
             progLine = new LineProgram( gl );
 
-            progTex = new ColorTextureProgram1D( gl );
+            progTex = new ColorTexture1DProgram( gl );
             progTex.setTexture( gl, 0 );
 
             // although the vertex coordinates may change, the texture coordinates
