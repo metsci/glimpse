@@ -88,31 +88,31 @@ public class TimeXAxisPainter extends TimeAxisPainter
         List<TimeStamp> tickTimes = handler.tickTimes( axis, width );
         double tickInterval = handler.tickInterval( tickTimes );
 
-        prog.begin( gl3 );
+        progLine.begin( gl3 );
         try
         {
-            path.clear( );
+            pathLine.clear( );
             for ( TimeStamp t : tickTimes )
             {
                 float x = ( float ) fromTimeStamp( t );
 
-                path.moveTo( x, height );
-                path.lineTo( x, height - tickSize );
+                pathLine.moveTo( x, height );
+                pathLine.lineTo( x, height - tickSize );
             }
 
             style.thickness_PX = tickLineWidth;
             style.rgba = tickColor;
 
-            prog.setViewport( gl3, bounds );
-            prog.setOrtho( gl3, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
+            progLine.setViewport( gl3, bounds );
+            progLine.setOrtho( gl3, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
             
-            prog.draw( gl3, style, path );
+            progLine.draw( gl3, style, pathLine );
 
             if ( showCurrentTimeLabel ) drawCurrentTimeTick( gl3, axis, width, height );
         }
         finally
         {
-            prog.end( gl3 );
+            progLine.end( gl3 );
         }
 
         GlimpseColor.setColor( textRenderer, textColor );
@@ -229,14 +229,14 @@ public class TimeXAxisPainter extends TimeAxisPainter
         int pixelTime = axis.valueToScreenPixel( axisTime );
 
         {
-            path.clear( );
-            path.moveTo( axisTime, height );
-            path.lineTo( axisTime, 0 );
+            pathLine.clear( );
+            pathLine.moveTo( axisTime, height );
+            pathLine.lineTo( axisTime, 0 );
 
             style.thickness_PX = currentTimeLineThickness;
             style.rgba = currentTimeTickColor;
 
-            prog.draw( gl3, style, path );
+            progLine.draw( gl3, style, pathLine );
         }
 
         GlimpseColor.setColor( textRenderer, currentTimeTextColor );

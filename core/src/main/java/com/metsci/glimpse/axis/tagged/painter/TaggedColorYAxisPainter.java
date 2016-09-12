@@ -225,22 +225,22 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         tagStyle.rgba = color;
         tagStyle.thickness_PX = tagPointerOutlineWidth;
 
-        pathLine.clear( );
-        pathLine.moveTo( xMin, y );
-        pathLine.lineTo( xMid, y + tagHalfWidth );
-        pathLine.lineTo( xMax, y + tagHalfWidth );
-        pathLine.lineTo( xMax, y - tagHalfWidth );
-        pathLine.lineTo( xMid, y - tagHalfWidth );
-        pathLine.lineTo( xMin, y );
+        pathOutline.clear( );
+        pathOutline.moveTo( xMin, y );
+        pathOutline.lineTo( xMid, y + tagHalfWidth );
+        pathOutline.lineTo( xMax, y + tagHalfWidth );
+        pathOutline.lineTo( xMax, y - tagHalfWidth );
+        pathOutline.lineTo( xMid, y - tagHalfWidth );
+        pathOutline.lineTo( xMin, y );
 
-        progLine.begin( gl3 );
+        progOutline.begin( gl3 );
         try
         {
-            progLine.draw( gl3, tagStyle, pathLine );
+            progOutline.draw( gl3, tagStyle, pathOutline );
         }
         finally
         {
-            progLine.end( gl3 );
+            progOutline.end( gl3 );
         }
     }
 

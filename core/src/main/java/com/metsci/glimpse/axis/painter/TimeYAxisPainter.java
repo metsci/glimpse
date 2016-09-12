@@ -90,29 +90,29 @@ public class TimeYAxisPainter extends TimeAxisPainter
         List<TimeStamp> tickTimes = handler.tickTimes( axis, height );
         double tickInterval = handler.tickInterval( tickTimes );
 
-        prog.begin( gl3 );
+        progLine.begin( gl3 );
         try
         {
-            path.clear( );
+            pathLine.clear( );
             for ( TimeStamp t : tickTimes )
             {
                 float y = ( float ) fromTimeStamp( t );
 
-                path.moveTo( width, y );
-                path.lineTo( width - tickSize, y );
+                pathLine.moveTo( width, y );
+                pathLine.lineTo( width - tickSize, y );
             }
 
             style.thickness_PX = tickLineWidth;
             style.rgba = tickColor;
 
-            prog.setViewport( gl3, bounds );
-            prog.setOrtho( gl3, -0.5f, width - 0.5f, ( float ) axis.getMin( ), ( float ) axis.getMax( ) );
+            progLine.setViewport( gl3, bounds );
+            progLine.setOrtho( gl3, -0.5f, width - 0.5f, ( float ) axis.getMin( ), ( float ) axis.getMax( ) );
             
-            prog.draw( gl3, style, path );
+            progLine.draw( gl3, style, pathLine );
         }
         finally
         {
-            prog.end( gl3 );
+            progLine.end( gl3 );
         }
 
         GlimpseColor.setColor( textRenderer, textColor );

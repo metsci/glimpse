@@ -75,9 +75,9 @@ public class NumericXAxisPainter extends NumericAxisPainter
     
     protected void initShaderPrograms( GL gl )
     {
-        if ( prog == null )
+        if ( progLine == null )
         {
-            prog = new LineProgram( gl.getGL3( ) );
+            progLine = new LineProgram( gl.getGL3( ) );
         }
     }
 
@@ -98,10 +98,10 @@ public class NumericXAxisPainter extends NumericAxisPainter
         double jTick0 = getTickTopY( height, tickSize );
         double jTick1 = getTickBottomY( height, tickSize );
 
-        prog.begin( gl2es2 );
+        progLine.begin( gl2es2 );
         try
         {
-            path.clear( );
+            pathLine.clear( );
             style.thickness_PX = tickLineWidth;
             style.rgba = tickColor;
 
@@ -121,8 +121,8 @@ public class NumericXAxisPainter extends NumericAxisPainter
                     break;
                 }
 
-                path.moveTo( ( float ) iTick, ( float ) jTick0 );
-                path.lineTo( ( float ) iTick, ( float ) jTick1 );
+                pathLine.moveTo( ( float ) iTick, ( float ) jTick0 );
+                pathLine.lineTo( ( float ) iTick, ( float ) jTick1 );
             }
 
             if ( showMinorTicks )
@@ -135,19 +135,19 @@ public class NumericXAxisPainter extends NumericAxisPainter
                 {
                     double iTick = converter.fromAxisUnits( xMinor[i] );
 
-                    path.moveTo( ( float ) iTick, ( float ) jTick0 );
-                    path.lineTo( ( float ) iTick, ( float ) jTick1 );
+                    pathLine.moveTo( ( float ) iTick, ( float ) jTick0 );
+                    pathLine.lineTo( ( float ) iTick, ( float ) jTick1 );
                 }
             }
 
-            prog.setViewport( gl2es2, bounds );
-            prog.setOrtho( gl2es2, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
+            progLine.setViewport( gl2es2, bounds );
+            progLine.setOrtho( gl2es2, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
 
-            prog.draw( gl2es2, style, path, 1.0 );
+            progLine.draw( gl2es2, style, pathLine, 1.0 );
         }
         finally
         {
-            prog.end( gl2es2 );
+            progLine.end( gl2es2 );
         }
 
         if ( showTickLabels )
@@ -230,21 +230,21 @@ public class NumericXAxisPainter extends NumericAxisPainter
             int height = bounds.getHeight( );
             float x0 = ( float ) axis.getSelectionCenter( );
 
-            prog.begin( gl2es2 );
+            progLine.begin( gl2es2 );
             try
             {
-                path.clear( );
+                pathLine.clear( );
                 style.thickness_PX = markerWidth;
                 style.rgba = tickColor;
 
-                path.moveTo( x0, 0 );
-                path.lineTo( x0, height );
+                pathLine.moveTo( x0, 0 );
+                pathLine.lineTo( x0, height );
 
-                prog.draw( gl2es2, style, path, 1.0 );
+                progLine.draw( gl2es2, style, pathLine, 1.0 );
             }
             finally
             {
-                prog.end( gl2es2 );
+                progLine.end( gl2es2 );
             }
         }
     }

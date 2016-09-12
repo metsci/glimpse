@@ -82,7 +82,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         this.tickBufferSize = 10;
 
-        this.tagXyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 2 );
+        this.tagXyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
 
         this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
 
@@ -223,22 +223,25 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         tagStyle.rgba = color;
         tagStyle.thickness_PX = tagPointerOutlineWidth;
 
-        pathLine.clear( );
-        pathLine.moveTo( x, yMin );
-        pathLine.lineTo( x + tagHalfWidth, yMid );
-        pathLine.lineTo( x + tagHalfWidth, yMax );
-        pathLine.lineTo( x - tagHalfWidth, yMax );
-        pathLine.lineTo( x - tagHalfWidth, yMid );
-        pathLine.lineTo( x, yMin );
+        pathOutline.clear( );
+        pathOutline.moveTo( x, yMin );
+        pathOutline.lineTo( x + tagHalfWidth, yMid );
+        pathOutline.lineTo( x + tagHalfWidth, yMax );
+        pathOutline.lineTo( x - tagHalfWidth, yMax );
+        pathOutline.lineTo( x - tagHalfWidth, yMid );
+        pathOutline.lineTo( x, yMin );
 
-        progLine.begin( gl3 );
+        progOutline.begin( gl3 );
         try
         {
-            progLine.draw( gl3, tagStyle, pathLine );
+            progOutline.setPixelOrtho( gl3, bounds );
+            progOutline.setViewport( gl3, bounds );
+            
+            progOutline.draw( gl3, tagStyle, pathOutline );
         }
         finally
         {
-            progLine.end( gl3 );
+            progOutline.end( gl3 );
         }
     }
 

@@ -56,8 +56,8 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     protected ColorTexture1DProgram progTex;
     protected LinePath pathTex;
 
-    protected LineProgram progLine;
-    protected LinePath pathLine;
+    protected LineProgram progOutline;
+    protected LinePath pathOutline;
 
     protected LineStyle style;
 
@@ -71,7 +71,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     {
         super( ticks );
 
-        this.pathLine = new LinePath( );
+        this.pathOutline = new LinePath( );
         this.pathTex = new LinePath( );
 
         this.sVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1 );
@@ -127,7 +127,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
 
         if ( progTex == null )
         {
-            progLine = new LineProgram( gl.getGL3( ) );
+            progOutline = new LineProgram( gl.getGL3( ) );
 
             progTex = new ColorTexture1DProgram( gl.getGL3( ) );
             progTex.setTexture( gl.getGL3( ), 0 );
@@ -152,12 +152,12 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             float x1 = getColorBarMinX( width );
             float x2 = getColorBarMaxX( width );
 
-            pathLine.clear( );
-            pathLine.lineTo( x2, 0.5f );
-            pathLine.lineTo( x1, 0.5f );
-            pathLine.lineTo( x1, height );
-            pathLine.lineTo( x2, height );
-            pathLine.lineTo( x2, 0.5f );
+            pathOutline.clear( );
+            pathOutline.lineTo( x2, 0.5f );
+            pathOutline.lineTo( x1, 0.5f );
+            pathOutline.lineTo( x1, height );
+            pathOutline.lineTo( x2, height );
+            pathOutline.lineTo( x2, 0.5f );
 
             pathTex.clear( );
 
@@ -183,17 +183,17 @@ public class ColorYAxisPainter extends NumericYAxisPainter
                 }
 
                 // draw outline box
-                progLine.begin( gl );
+                progOutline.begin( gl );
                 try
                 {
-                    progLine.setPixelOrtho( gl, bounds );
-                    progLine.setViewport( gl, bounds );
+                    progOutline.setPixelOrtho( gl, bounds );
+                    progOutline.setViewport( gl, bounds );
 
-                    progLine.draw( gl, style, pathLine );
+                    progOutline.draw( gl, style, pathOutline );
                 }
                 finally
                 {
-                    progLine.end( gl );
+                    progOutline.end( gl );
                 }
             }
             finally

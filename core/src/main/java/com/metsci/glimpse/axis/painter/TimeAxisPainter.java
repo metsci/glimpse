@@ -205,9 +205,9 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
             newFont = null;
         }
 
-        if ( prog == null )
+        if ( progLine == null )
         {
-            prog = new LineProgram( context.getGL( ).getGL2ES2( ) );
+            progLine = new LineProgram( context.getGL( ).getGL2ES2( ) );
         }
 
     }

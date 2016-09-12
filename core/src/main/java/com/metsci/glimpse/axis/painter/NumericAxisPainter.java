@@ -81,9 +81,9 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
 
-    protected LinePath path;
+    protected LinePath pathLine;
     protected LineStyle style;
-    protected LineProgram prog;
+    protected LineProgram progLine;
 
     public NumericAxisPainter( AxisLabelHandler ticks )
     {
@@ -141,13 +141,13 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
 
     protected void initLineShader( )
     {
-        this.path = new LinePath( );
+        this.pathLine = new LinePath( );
 
         this.style = new LineStyle( );
         style.feather_PX = 0;
         this.style.stippleEnable = false;
 
-        this.prog = null;
+        this.progLine = null;
     }
 
     public void setAxisLabel( String label )
