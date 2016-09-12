@@ -51,6 +51,7 @@ void main( )
         vec2 outerAboveB_PX = posB_PX + outerNormal_PX*normalBC - feather_PX*dirBC;
         vec2 innerJoinB_PX = innerAboveB_PX;
         vec2 outerJoinB_PX = outerAboveB_PX;
+        bool isLeftTurnB = true;
 
         vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
         vec2 deltaAB_PX = posB_PX - posA_PX;
@@ -98,6 +99,8 @@ void main( )
                 //
                 if ( dot( dirJoin, dirAB ) < 0.0 )
                 {
+                    isLeftTurnB = true;
+
                     innerJoinB_PX = posB_PX - innerExtrude_PX*dirJoin;
                     outerJoinB_PX = posB_PX - outerExtrude_PX*dirJoin;
 
@@ -111,6 +114,8 @@ void main( )
                 }
                 else
                 {
+                    isLeftTurnB = false;
+
                     innerJoinB_PX = posB_PX + innerExtrude_PX*dirJoin;
                     outerJoinB_PX = posB_PX + outerExtrude_PX*dirJoin;
 
@@ -136,6 +141,7 @@ void main( )
         vec2 outerAboveC_PX = posC_PX + outerNormal_PX*normalBC + feather_PX*dirBC;
         vec2 innerJoinC_PX = innerBelowC_PX;
         vec2 outerJoinC_PX = outerBelowC_PX;
+        bool isLeftTurnC = false;
 
         vec2 posD_PX = gl_in[ 3 ].gl_Position.xy;
         vec2 deltaCD_PX = posD_PX - posC_PX;
@@ -167,6 +173,8 @@ void main( )
 
                 if ( dot( dirJoin, dirBC ) < 0.0 )
                 {
+                    isLeftTurnC = true;
+
                     innerJoinC_PX = posC_PX - innerExtrude_PX*dirJoin;
                     outerJoinC_PX = posC_PX - outerExtrude_PX*dirJoin;
 
@@ -180,6 +188,8 @@ void main( )
                 }
                 else
                 {
+                    isLeftTurnC = false;
+
                     innerJoinC_PX = posC_PX + innerExtrude_PX*dirJoin;
                     outerJoinC_PX = posC_PX + outerExtrude_PX*dirJoin;
 
@@ -226,11 +236,14 @@ void main( )
         gRgba = vec4( 0.4, 0.5, 0.7, 0.5 );
         gFeather = 1.0;
 
-        gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
-        EmitVertex( );
+        if ( isLeftTurnB )
+        {
+            gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
 
-        gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
-        EmitVertex( );
+            gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
+        }
 
         gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
         EmitVertex( );
@@ -244,6 +257,15 @@ void main( )
         gl_Position = pxToNdc( outerBelowC_PX, VIEWPORT_SIZE_PX );
         EmitVertex( );
 
+        if ( isLeftTurnC )
+        {
+            gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
+
+            gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
+        }
+
         EndPrimitive( );
 
 
@@ -251,11 +273,14 @@ void main( )
         gRgba = vec4( 0.4, 0.5, 0.7, 0.5 );
         gFeather = 1.0;
 
-        gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
-        EmitVertex( );
+        if ( !isLeftTurnC )
+        {
+            gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
 
-        gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
-        EmitVertex( );
+            gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
+        }
 
         gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
         EmitVertex( );
@@ -268,6 +293,15 @@ void main( )
 
         gl_Position = pxToNdc( outerAboveB_PX, VIEWPORT_SIZE_PX );
         EmitVertex( );
+
+        if ( !isLeftTurnB )
+        {
+            gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
+
+            gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
+            EmitVertex( );
+        }
 
         EndPrimitive( );
     }
