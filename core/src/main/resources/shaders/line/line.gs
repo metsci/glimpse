@@ -75,14 +75,13 @@ void main( )
                 float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
                 float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
-                float innerExtrude_PX = innerBevel_PX;
-                float outerExtrude_PX = outerBevel_PX;
+                bool useMiter = ( lengthJoin > 0.25 );
+                float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
+                float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
                 float innerIntrude_PX = innerMiter_PX;
                 float outerIntrude_PX = outerMiter_PX;
 
-                // float innerExtrude_PX = ( lengthJoin > 0.25 ? miter_PX : bevel_PX );
-                //
                 // float innerIntrude_PX;
                 // float outerIntrude_PX;
                 // if ( )
@@ -165,8 +164,9 @@ void main( )
                 float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
                 float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
-                float innerExtrude_PX = innerBevel_PX;
-                float outerExtrude_PX = outerBevel_PX;
+                bool useMiter = ( lengthJoin > 0.25 );
+                float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
+                float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
                 float innerIntrude_PX = innerMiter_PX;
                 float outerIntrude_PX = outerMiter_PX;
