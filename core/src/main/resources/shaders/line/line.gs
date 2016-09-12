@@ -60,7 +60,7 @@ void main( )
             vec2 normalAB = vec2( -dirAB.y, dirAB.x );
             vec2 deltaJoin = normalAB + normalBC;
             float lengthJoin = length( deltaJoin );
-            if ( lengthJoin > 0.0 )
+            if ( lengthJoin > 0.01 )
             {
                 vec2 dirJoin = deltaJoin / lengthJoin;
                 float bevelScale = dot( dirJoin, normalBC );
@@ -136,7 +136,7 @@ void main( )
             vec2 normalCD = vec2( -dirCD.y, dirCD.x );
             vec2 deltaJoin = normalBC + normalCD;
             float lengthJoin = length( deltaJoin );
-            if ( lengthJoin > 0.0 )
+            if ( lengthJoin > 0.01 )
             {
                 vec2 dirJoin = deltaJoin / lengthJoin;
                 float bevelScale = dot( dirJoin, normalBC );
