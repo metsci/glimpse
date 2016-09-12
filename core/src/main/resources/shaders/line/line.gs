@@ -44,12 +44,11 @@ void main( )
         // B
         //
 
+        // Start with joinless defaults, and overwrite with joined values below
         vec2 innerBelowB_PX = posB_PX - innerNormal_PX*normalBC + feather_PX*dirBC;
         vec2 outerBelowB_PX = posB_PX - outerNormal_PX*normalBC - feather_PX*dirBC;
-
         vec2 innerAboveB_PX = posB_PX + innerNormal_PX*normalBC + feather_PX*dirBC;
         vec2 outerAboveB_PX = posB_PX + outerNormal_PX*normalBC - feather_PX*dirBC;
-
         vec2 innerJoinB_PX = innerAboveB_PX;
         vec2 outerJoinB_PX = outerAboveB_PX;
 
@@ -57,14 +56,12 @@ void main( )
         vec2 deltaAB_PX = posB_PX - posA_PX;
         float lengthAB_PX = length( deltaAB_PX );
         float mileageA_PX = vMileage_PX[ 0 ];
-
         if ( lengthAB_PX > 0.0 && mileageB_PX >= mileageA_PX )
         {
             vec2 dirAB = deltaAB_PX / lengthAB_PX;
             vec2 normalAB = vec2( -dirAB.y, dirAB.x );
             vec2 deltaJoin = normalAB + normalBC;
             float lengthJoin = length( deltaJoin );
-
             if ( lengthJoin > 0.0 )
             {
                 vec2 dirJoin = deltaJoin / lengthJoin;
@@ -116,12 +113,11 @@ void main( )
         // C
         //
 
+        // Start with joinless defaults, and overwrite with joined values below
         vec2 innerBelowC_PX = posC_PX - innerNormal_PX*normalBC - feather_PX*dirBC;
         vec2 outerBelowC_PX = posC_PX - outerNormal_PX*normalBC + feather_PX*dirBC;
-
         vec2 innerAboveC_PX = posC_PX + innerNormal_PX*normalBC - feather_PX*dirBC;
         vec2 outerAboveC_PX = posC_PX + outerNormal_PX*normalBC + feather_PX*dirBC;
-
         vec2 innerJoinC_PX = innerBelowC_PX;
         vec2 outerJoinC_PX = outerBelowC_PX;
 
@@ -129,14 +125,12 @@ void main( )
         vec2 deltaCD_PX = posD_PX - posC_PX;
         float lengthCD_PX = length( deltaCD_PX );
         float mileageD_PX = vMileage_PX[ 3 ];
-
         if ( lengthCD_PX > 0.0 && mileageD_PX >= mileageC_PX )
         {
             vec2 dirCD = deltaCD_PX / lengthCD_PX;
             vec2 normalCD = vec2( -dirCD.y, dirCD.x );
             vec2 deltaJoin = normalBC + normalCD;
             float lengthJoin = length( deltaJoin );
-
             if ( lengthJoin > 0.0 )
             {
                 vec2 dirJoin = deltaJoin / lengthJoin;
