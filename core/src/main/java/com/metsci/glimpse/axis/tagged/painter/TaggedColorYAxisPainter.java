@@ -26,7 +26,13 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import javax.media.opengl.GL2;
+import static javax.media.opengl.GL.*;
+
+import java.nio.FloatBuffer;
+import java.util.Arrays;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.ColorYAxisPainter;
@@ -36,8 +42,12 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.FlatColorProgram;
 
 /**
  * A vertical (y) axis painter which displays positions of tags on
@@ -54,9 +64,13 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
     protected static final int DEFAULT_TAG_HEIGHT = 15;
     protected static final int DEFAULT_TAG_HALFBASE = 5;
 
-    protected float[] tagColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f );
+    protected float[] tagColor;
     protected boolean tagColorSet = false;
 
+    protected FlatColorProgram flatColorProg;
+    protected MappableBuffer tagXyVbo;
+    protected LineStyle tagStyle;
+    
     protected int tagHalfWidth = DEFAULT_TAG_HALFBASE;
     protected int tagHeight = DEFAULT_TAG_HEIGHT;
     protected int tagPointerHeight = DEFAULT_TAG_POINTER_HEIGHT;
@@ -67,11 +81,25 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         super( ticks );
 
         this.tickBufferSize = 10;
+
+        this.tagXyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 2 );
+
+        this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
+        
+        this.tagStyle = new LineStyle( );
+        this.tagStyle.stippleEnable = false;
+        this.tagStyle.feather_PX = 0.0f;
     }
 
     public void setTagColor( float[] color )
     {
-        this.tagColor = color;
+        this.setTagColor0( color );
+        this.tagColorSet = true;
+    }
+
+    protected void setTagColor0( float[] color )
+    {
+        this.tagColor = Arrays.copyOf( color, 4 );
     }
 
     public void setTagHalfWidth( int halfWidth )
@@ -102,55 +130,53 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis1D axis = getAxis1D( context );
+        GlimpseBounds bounds = getBounds( context );
+
         updateTextRenderer( );
         if ( textRenderer == null ) return;
+
+        TickInfo info = getTickInfo( axis, bounds );
+        
+        initShaderPrograms( gl );
+        paintColorScale( context );
+        paintTicks( gl, axis, bounds, info );
+        paintTickLabels( gl, axis, bounds, info );
+        paintAxisLabel( gl, axis, bounds );
+        paintSelectionLine( gl, axis, bounds );
 
         if ( axis instanceof TaggedAxis1D )
         {
             TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
+            paintTags( gl, taggedAxis, bounds );
+        }
+    }
+    
+    @Override
+    protected void initShaderPrograms( GL gl )
+    {
+        super.initShaderPrograms( gl );
 
-            GL2 gl = context.getGL( ).getGL2( );
-
-            int width = bounds.getWidth( );
-            int height = bounds.getHeight( );
-
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-
-            paintColorScale( gl, taggedAxis, width, height );
-
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
-
-            paintTicks( gl, taggedAxis, width, height );
-            paintAxisLabel( gl, taggedAxis, width, height );
-            paintSelectionLine( gl, taggedAxis, width, height );
-
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( -0.5, width - 1 + 0.5f, -0.5, height - 1 + 0.5f, -1, 1 );
-
-            paintTags( gl, taggedAxis, width, height );
+        if ( flatColorProg == null )
+        {
+            flatColorProg = new FlatColorProgram( gl.getGL3( ) );
         }
     }
 
-    protected void paintTags( GL2 gl, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTags( GL gl, TaggedAxis1D taggedAxis, GlimpseBounds bounds )
     {
         for ( Tag tag : taggedAxis.getSortedTags( ) )
         {
-            paintTag( gl, tag, taggedAxis, width, height );
+            paintTag( gl, tag, taggedAxis, bounds );
         }
     }
 
-    protected void paintTag( GL2 gl, Tag tag, TaggedAxis1D taggedAxis, int width, int height )
+    protected void paintTag( GL gl, Tag tag, TaggedAxis1D taggedAxis, GlimpseBounds bounds )
     {
+        int width = bounds.getWidth( );
         int y = taggedAxis.valueToScreenPixel( tag.getValue( ) );
         int xMin = getTagMinX( width );
         int xMid = getTagPointerMaxX( width );
@@ -163,48 +189,58 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
             color = ( float[] ) colorValue;
         }
 
-        GlimpseColor.glColor( gl, color, 0.2f );
-        gl.glBegin( GL2.GL_TRIANGLES );
+        GL3 gl3 = gl.getGL3( );
+
+        FloatBuffer xy = tagXyVbo.mapFloats( gl, 18 );
+
+        xy.put( xMin ).put( y );
+        xy.put( xMid ).put( y - tagHalfWidth );
+        xy.put( xMid ).put( y + tagHalfWidth );
+
+        xy.put( xMax ).put( y - tagHalfWidth );
+        xy.put( xMid ).put( y - tagHalfWidth );
+        xy.put( xMid ).put( y + tagHalfWidth );
+        
+        xy.put( xMid ).put( y + tagHalfWidth );
+        xy.put( xMax ).put( y + tagHalfWidth );
+        xy.put( xMax ).put( y - tagHalfWidth );
+        
+        tagXyVbo.seal( gl );
+
+        LineUtils.enableStandardBlending( gl );
+        flatColorProg.begin( gl3 );
         try
         {
-            gl.glVertex2f( xMin, y );
-            gl.glVertex2f( xMid, y - tagHalfWidth );
-            gl.glVertex2f( xMid, y + tagHalfWidth );
+            flatColorProg.setPixelOrtho( gl3, bounds );
+            flatColorProg.setColor( gl3, color[0], color[1], color[2], 0.3f );
+            
+            flatColorProg.draw( gl3, GL.GL_TRIANGLES, tagXyVbo, 0, 9 );
         }
         finally
         {
-            gl.glEnd( );
+            flatColorProg.end( gl3 );
+            gl.glDisable( GL.GL_BLEND );
         }
 
-        gl.glBegin( GL2.GL_QUADS );
-        try
-        {
-            gl.glVertex2f( xMax, y - tagHalfWidth );
-            gl.glVertex2f( xMid, y - tagHalfWidth );
-            gl.glVertex2f( xMid, y + tagHalfWidth );
-            gl.glVertex2f( xMax, y + tagHalfWidth );
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
+        tagStyle.rgba = color;
+        tagStyle.thickness_PX = tagPointerOutlineWidth;
 
-        GlimpseColor.glColor( gl, color, 1f );
-        gl.glLineWidth( tagPointerOutlineWidth );
-        gl.glEnable( GL2.GL_LINE_SMOOTH );
-        gl.glBegin( GL2.GL_LINE_LOOP );
+        pathLine.clear( );
+        pathLine.moveTo( xMin, y );
+        pathLine.lineTo( xMid, y + tagHalfWidth );
+        pathLine.lineTo( xMax, y + tagHalfWidth );
+        pathLine.lineTo( xMax, y - tagHalfWidth );
+        pathLine.lineTo( xMid, y - tagHalfWidth );
+        pathLine.lineTo( xMin, y );
+
+        progLine.begin( gl3 );
         try
         {
-            gl.glVertex2f( xMin, y );
-            gl.glVertex2f( xMid, y + tagHalfWidth );
-            gl.glVertex2f( xMax, y + tagHalfWidth );
-            gl.glVertex2f( xMax, y - tagHalfWidth );
-            gl.glVertex2f( xMid, y - tagHalfWidth );
-            gl.glVertex2f( xMin, y );
+            progLine.draw( gl3, tagStyle, pathLine );
         }
         finally
         {
-            gl.glEnd( );
+            progLine.end( gl3 );
         }
     }
 

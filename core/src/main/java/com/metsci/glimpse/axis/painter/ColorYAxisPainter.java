@@ -28,6 +28,7 @@ package com.metsci.glimpse.axis.painter;
 
 import static javax.media.opengl.GL.*;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
@@ -110,32 +111,32 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         Axis1D axis = getAxis1D( context );
         GlimpseBounds bounds = getBounds( context );
 
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
+        initShaderPrograms( gl );
+        paintColorScale( context );
+        TickInfo info = getTickInfo( axis, bounds );
+        paintTicks( gl, axis, bounds, info );
+        paintTickLabels( gl, axis, bounds, info );
+        paintAxisLabel( gl, axis, bounds );
+        paintSelectionLine( gl, axis, bounds );
+    }
+    
+    @Override
+    protected void initShaderPrograms( GL gl )
+    {
+        super.initShaderPrograms( gl );
 
         if ( progTex == null )
         {
-            progLine = new LineProgram( gl );
+            progLine = new LineProgram( gl.getGL3( ) );
 
-            progTex = new ColorTexture1DProgram( gl );
-            progTex.setTexture( gl, 0 );
+            progTex = new ColorTexture1DProgram( gl.getGL3( ) );
+            progTex.setTexture( gl.getGL3( ), 0 );
 
             // although the vertex coordinates may change, the texture coordinates
             // stay constant, so just set them up once here
             sVbo.mapFloats( gl, 4 ).put( 0.0f ).put( 0.0f ).put( 1.0f ).put( 1.0f );
             sVbo.seal( gl );
         }
-
-        paintColorScale( context );
-
-        TickInfo info = getTickInfo( axis, bounds );
-
-        paintTicks( gl, axis, bounds, info );
-        paintTickLabels( gl, axis, bounds, info );
-        paintAxisLabel( gl, axis, bounds );
-        paintSelectionLine( gl, axis, bounds );
     }
 
     protected void paintColorScale( GlimpseContext context )

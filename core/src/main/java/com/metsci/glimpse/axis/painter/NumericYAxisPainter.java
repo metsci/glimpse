@@ -64,10 +64,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
+        initShaderPrograms( gl );
 
         TickInfo info = getTickInfo( axis, bounds );
 
@@ -75,6 +72,14 @@ public class NumericYAxisPainter extends NumericAxisPainter
         paintTickLabels( gl, axis, bounds, info );
         paintAxisLabel( gl, axis, bounds );
         paintSelectionLine( gl, axis, bounds );
+    }
+    
+    protected void initShaderPrograms( GL gl )
+    {
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl.getGL3( ) );
+        }
     }
 
     protected void paintTickLabels( GL gl, Axis1D axis, GlimpseBounds bounds, TickInfo info )

@@ -42,6 +42,7 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
@@ -68,6 +69,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
     protected FlatColorProgram flatColorProg;
     protected MappableBuffer tagXyVbo;
+    protected LineStyle tagStyle;
 
     protected int tagHalfWidth = DEFAULT_TAG_HALFBASE;
     protected int tagHeight = DEFAULT_TAG_HEIGHT;
@@ -83,6 +85,10 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         this.tagXyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 2 );
 
         this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
+
+        this.tagStyle = new LineStyle( );
+        this.tagStyle.stippleEnable = false;
+        this.tagStyle.feather_PX = 0.0f;
 
     }
 
@@ -196,7 +202,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         xy.put( x + tagHalfWidth ).put( yMid );
         xy.put( x + tagHalfWidth ).put( yMax );
         xy.put( x - tagHalfWidth ).put( yMax );
-        
+
         tagXyVbo.seal( gl );
 
         LineUtils.enableStandardBlending( gl );
@@ -205,7 +211,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         {
             flatColorProg.setPixelOrtho( gl3, bounds );
             flatColorProg.setColor( gl3, color[0], color[1], color[2], 0.3f );
-            
+
             flatColorProg.draw( gl3, GL.GL_TRIANGLES, tagXyVbo, 0, 9 );
         }
         finally
@@ -214,8 +220,8 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
             gl.glDisable( GL.GL_BLEND );
         }
 
-        style.rgba = color;
-        style.thickness_PX = tagPointerOutlineWidth;
+        tagStyle.rgba = color;
+        tagStyle.thickness_PX = tagPointerOutlineWidth;
 
         pathLine.clear( );
         pathLine.moveTo( x, yMin );
@@ -228,7 +234,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         progLine.begin( gl3 );
         try
         {
-            progLine.draw( gl3, style, pathLine );
+            progLine.draw( gl3, tagStyle, pathLine );
         }
         finally
         {
