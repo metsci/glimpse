@@ -1,6 +1,6 @@
 package com.metsci.glimpse.support.line;
 
-import static com.metsci.glimpse.support.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.support.line.LineJoinType.JOIN_NONE;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
 
@@ -22,7 +22,12 @@ public class LineStyle
      */
     public float feather_PX = 0.9f;
 
-    public LineJoinType joinType = JOIN_MITER;
+    /**
+     * How to join connected line segments. Defaults to NONE, which gives appearance
+     * and performance similar to familiar GL line drawing. Other join types may look
+     * nicer, but should be expected to be slower to render.
+     */
+    public LineJoinType joinType = JOIN_NONE;
 
     public boolean stippleEnable = false;
 
