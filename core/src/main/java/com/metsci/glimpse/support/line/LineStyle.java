@@ -1,5 +1,7 @@
 package com.metsci.glimpse.support.line;
 
+import static com.metsci.glimpse.support.line.LineJoinType.JOIN_MITER;
+
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class LineStyle
@@ -20,10 +22,7 @@ public class LineStyle
      */
     public float feather_PX = 0.9f;
 
-    /**
-     * 0 = NONE, 1 = BEVEL, 2 = MITER
-     */
-    public int joinType = 2;
+    public LineJoinType joinType = JOIN_MITER;
 
     public boolean stippleEnable = false;
 

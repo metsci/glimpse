@@ -111,7 +111,7 @@ public class LineProgram
 
         gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
         gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
-        gl.glUniform1i( JOIN_TYPE, style.joinType );
+        gl.glUniform1i( JOIN_TYPE, style.joinType.value );
     }
 
     public void draw( GL2ES2 gl, LineStyle style, LinePath path )
