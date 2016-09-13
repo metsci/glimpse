@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -42,19 +46,29 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class BorderPainter extends GlimpsePainterBase
 {
-    protected float[] borderColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
     protected boolean colorSet = false;
-
-    protected float lineWidth = 1.0f;
-
-    protected int stippleFactor = 1;
-    protected short stipplePattern = ( short ) 0x00FF;
-    protected boolean stippleOn = false;
 
     protected boolean drawTop = true;
     protected boolean drawBottom = true;
     protected boolean drawRight = true;
     protected boolean drawLeft = true;
+
+    protected LineProgram prog;
+    protected LineStyle style;
+    protected LinePath path;
+
+    public BorderPainter( )
+    {
+        this.style = new LineStyle( );
+        this.style.feather_PX = 0;
+        this.style.stippleEnable = false;
+        this.style.thickness_PX = 1.0f;
+        this.style.stipplePattern = ( short ) 0x00FF;
+        this.style.stippleScale = 1;
+        this.style.rgba = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
+
+        this.path = new LinePath( );
+    }
 
     public BorderPainter setDrawTop( boolean draw )
     {
@@ -82,29 +96,36 @@ public class BorderPainter extends GlimpsePainterBase
 
     public BorderPainter setDotted( boolean dotted )
     {
-        this.stippleOn = dotted;
+        this.style.stippleEnable = dotted;
         return this;
     }
 
     public BorderPainter setLineWidth( float lineWidth )
     {
-        this.lineWidth = lineWidth;
+        this.style.thickness_PX = lineWidth;
         return this;
     }
 
     public BorderPainter setColor( float[] rgba )
     {
-        borderColor = rgba;
+        this.style.rgba = rgba;
+        this.colorSet = true;
         return this;
     }
 
     public BorderPainter setColor( float r, float g, float b, float a )
     {
-        borderColor[0] = r;
-        borderColor[1] = g;
-        borderColor[2] = b;
-        borderColor[3] = a;
-        colorSet = true;
+        this.style.rgba[0] = r;
+        this.style.rgba[1] = g;
+        this.style.rgba[2] = b;
+        this.style.rgba[3] = a;
+        this.colorSet = true;
+        return this;
+    }
+
+    protected BorderPainter setColor0( float[] rgba )
+    {
+        this.style.rgba = rgba;
         return this;
     }
 
@@ -114,68 +135,73 @@ public class BorderPainter extends GlimpsePainterBase
         // ignore the look and feel if a color has been manually set
         if ( !colorSet )
         {
-            setColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
+            setColor0( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
             colorSet = false;
         }
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void doPaintTo( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
 
         int x = bounds.getX( );
         int y = bounds.getY( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( x - 0.5, x + width + 0.5f, y - 0.5, y + height + 0.5f, -1, 1 );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-
-        gl.glLineWidth( lineWidth );
-        gl.glColor4fv( borderColor, 0 );
-
-        if ( stippleOn )
+        if ( prog == null )
         {
-            gl.glEnable( GL2.GL_LINE_STIPPLE );
-            gl.glLineStipple( stippleFactor, stipplePattern );
+            prog = new LineProgram( gl );
         }
 
-        gl.glBegin( GL2.GL_LINES );
+        LineUtils.enableStandardBlending( gl );
+        prog.begin( gl );
         try
         {
+            prog.setPixelOrtho( gl, bounds );
+            prog.setViewport( gl, bounds );
+
+            path.clear( );
+
             if ( drawBottom )
             {
-                gl.glVertex2f( x, y );
-                gl.glVertex2f( x + width, y );
+                path.moveTo( x, y );
+                path.lineTo( x + width, y );
             }
 
             if ( drawRight )
             {
-                gl.glVertex2f( x + width, y );
-                gl.glVertex2f( x + width, y + height );
+                path.moveTo( x + width, y );
+                path.lineTo( x + width, y + height );
             }
 
             if ( drawTop )
             {
-                gl.glVertex2f( x + width, y + height );
-                gl.glVertex2f( x, y + height );
+                path.moveTo( x + width, y + height );
+                path.lineTo( x, y + height );
             }
 
             if ( drawLeft )
             {
-                gl.glVertex2f( x, y + height );
-                gl.glVertex2f( x, y );
+                path.moveTo( x, y + height );
+                path.lineTo( x, y );
             }
+
+            prog.draw( gl, style, path );
 
         }
         finally
         {
-            gl.glEnd( );
+            prog.end( gl );
+            LineUtils.disableStandardBlending( gl );
         }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        // TODO Auto-generated method stub
     }
 }

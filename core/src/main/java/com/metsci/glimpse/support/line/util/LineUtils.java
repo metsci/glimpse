@@ -19,11 +19,15 @@ import com.metsci.glimpse.axis.Axis2D;
 
 public class LineUtils
 {
-
     public static void enableStandardBlending( GL gl )
     {
         gl.glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL_BLEND );
+    }
+    
+    public static void disableStandardBlending( GL gl )
+    {
+        gl.glDisable( GL_BLEND );
     }
 
     public static double distance( double x0, double y0, double x1, double y1, double ppvAspectRatio )

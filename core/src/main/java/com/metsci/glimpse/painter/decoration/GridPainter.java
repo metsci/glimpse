@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static java.lang.Integer.parseInt;
+import static java.lang.Integer.*;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -37,15 +37,19 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
 
 /**
  * Displays dotted horizontal and vertical grid lines.
  *
  * @author ulman
  */
-public class GridPainter extends GlimpseDataPainter2D
+public class GridPainter extends GlimpsePainterBase
 {
     protected static final short CASE3 = ( short ) parseInt( "1100110011001100", 2 );
     protected static final short CASE2 = ( short ) parseInt( "0110011001100110", 2 );
@@ -68,10 +72,22 @@ public class GridPainter extends GlimpseDataPainter2D
     protected AxisLabelHandler ticksX;
     protected AxisLabelHandler ticksY;
 
+    protected LineProgram prog;
+    protected LineStyle style;
+    protected LinePath path;
+
     public GridPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
         this.ticksY = ticksY;
+
+        this.style = new LineStyle( );
+        this.style.feather_PX = 0;
+        this.style.stippleEnable = false;
+        this.style.stipplePattern = ( short ) 0x00FF;
+        this.style.stippleScale = 1;
+
+        this.path = new LinePath( );
     }
 
     public GridPainter( )
@@ -144,41 +160,50 @@ public class GridPainter extends GlimpseDataPainter2D
     }
 
     // make the stipple look like it's translating during drags
-    protected void glLineStipple( GL2 gl, Axis1D axis, AxisUnitConverter converter )
+    protected short getStipplePattern( Axis1D axis, AxisUnitConverter converter )
     {
         int stipplePhase = ( int ) ( axis.valueToScreenPixelUnits( converter.fromAxisUnits( 0 ) ) ) % 4;
         stipplePhase = stipplePhase < 0 ? stipplePhase + 4 : stipplePhase;
-        glLineStipple( gl, stipplePhase );
+        return getStipplePattern( stipplePhase );
     }
 
-    protected void glLineStipple( GL2 gl, int stipplePhase )
+    protected short getStipplePattern( int stipplePhase )
     {
         switch ( stipplePhase )
         {
             case 3:
-                gl.glLineStipple( 1, CASE3 );
-                break;
+                return CASE3;
             case 2:
-                gl.glLineStipple( 1, CASE2 );
-                break;
+                return CASE2;
             case 1:
-                gl.glLineStipple( 1, CASE1 );
-                break;
+                return CASE1;
             case 0:
-                gl.glLineStipple( 1, CASE0 );
-                break;
+                return CASE0;
             default:
-                break;
+                return CASE0;
+        }
+    }
+
+    protected void setStippleStyle( Axis1D axis, AxisUnitConverter converter )
+    {
+        if ( this.stipple )
+        {
+            style.stippleEnable = true;
+            style.stipplePattern = getStipplePattern( axis, converter );
+            style.stippleScale = 1.0f;
+        }
+        else
+        {
+            style.stippleEnable = false;
         }
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        // we want crisp lines
-        gl.glDisable( GL2.GL_LINE_SMOOTH );
-        gl.glDisable( GL2.GL_POINT_SMOOTH );
-        if ( this.stipple ) gl.glEnable( GL2.GL_LINE_STIPPLE );
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = getAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
 
         if ( ticksX == null || ticksY == null ) return;
 
@@ -193,100 +218,113 @@ public class GridPainter extends GlimpseDataPainter2D
         converterY = converterY == null ? AxisUnitConverters.identity : converterY;
         Axis1D axisY = axis.getAxisY( );
 
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl );
+        }
+
         //////////////
         //////////////  Vertical Lines
         //////////////
 
-        if ( showVertical )
+        LineUtils.enableStandardBlending( gl );
+        prog.begin( gl );
+        try
         {
-            gl.glLineWidth( majorLineThickness );
-            gl.glColor4fv( majorLineColor, 0 );
-            if ( this.stipple ) glLineStipple( gl, axisY, converterY );
+            prog.setAxisOrtho( gl, axis );
+            prog.setViewport( gl, bounds );
 
-            gl.glBegin( GL2.GL_LINES );
-            try
+            if ( showVertical )
             {
+                style.thickness_PX = majorLineThickness;
+                style.rgba = majorLineColor;
+                setStippleStyle( axisY, converterY );
+
+                path.clear( );
+
                 for ( int i = 0; i < xTicks.length; i++ )
                 {
                     double iTick = converterX.fromAxisUnits( xTicks[i] );
-                    gl.glVertex2d( iTick, axis.getMinY( ) );
-                    gl.glVertex2d( iTick, axis.getMaxY( ) );
+                    path.moveTo( ( float ) iTick, ( float ) axis.getMinY( ) );
+                    path.lineTo( ( float ) iTick, ( float ) axis.getMaxY( ) );
                 }
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
 
-            if ( showMinorTicks )
-            {
-                GlimpseColor.glColor( gl, majorLineColor, 0.1f );
-                double[] xMinor = ticksX.getMinorTickPositions( xTicks );
+                prog.draw( gl, style, path );
 
-                gl.glBegin( GL2.GL_LINES );
-                try
+                if ( showMinorTicks )
                 {
+                    style.thickness_PX = minorLineThickness;
+                    style.rgba = minorLineColor;
+                    style.stippleEnable = false;
+
+                    double[] xMinor = ticksX.getMinorTickPositions( xTicks );
+
+                    path.clear( );
 
                     for ( int i = 0; i < xMinor.length; i++ )
                     {
                         double iTick = converterX.fromAxisUnits( xMinor[i] );
-                        gl.glVertex2d( iTick, axis.getMinY( ) );
-                        gl.glVertex2d( iTick, axis.getMaxY( ) );
+                        path.moveTo( ( float ) iTick, ( float ) axis.getMinY( ) );
+                        path.lineTo( ( float ) iTick, ( float ) axis.getMaxY( ) );
                     }
 
-                }
-                finally
-                {
-                    gl.glEnd( );
+                    prog.draw( gl, style, path );
                 }
             }
-        }
 
-        //////////////
-        //////////////  Horizontal Lines
-        //////////////
+            //////////////
+            //////////////  Horizontal Lines
+            //////////////
 
-        if ( showHorizontal )
-        {
-            gl.glLineWidth( majorLineThickness );
-            gl.glColor4fv( majorLineColor, 0 );
-            if ( this.stipple ) glLineStipple( gl, axisX, converterX );
-
-            gl.glBegin( GL2.GL_LINES );
-            try
+            if ( showHorizontal )
             {
-                for ( int i = 0; i < yTicks.length; i++ )
+                style.thickness_PX = majorLineThickness;
+                style.rgba = majorLineColor;
+                setStippleStyle( axisX, converterX );
+
+                path.clear( );
+
+                for ( int i = 0; i < xTicks.length; i++ )
                 {
                     double jTick = converterY.fromAxisUnits( yTicks[i] );
-                    gl.glVertex2d( axis.getMinX( ), jTick );
-                    gl.glVertex2d( axis.getMaxX( ), jTick );
+                    path.moveTo( ( float ) axis.getMinX( ), ( float ) jTick );
+                    path.lineTo( ( float ) axis.getMaxX( ), ( float ) jTick );
                 }
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
 
-            if ( showMinorTicks )
-            {
-                GlimpseColor.glColor( gl, majorLineColor, 0.1f );
-                double[] yMinor = ticksY.getMinorTickPositions( yTicks );
+                prog.draw( gl, style, path );
 
-                gl.glBegin( GL2.GL_LINES );
-                try
+                if ( showMinorTicks )
                 {
+                    style.thickness_PX = minorLineThickness;
+                    style.rgba = minorLineColor;
+                    style.stippleEnable = false;
+
+                    double[] yMinor = ticksY.getMinorTickPositions( yTicks );
+
+                    path.clear( );
+
                     for ( int i = 0; i < yMinor.length; i++ )
                     {
                         double jTick = converterY.fromAxisUnits( yMinor[i] );
-                        gl.glVertex2d( axis.getMinX( ), jTick );
-                        gl.glVertex2d( axis.getMaxX( ), jTick );
+                        path.moveTo( ( float ) axis.getMinX( ), ( float ) jTick );
+                        path.lineTo( ( float ) axis.getMaxX( ), ( float ) jTick );
                     }
-                }
-                finally
-                {
-                    gl.glEnd( );
+
+                    prog.draw( gl, style, path );
                 }
             }
         }
+        finally
+        {
+            prog.end( gl );
+            LineUtils.disableStandardBlending( gl );
+        }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

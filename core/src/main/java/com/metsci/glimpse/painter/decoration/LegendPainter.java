@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -36,23 +35,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.FlatColorProgram;
 
 /**
  * Displays a simple color based legend floating on top of the plot.
  *
  * @author bumgarner
  */
-public abstract class LegendPainter extends GlimpsePainter2D
+public abstract class LegendPainter extends GlimpsePainterBase
 {
 
     //TODO is there a better way to support this?
@@ -92,12 +96,23 @@ public abstract class LegendPainter extends GlimpsePainter2D
     private volatile Font newFont = null;
     private volatile boolean antialias = false;
 
+    protected FlatColorProgram flatProg;
+    protected LineProgram lineProg;
+    protected LineStyle style;
+    protected LinePath path;
+
     public LegendPainter( LegendPlacement placement )
     {
         this.placement = placement;
         this.list = new ArrayList<String>( );
         this.colors = new HashMap<String, float[]>( );
         setFont( 15, false );
+
+        this.style = new LineStyle( );
+        this.style.feather_PX = 0;
+        this.style.stippleEnable = false;
+
+        this.path = new LinePath( );
     }
 
     public LegendPainter setFont( Font font )
@@ -165,34 +180,66 @@ public abstract class LegendPainter extends GlimpsePainter2D
         addItem( label, new float[] { r, g, b, a } );
     }
 
-    public synchronized void addItem( String label, float[] rgba )
+    public void addItem( String label, float[] rgba )
     {
-        if ( !colors.containsKey( label ) )
+        painterLock.lock( );
+        try
         {
-            list.add( label );
+            if ( !colors.containsKey( label ) )
+            {
+                list.add( label );
+            }
+            colors.put( label, rgba );
         }
-        colors.put( label, rgba );
+        finally
+        {
+            painterLock.unlock( );
+        }
     }
 
-    public synchronized void removeItem( String label )
+    public void removeItem( String label )
     {
-        list.remove( label );
-        colors.remove( label );
+        painterLock.lock( );
+        try
+        {
+            list.remove( label );
+            colors.remove( label );
+        }
+        finally
+        {
+            painterLock.unlock( );
+        }
     }
 
-    public synchronized void clear( )
+    public void clear( )
     {
-        list.clear( );
-        colors.clear( );
+        painterLock.lock( );
+        try
+        {
+            list.clear( );
+            colors.clear( );
+        }
+        finally
+        {
+            painterLock.unlock( );
+        }
     }
 
-    public synchronized void setColor( String label, float r, float g, float b, float a )
+    public void setColor( String label, float r, float g, float b, float a )
     {
-        float[] rgba = colors.get( label );
-        rgba[0] = r;
-        rgba[1] = g;
-        rgba[2] = b;
-        rgba[3] = a;
+        painterLock.lock( );
+        try
+        {
+            float[] rgba = colors.get( label );
+            rgba[0] = r;
+            rgba[1] = g;
+            rgba[2] = b;
+            rgba[3] = a;
+        }
+        finally
+        {
+            painterLock.unlock( );
+        }
     }
 
     public void setColor( String label, float[] rgba )
@@ -239,8 +286,14 @@ public abstract class LegendPainter extends GlimpsePainter2D
         this.itemWidth = width;
     }
 
-    private synchronized void displayLegend( GL2 gl, int width, int height )
+    private void displayLegend( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds glimpseBounds = getBounds( context );
+
+        int width = glimpseBounds.getWidth( );
+        int height = glimpseBounds.getHeight( );
+
         //Figure out dimensions and position
         int lw = 0;
         int lh = spacer;
@@ -255,67 +308,100 @@ public abstract class LegendPainter extends GlimpsePainter2D
         int lx = upperLeftX( width, height, lw, lh );
         int ly = upperLeftY( width, height, lw, lh );
 
+        if ( lineProg == null )
+        {
+            lineProg = new LineProgram( gl );
+        }
+
+        if ( flatProg == null )
+        {
+            flatProg = new FlatColorProgram( gl );
+        }
+
         //draw a white box and black border
-        gl.glColor4fv( GlimpseColor.getWhite( ), 0 );
-        gl.glBegin( GL2.GL_POLYGON );
-        try
-        {
-            gl.glVertex2f( lx, ly );
-            gl.glVertex2f( lx, ly - lh );
-            gl.glVertex2f( lx + lw, ly - lh );
-            gl.glVertex2f( lx + lw, ly );
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
-        gl.glColor4fv( GlimpseColor.getBlack( ), 0 );
-        gl.glLineWidth( 2f );
-        gl.glBegin( GL2.GL_LINE_LOOP );
-        try
-        {
-            gl.glVertex2f( lx, ly );
-            gl.glVertex2f( lx, ly - lh );
-            gl.glVertex2f( lx + lw, ly - lh );
-            gl.glVertex2f( lx + lw, ly );
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
 
-        //draw the color items
-        int xpos = lx + spacer;
-        int ypos = ly - spacer;
-        for ( String label : list )
-        {
-            Rectangle2D bounds = textRenderer.getBounds( label );
-            int labelHeight = ( int ) bounds.getHeight( );
-            float[] rgba = colors.get( label );
-            drawLegendItem( gl, label, xpos, ypos, rgba, labelHeight );
-            ypos -= ( labelHeight + spacer );
-        }
-
-        //draw the text labels
-        xpos = lx + spacer + itemWidth + spacer;
-        ypos = ly - spacer;
-        textRenderer.beginRendering( width, height );
-        GlimpseColor.setColor( textRenderer, textColor );
+        LineUtils.enableStandardBlending( gl );
         try
         {
+            flatProg.begin( gl );
+            try
+            {
+                flatProg.setPixelOrtho( gl, glimpseBounds );
+                flatProg.setColor( gl, GlimpseColor.getWhite( ) );
+
+                path.clear( );
+                path.lineTo( lx, ly );
+                path.lineTo( lx, ly - lh );
+                path.lineTo( lx + lw, ly );
+                path.lineTo( lx + lw, ly - lh );
+
+                flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, path.xyVbo( gl ), 0, 4 );
+            }
+            finally
+            {
+                flatProg.end( gl );
+            }
+
+            lineProg.begin( gl );
+            try
+            {
+                lineProg.setPixelOrtho( gl, glimpseBounds );
+                lineProg.setViewport( gl, glimpseBounds );
+
+                style.rgba = GlimpseColor.getBlack( );
+                style.thickness_PX = 2.0f;
+                style.stippleEnable = false;
+
+                path.clear( );
+                path.moveTo( lx, ly );
+                path.lineTo( lx, ly - lh );
+                path.lineTo( lx + lw, ly - lh );
+                path.lineTo( lx + lw, ly );
+                path.lineTo( lx, ly );
+
+                lineProg.draw( gl, style, path );
+            }
+            finally
+            {
+                lineProg.end( gl );
+            }
+
+            //draw the color items
+            int xpos = lx + spacer;
+            int ypos = ly - spacer;
             for ( String label : list )
             {
                 Rectangle2D bounds = textRenderer.getBounds( label );
                 int labelHeight = ( int ) bounds.getHeight( );
-                textRenderer.draw( label, xpos, ypos - labelHeight );
+                float[] rgba = colors.get( label );
+                drawLegendItem( gl, label, xpos, ypos, rgba, labelHeight );
                 ypos -= ( labelHeight + spacer );
+            }
+
+            //draw the text labels
+            xpos = lx + spacer + itemWidth + spacer;
+            ypos = ly - spacer;
+            textRenderer.beginRendering( width, height );
+            GlimpseColor.setColor( textRenderer, textColor );
+            try
+            {
+                for ( String label : list )
+                {
+                    Rectangle2D bounds = textRenderer.getBounds( label );
+                    int labelHeight = ( int ) bounds.getHeight( );
+                    textRenderer.draw( label, xpos, ypos - labelHeight );
+                    ypos -= ( labelHeight + spacer );
+                }
+            }
+            finally
+            {
+                textRenderer.endRendering( );
             }
         }
         finally
         {
-            textRenderer.endRendering( );
+            LineUtils.disableStandardBlending( gl );
         }
-
     }
 
     private int upperLeftX( int width, int height, int lw, int lh )
@@ -358,7 +444,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
     }
 
-    protected abstract void drawLegendItem( GL2 gl, String label, int xpos, int ypos, float[] rgba, int height );
+    protected abstract void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height );
 
     public static class BlockLegendPainter extends LegendPainter
     {
@@ -368,20 +454,26 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
 
         @Override
-        protected void drawLegendItem( GL2 gl, String label, int xpos, int ypos, float[] rgba, int height )
+        protected void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height )
         {
-            gl.glColor4fv( rgba, 0 );
-            gl.glBegin( GL2.GL_POLYGON );
+            GL3 gl3 = gl.getGL3( );
+
+            flatProg.begin( gl3 );
             try
             {
-                gl.glVertex2d( xpos, ypos );
-                gl.glVertex2d( xpos + itemWidth, ypos );
-                gl.glVertex2d( xpos + itemWidth, ypos - height );
-                gl.glVertex2d( xpos, ypos - height );
+                flatProg.setColor( gl3, rgba );
+
+                path.clear( );
+                path.lineTo( xpos, ypos );
+                path.lineTo( xpos + itemWidth, ypos );
+                path.lineTo( xpos, ypos - height );
+                path.lineTo( xpos + itemWidth, ypos - height );
+
+                flatProg.draw( gl3, GL.GL_TRIANGLE_STRIP, path.xyVbo( gl ), 0, 4 );
             }
             finally
             {
-                gl.glEnd( );
+                flatProg.end( gl3 );
             }
         }
 
@@ -398,31 +490,38 @@ public abstract class LegendPainter extends GlimpsePainter2D
         }
 
         @Override
-        protected void drawLegendItem( GL2 gl, String label, int xpos, int ypos, float[] rgba, int height )
+        protected void drawLegendItem( GL gl, String label, int xpos, int ypos, float[] rgba, int height )
         {
-            gl.glColor4fv( rgba, 0 );
+            GL3 gl3 = gl.getGL3( );
 
             LineLegendPainterItem item = items.get( label );
-            if ( item.doStipple )
-            {
-                gl.glEnable( GL2.GL_LINE_STIPPLE );
-                gl.glLineStipple( item.stippleFactor, item.stipplePattern );
-            }
-            else
-            {
-                gl.glDisable( GL2.GL_LINE_STIPPLE );
-            }
-            gl.glLineWidth( item.lineWidth );
-            gl.glBegin( GL2.GL_LINE_STRIP );
             double ymid = ypos - ( height / 2. );
+
+            lineProg.begin( gl3 );
             try
             {
-                gl.glVertex2d( xpos, ymid );
-                gl.glVertex2d( xpos + itemWidth, ymid );
+                style.rgba = rgba;
+                style.thickness_PX = item.lineWidth;
+                if ( item.doStipple )
+                {
+                    style.stippleEnable = true;
+                    style.stippleScale = item.stippleFactor;
+                    style.stipplePattern = item.stipplePattern;
+                }
+                else
+                {
+                    style.stippleEnable = false;
+                }
+
+                path.clear( );
+                path.moveTo( ( float ) xpos, ( float ) ymid );
+                path.lineTo( ( float ) ( xpos + itemWidth ), ( float ) ymid );
+
+                lineProg.draw( gl3, style, path );
             }
             finally
             {
-                gl.glEnd( );
+                lineProg.end( gl3 );
             }
         }
 
@@ -481,7 +580,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
     }
 
     @Override
-    public synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public synchronized void doPaintTo( GlimpseContext context )
     {
         if ( newFont != null )
         {
@@ -495,25 +594,9 @@ public abstract class LegendPainter extends GlimpsePainter2D
 
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
-
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-        gl.glEnable( GL2.GL_LINE_SMOOTH );
-        gl.glEnable( GL2.GL_POINT_SMOOTH );
-
         if ( isVisible( ) && !list.isEmpty( ) )
         {
-            displayLegend( gl, width, height );
+            displayLegend( context );
         }
     }
 
@@ -529,7 +612,7 @@ public abstract class LegendPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GlimpseContext context )
+    public void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null )
         {

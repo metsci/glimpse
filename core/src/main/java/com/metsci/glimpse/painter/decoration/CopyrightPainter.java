@@ -28,8 +28,6 @@ package com.metsci.glimpse.painter.decoration;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
-
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -65,16 +63,18 @@ public class CopyrightPainter extends GlimpsePainterBase
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void doPaintTo( GlimpseContext context )
     {
         if ( textRenderer == null ) return;
+
+        GlimpseBounds bounds = getBounds( context );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
