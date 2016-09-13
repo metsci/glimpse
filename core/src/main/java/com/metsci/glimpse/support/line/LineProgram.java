@@ -34,6 +34,7 @@ public class LineProgram
     public final int STIPPLE_PATTERN;
     public final int LINE_THICKNESS_PX;
     public final int FEATHER_THICKNESS_PX;
+    public final int JOIN_TYPE;
 
 
     // Vertex attributes
@@ -55,6 +56,7 @@ public class LineProgram
         this.STIPPLE_PATTERN = gl.glGetUniformLocation( programHandle, "STIPPLE_PATTERN" );
         this.LINE_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "LINE_THICKNESS_PX" );
         this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
+        this.JOIN_TYPE = gl.glGetUniformLocation( programHandle, "JOIN_TYPE" );
 
         this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
         this.inMileage = gl.glGetAttribLocation( programHandle, "inMileage" );
@@ -109,6 +111,7 @@ public class LineProgram
 
         gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
         gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
+        gl.glUniform1i( JOIN_TYPE, style.joinType );
     }
 
     public void draw( GL2ES2 gl, LineStyle style, LinePath path )

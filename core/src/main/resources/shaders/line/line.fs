@@ -30,14 +30,14 @@ void main( )
         float bitAlpha = float( sign( STIPPLE_PATTERN & ( 0x1 << int( bitNum ) ) ) );
 
         float posInBit_PX = bitWidth_PX*( bitNum - floor( bitNum ) );
-        if ( posInBit_PX < feather_PX )
+        if ( FEATHER_THICKNESS_PX > 0.0 && posInBit_PX < feather_PX )
         {
             float bitNumPrev = mod( bitNum - 1.0, 16.0 );
             float bitAlphaPrev = float( sign( STIPPLE_PATTERN & ( 0x1 << int( bitNumPrev ) ) ) );
             float mixFrac = ( feather_PX + posInBit_PX ) / ( 2.0 * feather_PX );
             stippleAlpha = mix( bitAlphaPrev, bitAlpha, mixFrac );
         }
-        else if ( posInBit_PX > bitWidth_PX - feather_PX )
+        else if ( FEATHER_THICKNESS_PX > 0.0 && posInBit_PX > bitWidth_PX - feather_PX )
         {
             float bitNumNext = mod( bitNum + 1.0, 16.0 );
             float bitAlphaNext = float( sign( STIPPLE_PATTERN & ( 0x1 << int( bitNumNext ) ) ) );

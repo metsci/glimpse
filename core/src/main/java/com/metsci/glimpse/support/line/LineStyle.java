@@ -20,6 +20,11 @@ public class LineStyle
      */
     public float feather_PX = 0.9f;
 
+    /**
+     * 0 = NONE, 1 = BEVEL, 2 = MITER
+     */
+    public int joinType = 2;
+
     public boolean stippleEnable = false;
 
     /**

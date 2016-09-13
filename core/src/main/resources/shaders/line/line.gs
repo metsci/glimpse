@@ -13,6 +13,9 @@ uniform vec2 VIEWPORT_SIZE_PX;
 uniform float LINE_THICKNESS_PX;
 uniform float FEATHER_THICKNESS_PX;
 
+// 0 = NONE, 1 = BEVEL, 2 = MITER
+uniform int JOIN_TYPE;
+
 in float vMileage_PX[];
 
 out float gMileage_PX;
@@ -50,65 +53,68 @@ void main( )
         vec2 outerJoinB_PX = outerAboveB_PX;
         bool isLeftTurnB = true;
 
-        vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
-        vec2 deltaAB_PX = posB_PX - posA_PX;
-        float lengthAB_PX = length( deltaAB_PX );
-        float mileageA_PX = vMileage_PX[ 0 ];
-        if ( lengthAB_PX > 0.0 && mileageB_PX >= mileageA_PX )
+        if ( JOIN_TYPE != 0 )
         {
-            vec2 dirAB = deltaAB_PX / lengthAB_PX;
-            vec2 normalAB = vec2( -dirAB.y, dirAB.x );
-            vec2 deltaJoin = normalAB + normalBC;
-            float lengthJoin = length( deltaJoin );
-            if ( lengthJoin > 0.01 )
+            vec2 posA_PX = gl_in[ 0 ].gl_Position.xy;
+            vec2 deltaAB_PX = posB_PX - posA_PX;
+            float lengthAB_PX = length( deltaAB_PX );
+            float mileageA_PX = vMileage_PX[ 0 ];
+            if ( lengthAB_PX > 0.0 && mileageB_PX >= mileageA_PX )
             {
-                vec2 dirJoin = deltaJoin / lengthJoin;
-                float bevelScale = dot( dirJoin, normalBC );
-                float miterScale = 1.0 / bevelScale;
-
-                float innerMiter_PX = innerNormal_PX * miterScale;
-                float outerMiter_PX = outerNormal_PX * miterScale;
-
-                float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
-                float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
-
-                bool useMiter = ( lengthJoin > 0.25 );
-                float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
-                float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
-
-                float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
-                float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
-                float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
-
-                if ( dot( dirJoin, dirAB ) < 0.0 )
+                vec2 dirAB = deltaAB_PX / lengthAB_PX;
+                vec2 normalAB = vec2( -dirAB.y, dirAB.x );
+                vec2 deltaJoin = normalAB + normalBC;
+                float lengthJoin = length( deltaJoin );
+                if ( lengthJoin > 0.01 )
                 {
-                    isLeftTurnB = true;
+                    vec2 dirJoin = deltaJoin / lengthJoin;
+                    float bevelScale = dot( dirJoin, normalBC );
+                    float miterScale = 1.0 / bevelScale;
 
-                    innerJoinB_PX = posB_PX - innerExtrude_PX*dirJoin;
-                    outerJoinB_PX = posB_PX - outerExtrude_PX*dirJoin;
+                    float innerMiter_PX = innerNormal_PX * miterScale;
+                    float outerMiter_PX = outerNormal_PX * miterScale;
 
-                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                    innerBelowB_PX = posB_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                    outerBelowB_PX = posB_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
+                    float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
-                    innerAboveB_PX = posB_PX + innerIntrude_PX*dirJoin;
-                    outerAboveB_PX = posB_PX + outerIntrude_PX*dirJoin;
-                }
-                else
-                {
-                    isLeftTurnB = false;
+                    bool useMiter = ( JOIN_TYPE == 2 && lengthJoin > 0.25 );
+                    float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
+                    float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
-                    innerJoinB_PX = posB_PX + innerExtrude_PX*dirJoin;
-                    outerJoinB_PX = posB_PX + outerExtrude_PX*dirJoin;
+                    float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
+                    float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
+                    float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
-                    innerBelowB_PX = posB_PX - innerIntrude_PX*dirJoin;
-                    outerBelowB_PX = posB_PX - outerIntrude_PX*dirJoin;
+                    if ( dot( dirJoin, dirAB ) < 0.0 )
+                    {
+                        isLeftTurnB = true;
 
-                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                    innerAboveB_PX = posB_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                    outerAboveB_PX = posB_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        innerJoinB_PX = posB_PX - innerExtrude_PX*dirJoin;
+                        outerJoinB_PX = posB_PX - outerExtrude_PX*dirJoin;
+
+                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        innerBelowB_PX = posB_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        outerBelowB_PX = posB_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+
+                        innerAboveB_PX = posB_PX + innerIntrude_PX*dirJoin;
+                        outerAboveB_PX = posB_PX + outerIntrude_PX*dirJoin;
+                    }
+                    else
+                    {
+                        isLeftTurnB = false;
+
+                        innerJoinB_PX = posB_PX + innerExtrude_PX*dirJoin;
+                        outerJoinB_PX = posB_PX + outerExtrude_PX*dirJoin;
+
+                        innerBelowB_PX = posB_PX - innerIntrude_PX*dirJoin;
+                        outerBelowB_PX = posB_PX - outerIntrude_PX*dirJoin;
+
+                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        innerAboveB_PX = posB_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        outerAboveB_PX = posB_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    }
                 }
             }
         }
@@ -126,80 +132,84 @@ void main( )
         vec2 outerJoinC_PX = outerBelowC_PX;
         bool isLeftTurnC = false;
 
-        vec2 posD_PX = gl_in[ 3 ].gl_Position.xy;
-        vec2 deltaCD_PX = posD_PX - posC_PX;
-        float lengthCD_PX = length( deltaCD_PX );
-        float mileageD_PX = vMileage_PX[ 3 ];
-        if ( lengthCD_PX > 0.0 && mileageD_PX >= mileageC_PX )
+        if ( JOIN_TYPE != 0 )
         {
-            vec2 dirCD = deltaCD_PX / lengthCD_PX;
-            vec2 normalCD = vec2( -dirCD.y, dirCD.x );
-            vec2 deltaJoin = normalBC + normalCD;
-            float lengthJoin = length( deltaJoin );
-            if ( lengthJoin > 0.01 )
+            vec2 posD_PX = gl_in[ 3 ].gl_Position.xy;
+            vec2 deltaCD_PX = posD_PX - posC_PX;
+            float lengthCD_PX = length( deltaCD_PX );
+            float mileageD_PX = vMileage_PX[ 3 ];
+            if ( lengthCD_PX > 0.0 && mileageD_PX >= mileageC_PX )
             {
-                vec2 dirJoin = deltaJoin / lengthJoin;
-                float bevelScale = dot( dirJoin, normalBC );
-                float miterScale = 1.0 / bevelScale;
-
-                float innerMiter_PX = innerNormal_PX * miterScale;
-                float outerMiter_PX = outerNormal_PX * miterScale;
-
-                float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
-                float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
-
-                bool useMiter = ( lengthJoin > 0.25 );
-                float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
-                float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
-
-                float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
-                float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
-                float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
-
-                if ( dot( dirJoin, dirBC ) < 0.0 )
+                vec2 dirCD = deltaCD_PX / lengthCD_PX;
+                vec2 normalCD = vec2( -dirCD.y, dirCD.x );
+                vec2 deltaJoin = normalBC + normalCD;
+                float lengthJoin = length( deltaJoin );
+                if ( lengthJoin > 0.01 )
                 {
-                    isLeftTurnC = true;
+                    vec2 dirJoin = deltaJoin / lengthJoin;
+                    float bevelScale = dot( dirJoin, normalBC );
+                    float miterScale = 1.0 / bevelScale;
 
-                    innerJoinC_PX = posC_PX - innerExtrude_PX*dirJoin;
-                    outerJoinC_PX = posC_PX - outerExtrude_PX*dirJoin;
+                    float innerMiter_PX = innerNormal_PX * miterScale;
+                    float outerMiter_PX = outerNormal_PX * miterScale;
 
-                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                    innerBelowC_PX = posC_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                    outerBelowC_PX = posC_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
+                    float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
-                    innerAboveC_PX = posC_PX + innerIntrude_PX*dirJoin;
-                    outerAboveC_PX = posC_PX + outerIntrude_PX*dirJoin;
-                }
-                else
-                {
-                    isLeftTurnC = false;
+                    bool useMiter = ( JOIN_TYPE == 2 && lengthJoin > 0.25 );
+                    float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
+                    float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
-                    innerJoinC_PX = posC_PX + innerExtrude_PX*dirJoin;
-                    outerJoinC_PX = posC_PX + outerExtrude_PX*dirJoin;
+                    float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
+                    float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
+                    float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
-                    innerBelowC_PX = posC_PX - innerIntrude_PX*dirJoin;
-                    outerBelowC_PX = posC_PX - outerIntrude_PX*dirJoin;
+                    if ( dot( dirJoin, dirBC ) < 0.0 )
+                    {
+                        isLeftTurnC = true;
 
-                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                    innerAboveC_PX = posC_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                    outerAboveC_PX = posC_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        innerJoinC_PX = posC_PX - innerExtrude_PX*dirJoin;
+                        outerJoinC_PX = posC_PX - outerExtrude_PX*dirJoin;
+
+                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        innerBelowC_PX = posC_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        outerBelowC_PX = posC_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+
+                        innerAboveC_PX = posC_PX + innerIntrude_PX*dirJoin;
+                        outerAboveC_PX = posC_PX + outerIntrude_PX*dirJoin;
+                    }
+                    else
+                    {
+                        isLeftTurnC = false;
+
+                        innerJoinC_PX = posC_PX + innerExtrude_PX*dirJoin;
+                        outerJoinC_PX = posC_PX + outerExtrude_PX*dirJoin;
+
+                        innerBelowC_PX = posC_PX - innerIntrude_PX*dirJoin;
+                        outerBelowC_PX = posC_PX - outerIntrude_PX*dirJoin;
+
+                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        innerAboveC_PX = posC_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        outerAboveC_PX = posC_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                    }
                 }
             }
         }
 
 
-
-
-        // Line interior
+        // Emit triangle-strip for line interior
         //
 
         gFeatherAlpha = 1.0;
 
-        gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
-        gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
-        EmitVertex( );
+        if ( JOIN_TYPE != 0 )
+        {
+            gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
+            gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
+            EmitVertex( );
+        }
 
         gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
         gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
@@ -217,19 +227,23 @@ void main( )
         gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
         EmitVertex( );
 
-        gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
-        gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
-        EmitVertex( );
+        if ( JOIN_TYPE != 0 )
+        {
+            gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
+            gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
+            EmitVertex( );
+        }
 
         EndPrimitive( );
 
 
-        if ( feather_PX > 0.0 )
+        if ( FEATHER_THICKNESS_PX > 0.0 )
         {
-            // Feather below
+
+            // Emit triangle-strip for feather region below line
             //
 
-            if ( isLeftTurnB )
+            if ( JOIN_TYPE != 0 && isLeftTurnB )
             {
                 gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
@@ -262,7 +276,7 @@ void main( )
             gFeatherAlpha = 0.0;
             EmitVertex( );
 
-            if ( isLeftTurnC )
+            if ( JOIN_TYPE != 0 && isLeftTurnC )
             {
                 gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
@@ -278,10 +292,10 @@ void main( )
             EndPrimitive( );
 
 
-            // Feather above
+            // Emit triangle-strip for feather region above line
             //
 
-            if ( !isLeftTurnC )
+            if ( JOIN_TYPE != 0 && !isLeftTurnC )
             {
                 gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
@@ -314,7 +328,7 @@ void main( )
             gFeatherAlpha = 0.0;
             EmitVertex( );
 
-            if ( !isLeftTurnB )
+            if ( JOIN_TYPE != 0 && !isLeftTurnB )
             {
                 gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
@@ -328,6 +342,7 @@ void main( )
             }
 
             EndPrimitive( );
+
         }
     }
 }
