@@ -4,7 +4,7 @@ import static com.metsci.glimpse.support.line.util.ShaderUtils.createProgram;
 import static com.metsci.glimpse.support.line.util.ShaderUtils.requireResourceText;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINE_STRIP;
+import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import javax.media.opengl.GL2ES2;
 
@@ -28,12 +28,15 @@ public class LineProgram
     public final int AXIS_RECT;
     public final int VIEWPORT_SIZE_PX;
 
+    public final int LINE_THICKNESS_PX;
+    public final int FEATHER_THICKNESS_PX;
+    public final int JOIN_TYPE;
+    public final int MITER_LIMIT;
+
     public final int RGBA;
     public final int STIPPLE_ENABLE;
     public final int STIPPLE_SCALE;
     public final int STIPPLE_PATTERN;
-    public final int LINE_THICKNESS_PX;
-    public final int FEATHER_THICKNESS_PX;
 
 
     // Vertex attributes
@@ -49,12 +52,15 @@ public class LineProgram
         this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
         this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( programHandle, "VIEWPORT_SIZE_PX" );
 
+        this.LINE_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "LINE_THICKNESS_PX" );
+        this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
+        this.JOIN_TYPE = gl.glGetUniformLocation( programHandle, "JOIN_TYPE" );
+        this.MITER_LIMIT = gl.glGetUniformLocation( programHandle, "MITER_LIMIT" );
+
         this.RGBA = gl.glGetUniformLocation( programHandle, "RGBA" );
         this.STIPPLE_ENABLE = gl.glGetUniformLocation( programHandle, "STIPPLE_ENABLE" );
         this.STIPPLE_SCALE = gl.glGetUniformLocation( programHandle, "STIPPLE_SCALE" );
         this.STIPPLE_PATTERN = gl.glGetUniformLocation( programHandle, "STIPPLE_PATTERN" );
-        this.LINE_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "LINE_THICKNESS_PX" );
-        this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
 
         this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
         this.inMileage = gl.glGetAttribLocation( programHandle, "inMileage" );
@@ -94,6 +100,11 @@ public class LineProgram
 
     public void setStyle( GL2ES2 gl, LineStyle style )
     {
+        gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
+        gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
+        gl.glUniform1i( JOIN_TYPE, style.joinType.value );
+        gl.glUniform1f( MITER_LIMIT, style.miterLimit );
+
         gl.glUniform4fv( RGBA, 1, style.rgba, 0 );
 
         if ( style.stippleEnable )
@@ -106,9 +117,6 @@ public class LineProgram
         {
             gl.glUniform1i( STIPPLE_ENABLE, 0 );
         }
-
-        gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
-        gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
     }
 
     public void draw( GL2ES2 gl, LineStyle style, LinePath path )
@@ -133,7 +141,7 @@ public class LineProgram
         gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
         gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
 
-        gl.glDrawArrays( GL_LINE_STRIP, first, count );
+        gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
     }
 
     public void draw( GL2ES2 gl, int xyVbo, int mileageVbo, int first, int count )
@@ -144,7 +152,7 @@ public class LineProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
         gl.glVertexAttribPointer( inMileage, 1, GL_FLOAT, false, 0, 0 );
 
-        gl.glDrawArrays( GL_LINE_STRIP, first, count );
+        gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
     }
 
     public void end( GL2ES2 gl )

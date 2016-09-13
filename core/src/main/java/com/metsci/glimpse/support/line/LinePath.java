@@ -1,7 +1,10 @@
 package com.metsci.glimpse.support.line;
 
+import static com.metsci.glimpse.support.line.util.LineUtils.putWithFirstAndLastDuplicated;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_STATIC_DRAW;
+
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
@@ -67,14 +70,22 @@ public class LinePath
 
     public int numVertices( )
     {
-        return data.numVertices( );
+        // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
+        int numVertices = data.numVertices( );
+        return ( numVertices == 0 ? 0 : numVertices + 2 );
     }
 
     public MappableBuffer xyVbo( GL gl )
     {
         if ( xyDirty )
         {
-            xyVbo.setFloats( gl, data.xyBuffer( ) );
+            FloatBuffer xyData = data.xyBuffer( );
+
+            // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
+            FloatBuffer xyMapped = xyVbo.mapFloats( gl, xyData.remaining( ) + 4 );
+            putWithFirstAndLastDuplicated( xyData, xyMapped, 2 );
+            xyVbo.seal( gl );
+
             this.xyDirty = false;
         }
 
@@ -85,7 +96,13 @@ public class LinePath
     {
         if ( connectDirty )
         {
-            connectVbo.setFloats( gl, data.connectBuffer( ) );
+            FloatBuffer connectData = data.connectBuffer( );
+
+            // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
+            FloatBuffer connectMapped = connectVbo.mapFloats( gl, connectData.remaining( ) + 2 );
+            putWithFirstAndLastDuplicated( connectData, connectMapped, 1 );
+            connectVbo.seal( gl );
+
             this.connectDirty = false;
         }
 
@@ -104,7 +121,13 @@ public class LinePath
 
         if ( mileageDirty )
         {
-            mileageVbo.setFloats( gl, data.mileageBuffer( ) );
+            FloatBuffer mileageData = data.mileageBuffer( );
+
+            // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
+            FloatBuffer mileageMapped = mileageVbo.mapFloats( gl, mileageData.remaining( ) + 2 );
+            putWithFirstAndLastDuplicated( mileageData, mileageMapped, 1 );
+            mileageVbo.seal( gl );
+
             this.mileageDirty = false;
         }
 

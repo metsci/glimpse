@@ -45,6 +45,37 @@ public class LineUtils
         return flipped;
     }
 
+    /**
+     * Like {@link FloatBuffer#put(FloatBuffer)}, except prepends a duplicate copy of the first
+     * {@code floatsToDuplicate} values, and appends a duplicate copy of the last {@code floatsToDuplicate}
+     * values. This is useful when using {@link javax.media.opengl.GL3#GL_LINE_STRIP_ADJACENCY},
+     * for example.
+     *
+     * If the {@code from} buffer does not have at least {@code floatsToDuplicate} values remaining,
+     * this function does not modify either buffer.
+     */
+    public static void putWithFirstAndLastDuplicated( FloatBuffer from, FloatBuffer to, int floatsToDuplicate )
+    {
+        if ( from.remaining( ) >= floatsToDuplicate )
+        {
+            // Double-put first vertex, to work with GL_LINE_STRIP_ADJACENCY
+            for ( int i = 0; i < floatsToDuplicate; i++ )
+            {
+                // Use get-at-index to avoid modifying from's position
+                to.put( from.get( i ) );
+            }
+
+            to.put( from );
+
+            // Double-put last vertex, to work with GL_LINE_STRIP_ADJACENCY
+            for ( int i = from.position( ) - floatsToDuplicate; i < from.position( ); i++ )
+            {
+                // Use get-at-index to avoid modifying from's position
+                to.put( from.get( i ) );
+            }
+        }
+    }
+
     public static FloatBuffer ensureAdditionalCapacity( FloatBuffer buffer, int additionalFloats, boolean deallocOldBuffer )
     {
         int minCapacity = buffer.position( ) + additionalFloats;
