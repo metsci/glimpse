@@ -19,16 +19,25 @@ public class LineStyle
      * The thickness of the feather region, across which alpha fades to transparent.
      * Half the feather thickness (the more opaque half) lies inside the ideal bounds
      * of the line, and half (the more transparent half) lies outside.
+     *
+     * For feathering to work, {@link javax.media.opengl.GL#GL_BLEND} must be enabled.
+     *
+     * Line rendering is likely to be faster with feather set to zero.
      */
     public float feather_PX = 0.9f;
 
     /**
      * How to join connected line segments. Defaults to NONE, which gives appearance
      * and performance similar to familiar GL line drawing. Other join types may look
-     * nicer, but should be expected to be slower to render.
+     * nicer, but are more computationally expensive to render.
+     *
+     * Line rendering is likely to be faster with a join-type of NONE.
      */
     public LineJoinType joinType = JOIN_NONE;
 
+    /**
+     * Line rendering is likely to be faster with stippling disabled.
+     */
     public boolean stippleEnable = false;
 
     /**
