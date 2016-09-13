@@ -1,5 +1,6 @@
 package com.metsci.glimpse.examples.basic;
 
+import com.metsci.glimpse.axis.painter.NumericPolarAxisPainter;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -85,6 +86,7 @@ public class TestExample implements GlimpseLayoutProvider
         layoutX.addPainter( painter );
         */
 
+        /*
         GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
 
         TaggedPartialColorYAxisPainter painter = new TaggedPartialColorYAxisPainter( new GridAxisLabelHandler( ) );
@@ -102,7 +104,8 @@ public class TestExample implements GlimpseLayoutProvider
         layoutY.addGlimpseMouseAllListener( new TaggedAxisMouseListener1D( ) );
         plot.addLayout( layoutY );
         layoutY.addPainter( painter );
-
+        */
+        
         /*
         GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
         AxisUtil.attachVerticalMouseListener( layoutY );
@@ -111,9 +114,7 @@ public class TestExample implements GlimpseLayoutProvider
         layoutY.addPainter( painter );
         */
 
-        /*
-        plot.addPainter( new NumericXYAxisPainter( ) );
-        */
+        plot.addPainter( new NumericPolarAxisPainter( ) );
 
         return plot;
     }

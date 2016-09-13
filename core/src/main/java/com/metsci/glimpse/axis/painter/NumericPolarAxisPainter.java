@@ -30,6 +30,7 @@ import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
@@ -39,6 +40,10 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.LineUtils;
 
 public class NumericPolarAxisPainter extends NumericXYAxisPainter
 {
@@ -50,7 +55,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
     // Number of sectors to draw when there's a full circle shown
     private int nSectors = 12;
 
-    private float lineWidth = 1.25f;
+    private float lineWidth = 1.0f;
 
     private float maxRadius = 0;
 
@@ -61,36 +66,31 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
     private float[] insideTextColor = null;
     private float[] outsideTextColor = null;
 
-    protected void drawCircle( GL2 gl, double cx, double cy, double r, int num_segments )
+    protected LinePath pathRadial;
+    protected LinePath pathCircle;
+
+    protected LineStyle styleRadial;
+    protected LineStyle styleCircle;
+
+    public NumericPolarAxisPainter( )
     {
-        if ( circleStipplePattern > 0 )
-        {
-            gl.glEnable( GL2.GL_LINE_STIPPLE );
-            gl.glLineStipple( circleStippleFactor, circleStipplePattern );
-        }
+        this.pathRadial = new LinePath( );
+        this.pathCircle = new LinePath( );
 
-        gl.glBegin( GL.GL_LINE_LOOP );
+        this.styleRadial = new LineStyle( );
+        this.styleRadial.feather_PX = 0.8f;
+        this.styleRadial.thickness_PX = lineWidth;
+        this.styleRadial.rgba = GlimpseColor.getBlack( );
 
-        try
-        {
-            for ( int ii = 0; ii < num_segments; ii++ )
-            {
-                double theta = TWO_PI * ii / num_segments;
+        this.styleCircle = new LineStyle( );
+        this.styleCircle.feather_PX = 0.8f;
+        this.styleCircle.thickness_PX = lineWidth;
+        this.styleCircle.rgba = GlimpseColor.getBlack( );
 
-                double x = r * Math.cos( theta );
-                double y = r * Math.sin( theta );
-
-                gl.glVertex2d( x + cx, y + cy );
-            }
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
     }
-
+    
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
         if ( this.newFont != null )
         {
@@ -101,11 +101,17 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
 
         if ( this.textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
-        gl.glLineWidth( lineWidth );
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = getAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
 
-        int width = bounds.getWidth( );
+        if ( prog == null )
+        {
+            prog = new LineProgram( gl );
+        }
+
         int height = bounds.getHeight( );
+        int width = bounds.getWidth( );
 
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
@@ -222,46 +228,76 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
             positionsY[ii] = ( minIndex + ii ) * exactInterval;
         }
 
-        // Draw lines & circles
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
-
-        GlimpseColor.glColor( gl, lineColor );
-
         AxisUnitConverter convX = ticksX.getAxisUnitConverter( );
         convX = convX == null ? AxisUnitConverters.identity : convX;
 
         AxisUnitConverter convY = AxisUnitConverters.suShownAsNavigationDegrees;
 
-        if ( showHorizontal )
+        LineUtils.enableStandardBlending( gl );
+        prog.begin( gl );
+        try
         {
-            gl.glBegin( GL.GL_LINES );
-            try
+            prog.setViewport( gl, bounds );
+            prog.setAxisOrtho( gl, axis );
+            
+            if ( showHorizontal )
             {
+                if ( radialStipplePattern > 0 )
+                {
+                    styleRadial.stippleEnable = true;
+                    styleRadial.stipplePattern = radialStipplePattern;
+                    styleRadial.stippleScale = radialStippleFactor;
+                }
+                else
+                {
+                    styleRadial.stippleEnable = false;
+                }
+
+                pathRadial.clear( );
+
                 for ( int ii = 0; ii < positionsY.length; ii++ )
                 {
-                    gl.glVertex2d( 0, 0 );
-                    gl.glVertex2d( Math.cos( positionsY[ii] ) * maxDist, Math.sin( positionsY[ii] ) * maxDist );
+                    pathRadial.moveTo( 0, 0 );
+                    pathRadial.lineTo( ( float ) ( Math.cos( positionsY[ii] ) * maxDist ), ( float ) ( Math.sin( positionsY[ii] ) * maxDist ) );
                 }
+
+                prog.draw( gl, style, pathRadial );
             }
-            finally
+
+            if ( showVertical )
             {
-                gl.glEnd( );
+                if ( radialStipplePattern > 0 )
+                {
+                    styleRadial.stippleEnable = true;
+                    styleRadial.stipplePattern = radialStipplePattern;
+                    styleRadial.stippleScale = radialStippleFactor;
+                }
+                else
+                {
+                    styleRadial.stippleEnable = false;
+                }
+                
+                pathCircle.clear( );
+
+                for ( int ii = 0; ii < positionsX.length; ii++ )
+                {
+                    calculateCircleVertices( gl, pathCircle, 0f, 0f, ( float ) positionsX[ii], 360 );
+                }
+                
+                prog.draw( gl, styleCircle, pathCircle );
             }
         }
-
-        if ( showVertical )
+        finally
         {
-            for ( int ii = 0; ii < positionsX.length; ii++ )
-            {
-                drawCircle( gl, 0f, 0f, ( float ) positionsX[ii], 360 );
-            }
+            prog.end( gl );
+            gl.glDisable( GL.GL_BLEND );
         }
 
         // Draw Labels
         GlimpseColor.setColor( textRenderer, insideTextColor == null ? textColor : insideTextColor );
 
+        GL2 gl2 = gl.getGL2( );
+        
         /* first - label range rings:
          * If x-axis is visible, label all intersections with that axis
          * otherwise, if y-axis is visible, label all intersections with that axis
@@ -311,9 +347,9 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
                         yOffset = ( int ) -textBounds.getHeight( ) - textPadding + 2;
                         xOffset = textPadding;
                     }
-                    gl.glMatrixMode( GL2.GL_PROJECTION );
-                    gl.glTranslated( labelX, labelY, 0 );
-                    gl.glRotated( rotAngle, 0, 0, 1 );
+                    gl2.glMatrixMode( GL2.GL_PROJECTION );
+                    gl2.glTranslated( labelX, labelY, 0 );
+                    gl2.glRotated( rotAngle, 0, 0, 1 );
                     textRenderer.draw( label, xOffset, yOffset );
                 }
             }
@@ -382,9 +418,9 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
                         xOffset = ( int ) -textBounds.getWidth( ) - textPadding;
                     }
                 }
-                gl.glMatrixMode( GL2.GL_PROJECTION );
-                gl.glTranslated( labelX, labelY, 0 );
-                gl.glRotated( rotAngle, 0, 0, 1 );
+                gl2.glMatrixMode( GL2.GL_PROJECTION );
+                gl2.glTranslated( labelX, labelY, 0 );
+                gl2.glRotated( rotAngle, 0, 0, 1 );
                 textRenderer.draw( label, xOffset, yOffset );
             }
             finally
@@ -393,6 +429,36 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
             }
         }
     }
+    
+    protected void calculateCircleVertices( GL gl, LinePath path, float cx, float cy, float r, int num_segments )
+    {
+        float start_x = 0;
+        float start_y = 0;
+        
+        for ( int ii = 0; ii < num_segments; ii++ )
+        {
+            float theta = (float) ( TWO_PI * ii / num_segments );
+
+            float x = (float) ( r * Math.cos( theta ) );
+            float y = (float) ( r * Math.sin( theta ) );
+
+            if ( ii == 0 )
+            {
+                start_x = x;
+                start_y = y;
+                
+                path.moveTo( x + cx, y + cy );
+            }
+            else
+            {
+                path.lineTo( x + cx, y + cy );
+
+            }
+        }
+        
+        path.lineTo( start_x + cx, start_y + cy );
+    }
+
 
     // Padding between labels and axis lines
     public int getTextPadding( )
