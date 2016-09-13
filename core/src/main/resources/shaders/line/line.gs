@@ -21,6 +21,12 @@ uniform float FEATHER_THICKNESS_PX;
 // 0 = NONE, 1 = BEVEL, 2 = MITER
 uniform int JOIN_TYPE;
 
+// To keep miters from getting too long, mitering is only used when
+// miterLength <= miterLimit*lineThickness (where miterLength is the
+// distance from the outer tip of the miter to its inner corner).
+// Otherwise, a bevel join is used instead.
+uniform float MITER_LIMIT;
+
 // Cumulative distance to each vertex from the start of the connected
 // line strip.
 in float vMileage_PX[];
@@ -96,7 +102,7 @@ void main( )
                     float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
                     // Extrude is the distance from B outward to the join vertex
-                    bool useMiter = ( JOIN_TYPE == 2 && lengthJoin > 0.25 );
+                    bool useMiter = ( JOIN_TYPE == 2 && miterScale <= MITER_LIMIT );
                     float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
                     float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
@@ -181,7 +187,7 @@ void main( )
                     float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
                     // Extrude is the distance from C outward to the join vertex
-                    bool useMiter = ( JOIN_TYPE == 2 && lengthJoin > 0.25 );
+                    bool useMiter = ( JOIN_TYPE == 2 && miterScale <= MITER_LIMIT );
                     float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
                     float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
