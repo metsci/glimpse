@@ -23,6 +23,7 @@ vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
     return ( xy_FRAC * viewportSize_PX );
 }
 
+// AXIS_RECT is (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
 

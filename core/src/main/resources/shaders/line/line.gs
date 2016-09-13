@@ -11,11 +11,18 @@ vec4 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
 
 uniform vec2 VIEWPORT_SIZE_PX;
 uniform float LINE_THICKNESS_PX;
+
+// The width of the feather region, which lies along the edge of the
+// line region, and across which alpha fades to zero. Half the width
+// of the feather region (the more opaque half) lies inside the ideal
+// bounds of the line. Half (the more transparent half) lies outside.
 uniform float FEATHER_THICKNESS_PX;
 
 // 0 = NONE, 1 = BEVEL, 2 = MITER
 uniform int JOIN_TYPE;
 
+// Cumulative distance to each vertex from the start of the connected
+// line strip.
 in float vMileage_PX[];
 
 out float gMileage_PX;
@@ -23,6 +30,15 @@ out float gFeatherAlpha;
 
 void main( )
 {
+    // The segment we're drawing starts at "B" (which is incoming vertex #1) and
+    // ends at "C" (vertex #2). The vertex before this segment is "A" (vertex #0),
+    // and the one after is "D" (vertex #3).
+    //
+    // "Inner" and "outer" refer to the inner and outer edges of the feather region.
+    //
+    // "Above" and "below" mean up and down, respectively, along the normalBC axis.
+    //
+
     vec2 posB_PX = gl_in[ 1 ].gl_Position.xy;
     vec2 posC_PX = gl_in[ 2 ].gl_Position.xy;
     vec2 deltaBC_PX = posC_PX - posB_PX;
@@ -44,7 +60,7 @@ void main( )
         // B
         //
 
-        // Start with joinless defaults, and overwrite with joined values below
+        // Init to values appropriate for a JOIN_TYPE of NONE, then overwrite below based on JOIN_TYPE
         vec2 innerBelowB_PX = posB_PX - innerNormal_PX*normalBC + feather_PX*dirBC;
         vec2 outerBelowB_PX = posB_PX - outerNormal_PX*normalBC - feather_PX*dirBC;
         vec2 innerAboveB_PX = posB_PX + innerNormal_PX*normalBC + feather_PX*dirBC;
@@ -71,20 +87,30 @@ void main( )
                     float bevelScale = dot( dirJoin, normalBC );
                     float miterScale = 1.0 / bevelScale;
 
+                    // For a miter region, we feather out along normalBC
                     float innerMiter_PX = innerNormal_PX * miterScale;
                     float outerMiter_PX = outerNormal_PX * miterScale;
 
+                    // For a bevel region, we feather out along dirJoin
                     float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
                     float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
+                    // Extrude is the distance from B outward to the join vertex
                     bool useMiter = ( JOIN_TYPE == 2 && lengthJoin > 0.25 );
                     float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
                     float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
+                    // Intrude is the distance from B inward to where the lines separate
                     float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
                     float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
                     float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
+                    // Vector for mitering the corners of the feather region
+                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                    vec2 featherMiter_PX = ( feather_PX / dot( dirFeatherMiter, normalBC ) ) * dirFeatherMiter;
+
+                    // To get triangle_strip to work, vertex order must differ for left and right turns
                     if ( dot( dirJoin, dirAB ) < 0.0 )
                     {
                         isLeftTurnB = true;
@@ -92,10 +118,8 @@ void main( )
                         innerJoinB_PX = posB_PX - innerExtrude_PX*dirJoin;
                         outerJoinB_PX = posB_PX - outerExtrude_PX*dirJoin;
 
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                        innerBelowB_PX = posB_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                        outerBelowB_PX = posB_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        innerBelowB_PX = posB_PX - normal_PX*normalBC + featherMiter_PX;
+                        outerBelowB_PX = posB_PX - normal_PX*normalBC - featherMiter_PX;
 
                         innerAboveB_PX = posB_PX + innerIntrude_PX*dirJoin;
                         outerAboveB_PX = posB_PX + outerIntrude_PX*dirJoin;
@@ -110,10 +134,8 @@ void main( )
                         innerBelowB_PX = posB_PX - innerIntrude_PX*dirJoin;
                         outerBelowB_PX = posB_PX - outerIntrude_PX*dirJoin;
 
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                        innerAboveB_PX = posB_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                        outerAboveB_PX = posB_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        innerAboveB_PX = posB_PX + normal_PX*normalBC - featherMiter_PX;
+                        outerAboveB_PX = posB_PX + normal_PX*normalBC + featherMiter_PX;
                     }
                 }
             }
@@ -123,7 +145,7 @@ void main( )
         // C
         //
 
-        // Start with joinless defaults, and overwrite with joined values below
+        // Init to values appropriate for a JOIN_TYPE of NONE, then overwrite below based on JOIN_TYPE
         vec2 innerBelowC_PX = posC_PX - innerNormal_PX*normalBC - feather_PX*dirBC;
         vec2 outerBelowC_PX = posC_PX - outerNormal_PX*normalBC + feather_PX*dirBC;
         vec2 innerAboveC_PX = posC_PX + innerNormal_PX*normalBC - feather_PX*dirBC;
@@ -150,20 +172,30 @@ void main( )
                     float bevelScale = dot( dirJoin, normalBC );
                     float miterScale = 1.0 / bevelScale;
 
+                    // For a miter region, we feather out along normalBC
                     float innerMiter_PX = innerNormal_PX * miterScale;
                     float outerMiter_PX = outerNormal_PX * miterScale;
 
+                    // For a bevel region, we feather out along dirJoin
                     float innerBevel_PX = ( normal_PX * bevelScale ) - feather_PX;
                     float outerBevel_PX = ( normal_PX * bevelScale ) + feather_PX;
 
+                    // Extrude is the distance from C outward to the join vertex
                     bool useMiter = ( JOIN_TYPE == 2 && lengthJoin > 0.25 );
                     float innerExtrude_PX = ( useMiter ? innerMiter_PX : innerBevel_PX );
                     float outerExtrude_PX = ( useMiter ? outerMiter_PX : outerBevel_PX );
 
+                    // Intrude is the distance from C inward to where the lines separate
                     float maxIntrudeScale = 1.0 / dot( dirJoin, dirBC );
                     float innerIntrude_PX = min( innerMiter_PX, abs( ( lengthBC_PX - feather_PX ) * maxIntrudeScale ) );
                     float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
+                    // Vector for mitering the corners of the feather region
+                    vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
+                    vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                    vec2 featherMiter_PX = ( feather_PX / dot( dirFeatherMiter, normalBC ) ) * dirFeatherMiter;
+
+                    // To get triangle_strip to work, vertex order must differ for left and right turns
                     if ( dot( dirJoin, dirBC ) < 0.0 )
                     {
                         isLeftTurnC = true;
@@ -171,10 +203,8 @@ void main( )
                         innerJoinC_PX = posC_PX - innerExtrude_PX*dirJoin;
                         outerJoinC_PX = posC_PX - outerExtrude_PX*dirJoin;
 
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                        innerBelowC_PX = posC_PX - normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                        outerBelowC_PX = posC_PX - normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        innerBelowC_PX = posC_PX - normal_PX*normalBC + featherMiter_PX;
+                        outerBelowC_PX = posC_PX - normal_PX*normalBC - featherMiter_PX;
 
                         innerAboveC_PX = posC_PX + innerIntrude_PX*dirJoin;
                         outerAboveC_PX = posC_PX + outerIntrude_PX*dirJoin;
@@ -189,10 +219,8 @@ void main( )
                         innerBelowC_PX = posC_PX - innerIntrude_PX*dirJoin;
                         outerBelowC_PX = posC_PX - outerIntrude_PX*dirJoin;
 
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
-                        innerAboveC_PX = posC_PX + normal_PX*normalBC - feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
-                        outerAboveC_PX = posC_PX + normal_PX*normalBC + feather_PX*dirFeatherMiter/dot( dirFeatherMiter, normalBC );
+                        innerAboveC_PX = posC_PX + normal_PX*normalBC - featherMiter_PX;
+                        outerAboveC_PX = posC_PX + normal_PX*normalBC + featherMiter_PX;
                     }
                 }
             }
