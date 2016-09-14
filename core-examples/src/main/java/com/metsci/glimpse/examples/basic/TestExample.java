@@ -4,11 +4,10 @@ import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.decoration.CopyrightPainter;
-import com.metsci.glimpse.painter.decoration.CrosshairPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.decoration.MapBorderPainter;
+import com.metsci.glimpse.painter.decoration.WatermarkPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
+import com.metsci.glimpse.util.io.StreamOpener;
 
 public class TestExample implements GlimpseLayoutProvider
 {
@@ -110,15 +109,18 @@ public class TestExample implements GlimpseLayoutProvider
         */
 
         plot.addPainter( new MapBorderPainter( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) ) );
-//        plot.addPainter( new CopyrightPainter( ) );
-//        CrosshairPainter painter = new CrosshairPainter( );
-//        painter.showSelectionBox( true );
-//        painter.showSelectionCrosshairs( false );
-//        painter.setShadeSelectionBox( true );
-//        plot.addPainter( painter );
-//        GridPainter gridPainter = new GridPainter( );
-//        gridPainter.setShowMinorGrid( true );
-//        plot.addPainter( gridPainter );
+        //        plot.addPainter( new CopyrightPainter( ) );
+        //        CrosshairPainter painter = new CrosshairPainter( );
+        //        painter.showSelectionBox( true );
+        //        painter.showSelectionCrosshairs( false );
+        //        painter.setShadeSelectionBox( true );
+        //        plot.addPainter( painter );
+        //        GridPainter gridPainter = new GridPainter( );
+        //        gridPainter.setShowMinorGrid( true );
+        //        plot.addPainter( gridPainter );
+
+        WatermarkPainter watermarkPainter = new WatermarkPainter( StreamOpener.fileThenResource, "images/GlimpseLogo.png" );
+        plot.addPainter( watermarkPainter );
 
         return plot;
     }

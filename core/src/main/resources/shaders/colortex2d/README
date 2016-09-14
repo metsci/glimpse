@@ -1,0 +1,9 @@
+colortex2d
+
+Applies a 2d rgba texture to a set of vertices specified in axis coordinates.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.ColorTextureProgram2D.java
+ 
+Example Usages:
+ * com.metsci.glimpse.painter.decoration.WatermarkPainter.java
