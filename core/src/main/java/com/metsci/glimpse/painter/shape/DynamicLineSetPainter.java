@@ -27,7 +27,7 @@
 package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL2ES2.*;
