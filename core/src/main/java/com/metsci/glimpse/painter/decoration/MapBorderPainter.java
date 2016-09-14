@@ -33,7 +33,6 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
@@ -75,7 +74,7 @@ public class MapBorderPainter extends GlimpsePainterBase
     {
         this.ticksX = ticksX;
         this.ticksY = ticksY;
-        
+
         this.inXys = new MappableBufferBuilder( );
         this.inRgba = new MappableBufferBuilder( );
 
@@ -275,7 +274,7 @@ public class MapBorderPainter extends GlimpsePainterBase
         }
 
         linePath.clear( );
-        
+
         addLineCorners( width, height );
 
         linePath.moveTo( borderSize, borderSize );
@@ -289,7 +288,7 @@ public class MapBorderPainter extends GlimpsePainterBase
         linePath.lineTo( width - 0.5f, height - 0.5f );
         linePath.lineTo( width - 0.5f, 0.5f );
         linePath.lineTo( 0.5f, 0.5f );
-        
+
         lineProg.begin( gl );
         try
         {
@@ -307,8 +306,12 @@ public class MapBorderPainter extends GlimpsePainterBase
 
     private void addLineCorners( int width, int height )
     {
+        linePath.addRectangle( 0, 0, borderSize, borderSize );
+        linePath.addRectangle( 0, height, borderSize, height - borderSize );
+        linePath.addRectangle( width, 0, width - borderSize, borderSize );
+        linePath.addRectangle( width - borderSize, height - borderSize, width, height );
     }
-    
+
     private void addFillCorners( int width, int height )
     {
         inXys.addQuad2f( 0, 0, borderSize, borderSize );

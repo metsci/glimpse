@@ -44,6 +44,15 @@ public class LinePath
         this.mileageDirty = true;
     }
 
+    public void addRectangle( float x1, float y1, float x2, float y2 )
+    {
+        moveTo( x1, y1 );
+        lineTo( x2, y1 );
+        lineTo( x2, y2 );
+        lineTo( x1, y2 );
+        lineTo( x1, y1 );
+    }
+    
     public void moveTo( float x, float y )
     {
         addVertex( x, y, false );
@@ -56,7 +65,7 @@ public class LinePath
 
     public void addVertex( float x, float y, boolean connect )
     {
-        data.addVertex( x, y, connect );
+        this.data.addVertex( x, y, connect );
 
         this.xyDirty = true;
         this.connectDirty = true;
@@ -65,7 +74,7 @@ public class LinePath
 
     public void clear( )
     {
-        data.clear( );
+        this.data.clear( );
 
         this.xyDirty = true;
         this.connectDirty = true;
