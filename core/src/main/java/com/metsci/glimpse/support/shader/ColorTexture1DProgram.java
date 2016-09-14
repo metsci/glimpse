@@ -113,6 +113,11 @@ public class ColorTexture1DProgram
     {
         draw( gl, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count);
     }
+    
+    public void draw( GL2ES2 gl, AbstractTexture texture, MappableBufferBuilder xyVertices, MappableBufferBuilder sVertices )
+    {
+        draw( gl, GL_TRIANGLES, texture, xyVertices.getBuffer( gl ), sVertices.getBuffer( gl ), 0, sVertices.numFloats( ) );
+    }
 
     public void end( GL2ES2 gl )
     {

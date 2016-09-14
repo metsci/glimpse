@@ -11,6 +11,19 @@ public class DirectBufferUtils
 {
 
     /**
+     * Calls {@link FloatBuffer#duplicate()}, flips the result, and returns it.
+     * <p>
+     * This is a convenient way to get a flipped version of a buffer, without
+     * modifying the original buffer's position or limit.
+     */
+    public static FloatBuffer flipped( FloatBuffer buffer )
+    {
+        FloatBuffer flipped = buffer.duplicate( );
+        flipped.flip( );
+        return flipped;
+    }
+
+    /**
      * If the supplied buffer has enough capacity to put the specified number of
      * additional values (starting at its position), then the supplied buffer is
      * returned.

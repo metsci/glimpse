@@ -1,6 +1,6 @@
 flat_color
 
-Applies a flat color to a set of vertices specified in axis coordinates.
+Applies a flat color to a set of vertices.
 
 Java Wrappers:
  * com.metsci.glimpse.support.shader.FLatColorProgram.java

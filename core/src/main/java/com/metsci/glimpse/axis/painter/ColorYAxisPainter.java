@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static javax.media.opengl.GL.*;
-
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
@@ -35,7 +33,6 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -43,6 +40,7 @@ import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.shader.ColorTexture1DProgram;
+import com.metsci.glimpse.support.shader.MappableBufferBuilder;
 
 /**
  * A vertical (y) axis with a color bar and labeled ticks along the right hand side.
@@ -53,15 +51,14 @@ import com.metsci.glimpse.support.shader.ColorTexture1DProgram;
 public class ColorYAxisPainter extends NumericYAxisPainter
 {
     protected ColorTexture1DProgram progTex;
-    protected LinePath pathTex;
+    protected MappableBufferBuilder xyBuffer;
+    protected MappableBufferBuilder sBuffer;
+    protected ColorTexture1D colorTexture;
 
     protected LineProgram progOutline;
     protected LinePath pathOutline;
 
     protected LineStyle style;
-
-    protected GLStreamingBuffer sVbo;
-    protected ColorTexture1D colorTexture;
 
     protected int colorBarSize = 10;
     protected boolean outline = true;
@@ -71,9 +68,8 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         super( ticks );
 
         this.pathOutline = new LinePath( );
-        this.pathTex = new LinePath( );
-
-        this.sVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1 );
+        this.xyBuffer = new MappableBufferBuilder( );
+        this.sBuffer = new MappableBufferBuilder( );
 
         this.style = new LineStyle( );
         this.style.stippleEnable = false;
@@ -118,7 +114,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         paintAxisLabel( gl, axis, bounds );
         paintSelectionLine( gl, axis, bounds );
     }
-    
+
     @Override
     protected void initShaderPrograms( GL gl )
     {
@@ -133,8 +129,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
 
             // although the vertex coordinates may change, the texture coordinates
             // stay constant, so just set them up once here
-            sVbo.mapFloats( gl, 4 ).put( 0.0f ).put( 0.0f ).put( 1.0f ).put( 1.0f );
-            sVbo.seal( gl );
+            sBuffer.addQuad1f( 0, 1, 0, 1 );
         }
     }
 
@@ -158,12 +153,8 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             pathOutline.lineTo( x2, height );
             pathOutline.lineTo( x2, 0.5f );
 
-            pathTex.clear( );
-
-            pathTex.lineTo( x2, 0.5f );
-            pathTex.lineTo( x1, 0.5f );
-            pathTex.lineTo( x2, height );
-            pathTex.lineTo( x1, width );
+            xyBuffer.clear( );
+            xyBuffer.addQuad2f( x1, 0.5f, x2, height );
 
             GLUtils.enableStandardBlending( gl );
             try
@@ -174,7 +165,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
                 {
                     progTex.setPixelOrtho( gl, bounds );
 
-                    progTex.draw( gl, colorTexture, pathTex.xyVbo( gl ), sVbo, 0, pathTex.numVertices( ) );
+                    progTex.draw( gl, colorTexture, xyBuffer, sBuffer );
                 }
                 finally
                 {

@@ -28,13 +28,6 @@ public class LineUtils
         return ( axis.getAxisX( ).getPixelsPerValue( ) / axis.getAxisY( ).getPixelsPerValue( ) );
     }
 
-    public static FloatBuffer flipped( FloatBuffer buffer )
-    {
-        FloatBuffer flipped = buffer.duplicate( );
-        flipped.flip( );
-        return flipped;
-    }
-
     /**
      * Like {@link FloatBuffer#put(FloatBuffer)}, except prepends a duplicate copy of the first
      * {@code floatsToDuplicate} values, and appends a duplicate copy of the last {@code floatsToDuplicate}
