@@ -1,26 +1,47 @@
 package com.metsci.glimpse.support.line.util;
 
+import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
 import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
 import static java.lang.Math.max;
 import static javax.media.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
 import static javax.media.opengl.GL.GL_MAP_WRITE_BIT;
 
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 
 /**
- * Represents a buffer object, and provides methods that (should) allow the
- * buffer to be mapped for convenient writing without incurring surprising
- * performance penalties.
+ * Represents a device buffer that needs to be re-written frequently, and
+ * frequently read for rendering as well. Makes a good replacement for
+ * immediate-mode rendering.
  * <p>
- * Follows advice from Rob Barris in March 2010 (which can be found
- * <a href="https://www.opengl.org/discussion_boards/showthread.php/170118-VBOs-strangely-slow?p=1197780#post1197780">here</a>)
- * on how to avoid driver-level synchronization. However, synchronization is
- * ultimately up to the driver, and the approach taken here is not guaranteed
- * to work on every driver.
+ * Uses the recommended approach for
+ * <a href="https://www.opengl.org/wiki/Buffer_Object_Streaming">buffer object streaming</a>.
+ * Specifically:
+ * <ol>
+ * <li>Allocate a large block of device-buffer memory
+ * <li>Write to a small section of the block
+ * <li>Render using the written section
+ * <li>Write to the <i>next</i> section of the block
+ * <li>Render using the newly written section
+ * <li>Repeat
+ * <li>Once the whole block has been used, allocate a new block
+ * </ol>
+ * When a new block is allocated, the old block is dereferenced, but not
+ * actually deleted until pending render operations are done with it. This
+ * approach avoids driver-level synchronization, because the new block can
+ * be written to without waiting for pending render operations to finish.
+ * <p>
+ * The cost is an increase in device-memory allocations. However, allocating
+ * in large blocks keeps the frequency of allocations down. Furthermore, in
+ * most cases, successive blocks will be the same size, so it is reasonable
+ * to assume that old blocks will be recycled by the driver's memory manager.
+ * For more info see the explanation <a href="https://www.opengl.org/discussion_boards/showthread.php/170118-VBOs-strangely-slow?p=1197780#post1197780">here</a>.
  * <p>
  * Expected usage looks something like this:
  * <pre>
@@ -132,7 +153,7 @@ public class MappableBuffer
     /**
      * Convenience method that maps a region, copies data into it using {@link FloatBuffer#put(FloatBuffer)},
      * and then seals the region.
-     *
+     * <p>
      * Note that this will modify the buffer's {@code position}.
      */
     public void setFloats( GL gl, FloatBuffer floats )
@@ -143,9 +164,35 @@ public class MappableBuffer
     }
 
     /**
+     * Convenience method that maps a region, copies data into it using {@link DoubleBuffer#put(DoubleBuffer)},
+     * and then seals the region.
+     * <p>
+     * Note that this will modify the buffer's {@code position}.
+     */
+    public void setDoubles( GL gl, DoubleBuffer doubles )
+    {
+        DoubleBuffer mapped = mapDoubles( gl, doubles.remaining( ) );
+        mapped.put( doubles );
+        seal( gl );
+    }
+
+    /**
+     * Convenience method that maps a region, copies data into it using {@link IntBuffer#put(IntBuffer)},
+     * and then seals the region.
+     * <p>
+     * Note that this will modify the buffer's {@code position}.
+     */
+    public void setInts( GL gl, IntBuffer ints )
+    {
+        IntBuffer mapped = mapInts( gl, ints.remaining( ) );
+        mapped.put( ints );
+        seal( gl );
+    }
+
+    /**
      * Convenience method that maps a region, copies data into it using {@link ByteBuffer#put(ByteBuffer)},
      * and then seals the region.
-     *
+     * <p>
      * Note that this will modify the buffer's {@code position}.
      */
     public void setBytes( GL gl, ByteBuffer bytes )
@@ -165,16 +212,34 @@ public class MappableBuffer
     }
 
     /**
+     * Convenience wrapper around {@link #mapBytes(GL, long)} -- converts {@code numDoubles} to a
+     * byte count, and converts the returned buffer to a {@link DoubleBuffer}.
+     */
+    public DoubleBuffer mapDoubles( GL gl, long numDoubles )
+    {
+        return mapBytes( gl, numDoubles * SIZEOF_DOUBLE ).asDoubleBuffer( );
+    }
+
+    /**
+     * Convenience wrapper around {@link #mapBytes(GL, long)} -- converts {@code numInts} to a
+     * byte count, and converts the returned buffer to an {@link IntBuffer}.
+     */
+    public IntBuffer mapInts( GL gl, long numInts )
+    {
+        return mapBytes( gl, numInts * SIZEOF_INT ).asIntBuffer( );
+    }
+
+    /**
      * Returns a buffer representing host memory owned by the graphics driver. The returned buffer
      * should be treated as <em>write-only</em>. After writing to the buffer, call {@link #seal(GL)}
      * to indicate to the driver that the newly written contents are ready to be pushed to the device.
-     *
+     * <p>
      * It is okay to request more bytes than will actually be written, as long as you then avoid
      * actually trying to use the values in the unwritten region (e.g. by passing the appropriate
      * number of vertices to {@link GL#glDrawArrays(int, int, int)}.
-     *
+     * <p>
      * Note, however, that the driver may push the entire mapped region to the device -- so while
-     * {@code numBytes} is just an upper bound, it should be a reasonably tight upper bound.
+     * {@code numBytes} is an upper bound, it should be a reasonably tight upper bound.
      */
     public ByteBuffer mapBytes( GL gl, long numBytes )
     {
