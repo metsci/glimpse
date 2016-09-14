@@ -49,14 +49,6 @@ public class LinePathData
         this.mileagePpvAspectRatio = Double.NaN;
     }
 
-    public void clear( )
-    {
-        this.xyBuffer.clear( );
-        this.connectBuffer.clear( );
-        this.mileageBuffer.clear( );
-        this.mileagePpvAspectRatio = Double.NaN;
-    }
-
     public void addVertex( float x, float y, boolean connect )
     {
         this.xyBuffer = ensureAdditionalCapacity( xyBuffer, 2, true );
@@ -64,6 +56,14 @@ public class LinePathData
 
         this.connectBuffer = ensureAdditionalCapacity( connectBuffer, 1, true );
         connectBuffer.put( connect ? 1f : 0f );
+    }
+
+    public void clear( )
+    {
+        xyBuffer.clear( );
+        connectBuffer.clear( );
+        mileageBuffer.clear( );
+        this.mileagePpvAspectRatio = Double.NaN;
     }
 
     public int numVertices( )
