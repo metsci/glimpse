@@ -1,13 +1,18 @@
 package com.metsci.glimpse.examples.basic;
 
+import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.axis.tagged.Tag;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.CopyrightPainter;
-import com.metsci.glimpse.painter.decoration.CrosshairPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.colormap.ColorGradients;
 
 public class TestExample implements GlimpseLayoutProvider
 {
@@ -80,25 +85,23 @@ public class TestExample implements GlimpseLayoutProvider
         layoutX.addPainter( painter );
         */
 
-        /*
         GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
-        
+
         TaggedPartialColorYAxisPainter painter = new TaggedPartialColorYAxisPainter( new GridAxisLabelHandler( ) );
-        
+
         TaggedAxis1D axis = new TaggedAxis1D( );
         axis.addTag( "T1", 0.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.0f );
         axis.addTag( "T2", 1.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.9f );
         axis.addTag( "T3", 2.0 ).setAttribute( Tag.TEX_COORD_ATTR, 1.0f ).setAttribute( Tag.TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
         layoutY.setAxis( axis );
-        
+
         ColorTexture1D texture = new ColorTexture1D( 1024 );
         texture.setColorGradient( ColorGradients.viridis );
         painter.setColorScale( texture );
-        
+
         layoutY.addGlimpseMouseAllListener( new TaggedAxisMouseListener1D( ) );
         plot.addLayout( layoutY );
         layoutY.addPainter( painter );
-        */
 
         /*
         GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
@@ -108,17 +111,18 @@ public class TestExample implements GlimpseLayoutProvider
         layoutY.addPainter( painter );
         */
 
-        plot.addPainter( new BorderPainter( ).setLineWidth( 10.0f ) );
+        //        plot.addPainter( new MapBorderPainter( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) ) );
+        /*
         plot.addPainter( new CopyrightPainter( ) );
         CrosshairPainter painter = new CrosshairPainter( );
         painter.showSelectionBox( true );
-        painter.showSelectionCrosshairs(false);
+        painter.showSelectionCrosshairs( false );
         painter.setShadeSelectionBox( true );
         plot.addPainter( painter );
         GridPainter gridPainter = new GridPainter( );
         gridPainter.setShowMinorGrid( true );
         plot.addPainter( gridPainter );
-        
+        */
 
         return plot;
     }

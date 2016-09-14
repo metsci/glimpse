@@ -144,7 +144,7 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         this.pathLine = new LinePath( );
 
         this.style = new LineStyle( );
-        style.feather_PX = 0;
+        this.style.feather_PX = 0;
         this.style.stippleEnable = false;
 
         this.progLine = null;

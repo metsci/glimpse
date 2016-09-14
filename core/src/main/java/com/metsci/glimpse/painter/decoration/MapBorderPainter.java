@@ -26,14 +26,26 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import static javax.media.opengl.GL.*;
+
+import java.nio.FloatBuffer;
+
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.line.util.MappableBuffer;
+import com.metsci.glimpse.support.shader.ArrayColorProgram;
+import com.metsci.glimpse.support.shader.FlatColorProgram;
 
 /**
  * An alternative {@link BorderPainter} which displays alternating
@@ -41,7 +53,7 @@ import com.metsci.glimpse.painter.base.GlimpsePainter2D;
  *
  * @author ulman
  */
-public class MapBorderPainter extends GlimpsePainter2D
+public class MapBorderPainter extends GlimpsePainterBase
 {
     protected float[] outerColor = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
     protected float[] innerColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -56,11 +68,22 @@ public class MapBorderPainter extends GlimpsePainter2D
 
     protected double savedValueY = -1;
     protected boolean savedOrientY = false;
+    
+    protected ArrayColorProgram triangleProg;
+    
+    protected MappableBuffer inXys;
+    protected MappableBuffer inRgba;
+    
+//    protected LineStyle style;
+//    protected LinePath path;
 
     public MapBorderPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
         this.ticksY = ticksY;
+        
+        this.inXys = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 10 );
+        this.inRgba = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 10 );
     }
 
     public int getBorderSize( )
@@ -154,28 +177,28 @@ public class MapBorderPainter extends GlimpsePainter2D
         }
     }
 
-    private void glSetColor( GL2 gl, int i, boolean orient )
+    private float[] getColor( int i, boolean orient )
     {
         if ( i % 2 == 0 )
         {
             if ( orient )
             {
-                gl.glColor4fv( outerColor, 0 );
+                return outerColor;
             }
             else
             {
-                gl.glColor4fv( innerColor, 0 );
+                return innerColor;
             }
         }
         else
         {
             if ( orient )
             {
-                gl.glColor4fv( innerColor, 0 );
+                return innerColor;
             }
             else
             {
-                gl.glColor4fv( outerColor, 0 );
+                return outerColor;
             }
         }
     }
@@ -225,10 +248,14 @@ public class MapBorderPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
         if ( ticksX == null || ticksY == null ) return;
 
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = getAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
+        
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
 
@@ -237,122 +264,152 @@ public class MapBorderPainter extends GlimpsePainter2D
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        GL2 gl = context.getGL( ).getGL2( );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
-
         double[] xPositions = ticksX.getTickPositions( axis.getAxisX( ) );
         double[] yPositions = ticksY.getTickPositions( axis.getAxisY( ) );
 
         boolean orientX = innerOrOuterFirstX( xPositions );
         boolean orientY = innerOrOuterFirstY( yPositions );
 
+        if ( triangleProg == null )
+        {
+            triangleProg = new ArrayColorProgram( gl );
+        }
+        
+        int count = xPositions.length * 12;
+        
+        FloatBuffer xy = inXys.mapFloats( gl, count * 2 );
+        FloatBuffer rgba = inRgba.mapFloats( gl, count * 4 );
+        
         for ( int i = 0; i < xPositions.length; i++ )
         {
-            glSetColor( gl, i, orientX );
+            float[] color1 = getColor( i, orientX );
 
             int pos1X = axisX.valueToScreenPixel( xPositions[i] );
             int pos2X = i == xPositions.length - 1 ? width : axisX.valueToScreenPixel( xPositions[i + 1] );
 
-            gl.glBegin( GL2.GL_POLYGON );
-            try
-            {
-                gl.glVertex2d( pos1X, borderSize );
-                gl.glVertex2d( pos1X, 0 );
-                gl.glVertex2d( pos2X, 0 );
-                gl.glVertex2d( pos2X, borderSize );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
+            xy.put( pos1X ).put( borderSize );
+            xy.put( pos1X ).put( 0 );
+            xy.put( pos2X ).put( borderSize );
 
-            glSetColor( gl, i, !orientX );
+            xy.put( pos2X ).put( 0 );
+            xy.put( pos2X ).put( borderSize );
+            xy.put( pos1X ).put( 0 );
+            
+            rgba.put( color1 );
+            rgba.put( color1 );
+            rgba.put( color1 );
+            
+            rgba.put( color1 );
+            rgba.put( color1 );
+            rgba.put( color1 );
 
-            gl.glBegin( GL2.GL_POLYGON );
-            try
-            {
-                gl.glVertex2d( pos1X, height - borderSize );
-                gl.glVertex2d( pos1X, height );
-                gl.glVertex2d( pos2X, height );
-                gl.glVertex2d( pos2X, height - borderSize );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
+            float[]  color2 = getColor( i, !orientX );
+
+            xy.put( pos1X ).put( height - borderSize );
+            xy.put( pos1X ).put( height );
+            xy.put( pos2X ).put( height - borderSize );
+
+            xy.put( pos2X ).put( height );
+            xy.put( pos2X ).put( height - borderSize );
+            xy.put( pos1X ).put( height );
+            
+            rgba.put( color2 );
+            rgba.put( color2 );
+            rgba.put( color2 );
+            
+            rgba.put( color2 );
+            rgba.put( color2 );
+            rgba.put( color2 );
         }
-
-        for ( int i = 0; i < yPositions.length; i++ )
-        {
-            glSetColor( gl, i, orientY );
-
-            int pos1Y = axisY.valueToScreenPixel( yPositions[i] );
-            int pos2Y = i == yPositions.length - 1 ? height : axisY.valueToScreenPixel( yPositions[i + 1] );
-
-            gl.glBegin( GL2.GL_POLYGON );
-            try
-            {
-                gl.glVertex2d( borderSize, pos1Y );
-                gl.glVertex2d( 0, pos1Y );
-                gl.glVertex2d( 0, pos2Y );
-                gl.glVertex2d( borderSize, pos2Y );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-
-            glSetColor( gl, i, !orientY );
-
-            gl.glBegin( GL2.GL_POLYGON );
-            try
-            {
-                gl.glVertex2d( width - borderSize, pos1Y );
-                gl.glVertex2d( width, pos1Y );
-                gl.glVertex2d( width, pos2Y );
-                gl.glVertex2d( width - borderSize, pos2Y );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
-        }
-
-        gl.glColor4fv( innerColor, 0 );
-        glDrawCorners( gl, GL2.GL_POLYGON, width, height );
-
-        gl.glColor4fv( outerColor, 0 );
-        glDrawCorners( gl, GL2.GL_LINE_LOOP, width, height );
-
-        gl.glBegin( GL2.GL_LINE_LOOP );
+        
+        inXys.seal( gl );
+        inRgba.seal( gl );
+        
+        triangleProg.begin( gl );
         try
         {
-            gl.glVertex2d( borderSize, borderSize );
-            gl.glVertex2d( borderSize, height - borderSize );
-            gl.glVertex2d( width - borderSize, height - borderSize );
-            gl.glVertex2d( width - borderSize, borderSize );
+            triangleProg.setPixelOrtho( gl, bounds );
+            
+            triangleProg.draw( gl, GL.GL_TRIANGLES, inXys, inRgba, 0, count );
         }
         finally
         {
-            gl.glEnd( );
+            triangleProg.end( gl );
         }
 
-        gl.glBegin( GL2.GL_LINE_LOOP );
-        try
-        {
-            gl.glVertex2d( 0.5, 0.5 );
-            gl.glVertex2d( 0.5, height - 0.5 );
-            gl.glVertex2d( width - 0.5, height - 0.5 );
-            gl.glVertex2d( width - 0.5, 0.5 );
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
+//        for ( int i = 0; i < yPositions.length; i++ )
+//        {
+//            glSetColor( gl, i, orientY );
+//
+//            int pos1Y = axisY.valueToScreenPixel( yPositions[i] );
+//            int pos2Y = i == yPositions.length - 1 ? height : axisY.valueToScreenPixel( yPositions[i + 1] );
+//
+//            gl.glBegin( GL2.GL_POLYGON );
+//            try
+//            {
+//                gl.glVertex2d( borderSize, pos1Y );
+//                gl.glVertex2d( 0, pos1Y );
+//                gl.glVertex2d( 0, pos2Y );
+//                gl.glVertex2d( borderSize, pos2Y );
+//            }
+//            finally
+//            {
+//                gl.glEnd( );
+//            }
+//
+//            glSetColor( gl, i, !orientY );
+//
+//            gl.glBegin( GL2.GL_POLYGON );
+//            try
+//            {
+//                gl.glVertex2d( width - borderSize, pos1Y );
+//                gl.glVertex2d( width, pos1Y );
+//                gl.glVertex2d( width, pos2Y );
+//                gl.glVertex2d( width - borderSize, pos2Y );
+//            }
+//            finally
+//            {
+//                gl.glEnd( );
+//            }
+//        }
+//
+//        gl.glColor4fv( innerColor, 0 );
+//        glDrawCorners( gl, GL2.GL_POLYGON, width, height );
+//
+//        gl.glColor4fv( outerColor, 0 );
+//        glDrawCorners( gl, GL2.GL_LINE_LOOP, width, height );
+//
+//        gl.glBegin( GL2.GL_LINE_LOOP );
+//        try
+//        {
+//            gl.glVertex2d( borderSize, borderSize );
+//            gl.glVertex2d( borderSize, height - borderSize );
+//            gl.glVertex2d( width - borderSize, height - borderSize );
+//            gl.glVertex2d( width - borderSize, borderSize );
+//        }
+//        finally
+//        {
+//            gl.glEnd( );
+//        }
+//
+//        gl.glBegin( GL2.GL_LINE_LOOP );
+//        try
+//        {
+//            gl.glVertex2d( 0.5, 0.5 );
+//            gl.glVertex2d( 0.5, height - 0.5 );
+//            gl.glVertex2d( width - 0.5, height - 0.5 );
+//            gl.glVertex2d( width - 0.5, 0.5 );
+//        }
+//        finally
+//        {
+//            gl.glEnd( );
+//        }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -284,7 +284,7 @@ public class GridPainter extends GlimpsePainterBase
 
                 path.clear( );
 
-                for ( int i = 0; i < xTicks.length; i++ )
+                for ( int i = 0; i < yTicks.length; i++ )
                 {
                     double jTick = converterY.fromAxisUnits( yTicks[i] );
                     path.moveTo( ( float ) axis.getMinX( ), ( float ) jTick );

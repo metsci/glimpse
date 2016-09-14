@@ -41,6 +41,7 @@ import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.FlatColorProgram;
+import com.metsci.glimpse.support.shader.MappableBufferBuilder;
 
 /**
  * Displays crosshairs and a selection box centered over the position
@@ -69,18 +70,21 @@ public class CrosshairPainter extends GlimpsePainterBase
     protected boolean colorSet = false;
 
     protected FlatColorProgram flatProg;
+    protected MappableBufferBuilder flatPath;
+
     protected LineProgram lineProg;
-    protected LineStyle style;
-    protected LinePath path;
+    protected LineStyle lineStyle;
+    protected LinePath linePath;
 
     public CrosshairPainter( )
     {
-        this.style = new LineStyle( );
-        this.style.feather_PX = 0;
-        this.style.stippleEnable = false;
-        this.style.thickness_PX = 2.0f;
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.feather_PX = 0;
+        this.lineStyle.stippleEnable = false;
+        this.lineStyle.thickness_PX = 2.0f;
 
-        this.path = new LinePath( );
+        this.linePath = new LinePath( );
+        this.flatPath = new MappableBufferBuilder( );
     }
 
     public void setCursorColor( float[] rgba )
@@ -123,7 +127,7 @@ public class CrosshairPainter extends GlimpsePainterBase
 
     public void setLineWidth( float width )
     {
-        this.style.thickness_PX = width;
+        this.lineStyle.thickness_PX = width;
     }
 
     public void showSelectionBox( boolean show )
@@ -210,7 +214,7 @@ public class CrosshairPainter extends GlimpsePainterBase
 
         if ( showSelectionBox )
         {
-            style.rgba = paintXor ? xorColor : cursorColor;
+            lineStyle.rgba = paintXor ? xorColor : cursorColor;
 
             conditionallyEnableXor( gl );
             lineProg.begin( gl );
@@ -218,15 +222,15 @@ public class CrosshairPainter extends GlimpsePainterBase
             {
                 lineProg.setAxisOrtho( gl, axis );
                 lineProg.setViewport( gl, bounds );
-                path.clear( );
+                linePath.clear( );
 
-                path.moveTo( centerX - sizeX, centerY - sizeY );
-                path.lineTo( centerX - sizeX, centerY + sizeY );
-                path.lineTo( centerX + sizeX, centerY + sizeY );
-                path.lineTo( centerX + sizeX, centerY - sizeY );
-                path.lineTo( centerX - sizeX, centerY - sizeY );
+                linePath.moveTo( centerX - sizeX, centerY - sizeY );
+                linePath.lineTo( centerX - sizeX, centerY + sizeY );
+                linePath.lineTo( centerX + sizeX, centerY + sizeY );
+                linePath.lineTo( centerX + sizeX, centerY - sizeY );
+                linePath.lineTo( centerX - sizeX, centerY - sizeY );
 
-                lineProg.draw( gl, style, path );
+                lineProg.draw( gl, lineStyle, linePath );
             }
             finally
             {
@@ -240,17 +244,20 @@ public class CrosshairPainter extends GlimpsePainterBase
                 flatProg.begin( gl );
                 try
                 {
-                    flatProg.setColor( gl, shadeColor );
+//                    flatProg.setColor( gl, shadeColor );
                     flatProg.setAxisOrtho( gl, axis );
 
-                    path.clear( );
+                    flatPath.clear( );
 
-                    path.lineTo( centerX - sizeX, centerY - sizeY );
-                    path.lineTo( centerX - sizeX, centerY + sizeY );
-                    path.lineTo( centerX + sizeX, centerY - sizeY );
-                    path.lineTo( centerX + sizeX, centerY + sizeY );
-
-                    flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, path.xyVbo( gl ), 0, 4 );
+                    flatPath.addQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
+                    flatProg.draw( gl, flatPath, shadeColor );
+                    
+//                    flatPath.addVertex2f( centerX - sizeX, centerY - sizeY );
+//                    flatPath.addVertex2f( centerX - sizeX, centerY + sizeY );
+//                    flatPath.addVertex2f( centerX + sizeX, centerY - sizeY );
+//                    flatPath.addVertex2f( centerX + sizeX, centerY + sizeY );
+//
+//                    flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, linePath.xyVbo( gl ), 0, flatPath.numFloats( ) / 2 );
                 }
                 finally
                 {
@@ -264,7 +271,7 @@ public class CrosshairPainter extends GlimpsePainterBase
         {
             if ( showSelectionBox )
             {
-                style.rgba = paintXor ? xorColor : cursorColor;
+                lineStyle.rgba = paintXor ? xorColor : cursorColor;
 
                 conditionallyEnableXor( gl );
                 lineProg.begin( gl );
@@ -272,28 +279,28 @@ public class CrosshairPainter extends GlimpsePainterBase
                 {
                     lineProg.setAxisOrtho( gl, axis );
                     lineProg.setViewport( gl, bounds );
-                    
-                    path.clear( );
+
+                    linePath.clear( );
 
                     if ( !hideVerticalHairs )
                     {
-                        path.moveTo( centerX, minY );
-                        path.lineTo( centerX, centerY - sizeY );
+                        linePath.moveTo( centerX, minY );
+                        linePath.lineTo( centerX, centerY - sizeY );
 
-                        path.moveTo( centerX, centerY + sizeY );
-                        path.lineTo( centerX, maxY );
+                        linePath.moveTo( centerX, centerY + sizeY );
+                        linePath.lineTo( centerX, maxY );
                     }
 
                     if ( !hideHorizontalHairs )
                     {
-                        path.moveTo( minX, centerY );
-                        path.lineTo( centerX - sizeX, centerY );
+                        linePath.moveTo( minX, centerY );
+                        linePath.lineTo( centerX - sizeX, centerY );
 
-                        path.moveTo( centerX + sizeX, centerY );
-                        path.lineTo( maxX, centerY );
+                        linePath.moveTo( centerX + sizeX, centerY );
+                        linePath.lineTo( maxX, centerY );
                     }
 
-                    lineProg.draw( gl, style, path );
+                    lineProg.draw( gl, lineStyle, linePath );
 
                 }
                 finally
@@ -304,7 +311,7 @@ public class CrosshairPainter extends GlimpsePainterBase
             }
             else
             {
-                style.rgba = paintXor ? xorColor : cursorColor;
+                lineStyle.rgba = paintXor ? xorColor : cursorColor;
 
                 conditionallyEnableXor( gl );
                 lineProg.begin( gl );
@@ -312,22 +319,22 @@ public class CrosshairPainter extends GlimpsePainterBase
                 {
                     lineProg.setAxisOrtho( gl, axis );
                     lineProg.setViewport( gl, bounds );
-                    
-                    path.clear( );
+
+                    linePath.clear( );
 
                     if ( !hideVerticalHairs )
                     {
-                        path.moveTo( centerX, minY );
-                        path.lineTo( centerX, maxY );
+                        linePath.moveTo( centerX, minY );
+                        linePath.lineTo( centerX, maxY );
                     }
 
                     if ( !hideHorizontalHairs )
                     {
-                        path.moveTo( minX, centerY );
-                        path.lineTo( maxX, centerY );
+                        linePath.moveTo( minX, centerY );
+                        linePath.lineTo( maxX, centerY );
                     }
 
-                    lineProg.draw( gl, style, path );
+                    lineProg.draw( gl, lineStyle, linePath );
 
                 }
                 finally

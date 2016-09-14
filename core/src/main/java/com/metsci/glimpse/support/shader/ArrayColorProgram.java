@@ -10,48 +10,39 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.support.line.util.MappableBuffer;
 
-public class FlatColorProgram
+public class ArrayColorProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "shaders/flat_color/flat_color.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/flat_color/flat_color.fs" );
+    public static final String vertShader_GLSL = requireResourceText( "shaders/array_color/array_color.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/array_color/array_color.fs" );
 
     public final int programHandle;
 
     // Uniforms
 
     public final int AXIS_RECT;
-    public final int RGBA;
 
     // Vertex attributes
 
     public final int inXy;
+    public final int inRgba;
 
-    public FlatColorProgram( GL2ES2 gl )
+    public ArrayColorProgram( GL2ES2 gl )
     {
         this.programHandle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
 
         this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
-        this.RGBA = gl.glGetUniformLocation( programHandle, "RGBA" );
 
         this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
+        this.inRgba = gl.glGetAttribLocation( programHandle, "inRgba" );
     }
 
     public void begin( GL2ES2 gl )
     {
         gl.glUseProgram( programHandle );
         gl.glEnableVertexAttribArray( inXy );
+        gl.glEnableVertexAttribArray( inRgba );
     }
     
-    public void setColor( GL2ES2 gl, float r, float g, float b, float a )
-    {
-        gl.glUniform4f( RGBA, r, g, b, a );
-    }
-    
-    public void setColor( GL2ES2 gl, float[] vRGBA )
-    {
-        gl.glUniform4fv( RGBA, 1, vRGBA, 0 );
-    }
-
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
     {
         setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
@@ -67,31 +58,31 @@ public class FlatColorProgram
         gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, MappableBuffer xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer rgbaVbo, int first, int count )
     {
-        draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
+        draw( gl, GL.GL_TRIANGLES, xyVbo, rgbaVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, MappableBuffer xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, MappableBuffer xyVbo, MappableBuffer rgbaVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+        
+        gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( ) );
+        gl.glVertexAttribPointer( inRgba, 2, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, int xyVbo, int rgbaVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
 
+        gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo );
+        gl.glVertexAttribPointer( inRgba, 2, GL_FLOAT, false, 0, 0 );
+        
         gl.glDrawArrays( mode, first, count );
-    }
-    
-    public void draw( GL2ES2 gl, MappableBufferBuilder xyVertices, float[] color )
-    {
-        setColor( gl, color );
-        draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )
