@@ -43,12 +43,12 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisExponentLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -253,7 +253,7 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
         Axis2D axis = getAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
         
-        LineUtils.enableStandardBlending( gl );
+        GLUtils.enableStandardBlending( gl );
         try
         {
             if ( this.newFont != null )

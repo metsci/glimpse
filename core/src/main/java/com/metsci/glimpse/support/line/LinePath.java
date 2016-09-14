@@ -8,20 +8,20 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
-import com.metsci.glimpse.support.line.util.MappableBuffer;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 
 public class LinePath
 {
 
     protected final LinePathData data;
 
-    protected MappableBuffer xyVbo;
+    protected GLStreamingBuffer xyVbo;
     protected boolean xyDirty;
 
-    protected MappableBuffer connectVbo;
+    protected GLStreamingBuffer connectVbo;
     protected boolean connectDirty;
 
-    protected MappableBuffer mileageVbo;
+    protected GLStreamingBuffer mileageVbo;
     protected boolean mileageDirty;
 
 
@@ -34,16 +34,16 @@ public class LinePath
     {
         this.data = new LinePathData( initialNumVertices );
 
-        this.xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.xyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.xyDirty = true;
 
-        this.connectVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.connectVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.connectDirty = true;
 
-        this.mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.mileageVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.mileageDirty = true;
     }
-    
+
     public void clear( )
     {
         this.data.clear( );
@@ -75,7 +75,7 @@ public class LinePath
         return ( numVertices == 0 ? 0 : numVertices + 2 );
     }
 
-    public MappableBuffer xyVbo( GL gl )
+    public GLStreamingBuffer xyVbo( GL gl )
     {
         if ( xyDirty )
         {
@@ -92,7 +92,7 @@ public class LinePath
         return xyVbo;
     }
 
-    public MappableBuffer connectVbo( GL gl )
+    public GLStreamingBuffer connectVbo( GL gl )
     {
         if ( connectDirty )
         {
@@ -109,12 +109,12 @@ public class LinePath
         return connectVbo;
     }
 
-    public MappableBuffer mileageVbo( GL gl, double ppvAspectRatio )
+    public GLStreamingBuffer mileageVbo( GL gl, double ppvAspectRatio )
     {
         return mileageVbo( gl, ppvAspectRatio, 1.0000000001 );
     }
 
-    public MappableBuffer mileageVbo( GL gl, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
+    public GLStreamingBuffer mileageVbo( GL gl, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
     {
         int mileageDirtyCount = data.updateMileage( ppvAspectRatio, ppvAspectRatioChangeThreshold );
         this.mileageDirty |= ( mileageDirtyCount > 0 );

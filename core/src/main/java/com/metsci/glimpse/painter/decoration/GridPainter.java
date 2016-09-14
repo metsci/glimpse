@@ -317,7 +317,7 @@ public class GridPainter extends GlimpsePainterBase
         finally
         {
             prog.end( gl );
-            LineUtils.disableStandardBlending( gl );
+            LineUtils.disableBlending( gl );
         }
     }
 

@@ -255,7 +255,7 @@ public class CrosshairPainter extends GlimpsePainterBase
                 finally
                 {
                     flatProg.end( gl );
-                    LineUtils.disableStandardBlending( gl );
+                    LineUtils.disableBlending( gl );
                 }
             }
         }

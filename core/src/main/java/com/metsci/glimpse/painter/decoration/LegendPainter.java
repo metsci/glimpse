@@ -400,7 +400,7 @@ public abstract class LegendPainter extends GlimpsePainterBase
         }
         finally
         {
-            LineUtils.disableStandardBlending( gl );
+            LineUtils.disableBlending( gl );
         }
     }
 

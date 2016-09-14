@@ -1,9 +1,9 @@
 package com.metsci.glimpse.support.line.example;
 
-import static com.metsci.glimpse.support.line.LineJoinType.JOIN_MITER;
-import static com.metsci.glimpse.support.line.util.LineUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.line.util.LineUtils.ppvAspectRatio;
-import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.support.line.LineJoinType.*;
+import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
 
 import java.util.Random;
 

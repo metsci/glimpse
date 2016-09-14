@@ -26,12 +26,10 @@
  */
 package com.metsci.glimpse.gl.util;
 
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GL2ES2.*;
 import static jogamp.opengl.glu.error.Error.*;
 
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -39,80 +37,24 @@ import javax.media.opengl.GL2ES2;
 
 public class GLErrorUtils
 {
-    private GLErrorUtils( )
-    {
-    };
-
     public static void logGLShaderInfoLog( Logger logger, GL2ES2 gl, int shaderObject, String prefix )
     {
-        String log = getGLShaderInfoLog( gl, shaderObject );
+        String log = getShaderInfoLog( gl, shaderObject );
 
         if ( log != null && !log.isEmpty( ) )
         {
             logWarning( logger, "%s: %s", prefix, log );
         }
-    }
-
-    public static String getGLShaderInfoLog( GL2ES2 gl, int shaderObject )
-    {
-        IntBuffer intValue = IntBuffer.allocate( 1 );
-
-        gl.glGetShaderiv( shaderObject, GL_INFO_LOG_LENGTH, intValue );
-
-        int lengthWithNull = intValue.get( );
-        if ( lengthWithNull <= 1 )
-        {
-            // just use a default length
-            lengthWithNull = 1000;
-        }
-
-        ByteBuffer infoLog = ByteBuffer.allocate( lengthWithNull );
-
-        intValue.flip( );
-        gl.glGetShaderInfoLog( shaderObject, lengthWithNull, intValue, infoLog );
-
-        int actualLength = intValue.get( );
-
-        byte[] infoBytes = new byte[actualLength];
-        infoLog.get( infoBytes );
-
-        return new String( infoBytes );
     }
 
     public static void logGLProgramInfoLog( Logger logger, GL2ES2 gl, int programObject, String prefix )
     {
-        String log = getGLProgramInfoLog( gl, programObject );
+        String log = getProgramInfoLog( gl, programObject );
 
         if ( log != null && !log.isEmpty( ) )
         {
             logWarning( logger, "%s: %s", prefix, log );
         }
-    }
-
-    public static String getGLProgramInfoLog( GL2ES2 gl, int programObject )
-    {
-        IntBuffer intValue = IntBuffer.allocate( 1 );
-
-        gl.glGetProgramiv( programObject, GL_INFO_LOG_LENGTH, intValue );
-
-        int lengthWithNull = intValue.get( );
-        if ( lengthWithNull <= 1 )
-        {
-            // just use a default length
-            lengthWithNull = 1000;
-        }
-
-        ByteBuffer infoLog = ByteBuffer.allocate( lengthWithNull );
-
-        intValue.flip( );
-        gl.glGetProgramInfoLog( programObject, lengthWithNull, intValue, infoLog );
-
-        int actualLength = intValue.get( );
-
-        byte[] infoBytes = new byte[actualLength];
-        infoLog.get( infoBytes );
-
-        return new String( infoBytes );
     }
 
     public static boolean logGLError( Logger logger, GL gl, String prefix )

@@ -39,11 +39,11 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
 
 public class NumericPolarAxisPainter extends NumericXYAxisPainter
 {
@@ -233,7 +233,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
 
         AxisUnitConverter convY = AxisUnitConverters.suShownAsNavigationDegrees;
 
-        LineUtils.enableStandardBlending( gl );
+        GLUtils.enableStandardBlending( gl );
         prog.begin( gl );
         try
         {

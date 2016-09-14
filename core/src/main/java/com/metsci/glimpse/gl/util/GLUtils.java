@@ -41,10 +41,6 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GLUtils
 {
-    private GLUtils( )
-    {
-    };
-
     public static int genBuffer( GL gl )
     {
         int[] handle = new int[1];
@@ -73,6 +69,34 @@ public class GLUtils
         gl.glGetBooleanv( param, value, 0 );
 
         return value[0] != 0;
+    }
+
+    /**
+     * Enables blending, and set the blend func that gives the intuitive
+     * behavior for most situations.
+     * <p>
+     * Blended RGB will be the weighted average of source RGB and dest RGB:
+     * <pre>
+     *    RGB = (A_s)*RGB_s + (1-A_s)*RGB_d
+     * </pre>
+     * Blended Alpha will be:
+     * <pre>
+     *    A = 1 - (1-A_d)*(1-A_s)
+     *      = A_s*(1) + A_d*(1-A_s)
+     * </pre>
+     * Often the blended alpha has no visible effect. However, it matters
+     * when reading pixels from the resulting framebuffer -- for export to
+     * an image file, e.g.
+     */
+    public static void enableStandardBlending( GL gl )
+    {
+        gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL.GL_BLEND );
+    }
+
+    public static void disableBlending( GL gl )
+    {
+        gl.glDisable( GL.GL_BLEND );
     }
 
     public static int getGLTextureDim( int ndim )

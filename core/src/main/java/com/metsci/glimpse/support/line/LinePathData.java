@@ -1,10 +1,9 @@
 package com.metsci.glimpse.support.line;
 
-import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
-import static com.metsci.glimpse.support.line.util.LineUtils.distance;
-import static com.metsci.glimpse.support.line.util.LineUtils.ensureAdditionalCapacity;
-import static com.metsci.glimpse.support.line.util.LineUtils.flipped;
-import static java.lang.Math.max;
+import static com.jogamp.common.nio.Buffers.*;
+import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static java.lang.Math.*;
 
 import java.nio.FloatBuffer;
 
@@ -49,7 +48,7 @@ public class LinePathData
         this.mileageBuffer = newDirectFloatBuffer( 1*initialNumVertices );
         this.mileagePpvAspectRatio = Double.NaN;
     }
-    
+
     public void clear( )
     {
         this.xyBuffer.clear( );

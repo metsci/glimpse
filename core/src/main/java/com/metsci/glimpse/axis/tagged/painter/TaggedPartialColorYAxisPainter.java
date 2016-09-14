@@ -33,7 +33,6 @@ import java.nio.FloatBuffer;
 import java.util.List;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -42,8 +41,8 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.support.line.util.LineUtils;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * A vertical (y) axis painter which displays positions of tags in addition
@@ -55,15 +54,15 @@ import com.metsci.glimpse.support.line.util.MappableBuffer;
  */
 public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
 {
-    protected MappableBuffer vertexCoords;
-    protected MappableBuffer textureCoords;
+    protected GLStreamingBuffer vertexCoords;
+    protected GLStreamingBuffer textureCoords;
 
     public TaggedPartialColorYAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
 
-        this.vertexCoords = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
-        this.textureCoords = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
+        this.vertexCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
+        this.textureCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
     }
 
     @Override
@@ -92,7 +91,7 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
             pathOutline.lineTo( x2, height );
             pathOutline.lineTo( x2, 0.5f );
 
-            LineUtils.enableStandardBlending( gl );
+            GLUtils.enableStandardBlending( gl );
             try
             {
                 if ( count > 0 )
@@ -127,7 +126,7 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
             }
             finally
             {
-                gl.glDisable( GL2.GL_BLEND );
+                gl.glDisable( GL.GL_BLEND );
             }
         }
     }

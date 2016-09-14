@@ -1,6 +1,6 @@
 package com.metsci.glimpse.support.shader;
 
-import static com.metsci.glimpse.support.line.util.ShaderUtils.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static javax.media.opengl.GL.*;
 
 import javax.media.opengl.GL;
@@ -8,7 +8,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 
 public class FlatColorProgram
 {
@@ -67,12 +67,12 @@ public class FlatColorProgram
         gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, MappableBuffer xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
     {
         draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, MappableBuffer xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );

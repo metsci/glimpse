@@ -29,20 +29,19 @@ package com.metsci.glimpse.axis.painter;
 import static javax.media.opengl.GL.*;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.support.shader.ColorTexture1DProgram;
 
 /**
@@ -61,7 +60,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
 
     protected LineStyle style;
 
-    protected MappableBuffer sVbo;
+    protected GLStreamingBuffer sVbo;
     protected ColorTexture1D colorTexture;
 
     protected int colorBarSize = 10;
@@ -74,7 +73,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         this.pathOutline = new LinePath( );
         this.pathTex = new LinePath( );
 
-        this.sVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1 );
+        this.sVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, 1 );
 
         this.style = new LineStyle( );
         this.style.stippleEnable = false;
@@ -165,7 +164,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             pathTex.lineTo( width, y2 );
             pathTex.lineTo( width, y1 );
 
-            LineUtils.enableStandardBlending( gl );
+            GLUtils.enableStandardBlending( gl );
             try
             {
                 // draw color scale
@@ -197,7 +196,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             }
             finally
             {
-                gl.glDisable( GL2.GL_BLEND );
+                gl.glDisable( GL.GL_BLEND );
             }
         }
     }

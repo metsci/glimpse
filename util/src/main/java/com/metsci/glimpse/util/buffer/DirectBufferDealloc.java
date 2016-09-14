@@ -1,15 +1,24 @@
-package com.metsci.glimpse.support.line.util;
+package com.metsci.glimpse.util.buffer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.util.Collection;
 
+/**
+ * Uses non-public APIs (e.g. via reflection) to free the off-heap memory that
+ * backs an NIO direct buffer. Normally such off-heap memory is not freed until
+ * the garbage collector finalizes the direct buffer. This delay causes problems
+ * when a lot of off-heap memory is used, but garbage collections are infrequent.
+ * <p>
+ * Currently only works for Oracle and OpenJDK, but could probably be extended to
+ * others.
+ * <p>
+ * <strong><em>Use with caution.</em></strong> Deallocating a buffer inappropriately
+ * can crash the JVM, or worse.
+ */
 public class DirectBufferDealloc
 {
-
-    // Currently only set up for Oracle and OpenJDK, but could be extended
-    // to others if necessary
 
     protected static final Class<?> directBufferClass;
     protected static final Method getCleanerMethod;

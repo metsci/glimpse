@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line.util;
+package com.metsci.glimpse.gl.shader;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.metsci.glimpse.util.GeneralUtils.array;
@@ -23,7 +23,7 @@ import javax.media.opengl.GL2ES2;
 import com.google.common.io.Resources;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
-public class ShaderUtils
+public class GLShaderUtils
 {
 
     public static String requireResourceText( String resourcePath )

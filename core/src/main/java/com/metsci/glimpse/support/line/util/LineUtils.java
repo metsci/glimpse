@@ -1,35 +1,21 @@
 package com.metsci.glimpse.support.line.util;
 
-import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
-import static com.metsci.glimpse.support.line.util.DirectBufferDealloc.deallocateDirectBuffers;
-import static java.lang.Math.ceil;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.sqrt;
-import static javax.media.opengl.GL.GL_BLEND;
-import static javax.media.opengl.GL.GL_ONE;
-import static javax.media.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
-import static javax.media.opengl.GL.GL_SRC_ALPHA;
+import static java.lang.Math.*;
 
 import java.nio.FloatBuffer;
-
-import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis2D;
 
 public class LineUtils
 {
-    public static void enableStandardBlending( GL gl )
-    {
-        gl.glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL_BLEND );
-    }
-    
-    public static void disableStandardBlending( GL gl )
-    {
-        gl.glDisable( GL_BLEND );
-    }
 
+    /**
+     * Computes XY distance in X units, allowing Y units to differ from X units by a linear factor.
+     * The ratio of X units to Y units is specified with {@code ppvAspectRatio}. This is useful when
+     * computing cumulative distance along a line-strip, for stippling.
+     * <p>
+     * @see #ppvAspectRatio(Axis2D)
+     */
     public static double distance( double x0, double y0, double x1, double y1, double ppvAspectRatio )
     {
         double dx = x1 - x0;
@@ -54,7 +40,7 @@ public class LineUtils
      * {@code floatsToDuplicate} values, and appends a duplicate copy of the last {@code floatsToDuplicate}
      * values. This is useful when using {@link javax.media.opengl.GL3#GL_LINE_STRIP_ADJACENCY},
      * for example.
-     *
+     * <p>
      * If the {@code from} buffer does not have at least {@code floatsToDuplicate} values remaining,
      * this function does not modify either buffer.
      */
@@ -77,39 +63,6 @@ public class LineUtils
                 // Use get-at-index to avoid modifying from's position
                 to.put( from.get( i ) );
             }
-        }
-    }
-
-    public static FloatBuffer ensureAdditionalCapacity( FloatBuffer buffer, int additionalFloats, boolean deallocOldBuffer )
-    {
-        int minCapacity = buffer.position( ) + additionalFloats;
-        if ( buffer.capacity( ) >= minCapacity )
-        {
-            return buffer;
-        }
-        else if ( minCapacity > Integer.MAX_VALUE )
-        {
-            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT: requested-capacity = " + minCapacity );
-        }
-        else
-        {
-            long newCapacity = min( Integer.MAX_VALUE, max( minCapacity, ( long ) ceil( 1.618 * buffer.capacity( ) ) ) );
-            FloatBuffer newBuffer = newDirectFloatBuffer( ( int ) newCapacity );
-
-            if ( deallocOldBuffer )
-            {
-                buffer.flip( );
-                newBuffer.put( buffer );
-                deallocateDirectBuffers( buffer );
-            }
-            else
-            {
-                FloatBuffer dupe = buffer.duplicate( );
-                dupe.flip( );
-                newBuffer.put( dupe );
-            }
-
-            return newBuffer;
         }
     }
 

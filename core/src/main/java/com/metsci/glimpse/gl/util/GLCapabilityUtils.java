@@ -43,10 +43,6 @@ import javax.media.opengl.GLContext;
  */
 public class GLCapabilityUtils
 {
-    private GLCapabilityUtils( )
-    {
-    };
-
     // these come from the official OpenGL documentation
     public static final String glVendorDocumentation = "The company responsible for this GL implementation. This name does not change from release to release.";
     public static final String glRendererDocumentation = "The name of the renderer. This name is typically specific to a particular configuration of a hardware platform. It does not change from release to release.";

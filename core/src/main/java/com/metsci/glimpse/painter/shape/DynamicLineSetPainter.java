@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.painter.shape;
 
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static com.metsci.glimpse.support.line.util.LineUtils.*;
-import static com.metsci.glimpse.support.line.util.ShaderUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL2ES2.*;
@@ -47,11 +47,11 @@ import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkColorAccumulator;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
@@ -77,8 +77,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     protected FloatBuffer rgbaBuffer;
     protected FloatBuffer xyBuffer;
 
-    protected MappableBuffer rgbaMappableBuffer;
-    protected MappableBuffer xyMappableBuffer;
+    protected GLStreamingBuffer rgbaStreamingBuffer;
+    protected GLStreamingBuffer xyStreamingBuffer;
     protected FloatBuffer tempBuffer;
 
     // point id (which can be any object) -> index into pointBuffer
@@ -108,8 +108,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         this.xyBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
         this.rgbaBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
 
-        this.xyMappableBuffer = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
-        this.rgbaMappableBuffer = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
+        this.xyStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
+        this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
 
         this.searchResults = new IntsArray( );
 
@@ -305,7 +305,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             {
                 rgbaBuffer.position( 0 );
                 rgbaBuffer.limit( lineCount * 2 * 4 );
-                rgbaMappableBuffer.setFloats( gl, rgbaBuffer );
+                rgbaStreamingBuffer.setFloats( gl, rgbaBuffer );
                 rgbaBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
             }
 
@@ -313,7 +313,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             {
                 xyBuffer.position( 0 );
                 xyBuffer.limit( lineCount * 2 * 2 );
-                xyMappableBuffer.setFloats( gl, xyBuffer );
+                xyStreamingBuffer.setFloats( gl, xyBuffer );
                 xyBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
             }
 
@@ -324,7 +324,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
                 prog.setAxisOrtho( gl, axis );
                 prog.setStyle( gl, style );
 
-                prog.draw( gl, xyMappableBuffer, rgbaMappableBuffer, 0, lineCount * 2 );
+                prog.draw( gl, xyStreamingBuffer, rgbaStreamingBuffer, 0, lineCount * 2 );
             }
             finally
             {
@@ -772,7 +772,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
         }
 
-        public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer rgbaVbo, int first, int count )
+        public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
         {
             gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
             gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );

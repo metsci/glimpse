@@ -1,6 +1,6 @@
 package com.metsci.glimpse.support.line.example;
 
-import static com.metsci.glimpse.support.line.util.LineUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL2ES2.*;
 
@@ -10,24 +10,24 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
 
 public class ExampleBorderPainter extends GlimpsePainterBase
 {
 
-    protected final MappableBuffer xyVbo;
-    protected final MappableBuffer mileageVbo;
+    protected final GLStreamingBuffer xyVbo;
+    protected final GLStreamingBuffer mileageVbo;
 
     protected LineStyle style;
     protected LineProgram prog;
 
     public ExampleBorderPainter( )
     {
-        this.xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
-        this.mileageVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
+        this.xyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
+        this.mileageVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 1000 );
 
         this.style = new LineStyle( );
         this.prog = null;

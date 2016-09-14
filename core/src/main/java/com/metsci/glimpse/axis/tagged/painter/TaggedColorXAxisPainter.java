@@ -41,10 +41,10 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.FlatColorProgram;
@@ -68,7 +68,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
     protected boolean tagColorSet = false;
 
     protected FlatColorProgram flatColorProg;
-    protected MappableBuffer tagXyVbo;
+    protected GLStreamingBuffer tagXyVbo;
     protected LineStyle tagStyle;
 
     protected int tagHalfWidth = DEFAULT_TAG_HALFBASE;
@@ -82,7 +82,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         this.tickBufferSize = 10;
 
-        this.tagXyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
+        this.tagXyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
 
         this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
 
@@ -205,7 +205,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         tagXyVbo.seal( gl );
 
-        LineUtils.enableStandardBlending( gl );
+        GLUtils.enableStandardBlending( gl );
         flatColorProg.begin( gl3 );
         try
         {

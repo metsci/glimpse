@@ -1,16 +1,14 @@
 package com.metsci.glimpse.support.line;
 
-import static com.metsci.glimpse.support.line.util.ShaderUtils.createProgram;
-import static com.metsci.glimpse.support.line.util.ShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL3.*;
 
 import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 
 public class LineProgram
 {
@@ -128,12 +126,12 @@ public class LineProgram
     {
         setStyle( gl, style );
 
-        MappableBuffer xyVbo = path.xyVbo( gl );
-        MappableBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
+        GLStreamingBuffer xyVbo = path.xyVbo( gl );
+        GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
         draw( gl, xyVbo, mileageVbo, 0, path.numVertices( ) );
     }
 
-    public void draw( GL2ES2 gl, MappableBuffer xyVbo, MappableBuffer mileageVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer mileageVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );

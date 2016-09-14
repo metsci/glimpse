@@ -1,12 +1,9 @@
-package com.metsci.glimpse.support.line.util;
+package com.metsci.glimpse.gl;
 
-import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
-import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
-import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
-import static java.lang.Math.max;
-import static javax.media.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
-import static javax.media.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.common.nio.Buffers.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static java.lang.Math.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
@@ -17,7 +14,7 @@ import javax.media.opengl.GL;
 
 /**
  * Represents a device buffer that needs to be re-written frequently, and
- * frequently read for rendering as well. Makes a good replacement for
+ * frequently read for rendering as well. Helpful for migrating away from
  * immediate-mode rendering.
  * <p>
  * Uses the recommended approach for
@@ -47,7 +44,7 @@ import javax.media.opengl.GL;
  * <pre>
  *    // At init-time
  *
- *    MappableBuffer xyVbo = new MappableBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 100 );
+ *    GLStreamingBuffer xyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 100 );
  *    ...
  *
  *    // At render-time
@@ -68,7 +65,7 @@ import javax.media.opengl.GL;
  *    gl.glDrawArrays( ..., 0, numVertices );
  * </pre>
  */
-public class MappableBuffer
+public class GLStreamingBuffer
 {
 
     public final int target;
@@ -115,7 +112,7 @@ public class MappableBuffer
     protected long mappedSize;
 
 
-    public MappableBuffer( int target, int usage, int blockSizeFactor )
+    public GLStreamingBuffer( int target, int usage, int blockSizeFactor )
     {
         this.target = target;
         this.usage = usage;
