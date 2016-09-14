@@ -1,6 +1,6 @@
 package com.metsci.glimpse.support.line;
 
-import static com.metsci.glimpse.support.line.util.LineUtils.putWithFirstAndLastDuplicated;
+import static com.metsci.glimpse.support.line.LineUtils.*;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_STATIC_DRAW;
 

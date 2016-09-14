@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line.util;
+package com.metsci.glimpse.support.line;
 
 import static java.lang.Math.*;
 
