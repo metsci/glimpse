@@ -6,6 +6,7 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.MapBorderPainter;
 import com.metsci.glimpse.painter.decoration.WatermarkPainter;
+import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.util.io.StreamOpener;
 
@@ -108,7 +109,7 @@ public class TestExample implements GlimpseLayoutProvider
         layoutY.addPainter( painter );
         */
 
-        plot.addPainter( new MapBorderPainter( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) ) );
+        //plot.addPainter( new MapBorderPainter( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) ) );
         //        plot.addPainter( new CopyrightPainter( ) );
         //        CrosshairPainter painter = new CrosshairPainter( );
         //        painter.showSelectionBox( true );
@@ -119,8 +120,10 @@ public class TestExample implements GlimpseLayoutProvider
         //        gridPainter.setShowMinorGrid( true );
         //        plot.addPainter( gridPainter );
 
-        WatermarkPainter watermarkPainter = new WatermarkPainter( StreamOpener.fileThenResource, "images/GlimpseLogo.png" );
-        plot.addPainter( watermarkPainter );
+        //WatermarkPainter watermarkPainter = new WatermarkPainter( StreamOpener.fileThenResource, "images/GlimpseLogo.png" );
+        plot.addPainter( new ScalePainter( ) );
+
+        //plot.addPainter( watermarkPainter );
 
         return plot;
     }
