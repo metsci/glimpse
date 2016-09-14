@@ -13,6 +13,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.line.LineJoinType;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -47,12 +48,40 @@ public class RandomLinesPainter extends GlimpsePainterBase
         }
 
         this.style = new LineStyle( );
-        style.thickness_PX = 4;
-        style.joinType = JOIN_MITER;
+        style.thickness_PX = 5;
+        style.joinType = LineJoinType.JOIN_MITER;
         style.rgba = floats( 0.7f, 0, 0, 1 );
         style.stippleEnable = true;
         style.stippleScale = 2;
         style.stipplePattern = 0b0001010111111111;
+        
+        (new Thread( )
+        {
+            public void run( )
+            {
+                int dir = 1;
+                
+                while ( true )
+                {
+                    style.thickness_PX = style.thickness_PX += dir * 0.05;    
+                
+                    if ( style.thickness_PX > 10 ) dir = -1;
+                    if ( style.thickness_PX < 2 ) dir = 1;
+                    
+                    try
+                    {
+                        Thread.sleep( 5 );
+                    }
+                    catch ( InterruptedException e )
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                
+            }
+            
+        }).start( );
 
         this.prog = null;
     }

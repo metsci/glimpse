@@ -69,7 +69,7 @@ public class ArrayColorProgram
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
         
         gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( ) );
-        gl.glVertexAttribPointer( inRgba, 2, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
+        gl.glVertexAttribPointer( inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );
     }
@@ -80,9 +80,14 @@ public class ArrayColorProgram
         gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo );
-        gl.glVertexAttribPointer( inRgba, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( inRgba, 4, GL_FLOAT, false, 0, 0 );
         
         gl.glDrawArrays( mode, first, count );
+    }
+    
+    public void draw( GL2ES2 gl, MappableBufferBuilder xy, MappableBufferBuilder rgba )
+    {
+        draw( gl, GL_TRIANGLES, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )

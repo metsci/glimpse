@@ -84,9 +84,27 @@ public class MappableBufferBuilder
         
         data.addVertex1f( x2y1 );
         data.addVertex1f( x1y2 );
-        data.addVertex1f( x2y2);
+        data.addVertex1f( x2y2 );
         
         dirty = true;
+    }
+    
+    public void addQuad4fv( float[] x1y1, float[] x1y2, float[] x2y1, float[] x2y2 )
+    {
+        data.addVertex4fv( x1y1 );
+        data.addVertex4fv( x1y2 );
+        data.addVertex4fv( x2y1 );
+        
+        data.addVertex4fv( x2y1 );
+        data.addVertex4fv( x1y2 );
+        data.addVertex4fv( x2y2 );
+        
+        dirty = true;
+    }
+    
+    public void addQuadSolidColor( float[] color )
+    {
+        addQuad4fv( color, color, color, color );
     }
     
     public static class MappableBufferData
@@ -106,13 +124,19 @@ public class MappableBufferBuilder
         public void addVertex1f( float v )
         {
             this.buffer = ensureAdditionalCapacity( buffer, 1, true );
-            buffer.put( v );
+            this.buffer.put( v );
         }
         
         public void addVertex2f( float x, float y )
         {
             this.buffer = ensureAdditionalCapacity( buffer, 2, true );
-            buffer.put( x ).put( y );
+            this.buffer.put( x ).put( y );
+        }
+        
+        public void addVertex4fv( float[] v )
+        {
+            this.buffer = ensureAdditionalCapacity( buffer, 4, true );
+            this.buffer.put( v );
         }
 
         public int position( )
