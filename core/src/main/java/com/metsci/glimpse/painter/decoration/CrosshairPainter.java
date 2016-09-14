@@ -33,11 +33,11 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.FlatColorProgram;
@@ -240,7 +240,7 @@ public class CrosshairPainter extends GlimpsePainterBase
 
             if ( shadeSelectionBox )
             {
-                LineUtils.enableStandardBlending( gl );
+                GLUtils.enableStandardBlending( gl );
                 flatProg.begin( gl );
                 try
                 {
@@ -251,7 +251,7 @@ public class CrosshairPainter extends GlimpsePainterBase
 
                     flatPath.addQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
                     flatProg.draw( gl, flatPath, shadeColor );
-                    
+
 //                    flatPath.addVertex2f( centerX - sizeX, centerY - sizeY );
 //                    flatPath.addVertex2f( centerX - sizeX, centerY + sizeY );
 //                    flatPath.addVertex2f( centerX + sizeX, centerY - sizeY );
@@ -262,7 +262,7 @@ public class CrosshairPainter extends GlimpsePainterBase
                 finally
                 {
                     flatProg.end( gl );
-                    LineUtils.disableBlending( gl );
+                    GLUtils.disableBlending( gl );
                 }
             }
         }

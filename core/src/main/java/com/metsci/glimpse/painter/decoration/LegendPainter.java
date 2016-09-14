@@ -41,12 +41,12 @@ import javax.media.opengl.GL3;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.FlatColorProgram;
@@ -320,7 +320,7 @@ public abstract class LegendPainter extends GlimpsePainterBase
 
         //draw a white box and black border
 
-        LineUtils.enableStandardBlending( gl );
+        GLUtils.enableStandardBlending( gl );
         try
         {
             flatProg.begin( gl );
@@ -400,7 +400,7 @@ public abstract class LegendPainter extends GlimpsePainterBase
         }
         finally
         {
-            LineUtils.disableBlending( gl );
+            GLUtils.disableBlending( gl );
         }
     }
 

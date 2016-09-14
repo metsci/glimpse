@@ -38,11 +38,11 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.LineUtils;
 
 /**
  * Displays dotted horizontal and vertical grid lines.
@@ -227,7 +227,7 @@ public class GridPainter extends GlimpsePainterBase
         //////////////  Vertical Lines
         //////////////
 
-        LineUtils.enableStandardBlending( gl );
+        GLUtils.enableStandardBlending( gl );
         prog.begin( gl );
         try
         {
@@ -317,7 +317,7 @@ public class GridPainter extends GlimpsePainterBase
         finally
         {
             prog.end( gl );
-            LineUtils.disableBlending( gl );
+            GLUtils.disableBlending( gl );
         }
     }
 

@@ -39,11 +39,11 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.util.MappableBuffer;
 import com.metsci.glimpse.support.shader.ArrayColorProgram;
 import com.metsci.glimpse.support.shader.FlatColorProgram;
 
@@ -70,10 +70,10 @@ public class MapBorderPainter extends GlimpsePainterBase
     protected boolean savedOrientY = false;
     
     protected ArrayColorProgram triangleProg;
-    
-    protected MappableBuffer inXys;
-    protected MappableBuffer inRgba;
-    
+
+    protected GLStreamingBuffer inXys;
+    protected GLStreamingBuffer inRgba;
+
 //    protected LineStyle style;
 //    protected LinePath path;
 
@@ -82,8 +82,8 @@ public class MapBorderPainter extends GlimpsePainterBase
         this.ticksX = ticksX;
         this.ticksY = ticksY;
         
-        this.inXys = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 10 );
-        this.inRgba = new MappableBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 10 );
+        this.inXys = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 10 );
+        this.inRgba = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 10 );
     }
 
     public int getBorderSize( )
