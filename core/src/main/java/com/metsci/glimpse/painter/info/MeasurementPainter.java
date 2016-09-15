@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
@@ -40,8 +40,14 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.shader.FlatColorProgram;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * Displays a protractor and ruler when the mouse cursor is locked
@@ -49,7 +55,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class MeasurementPainter extends GlimpseDataPainter2D
+public class MeasurementPainter extends GlimpsePainterBase
 {
     private static final double RADIANS_PER_VERTEX = Math.PI / 60.0;
     private static final double RAD_TO_DEG = 180.0 / Math.PI;
@@ -72,6 +78,13 @@ public class MeasurementPainter extends GlimpseDataPainter2D
     protected DecimalFormat distanceFormatter;
     protected AxisUnitConverter distanceUnitConverter;
 
+    protected FlatColorProgram fillProg;
+    protected GLStreamingBufferBuilder fillBuilder;
+
+    protected LineProgram lineProg;
+    protected LinePath linePath;
+    protected LineStyle lineStyle;
+
     public MeasurementPainter( )
     {
         this( "" );
@@ -88,6 +101,13 @@ public class MeasurementPainter extends GlimpseDataPainter2D
         this.angleFormatter = angleFormatter;
         this.distanceFormatter = distanceFormatter;
         this.distanceUnitConverter = AxisUnitConverters.identity;
+
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.stippleEnable = false;
+        this.lineStyle.feather_PX = 0.8f;
+
+        this.linePath = new LinePath( );
+        this.fillBuilder = new GLStreamingBufferBuilder( );
     }
 
     public void setDistanceUnitConverter( AxisUnitConverter converter )
@@ -140,16 +160,17 @@ public class MeasurementPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
+        this.textRenderer.dispose( );
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( textRenderer == null ) return;
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -162,59 +183,80 @@ public class MeasurementPainter extends GlimpseDataPainter2D
 
         if ( !lockedX && !lockedY ) return;
 
-        double lockX = axisX.getSelectionCenter( );
-        double lockY = axisY.getSelectionCenter( );
+        float lockX = ( float ) axisX.getSelectionCenter( );
+        float lockY = ( float ) axisY.getSelectionCenter( );
 
-        double mouseX = axisX.getMouseValue( );
-        double mouseY = axisY.getMouseValue( );
+        float mouseX = ( float ) axisX.getMouseValue( );
+        float mouseY = ( float ) axisY.getMouseValue( );
 
-        double diffX = mouseX - lockX;
-        double diffY = mouseY - lockY;
+        float diffX = mouseX - lockX;
+        float diffY = mouseY - lockY;
 
-        double distance = Math.sqrt( diffX * diffX + diffY * diffY );
+        float distance = ( float ) Math.sqrt( diffX * diffX + diffY * diffY );
 
-        double angle = Math.atan2( mouseY - lockY, mouseX - lockX );
+        float angle = ( float ) Math.atan2( mouseY - lockY, mouseX - lockX );
         int sign = angle < 0 ? -1 : 1;
-        double step = RADIANS_PER_VERTEX;
-        double radius = distance * ANGLE_WEDGE_RADIUS_FRACTION;
+        float step = ( float ) RADIANS_PER_VERTEX;
+        float radius = ( float ) ( distance * ANGLE_WEDGE_RADIUS_FRACTION );
+
+        if ( this.lineProg == null )
+        {
+            this.lineProg = new LineProgram( gl );
+        }
+
+        if ( this.fillProg == null )
+        {
+            this.fillProg = new FlatColorProgram( gl );
+        }
 
         //// draw ruler ////
-        gl.glLineWidth( rulerWidth );
-        gl.glColor4fv( rulerColor, 0 );
 
-        gl.glBegin( GL2.GL_LINES );
+        this.linePath.clear( );
+        this.linePath.moveTo( lockX, lockY );
+        this.linePath.lineTo( mouseX, mouseY );
+
+        this.lineProg.begin( gl );
         try
         {
-            gl.glVertex2d( lockX, lockY );
-            gl.glVertex2d( mouseX, mouseY );
+            this.lineProg.setAxisOrtho( gl, axis );
+            this.lineProg.setViewport( gl, bounds );
+
+            this.lineStyle.rgba = rulerColor;
+            this.lineStyle.thickness_PX = rulerWidth;
+
+            this.lineProg.draw( gl, lineStyle, linePath );
         }
         finally
         {
-            gl.glEnd( );
+            this.lineProg.end( gl );
         }
 
-        //// draw protractor ////
-        gl.glColor4fv( protractorColor, 0 );
+        this.fillBuilder.clear( );
 
-        gl.glBegin( GL2.GL_TRIANGLE_FAN );
+        this.fillBuilder.addVertex2f( lockX, lockY );
+
+        for ( double a = 0; a < angle * sign; a += step )
+        {
+            double x = lockX + Math.cos( a * sign ) * radius;
+            double y = lockY + Math.sin( a * sign ) * radius;
+            this.fillBuilder.addVertex2f( ( float ) x, ( float ) y );
+        }
+
+        double x = lockX + Math.cos( angle ) * radius;
+        double y = lockY + Math.sin( angle ) * radius;
+        this.fillBuilder.addVertex2f( ( float ) x, ( float ) y );
+
+        this.fillProg.begin( gl );
         try
         {
-            gl.glVertex2d( lockX, lockY );
+            this.fillProg.setAxisOrtho( gl, axis );
+            this.fillProg.setColor( gl, protractorColor );
 
-            for ( double a = 0; a < angle * sign; a += step )
-            {
-                double x = lockX + Math.cos( a * sign ) * radius;
-                double y = lockY + Math.sin( a * sign ) * radius;
-                gl.glVertex2d( x, y );
-            }
-
-            double x = lockX + Math.cos( angle ) * radius;
-            double y = lockY + Math.sin( angle ) * radius;
-            gl.glVertex2d( x, y );
+            this.fillProg.draw( gl, GL.GL_TRIANGLE_FAN, this.fillBuilder.getBuffer( gl ), 0, this.fillBuilder.numFloats( ) / 2 );
         }
         finally
         {
-            gl.glEnd( );
+            this.fillProg.end( gl );
         }
 
         //// draw angle text ////

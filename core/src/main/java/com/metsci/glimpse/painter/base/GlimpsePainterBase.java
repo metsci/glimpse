@@ -175,7 +175,7 @@ public abstract class GlimpsePainterBase implements GlimpsePainter
     @Override
     public void paintTo( GlimpseContext context )
     {
-        if ( !this.isVisible( ) ) return;
+        if ( !this.isVisible( ) || this.isDisposed( ) ) return;
 
         this.painterLock.lock( );
         try
