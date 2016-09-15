@@ -442,7 +442,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -454,7 +454,7 @@ public class AnnotationPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
-
+        if ( textRenderer != null ) textRenderer.dispose( );
+        textRenderer = null;
     }
 }
