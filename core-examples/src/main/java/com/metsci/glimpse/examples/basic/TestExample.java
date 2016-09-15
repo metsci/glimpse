@@ -3,8 +3,12 @@ package com.metsci.glimpse.examples.basic;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.decoration.CrosshairPainter;
 import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.painter.info.MeasurementPainter;
+import com.metsci.glimpse.painter.info.SimpleTextPainter;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 
 public class TestExample implements GlimpseLayoutProvider
@@ -108,11 +112,11 @@ public class TestExample implements GlimpseLayoutProvider
 
         //plot.addPainter( new MapBorderPainter( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) ) );
         //        plot.addPainter( new CopyrightPainter( ) );
-        //        CrosshairPainter painter = new CrosshairPainter( );
-        //        painter.showSelectionBox( true );
-        //        painter.showSelectionCrosshairs( false );
-        //        painter.setShadeSelectionBox( true );
-        //        plot.addPainter( painter );
+        CrosshairPainter painter = new CrosshairPainter( );
+        painter.showSelectionBox( true );
+        painter.showSelectionCrosshairs( false );
+        painter.setShadeSelectionBox( true );
+        plot.addPainter( painter );
         //        GridPainter gridPainter = new GridPainter( );
         //        gridPainter.setShowMinorGrid( true );
         //        plot.addPainter( gridPainter );
@@ -120,6 +124,15 @@ public class TestExample implements GlimpseLayoutProvider
         //WatermarkPainter watermarkPainter = new WatermarkPainter( StreamOpener.fileThenResource, "images/GlimpseLogo.png" );
         plot.addPainter( new ScalePainter( ) );
         plot.addPainter( new MeasurementPainter( ) );
+        SimpleTextPainter textPainter = new SimpleTextPainter( );
+        textPainter.setHorizontalPosition( HorizontalPosition.Center );
+        textPainter.setVerticalPosition( VerticalPosition.Center );
+        textPainter.setPaintBackground( false );
+        textPainter.setPaintBorder( true );
+        textPainter.setText( "test" );
+        textPainter.setFont( 80, true );
+
+        plot.addPainter( textPainter );
 
         //plot.addPainter( watermarkPainter );
 

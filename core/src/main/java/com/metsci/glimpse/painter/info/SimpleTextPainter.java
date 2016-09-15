@@ -26,24 +26,28 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.context.GlimpseTarget;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineJoinType;
+import com.metsci.glimpse.support.line.LinePath;
+import com.metsci.glimpse.support.line.LineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.FlatColorProgram;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * A painter which displays arbitrary text at a fixed pixel
@@ -92,11 +96,26 @@ public class SimpleTextPainter extends GlimpsePainterBase
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
+    protected FlatColorProgram fillProg;
+    protected GLStreamingBufferBuilder fillBuilder;
+
+    protected LineProgram lineProg;
+    protected LinePath linePath;
+    protected LineStyle lineStyle;
+
     public SimpleTextPainter( )
     {
         this.newFont = getDefaultBold( 12 );
         this.hPos = HorizontalPosition.Left;
         this.vPos = VerticalPosition.Bottom;
+
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.stippleEnable = false;
+        this.lineStyle.joinType = LineJoinType.JOIN_NONE;
+        this.lineStyle.feather_PX = 0f;
+
+        this.linePath = new LinePath( );
+        this.fillBuilder = new GLStreamingBufferBuilder( );
     }
 
     public SimpleTextPainter setHorizontalLabels( boolean horizontal )
@@ -281,15 +300,18 @@ public class SimpleTextPainter extends GlimpsePainterBase
         return sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
     }
 
-    protected void paintToHorizontal( GL2 gl, int width, int height, Rectangle2D textBounds )
+    protected void paintToHorizontal( GL3 gl, GlimpseBounds bounds, Rectangle2D textBounds )
     {
         int xText = horizontalPadding;
         int yText = verticalPadding;
 
+        int width = bounds.getWidth( );
+        int height = bounds.getHeight( );
+
         switch ( hPos )
         {
             case Left:
-                xText = ( int ) horizontalPadding;
+                xText = horizontalPadding;
                 break;
             case Center:
                 xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.5 );
@@ -302,7 +324,7 @@ public class SimpleTextPainter extends GlimpsePainterBase
         switch ( vPos )
         {
             case Bottom:
-                yText = ( int ) verticalPadding;
+                yText = verticalPadding;
                 break;
             case Center:
                 yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.5 );
@@ -314,15 +336,6 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
         if ( paintBackground || paintBorder )
         {
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( -0.5, width - 1 + 0.5, -0.5, height - 1 + 0.5, -1, 1 );
-            gl.glMatrixMode( GL2.GL_MODELVIEW );
-            gl.glLoadIdentity( );
-
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
             Rectangle2D bound = sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
 
             int xTextMax = ( int ) ( xText + bound.getWidth( ) + ( bound.getMinX( ) ) - 1 );
@@ -330,46 +343,43 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
             if ( paintBackground )
             {
-                // Draw Text Background
-                gl.glColor4fv( backgroundColor, 0 );
+                this.fillBuilder.clear( );
+                this.fillBuilder.addQuad2f( xText - 0.5f - 2, yText - 0.5f - 2, xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
 
-                gl.glBegin( GL2.GL_QUADS );
+                this.fillProg.begin( gl );
                 try
                 {
-                    gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
-                    gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
-                    gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
-                    gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
+                    this.fillProg.setPixelOrtho( gl, bounds );
+
+                    this.fillProg.draw( gl, this.fillBuilder, this.backgroundColor );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    this.fillProg.end( gl );
                 }
             }
 
             if ( paintBorder )
             {
-                // Draw Text Border
-                gl.glColor4fv( borderColor, 0 );
-                gl.glEnable( GL2.GL_LINE_SMOOTH );
+                this.linePath.clear( );
+                this.linePath.addRectangle( xText - 0.5f - 2, yText - 0.5f - 2, xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
 
-                gl.glBegin( GL2.GL_LINE_STRIP );
+                this.lineProg.begin( gl );
                 try
                 {
-                    gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
-                    gl.glVertex2f( xTextMax + 0.5f + 2, yText - 0.5f - 2 );
-                    gl.glVertex2f( xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
-                    gl.glVertex2f( xText - 0.5f - 2, yTextMax + 0.5f + 2 );
-                    gl.glVertex2f( xText - 0.5f - 2, yText - 0.5f - 2 );
+                    this.lineProg.setPixelOrtho( gl, bounds );
+                    this.lineProg.setViewport( gl, bounds );
+
+                    this.lineStyle.rgba = borderColor;
+
+                    this.lineProg.draw( gl, this.lineStyle, this.linePath );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    this.lineProg.end( gl );
                 }
             }
         }
-
-        gl.glDisable( GL2.GL_BLEND );
 
         textRenderer.beginRendering( width, height );
         try
@@ -391,10 +401,13 @@ public class SimpleTextPainter extends GlimpsePainterBase
         }
     }
 
-    protected void paintToVertical( GL2 gl, int width, int height, Rectangle2D textBounds )
+    protected void paintToVertical( GL3 gl, GlimpseBounds bounds, Rectangle2D textBounds )
     {
         int xText = horizontalPadding;
         int yText = verticalPadding;
+
+        int width = bounds.getWidth( );
+        int height = bounds.getHeight( );
 
         double textWidth = textBounds.getWidth( );
         double textHeight = textBounds.getHeight( );
@@ -405,101 +418,91 @@ public class SimpleTextPainter extends GlimpsePainterBase
         switch ( hPos )
         {
             case Left:
-                xText = ( int ) ( horizontalPadding - halfTextWidth + halfTextHeight );
+                xText = horizontalPadding - halfTextWidth + halfTextHeight;
                 break;
             case Center:
                 xText = ( int ) ( width / 2d - halfTextWidth );
                 break;
             case Right:
-                xText = ( int ) ( width - halfTextWidth - halfTextHeight - horizontalPadding );
+                xText = width - halfTextWidth - halfTextHeight - horizontalPadding;
                 break;
         }
 
         switch ( vPos )
         {
             case Bottom:
-                yText = ( int ) ( verticalPadding - halfTextHeight + halfTextWidth );
+                yText = verticalPadding - halfTextHeight + halfTextWidth;
                 break;
             case Center:
                 yText = ( int ) ( height / 2d - halfTextHeight );
                 break;
             case Top:
-                yText = ( int ) ( height - halfTextHeight - halfTextWidth - verticalPadding );
+                yText = height - halfTextHeight - halfTextWidth - verticalPadding;
                 break;
         }
 
-        if ( this.paintBackground || this.paintBorder )
+        if ( paintBackground || paintBorder )
         {
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( 0, width, 0, height, -1, 1 );
-            gl.glMatrixMode( GL2.GL_MODELVIEW );
-            gl.glLoadIdentity( );
-
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
             int buffer = 2;
 
-            int xTextMin = ( int ) ( xText + halfTextWidth - halfTextHeight - buffer );
-            int yTextMin = ( int ) ( yText + halfTextWidth + halfTextHeight + buffer );
+            int xTextMin = xText + halfTextWidth - halfTextHeight - buffer;
+            int yTextMin = yText + halfTextWidth + halfTextHeight + buffer;
 
-            int xTextMax = ( int ) ( xText + halfTextWidth + halfTextHeight + buffer + 3 );
-            int yTextMax = ( int ) ( yText - halfTextWidth + halfTextHeight - buffer );
+            int xTextMax = xText + halfTextWidth + halfTextHeight + buffer + 3;
+            int yTextMax = yText - halfTextWidth + halfTextHeight - buffer;
 
-            if ( this.paintBackground )
+            if ( paintBackground )
             {
-                // Draw Text Background
-                gl.glColor4fv( backgroundColor, 0 );
+                this.fillBuilder.clear( );
+                this.fillBuilder.addQuad2f( xTextMin, yTextMin, xTextMax, yTextMax );
 
-                gl.glBegin( GL2.GL_QUADS );
+                this.fillProg.begin( gl );
                 try
                 {
-                    gl.glVertex2f( xTextMin, yTextMin );
-                    gl.glVertex2f( xTextMax, yTextMin );
-                    gl.glVertex2f( xTextMax, yTextMax );
-                    gl.glVertex2f( xTextMin, yTextMax );
+                    this.fillProg.setPixelOrtho( gl, bounds );
+
+                    this.fillProg.draw( gl, this.fillBuilder, this.backgroundColor );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    this.fillProg.end( gl );
                 }
             }
 
-            if ( this.paintBorder )
+            if ( paintBorder )
             {
-                // Draw Text Background
-                gl.glColor4fv( borderColor, 0 );
-                gl.glEnable( GL2.GL_LINE_SMOOTH );
+                this.linePath.clear( );
+                this.linePath.addRectangle( xTextMin, yTextMin, xTextMax, yTextMax );
 
-                gl.glBegin( GL2.GL_LINE_STRIP );
+                this.lineProg.begin( gl );
                 try
                 {
-                    gl.glVertex2f( xTextMin, yTextMin );
-                    gl.glVertex2f( xTextMax, yTextMin );
-                    gl.glVertex2f( xTextMax, yTextMax );
-                    gl.glVertex2f( xTextMin, yTextMax );
-                    gl.glVertex2f( xTextMin, yTextMin );
+                    this.lineProg.setPixelOrtho( gl, bounds );
+                    this.lineProg.setViewport( gl, bounds );
+
+                    this.lineStyle.rgba = borderColor;
+
+                    this.lineProg.draw( gl, this.lineStyle, this.linePath );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    this.lineProg.end( gl );
                 }
             }
         }
-
-        gl.glDisable( GL2.GL_BLEND );
 
         textRenderer.beginRendering( width, height );
         try
         {
+            GL2 gl2 = gl.getGL2( );
+
             double xShift = xText + halfTextWidth;
             double yShift = yText + halfTextHeight;
 
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glTranslated( xShift, yShift, 0 );
-            gl.glRotated( 90, 0, 0, 1.0f );
-            gl.glTranslated( -xShift, -yShift, 0 );
+            gl2.glMatrixMode( GL2.GL_PROJECTION );
+            gl2.glTranslated( xShift, yShift, 0 );
+            gl2.glRotated( 90, 0, 0, 1.0f );
+            gl2.glTranslated( -xShift, -yShift, 0 );
 
             if ( !textColorSet && !paintBackground )
             {
@@ -518,7 +521,8 @@ public class SimpleTextPainter extends GlimpsePainterBase
         }
     }
 
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    @Override
+    protected void doPaintTo( GlimpseContext context )
     {
         if ( newFont != null )
         {
@@ -527,35 +531,37 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
         if ( text == null || textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
+        GlimpseBounds bounds = getBounds( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         Rectangle2D textBounds = sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
 
-        if ( horizontal )
+        if ( this.lineProg == null )
         {
-            paintToHorizontal( gl, width, height, textBounds );
-        }
-        else
-        {
-            paintToVertical( gl, width, height, textBounds );
-        }
-    }
-
-    @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
-    {
-        Axis2D axis = null;
-
-        GlimpseTarget target = context.getTargetStack( ).getTarget( );
-        if ( target instanceof GlimpseAxisLayout2D )
-        {
-            GlimpseAxisLayout2D layout = ( GlimpseAxisLayout2D ) target;
-            axis = layout.getAxis( context );
+            this.lineProg = new LineProgram( gl );
         }
 
-        paintTo( context, bounds, axis );
+        if ( this.fillProg == null )
+        {
+            this.fillProg = new FlatColorProgram( gl );
+        }
+
+        GLUtils.enableStandardBlending( gl );
+        try
+        {
+            if ( horizontal )
+            {
+                paintToHorizontal( gl, bounds, textBounds );
+            }
+            else
+            {
+                paintToVertical( gl, bounds, textBounds );
+            }
+        }
+        finally
+        {
+            GLUtils.disableBlending( gl );
+        }
     }
 
     protected void updateTextRenderer( )
@@ -563,5 +569,11 @@ public class SimpleTextPainter extends GlimpsePainterBase
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = new TextRenderer( newFont, antialias, false );
         newFont = null;
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        this.textRenderer.dispose( );
     }
 }

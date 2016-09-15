@@ -35,6 +35,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.line.LineJoinType;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -81,7 +82,8 @@ public class CrosshairPainter extends GlimpsePainterBase
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
         this.lineStyle.stippleEnable = false;
-        this.lineStyle.thickness_PX = 2.0f;
+        this.lineStyle.thickness_PX = 5.0f;
+        this.lineStyle.joinType = LineJoinType.JOIN_MITER;
 
         this.linePath = new LinePath( );
         this.flatPath = new GLStreamingBufferBuilder( );
@@ -244,7 +246,7 @@ public class CrosshairPainter extends GlimpsePainterBase
                 flatProg.begin( gl );
                 try
                 {
-//                    flatProg.setColor( gl, shadeColor );
+                    //                    flatProg.setColor( gl, shadeColor );
                     flatProg.setAxisOrtho( gl, axis );
 
                     flatPath.clear( );
@@ -252,12 +254,12 @@ public class CrosshairPainter extends GlimpsePainterBase
                     flatPath.addQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
                     flatProg.draw( gl, flatPath, shadeColor );
 
-//                    flatPath.addVertex2f( centerX - sizeX, centerY - sizeY );
-//                    flatPath.addVertex2f( centerX - sizeX, centerY + sizeY );
-//                    flatPath.addVertex2f( centerX + sizeX, centerY - sizeY );
-//                    flatPath.addVertex2f( centerX + sizeX, centerY + sizeY );
-//
-//                    flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, linePath.xyVbo( gl ), 0, flatPath.numFloats( ) / 2 );
+                    //                    flatPath.addVertex2f( centerX - sizeX, centerY - sizeY );
+                    //                    flatPath.addVertex2f( centerX - sizeX, centerY + sizeY );
+                    //                    flatPath.addVertex2f( centerX + sizeX, centerY - sizeY );
+                    //                    flatPath.addVertex2f( centerX + sizeX, centerY + sizeY );
+                    //
+                    //                    flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, linePath.xyVbo( gl ), 0, flatPath.numFloats( ) / 2 );
                 }
                 finally
                 {
