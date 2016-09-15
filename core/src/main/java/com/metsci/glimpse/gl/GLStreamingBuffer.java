@@ -267,7 +267,7 @@ public class GLStreamingBuffer
             this.mappedOffset = 0;
         }
 
-        return gl.glMapBufferRange( target, mappedOffset, mappedSize, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
+        return gl.glMapBufferRange( target, mappedOffset, mappedSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
     }
 
     /**
