@@ -82,8 +82,8 @@ public class CrosshairPainter extends GlimpsePainterBase
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
         this.lineStyle.stippleEnable = false;
-        this.lineStyle.thickness_PX = 5.0f;
-        this.lineStyle.joinType = LineJoinType.JOIN_MITER;
+        this.lineStyle.thickness_PX = 1.0f;
+        this.lineStyle.joinType = LineJoinType.JOIN_NONE;
 
         this.linePath = new LinePath( );
         this.flatPath = new GLStreamingBufferBuilder( );
