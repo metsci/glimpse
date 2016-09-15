@@ -51,7 +51,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.shader.ColorTexture2DProgram;
-import com.metsci.glimpse.support.shader.MappableBufferBuilder;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 import com.metsci.glimpse.util.io.StreamOpener;
 
 public class WatermarkPainter extends GlimpsePainterBase
@@ -150,8 +150,8 @@ public class WatermarkPainter extends GlimpsePainterBase
     protected boolean initialized;
 
     protected ColorTexture2DProgram prog;
-    protected MappableBufferBuilder inXy;
-    protected MappableBufferBuilder inS;
+    protected GLStreamingBufferBuilder inXy;
+    protected GLStreamingBufferBuilder inS;
 
     public WatermarkPainter( BufferedImage image )
     {
@@ -185,8 +185,8 @@ public class WatermarkPainter extends GlimpsePainterBase
         this.texture = null;
         this.initialized = false;
 
-        this.inXy = new MappableBufferBuilder( );
-        this.inS = new MappableBufferBuilder( );
+        this.inXy = new GLStreamingBufferBuilder( );
+        this.inS = new GLStreamingBufferBuilder( );
     }
 
     public static Supplier<BufferedImage> newImageLoader( final StreamOpener opener, final String location )

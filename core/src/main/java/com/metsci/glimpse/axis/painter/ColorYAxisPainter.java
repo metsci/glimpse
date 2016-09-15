@@ -40,7 +40,7 @@ import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.shader.ColorTexture1DProgram;
-import com.metsci.glimpse.support.shader.MappableBufferBuilder;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * A vertical (y) axis with a color bar and labeled ticks along the right hand side.
@@ -51,8 +51,8 @@ import com.metsci.glimpse.support.shader.MappableBufferBuilder;
 public class ColorYAxisPainter extends NumericYAxisPainter
 {
     protected ColorTexture1DProgram progTex;
-    protected MappableBufferBuilder xyBuffer;
-    protected MappableBufferBuilder sBuffer;
+    protected GLStreamingBufferBuilder xyBuffer;
+    protected GLStreamingBufferBuilder sBuffer;
     protected ColorTexture1D colorTexture;
 
     protected LineProgram progOutline;
@@ -68,8 +68,8 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         super( ticks );
 
         this.pathOutline = new LinePath( );
-        this.xyBuffer = new MappableBufferBuilder( );
-        this.sBuffer = new MappableBufferBuilder( );
+        this.xyBuffer = new GLStreamingBufferBuilder( );
+        this.sBuffer = new GLStreamingBufferBuilder( );
 
         this.style = new LineStyle( );
         this.style.stippleEnable = false;

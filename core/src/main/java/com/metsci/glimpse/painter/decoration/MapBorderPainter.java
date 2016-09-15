@@ -38,7 +38,7 @@ import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.shader.ArrayColorProgram;
-import com.metsci.glimpse.support.shader.MappableBufferBuilder;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * An alternative {@link BorderPainter} which displays alternating
@@ -63,8 +63,8 @@ public class MapBorderPainter extends GlimpsePainterBase
     protected boolean savedOrientY = false;
 
     protected ArrayColorProgram fillProg;
-    protected MappableBufferBuilder inXys;
-    protected MappableBufferBuilder inRgba;
+    protected GLStreamingBufferBuilder inXys;
+    protected GLStreamingBufferBuilder inRgba;
 
     protected LineProgram lineProg;
     protected LineStyle lineStyle;
@@ -75,8 +75,8 @@ public class MapBorderPainter extends GlimpsePainterBase
         this.ticksX = ticksX;
         this.ticksY = ticksY;
 
-        this.inXys = new MappableBufferBuilder( );
-        this.inRgba = new MappableBufferBuilder( );
+        this.inXys = new GLStreamingBufferBuilder( );
+        this.inRgba = new GLStreamingBufferBuilder( );
 
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;

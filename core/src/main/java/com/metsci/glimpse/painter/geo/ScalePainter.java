@@ -50,7 +50,7 @@ import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.shader.ArrayColorProgram;
-import com.metsci.glimpse.support.shader.MappableBufferBuilder;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 import com.metsci.glimpse.util.units.Length;
 
 /**
@@ -83,8 +83,8 @@ public class ScalePainter extends GlimpsePainterBase
     protected boolean showOverallLength = true;
 
     protected ArrayColorProgram fillProg;
-    protected MappableBufferBuilder fillXy;
-    protected MappableBufferBuilder fillRgba;
+    protected GLStreamingBufferBuilder fillXy;
+    protected GLStreamingBufferBuilder fillRgba;
 
     protected LineProgram lineProg;
     protected LineStyle lineStyle;
@@ -128,8 +128,8 @@ public class ScalePainter extends GlimpsePainterBase
         this.lineStyle.rgba = borderColor;
 
         this.linePath = new LinePath( );
-        this.fillXy = new MappableBufferBuilder( );
-        this.fillRgba = new MappableBufferBuilder( );
+        this.fillXy = new GLStreamingBufferBuilder( );
+        this.fillRgba = new GLStreamingBufferBuilder( );
     }
 
     protected TextRenderer createTickTextRenderer( )

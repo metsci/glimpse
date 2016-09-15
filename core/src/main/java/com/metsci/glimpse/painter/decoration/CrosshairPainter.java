@@ -41,7 +41,7 @@ import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.FlatColorProgram;
-import com.metsci.glimpse.support.shader.MappableBufferBuilder;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * Displays crosshairs and a selection box centered over the position
@@ -70,7 +70,7 @@ public class CrosshairPainter extends GlimpsePainterBase
     protected boolean colorSet = false;
 
     protected FlatColorProgram flatProg;
-    protected MappableBufferBuilder flatPath;
+    protected GLStreamingBufferBuilder flatPath;
 
     protected LineProgram lineProg;
     protected LineStyle lineStyle;
@@ -84,7 +84,7 @@ public class CrosshairPainter extends GlimpsePainterBase
         this.lineStyle.thickness_PX = 2.0f;
 
         this.linePath = new LinePath( );
-        this.flatPath = new MappableBufferBuilder( );
+        this.flatPath = new GLStreamingBufferBuilder( );
     }
 
     public void setCursorColor( float[] rgba )

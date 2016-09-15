@@ -88,7 +88,7 @@ public class FlatColorProgram
         gl.glDrawArrays( mode, first, count );
     }
     
-    public void draw( GL2ES2 gl, MappableBufferBuilder xyVertices, float[] color )
+    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
     {
         setColor( gl, color );
         draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );

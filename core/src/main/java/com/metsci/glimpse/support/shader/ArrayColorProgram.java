@@ -85,7 +85,7 @@ public class ArrayColorProgram
         gl.glDrawArrays( mode, first, count );
     }
     
-    public void draw( GL2ES2 gl, MappableBufferBuilder xy, MappableBufferBuilder rgba )
+    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba )
     {
         draw( gl, GL_TRIANGLES, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
     }
