@@ -328,6 +328,7 @@ public class ScalePainter extends GlimpsePainterBase
         }
 
         fillXy.clear( );
+        fillRgba.clear( );
 
         for ( int i = 0; i < tickCount; i++ )
         {
@@ -337,19 +338,19 @@ public class ScalePainter extends GlimpsePainterBase
             double offset2 = totalSize * ( ( i + 1 ) / ( double ) tickCount );
 
             fillXy.addQuad2f( ( float ) ( width - bufferX - offset1 ),
-                    ( float ) ( bufferY ),
+                    ( bufferY ),
                     ( float ) ( width - bufferX - offset2 ),
-                    ( float ) ( bufferY + pixelHeight ) );
+                    bufferY + pixelHeight );
 
             fillRgba.addQuadSolidColor( color );
         }
 
         linePath.clear( );
 
-        linePath.addRectangle( ( float ) ( width - bufferX ),
-                ( float ) ( bufferY ),
+        linePath.addRectangle( width - bufferX,
+                ( bufferY ),
                 ( float ) ( width - bufferX - totalSize ),
-                ( float ) ( bufferY + pixelHeight ) );
+                bufferY + pixelHeight );
 
         GLUtils.enableStandardBlending( gl );
         try

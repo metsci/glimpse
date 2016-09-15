@@ -224,8 +224,8 @@ public class CrosshairPainter extends GlimpsePainterBase
             {
                 lineProg.setAxisOrtho( gl, axis );
                 lineProg.setViewport( gl, bounds );
-                linePath.clear( );
 
+                linePath.clear( );
                 linePath.moveTo( centerX - sizeX, centerY - sizeY );
                 linePath.lineTo( centerX - sizeX, centerY + sizeY );
                 linePath.lineTo( centerX + sizeX, centerY + sizeY );
@@ -246,20 +246,12 @@ public class CrosshairPainter extends GlimpsePainterBase
                 flatProg.begin( gl );
                 try
                 {
-                    //                    flatProg.setColor( gl, shadeColor );
                     flatProg.setAxisOrtho( gl, axis );
 
                     flatPath.clear( );
-
                     flatPath.addQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
-                    flatProg.draw( gl, flatPath, shadeColor );
 
-                    //                    flatPath.addVertex2f( centerX - sizeX, centerY - sizeY );
-                    //                    flatPath.addVertex2f( centerX - sizeX, centerY + sizeY );
-                    //                    flatPath.addVertex2f( centerX + sizeX, centerY - sizeY );
-                    //                    flatPath.addVertex2f( centerX + sizeX, centerY + sizeY );
-                    //
-                    //                    flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, linePath.xyVbo( gl ), 0, flatPath.numFloats( ) / 2 );
+                    flatProg.draw( gl, flatPath, shadeColor );
                 }
                 finally
                 {
