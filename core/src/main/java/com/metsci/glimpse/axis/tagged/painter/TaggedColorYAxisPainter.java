@@ -70,7 +70,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
     protected FlatColorProgram flatColorProg;
     protected GLStreamingBuffer tagXyVbo;
     protected LineStyle tagStyle;
-    
+
     protected int tagHalfWidth = DEFAULT_TAG_HALFBASE;
     protected int tagHeight = DEFAULT_TAG_HEIGHT;
     protected int tagPointerHeight = DEFAULT_TAG_POINTER_HEIGHT;
@@ -85,7 +85,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         this.tagXyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 2 );
 
         this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
-        
+
         this.tagStyle = new LineStyle( );
         this.tagStyle.stippleEnable = false;
         this.tagStyle.feather_PX = 0.0f;
@@ -140,8 +140,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         if ( textRenderer == null ) return;
 
         TickInfo info = getTickInfo( axis, bounds );
-        
-        initShaderPrograms( gl );
+
         paintColorScale( context );
         paintTicks( gl, axis, bounds, info );
         paintTickLabels( gl, axis, bounds, info );
@@ -154,16 +153,13 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
             paintTags( gl, taggedAxis, bounds );
         }
     }
-    
-    @Override
-    protected void initShaderPrograms( GL gl )
-    {
-        super.initShaderPrograms( gl );
 
-        if ( flatColorProg == null )
-        {
-            flatColorProg = new FlatColorProgram( gl.getGL3( ) );
-        }
+    @Override
+    protected void initShaders( )
+    {
+        super.initShaders( );
+
+        this.flatColorProg = new FlatColorProgram( );
     }
 
     protected void paintTags( GL gl, TaggedAxis1D taggedAxis, GlimpseBounds bounds )
@@ -200,11 +196,11 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         xy.put( xMax ).put( y - tagHalfWidth );
         xy.put( xMid ).put( y - tagHalfWidth );
         xy.put( xMid ).put( y + tagHalfWidth );
-        
+
         xy.put( xMid ).put( y + tagHalfWidth );
         xy.put( xMax ).put( y + tagHalfWidth );
         xy.put( xMax ).put( y - tagHalfWidth );
-        
+
         tagXyVbo.seal( gl );
 
         GLUtils.enableStandardBlending( gl );
@@ -213,7 +209,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         {
             flatColorProg.setPixelOrtho( gl3, bounds );
             flatColorProg.setColor( gl3, color[0], color[1], color[2], 0.3f );
-            
+
             flatColorProg.draw( gl3, GL.GL_TRIANGLES, tagXyVbo, 0, 9 );
         }
         finally

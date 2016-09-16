@@ -41,8 +41,8 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineJoinType;
 import com.metsci.glimpse.support.line.LinePath;
-import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
 
 public class NumericPolarAxisPainter extends NumericXYAxisPainter
@@ -78,17 +78,16 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         this.pathCircle = new LinePath( );
 
         this.styleRadial = new LineStyle( );
-        this.styleRadial.feather_PX = 0.8f;
         this.styleRadial.thickness_PX = lineWidth;
         this.styleRadial.rgba = GlimpseColor.getBlack( );
 
         this.styleCircle = new LineStyle( );
-        this.styleCircle.feather_PX = 0.8f;
         this.styleCircle.thickness_PX = lineWidth;
+        this.styleCircle.joinType = LineJoinType.JOIN_NONE;
         this.styleCircle.rgba = GlimpseColor.getBlack( );
 
     }
-    
+
     @Override
     public void doPaintTo( GlimpseContext context )
     {
@@ -104,11 +103,6 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         GL3 gl = context.getGL( ).getGL3( );
         Axis2D axis = getAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
-
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
 
         int height = bounds.getHeight( );
         int width = bounds.getWidth( );
@@ -201,11 +195,11 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
 
         double[] positionsX = ticksX.getTickPositions( xAxis );
 
-        /* 
-         * Different heuristic for angles, because the axis size is difficult to 
+        /*
+         * Different heuristic for angles, because the axis size is difficult to
          * define in a way that gets good results.  The idea here is always have 30 degree
          * intervals when the origin is visible, and approximately nSectors intervals when not.
-         * Subdivision is done by repeated halving of the original 30 degree intervals. 
+         * Subdivision is done by repeated halving of the original 30 degree intervals.
          */
         double approxInterval = ( maxTheta - minTheta ) / nSectors;
         double intervalRatio = 2 * Math.PI / ( maxTheta - minTheta );
@@ -239,7 +233,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         {
             prog.setViewport( gl, bounds );
             prog.setAxisOrtho( gl, axis );
-            
+
             if ( showHorizontal )
             {
                 if ( radialStipplePattern > 0 )
@@ -276,14 +270,14 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
                 {
                     styleRadial.stippleEnable = false;
                 }
-                
+
                 pathCircle.clear( );
 
                 for ( int ii = 0; ii < positionsX.length; ii++ )
                 {
                     calculateCircleVertices( gl, pathCircle, 0f, 0f, ( float ) positionsX[ii], 360 );
                 }
-                
+
                 prog.draw( gl, styleCircle, pathCircle );
             }
         }
@@ -297,7 +291,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         GlimpseColor.setColor( textRenderer, insideTextColor == null ? textColor : insideTextColor );
 
         GL2 gl2 = gl.getGL2( );
-        
+
         /* first - label range rings:
          * If x-axis is visible, label all intersections with that axis
          * otherwise, if y-axis is visible, label all intersections with that axis
@@ -360,7 +354,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         }
 
         /*
-         * Now label bearing lines.  If room, do it outside the outermost circle (this requires a 
+         * Now label bearing lines.  If room, do it outside the outermost circle (this requires a
          * maximum range), else where they intersect with the middle range ring
          */
         boolean labelOutside = false;
@@ -429,24 +423,24 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
             }
         }
     }
-    
+
     protected void calculateCircleVertices( GL gl, LinePath path, float cx, float cy, float r, int num_segments )
     {
         float start_x = 0;
         float start_y = 0;
-        
+
         for ( int ii = 0; ii < num_segments; ii++ )
         {
-            float theta = (float) ( TWO_PI * ii / num_segments );
+            float theta = ( float ) ( TWO_PI * ii / num_segments );
 
-            float x = (float) ( r * Math.cos( theta ) );
-            float y = (float) ( r * Math.sin( theta ) );
+            float x = ( float ) ( r * Math.cos( theta ) );
+            float y = ( float ) ( r * Math.sin( theta ) );
 
             if ( ii == 0 )
             {
                 start_x = x;
                 start_y = y;
-                
+
                 path.moveTo( x + cx, y + cy );
             }
             else
@@ -455,10 +449,9 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
 
             }
         }
-        
+
         path.lineTo( start_x + cx, start_y + cy );
     }
-
 
     // Padding between labels and axis lines
     public int getTextPadding( )

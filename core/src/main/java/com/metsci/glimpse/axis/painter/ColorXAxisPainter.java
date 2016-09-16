@@ -105,8 +105,6 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        initShaderPrograms( gl );
-
         paintColorScale( context );
         paintTicks( gl, axis, bounds );
         paintAxisLabel( gl, axis, bounds );
@@ -114,21 +112,12 @@ public class ColorXAxisPainter extends NumericXAxisPainter
     }
 
     @Override
-    protected void initShaderPrograms( GL gl )
+    protected void initShaders( )
     {
-        super.initShaderPrograms( gl );
+        super.initShaders( );
 
-        if ( progTex == null )
-        {
-            progOutline = new LineProgram( gl.getGL3( ) );
-
-            progTex = new ColorTexture1DProgram( gl.getGL3( ) );
-            progTex.setTexture( gl.getGL3( ), 0 );
-
-            // although the vertex coordinates may change, the texture coordinates
-            // stay constant, so just set them up once here
-            sBuffer.addQuad1f( 0, 0, 1, 1 );
-        }
+        progOutline = new LineProgram( );
+        progTex = new ColorTexture1DProgram( );
     }
 
     protected void paintColorScale( GlimpseContext context )
@@ -153,6 +142,9 @@ public class ColorXAxisPainter extends NumericXAxisPainter
 
             xyBuffer.clear( );
             xyBuffer.addQuad2f( 0.5f, y1, width, y2 );
+
+            sBuffer.clear( );
+            sBuffer.addQuad1f( 0, 0, 1, 1 );
 
             GLUtils.enableStandardBlending( gl );
             try

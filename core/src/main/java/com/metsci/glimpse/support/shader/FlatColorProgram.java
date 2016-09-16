@@ -15,41 +15,66 @@ public class FlatColorProgram
     public static final String vertShader_GLSL = requireResourceText( "shaders/flat_color/flat_color.vs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/flat_color/flat_color.fs" );
 
-    public final int programHandle;
-
-    // Uniforms
-
-    public final int AXIS_RECT;
-    public final int RGBA;
-
-    // Vertex attributes
-
-    public final int inXy;
-
-    public FlatColorProgram( GL2ES2 gl )
+    public static class ProgramHandles
     {
-        this.programHandle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+        public final int handle;
 
-        this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
-        this.RGBA = gl.glGetUniformLocation( programHandle, "RGBA" );
+        // Uniforms
 
-        this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
+        public final int AXIS_RECT;
+        public final int RGBA;
+
+        // Vertex attributes
+
+        public final int inXy;
+
+        public ProgramHandles( GL2ES2 gl )
+        {
+            this.handle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+
+            this.AXIS_RECT = gl.glGetUniformLocation( this.handle, "AXIS_RECT" );
+            this.RGBA = gl.glGetUniformLocation( this.handle, "RGBA" );
+
+            this.inXy = gl.glGetAttribLocation( this.handle, "inXy" );
+        }
+    }
+
+    protected ProgramHandles handles;
+
+    public FlatColorProgram( )
+    {
+        this.handles = null;
+    }
+
+    public ProgramHandles handles( GL2ES2 gl )
+    {
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl );
+        }
+
+        return this.handles;
     }
 
     public void begin( GL2ES2 gl )
     {
-        gl.glUseProgram( programHandle );
-        gl.glEnableVertexAttribArray( inXy );
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl );
+        }
+
+        gl.glUseProgram( this.handles.handle );
+        gl.glEnableVertexAttribArray( this.handles.inXy );
     }
-    
+
     public void setColor( GL2ES2 gl, float r, float g, float b, float a )
     {
-        gl.glUniform4f( RGBA, r, g, b, a );
+        gl.glUniform4f( this.handles.RGBA, r, g, b, a );
     }
-    
+
     public void setColor( GL2ES2 gl, float[] vRGBA )
     {
-        gl.glUniform4fv( RGBA, 1, vRGBA, 0 );
+        gl.glUniform4fv( this.handles.RGBA, 1, vRGBA, 0 );
     }
 
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
@@ -64,7 +89,7 @@ public class FlatColorProgram
 
     public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
     {
-        gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, yMax );
+        gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
     public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
@@ -75,7 +100,7 @@ public class FlatColorProgram
     public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );
     }
@@ -83,11 +108,11 @@ public class FlatColorProgram
     public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }
-    
+
     public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
     {
         setColor( gl, color );
@@ -96,7 +121,7 @@ public class FlatColorProgram
 
     public void end( GL2ES2 gl )
     {
-        gl.glDisableVertexAttribArray( inXy );
+        gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
     }
 }

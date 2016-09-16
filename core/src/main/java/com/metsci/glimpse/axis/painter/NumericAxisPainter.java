@@ -91,7 +91,7 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         resetFont( );
         resetLabelColors( );
         resetTickColor( );
-        initLineShader( );
+        initShaders( );
     }
 
     protected class TickInfo
@@ -139,7 +139,7 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         return info;
     }
 
-    protected void initLineShader( )
+    protected void initShaders( )
     {
         this.pathLine = new LinePath( );
 
@@ -147,7 +147,7 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         this.style.feather_PX = 0;
         this.style.stippleEnable = false;
 
-        this.progLine = null;
+        this.progLine = new LineProgram( );
     }
 
     public void setAxisLabel( String label )

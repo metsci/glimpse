@@ -40,7 +40,6 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.line.LineProgram;
 
 /**
  * A vertical (y) axis with labeled ticks along the left side.
@@ -64,22 +63,12 @@ public class NumericYAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        initShaderPrograms( gl );
-
         TickInfo info = getTickInfo( axis, bounds );
 
         paintTicks( gl, axis, bounds, info );
         paintTickLabels( gl, axis, bounds, info );
         paintAxisLabel( gl, axis, bounds );
         paintSelectionLine( gl, axis, bounds );
-    }
-    
-    protected void initShaderPrograms( GL gl )
-    {
-        if ( progLine == null )
-        {
-            progLine = new LineProgram( gl.getGL3( ) );
-        }
     }
 
     protected void paintTickLabels( GL gl, Axis1D axis, GlimpseBounds bounds, TickInfo info )

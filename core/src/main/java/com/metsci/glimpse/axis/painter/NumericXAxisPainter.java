@@ -40,7 +40,6 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.line.LineProgram;
 
 /**
  * A horizontal (x) axis with labeled ticks along the bottom.
@@ -66,19 +65,9 @@ public class NumericXAxisPainter extends NumericAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        initShaderPrograms( gl );
-        
         paintTicks( gl, axis, bounds );
         paintAxisLabel( gl, axis, bounds );
         paintSelectionLine( gl, axis, bounds );
-    }
-    
-    protected void initShaderPrograms( GL gl )
-    {
-        if ( progLine == null )
-        {
-            progLine = new LineProgram( gl.getGL3( ) );
-        }
     }
 
     protected void paintTicks( GL gl, Axis1D axis, GlimpseBounds bounds )

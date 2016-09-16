@@ -140,7 +140,6 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        initShaderPrograms( gl );
         paintColorScale( context );
         paintTicks( gl, axis, bounds );
         paintAxisLabel( gl, axis, bounds );
@@ -154,14 +153,11 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
     }
 
     @Override
-    protected void initShaderPrograms( GL gl )
+    protected void initShaders( )
     {
-        super.initShaderPrograms( gl );
+        super.initShaders( );
 
-        if ( flatColorProg == null )
-        {
-            flatColorProg = new FlatColorProgram( gl.getGL3( ) );
-        }
+        this.flatColorProg = new FlatColorProgram( );
     }
 
     protected void paintTags( GL gl, TaggedAxis1D taggedAxis, GlimpseBounds bounds )
@@ -236,7 +232,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         {
             progOutline.setPixelOrtho( gl3, bounds );
             progOutline.setViewport( gl3, bounds );
-            
+
             progOutline.draw( gl3, tagStyle, pathOutline );
         }
         finally
