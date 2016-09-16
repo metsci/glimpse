@@ -4,6 +4,7 @@ import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.support.line.LineJoinType.*;
 import static com.metsci.glimpse.support.line.LineUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
+import static java.lang.System.*;
 
 import java.util.Random;
 
@@ -13,7 +14,6 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.line.LineJoinType;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -48,40 +48,11 @@ public class RandomLinesPainter extends GlimpsePainterBase
         }
 
         this.style = new LineStyle( );
-        style.thickness_PX = 5;
-        style.joinType = LineJoinType.JOIN_MITER;
+        style.joinType = JOIN_MITER;
         style.rgba = floats( 0.7f, 0, 0, 1 );
         style.stippleEnable = true;
         style.stippleScale = 2;
         style.stipplePattern = 0b0001010111111111;
-        
-        (new Thread( )
-        {
-            public void run( )
-            {
-                int dir = 1;
-                
-                while ( true )
-                {
-                    style.thickness_PX = style.thickness_PX += dir * 0.05;    
-                
-                    if ( style.thickness_PX > 10 ) dir = -1;
-                    if ( style.thickness_PX < 2 ) dir = 1;
-                    
-                    try
-                    {
-                        Thread.sleep( 5 );
-                    }
-                    catch ( InterruptedException e )
-                    {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-                
-            }
-            
-        }).start( );
 
         this.prog = null;
     }
@@ -105,6 +76,26 @@ public class RandomLinesPainter extends GlimpsePainterBase
         {
             prog.setViewport( gl, bounds );
             prog.setAxisOrtho( gl, axis );
+
+            // Make lines pulsate
+            {
+                float maxThickness_PX = 10;
+                float minThickness_PX = 2;
+                long halfPeriod_MILLIS = 800;
+
+                long t = currentTimeMillis( );
+                long stepNum = t / halfPeriod_MILLIS;
+                float stepFrac = ( t % halfPeriod_MILLIS ) / ( ( float ) halfPeriod_MILLIS );
+                if ( stepNum % 2 == 0 )
+                {
+                    style.thickness_PX = minThickness_PX + ( maxThickness_PX - minThickness_PX )*stepFrac;
+                }
+                else
+                {
+                    style.thickness_PX = maxThickness_PX - ( maxThickness_PX - minThickness_PX )*stepFrac;
+                }
+            }
+
             prog.draw( gl, style, path, ppvAspectRatio( axis ) );
         }
         finally

@@ -14,7 +14,7 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-public class LineExample3
+public class LinePathExample
 {
 
     public static void main( String[] args )
@@ -23,7 +23,6 @@ public class LineExample3
 
         plot.addPainter( new BackgroundPainter( ) );
         plot.addPainter( new RandomLinesPainter( ) );
-        plot.addPainter( new ExampleBorderPainter( ) );
 
         SwingUtilities.invokeLater( new Runnable( )
         {
