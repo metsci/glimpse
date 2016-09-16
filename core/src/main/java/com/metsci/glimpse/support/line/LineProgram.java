@@ -5,6 +5,7 @@ import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL3.*;
 
 import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL2ES3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -155,12 +156,12 @@ public class LineProgram
         }
     }
 
-    public void draw( GL2ES2 gl, LineStyle style, LinePath path )
+    public void draw( GL2ES3 gl, LineStyle style, LinePath path )
     {
         this.draw( gl, style, path, 1.0 );
     }
 
-    public void draw( GL2ES2 gl, LineStyle style, LinePath path, double ppvAspectRatio )
+    public void draw( GL2ES3 gl, LineStyle style, LinePath path, double ppvAspectRatio )
     {
         this.setStyle( gl, style );
 
@@ -174,13 +175,13 @@ public class LineProgram
         this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, path.numVertices( ) );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
+    public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
         gl.glBindBuffer( flagsVbo.target, flagsVbo.buffer( ) );
-        gl.glVertexAttribPointer( this.handles.inFlags, 1, GL_BYTE, false, 0, flagsVbo.sealedOffset( ) );
+        gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
 
         gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
@@ -188,13 +189,13 @@ public class LineProgram
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
     }
 
-    public void draw( GL2ES2 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
+    public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
-        gl.glVertexAttribPointer( this.handles.inFlags, 1, GL_BYTE, false, 0, 0 );
+        gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
         gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );

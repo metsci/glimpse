@@ -12,6 +12,7 @@ import static javax.swing.WindowConstants.*;
 import java.util.Random;
 
 import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL2ES3;
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -105,7 +106,7 @@ public class LinePathExample
         {
             GlimpseBounds bounds = getBounds( context );
             Axis2D axis = getAxis2D( context );
-            GL2ES2 gl = context.getGL( ).getGL2ES2( );
+            GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
             enableStandardBlending( gl );
             prog.begin( gl );
