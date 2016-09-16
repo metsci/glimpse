@@ -32,7 +32,7 @@ import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -72,7 +72,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
 
     protected void paintTicks( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
-        GL2ES2 gl2es2 = gl.getGL2ES2( );
+        GL3 gl3 = gl.getGL3( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -87,7 +87,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
         double jTick0 = getTickTopY( height, tickSize );
         double jTick1 = getTickBottomY( height, tickSize );
 
-        progLine.begin( gl2es2 );
+        progLine.begin( gl3 );
         try
         {
             pathLine.clear( );
@@ -129,14 +129,14 @@ public class NumericXAxisPainter extends NumericAxisPainter
                 }
             }
 
-            progLine.setViewport( gl2es2, bounds );
-            progLine.setOrtho( gl2es2, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
+            progLine.setViewport( gl3, bounds );
+            progLine.setOrtho( gl3, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
 
-            progLine.draw( gl2es2, style, pathLine, 1.0 );
+            progLine.draw( gl3, style, pathLine, 1.0 );
         }
         finally
         {
-            progLine.end( gl2es2 );
+            progLine.end( gl3 );
         }
 
         if ( showTickLabels )
@@ -214,12 +214,12 @@ public class NumericXAxisPainter extends NumericAxisPainter
         // Selection line
         if ( showSelectionLine )
         {
-            GL2ES2 gl2es2 = gl.getGL2ES2( );
+            GL3 gl3 = gl.getGL3( );
 
             int height = bounds.getHeight( );
             float x0 = ( float ) axis.getSelectionCenter( );
 
-            progLine.begin( gl2es2 );
+            progLine.begin( gl3 );
             try
             {
                 pathLine.clear( );
@@ -229,11 +229,11 @@ public class NumericXAxisPainter extends NumericAxisPainter
                 pathLine.moveTo( x0, 0 );
                 pathLine.lineTo( x0, height );
 
-                progLine.draw( gl2es2, style, pathLine, 1.0 );
+                progLine.draw( gl3, style, pathLine, 1.0 );
             }
             finally
             {
-                progLine.end( gl2es2 );
+                progLine.end( gl3 );
             }
         }
     }

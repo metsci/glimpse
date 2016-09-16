@@ -41,6 +41,8 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GLUtils
 {
+    public static final int BYTES_PER_FLOAT = 4;
+
     public static int genBuffer( GL gl )
     {
         int[] handle = new int[1];
@@ -197,6 +199,7 @@ public class GLUtils
     {
         return new Runnable( )
         {
+            @Override
             public void run( )
             {
                 canvas.paint( );
