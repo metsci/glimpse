@@ -106,8 +106,9 @@ public abstract class LegendPainter extends GlimpsePainterBase
         this.placement = placement;
         this.list = new ArrayList<String>( );
         this.colors = new HashMap<String, float[]>( );
-        setFont( 15, false );
+        this.setFont( 15, false );
 
+        this.flatProg = new FlatColorProgram( );
         this.lineProg = new LineProgram( );
 
         this.style = new LineStyle( );
@@ -310,11 +311,6 @@ public abstract class LegendPainter extends GlimpsePainterBase
         int lx = upperLeftX( width, height, lw, lh );
         int ly = upperLeftY( width, height, lw, lh );
 
-        if ( flatProg == null )
-        {
-            flatProg = new FlatColorProgram( gl );
-        }
-
         //draw a white box and black border
 
         GLUtils.enableStandardBlending( gl );
@@ -511,8 +507,8 @@ public abstract class LegendPainter extends GlimpsePainterBase
                 }
 
                 path.clear( );
-                path.moveTo( ( float ) xpos, ( float ) ymid );
-                path.lineTo( ( float ) ( xpos + itemWidth ), ( float ) ymid );
+                path.moveTo( xpos, ( float ) ymid );
+                path.lineTo( xpos + itemWidth, ( float ) ymid );
 
                 lineProg.draw( gl3, style, path );
             }

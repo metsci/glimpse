@@ -80,12 +80,13 @@ public class CrosshairPainter extends GlimpsePainterBase
     public CrosshairPainter( )
     {
         this.lineProg = new LineProgram( );
+        this.flatProg = new FlatColorProgram( );
 
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
         this.lineStyle.stippleEnable = false;
         this.lineStyle.thickness_PX = 1.0f;
-        this.lineStyle.joinType = LineJoinType.JOIN_NONE;
+        this.lineStyle.joinType = LineJoinType.JOIN_MITER;
 
         this.linePath = new LinePath( );
         this.flatPath = new GLStreamingBufferBuilder( );
@@ -205,11 +206,6 @@ public class CrosshairPainter extends GlimpsePainterBase
 
         float centerY = ( float ) axisY.getSelectionCenter( );
         float sizeY = ( float ) axisY.getSelectionSize( ) / 2;
-
-        if ( flatProg == null )
-        {
-            flatProg = new FlatColorProgram( gl );
-        }
 
         if ( showSelectionBox )
         {

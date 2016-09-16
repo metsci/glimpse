@@ -15,40 +15,65 @@ public class ColorTexture1DProgram
     public static final String vertShader_GLSL = requireResourceText( "shaders/colortex1d/colortex1d.vs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/colortex1d/colortex1d.fs" );
 
-    public final int programHandle;
+    public static class ProgramHandles
+    {
+        public final int handle;
 
-    // Uniforms
+        // Uniforms
 
-    public final int AXIS_RECT;
-    public final int TEXTURE1D;
+        public final int AXIS_RECT;
+        public final int TEXTURE1D;
 
-    // Vertex attributes
+        // Vertex attributes
 
-    public final int inXy;
-    public final int inS;
+        public final int inXy;
+        public final int inS;
+
+        public ProgramHandles( GL2ES2 gl )
+        {
+            this.handle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+
+            this.AXIS_RECT = gl.glGetUniformLocation( this.handle, "AXIS_RECT" );
+            this.TEXTURE1D = gl.glGetUniformLocation( this.handle, "TEXTURE1D" );
+
+            this.inXy = gl.glGetAttribLocation( this.handle, "inXy" );
+            this.inS = gl.glGetAttribLocation( this.handle, "inS" );
+        }
+    }
 
     // Local state
 
     protected int textureUnit;
 
-    public ColorTexture1DProgram( GL2ES2 gl )
+    protected ProgramHandles handles;
+
+    public ColorTexture1DProgram( )
     {
-        this.programHandle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+        this.handles = null;
+    }
 
-        this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
-        this.TEXTURE1D = gl.glGetUniformLocation( programHandle, "TEXTURE1D" );
+    public ProgramHandles handles( GL2ES2 gl )
+    {
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl );
+        }
 
-        this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
-        this.inS = gl.glGetAttribLocation( programHandle, "inS" );
+        return this.handles;
     }
 
     public void begin( GL2ES2 gl )
     {
-        gl.glUseProgram( programHandle );
-        gl.glEnableVertexAttribArray( inXy );
-        gl.glEnableVertexAttribArray( inS );
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl );
+        }
+
+        gl.glUseProgram( this.handles.handle );
+        gl.glEnableVertexAttribArray( this.handles.inXy );
+        gl.glEnableVertexAttribArray( this.handles.inS );
     }
-    
+
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
     {
         setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
@@ -61,13 +86,13 @@ public class ColorTexture1DProgram
 
     public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
     {
-        gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, yMax );
+        gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
     public void setTexture( GL2ES2 gl, int textureUnit )
     {
         this.textureUnit = textureUnit;
-        gl.glUniform1i( TEXTURE1D, textureUnit );
+        gl.glUniform1i( this.handles.TEXTURE1D, textureUnit );
     }
 
     public void draw( GL2ES2 gl, int mode, AbstractTexture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
@@ -76,7 +101,7 @@ public class ColorTexture1DProgram
 
         draw( gl, mode, xyVbo, sVbo, first, count );
     }
-    
+
     public void draw( GL2ES2 gl, AbstractTexture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
         draw( gl, GL_TRIANGLE_STRIP, texture, xyVbo, sVbo, first, count );
@@ -85,14 +110,14 @@ public class ColorTexture1DProgram
     public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
         gl.glBindBuffer( sVbo.target, sVbo.buffer( ) );
-        gl.glVertexAttribPointer( inS, 1, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
+        gl.glVertexAttribPointer( this.handles.inS, 1, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );
     }
-    
+
     public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
         draw( gl, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count );
@@ -101,19 +126,19 @@ public class ColorTexture1DProgram
     public void draw( GL2ES2 gl, int mode, int xyVbo, int sVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
-        gl.glVertexAttribPointer( inS, 1, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inS, 1, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }
-    
+
     public void draw( GL2ES2 gl, int xyVbo, int sVbo, int first, int count )
     {
-        draw( gl, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count);
+        draw( gl, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count );
     }
-    
+
     public void draw( GL2ES2 gl, AbstractTexture texture, GLStreamingBufferBuilder xyVertices, GLStreamingBufferBuilder sVertices )
     {
         draw( gl, GL_TRIANGLES, texture, xyVertices.getBuffer( gl ), sVertices.getBuffer( gl ), 0, sVertices.numFloats( ) );
@@ -121,8 +146,8 @@ public class ColorTexture1DProgram
 
     public void end( GL2ES2 gl )
     {
-        gl.glDisableVertexAttribArray( inXy );
-        gl.glDisableVertexAttribArray( inS );
+        gl.glDisableVertexAttribArray( this.handles.inXy );
+        gl.glDisableVertexAttribArray( this.handles.inS );
         gl.glUseProgram( 0 );
     }
 }

@@ -106,7 +106,6 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         Axis1D axis = getAxis1D( context );
         GlimpseBounds bounds = getBounds( context );
 
-        initShaderPrograms( gl );
         paintColorScale( context );
         TickInfo info = getTickInfo( axis, bounds );
         paintTicks( gl, axis, bounds, info );
@@ -116,21 +115,12 @@ public class ColorYAxisPainter extends NumericYAxisPainter
     }
 
     @Override
-    protected void initShaderPrograms( GL gl )
+    protected void initShaders( )
     {
-        super.initShaderPrograms( gl );
+        super.initShaders( );
 
-        if ( progTex == null )
-        {
-            progOutline = new LineProgram( gl.getGL3( ) );
-
-            progTex = new ColorTexture1DProgram( gl.getGL3( ) );
-            progTex.setTexture( gl.getGL3( ), 0 );
-
-            // although the vertex coordinates may change, the texture coordinates
-            // stay constant, so just set them up once here
-            sBuffer.addQuad1f( 0, 1, 0, 1 );
-        }
+        progOutline = new LineProgram( );
+        progTex = new ColorTexture1DProgram( );
     }
 
     protected void paintColorScale( GlimpseContext context )
@@ -155,6 +145,9 @@ public class ColorYAxisPainter extends NumericYAxisPainter
 
             xyBuffer.clear( );
             xyBuffer.addQuad2f( x1, 0.5f, x2, height );
+
+            sBuffer.clear( );
+            sBuffer.addQuad1f( 0, 1, 0, 1 );
 
             GLUtils.enableStandardBlending( gl );
             try

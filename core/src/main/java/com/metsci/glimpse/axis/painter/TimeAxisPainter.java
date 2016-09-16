@@ -34,7 +34,6 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -139,11 +138,13 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
         this.showCurrentTimeLabel = show;
     }
 
+    @Override
     public void setFont( Font font )
     {
         setFont( font, true );
     }
 
+    @Override
     public void setTickColor( float[] color )
     {
         this.tickColor = color;
@@ -156,6 +157,7 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
         this.labelColorSet = true;
     }
 
+    @Override
     public void setFont( Font font, boolean antialias )
     {
         this.newFont = font;
@@ -204,11 +206,5 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
             textRenderer = new TextRenderer( newFont, antialias, false );
             newFont = null;
         }
-
-        if ( progLine == null )
-        {
-            progLine = new LineProgram( context.getGL( ).getGL2ES2( ) );
-        }
-
     }
 }
