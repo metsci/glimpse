@@ -1,8 +1,7 @@
 package com.metsci.glimpse.support.line;
 
 import static com.metsci.glimpse.support.line.LineUtils.*;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 
@@ -42,6 +41,15 @@ public class LinePath
 
         this.mileageVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.mileageDirty = true;
+    }
+
+    public void dispose( GL gl )
+    {
+        this.data.clear( );
+
+        this.xyVbo.dispose( gl );
+        this.connectVbo.dispose( gl );
+        this.mileageVbo.dispose( gl );
     }
 
     public void addRectangle( float x1, float y1, float x2, float y2 )

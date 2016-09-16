@@ -54,7 +54,7 @@ public class RandomLinesPainter extends GlimpsePainterBase
         style.stippleScale = 2;
         style.stipplePattern = 0b0001010111111111;
 
-        this.prog = null;
+        this.prog = new LineProgram( );
     }
 
     @Override
@@ -65,11 +65,6 @@ public class RandomLinesPainter extends GlimpsePainterBase
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
         enableStandardBlending( gl );
-
-        if ( prog == null )
-        {
-            this.prog = new LineProgram( gl );
-        }
 
         prog.begin( gl );
         try
@@ -107,6 +102,8 @@ public class RandomLinesPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        //XXX should LineProgram or MappableBuffer be disposed?
+        GL2ES2 gl = context.getGL( ).getGL2ES2( );
+        this.path.dispose( gl );
+        this.prog.dispose( gl );
     }
 }

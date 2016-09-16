@@ -48,6 +48,11 @@ public class GLUtils
         return handle[0];
     }
 
+    public static void deleteBuffers( GL gl, int... handles )
+    {
+        gl.glDeleteBuffers( handles.length, handles, 0 );
+    }
+
     public static int genTexture( GL gl )
     {
         int[] handle = new int[1];

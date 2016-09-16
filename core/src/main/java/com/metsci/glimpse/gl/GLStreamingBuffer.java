@@ -84,8 +84,7 @@ public class GLStreamingBuffer
     protected final int blockSizeFactor;
 
     /**
-     * Assigned only once, the first time {@link #map(GL, long)} is
-     * called
+     * Zero until the first call to {@link #map(GL, long)}
      */
     protected int buffer;
 
@@ -95,7 +94,8 @@ public class GLStreamingBuffer
     protected long blockSize;
 
     /**
-     * The byte offset of the most recently sealed range
+     * The byte offset of the most recently sealed range, or -1 if
+     * no ranges have been sealed yet
      */
     protected long sealedOffset;
 
@@ -294,6 +294,33 @@ public class GLStreamingBuffer
         this.sealedOffset = mappedOffset;
         this.mappedOffset += mappedSize;
         this.mappedSize = 0;
+    }
+
+    /**
+     * Deletes the buffer (unmapping first, if necessary), and resets this object to the way
+     * it was before {@link #mapBytes(GL, long)} was first called.
+     * <p>
+     * This object can be safely reused after being disposed, but in most cases there is no
+     * significant advantage to doing so.
+     */
+    public void dispose( GL gl )
+    {
+        if ( this.mappedSize != 0 )
+        {
+            gl.glBindBuffer( this.target, this.buffer );
+            gl.glUnmapBuffer( this.target );
+            this.mappedSize = 0;
+        }
+
+        if ( this.buffer != 0 )
+        {
+            deleteBuffers( gl, this.buffer );
+            this.buffer = 0;
+        }
+
+        this.blockSize = 0;
+        this.sealedOffset = -1;
+        this.mappedOffset = 0;
     }
 
 }
