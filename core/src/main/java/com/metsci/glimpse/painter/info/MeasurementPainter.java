@@ -103,6 +103,7 @@ public class MeasurementPainter extends GlimpsePainterBase
         this.distanceUnitConverter = AxisUnitConverters.identity;
 
         this.lineProg = new LineProgram( );
+        this.fillProg = new FlatColorProgram( );
 
         this.lineStyle = new LineStyle( );
         this.lineStyle.stippleEnable = false;
@@ -200,11 +201,6 @@ public class MeasurementPainter extends GlimpsePainterBase
         int sign = angle < 0 ? -1 : 1;
         float step = ( float ) RADIANS_PER_VERTEX;
         float radius = ( float ) ( distance * ANGLE_WEDGE_RADIUS_FRACTION );
-
-        if ( this.fillProg == null )
-        {
-            this.fillProg = new FlatColorProgram( gl );
-        }
 
         //// draw ruler ////
 

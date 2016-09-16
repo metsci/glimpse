@@ -33,8 +33,8 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis2D;
@@ -42,6 +42,7 @@ import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -51,7 +52,7 @@ import com.metsci.glimpse.support.font.SimpleTextLayoutCenter;
 
 /**
  * Displays tool tip text at a specified position.
- * 
+ *
  * @author ulman
  */
 public class TooltipPainter extends SimpleTextPainter
@@ -127,7 +128,7 @@ public class TooltipPainter extends SimpleTextPainter
 
     /**
      * Sets icons and associated colors.
-     * 
+     *
      * @see #setIcons(List)
      */
     public synchronized TooltipPainter setIcons( List<Object> iconIds, List<float[]> colors )
@@ -347,8 +348,15 @@ public class TooltipPainter extends SimpleTextPainter
     }
 
     @Override
-    protected synchronized void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    protected synchronized void doPaintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
+        int width = bounds.getWidth( );
+        int height = bounds.getHeight( );
+
         if ( axis == null && !drawInPixelCoords )
         {
             throw new AxisNotSetException( this, context );
@@ -359,7 +367,7 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( icons == null )
         {
-            loadIcons( context.getGL( ) );
+            loadIcons( context );
         }
 
         if ( newFont != null )
@@ -374,186 +382,188 @@ public class TooltipPainter extends SimpleTextPainter
 
         if ( iconIds == null && lines == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5, -0.5, height - 1 + 0.5, -1, 1 );
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-
-        double textHeight = 0;
-        if ( lines != null )
+        GLUtils.enableStandardBlending( gl );
+        try
         {
-            textHeight = ( textLayout.getLineHeight( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
-        }
-
-        float iconSize;
-        if ( iconIds == null || iconIds.isEmpty( ) )
-        {
-            iconSize = 0;
-        }
-        else if ( iconSizeFixedToText && textHeight != 0 )
-        {
-            iconSize = ( float ) textLayout.getLineHeight( );
-        }
-        else
-        {
-            iconSize = this.iconSize;
-        }
-
-        // calculate largest height of box
-        double iconHeight = 0;
-        if ( icons != null )
-        {
-            iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
-        }
-
-        int boundingHeight = ( int ) ( borderSize * 2 + Math.max( iconHeight, textHeight ) );
-
-        // calculate largest width of box
-        float textLength = 0;
-        if ( lines != null )
-        {
-            for ( int k = 0; k < lines.size( ); k++ )
+            double textHeight = 0;
+            if ( lines != null )
             {
-                textLength = Math.max( textLength, lines.get( k ).width );
+                textHeight = ( textLayout.getLineHeight( ) ) * lines.size( ) + lineSpacing * ( lines.size( ) - 1 );
             }
-        }
 
-        int boundingWidth = ( int ) ( borderSize * 2 + iconSize + textLength );
-        if ( iconIds != null && !iconIds.isEmpty( ) && lines != null )
-        {
-            boundingWidth += textIconSpacing;
-        }
-
-        // fold the insets and the offset together
-        int offsetX = this.offsetX + this.insets.left;
-        int offsetY = this.offsetY - this.insets.top;
-
-        // adjust bounds to clamp the text box to the edge of the screen
-        double clampX = offsetX, clampY = offsetY;
-        if ( clampToScreenEdges )
-        {
-            if ( x + boundingWidth + offsetX > bounds.getWidth( ) ) clampX = bounds.getWidth( ) - boundingWidth - x;
-            if ( x + offsetX < 0 ) clampX = -x;
-            if ( y + offsetY > bounds.getHeight( ) ) clampY = bounds.getHeight( ) - y;
-            if ( boundingHeight > y + offsetY ) clampY = boundingHeight - y;
-        }
-
-        // paint background and border 
-        if ( this.paintBackground || this.paintBorder )
-        {
-
-            if ( this.paintBackground )
+            float iconSize;
+            if ( iconIds == null || iconIds.isEmpty( ) )
             {
-                // Draw Text Background
-                gl.glColor4fv( backgroundColor, 0 );
+                iconSize = 0;
+            }
+            else if ( iconSizeFixedToText && textHeight != 0 )
+            {
+                iconSize = ( float ) textLayout.getLineHeight( );
+            }
+            else
+            {
+                iconSize = this.iconSize;
+            }
 
-                gl.glBegin( GL2.GL_QUADS );
-                try
+            // calculate largest height of box
+            double iconHeight = 0;
+            if ( icons != null )
+            {
+                iconHeight = iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 );
+            }
+
+            int boundingHeight = ( int ) ( borderSize * 2 + Math.max( iconHeight, textHeight ) );
+
+            // calculate largest width of box
+            float textLength = 0;
+            if ( lines != null )
+            {
+                for ( int k = 0; k < lines.size( ); k++ )
                 {
-                    borderVertices( gl, boundingHeight, boundingWidth, x + clampX, y + clampY );
-                }
-                finally
-                {
-                    gl.glEnd( );
+                    textLength = Math.max( textLength, lines.get( k ).width );
                 }
             }
 
-            if ( this.paintBorder )
+            int boundingWidth = ( int ) ( borderSize * 2 + iconSize + textLength );
+            if ( iconIds != null && !iconIds.isEmpty( ) && lines != null )
             {
-                // Draw Text Background
-                gl.glColor4fv( borderColor, 0 );
-                gl.glEnable( GL2.GL_LINE_SMOOTH );
-
-                gl.glBegin( GL2.GL_LINE_LOOP );
-                try
-                {
-                    borderVertices( gl, boundingHeight, boundingWidth, x + clampX, y + clampY );
-                }
-                finally
-                {
-                    gl.glEnd( );
-                }
+                boundingWidth += textIconSpacing;
             }
-        }
-        gl.glDisable( GL2.GL_BLEND );
 
-        // draw text
-        if ( lines != null && textRenderer != null )
-        {
-            GlimpseColor.setColor( textRenderer, textColor );
-            textRenderer.beginRendering( width, height );
-            try
+            // fold the insets and the offset together
+            int offsetX = this.offsetX + this.insets.left;
+            int offsetY = this.offsetY - this.insets.top;
+
+            // adjust bounds to clamp the text box to the edge of the screen
+            double clampX = offsetX, clampY = offsetY;
+            if ( clampToScreenEdges )
             {
-                double posX = x + iconSize + borderSize;
-
-                if ( iconIds != null && !iconIds.isEmpty( ) )
-                {
-                    posX += textIconSpacing;
-                }
-
-                double posY = y - borderSize - textLayout.getLineHeight( );
-                double iconPosY = Float.NEGATIVE_INFINITY;
-
-                if ( wrapTextAroundIcon && icons != null )
-                {
-                    iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
-                }
-
-                for ( int i = 0; i < lines.size( ); i++ )
-                {
-                    if ( posY + textLayout.getLineHeight( ) < iconPosY ) posX = x + borderSize;
-                    textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
-                    posY = posY - lineSpacing - ( textLayout.getLineHeight( ) );
-                }
+                if ( x + boundingWidth + offsetX > bounds.getWidth( ) ) clampX = bounds.getWidth( ) - boundingWidth - x;
+                if ( x + offsetX < 0 ) clampX = -x;
+                if ( y + offsetY > bounds.getHeight( ) ) clampY = bounds.getHeight( ) - y;
+                if ( boundingHeight > y + offsetY ) clampY = boundingHeight - y;
             }
-            finally
-            {
-                textRenderer.endRendering( );
-            }
-        }
 
-        // draw icons
-        if ( iconIds != null && !iconIds.isEmpty( ) )
-        {
-            atlas.beginRendering( gl );
-            try
+            // paint background and border
+            if ( this.paintBackground || this.paintBorder )
             {
-                double posY = y - borderSize - iconSize;
-                for ( int i = 0; i < iconIds.size( ); i++ )
+                if ( paintBackground )
                 {
-                    Object iconId = iconIds.get( i );
-                    ImageData iconData = icons.get( i );
+                    this.fillBuilder.clear( );
+                    this.fillBuilder.addQuad2f( boundingHeight, boundingWidth, ( float ) ( x + clampX ), ( float ) ( y + clampY ) );
 
-                    if ( iconId != null && iconData != null )
+                    this.fillProg.begin( gl );
+                    try
                     {
-                        double iconScale = iconSize / ( double ) iconData.getWidth( );
+                        this.fillProg.setPixelOrtho( gl, bounds );
 
-                        float[] color = defaultIconColor;
+                        this.fillProg.draw( gl, this.fillBuilder, this.backgroundColor );
+                    }
+                    finally
+                    {
+                        this.fillProg.end( gl );
+                    }
+                }
 
-                        if ( iconColors != null && i < iconColors.size( ) )
-                        {
-                            float[] iconColor = iconColors.get( i );
-                            if ( iconColor != null ) color = iconColor;
-                        }
+                if ( paintBorder )
+                {
+                    this.linePath.clear( );
+                    this.linePath.addRectangle( boundingHeight, boundingWidth, ( float ) ( x + clampX ), ( float ) ( y + clampY ) );
 
-                        GlimpseColor.glColor( gl, color );
-                        atlas.drawImage( gl, iconId, ( int ) ( x + borderSize + clampX ), ( int ) ( posY + clampY ), iconScale, iconScale, 0, iconData.getHeight( ) );
-                        posY = posY - iconSize - iconSpacing;
+                    this.lineProg.begin( gl );
+                    try
+                    {
+                        this.lineProg.setPixelOrtho( gl, bounds );
+                        this.lineProg.setViewport( gl, bounds );
+
+                        this.lineStyle.rgba = borderColor;
+
+                        this.lineProg.draw( gl, this.lineStyle, this.linePath );
+                    }
+                    finally
+                    {
+                        this.lineProg.end( gl );
                     }
                 }
             }
-            finally
+            gl.glDisable( GL2.GL_BLEND );
+
+            // draw text
+            if ( lines != null && textRenderer != null )
             {
-                atlas.endRendering( gl );
+                GlimpseColor.setColor( textRenderer, textColor );
+                textRenderer.beginRendering( width, height );
+                try
+                {
+                    double posX = x + iconSize + borderSize;
+
+                    if ( iconIds != null && !iconIds.isEmpty( ) )
+                    {
+                        posX += textIconSpacing;
+                    }
+
+                    double posY = y - borderSize - textLayout.getLineHeight( );
+                    double iconPosY = Float.NEGATIVE_INFINITY;
+
+                    if ( wrapTextAroundIcon && icons != null )
+                    {
+                        iconPosY = y - ( iconSize * icons.size( ) + iconSpacing * ( icons.size( ) - 1 ) + borderSize );
+                    }
+
+                    for ( int i = 0; i < lines.size( ); i++ )
+                    {
+                        if ( posY + textLayout.getLineHeight( ) < iconPosY ) posX = x + borderSize;
+                        textRenderer.draw( lines.get( i ).text, ( int ) ( posX + clampX ), ( int ) ( posY + clampY ) );
+                        posY = posY - lineSpacing - ( textLayout.getLineHeight( ) );
+                    }
+                }
+                finally
+                {
+                    textRenderer.endRendering( );
+                }
             }
+
+            // draw icons
+            if ( iconIds != null && !iconIds.isEmpty( ) )
+            {
+                atlas.beginRendering( context );
+                try
+                {
+                    double posY = y - borderSize - iconSize;
+                    for ( int i = 0; i < iconIds.size( ); i++ )
+                    {
+                        Object iconId = iconIds.get( i );
+                        ImageData iconData = icons.get( i );
+
+                        if ( iconId != null && iconData != null )
+                        {
+                            double iconScale = iconSize / ( double ) iconData.getWidth( );
+
+                            float[] color = defaultIconColor;
+
+                            if ( iconColors != null && i < iconColors.size( ) )
+                            {
+                                float[] iconColor = iconColors.get( i );
+                                if ( iconColor != null ) color = iconColor;
+                            }
+
+                            int scaleX = ( int ) ( x + borderSize + clampX );
+                            int scaleY = ( int ) ( posY + clampY );
+
+                            atlas.drawImage( gl, iconId, scaleX, scaleY, iconScale, iconScale, 0, iconData.getHeight( ), color );
+                            posY = posY - iconSize - iconSpacing;
+                        }
+                    }
+                }
+                finally
+                {
+                    atlas.endRendering( context );
+                }
+            }
+        }
+        finally
+        {
+            GLUtils.disableBlending( gl );
         }
     }
 
@@ -572,15 +582,15 @@ public class TooltipPainter extends SimpleTextPainter
         lines = textLayout.getLines( );
     }
 
-    protected void loadIcons( GL gl )
+    protected void loadIcons( GlimpseContext context )
     {
         // looks strange, but causes atlas to load pending icons
         // this is necessary to do here because calls to atlas.getImageData( )
         // will fail if we do not
         if ( iconIds != null )
         {
-            atlas.beginRendering( gl );
-            atlas.endRendering( gl );
+            atlas.beginRendering( context );
+            atlas.endRendering( context );
         }
 
         int size = iconIds == null ? 0 : iconIds.size( );
@@ -598,7 +608,7 @@ public class TooltipPainter extends SimpleTextPainter
     // draw the edges of the tooltip bounding box
     protected void borderVertices( GL2 gl, int height, int width, double x, double y )
     {
-        //(  x, y ) are the coordinates of the top-left corner of the box 
+        //(  x, y ) are the coordinates of the top-left corner of the box
         gl.glVertex2d( x - insets.left, y + insets.top );
         gl.glVertex2d( x - insets.left, y - height - insets.bottom );
         gl.glVertex2d( x + width + insets.right, y - height - insets.bottom );

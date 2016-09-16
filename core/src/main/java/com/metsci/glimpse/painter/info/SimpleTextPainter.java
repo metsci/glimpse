@@ -110,6 +110,7 @@ public class SimpleTextPainter extends GlimpsePainterBase
         this.vPos = VerticalPosition.Bottom;
 
         this.lineProg = new LineProgram( );
+        this.fillProg = new FlatColorProgram( );
 
         this.lineStyle = new LineStyle( );
         this.lineStyle.stippleEnable = false;
@@ -537,11 +538,6 @@ public class SimpleTextPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
 
         Rectangle2D textBounds = sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
-
-        if ( this.fillProg == null )
-        {
-            this.fillProg = new FlatColorProgram( gl );
-        }
 
         GLUtils.enableStandardBlending( gl );
         try

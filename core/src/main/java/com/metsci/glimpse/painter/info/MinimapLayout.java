@@ -234,6 +234,8 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             this.lineStyle.thickness_PX = 1.0f;
 
             this.linePath = new LinePath( );
+            this.fillProg = new FlatColorProgram( );
+
         }
 
         @Override
@@ -249,11 +251,6 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             float maxX = ( float ) mainMapAxis.getMaxX( );
             float minY = ( float ) mainMapAxis.getMinY( );
             float maxY = ( float ) mainMapAxis.getMaxY( );
-
-            if ( this.fillProg == null )
-            {
-                this.fillProg = new FlatColorProgram( gl );
-            }
 
             GLUtils.enableStandardBlending( gl );
             try

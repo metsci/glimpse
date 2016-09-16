@@ -70,6 +70,7 @@ public class CursorTextPainter extends GlimpsePainterBase
 
     public CursorTextPainter( Font font )
     {
+        this.prog = new FlatColorProgram( );
         this.textRenderer = new TextRenderer( font );
         this.builder = new GLStreamingBufferBuilder( );
     }
@@ -237,11 +238,6 @@ public class CursorTextPainter extends GlimpsePainterBase
         String xText = getTextX( axis );
         String yText = getTextY( axis );
         String zText = getTextZ( axis );
-
-        if ( prog == null )
-        {
-            this.prog = new FlatColorProgram( gl );
-        }
 
         Rectangle2D xTextBounds = textRenderer.getBounds( xText );
         Rectangle2D yTextBounds = textRenderer.getBounds( yText );
