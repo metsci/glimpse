@@ -1,8 +1,8 @@
 package com.metsci.glimpse.support.line;
 
-import static com.metsci.glimpse.support.line.LineUtils.*;
 import static javax.media.opengl.GL.*;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
@@ -17,8 +17,8 @@ public class LinePath
     protected GLStreamingBuffer xyVbo;
     protected boolean xyDirty;
 
-    protected GLStreamingBuffer connectVbo;
-    protected boolean connectDirty;
+    protected GLStreamingBuffer flagsVbo;
+    protected boolean flagsDirty;
 
     protected GLStreamingBuffer mileageVbo;
     protected boolean mileageDirty;
@@ -36,8 +36,8 @@ public class LinePath
         this.xyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.xyDirty = true;
 
-        this.connectVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
-        this.connectDirty = true;
+        this.flagsVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.flagsDirty = true;
 
         this.mileageVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.mileageDirty = true;
@@ -48,7 +48,7 @@ public class LinePath
         this.data.clear( );
 
         this.xyVbo.dispose( gl );
-        this.connectVbo.dispose( gl );
+        this.flagsVbo.dispose( gl );
         this.mileageVbo.dispose( gl );
     }
 
@@ -60,94 +60,125 @@ public class LinePath
         lineTo( x1, y2 );
         lineTo( x1, y1 );
     }
-    
+
     public void moveTo( float x, float y )
     {
-        addVertex( x, y, false );
+        this.moveTo( x, y, 0f );
+    }
+
+    public void moveTo( float x, float y, float mileage )
+    {
+        this.data.moveTo( x, y, mileage );
+        this.setDirty( );
     }
 
     public void lineTo( float x, float y )
     {
-        addVertex( x, y, true );
+        this.data.lineTo( x, y );
+        this.setDirty( );
     }
 
-    public void addVertex( float x, float y, boolean connect )
+    public void closeLoop( )
     {
-        this.data.addVertex( x, y, connect );
-
-        this.xyDirty = true;
-        this.connectDirty = true;
-        this.mileageDirty = true;
+        this.data.closeLoop( );
+        this.setDirty( );
     }
 
     public void clear( )
     {
         this.data.clear( );
+        this.setDirty( );
+    }
 
+    protected void setDirty( )
+    {
         this.xyDirty = true;
-        this.connectDirty = true;
+        this.flagsDirty = true;
         this.mileageDirty = true;
     }
 
     public int numVertices( )
     {
-        // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
-        int numVertices = data.numVertices( );
-        return ( numVertices == 0 ? 0 : numVertices + 2 );
+        // The vbo() methods append an extra vertex to make sure GL_LINE_STRIP_ADJACENCY works right
+        int numVertices = this.data.numVertices( );
+        return ( numVertices == 0 ? 0 : numVertices + 1 );
     }
 
     public GLStreamingBuffer xyVbo( GL gl )
     {
-        if ( xyDirty )
+        if ( this.xyDirty )
         {
-            FloatBuffer xyData = data.xyBuffer( );
+            FloatBuffer xyData = this.data.xyBuffer( );
 
-            // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
-            FloatBuffer xyMapped = xyVbo.mapFloats( gl, xyData.remaining( ) + 4 );
-            putWithFirstAndLastDuplicated( xyData, xyMapped, 2 );
-            xyVbo.seal( gl );
+            FloatBuffer xyMapped = this.xyVbo.mapFloats( gl, xyData.remaining( ) + 2 );
+            xyMapped.put( xyData );
+
+            // Append an extra vertex to make sure GL_LINE_STRIP_ADJACENCY works right
+            if ( xyData.position( ) >= 2 )
+            {
+                xyData.position( xyData.position( ) - 2 );
+                float xTrailer = xyData.get( );
+                float yTrailer = xyData.get( );
+                xyMapped.put( xTrailer ).put( yTrailer );
+            }
+
+            this.xyVbo.seal( gl );
 
             this.xyDirty = false;
         }
 
-        return xyVbo;
+        return this.xyVbo;
     }
 
-    public GLStreamingBuffer connectVbo( GL gl )
+    public GLStreamingBuffer flagsVbo( GL gl )
     {
-        if ( connectDirty )
+        if ( this.flagsDirty )
         {
-            FloatBuffer connectData = data.connectBuffer( );
+            ByteBuffer flagsData = this.data.flagsBuffer( );
 
-            // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
-            FloatBuffer connectMapped = connectVbo.mapFloats( gl, connectData.remaining( ) + 2 );
-            putWithFirstAndLastDuplicated( connectData, connectMapped, 1 );
-            connectVbo.seal( gl );
+            ByteBuffer flagsMapped = this.flagsVbo.mapBytes( gl, flagsData.remaining( ) + 1 );
+            flagsMapped.put( flagsData );
 
-            this.connectDirty = false;
+            // Append an extra vertex to make sure GL_LINE_STRIP_ADJACENCY works right
+            if ( flagsData.position( ) >= 1 )
+            {
+                byte flagsTrailer = ( byte ) 0;
+                flagsMapped.put( flagsTrailer );
+            }
+
+            this.flagsVbo.seal( gl );
+
+            this.flagsDirty = false;
         }
 
-        return connectVbo;
+        return this.flagsVbo;
     }
 
     public GLStreamingBuffer mileageVbo( GL gl, double ppvAspectRatio )
     {
-        return mileageVbo( gl, ppvAspectRatio, 1.0000000001 );
+        return this.mileageVbo( gl, ppvAspectRatio, 1.0000000001 );
     }
 
     public GLStreamingBuffer mileageVbo( GL gl, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
     {
-        int mileageDirtyCount = data.updateMileage( ppvAspectRatio, ppvAspectRatioChangeThreshold );
+        int mileageDirtyCount = this.data.updateMileage( ppvAspectRatio, ppvAspectRatioChangeThreshold );
         this.mileageDirty |= ( mileageDirtyCount > 0 );
 
-        if ( mileageDirty )
+        if ( this.mileageDirty )
         {
-            FloatBuffer mileageData = data.mileageBuffer( );
+            FloatBuffer mileageData = this.data.mileageBuffer( );
 
-            // First and last vertices get duplicated for GL_LINE_STRIP_ADJACENCY
-            FloatBuffer mileageMapped = mileageVbo.mapFloats( gl, mileageData.remaining( ) + 2 );
-            putWithFirstAndLastDuplicated( mileageData, mileageMapped, 1 );
-            mileageVbo.seal( gl );
+            FloatBuffer mileageMapped = this.mileageVbo.mapFloats( gl, mileageData.remaining( ) + 1 );
+            mileageMapped.put( mileageData );
+
+            // Append an extra vertex to make sure GL_LINE_STRIP_ADJACENCY works right
+            if ( mileageData.position( ) >= 1 )
+            {
+                float mileageTrailer = 0f;
+                mileageMapped.put( mileageTrailer );
+            }
+
+            this.mileageVbo.seal( gl );
 
             this.mileageDirty = false;
         }

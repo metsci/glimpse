@@ -43,6 +43,7 @@ public class LineProgram
         public final int STIPPLE_PATTERN;
 
         public final int inXy;
+        public final int inFlags;
         public final int inMileage;
 
         public LineProgramHandles( GL2ES2 gl )
@@ -63,6 +64,7 @@ public class LineProgram
             this.STIPPLE_PATTERN = gl.glGetUniformLocation( program, "STIPPLE_PATTERN" );
 
             this.inXy = gl.glGetAttribLocation( program, "inXy" );
+            this.inFlags = gl.glGetAttribLocation( program, "inFlags" );
             this.inMileage = gl.glGetAttribLocation( program, "inMileage" );
         }
     }
@@ -103,6 +105,7 @@ public class LineProgram
 
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
+        gl.glEnableVertexAttribArray( this.handles.inFlags );
         gl.glEnableVertexAttribArray( this.handles.inMileage );
     }
 
@@ -162,14 +165,22 @@ public class LineProgram
         this.setStyle( gl, style );
 
         GLStreamingBuffer xyVbo = path.xyVbo( gl );
-        GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
-        this.draw( gl, xyVbo, mileageVbo, 0, path.numVertices( ) );
+        GLStreamingBuffer flagsVbo = path.flagsVbo( gl );
+
+        // WIP
+        //GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.connectVbo( gl ) );
+        GLStreamingBuffer mileageVbo = path.mileageVbo( gl, ppvAspectRatio );
+
+        this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, path.numVertices( ) );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer mileageVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+        gl.glBindBuffer( flagsVbo.target, flagsVbo.buffer( ) );
+        gl.glVertexAttribPointer( this.handles.inFlags, 1, GL_BYTE, false, 0, flagsVbo.sealedOffset( ) );
 
         gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
@@ -177,10 +188,13 @@ public class LineProgram
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
     }
 
-    public void draw( GL2ES2 gl, int xyVbo, int mileageVbo, int first, int count )
+    public void draw( GL2ES2 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
+        gl.glVertexAttribPointer( this.handles.inFlags, 1, GL_BYTE, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
         gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
@@ -191,6 +205,7 @@ public class LineProgram
     public void end( GL2ES2 gl )
     {
         gl.glDisableVertexAttribArray( this.handles.inXy );
+        gl.glDisableVertexAttribArray( this.handles.inFlags );
         gl.glDisableVertexAttribArray( this.handles.inMileage );
         gl.glUseProgram( 0 );
     }

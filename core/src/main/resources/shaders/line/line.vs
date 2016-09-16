@@ -28,12 +28,16 @@ uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
 
 in vec2 inXy;
+in int inFlags;
 in float inMileage;
 
+out int vFlags;
 out float vMileage_PX;
 
 void main( )
 {
+    vFlags = inFlags;
+
     float mileage_AXIS = inMileage;
     vec2 ppv = VIEWPORT_SIZE_PX / axisSize( AXIS_RECT );
     vMileage_PX = mileage_AXIS * ppv.x;
