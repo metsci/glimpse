@@ -79,6 +79,8 @@ public class CrosshairPainter extends GlimpsePainterBase
 
     public CrosshairPainter( )
     {
+        this.lineProg = new LineProgram( );
+
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
         this.lineStyle.stippleEnable = false;
@@ -203,11 +205,6 @@ public class CrosshairPainter extends GlimpsePainterBase
 
         float centerY = ( float ) axisY.getSelectionCenter( );
         float sizeY = ( float ) axisY.getSelectionSize( ) / 2;
-
-        if ( lineProg == null )
-        {
-            lineProg = new LineProgram( gl );
-        }
 
         if ( flatProg == null )
         {

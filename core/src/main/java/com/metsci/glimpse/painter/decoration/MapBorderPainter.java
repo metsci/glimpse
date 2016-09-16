@@ -78,6 +78,8 @@ public class MapBorderPainter extends GlimpsePainterBase
         this.inXys = new GLStreamingBufferBuilder( );
         this.inRgba = new GLStreamingBufferBuilder( );
 
+        this.lineProg = new LineProgram( );
+
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
         this.lineStyle.thickness_PX = 1.0f;
@@ -266,11 +268,6 @@ public class MapBorderPainter extends GlimpsePainterBase
         finally
         {
             fillProg.end( gl );
-        }
-
-        if ( lineProg == null )
-        {
-            lineProg = new LineProgram( gl );
         }
 
         linePath.clear( );

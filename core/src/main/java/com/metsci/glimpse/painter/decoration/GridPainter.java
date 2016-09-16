@@ -81,6 +81,8 @@ public class GridPainter extends GlimpsePainterBase
         this.ticksX = ticksX;
         this.ticksY = ticksY;
 
+        this.prog = new LineProgram( );
+
         this.style = new LineStyle( );
         this.style.feather_PX = 0;
         this.style.stippleEnable = false;
@@ -217,11 +219,6 @@ public class GridPainter extends GlimpsePainterBase
         AxisUnitConverter converterY = ticksY.getAxisUnitConverter( );
         converterY = converterY == null ? AxisUnitConverters.identity : converterY;
         Axis1D axisY = axis.getAxisY( );
-
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
 
         //////////////
         //////////////  Vertical Lines

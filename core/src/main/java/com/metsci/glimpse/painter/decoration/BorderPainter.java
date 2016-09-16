@@ -59,6 +59,8 @@ public class BorderPainter extends GlimpsePainterBase
 
     public BorderPainter( )
     {
+        this.prog = new LineProgram( );
+
         this.style = new LineStyle( );
         this.style.feather_PX = 0;
         this.style.stippleEnable = false;
@@ -150,11 +152,6 @@ public class BorderPainter extends GlimpsePainterBase
         int y = bounds.getY( );
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-
-        if ( prog == null )
-        {
-            prog = new LineProgram( gl );
-        }
 
         GLUtils.enableStandardBlending( gl );
         prog.begin( gl );

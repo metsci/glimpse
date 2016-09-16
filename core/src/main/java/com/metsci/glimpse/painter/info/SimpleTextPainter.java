@@ -109,6 +109,8 @@ public class SimpleTextPainter extends GlimpsePainterBase
         this.hPos = HorizontalPosition.Left;
         this.vPos = VerticalPosition.Bottom;
 
+        this.lineProg = new LineProgram( );
+
         this.lineStyle = new LineStyle( );
         this.lineStyle.stippleEnable = false;
         this.lineStyle.joinType = LineJoinType.JOIN_NONE;
@@ -535,11 +537,6 @@ public class SimpleTextPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
 
         Rectangle2D textBounds = sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
-
-        if ( this.lineProg == null )
-        {
-            this.lineProg = new LineProgram( gl );
-        }
 
         if ( this.fillProg == null )
         {

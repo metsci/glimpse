@@ -121,6 +121,8 @@ public class ScalePainter extends GlimpsePainterBase
         this.pixelHeight = 20;
         this.pixelWidth = 300;
 
+        this.lineProg = new LineProgram( );
+
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
         this.lineStyle.stippleEnable = false;
@@ -316,11 +318,6 @@ public class ScalePainter extends GlimpsePainterBase
         double totalSize = scalePixelSize * tickCount;
 
         GL3 gl = context.getGL( ).getGL3( );
-
-        if ( lineProg == null )
-        {
-            lineProg = new LineProgram( gl );
-        }
 
         if ( fillProg == null )
         {

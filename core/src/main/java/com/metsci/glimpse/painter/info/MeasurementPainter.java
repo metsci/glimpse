@@ -102,6 +102,8 @@ public class MeasurementPainter extends GlimpsePainterBase
         this.distanceFormatter = distanceFormatter;
         this.distanceUnitConverter = AxisUnitConverters.identity;
 
+        this.lineProg = new LineProgram( );
+
         this.lineStyle = new LineStyle( );
         this.lineStyle.stippleEnable = false;
         this.lineStyle.feather_PX = 0.8f;
@@ -198,11 +200,6 @@ public class MeasurementPainter extends GlimpsePainterBase
         int sign = angle < 0 ? -1 : 1;
         float step = ( float ) RADIANS_PER_VERTEX;
         float radius = ( float ) ( distance * ANGLE_WEDGE_RADIUS_FRACTION );
-
-        if ( this.lineProg == null )
-        {
-            this.lineProg = new LineProgram( gl );
-        }
 
         if ( this.fillProg == null )
         {

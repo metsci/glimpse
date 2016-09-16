@@ -108,6 +108,8 @@ public abstract class LegendPainter extends GlimpsePainterBase
         this.colors = new HashMap<String, float[]>( );
         setFont( 15, false );
 
+        this.lineProg = new LineProgram( );
+
         this.style = new LineStyle( );
         this.style.feather_PX = 0;
         this.style.stippleEnable = false;
@@ -307,11 +309,6 @@ public abstract class LegendPainter extends GlimpsePainterBase
 
         int lx = upperLeftX( width, height, lw, lh );
         int ly = upperLeftY( width, height, lw, lh );
-
-        if ( lineProg == null )
-        {
-            lineProg = new LineProgram( gl );
-        }
 
         if ( flatProg == null )
         {
