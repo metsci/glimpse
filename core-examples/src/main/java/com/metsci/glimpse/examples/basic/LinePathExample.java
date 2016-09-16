@@ -87,6 +87,12 @@ public class LinePathExample
                 path.moveTo( x0, y0 );
                 path.lineTo( x1, y1 );
                 path.lineTo( x2, y2 );
+
+                // Make some of the line-strips closed loops
+                if ( i % 2 == 0 )
+                {
+                    path.closeLoop( );
+                }
             }
 
             // Set line appearance (except for thickness, which is set in doPaintTo)
