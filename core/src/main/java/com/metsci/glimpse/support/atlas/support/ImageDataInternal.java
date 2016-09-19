@@ -32,7 +32,7 @@ import com.jogamp.opengl.util.texture.TextureCoords;
  * Metadata for each image in the TextureAtlas. Used to store data about images which
  * have already been incorporated into the TextureAtlas. For images waiting in the queue
  * to be added to the TextureAtlas, see ImageDataExternal.
- * 
+ *
  * @author ulman
  * @see com.sun.opengl.util.j2d.TextRenderer$TextData
  * @see ImageDataExternal

@@ -39,7 +39,7 @@ public class GLStreamingBufferBuilder
 
         this.buffer.dispose( gl );
     }
-    
+
     public GLStreamingBuffer getBuffer( GL gl )
     {
         if ( dirty )

@@ -40,7 +40,7 @@ public class GeoReprojection implements Projection
     /**
      * <p>Builds a projection which maps a texture which was rendered in one GeoProjection space
      * into another GeoProjection space.</p>
-     * 
+     *
      * <p>A common usage. This would take a texture which had been
      * {@code
      * GeoProjection from = new TangentPlane( LatLonGeo.fromDegrees( 0, 0 ) );
@@ -49,7 +49,7 @@ public class GeoReprojection implements Projection
      * GeoProjection to = new MercatorProjection( );
      * new GeoReprojection( flat, from, to );
      * }
-     * 
+     *
      * @param flat mapping from texture space to flat projection space
      * @param from current mapping from flat projection space to lat/lon space
      * @param to desired mapping from flat projection space to lat/lon space

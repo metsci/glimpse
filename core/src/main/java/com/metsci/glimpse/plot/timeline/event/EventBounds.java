@@ -32,7 +32,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 /**
  * Metadata about an Event used by the {@link EventSelectionHandler} to indicate
  * what part of an event was clicked (the icon, label, etc...).
- * 
+ *
  * @author ulman
  */
 public class EventBounds

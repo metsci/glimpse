@@ -105,7 +105,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
             progLine.setViewport( gl3, bounds );
             progLine.setOrtho( gl3, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
-            
+
             progLine.draw( gl3, style, pathLine );
 
             if ( showCurrentTimeLabel ) drawCurrentTimeTick( gl3, axis, width, height );

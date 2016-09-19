@@ -59,7 +59,7 @@ public class SimplePointShader extends GlimpseShaderProgram
 
     protected GLUniformData constantSize;
     protected GLUniformData constantColor;
-    
+
     protected GLUniformData mvpMatrix;
 
     protected GLArrayDataClient vertexAttribute;
@@ -88,7 +88,7 @@ public class SimplePointShader extends GlimpseShaderProgram
         this.constantColor = this.addUniformData( new GLUniformData( "constant_size", 1 ) );
 
         this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
-        
+
         this.vertexAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "a_position", 2, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
         this.colorAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valColor", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
         this.sizeAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valSize", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
@@ -113,19 +113,19 @@ public class SimplePointShader extends GlimpseShaderProgram
             }
         } );
     }
-    
+
     protected void addDefaultVertexShader( )
     {
         this.addVertexShader( "shaders/point/point_shader.vs" );
     }
-    
+
     public void setProjectionMatrix( Axis2D axis )
     {
         Matrix4 m = new Matrix4( );
         m.makeOrtho( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ), -1, 1 );
         this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
     }
-    
+
     public void setVertexData( Buffer b )
     {
         this.vertexAttribute.reset( );

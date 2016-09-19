@@ -50,7 +50,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 /**
  * GlimpseSurfaceTile uses TextureSurfaceTile to display the output of Glimpse
  * offscreen rendering onto the surface of the Worldwind globe.
- * 
+ *
  * @author ulman
  */
 public class GlimpseStaticSurfaceTile extends AbstractLayer implements GlimpseSurfaceTile, Renderable, PreRenderable

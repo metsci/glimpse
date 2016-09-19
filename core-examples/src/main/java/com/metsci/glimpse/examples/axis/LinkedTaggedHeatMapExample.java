@@ -53,7 +53,7 @@ public class LinkedTaggedHeatMapExample
         // create a parent TaggedAxis1D and set it not to link the tags of its children
         TaggedAxis1D parent = new TaggedAxis1D( );
         parent.setLinkTags( false );
-        
+
         // link the z (color) axis of the two plots
         layout1.getAxisZ( ).setParent( parent, true );
         layout2.getAxisZ( ).setParent( parent, true );

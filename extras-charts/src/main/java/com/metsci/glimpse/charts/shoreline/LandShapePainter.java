@@ -54,7 +54,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
 /**
  * Originally designed to display shoreline data available from the NOAA/NGDC Coastline Extractor
  * tool at http://www.ngdc.noaa.gov/mgg_coastline/</p>
- * 
+ *
  * Now capable of painting all LandShapes, NdgcFile shapes as wells as Gshhs shapes.
  *
  * When downloading ndgc data, choose the following options:
@@ -62,8 +62,8 @@ import com.metsci.glimpse.util.vector.Vector2d;
  * Compression Method: None
  * Coast Format: Mapgen
  * Coast Preview: No Preview
- * 
- * 
+ *
+ *
  * @author ulman
  * @author cunningham
  */
@@ -86,10 +86,10 @@ public class LandShapePainter extends GlimpsePainter2D
 
     /**
      * Deprecated in favor of loadNdgcLandFile( InputStream in, GeoProjection geoProjection )
-     *  
+     *
      * @param in
      * @param geoProjection
-     * @throws IOException    
+     * @throws IOException
      */
     @Deprecated
     public void loadLandFile( InputStream in, GeoProjection geoProjection ) throws IOException
@@ -104,7 +104,7 @@ public class LandShapePainter extends GlimpsePainter2D
 
     /**
      * Deprecated in favor of loadNgdcLandFile( String file, GeoProjection geoProjection )
-     * 
+     *
      * @param file
      * @param geoProjection
      * @throws IOException

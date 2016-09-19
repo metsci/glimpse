@@ -1467,7 +1467,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
         // mapping from polygonId to IdPolygon object
         Map<Object, IdPolygon> polygonMap;
-        // polygons added since last display( ) call 
+        // polygons added since last display( ) call
         Set<IdPolygon> newPolygons;
         // polygons selected since the last display( ) call
         // (always a subset of newPolygons)

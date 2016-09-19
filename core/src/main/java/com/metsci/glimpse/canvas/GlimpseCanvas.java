@@ -72,21 +72,21 @@ public interface GlimpseCanvas extends GlimpseTarget
      * Destroys the native surface which this canvas draws to. Does not dispose of GL resources associated
      * with GlimpsePainters and GlimpseLayouts attached to the GlimpseCanvas (as these may be attached to other
      * GlimpseCanvases as well). Disposing of Glimpse resources can be done via {@code #disposeAttached()}.
-     * 
+     *
      * @see #disposeAttached()
      */
     public void destroy( );
 
     /**
      * Disposes native resources of GlimpseLayouts and GlimpsePainters associated with the GlimpseCanvas.
-     * 
+     *
      * @see #destroy()
      */
     public void disposeAttached( );
 
     /**
      * A convenience method which is equivalent to:
-     * 
+     *
      * <code>
      * disposeAttached( );
      * destroy( );
@@ -97,7 +97,7 @@ public interface GlimpseCanvas extends GlimpseTarget
     /**
      * <p>Calls {@link GlimpsePainter#dispose(GlimpseContext)} the next time the GLContext associated with
      * this GlimpseCanvas is active. Generally this call is equivalent to:</p>
-     * 
+     *
      * <code>
      *  this.getGLDrawable( ).invoke( false, new GLRunnable( )
      *  {
@@ -109,7 +109,7 @@ public interface GlimpseCanvas extends GlimpseTarget
      *      }
      *  } );
      * </code>
-     * 
+     *
      * <p>The GlimpsePainter should be removed from all GlimpseLayouts via
      * {@link GlimpseLayout#removePainter(GlimpsePainter)} before disposePainter is called. After the GlimpsePainter
      * is disposed, it will no longer be valid for drawing on any GlimpseCanvas.</p>
@@ -133,7 +133,7 @@ public interface GlimpseCanvas extends GlimpseTarget
      * Returns the scale factors needed to convert the _native_ pixel coordinates to
      * the _window_ pixel coordinates. This only really matters on displays like like
      * Macbook Retina.
-     * 
+     *
      * @return the scale factors as {scaleX, scaleY}
      */
     public int[] getSurfaceScale( );

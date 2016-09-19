@@ -31,7 +31,7 @@ import com.metsci.glimpse.axis.Axis1D;
 /**
  * An AxisLabelHandler which displays axis value "as-is" without
  * attempting to truncate very large values by displaying as powers of 1000.
- * 
+ *
  * @author ulman
  */
 public class SimpleAxisLabelHandler extends GridAxisLabelHandler

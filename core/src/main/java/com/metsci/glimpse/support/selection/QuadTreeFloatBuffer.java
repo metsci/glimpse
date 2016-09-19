@@ -7,9 +7,9 @@ import com.metsci.glimpse.util.quadtree.QuadTreeInts;
 /**
  * A QuadTree backed by a FloatBuffer containing x/y coordinates of points stored in tree.
  * Points are references by the QuadTree using their index into the FloatBuffer.
- * 
+ *
  * Points are assumed to be packed into the FloatBuffer like: [ x0, y0, x1, y1, ... ]
- * 
+ *
  * @author ulman
  */
 public class QuadTreeFloatBuffer
@@ -47,7 +47,7 @@ public class QuadTreeFloatBuffer
             xyIndex.add( i );
         }
     }
-    
+
     public void addIndices( int[] indices )
     {
         for ( int index : indices )
@@ -60,7 +60,7 @@ public class QuadTreeFloatBuffer
     {
         this.addIndex( startIndex, this.buffer.limit( ) / 2 );
     }
-    
+
     /**
      * Add points at indices [startIndex,endIndex) in the backing FloatBuffer
      * to the QuadTreeInts.
@@ -72,7 +72,7 @@ public class QuadTreeFloatBuffer
             xyIndex.add( i );
         }
     }
-    
+
     public void removeIndices( int[] indices )
     {
         for ( int index : indices )
@@ -80,7 +80,7 @@ public class QuadTreeFloatBuffer
             xyIndex.remove( index );
         }
     }
-    
+
     public void removeIndex( int startIndex )
     {
         this.removeIndex( startIndex, this.buffer.limit( ) / 2 );

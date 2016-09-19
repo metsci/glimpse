@@ -71,7 +71,7 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
     public TaggedPartialColorXAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
-        
+
         this.vertexCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
         this.textureCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
     }
@@ -101,7 +101,7 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
             pathOutline.lineTo( width, y1 );
             pathOutline.lineTo( width, y2 );
             pathOutline.lineTo( 0.5f, y2 );
-            
+
             GLUtils.enableStandardBlending( gl );
             try
             {
@@ -193,7 +193,7 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
                 init = true;
             }
         }
-        
+
         vertexCoords.seal( gl );
         textureCoords.seal( gl );
 

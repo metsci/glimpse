@@ -48,7 +48,7 @@ import com.metsci.glimpse.util.concurrent.ConcurrencyUtils;
 
 /**
  * An FPSAnimator-like class which performs rendering on the Swing EDT.
- * 
+ *
  * @see FPSAnimator
  * @author ulman
  */

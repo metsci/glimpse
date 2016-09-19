@@ -38,10 +38,10 @@ import javax.media.opengl.GL2;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 
 /**
- * 
+ *
  * A texture class which stores 3 channel RGB colors. Each color channel
  * contains 8 bit values (capped from 0 to 255).
- * 
+ *
  * @author oren
  */
 public class RGBTextureProjected2D extends TextureProjected2D

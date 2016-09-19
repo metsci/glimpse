@@ -36,7 +36,7 @@ import javax.media.opengl.GL2;
  * drawn into, data loaded onto, etc...) by another class. ExternalTextureProjected2D
  * simply allows the projection capabilities of TextureProjected2D to be applied
  * to such an externally handled texture.
- * 
+ *
  * @author ulman
  */
 public class ExternalTextureProjected2D extends TextureProjected2D

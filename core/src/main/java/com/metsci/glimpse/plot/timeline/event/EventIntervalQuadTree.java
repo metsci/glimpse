@@ -35,7 +35,7 @@ import com.metsci.glimpse.support.interval.IntervalQuadTree;
  * TimeStamps, it uses {@link #equals(Object)} to satisfy the {@link Set} contract.
  * If two values are equal they must also have the same {@link Keyed#getStartTime()}
  * and {@link Keyed#getEndTime()}. However, two values which are not equal may have
- * the same start and end.</p> 
+ * the same start and end.</p>
 */
 public class EventIntervalQuadTree extends IntervalQuadTree<Event>
 {

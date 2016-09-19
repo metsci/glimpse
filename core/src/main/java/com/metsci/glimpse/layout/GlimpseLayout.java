@@ -243,7 +243,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     /**
      * Historical accident caused removeAll() and removeAllLayouts() to both exist
      * they are both retained for backwards compatibility.
-     * 
+     *
      * @deprecated see {@link #removeAllLayouts()}
      */
     public void removeAll( )
@@ -273,13 +273,13 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
      * <p>Sets the relative ordering constant for this painter. Painters with low
      * z order will be painter first (in the back) and those with high z order
      * will be painted last (in the front).</p>
-     * 
+     *
      * <p>The value itself has no meaning; it is relative to the z orders
      * of the other painters in the GlimpseLayout.
      * For {@link com.metsci.glimpse.layout.com.metsciGlimpseLayout} instances,
      * the z order also affects the order in which mouse events are delivered to
      * overlapping components.</p>
-     * 
+     *
      * <p>The z order is set to 0 by default. GlimpsePainters with the same z order
      * are painted in the order they were added to the GlimpseLayout. This means the
      * first painters added will be obscured by later painters.</p>

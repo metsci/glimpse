@@ -55,11 +55,11 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  * <p>Paints the default visualization for provided {@code Event} objects. Paints
  * a box with configurable border and background color and an optional icon
  * and text description.</p>
- * 
+ *
  * <p>The appearance of a single Event can be customized via
  * {@code Event#setEventPainter(EventPainter)} and the default appearance of all
  * Events can be customized via {@code EventPlotInfo#setEventPainter(EventPainter)}.</p>
- * 
+ *
  * @author ulman
  */
 public class DefaultEventPainter implements EventPainter
@@ -76,7 +76,7 @@ public class DefaultEventPainter implements EventPainter
 
     /**
      * Sets the maximum number of rows used to display icons in aggregate groups.
-     * 
+     *
      * @param rows
      */
     public void setMaxIconRows( int rows )

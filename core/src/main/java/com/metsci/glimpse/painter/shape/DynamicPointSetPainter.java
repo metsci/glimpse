@@ -54,9 +54,9 @@ import com.metsci.glimpse.util.primitives.IntsArray;
 
 /**
  * Efficiently paints dynamically changing groups of colored points. Support is provided
- * for very efficiently changing the color of existing points, as well as for adding 
+ * for very efficiently changing the color of existing points, as well as for adding
  * to existing sets of points.
- * 
+ *
  * @author ulman
  * @see com.metsci.glimpse.examples.misc.DynamicPointPainterExample
  */
@@ -71,7 +71,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
     protected float pointSize;
 
     protected QuadTreeFloatBuffer quadTree;
-    
+
     protected FloatBuffer colorBuffer;
     protected FloatBuffer pointBuffer;
 
@@ -106,7 +106,7 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
         this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
         this.quadTree = new QuadTreeFloatBuffer( this.pointBuffer );
-        
+
         this.searchResults = new IntsArray( );
     }
 

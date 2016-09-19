@@ -40,6 +40,6 @@ public class SampledColorScaleShaderInteger extends SampledColorScaleShader
     @Override
     protected void addShaders( )
     {
-        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader_integer.fs" );   
+        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader_integer.fs" );
     }
 }

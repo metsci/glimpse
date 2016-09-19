@@ -1,21 +1,21 @@
 /*
    Copyright (c) 2003-2005 Sun Microsystems, Inc. All Rights Reserved.
- 
+
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
-   
+
    - Redistribution of source code must retain the above copyright
      notice, this list of conditions and the following disclaimer.
-   
+
    - Redistribution in binary form must reproduce the above copyright
      notice, this list of conditions and the following disclaimer in the
      documentation and/or other materials provided with the distribution.
-   
+
    Neither the name of Sun Microsystems, Inc. or the names of
    contributors may be used to endorse or promote products derived from
    this software without specific prior written permission.
-   
+
    This software is provided "AS IS," without a warranty of any kind. ALL
    EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND WARRANTIES,
    INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY, FITNESS FOR A
@@ -28,7 +28,7 @@
    DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY,
    ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF
    SUN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-   
+
    You acknowledge that this software is not designed or intended for use
    in the design, construction, operation or maintenance of any nuclear
    facility.
@@ -226,7 +226,7 @@ public class AttributedTextRenderer
         antialiasing or fractional metrics, and the default
         RenderDelegate. Equivalent to <code>TextRenderer(font, false,
         false)</code>.
-    
+
         @param font the font to render with
     */
     public AttributedTextRenderer( Font font )
@@ -240,7 +240,7 @@ public class AttributedTextRenderer
         OpenGL's automatic mipmap generation for better smoothing when
         rendering the TextureRenderer's contents at a distance.
         Equivalent to <code>TextRenderer(font, false, false)</code>.
-    
+
         @param font the font to render with
         @param mipmap whether to attempt use of automatic mipmap generation
     */
@@ -256,7 +256,7 @@ public class AttributedTextRenderer
         level. No mipmap support is requested. Equivalent to
         <code>TextRenderer(font, antialiased, useFractionalMetrics,
         null)</code>.
-    
+
         @param font the font to render with
         @param antialiased whether to use antialiased fonts
         @param useFractionalMetrics whether to use fractional font
@@ -273,7 +273,7 @@ public class AttributedTextRenderer
         flags provide control over the same properties at the Java 2D
         level. The <code>renderDelegate</code> provides more control
         over the text rendered. No mipmap support is requested.
-    
+
         @param font the font to render with
         @param antialiased whether to use antialiased fonts
         @param useFractionalMetrics whether to use fractional font
@@ -294,7 +294,7 @@ public class AttributedTextRenderer
         over the text rendered. If <CODE>mipmap</CODE> is true, attempts
         to use OpenGL's automatic mipmap generation for better smoothing
         when rendering the TextureRenderer's contents at a distance.
-    
+
         @param font the font to render with
         @param antialiased whether to use antialiased fonts
         @param useFractionalMetrics whether to use fractional font
@@ -397,7 +397,7 @@ public class AttributedTextRenderer
         TextRenderer via {@link #setColor setColor}. This method
         disables the depth test and is equivalent to
         beginRendering(width, height, true).
-    
+
         @param width the width of the current on-screen OpenGL drawable
         @param height the height of the current on-screen OpenGL drawable
         @throws javax.media.opengl.GLException If an OpenGL context is not current when this method is called
@@ -417,7 +417,7 @@ public class AttributedTextRenderer
         changes the current color to the last color set with this
         TextRenderer via {@link #setColor setColor}. Disables the depth
         test if the disableDepthTest argument is true.
-    
+
         @param width the width of the current on-screen OpenGL drawable
         @param height the height of the current on-screen OpenGL drawable
         @param disableDepthTest whether to disable the depth test
@@ -437,7 +437,7 @@ public class AttributedTextRenderer
         environment mode to GL_MODULATE, and changes the current color
         to the last color set with this TextRenderer via {@link
         #setColor setColor}.
-    
+
         @throws GLException If an OpenGL context is not current when this method is called
     */
     public void begin3DRendering( ) throws GLException
@@ -447,7 +447,7 @@ public class AttributedTextRenderer
 
     /** Changes the current color of this TextRenderer to the supplied
         one. The default color is opaque white.
-    
+
         @param color the new color to use for rendering text
         @throws GLException If an OpenGL context is not current when this method is called
     */
@@ -472,7 +472,7 @@ public class AttributedTextRenderer
         com.sun.opengl.util.texture.Texture Texture}, although
         premultiplied colors are used internally. The default color is
         opaque white.
-    
+
         @param r the red component of the new color
         @param g the green component of the new color
         @param b the blue component of the new color
@@ -503,7 +503,7 @@ public class AttributedTextRenderer
         character is at position (x, y) specified in OpenGL coordinates,
         where the origin is at the lower-left of the drawable and the Y
         coordinate increases in the upward direction.
-    
+
         @param str the string to draw
         @param x the x coordinate at which to draw
         @param y the y coordinate at which to draw
@@ -531,7 +531,7 @@ public class AttributedTextRenderer
         the renderer's current color. The baseline of the leftmost
         character is placed at position (x, y, z) in the current
         coordinate system.
-    
+
         @param str the string to draw
         @param x the x coordinate at which to draw
         @param y the y coordinate at which to draw
@@ -573,7 +573,7 @@ public class AttributedTextRenderer
         Restores the projection and modelview matrices as well as
         several OpenGL state bits. Should be paired with {@link
         #beginRendering beginRendering}.
-    
+
         @throws GLException If an OpenGL context is not current when this method is called
     */
     public void endRendering( ) throws GLException
@@ -584,7 +584,7 @@ public class AttributedTextRenderer
     /** Ends a 3D render cycle with this {@link AttributedTextRenderer TextRenderer}.
         Restores several OpenGL state bits. Should be paired with {@link
         #begin3DRendering begin3DRendering}.
-    
+
         @throws GLException If an OpenGL context is not current when this method is called
     */
     public void end3DRendering( ) throws GLException
@@ -594,7 +594,7 @@ public class AttributedTextRenderer
 
     /** Disposes of all resources this TextRenderer is using. It is not
         valid to use the TextRenderer after this method is called.
-    
+
         @throws GLException If an OpenGL context is not current when this method is called
     */
     public void dispose( ) throws GLException
@@ -1553,7 +1553,7 @@ public class AttributedTextRenderer
         but if we encounter complex text and/or unicode sequences we
         don't understand, we can render them using the
         string-by-string method. <P>
-    
+
         Glyphs need to be able to re-upload themselves to the backing
         store on demand as we go along in the render sequence.
     */

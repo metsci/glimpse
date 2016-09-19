@@ -28,7 +28,7 @@ package com.metsci.glimpse.support.atlas.support;
 
 /**
  * Metadata for images waiting in the queue to be added to the TextureAtlas.
- * 
+ *
  * @author ulman
  * @see ImageDataInternal
  */

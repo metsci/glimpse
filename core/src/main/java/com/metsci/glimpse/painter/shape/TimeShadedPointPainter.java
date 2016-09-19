@@ -38,7 +38,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 /**
  * A Scatterplot point painter which associates a time with each data point. A subset of
  * the points can be displayed based on these time values.
- * 
+ *
  * @author ulman
  */
 public class TimeShadedPointPainter extends ShadedPointPainter

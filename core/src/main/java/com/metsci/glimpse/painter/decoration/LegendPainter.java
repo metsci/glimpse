@@ -608,10 +608,10 @@ public abstract class LegendPainter extends GlimpsePainterBase
     public void doDispose( GlimpseContext context )
     {
         if ( this.textRenderer != null ) this.textRenderer.dispose( );
-        
+
         this.lineProg.dispose( context.getGL( ).getGL3( ) );
         this.flatProg.dispose( context.getGL( ).getGL3( ) );
-        
+
         this.path.dispose( context.getGL( ) );
     }
 

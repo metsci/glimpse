@@ -31,10 +31,10 @@ import java.util.Map;
 
 /**
  * A constraint which enforces the ordering of the provided constraints.
- * 
+ *
  * The first constraint in the provided list must have the smallest value, the
  * last constraint must have the largest value.
- * 
+ *
  * @author sindhwani
  */
 public class OrderedConstraint extends NamedConstraint

@@ -77,10 +77,10 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * <p>A handle to one of the plotting areas making up a {@link StackedTimePlot2D}. This
  * is a specialized plotting area which supports display and manipulation of
  * {@link Event} objects.</p>
- * 
+ *
  * <p>For an example of this plot in use, see
  * {@link com.mcom.metsci.glimpse.examples.stacked.CollapsibleTimelinePlotExample}.</p>
- * 
+ *
  * @author ulman
  */
 public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
@@ -777,7 +777,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
      * overridden on a per-Event basis using {@link Event#setTextRenderingMode(OverlapRenderingMode)}.
      * However, the next call to {@link EventPlotInfo#setTextRenderingMode(OverlapRenderingMode)} will
      * reset all Events to the same value.
-     * 
+     *
      * @see Event#setOverlapMode(OverlapRenderingMode)
      */
     public void setTextRenderingMode( TextRenderingMode mode )

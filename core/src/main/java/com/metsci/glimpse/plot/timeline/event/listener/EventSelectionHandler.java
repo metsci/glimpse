@@ -39,7 +39,7 @@ import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 
 /**
  * Helper class which manages keeping track of selected Events for {@code EventPlotInfo}.
- * 
+ *
  * @author ulman
  */
 public class EventSelectionHandler
@@ -90,7 +90,7 @@ public class EventSelectionHandler
      * on an area of the timeline which contains no events. Otherwise, such
      * a click has no effect on the selected events. In this case, the only
      * way to deselect all events is to ctrl-click on all the selected events.
-     * 
+     *
      * @param clear
      */
     public void setClearSelectionOnClick( boolean clear )
@@ -112,13 +112,13 @@ public class EventSelectionHandler
      * {@link Event#setSelectable(boolean)}. Clicking one event removes all other
      * selected events unless the ctrl key is held down, in which case the clicked
      * event is added or removed from the set of selected Events.</p>
-     * 
+     *
      * <p>If custom selection semmantics are required (only selecting events
      * when their icon is clicked, for example), then
      * {@link #setAllowMouseEventSelection(boolean)} can be set to false and client
      * code can attach a custom {@link EventPlotListener} or {@link GlimpseMouseListener}
      * which calls {@link #setSelectedEvents(Set)} as desired based on user clicks.</p>
-     * 
+     *
      * @param allowSelection
      */
     public void setAllowMouseEventSelection( boolean allowSelection )

@@ -37,10 +37,10 @@ import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 /**
  * An adapter class which utilizes a {@link EventPainter} to (inefficiently)
  * perform the function of a {@link GroupedEventPainter}.
- * 
+ *
  * This class should generally not be used. Instead, a {@link GroupedEventPainter}
  * should be implemented which efficiently draws all events simultaneously.
- * 
+ *
  * @author ulman
  */
 public class GroupedEventPainterAdapter implements GroupedEventPainter

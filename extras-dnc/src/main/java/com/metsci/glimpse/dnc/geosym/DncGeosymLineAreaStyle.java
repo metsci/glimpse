@@ -28,19 +28,19 @@ package com.metsci.glimpse.dnc.geosym;
 
 public class DncGeosymLineAreaStyle
 {
-    
+
     public final String symbolId;
     public final String symbolType;
-    
+
     public final float lineWidth;
     public final float[] lineRgba;
     public final boolean hasLineStipple;
     public final int lineStippleFactor;
     public final short lineStipplePattern;
-    
+
     public final float[] fillRgba;
-    
-    
+
+
     public DncGeosymLineAreaStyle(String symbolId, String symbolType, float lineWidth, float[] lineRgba, boolean hasLineStipple, int lineStippleFactor, short lineStipplePattern, float[] fillRgba)
     {
         this.symbolId = symbolId;
@@ -52,5 +52,5 @@ public class DncGeosymLineAreaStyle
         this.lineStipplePattern = lineStipplePattern;
         this.fillRgba = fillRgba;
     }
-    
+
 }

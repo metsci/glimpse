@@ -45,7 +45,7 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
  * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
- * 
+ *
  * @author ulman
  */
 public class PopupMenuExample

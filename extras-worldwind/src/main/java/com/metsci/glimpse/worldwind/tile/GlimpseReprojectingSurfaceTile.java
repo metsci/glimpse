@@ -167,7 +167,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
         if ( texture == null )
         {
             init( glContext );
-            
+
             int width = offscreenCanvas.getTargetBounds( ).getWidth( );
             int height = offscreenCanvas.getTargetBounds( ).getHeight( );
             int texHandle = offscreenCanvas.getTextureUnit( );

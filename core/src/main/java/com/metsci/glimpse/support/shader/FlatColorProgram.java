@@ -124,7 +124,7 @@ public class FlatColorProgram
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
     }
-    
+
     /**
      * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
      * was first called.

@@ -65,16 +65,16 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
     {
         initialize( colorAxis, targetTexUnit, colorTexUnit );
     }
-    
+
     protected void addShaders( )
     {
-        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader.fs" );   
+        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader.fs" );
     }
-    
+
     protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
         this.addShaders( );
-        
+
         this.dataMin = this.addUniformData( new GLUniformData( "dataMin", getMin( colorAxis ) ) );
         this.dataMax = this.addUniformData( new GLUniformData( "dataMax", getMax( colorAxis ) ) );
         this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
