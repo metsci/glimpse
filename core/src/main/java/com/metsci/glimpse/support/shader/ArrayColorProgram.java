@@ -1,7 +1,10 @@
 package com.metsci.glimpse.support.shader;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TRIANGLES;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -15,34 +18,54 @@ public class ArrayColorProgram
     public static final String vertShader_GLSL = requireResourceText( "shaders/array_color/array_color.vs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/array_color/array_color.fs" );
 
-    public final int programHandle;
-
-    // Uniforms
-
-    public final int AXIS_RECT;
-
-    // Vertex attributes
-
-    public final int inXy;
-    public final int inRgba;
-
-    public ArrayColorProgram( GL2ES2 gl )
+    public static class ProgramHandles
     {
-        this.programHandle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+        public final int program;
 
-        this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
+        // Uniforms
 
-        this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
-        this.inRgba = gl.glGetAttribLocation( programHandle, "inRgba" );
+        public final int AXIS_RECT;
+
+        // Vertex attributes
+
+        public final int inXy;
+        public final int inRgba;
+
+        public ProgramHandles( GL2ES2 gl )
+        {
+            this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+
+            this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+
+            this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
+            this.inRgba = gl.glGetAttribLocation( this.program, "inRgba" );
+        }
+    }
+
+    protected ProgramHandles handles;
+
+    public ArrayColorProgram( )
+    {
+        this.handles = null;
+    }
+
+    public ProgramHandles handles( GL2ES2 gl )
+    {
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl );
+        }
+
+        return this.handles;
     }
 
     public void begin( GL2ES2 gl )
     {
-        gl.glUseProgram( programHandle );
-        gl.glEnableVertexAttribArray( inXy );
-        gl.glEnableVertexAttribArray( inRgba );
+        gl.glUseProgram( this.handles.program );
+        gl.glEnableVertexAttribArray( this.handles.inXy );
+        gl.glEnableVertexAttribArray( this.handles.inRgba );
     }
-    
+
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
     {
         setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
@@ -55,7 +78,7 @@ public class ArrayColorProgram
 
     public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
     {
-        gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, yMax );
+        gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
     public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
@@ -66,10 +89,10 @@ public class ArrayColorProgram
     public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
     {
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-        
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
         gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( ) );
-        gl.glVertexAttribPointer( inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
+        gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );
     }
@@ -77,14 +100,14 @@ public class ArrayColorProgram
     public void draw( GL2ES2 gl, int mode, int xyVbo, int rgbaVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-        gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo );
-        gl.glVertexAttribPointer( inRgba, 4, GL_FLOAT, false, 0, 0 );
-        
+        gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, 0 );
+
         gl.glDrawArrays( mode, first, count );
     }
-    
+
     public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba )
     {
         draw( gl, GL_TRIANGLES, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
@@ -92,7 +115,16 @@ public class ArrayColorProgram
 
     public void end( GL2ES2 gl )
     {
-        gl.glDisableVertexAttribArray( inXy );
+        gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
+    }
+
+    public void dispose( GL2ES2 gl )
+    {
+        if ( this.handles != null )
+        {
+            gl.glDeleteProgram( this.handles.program );
+            this.handles = null;
+        }
     }
 }

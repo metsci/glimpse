@@ -607,8 +607,8 @@ public class IconPainter extends GlimpsePainterBase
             Set<IconGroup> groups = entry.getValue( );
             if ( groups.isEmpty( ) ) continue;
 
-            atlas.beginRendering( gl );
-            atlas.endRendering( gl );
+            atlas.beginRendering( context );
+            atlas.endRendering( context );
 
             // draw each icon group, if it is visible
             for ( IconGroup group : groups )
@@ -623,7 +623,7 @@ public class IconPainter extends GlimpsePainterBase
                 this.shader.setColorCoordData( group.getPickColorCoords( ) );
                 this.shader.setVertexData( group.getBufferIconPlacement( ) );
 
-                atlas.beginRendering( gl );
+                atlas.beginRendering( context );
                 this.shader.useProgram( gl, true );
                 try
                 {
@@ -635,7 +635,7 @@ public class IconPainter extends GlimpsePainterBase
                 finally
                 {
                     this.shader.useProgram( gl, false );
-                    atlas.endRendering( gl );
+                    atlas.endRendering( context );
                 }
             }
         }
@@ -652,8 +652,6 @@ public class IconPainter extends GlimpsePainterBase
         GLContext glContext = context.getGLContext( );
 
         Set<PickResult> pickedIcons = new HashSet<PickResult>( );
-
-        this.setPickProjectionMatrix( bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( true );
@@ -682,7 +680,7 @@ public class IconPainter extends GlimpsePainterBase
 
                     resetPickFrameBuffer( glContext );
 
-                    atlas.beginRendering( gl );
+                    atlas.beginRendering( context );
                     this.shader.useProgram( gl, true );
                     try
                     {
@@ -691,7 +689,7 @@ public class IconPainter extends GlimpsePainterBase
                     finally
                     {
                         this.shader.useProgram( gl, false );
-                        atlas.endRendering( gl );
+                        atlas.endRendering( context );
                     }
 
                     checkPickFrameBuffer( context, group, pickedIcons );

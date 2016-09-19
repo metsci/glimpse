@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
 
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
@@ -166,6 +166,12 @@ public class MeasurementPainter extends GlimpsePainterBase
     public void doDispose( GlimpseContext context )
     {
         this.textRenderer.dispose( );
+
+        this.lineProg.dispose( context.getGL( ).getGL3( ) );
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
+
+        this.linePath.dispose( context.getGL( ) );
+        this.fillBuilder.dispose( context.getGL( ) );
     }
 
     @Override

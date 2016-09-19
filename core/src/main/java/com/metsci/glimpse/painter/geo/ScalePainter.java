@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.geo;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
@@ -122,6 +122,7 @@ public class ScalePainter extends GlimpsePainterBase
         this.pixelWidth = 300;
 
         this.lineProg = new LineProgram( );
+        this.fillProg = new ArrayColorProgram( );
 
         this.lineStyle = new LineStyle( );
         this.lineStyle.feather_PX = 0;
@@ -258,18 +259,25 @@ public class ScalePainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        if ( tickTextRenderer != null ) tickTextRenderer.dispose( );
-        if ( overallTextRenderer != null ) overallTextRenderer.dispose( );
+        if ( this.tickTextRenderer != null ) this.tickTextRenderer.dispose( );
+        if ( this.overallTextRenderer != null ) this.overallTextRenderer.dispose( );
 
-        overallTextRenderer = null;
-        tickTextRenderer = null;
+        this.overallTextRenderer = null;
+        this.tickTextRenderer = null;
+
+        this.linePath.dispose( context.getGL( ) );
+        this.fillXy.dispose( context.getGL( ) );
+        this.fillRgba.dispose( context.getGL( ) );
+
+        this.lineProg.dispose( context.getGL( ).getGL3( ) );
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
     }
 
     @Override
     protected void doPaintTo( GlimpseContext context )
     {
-        if ( tickTextRenderer == null ) return;
-        if ( overallTextRenderer == null ) return;
+        if ( this.tickTextRenderer == null ) return;
+        if ( this.overallTextRenderer == null ) return;
 
         Axis1D axis = null;
 
@@ -318,11 +326,6 @@ public class ScalePainter extends GlimpsePainterBase
         double totalSize = scalePixelSize * tickCount;
 
         GL3 gl = context.getGL( ).getGL3( );
-
-        if ( fillProg == null )
-        {
-            fillProg = new ArrayColorProgram( gl );
-        }
 
         fillXy.clear( );
         fillRgba.clear( );

@@ -303,32 +303,32 @@ public class HistogramPainter extends GlimpsePainterBase
 
     public float getBinSize( )
     {
-        return binSize;
+        return this.binSize;
     }
 
     public float getBinStart( )
     {
-        return binStart;
+        return this.binStart;
     }
 
     public float getMinY( )
     {
-        return minY;
+        return this.minY;
     }
 
     public float getMaxY( )
     {
-        return maxY;
+        return this.maxY;
     }
 
     public float getMinX( )
     {
-        return minX;
+        return this.minX;
     }
 
     public float getMaxX( )
     {
-        return maxX;
+        return this.maxX;
     }
 
     protected static float getBin( double data, double binSize, double binStart )
@@ -339,10 +339,12 @@ public class HistogramPainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        if ( bufferInitialized )
+        if ( this.bufferInitialized )
         {
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
+            context.getGL( ).glDeleteBuffers( 1, this.bufferHandle, 0 );
         }
+
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
     }
 
     @Override
@@ -351,36 +353,36 @@ public class HistogramPainter extends GlimpsePainterBase
         Axis2D axis = getAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
-        if ( dataSize == 0 ) return;
+        if ( this.dataSize == 0 ) return;
 
-        if ( !bufferInitialized )
+        if ( !this.bufferInitialized )
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-            bufferInitialized = true;
+            this.bufferHandle = new int[1];
+            gl.glGenBuffers( 1, this.bufferHandle, 0 );
+            this.bufferInitialized = true;
         }
 
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, this.bufferHandle[0] );
 
-        int dataSizeTemp = dataSize;
+        int dataSizeTemp = this.dataSize;
 
-        if ( newData )
+        if ( this.newData )
         {
-            dataBufferLock.lock( );
+            this.dataBufferLock.lock( );
             try
             {
-                dataSizeTemp = dataSize;
+                dataSizeTemp = this.dataSize;
 
                 // copy data from the host memory buffer to the device
                 gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSizeTemp * FLOATS_PER_BAR * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
 
                 GLErrorUtils.logGLError( logger, gl, "Error copying HistogramPainter data to device." );
 
-                newData = false;
+                this.newData = false;
             }
             finally
             {
-                dataBufferLock.unlock( );
+                this.dataBufferLock.unlock( );
             }
         }
 

@@ -1,8 +1,12 @@
 package com.metsci.glimpse.support.shader;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TRIANGLES;
+import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 
 import javax.media.opengl.GL2ES2;
 
@@ -17,7 +21,7 @@ public class ColorTexture2DProgram
 
     public static class ProgramHandles
     {
-        public final int handle;
+        public final int program;
 
         // Uniforms
 
@@ -33,14 +37,14 @@ public class ColorTexture2DProgram
 
         public ProgramHandles( GL2ES2 gl )
         {
-            this.handle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+            this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
 
-            this.AXIS_RECT = gl.glGetUniformLocation( this.handle, "AXIS_RECT" );
-            this.TEXTURE2D = gl.glGetUniformLocation( this.handle, "TEXTURE2D" );
-            this.RGBA = gl.glGetUniformLocation( this.handle, "RGBA" );
+            this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+            this.TEXTURE2D = gl.glGetUniformLocation( this.program, "TEXTURE2D" );
+            this.RGBA = gl.glGetUniformLocation( this.program, "RGBA" );
 
-            this.inXy = gl.glGetAttribLocation( this.handle, "inXy" );
-            this.inS = gl.glGetAttribLocation( this.handle, "inS" );
+            this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
+            this.inS = gl.glGetAttribLocation( this.program, "inS" );
         }
     }
 
@@ -74,7 +78,7 @@ public class ColorTexture2DProgram
             gl.glUniform4f( this.handles.RGBA, 1, 1, 1, 1 );
         }
 
-        gl.glUseProgram( this.handles.handle );
+        gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inS );
     }
@@ -177,5 +181,21 @@ public class ColorTexture2DProgram
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inS );
         gl.glUseProgram( 0 );
+    }
+
+    /**
+     * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
+     * was first called.
+     * <p>
+     * This object can be safely reused after being disposed, but in most cases there is no
+     * significant advantage to doing so.
+     */
+    public void dispose( GL2ES2 gl )
+    {
+        if ( this.handles != null )
+        {
+            gl.glDeleteProgram( this.handles.program );
+            this.handles = null;
+        }
     }
 }

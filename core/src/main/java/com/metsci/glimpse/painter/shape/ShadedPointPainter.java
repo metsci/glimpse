@@ -28,7 +28,6 @@ package com.metsci.glimpse.painter.shape;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -57,8 +56,6 @@ import com.metsci.glimpse.support.shader.SimplePointShader;
  */
 public class ShadedPointPainter extends GlimpsePainterBase
 {
-    protected ReentrantLock lock = new ReentrantLock( );
-
     protected FloatTexture1D sizeTexture;
     protected ColorTexture1D colorTexture;
 
@@ -74,13 +71,12 @@ public class ShadedPointPainter extends GlimpsePainterBase
 
     public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        this.lock = new ReentrantLock( );
         this.program = newShader( colorAxis, sizeAxis );
     }
 
     public void useVertexPositionData( FloatBuffer positionBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setVertexData( positionBuffer );
@@ -88,13 +84,13 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useColorAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setColorData( attributeBuffer );
@@ -102,13 +98,13 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useSizeAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setSizeData( attributeBuffer );
@@ -116,13 +112,13 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useColorScale( ColorTexture1D colorTexture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.colorTexture = colorTexture;
@@ -130,13 +126,13 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useSizeScale( FloatTexture1D sizeTexture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.sizeTexture = sizeTexture;
@@ -144,65 +140,65 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardAboveSize( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setDiscardAboveSize( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardBelowSize( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setDiscardBelowSize( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardAboveColor( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setDiscardAboveColor( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardBelowColor( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setDiscardBelowColor( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setConstantPointSize( float size )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.constantPointSize = size;
@@ -210,13 +206,13 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setConstantPointColor( float[] color )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.constantPointColor = color;
@@ -224,59 +220,59 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useConstantColor( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.setConstantPointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useConstantSize( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.setConstantPointSize0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useVariableSize( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.setVariablePointSize0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useVariableColor( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.setVariablePointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -316,44 +312,42 @@ public class ShadedPointPainter extends GlimpsePainterBase
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
+    public void doPaintTo( GlimpseContext context )
     {
         Axis2D axis = getAxis2D( context );
         GL2 gl = context.getGL( ).getGL2( );
 
-        lock.lock( );
+        if ( vertexCount == 0 ) return;
+
+        if ( !constantSize && ( sizeTexture == null ) ) return;
+
+        if ( !constantColor && ( colorTexture == null ) ) return;
+
+        if ( constantSize )
+        {
+            gl.glPointSize( constantPointSize );
+        }
+        else
+        {
+            sizeTexture.prepare( gl, 1 );
+
+            gl.glEnable( GL2.GL_VERTEX_PROGRAM_POINT_SIZE );
+        }
+
+        if ( constantColor )
+        {
+            GlimpseColor.glColor( gl, constantPointColor );
+        }
+        else
+        {
+            colorTexture.prepare( gl, 0 );
+        }
+
+        program.setProjectionMatrix( axis );
+
+        program.useProgram( gl, true );
         try
         {
-            if ( vertexCount == 0 ) return;
-
-            if ( !constantSize && ( sizeTexture == null ) ) return;
-
-            if ( !constantColor && ( colorTexture == null ) ) return;
-
-            if ( constantSize )
-            {
-                gl.glPointSize( constantPointSize );
-            }
-            else
-            {
-                sizeTexture.prepare( gl, 1 );
-
-                gl.glEnable( GL2.GL_VERTEX_PROGRAM_POINT_SIZE );
-            }
-
-            if ( constantColor )
-            {
-                GlimpseColor.glColor( gl, constantPointColor );
-            }
-            else
-            {
-                colorTexture.prepare( gl, 0 );
-            }
-
-            program.setProjectionMatrix( axis );
-
-            program.useProgram( gl, true );
-
             gl.glEnable( GL2.GL_POINT_SMOOTH );
             gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
             gl.glEnable( GL2.GL_BLEND );
@@ -362,14 +356,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
         finally
         {
-            try
-            {
-                if ( program != null ) program.useProgram( gl, false );
-            }
-            finally
-            {
-                lock.unlock( );
-            }
+            program.useProgram( gl, false );
         }
     }
 
@@ -381,9 +368,6 @@ public class ShadedPointPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        if ( program != null )
-        {
-            program.dispose( context.getGLContext( ) );
-        }
+        program.dispose( context.getGLContext( ) );
     }
 }
