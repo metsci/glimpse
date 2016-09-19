@@ -2,6 +2,7 @@ package com.metsci.glimpse.support.line;
 
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.line.LineUtils.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 
 import java.nio.ByteBuffer;
@@ -11,48 +12,61 @@ public class LinePathData
 {
 
     /**
-     * WIP
+     * Mask for the CONNECT bit, which indicates whether to draw a line segment
+     * from the previous vertex to the current vertex.
      */
     public static final byte FLAGS_CONNECT = 1 << 0;
 
     /**
-     * WIP
+     * Mask for the JOIN bit, which indicates whether to use a join (e.g. miter)
+     * at the current vertex.
      */
     public static final byte FLAGS_JOIN = 1 << 1;
 
 
     /**
-     * WIP
+     * The index of the first vertex in the current line-strip. Assigned a new
+     * value when {@link #moveTo(float, float, float)} is called. Set to -1 when
+     * when {@link #closeLoop()} is called.
+     * <p>
+     * Note the "first" vertex actually comes after the leading phantom vertex.
      */
     protected int stripFirst;
 
     /**
-     * WIP
+     * Contains two floats (x and y) for each vertex, indicating the position of
+     * the vertex.
      */
     protected FloatBuffer xyBuffer;
 
     /**
-     * WIP: Contains one byte for each vertex.
+     * Contains one byte for each vertex, containing bit-flags:
+     * <ul>
+     * <li>Bit 0: CONNECT  (Least Significant Bit)
+     * <li>Bit 1: JOIN
+     * </ul>
      */
     protected ByteBuffer flagsBuffer;
 
     /**
-     * WIP
-     *
      * Contains one float for each vertex, indicating the cumulative distance
      * to the vertex from the start of the connected line strip.
-     *
-     * Mileage is dependent on ppv-aspect-ratio. The ppv-aspect-ratio used to
-     * compute the current mileages is stored in {@link #mileagePpvAspectRatio}.
-     *
+     * <p>
+     * Mileage is dependent on ppv-aspect-ratio. The ppv-aspect-ratio that was
+     * used to compute the current mileage values is stored in {@link #mileagePpvAspectRatio}.
+     * <p>
      * Only needed when stippling is enabled, and can be expensive to compute.
-     * Therefore, values are not updated until specifically requested. <em>Values
-     * starting at {@link FloatBuffer#position()} are undefined.</em>
+     * Therefore, values are not updated until specifically requested by calling
+     * {@link #updateMileage(double, double)}.
+     * <p>
+     * A vertex that starts a new line strip will have an initial-mileage value.
+     * These initial-mileages are stored in this buffer -- they are <em>read</em>,
+     * rather than written, by {@link #updateMileage(double, double)}.
      */
     protected FloatBuffer mileageBuffer;
 
     /**
-     * WIP
+     * The first index at which mileage values need to be updated.
      */
     protected int mileageValidCount;
 
@@ -101,17 +115,21 @@ public class LinePathData
     {
         if ( this.stripFirst < 0 )
         {
-            throw new RuntimeException( "No current line-strip" );
+            throw new RuntimeException( "No current line-strip -- moveTo() must be called after instantiation, and after each call to closeLoop()" );
         }
 
         this.appendVertex( x, y, FLAGS_CONNECT | FLAGS_JOIN );
     }
 
+    /**
+     * After calling this method, client code must next call {@link #moveTo(float, float, float)},
+     * before calling either {@link #lineTo(float, float)} or {@link #closeLoop()} again.
+     */
     public void closeLoop( )
     {
         if ( this.stripFirst < 0 )
         {
-            throw new RuntimeException( "No current line-strip" );
+            throw new RuntimeException( "No current line-strip -- moveTo() must be called after instantiation, and after each call to closeLoop()" );
         }
 
 
@@ -168,6 +186,19 @@ public class LinePathData
 
         this.mileageValidCount = 0;
         this.mileagePpvAspectRatio = Double.NaN;
+    }
+
+    /**
+     * Deallocates buffers.
+     * <p>
+     * <em>This object must not be used again after this method has been called.</em>
+     */
+    public void dispose( )
+    {
+        deallocateDirectBuffers( this.xyBuffer, this.flagsBuffer, this.mileageBuffer );
+        this.xyBuffer = null;
+        this.flagsBuffer = null;
+        this.mileageBuffer = null;
     }
 
     public int numVertices( )

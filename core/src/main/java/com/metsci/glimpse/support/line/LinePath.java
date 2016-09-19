@@ -43,24 +43,6 @@ public class LinePath
         this.mileageDirty = true;
     }
 
-    public void dispose( GL gl )
-    {
-        this.data.clear( );
-
-        this.xyVbo.dispose( gl );
-        this.flagsVbo.dispose( gl );
-        this.mileageVbo.dispose( gl );
-    }
-
-    public void addRectangle( float x1, float y1, float x2, float y2 )
-    {
-        moveTo( x1, y1 );
-        lineTo( x2, y1 );
-        lineTo( x2, y2 );
-        lineTo( x1, y2 );
-        lineTo( x1, y1 );
-    }
-
     public void moveTo( float x, float y )
     {
         this.moveTo( x, y, 0f );
@@ -78,6 +60,10 @@ public class LinePath
         this.setDirty( );
     }
 
+    /**
+     * After calling this method, client code must next call {@link #moveTo(float, float, float)},
+     * before calling either {@link #lineTo(float, float)} or {@link #closeLoop()} again.
+     */
     public void closeLoop( )
     {
         this.data.closeLoop( );
@@ -90,11 +76,56 @@ public class LinePath
         this.setDirty( );
     }
 
+    /**
+     * Convenience method for adding an axis-aligned rectangle.
+     */
+    public void addRectangle( float x1, float y1, float x2, float y2 )
+    {
+        this.moveTo( x1, y1 );
+        this.lineTo( x2, y1 );
+        this.lineTo( x2, y2 );
+        this.lineTo( x1, y2 );
+        this.closeLoop( );
+    }
+
+    /**
+     * Convenience method for adding a polygon.
+     * <p>
+     * Use of varargs makes this method convenient, but may also make it inefficient in some cases,
+     * since the args must be passed in a float[] array.
+     */
+    public void addPolygon( float... xys )
+    {
+        int n = xys.length / 2;
+        if ( n > 0 )
+        {
+            this.moveTo( xys[ 0 ], xys[ 1 ] );
+            for ( int i = 1; i < n; i++ )
+            {
+                this.lineTo( xys[ 2*i + 0 ], xys[ 2*i + 1 ] );
+            }
+            this.closeLoop( );
+        }
+    }
+
     protected void setDirty( )
     {
         this.xyDirty = true;
         this.flagsDirty = true;
         this.mileageDirty = true;
+    }
+
+    /**
+     * Disposes buffers on host and device.
+     * <p>
+     * <em>This object must not be used again after this method has been called.</em>
+     */
+    public void dispose( GL gl )
+    {
+        this.data.dispose( );
+        this.xyVbo.dispose( gl );
+        this.flagsVbo.dispose( gl );
+        this.mileageVbo.dispose( gl );
     }
 
     public int numVertices( )
