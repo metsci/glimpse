@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
 import javax.media.opengl.GL3;
 
@@ -294,8 +294,11 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         @Override
         protected void doDispose( GlimpseContext context )
         {
-            // TODO Auto-generated method stub
+            this.lineProg.dispose( context.getGL( ).getGL3( ) );
+            this.fillProg.dispose( context.getGL( ).getGL3( ) );
 
+            this.fillBuilder.dispose( context.getGL( ) );
+            this.linePath.dispose( context.getGL( ) );
         }
     }
 

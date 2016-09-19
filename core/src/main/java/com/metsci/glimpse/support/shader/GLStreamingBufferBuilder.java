@@ -33,6 +33,13 @@ public class GLStreamingBufferBuilder
         this.dirty = true;
     }
 
+    public void dispose( GL gl )
+    {
+        this.data.clear( );
+
+        this.buffer.dispose( gl );
+    }
+    
     public GLStreamingBuffer getBuffer( GL gl )
     {
         if ( dirty )

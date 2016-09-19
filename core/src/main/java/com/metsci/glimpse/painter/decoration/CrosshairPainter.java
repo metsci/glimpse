@@ -336,7 +336,10 @@ public class CrosshairPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
-
+        lineProg.dispose( context.getGL( ).getGL3( ) );
+        linePath.dispose( context.getGL( ) );
+        
+        flatProg.dispose( context.getGL( ).getGL3( ) );
+        flatPath.dispose( context.getGL( ) );
     }
 }

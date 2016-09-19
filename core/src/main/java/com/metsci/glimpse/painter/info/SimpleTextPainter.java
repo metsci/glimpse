@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -568,5 +569,11 @@ public class SimpleTextPainter extends GlimpsePainterBase
     protected void doDispose( GlimpseContext context )
     {
         this.textRenderer.dispose( );
+
+        this.lineProg.dispose( context.getGL( ).getGL3( ) );
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
+
+        this.linePath.dispose( context.getGL( ) );
+        this.fillBuilder.dispose( context.getGL( ) );
     }
 }

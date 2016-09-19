@@ -17,7 +17,7 @@ public class FlatColorProgram
 
     public static class ProgramHandles
     {
-        public final int handle;
+        public final int program;
 
         // Uniforms
 
@@ -30,12 +30,12 @@ public class FlatColorProgram
 
         public ProgramHandles( GL2ES2 gl )
         {
-            this.handle = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+            this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
 
-            this.AXIS_RECT = gl.glGetUniformLocation( this.handle, "AXIS_RECT" );
-            this.RGBA = gl.glGetUniformLocation( this.handle, "RGBA" );
+            this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+            this.RGBA = gl.glGetUniformLocation( this.program, "RGBA" );
 
-            this.inXy = gl.glGetAttribLocation( this.handle, "inXy" );
+            this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
         }
     }
 
@@ -63,7 +63,7 @@ public class FlatColorProgram
             this.handles = new ProgramHandles( gl );
         }
 
-        gl.glUseProgram( this.handles.handle );
+        gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
     }
 
@@ -123,5 +123,21 @@ public class FlatColorProgram
     {
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
+    }
+    
+    /**
+     * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
+     * was first called.
+     * <p>
+     * This object can be safely reused after being disposed, but in most cases there is no
+     * significant advantage to doing so.
+     */
+    public void dispose( GL2ES2 gl )
+    {
+        if ( this.handles != null )
+        {
+            gl.glDeleteProgram( this.handles.program );
+            this.handles = null;
+        }
     }
 }

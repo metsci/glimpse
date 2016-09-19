@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -220,14 +221,15 @@ public class CursorTextPainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        textRenderer.dispose( );
+        this.textRenderer.dispose( );
+
+        this.prog.dispose( context.getGL( ).getGL3( ) );
+        this.builder.dispose( context.getGL( ) );
     }
 
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        if ( textRenderer == null ) return;
-
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = getAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );

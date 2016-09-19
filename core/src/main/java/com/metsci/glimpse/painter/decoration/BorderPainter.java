@@ -199,6 +199,7 @@ public class BorderPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
+        prog.dispose( context.getGL( ).getGL3( ) );
+        path.dispose( context.getGL( ) );
     }
 }

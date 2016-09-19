@@ -26,12 +26,17 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.jogamp.opengl.util.texture.TextureIO.*;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.*;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.lang.Math.*;
+import static com.jogamp.opengl.util.texture.TextureIO.newTexture;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.LEFT;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.RIGHT;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.BOTTOM;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.TOP;
+import static com.metsci.glimpse.util.GeneralUtils.doubles;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -185,6 +190,7 @@ public class WatermarkPainter extends GlimpsePainterBase
         this.texture = null;
         this.initialized = false;
 
+        this.prog = new ColorTexture2DProgram( );
         this.inXy = new GLStreamingBufferBuilder( );
         this.inS = new GLStreamingBufferBuilder( );
     }
@@ -316,11 +322,6 @@ public class WatermarkPainter extends GlimpsePainterBase
         inS.clear( );
         inS.addQuad2f( 0, 1, 1, 0 );
 
-        if ( prog == null )
-        {
-            prog = new ColorTexture2DProgram( gl );
-        }
-        
         texture.setTexParameteri( gl, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR );
         texture.setTexParameteri( gl, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR );
         texture.enable( gl );
@@ -350,7 +351,8 @@ public class WatermarkPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
-
+        prog.dispose( context.getGL( ).getGL3( ) );
+        inXy.dispose( context.getGL( ) );
+        inS.dispose( context.getGL( ) );
     }
 }

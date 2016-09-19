@@ -586,15 +586,15 @@ public class TextureAtlas
      */
     public void beginRendering( GlimpseContext context ) throws GLException
     {
-        this.currentContext = context;
-
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = GlimpsePainterBase.getBounds( context );
 
-        updateImages( );
+        this.currentContext = context;
 
         this.texProgram.begin( gl );
         this.texProgram.setPixelOrtho( gl, bounds );
+
+        this.updateImages( );
 
         final Texture texture = getBackingStore( ).getTexture( );
         gl.glActiveTexture( GL.GL_TEXTURE0 );

@@ -75,6 +75,8 @@ public class MapBorderPainter extends GlimpsePainterBase
         this.ticksX = ticksX;
         this.ticksY = ticksY;
 
+        this.fillProg = new ArrayColorProgram( );
+
         this.inXys = new GLStreamingBufferBuilder( );
         this.inRgba = new GLStreamingBufferBuilder( );
 
@@ -216,11 +218,6 @@ public class MapBorderPainter extends GlimpsePainterBase
         boolean orientX = innerOrOuterFirstX( xPositions );
         boolean orientY = innerOrOuterFirstY( yPositions );
 
-        if ( fillProg == null )
-        {
-            fillProg = new ArrayColorProgram( gl );
-        }
-
         inXys.clear( );
         inRgba.clear( );
 
@@ -325,7 +322,11 @@ public class MapBorderPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
+        fillProg.dispose( context.getGL( ).getGL3( ) );
+        inXys.dispose( context.getGL( ) );
+        inRgba.dispose( context.getGL( ) );
 
+        lineProg.dispose( context.getGL( ).getGL3( ) );
+        linePath.dispose( context.getGL( ) );
     }
 }

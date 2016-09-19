@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL2ES2.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_LINE_STRIP;
+import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -340,7 +344,10 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
+        this.prog.dispose( context.getGL( ).getGL3( ) );
+
+        this.rgbaStreamingBuffer.dispose( context.getGL( ) );
+        this.xyStreamingBuffer.dispose( context.getGL( ) );
     }
 
     protected int getSize( )
@@ -688,46 +695,77 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         public static final String lineGeomShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.gs" );
         public static final String lineFragShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.fs" );
 
-        public final int programHandle;
+        public static class LineProgramHandles
+        {
+            public final int program;
 
-        // Uniforms
+            public final int AXIS_RECT;
+            public final int VIEWPORT_SIZE_PX;
 
-        public final int AXIS_RECT;
-        public final int VIEWPORT_SIZE_PX;
+            public final int LINE_THICKNESS_PX;
+            public final int FEATHER_THICKNESS_PX;
 
-        public final int STIPPLE_ENABLE;
-        public final int STIPPLE_SCALE;
-        public final int STIPPLE_PATTERN;
-        public final int LINE_THICKNESS_PX;
-        public final int FEATHER_THICKNESS_PX;
+            public final int STIPPLE_ENABLE;
+            public final int STIPPLE_SCALE;
+            public final int STIPPLE_PATTERN;
 
-        // Vertex attributes
+            public final int inXy;
+            public final int inRgba;
 
-        public final int inXy;
-        public final int inRgba;
+            public LineProgramHandles( GL2ES2 gl )
+            {
+                this.program = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
+
+                this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
+                this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
+
+                this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
+                this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( program, "FEATHER_THICKNESS_PX" );
+
+                this.STIPPLE_ENABLE = gl.glGetUniformLocation( program, "STIPPLE_ENABLE" );
+                this.STIPPLE_SCALE = gl.glGetUniformLocation( program, "STIPPLE_SCALE" );
+                this.STIPPLE_PATTERN = gl.glGetUniformLocation( program, "STIPPLE_PATTERN" );
+
+                this.inXy = gl.glGetAttribLocation( program, "inXy" );
+                this.inRgba = gl.glGetAttribLocation( program, "inRgba" );
+            }
+        }
+
+        protected LineProgramHandles handles;
 
         public LineProgram( GL2ES2 gl )
         {
-            this.programHandle = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
+            this.handles = null;
+        }
 
-            this.AXIS_RECT = gl.glGetUniformLocation( programHandle, "AXIS_RECT" );
-            this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( programHandle, "VIEWPORT_SIZE_PX" );
+        /**
+         * Returns the raw GL handles for the shader program, uniforms, and attributes. Compiles and
+         * links the program, if necessary.
+         * <p>
+         * It is perfectly acceptable to use these handles directly, rather than calling the convenience
+         * methods in this class. However, the convenience methods are intended to be a fairly stable API,
+         * whereas the handles may change frequently.
+         */
+        public LineProgramHandles handles( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new LineProgramHandles( gl );
+            }
 
-            this.STIPPLE_ENABLE = gl.glGetUniformLocation( programHandle, "STIPPLE_ENABLE" );
-            this.STIPPLE_SCALE = gl.glGetUniformLocation( programHandle, "STIPPLE_SCALE" );
-            this.STIPPLE_PATTERN = gl.glGetUniformLocation( programHandle, "STIPPLE_PATTERN" );
-            this.LINE_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "LINE_THICKNESS_PX" );
-            this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( programHandle, "FEATHER_THICKNESS_PX" );
-
-            this.inXy = gl.glGetAttribLocation( programHandle, "inXy" );
-            this.inRgba = gl.glGetAttribLocation( programHandle, "inRgba" );
+            return this.handles;
         }
 
         public void begin( GL2ES2 gl )
         {
-            gl.glUseProgram( programHandle );
-            gl.glEnableVertexAttribArray( inXy );
-            gl.glEnableVertexAttribArray( inRgba );
+            if ( this.handles == null )
+            {
+                this.handles = new LineProgramHandles( gl );
+            }
+
+            gl.glUseProgram( this.handles.program );
+            gl.glEnableVertexAttribArray( this.handles.inXy );
+            gl.glEnableVertexAttribArray( this.handles.inRgba );
         }
 
         public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
@@ -737,7 +775,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         public void setViewport( GL2ES2 gl, int viewportWidth, int viewportHeight )
         {
-            gl.glUniform2f( VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
+            gl.glUniform2f( this.handles.VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
         }
 
         public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
@@ -752,42 +790,58 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
         {
-            gl.glUniform4f( AXIS_RECT, xMin, xMax, yMin, xMax );
+            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, xMax );
         }
 
         public void setStyle( GL2ES2 gl, LineStyle style )
         {
             if ( style.stippleEnable )
             {
-                gl.glUniform1i( STIPPLE_ENABLE, 1 );
-                gl.glUniform1f( STIPPLE_SCALE, style.stippleScale );
-                gl.glUniform1i( STIPPLE_PATTERN, style.stipplePattern );
+                gl.glUniform1i( this.handles.STIPPLE_ENABLE, 1 );
+                gl.glUniform1f( this.handles.STIPPLE_SCALE, style.stippleScale );
+                gl.glUniform1i( this.handles.STIPPLE_PATTERN, style.stipplePattern );
             }
             else
             {
-                gl.glUniform1i( STIPPLE_ENABLE, 0 );
+                gl.glUniform1i( this.handles.STIPPLE_ENABLE, 0 );
             }
 
-            gl.glUniform1f( LINE_THICKNESS_PX, style.thickness_PX );
-            gl.glUniform1f( FEATHER_THICKNESS_PX, style.feather_PX );
+            gl.glUniform1f( this.handles.LINE_THICKNESS_PX, style.thickness_PX );
+            gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
         }
 
         public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
         {
             gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
-            gl.glVertexAttribPointer( inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+            gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
             gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( ) );
-            gl.glVertexAttribPointer( inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
+            gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
             gl.glDrawArrays( GL_LINE_STRIP, first, count );
         }
 
         public void end( GL2ES2 gl )
         {
-            gl.glDisableVertexAttribArray( inXy );
-            gl.glDisableVertexAttribArray( inRgba );
+            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glDisableVertexAttribArray( this.handles.inRgba );
             gl.glUseProgram( 0 );
+        }
+
+        /**
+         * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
+         * was first called.
+         * <p>
+         * This object can be safely reused after being disposed, but in most cases there is no
+         * significant advantage to doing so.
+         */
+        public void dispose( GL2ES2 gl )
+        {
+            if ( this.handles != null )
+            {
+                gl.glDeleteProgram( this.handles.program );
+                this.handles = null;
+            }
         }
     }
 }

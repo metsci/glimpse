@@ -300,6 +300,9 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
+        
+        progLine.dispose( context.getGL( ).getGL3( ) );
+        pathLine.dispose( context.getGL( ) );
     }
 
     public void updateTextRenderer( )

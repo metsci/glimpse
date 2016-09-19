@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -282,32 +283,32 @@ public class StackedHistogramPainter extends GlimpsePainterBase
 
     public float getBinSize( )
     {
-        return binSize;
+        return this.binSize;
     }
 
     public float getBinStart( )
     {
-        return binStart;
+        return this.binStart;
     }
 
     public float getMinY( )
     {
-        return minY;
+        return this.minY;
     }
 
     public float getMaxY( )
     {
-        return maxY;
+        return this.maxY;
     }
 
     public float getMinX( )
     {
-        return minX;
+        return this.minX;
     }
 
     public float getMaxX( )
     {
-        return maxX;
+        return this.maxX;
     }
 
     protected static float getBin( double data, double binSize, double binStart )
@@ -318,10 +319,12 @@ public class StackedHistogramPainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        if ( bufferInitialized )
+        if ( this.bufferInitialized )
         {
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
+            context.getGL( ).glDeleteBuffers( 1, this.bufferHandle, 0 );
         }
+
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
     }
 
     @Override
@@ -330,23 +333,23 @@ public class StackedHistogramPainter extends GlimpsePainterBase
         Axis2D axis = getAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
-        if ( dataSeries == null || dataSeries.isEmpty( ) )
+        if ( this.dataSeries == null || this.dataSeries.isEmpty( ) )
         {
             return;
         }
 
-        if ( !bufferInitialized )
+        if ( !this.bufferInitialized )
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-            bufferInitialized = true;
+            this.bufferHandle = new int[1];
+            gl.glGenBuffers( 1, this.bufferHandle, 0 );
+            this.bufferInitialized = true;
         }
 
         gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
 
-        if ( newData )
+        if ( this.newData )
         {
-            dataBufferLock.lock( );
+            this.dataBufferLock.lock( );
             try
             {
                 // copy data from the host memory buffer to the device
@@ -354,11 +357,11 @@ public class StackedHistogramPainter extends GlimpsePainterBase
 
                 GLErrorUtils.logGLError( logger, gl, "Error copying HistogramPainter data to device." );
 
-                newData = false;
+                this.newData = false;
             }
             finally
             {
-                dataBufferLock.unlock( );
+                this.dataBufferLock.unlock( );
             }
         }
 
@@ -368,7 +371,7 @@ public class StackedHistogramPainter extends GlimpsePainterBase
         {
             this.fillProg.setAxisOrtho( gl, axis );
 
-            for ( HistogramEntry entry : dataSeries )
+            for ( HistogramEntry entry : this.dataSeries )
             {
                 this.fillProg.setColor( gl, entry.color );
 
