@@ -313,7 +313,7 @@ public class AbsoluteTimeAxisLabelHandler implements TimeAxisLabelHandler
     
     protected TimeStampFormat getTickFormat( double tickInterval )
     {
-        if ( tickInterval <= Time.fromMinutes( 1 ) )
+        if ( tickInterval < Time.fromMinutes( 1 ) )
         {
             return getSecondMinuteFormat( );
         }
