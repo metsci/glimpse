@@ -111,7 +111,7 @@ public class LinePathExample
         public void doPaintTo( GlimpseContext context )
         {
             GlimpseBounds bounds = getBounds( context );
-            Axis2D axis = getAxis2D( context );
+            Axis2D axis = requireAxis2D( context );
             GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
             enableStandardBlending( gl );
