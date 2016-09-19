@@ -185,16 +185,32 @@ public class LinePath
         return this.flagsVbo;
     }
 
+    /**
+     * Calls {@link #mileageVbo(GL, double, double)} with a threshold of 1+epsilon.
+     */
     public GLStreamingBuffer mileageVbo( GL gl, double ppvAspectRatio )
     {
         return this.mileageVbo( gl, ppvAspectRatio, 1.0000000001 );
     }
 
+    /**
+     * Recomputes mileages as necessary (based on the given threshold, and on the change in
+     * ppv-aspect-ratio), then returns the mileage VBO.
+     */
     public GLStreamingBuffer mileageVbo( GL gl, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
     {
         int mileageDirtyCount = this.data.updateMileage( ppvAspectRatio, ppvAspectRatioChangeThreshold );
         this.mileageDirty |= ( mileageDirtyCount > 0 );
 
+        return this.rawMileageVbo( gl );
+    }
+
+    /**
+     * Returns the mileage VBO <em>without recomputing the mileage values</em>. This is useful
+     * when meaningful values are not required, such as when rendering with stippling disabled.
+     */
+    public GLStreamingBuffer rawMileageVbo( GL gl )
+    {
         if ( this.mileageDirty )
         {
             FloatBuffer mileageData = this.data.mileageBuffer( );
