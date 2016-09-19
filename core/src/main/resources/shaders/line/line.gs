@@ -3,14 +3,21 @@
 layout( lines_adjacency ) in;
 layout( triangle_strip, max_vertices = 18 ) out;
 
+
+// Bit mask for whether to draw the line segment to the vertex in
+// question, from the preceding vertex
+const int FLAGS_CONNECT = 1 << 0;
+
+// Bit mask for whether to use a join at the vertex in question
+const int FLAGS_JOIN = 1 << 1;
+
+
 vec4 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
 {
     vec2 xy_FRAC = xy_PX / viewportSize_PX;
     return vec4( -1.0 + 2.0*xy_FRAC, 0.0, 1.0 );
 }
 
-const int FLAGS_CONNECT = 1 << 0;
-const int FLAGS_JOIN = 1 << 1;
 
 uniform vec2 VIEWPORT_SIZE_PX;
 uniform float LINE_THICKNESS_PX;
@@ -30,14 +37,20 @@ uniform int JOIN_TYPE;
 // Otherwise, a bevel join is used instead.
 uniform float MITER_LIMIT;
 
+
+// Bit-flags for each vertex:
+//  * Bit 0: CONNECT  (Least Significant Bit)
+//  * Bit 1: JOIN
 in int vFlags[];
 
 // Cumulative distance to each vertex from the start of the connected
 // line strip.
 in float vMileage_PX[];
 
+
 out float gMileage_PX;
 out float gFeatherAlpha;
+
 
 void main( )
 {
