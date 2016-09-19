@@ -42,7 +42,7 @@ import com.metsci.glimpse.util.primitives.IntsArray;
 public class DncLineShaders
 {
 
-    // XXX: Handling the ( ppvX != ppvY ) case will require separate values for cumulativeDistanceX and cumulativeDistanceY
+    // XXX: Assumes ppvX == ppvY
     public static final String lineVertShader_GLSL = join( "\n",
         "                                                                                                   ",
         "  #version 150                                                                                     ",
