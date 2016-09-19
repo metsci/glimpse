@@ -49,6 +49,8 @@ import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.newWorkerDaemon;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.timeSince_MILLIS;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getBounds;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -87,7 +89,6 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -115,13 +116,14 @@ import com.metsci.glimpse.dnc.geosym.DncGeosymLineAreaStyle;
 import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 
-public class DncPainter extends GlimpsePainter2D
+public class DncPainter implements GlimpsePainter
 {
 
     protected static final Logger logger = getLogger( DncPainter.class );
@@ -200,7 +202,7 @@ public class DncPainter extends GlimpsePainter2D
     protected final CopyOnWriteArrayList<Runnable> activeChunksListeners;
     public final Function<DncChunkKey,DncChunkPriority> chunkPriorityFunc;
 
-    // Accessed while holding mutex
+    protected boolean visible;
     protected DncGeosymTheme theme;
     protected Map<String,DncGeosymLineAreaStyle> lineAreaStyles;
     protected RasterizeArgs rasterizeArgs;
@@ -270,6 +272,7 @@ public class DncPainter extends GlimpsePainter2D
             }
         };
 
+        this.visible = true;
         this.theme = null;
         this.lineAreaStyles = emptyMap( );
         this.rasterizeArgs = null;
@@ -754,11 +757,14 @@ public class DncPainter extends GlimpsePainter2D
     }
 
     @Override
-    protected void dispose( GLContext context )
+    public void dispose( GlimpseContext context )
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
         synchronized ( mutex )
         {
+            // Don't try to dispose again if already disposed
+            if ( asyncExec.isShutdown( ) ) return;
+
             // Chunks
             for ( DncDeviceChunk dChunk : dChunksToDispose ) dChunk.dispose( gl );
             for ( DncDeviceChunk dChunk : dChunks.values( ) ) dChunk.dispose( gl );
@@ -820,9 +826,42 @@ public class DncPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext glimpse, GlimpseBounds bounds, Axis2D axis )
+    public boolean isDisposed( )
     {
-        GL3 gl = glimpse.getGL( ).getGL3( );
+        synchronized ( mutex )
+        {
+            return asyncExec.isShutdown( );
+        }
+    }
+
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    { }
+
+    @Override
+    public boolean isVisible( )
+    {
+        synchronized ( mutex )
+        {
+            return visible;
+        }
+    }
+
+    @Override
+    public void setVisible( boolean visible )
+    {
+        synchronized ( mutex )
+        {
+            this.visible = visible;
+        }
+    }
+
+    @Override
+    public void paintTo( GlimpseContext context )
+    {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         gl.glEnable( GL_BLEND );
 
@@ -831,6 +870,8 @@ public class DncPainter extends GlimpsePainter2D
 
         synchronized ( mutex )
         {
+            if ( !visible ) return;
+
             // Don't try to paint after disposal
             if ( asyncExec.isShutdown( ) ) return;
 
@@ -840,7 +881,7 @@ public class DncPainter extends GlimpsePainter2D
             {
                 int[] maxTextureDim = new int[ 1 ];
                 gl.glGetIntegerv( GL_MAX_TEXTURE_SIZE, maxTextureDim, 0 );
-                this.rasterizeArgs = new RasterizeArgs( maxTextureDim[ 0 ], glimpse.getDPI( ) );
+                this.rasterizeArgs = new RasterizeArgs( maxTextureDim[ 0 ], context.getDPI( ) );
                 logger.fine( "Rasterization args: max-texture-dim = " + rasterizeArgs.maxTextureDim + ", screen-dpi = " + rasterizeArgs.screenDpi );
                 mutex.notifyAll( );
             }
