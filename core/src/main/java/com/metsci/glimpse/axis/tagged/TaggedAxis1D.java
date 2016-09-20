@@ -234,7 +234,7 @@ public class TaggedAxis1D extends Axis1D
     protected void broadcastTaggedAxisUpdateUp0( TaggedAxis1D source, Set<Axis1D> visited )
     {
         TaggedAxis1D parentTaggedAxis = getLinkedParentAxis( );
-        
+
         if ( parentTaggedAxis != null )
         {
             parentTaggedAxis.broadcastTaggedAxisUpdateUp0( source, visited );
@@ -244,7 +244,7 @@ public class TaggedAxis1D extends Axis1D
             taggedAxisUpdated( source, visited );
         }
     }
-    
+
     protected TaggedAxis1D getLinkedParentAxis( )
     {
         if ( this.parentAxis != null && this.parentAxis instanceof TaggedAxis1D )
@@ -255,7 +255,7 @@ public class TaggedAxis1D extends Axis1D
                 return parentTaggedAxis;
             }
         }
-        
+
         return null;
     }
 

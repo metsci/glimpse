@@ -50,7 +50,7 @@ import gov.nasa.worldwindx.examples.ApplicationTemplate;
 /**
  * Demonstrates rendering the contents of a Glimpse plot onto
  * the surface of a WorldWind globe.
- * 
+ *
  * @author ulman
  */
 public class SurfaceTileExample

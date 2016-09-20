@@ -189,7 +189,7 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
             tickColorSet = false;
         }
     }
-    
+
     @Override
     public void doPaintTo( GlimpseContext context )
     {

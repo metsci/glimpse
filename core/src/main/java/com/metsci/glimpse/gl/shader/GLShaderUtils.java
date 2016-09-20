@@ -59,7 +59,7 @@ public class GLShaderUtils
         }
     }
 
-    
+
     public static int createProgram( GL2ES2 gl, String[] vertSources, String[] geomSources, String[] fragSources )
     {
         IntsArray shaders = new IntsArray( );
@@ -75,7 +75,7 @@ public class GLShaderUtils
             deleteShaders( gl, shaders.a );
         }
     }
-    
+
     public static int createProgram( GL2ES2 gl, String vertSource, String geomSource, String fragSource )
     {
         IntsArray shaders = new IntsArray( );

@@ -63,7 +63,7 @@ public class NumericRotatedYAxisPainter extends NumericYAxisPainter
         int height = bounds.getHeight( );
 
         GL2 gl2 = gl.getGL2( );
-        
+
         if ( showTickLabels )
         {
             AxisUnitConverter converter = ticks.getAxisUnitConverter( );

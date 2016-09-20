@@ -53,7 +53,7 @@ public class Tag
     /**
      * Special tag value used by TaggedHeatMapPainter to indicate which part
      * of a {@link ColorGradient} a Tag should be associated with.
-     * 
+     *
      * @see TaggedHeatMapPainter
      * @see TaggedColorScaleShader
      */

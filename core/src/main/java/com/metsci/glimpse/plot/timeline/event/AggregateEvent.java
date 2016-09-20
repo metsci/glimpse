@@ -39,7 +39,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * to see. {@code EventPlotInfo} can alleviate this problem by automatically
  * creating combined Events which represent aggregations of many user created
  * Events.
- * 
+ *
  * @author ulman
  */
 public class AggregateEvent extends Event

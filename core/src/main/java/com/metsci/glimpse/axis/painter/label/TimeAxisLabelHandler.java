@@ -117,14 +117,14 @@ public class TimeAxisLabelHandler implements AxisLabelHandler
 
         this.dayString = dayString;
         this.monthString = monthString;
-        
+
         this.monthYearString = monthYearString;
         this.yearString = yearString;
-        
+
         this.updateFormatters( );
 
         this.epoch = epoch;
-        
+
         this.converter = new AxisUnitConverter( )
         {
             @Override

@@ -46,7 +46,7 @@ import gov.nasa.worldwind.util.Logging;
 
 /**
  * A SurfaceTile which renders imagery from an OpenGL texture handle.
- * 
+ *
  * @author ulman
  */
 public class TextureSurfaceTile implements SurfaceTile, Renderable
@@ -81,7 +81,7 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
     {
         this.opacity = (float) opacity;
     }
-    
+
     public void setSurfaceTileRenderer( SurfaceTileRenderer renderer )
     {
         this.renderer = renderer;
@@ -143,7 +143,7 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         {
             gl.glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
         }
-        
+
         try
         {
             r.renderTiles( dc, this.thisList );
@@ -170,10 +170,10 @@ public class TextureSurfaceTile implements SurfaceTile, Renderable
         gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR );
         gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE );
         gl.glTexParameterf( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE );
-        
+
         gl.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL2.GL_BLEND );
-        
+
         //GlimpseColor.glColor( gl, GlimpseColor.getWhite( 0.5f ) );
 
         return true;

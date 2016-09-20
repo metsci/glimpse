@@ -43,7 +43,7 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
  * A point shader attached to a TaggedAxis1D which allows adjusting of the color
  * scale at multiple tag points (as opposed to TaggedPointShader which only
  * reads the lowest and highest tags and spreads the color scale between those).
- * 
+ *
  * @author ulman
  *
  */
@@ -58,7 +58,7 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
         this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
         this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
         this.sizeArg = this.addUniformData( new GLUniformData( "size", getSizeArgValue( ) ) );
-        
+
         sizeAxis.addAxisListener( this );
     }
 
@@ -67,7 +67,7 @@ public class PartialTaggedPointShader extends TaggedPointShader implements AxisL
     {
         this.addVertexShader( "shaders/point/tagged_point_shader.vs" );
     }
-    
+
     @Override
     public void axisUpdated( Axis1D axis )
     {

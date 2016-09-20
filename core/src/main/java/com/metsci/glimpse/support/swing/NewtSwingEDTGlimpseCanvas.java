@@ -49,22 +49,22 @@ import com.metsci.glimpse.painter.base.GlimpsePainter;
  * <p>A subclass of NewtSwingGlimpseCanvas which performs rendering on the Swing EDT,
  * enabling writing a Glimpse/JOGL/NEWT application using the Swing Single Threaded
  * Event Dispatch model.</p>
- * 
+ *
  * <p>All Glimpse/JOGL drawing is guaranteed to be performed on the Swing EDT, provided
  * {@link SwingEDTAnimator} is attached to the canvas' {@link GLAutoDrawable}.</p>
- * 
+ *
  * <p>All Glimpse mouse listeners are notified on the Swing EDT.</p>
- * 
+ *
  * <p>{@link #disposeAttached()} and {@link #disposePainter(GlimpsePainter)}
  * happen on the Swing EDT.</p>
- * 
+ *
  * <p>{@link GLEventListener#reshape(GLAutoDrawable, int, int, int, int)} happens on the
  * Swing EDT, but not with a current GL Context (which is fine because GlimpseCanvas does
  * not need an active context to perform its reshape operation.</p>
- * 
+ *
  * <p>{@link GLEventListener#init(GLAutoDrawable)} and {@link GLEventListener#dispose(GLAutoDrawable)}
  * do NOT happen on the Swing EDT.</p>
- * 
+ *
  * @author ulman
  * @see SwingEDTAnimator
  */

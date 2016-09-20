@@ -76,7 +76,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
     protected TimeToolTipHandler timeToolTipHandler;
 
     //@formatter:off
-   
+
     public TimePlotInfoImpl( final StackedTimePlot2D parent,
                          final PlotInfo child,
                          final GlimpseAxisLayout2D plotLayout,
@@ -91,7 +91,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
                          final DelegatePainter dataPainter )
     {
         super( child );
-        
+
         this.parent = parent;
         this.plotLayout = plotLayout;
         this.labelLayout = labelLayout;
@@ -103,11 +103,11 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
         this.labelBorderPainter = labelBorderPainter;
         this.backgroundPainter = backgroundPainter;
         this.dataPainter = dataPainter;
-        
+
         this.timeToolTipHandler = new TimeToolTipHandler( )
         {
             TimeStampFormat format = new TimeStampFormatStandard( "%2H:%2m:%3S", "UTC" );
-            
+
             @Override
             public void setToolTip( GlimpseMouseEvent e, TooltipPainter toolTipPainter )
             {
@@ -121,7 +121,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
                 toolTipPainter.setText( String.format( "%s\nTime: %s\nData: %.3f", labelPainter.getText( ), timestamp.toString( format ), value ) );
             }
         };
-        
+
         this.plotLayout.addGlimpseMouseAllListener( new GlimpseMouseAllListener( )
         {
             @Override
@@ -140,7 +140,7 @@ public class TimePlotInfoImpl extends PlotInfoWrapper implements TimePlotInfo
                     toolTipPainter.setText( null );
                 }
             }
-            
+
             @Override
             public void mouseEntered( GlimpseMouseEvent event )
             {

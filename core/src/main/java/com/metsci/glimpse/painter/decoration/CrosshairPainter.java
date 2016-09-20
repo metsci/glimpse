@@ -338,7 +338,7 @@ public class CrosshairPainter extends GlimpsePainterBase
     {
         lineProg.dispose( context.getGL( ).getGL3( ) );
         linePath.dispose( context.getGL( ) );
-        
+
         flatProg.dispose( context.getGL( ).getGL3( ) );
         flatPath.dispose( context.getGL( ) );
     }

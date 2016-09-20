@@ -284,7 +284,7 @@ public class StackedTimePlot2D extends StackedPlot2D
      * all the underlying plots and timeline. By default, it passes through mouse
      * events to the underlying GlimpseLayouts and is used to display the blue
      * time selection interval box.
-     * 
+     *
      * However, it can be used to perform arbitrary drawing on the timeline which
      * must stretch across multiple plots.
      */
@@ -309,9 +309,9 @@ public class StackedTimePlot2D extends StackedPlot2D
     }
 
     /**
-     * <p>Returns only the TimePlotInfo handles for plotting areas created with 
+     * <p>Returns only the TimePlotInfo handles for plotting areas created with
      * {@link #createTimePlot(String)}.</p>
-     * 
+     *
      * Note, this may not be all the plotting areas for this StackedPlot2D if some
      * vanilla plots were created using {@link #createPlot(String)}.
      */
@@ -337,7 +337,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     /**
      * Returns the timeline handle for the timeline identified via its unique string identifier.
-     * 
+     *
      * @param id a timeline unique identifier
      * @return the TimelineInfo handle
      */
@@ -365,7 +365,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     /**
      * Returns the time plot handle for the plot identified via its unique string identifier.
-     * 
+     *
      * @param id a plot unique identifier
      * @return the TimePlotInfo handle
      */
@@ -393,7 +393,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     /**
      * Returns the event plot handle for the plot identified via its unique string identifier.
-     * 
+     *
      * @param id a plot unique identifier
      * @return the EventPlotInfo handle
      */
@@ -465,7 +465,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not locking of the selected region is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow locking of the selected region
      * @see AxisMouseListener#setAllowSelectionLock(boolean)
      */
@@ -492,7 +492,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not zooming of the Y axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow zooming of the Y axis
      * @see AxisMouseListener#setAllowZoomY(boolean)
      */
@@ -525,7 +525,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not zooming of the X axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow zooming of the X axis
      * @see AxisMouseListener#setAllowZoomX(boolean)
      */
@@ -558,7 +558,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not panning of the Y axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow panning of the Y axis
      * @see AxisMouseListener#setAllowPanY(boolean)
      */
@@ -591,7 +591,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not panning of the X axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow panning of the X axis
      * @see AxisMouseListener#setAllowPanX(boolean)
      */

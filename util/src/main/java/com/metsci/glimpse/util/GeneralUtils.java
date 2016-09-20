@@ -277,7 +277,7 @@ public class GeneralUtils
     /**
      * Creates a new {@link HashSet} containing the elements of the specified
      * collection.
-     * 
+     *
      * @see {@link HashSet#HashSet(Collection)}
      */
     public static final <K> HashSet<K> newHashSet( Collection<? extends K> c )
@@ -323,7 +323,7 @@ public class GeneralUtils
     /**
      * Creates a new {@link HashMap} containing the same mappings as the
      * specified map.
-     * 
+     *
      * @see {@link HashMap#HashMap(Map)}
      */
     public static final <K, V> HashMap<K, V> newHashMap( Map<? extends K, ? extends V> m )
@@ -358,7 +358,7 @@ public class GeneralUtils
     /**
      * Creates a new {@link ArrayList} containing the elements of the specified
      * collection, in order.
-     * 
+     *
      * @see {@link ArrayList#ArrayList(Collection)}.
      */
     public static final <K> ArrayList<K> newArrayList( Collection<? extends K> c )

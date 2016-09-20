@@ -66,13 +66,13 @@ public class SampledIntensityScaleShader extends GlimpseShaderProgram implements
     protected void initialize( Axis1D colorAxis, int dataTexUnit, int hueTexUnit )
     {
         this.addShaders( );
-        
+
         this.dataMin = this.addUniformData( new GLUniformData( "dataMin", ( float ) getMin( colorAxis ) ) );
         this.dataMax = this.addUniformData( new GLUniformData( "dataMax", ( float ) getMax( colorAxis ) ) );
         this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
         this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", dataTexUnit ) );
         this.hueTexUnit = this.addUniformData( new GLUniformData( "huetex", hueTexUnit ) );
-        
+
         this.colorAxis = colorAxis;
         this.colorAxis.addAxisListener( this );
     }

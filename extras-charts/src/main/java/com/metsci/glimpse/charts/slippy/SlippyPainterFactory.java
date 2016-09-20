@@ -39,11 +39,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
- * 
+ *
  * Utility methods for constructing SlippyMapPainters from common sources.
- * 
+ *
  * TODO look into license/attribution requirements
- * 
+ *
  * @author oren
  */
 public class SlippyPainterFactory

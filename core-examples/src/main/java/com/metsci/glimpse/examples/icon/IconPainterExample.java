@@ -51,8 +51,8 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 
 /**
  * Demonstrates how to use IconPainter.
- * 
- * IconPainter can efficiently render large numbers of icons in fixed 
+ *
+ * IconPainter can efficiently render large numbers of icons in fixed
  * locations in data space by leveraging a TextureAtlas to store the icon images.
  *
  * Picking support is also provided, allowing the IconPainter to report on

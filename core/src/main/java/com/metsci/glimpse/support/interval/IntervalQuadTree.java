@@ -118,7 +118,7 @@ public abstract class IntervalQuadTree<V>
     /**
      * @param start inclusive start TimeStamp
      * @param end exclusive end TimeStamp
-     * 
+     *
      * @return all Events whose time span overlaps with the provided bounds.
      */
     public Collection<V> get( TimeStamp start, TimeStamp end )

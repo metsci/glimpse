@@ -50,7 +50,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * Paints 1D events with associated color, time span, icon, and label information.
- * 
+ *
  * @author ulman
  */
 public class EventPainterManager extends GlimpseDataPainter1D

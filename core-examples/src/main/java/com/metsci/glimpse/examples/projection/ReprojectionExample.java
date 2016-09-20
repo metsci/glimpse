@@ -59,7 +59,7 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
  * {@link com.metsci.glimpse.examples.worldwind.BathymetryTileExample}
  * to reproject Glimpse rendering performed using a {@link TangentPlane} onto the
  * WorldWind globe, which expects a {@link PlateCarreeProjection}.
- * 
+ *
  * @author ulman
  */
 public class ReprojectionExample

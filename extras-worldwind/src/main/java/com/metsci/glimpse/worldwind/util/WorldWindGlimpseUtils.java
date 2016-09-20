@@ -45,7 +45,7 @@ public class WorldWindGlimpseUtils
     /**
      * Establishes a bridge which passes Swing MouseEvents which occur in the provided WorldWindow
      * to any GlimpseMouseListeners attached to the provided GlimpseSurfaceTile.
-     * 
+     *
      * @param wwd
      * @param projection
      * @param tile
@@ -59,7 +59,7 @@ public class WorldWindGlimpseUtils
      * Links two WorldWindows so that the eye position of the master window is copied to the
      * eye position of the slave. Does not set up the reverse link. However, the caller may call
      * again with the arguments reversed to have both windows reflect each others position.
-     * 
+     *
      * @param master
      * @param slave
      */
@@ -80,7 +80,7 @@ public class WorldWindGlimpseUtils
     /**
      * Sets up a listener to update the center of the provided axes to reflect the current eye
      * position of the WorldWindow. The zoom level of the axes is never changed.
-     * 
+     *
      * @param wwd
      * @param projection
      * @param axis
@@ -115,7 +115,7 @@ public class WorldWindGlimpseUtils
      * Sets up a listener to update the eye position of the WorldWindow to match the
      * center of the provided Glimpse Axis2D (for the given GeoProjection). The elevation
      * of the WorldWindow is never adjusted.
-     * 
+     *
      * @param wwd
      * @param projection
      * @param axis

@@ -551,7 +551,7 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
-        
+
         prog.dispose( context.getGL( ).getGL3( ) );
         pathTick.dispose( context.getGL( ) );
         pathLeader.dispose( context.getGL( ) );

@@ -61,7 +61,7 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
         this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
         this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
         this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
-        
+
         this.alphaArg = this.addUniformData( new GLUniformData( "alpha", 1.0f ) );
         this.sizeArg = this.addUniformData( new GLUniformData( "size", getSizeArgValue( ) ) );
         this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );

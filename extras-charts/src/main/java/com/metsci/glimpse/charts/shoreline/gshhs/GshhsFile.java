@@ -48,11 +48,11 @@ import com.metsci.glimpse.util.io.LittleEndianDataInput;
 
 /**
  * The class can parse GSHHS version 1 files.
- * 
+ *
  * The GSHHS dataset can be downloaded from ftp://ftp.soest.hawaii.edu/pwessel/gshhs/ .
- *      
+ *
  * An alternate source: http://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/oldversions/
- * 
+ *
  * @author hogye
  */
 public class GshhsFile extends LandFile

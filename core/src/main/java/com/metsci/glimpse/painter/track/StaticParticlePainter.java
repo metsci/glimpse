@@ -80,7 +80,7 @@ public class StaticParticlePainter extends GlimpseDataPainter2D
     }
 
     /**
-     * 
+     *
      * @param time common array of times (each particle must have an x/y position for each time)
      * @param xPositions square array of x positions indexed as [particleIndex][timeIndex] (second index must match size of time array)
      * @param yPositions square array of y positions indexed as [particleIndex][timeIndex] (second index must match size of time array)

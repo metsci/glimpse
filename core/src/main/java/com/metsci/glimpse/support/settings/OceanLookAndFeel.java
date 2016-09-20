@@ -35,7 +35,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
  * A Glimpse LookAndFeel with a blue color scheme.
- * 
+ *
  * @author ulman
  */
 public class OceanLookAndFeel extends AbstractLookAndFeel

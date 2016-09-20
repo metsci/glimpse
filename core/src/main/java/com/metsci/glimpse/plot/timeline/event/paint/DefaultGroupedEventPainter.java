@@ -77,7 +77,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
     /**
      * Sets the maximum number of rows used to display icons in aggregate groups.
-     * 
+     *
      * @param rows
      */
     public void setMaxIconRows( int rows )

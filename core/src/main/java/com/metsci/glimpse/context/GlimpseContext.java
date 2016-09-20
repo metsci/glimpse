@@ -67,7 +67,7 @@ public interface GlimpseContext
      * Returns the scale factors needed to convert the _native_ pixel coordinates to
      * the _window_ pixel coordinates. This only really matters on displays like like
      * Macbook Retina.
-     * 
+     *
      * @return the scale factors as {scaleX, scaleY}
      */
     public int[] getSurfaceScale( );

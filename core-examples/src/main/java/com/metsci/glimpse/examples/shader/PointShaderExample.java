@@ -197,11 +197,11 @@ public class PointShaderExample implements GlimpseLayoutProvider
                         updateColors( colorValues, r );
                         colorValues.rewind( );
                         dp.useColorAttribData( colorValues );
-                        
+
                         updateSizes( sizeValues, r );
                         sizeValues.rewind( );
                         dp.useSizeAttribData( sizeValues );
-                        
+
                         //Thread.sleep( 10 );
 //                    }
 //                    catch ( InterruptedException e )

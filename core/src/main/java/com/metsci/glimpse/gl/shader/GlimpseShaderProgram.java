@@ -135,7 +135,7 @@ public class GlimpseShaderProgram
         this.program = new ShaderProgram( );
 
         GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( )." );
-        
+
         for ( ShaderCode code : codes )
         {
             boolean success = this.program.add( gl3, code, System.err );

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * be notified whenever events of interest occur via {@link #eventOccurred(Object)}.
  * Then, when no events have occurred for the duration of time specified in the
  * constructor, {@link #eventDispatch(Object)} is called.
- * 
+ *
  * @author ulman
  */
 public abstract class DelayedEventDispatcher<D>
@@ -107,7 +107,7 @@ public abstract class DelayedEventDispatcher<D>
                     long time;
 
                     if ( shutdown ) return;
-                    
+
                     // wait until enough time has passed between eventOccurred
                     while ( ( time = millisToNextUpdate( ) ) > 0 )
                     {
@@ -119,7 +119,7 @@ public abstract class DelayedEventDispatcher<D>
                         {
                         }
                     }
-                    
+
                     if ( shutdown ) return;
 
                     eventDispatch0( );
@@ -135,7 +135,7 @@ public abstract class DelayedEventDispatcher<D>
     {
         this.thread.start( );
     }
-    
+
     public void dispose( )
     {
         lock.lock( );

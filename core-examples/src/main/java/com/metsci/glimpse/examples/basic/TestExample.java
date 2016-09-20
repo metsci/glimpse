@@ -29,7 +29,75 @@ public class TestExample implements GlimpseLayoutProvider
     {
         EmptyPlot2D plot = new EmptyPlot2D( );
 
-        plot.getAxis( ).set( 0, 500, 0, 500 );
+        /*
+        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
+        AxisUtil.attachVerticalMouseListener( layoutY );
+        plot.addLayout( layoutY );
+
+        ColorRightYAxisPainter painter = new ColorRightYAxisPainter( new GridAxisLabelHandler( ) );
+        ColorTexture1D texture = new ColorTexture1D( 1024 );
+        texture.setColorGradient( ColorGradients.autumn );
+        painter.setColorScale( texture );
+
+        layoutY.addPainter( painter );
+        */
+
+        /*
+        GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
+        AxisUtil.attachHorizontalMouseListener( layoutX );
+        plot.addLayout( layoutX );
+
+        ColorXAxisPainter painter = new ColorXAxisPainter( new GridAxisLabelHandler( ) );
+        ColorTexture1D texture = new ColorTexture1D( 1024 );
+        texture.setColorGradient( ColorGradients.autumn );
+        painter.setColorScale( texture );
+
+        layoutX.addPainter( painter );
+        */
+
+        /*
+        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
+        AxisUtil.attachVerticalMouseListener( layoutY );
+        plot.addLayout( layoutY );
+        layoutY.addPainter( new NumericRotatedYAxisPainter( new GridAxisLabelHandler( ) ) );
+        */
+
+        /*
+        GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
+
+        TaggedPartialColorXAxisPainter painter = new TaggedPartialColorXAxisPainter( new GridAxisLabelHandler( ) );
+
+        painter.setColorBarSize( 100 );
+
+        TaggedAxis1D axis = new TaggedAxis1D( );
+        axis.addTag( "T1", 0.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.0f );
+        axis.addTag( "T2", 1.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.3f );
+        axis.addTag( "T3", 2.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.8f );
+        axis.addTag( "T4", 3.0 ).setAttribute( Tag.TAG_COLOR_ATTR, GlimpseColor.getRed( ) ).setAttribute( Tag.TEX_COORD_ATTR, 1.0f );
+
+        axis.addConstraint( new OrderedConstraint( "Order", Arrays.asList( "T1", "T2", "T3", "T4" ) ) );
+
+        layoutX.setAxis( axis );
+
+        ColorTexture1D texture = new ColorTexture1D( 1024 );
+        texture.setColorGradient( ColorGradients.prism );
+        painter.setColorScale( texture );
+
+        layoutX.addGlimpseMouseAllListener( new TaggedAxisMouseListener1D( ) );
+        plot.addLayout( layoutX );
+        layoutX.addPainter( painter );
+        */
+
+        /*
+        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
+
+        TaggedPartialColorYAxisPainter painter = new TaggedPartialColorYAxisPainter( new GridAxisLabelHandler( ) );
+
+        TaggedAxis1D axis = new TaggedAxis1D( );
+        axis.addTag( "T1", 0.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.0f );
+        axis.addTag( "T2", 1.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.9f );
+        axis.addTag( "T3", 2.0 ).setAttribute( Tag.TEX_COORD_ATTR, 1.0f ).setAttribute( Tag.TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
+        layoutY.setAxis( axis );
 
         plot.addPainter( new FillPainter( ) );
 

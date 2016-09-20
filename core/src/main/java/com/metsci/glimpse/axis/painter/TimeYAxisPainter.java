@@ -107,7 +107,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
 
             progLine.setViewport( gl3, bounds );
             progLine.setOrtho( gl3, -0.5f, width - 0.5f, ( float ) axis.getMin( ), ( float ) axis.getMax( ) );
-            
+
             progLine.draw( gl3, style, pathLine );
         }
         finally

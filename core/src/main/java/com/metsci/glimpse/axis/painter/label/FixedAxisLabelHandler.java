@@ -34,7 +34,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
 
 /**
  * Draws pre-defined labels at pre-defined locations.
- * 
+ *
  * @author borkholder
  */
 public class FixedAxisLabelHandler implements AxisLabelHandler
