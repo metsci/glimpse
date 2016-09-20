@@ -26,20 +26,20 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import java.nio.FloatBuffer;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import com.jogamp.common.nio.Buffers;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorMap;
+import com.metsci.glimpse.support.line.ColorLinePath;
+import com.metsci.glimpse.support.line.ColorLineProgram;
+import com.metsci.glimpse.support.line.LineStyle;
 
 /**
  * Plots a simple x-y lineplot. Provides options for modifying line thickness and color.
@@ -50,206 +50,173 @@ public class XYLinePainter extends GlimpsePainterBase
 {
     private static final Logger logger = Logger.getLogger( XYLinePainter.class.getName( ) );
 
-    protected float[] lineColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-    protected float lineThickness = 1;
-    protected boolean showLines = true;
+    //    protected float[] lineColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+    //    protected float lineThickness = 1;
 
-    protected float pointSize = 6;
+    //
+    //    protected float pointSize = 6;
+
+    //    protected int stippleFactor = 1;
+    //    protected short stipplePattern = ( short ) 0x00FF;
+    //    protected boolean stippleOn = false;
+
+    //    protected int[] colorHandle = null;
+    //    protected FloatBuffer colorBuffer = null;
+    //    protected boolean useColorDevice = false;
+    //    protected boolean useColorHost = false;
+
+    //    protected int dataSize = 0;
+    //    
+    //    protected int[] bufferHandle = null;
+    //    protected FloatBuffer dataBuffer = null;
+    //
+    //    protected ReentrantLock dataBufferLock = null;
+    //
+    //    protected volatile boolean newData = false;
+    //    protected volatile boolean bufferInitialized = false;
+
+    protected static final float[] defaultColor = GlimpseColor.getBlack( );
+
+    protected ColorLinePath path;
+    protected ColorLineProgram prog;
+    protected LineStyle style;
+
     protected boolean showPoints = true;
-
-    protected int stippleFactor = 1;
-    protected short stipplePattern = ( short ) 0x00FF;
-    protected boolean stippleOn = false;
-
-    protected int dataSize = 0;
-
-    protected int[] colorHandle = null;
-    protected FloatBuffer colorBuffer = null;
-    protected boolean useColorDevice = false;
-    protected boolean useColorHost = false;
-
-    protected int[] bufferHandle = null;
-    protected FloatBuffer dataBuffer = null;
-
-    protected ReentrantLock dataBufferLock = null;
-
-    protected volatile boolean newData = false;
-    protected volatile boolean bufferInitialized = false;
+    protected boolean showLines = true;
 
     public XYLinePainter( )
     {
-        this.dataBufferLock = new ReentrantLock( );
+        this.path = new ColorLinePath( );
+        this.prog = new ColorLineProgram( );
+        this.style = new LineStyle( );
     }
 
     public void setDataAndColor( double[] dataX, double[] dataY, double[] dataZ, ColorMap scale )
     {
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            setData( dataX, dataY );
-            setColor( dataZ, scale );
+            int dataSize = Math.min( dataX.length, dataY.length );
+
+            this.path.clear( );
+
+            float[] rgba = new float[4];
+
+            for ( int i = 0; i < dataSize; i++ )
+            {
+                scale.toColor( ( float ) dataZ[i], rgba );
+
+                if ( i == 0 )
+                    this.path.moveTo( ( float ) dataX[i], ( float ) dataY[i], rgba );
+                else
+                    this.path.lineTo( ( float ) dataX[i], ( float ) dataY[i], rgba );
+            }
         }
         finally
         {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setDataAndColor( float[] dataX, float[] dataY, float[] dataZ, ColorMap scale )
     {
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            setData( dataX, dataY );
-            setColor( dataZ, scale );
+            int dataSize = Math.min( dataX.length, dataY.length );
+
+            this.path.clear( );
+
+            float[] rgba = new float[4];
+
+            for ( int i = 0; i < dataSize; i++ )
+            {
+                scale.toColor( dataZ[i], rgba );
+
+                if ( i == 0 )
+                    this.path.moveTo( dataX[i], dataY[i], rgba );
+                else
+                    this.path.lineTo( dataX[i], dataY[i], rgba );
+            }
         }
         finally
         {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
-    public void setData( float[] dataX, float[] dataY )
+    public void setDataAndColor( float[] dataX, float[] dataY, float[][] rgba )
     {
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            dataSize = Math.min( dataX.length, dataY.length );
+            int dataSize = Math.min( dataX.length, dataY.length );
 
-            if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < dataSize * 2 )
-            {
-                this.dataBuffer = Buffers.newDirectFloatBuffer( dataSize * 2 );
-            }
+            this.path.clear( );
 
-            // copy data from the provided arrays into the host memory buffer
             for ( int i = 0; i < dataSize; i++ )
             {
-                this.dataBuffer.put( dataX[i] ).put( dataY[i] );
+                if ( i == 0 )
+                    this.path.moveTo( dataX[i], dataY[i], rgba[i] );
+                else
+                    this.path.lineTo( dataX[i], dataY[i], rgba[i] );
             }
-
-            this.newData = true;
         }
         finally
         {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setData( double[] dataX, double[] dataY )
     {
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            dataSize = Math.min( dataX.length, dataY.length );
+            int dataSize = Math.min( dataX.length, dataY.length );
 
-            if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < dataSize * 2 )
-            {
-                this.dataBuffer = Buffers.newDirectFloatBuffer( dataSize * 2 );
-            }
+            this.path.clear( );
 
-            // copy data from the provided arrays into the host memory buffer
             for ( int i = 0; i < dataSize; i++ )
             {
-                this.dataBuffer.put( ( float ) dataX[i] ).put( ( float ) dataY[i] );
+                if ( i == 0 )
+                    this.path.moveTo( ( float ) dataX[i], ( float ) dataY[i], defaultColor );
+                else
+                    this.path.lineTo( ( float ) dataX[i], ( float ) dataY[i], defaultColor );
             }
-
-            this.newData = true;
         }
         finally
         {
-            this.dataBufferLock.unlock( );
-        }
-    }
-
-    public void setColor( float[] dataZ, ColorMap scale )
-    {
-        this.dataBufferLock.lock( );
-        try
-        {
-            if ( colorBuffer == null || colorBuffer.rewind( ).capacity( ) < dataSize * 4 )
-            {
-                this.colorBuffer = Buffers.newDirectFloatBuffer( dataSize * 4 );
-            }
-
-            float[] color = new float[4];
-
-            // copy data from the provided arrays into the host memory buffer
-            for ( int i = 0; i < dataSize; i++ )
-            {
-                scale.toColor( dataZ[i], color );
-
-                this.colorBuffer.put( color[0] ).put( color[1] ).put( color[2] ).put( color[3] );
-            }
-
-            this.useColorHost = true;
-        }
-        finally
-        {
-            this.dataBufferLock.unlock( );
-        }
-    }
-
-    public void setColor( double[] dataZ, ColorMap scale )
-    {
-        this.dataBufferLock.lock( );
-        try
-        {
-            if ( colorBuffer == null || colorBuffer.rewind( ).capacity( ) < dataSize * 4 )
-            {
-                this.colorBuffer = Buffers.newDirectFloatBuffer( dataSize * 4 );
-            }
-
-            float[] color = new float[4];
-
-            // copy data from the provided arrays into the host memory buffer
-            for ( int i = 0; i < dataSize; i++ )
-            {
-                scale.toColor( ( float ) dataZ[i], color );
-
-                this.colorBuffer.put( color[0] ).put( color[1] ).put( color[2] ).put( color[3] );
-            }
-
-            this.useColorHost = true;
-        }
-        finally
-        {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setLineStipple( boolean activate )
     {
-        this.stippleOn = activate;
+        this.style.stippleEnable = activate;
     }
 
     public void setLineStipple( int stippleFactor, short stipplePattern )
     {
-        this.stippleFactor = stippleFactor;
-        this.stipplePattern = stipplePattern;
+        this.style.stippleEnable = true;
+        this.style.stippleScale = stippleFactor;
+        this.style.stipplePattern = stipplePattern;
     }
 
     public void setLineThickness( float lineThickness )
     {
-        this.lineThickness = lineThickness;
+        this.style.thickness_PX = lineThickness;
     }
 
-    public void setLineColor( float[] rgba )
+    public void setLineStyle( LineStyle style )
     {
-        this.lineColor = rgba;
+        this.style = style;
     }
 
-    public void setLineColor( float r, float g, float b, float a )
-    {
-        this.lineColor[0] = r;
-        this.lineColor[1] = g;
-        this.lineColor[2] = b;
-        this.lineColor[3] = a;
-    }
-
-    public void setPointSize( float pointSize )
-    {
-        this.pointSize = pointSize;
-    }
+    //    public void setPointSize( float pointSize )
+    //    {
+    //        this.pointSize = pointSize;
+    //    }
 
     public void showPoints( boolean show )
     {
@@ -264,11 +231,8 @@ public class XYLinePainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        if ( bufferInitialized )
-        {
-            context.getGL( ).glDeleteBuffers( 1, colorHandle, 0 );
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
-        }
+        this.path.dispose( context.getGL( ) );
+        this.prog.dispose( context.getGL( ).getGL3( ) );
     }
 
     @Override
@@ -276,84 +240,30 @@ public class XYLinePainter extends GlimpsePainterBase
     {
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
 
-        if ( dataSize == 0 ) return;
-
-        if ( !bufferInitialized )
+        GLUtils.enableStandardBlending( gl );
+        try
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-
-            colorHandle = new int[1];
-            gl.glGenBuffers( 1, colorHandle, 0 );
-
-            bufferInitialized = true;
-        }
-
-        if ( newData )
-        {
-            this.dataBufferLock.lock( );
-            try
+            if ( this.showLines )
             {
-                gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
-
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-
-                // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-
-                GLErrorUtils.logGLError( logger, gl, "Error in XYLinePainter" );
-
-                useColorDevice = useColorHost;
-                if ( useColorDevice )
+                this.prog.begin( gl );
+                try
                 {
-                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
+                    this.prog.setAxisOrtho( gl, axis );
+                    this.prog.setViewport( gl, bounds );
 
-                    // copy data from the host memory buffer to the device
-                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 4 * GLUtils.BYTES_PER_FLOAT, colorBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-
-                    GLErrorUtils.logGLError( logger, gl, "Error in XYLinePainter" );
+                    this.prog.draw( gl, style, path );
                 }
-
-                newData = false;
-            }
-            finally
-            {
-                this.dataBufferLock.unlock( );
+                finally
+                {
+                    this.prog.end( gl );
+                }
             }
         }
-
-        gl.glShadeModel( GL2.GL_FLAT );
-
-        if ( useColorDevice )
+        finally
         {
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
-            gl.glColorPointer( 4, GL2.GL_FLOAT, 0, 0 );
-            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-        }
-
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        gl.glColor4fv( lineColor, 0 );
-        gl.glLineWidth( lineThickness );
-
-        if ( showLines )
-        {
-            if ( stippleOn )
-            {
-                gl.glEnable( GL2.GL_LINE_STIPPLE );
-                gl.glLineStipple( stippleFactor, stipplePattern );
-            }
-
-            gl.glDrawArrays( GL2.GL_LINE_STRIP, 0, dataSize );
-        }
-
-        if ( showPoints )
-        {
-            gl.glPointSize( pointSize );
-            gl.glDrawArrays( GL2.GL_POINTS, 0, dataSize );
+            GLUtils.disableBlending( gl );
         }
     }
 }

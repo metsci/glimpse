@@ -47,10 +47,12 @@ in int vFlags[];
 // line strip.
 in float vMileage_PX[];
 
+//Color associated with each vertex
+in vec4 vRgba[];
 
 out float gMileage_PX;
 out float gFeatherAlpha;
-
+out vec4 gRgba;
 
 void main( )
 {
@@ -62,6 +64,9 @@ void main( )
     //
     // "Above" and "below" mean up and down, respectively, along the normalBC axis.
     //
+    
+    // color the entire line segment the color associated with the first vertex
+    vec4 rgba = vRgba[1];
 
     bool connectBC = ( ( vFlags[ 2 ] & FLAGS_CONNECT ) != 0 );
     if ( connectBC )
@@ -132,8 +137,7 @@ void main( )
                         float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
                         // Vector for mitering the corners of the feather region
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        vec2 dirFeatherMiter = normalize( dirJoin + normalBC );
                         vec2 featherMiter_PX = ( feather_PX / dot( dirFeatherMiter, normalBC ) ) * dirFeatherMiter;
 
                         // To get triangle_strip to work, vertex order must differ for left and right turns
@@ -218,8 +222,7 @@ void main( )
                         float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
                         // Vector for mitering the corners of the feather region
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        vec2 dirFeatherMiter = normalize( dirJoin + normalBC );
                         vec2 featherMiter_PX = ( feather_PX / dot( dirFeatherMiter, normalBC ) ) * dirFeatherMiter;
 
                         // To get triangle_strip to work, vertex order must differ for left and right turns
@@ -266,29 +269,35 @@ void main( )
             {
                 gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
+                gRgba = rgba;
                 EmitVertex( );
             }
 
             gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
             gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
+            gRgba = rgba;
             EmitVertex( );
 
             gl_Position = pxToNdc( innerAboveB_PX, VIEWPORT_SIZE_PX );
             gMileage_PX = mileageB_PX + dot( dirBC, innerAboveB_PX - posB_PX );
+            gRgba = rgba;
             EmitVertex( );
 
             gl_Position = pxToNdc( innerBelowC_PX, VIEWPORT_SIZE_PX );
             gMileage_PX = mileageB_PX + dot( dirBC, innerBelowC_PX - posB_PX );
+            gRgba = rgba;
             EmitVertex( );
 
             gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
             gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
+            gRgba = rgba;
             EmitVertex( );
 
             if ( joinC )
             {
                 gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
+                gRgba = rgba;
                 EmitVertex( );
             }
 
@@ -301,49 +310,57 @@ void main( )
                 // Emit triangle-strip for feather region below line
                 //
 
-                if ( joinB && isLeftTurnB )
+                if ( isLeftTurnB )
                 {
                     gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
                     gFeatherAlpha = 1.0;
+                    gRgba = rgba;
                     EmitVertex( );
 
                     gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, outerJoinB_PX - posB_PX );
                     gFeatherAlpha = 0.0;
+                    gRgba = rgba;
                     EmitVertex( );
                 }
 
                 gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
                 gFeatherAlpha = 1.0;
+                gRgba = rgba;
                 EmitVertex( );
 
                 gl_Position = pxToNdc( outerBelowB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, outerBelowB_PX - posB_PX );
                 gFeatherAlpha = 0.0;
+                gRgba = rgba;
                 EmitVertex( );
 
                 gl_Position = pxToNdc( innerBelowC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerBelowC_PX - posB_PX );
                 gFeatherAlpha = 1.0;
+                gRgba = rgba;
                 EmitVertex( );
 
                 gl_Position = pxToNdc( outerBelowC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, outerBelowC_PX - posB_PX );
                 gFeatherAlpha = 0.0;
+                gRgba = rgba;
                 EmitVertex( );
 
-                if ( joinC && isLeftTurnC )
+                if ( isLeftTurnC )
                 {
                     gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
                     gFeatherAlpha = 1.0;
+                    gRgba = rgba;
                     EmitVertex( );
 
                     gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, outerJoinC_PX - posB_PX );
                     gFeatherAlpha = 0.0;
+                    gRgba = rgba;
                     EmitVertex( );
                 }
 
@@ -353,49 +370,57 @@ void main( )
                 // Emit triangle-strip for feather region above line
                 //
 
-                if ( joinC && !isLeftTurnC )
+                if ( !isLeftTurnC )
                 {
                     gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
                     gFeatherAlpha = 1.0;
+                    gRgba = rgba;
                     EmitVertex( );
 
                     gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, outerJoinC_PX - posB_PX );
                     gFeatherAlpha = 0.0;
+                    gRgba = rgba;
                     EmitVertex( );
                 }
 
                 gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
                 gFeatherAlpha = 1.0;
+                gRgba = rgba;
                 EmitVertex( );
 
                 gl_Position = pxToNdc( outerAboveC_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, outerAboveC_PX - posB_PX );
                 gFeatherAlpha = 0.0;
+                gRgba = rgba;
                 EmitVertex( );
 
                 gl_Position = pxToNdc( innerAboveB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, innerAboveB_PX - posB_PX );
                 gFeatherAlpha = 1.0;
+                gRgba = rgba;
                 EmitVertex( );
 
                 gl_Position = pxToNdc( outerAboveB_PX, VIEWPORT_SIZE_PX );
                 gMileage_PX = mileageB_PX + dot( dirBC, outerAboveB_PX - posB_PX );
                 gFeatherAlpha = 0.0;
+                gRgba = rgba;
                 EmitVertex( );
 
-                if ( joinB && !isLeftTurnB )
+                if ( !isLeftTurnB )
                 {
                     gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
                     gFeatherAlpha = 1.0;
+                    gRgba = rgba;
                     EmitVertex( );
 
                     gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, outerJoinB_PX - posB_PX );
                     gFeatherAlpha = 0.0;
+                    gRgba = rgba;
                     EmitVertex( );
                 }
 

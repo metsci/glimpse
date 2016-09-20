@@ -30,9 +30,11 @@ uniform vec2 VIEWPORT_SIZE_PX;
 in vec2 inXy;
 in int inFlags;
 in float inMileage;
+in vec4 inRgba;
 
 out int vFlags;
 out float vMileage_PX;
+out vec4 vRgba;
 
 void main( )
 {
@@ -44,4 +46,6 @@ void main( )
 
     vec2 xy_AXIS = inXy;
     gl_Position.xy = axisXyToPx( xy_AXIS, AXIS_RECT, VIEWPORT_SIZE_PX );
+    
+    vRgba = inRgba;
 }

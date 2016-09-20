@@ -1,13 +1,13 @@
 #version 150
 
 uniform float FEATHER_THICKNESS_PX;
-uniform vec4 RGBA;
 uniform int STIPPLE_ENABLE;
 uniform float STIPPLE_SCALE;
 uniform int STIPPLE_PATTERN;
 
 in float gMileage_PX;
 in float gFeatherAlpha;
+in vec4 gRgba;
 
 out vec4 outRgba;
 
@@ -50,8 +50,8 @@ void main( )
         }
     }
 
-    outRgba.rgb = RGBA.rgb;
+    outRgba.rgb = gRgba.rgb;
 
     float minAlpha = min( gFeatherAlpha, stippleAlpha );
-    outRgba.a = RGBA.a * clamp( minAlpha, 0.0, 1.0 );
+    outRgba.a = gRgba.a * clamp( minAlpha, 0.0, 1.0 );
 }

@@ -1,9 +1,11 @@
 package com.metsci.glimpse.util.buffer;
 
-import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
-import static java.lang.Math.*;
-import static java.nio.ByteBuffer.*;
-import static java.nio.ByteOrder.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffers;
+import static java.lang.Math.ceil;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.nio.ByteBuffer.allocateDirect;
+import static java.nio.ByteOrder.nativeOrder;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -58,6 +60,13 @@ public class DirectBufferUtils
         return buffer;
     }
 
+    public static FloatBuffer grow4fv( FloatBuffer buffer, float[] rgba )
+    {
+        buffer = ensureAdditionalCapacity( buffer, 4, true );
+        buffer.put( rgba );
+        return buffer;
+    }
+
     public static ByteBuffer grow1b( ByteBuffer buffer, byte a )
     {
         buffer = ensureAdditionalCapacity( buffer, 1, true );
@@ -107,7 +116,7 @@ public class DirectBufferUtils
         }
         else if ( minBytes > Integer.MAX_VALUE )
         {
-            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes");
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );
         }
         else
         {
@@ -157,7 +166,7 @@ public class DirectBufferUtils
         }
         else if ( minBytes > Integer.MAX_VALUE )
         {
-            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes");
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );
         }
         else
         {
