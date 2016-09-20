@@ -61,6 +61,11 @@ public class ArrayColorProgram
 
     public void begin( GL2ES2 gl )
     {
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl );
+        }
+
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inRgba );

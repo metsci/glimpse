@@ -1,9 +1,14 @@
 package com.metsci.glimpse.gl;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
+import static com.metsci.glimpse.gl.util.GLUtils.deleteBuffers;
+import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
+import static java.lang.Math.max;
+import static javax.media.opengl.GL.GL_MAP_INVALIDATE_RANGE_BIT;
+import static javax.media.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
+import static javax.media.opengl.GL.GL_MAP_WRITE_BIT;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
@@ -110,7 +115,6 @@ public class GLStreamingBuffer
      * When sealed: zero
      */
     protected long mappedSize;
-
 
     public GLStreamingBuffer( int target, int usage, int blockSizeFactor )
     {

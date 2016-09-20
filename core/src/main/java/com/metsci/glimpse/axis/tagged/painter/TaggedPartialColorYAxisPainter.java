@@ -26,8 +26,10 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
+import static javax.media.opengl.GL.GL_TRIANGLES;
 
 import java.nio.FloatBuffer;
 import java.util.List;
@@ -85,11 +87,7 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
             float x2 = getColorBarMaxX( width );
 
             pathOutline.clear( );
-            pathOutline.lineTo( x2, 0.5f );
-            pathOutline.lineTo( x1, 0.5f );
-            pathOutline.lineTo( x1, height );
-            pathOutline.lineTo( x2, height );
-            pathOutline.lineTo( x2, 0.5f );
+            pathOutline.addRectangle( x1, 0.5f, x2, height );
 
             GLUtils.enableStandardBlending( gl );
             try

@@ -17,10 +17,10 @@ vec2 axisSize( vec4 axisRect )
     return ( axisMax( axisRect ) - axisMin( axisRect ) );
 }
 
-vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
+vec4 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 {
     vec2 xy_FRAC = ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect );
-    return 2 * xy_FRAC - 1;
+    return vec4( 2 * xy_FRAC - 1, 0.0, 1.0 );
 }
 
 uniform vec4 AXIS_RECT;

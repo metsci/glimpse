@@ -26,8 +26,10 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
+import static javax.media.opengl.GL.GL_TRIANGLES;
 
 import java.nio.FloatBuffer;
 import java.util.List;
@@ -71,7 +73,7 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
     public TaggedPartialColorXAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
-        
+
         this.vertexCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
         this.textureCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
     }
@@ -96,12 +98,8 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
             float y2 = getColorBarMaxY( height );
 
             pathOutline.clear( );
-            pathOutline.lineTo( 0.5f, y2 );
-            pathOutline.lineTo( 0.5f, y1 );
-            pathOutline.lineTo( width, y1 );
-            pathOutline.lineTo( width, y2 );
-            pathOutline.lineTo( 0.5f, y2 );
-            
+            pathOutline.addRectangle( 0.5f, y1, width, y2 );
+
             GLUtils.enableStandardBlending( gl );
             try
             {
@@ -193,7 +191,7 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
                 init = true;
             }
         }
-        
+
         vertexCoords.seal( gl );
         textureCoords.seal( gl );
 

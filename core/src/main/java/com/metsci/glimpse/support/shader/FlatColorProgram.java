@@ -1,7 +1,9 @@
 package com.metsci.glimpse.support.shader;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -102,6 +104,8 @@ public class FlatColorProgram
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
+        System.out.println( count );
+
         gl.glDrawArrays( mode, first, count );
     }
 
@@ -116,6 +120,7 @@ public class FlatColorProgram
     public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
     {
         setColor( gl, color );
+
         draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );
     }
 
@@ -124,7 +129,7 @@ public class FlatColorProgram
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
     }
-    
+
     /**
      * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
      * was first called.

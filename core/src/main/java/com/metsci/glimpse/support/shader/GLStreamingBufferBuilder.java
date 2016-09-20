@@ -1,8 +1,10 @@
 package com.metsci.glimpse.support.shader;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.ensureAdditionalCapacity;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.flipped;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.FloatBuffer;
 
@@ -39,7 +41,7 @@ public class GLStreamingBufferBuilder
 
         this.buffer.dispose( gl );
     }
-    
+
     public GLStreamingBuffer getBuffer( GL gl )
     {
         if ( dirty )

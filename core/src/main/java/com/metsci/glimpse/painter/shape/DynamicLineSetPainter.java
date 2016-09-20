@@ -124,6 +124,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         this.style.stippleEnable = false;
         this.style.stippleScale = 1;
         this.style.stipplePattern = ( short ) 0x00FF;
+
+        this.prog = new LineProgram( );
     }
 
     public void setDotted( boolean dotted )
@@ -299,11 +301,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             int lineCount = getSize( );
 
             if ( lineCount == 0 ) return;
-
-            if ( prog == null )
-            {
-                prog = new LineProgram( gl );
-            }
 
             if ( rgbaBufferDirty )
             {
@@ -733,7 +730,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         protected LineProgramHandles handles;
 
-        public LineProgram( GL2ES2 gl )
+        public LineProgram( )
         {
             this.handles = null;
         }

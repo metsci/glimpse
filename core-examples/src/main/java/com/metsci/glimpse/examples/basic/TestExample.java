@@ -1,10 +1,21 @@
 package com.metsci.glimpse.examples.basic;
 
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+
+import javax.media.opengl.GL3;
+
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.info.FpsPainter;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.EmptyPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.FlatColorProgram;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 public class TestExample implements GlimpseLayoutProvider
 {
@@ -18,121 +29,60 @@ public class TestExample implements GlimpseLayoutProvider
     {
         EmptyPlot2D plot = new EmptyPlot2D( );
 
-        /*
-        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
-        AxisUtil.attachVerticalMouseListener( layoutY );
-        plot.addLayout( layoutY );
+        plot.getAxis( ).set( 0, 500, 0, 500 );
 
-        ColorRightYAxisPainter painter = new ColorRightYAxisPainter( new GridAxisLabelHandler( ) );
-        ColorTexture1D texture = new ColorTexture1D( 1024 );
-        texture.setColorGradient( ColorGradients.autumn );
-        painter.setColorScale( texture );
-
-        layoutY.addPainter( painter );
-        */
-
-        /*
-        GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
-        AxisUtil.attachHorizontalMouseListener( layoutX );
-        plot.addLayout( layoutX );
-        
-        ColorXAxisPainter painter = new ColorXAxisPainter( new GridAxisLabelHandler( ) );
-        ColorTexture1D texture = new ColorTexture1D( 1024 );
-        texture.setColorGradient( ColorGradients.autumn );
-        painter.setColorScale( texture );
-        
-        layoutX.addPainter( painter );
-        */
-
-        /*
-        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
-        AxisUtil.attachVerticalMouseListener( layoutY );
-        plot.addLayout( layoutY );
-        layoutY.addPainter( new NumericRotatedYAxisPainter( new GridAxisLabelHandler( ) ) );
-        */
-
-        /*
-        GlimpseAxisLayoutX layoutX = new GlimpseAxisLayoutX( );
-        
-        TaggedPartialColorXAxisPainter painter = new TaggedPartialColorXAxisPainter( new GridAxisLabelHandler( ) );
-        
-        painter.setColorBarSize( 100 );
-        
-        TaggedAxis1D axis = new TaggedAxis1D( );
-        axis.addTag( "T1", 0.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.0f );
-        axis.addTag( "T2", 1.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.3f );
-        axis.addTag( "T3", 2.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.8f );
-        axis.addTag( "T4", 3.0 ).setAttribute( Tag.TAG_COLOR_ATTR, GlimpseColor.getRed( ) ).setAttribute( Tag.TEX_COORD_ATTR, 1.0f );
-        
-        axis.addConstraint( new OrderedConstraint( "Order", Arrays.asList( "T1", "T2", "T3", "T4" ) ) );
-        
-        layoutX.setAxis( axis );
-        
-        ColorTexture1D texture = new ColorTexture1D( 1024 );
-        texture.setColorGradient( ColorGradients.prism );
-        painter.setColorScale( texture );
-        
-        layoutX.addGlimpseMouseAllListener( new TaggedAxisMouseListener1D( ) );
-        plot.addLayout( layoutX );
-        layoutX.addPainter( painter );
-        */
-
-        /*
-        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
-
-        TaggedPartialColorYAxisPainter painter = new TaggedPartialColorYAxisPainter( new GridAxisLabelHandler( ) );
-
-        TaggedAxis1D axis = new TaggedAxis1D( );
-        axis.addTag( "T1", 0.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.0f );
-        axis.addTag( "T2", 1.0 ).setAttribute( Tag.TEX_COORD_ATTR, 0.9f );
-        axis.addTag( "T3", 2.0 ).setAttribute( Tag.TEX_COORD_ATTR, 1.0f ).setAttribute( Tag.TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
-        layoutY.setAxis( axis );
-
-        ColorTexture1D texture = new ColorTexture1D( 1024 );
-        texture.setColorGradient( ColorGradients.viridis );
-        painter.setColorScale( texture );
-
-        layoutY.addGlimpseMouseAllListener( new TaggedAxisMouseListener1D( ) );
-        plot.addLayout( layoutY );
-        layoutY.addPainter( painter );
-        */
-
-        /*
-        GlimpseAxisLayoutY layoutY = new GlimpseAxisLayoutY( );
-        AxisUtil.attachVerticalMouseListener( layoutY );
-        plot.addLayout( layoutY );
-        TimeYAxisPainter painter = new TimeYAxisPainter( new Epoch( TimeStamp.currentTime( ) ) );
-        layoutY.addPainter( painter );
-        */
-
-        plot.addPainter( new FpsPainter( ) );
-
-        //plot.addPainter( new MapBorderPainter( new GridAxisLabelHandler( ), new GridAxisLabelHandler( ) ) );
-        //        plot.addPainter( new CopyrightPainter( ) );
-        //        CrosshairPainter painter = new CrosshairPainter( );
-        //        painter.showSelectionBox( true );
-        //        painter.showSelectionCrosshairs( false );
-        //        painter.setShadeSelectionBox( true );
-        //        plot.addPainter( painter );
-        //        GridPainter gridPainter = new GridPainter( );
-        //        gridPainter.setShowMinorGrid( true );
-        //        plot.addPainter( gridPainter );
-
-        //WatermarkPainter watermarkPainter = new WatermarkPainter( StreamOpener.fileThenResource, "images/GlimpseLogo.png" );
-        //plot.addPainter( new ScalePainter( ) );
-        //plot.addPainter( new MeasurementPainter( ) );
-        //        SimpleTextPainter textPainter = new SimpleTextPainter( );
-        //        textPainter.setHorizontalPosition( HorizontalPosition.Center );
-        //        textPainter.setVerticalPosition( VerticalPosition.Center );
-        //        textPainter.setPaintBackground( false );
-        //        textPainter.setPaintBorder( true );
-        //        textPainter.setText( "test" );
-        //        textPainter.setFont( 80, true );
-        //
-        //        plot.addPainter( textPainter );
-
-        //plot.addPainter( watermarkPainter );
+        plot.addPainter( new FillPainter( ) );
 
         return plot;
+    }
+
+    public static class FillPainter extends GlimpsePainterBase
+    {
+        protected FlatColorProgram fillProg;
+        protected GLStreamingBufferBuilder fillBuilder;
+
+        public FillPainter( )
+        {
+            this.fillProg = new FlatColorProgram( );
+            this.fillBuilder = new GLStreamingBufferBuilder( );
+        }
+
+        @Override
+        protected void doDispose( GlimpseContext context )
+        {
+            this.fillProg.dispose( context.getGL( ).getGL3( ) );
+            this.fillBuilder.dispose( context.getGL( ) );
+        }
+
+        @Override
+        protected void doPaintTo( GlimpseContext context )
+        {
+            GlimpseBounds bounds = getBounds( context );
+            Axis2D axis = getAxis2D( context );
+            GL3 gl = context.getGL( ).getGL3( );
+
+            enableStandardBlending( gl );
+            try
+            {
+                this.fillBuilder.clear( );
+                this.fillBuilder.addQuad2f( 10, 10, 20, 20 );
+
+                this.fillProg.begin( gl );
+                try
+                {
+                    this.fillProg.setAxisOrtho( gl, axis );
+
+                    this.fillProg.draw( gl, this.fillBuilder, GlimpseColor.getBlack( ) );
+                }
+                finally
+                {
+                    this.fillProg.end( gl );
+                }
+            }
+            finally
+            {
+                GLUtils.disableBlending( gl );
+            }
+        }
     }
 }

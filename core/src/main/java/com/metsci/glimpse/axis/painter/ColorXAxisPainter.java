@@ -134,11 +134,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             float y2 = getColorBarMaxY( height );
 
             pathOutline.clear( );
-            pathOutline.lineTo( 0.5f, y2 );
-            pathOutline.lineTo( 0.5f, y1 );
-            pathOutline.lineTo( width, y1 );
-            pathOutline.lineTo( width, y2 );
-            pathOutline.lineTo( 0.5f, y2 );
+            pathOutline.addRectangle( 0.5f, y1, width, y2 );
 
             xyBuffer.clear( );
             xyBuffer.addQuad2f( 0.5f, y1, width, y2 );
