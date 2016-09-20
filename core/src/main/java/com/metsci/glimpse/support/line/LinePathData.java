@@ -45,6 +45,28 @@ public class LinePathData
      * <li>Bit 0: CONNECT  (Least Significant Bit)
      * <li>Bit 1: JOIN
      * </ul>
+     * <p>
+     * Example vertex flags for a line-strip:
+     * <pre>
+     *   Vertex:   (   [----*----*----]
+     *   Flags:    0   0   CJ   CJ    C </pre>
+     * And for a loop:
+     * <pre>
+     *   Vertex:   (   [----*----*----]   )
+     *   Flags:    0   J   CJ   CJ   CJ   0 </pre>
+     * Where:
+     * <pre>
+     *   ( = Leading Phantom Vertex
+     *   [ = Strip First Vertex
+     *   * = Normal Vertex
+     *   ] = Strip Last Vertex
+     *   ) = Trailing Phantom Vertex </pre>
+     * The loop differs from the strip in the following ways:
+     * <ul>
+     * <li>The loop's first and last vertices have their JOIN flags set
+     * <li>The loop's leading phantom vertex will have the same position as the loop's last vertex
+     * <li>The loop has a trailing phantom vertex, with the same position as the loop's first vertex
+     * <ul>
      */
     protected ByteBuffer flagsBuffer;
 
