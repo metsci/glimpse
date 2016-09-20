@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -177,7 +176,7 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             }
             finally
             {
-                gl.glDisable( GL.GL_BLEND );
+                GLUtils.disableBlending( gl );
             }
         }
     }

@@ -32,6 +32,6 @@ out float vS;
 
 void main( )
 {
-      gl_Position.xy = axisXyToNdc( inXy, AXIS_RECT );
+      gl_Position = axisXyToNdc( inXy, AXIS_RECT );
       vS = inS;
 }

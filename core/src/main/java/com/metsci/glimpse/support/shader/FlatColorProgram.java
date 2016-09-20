@@ -104,8 +104,6 @@ public class FlatColorProgram
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-        System.out.println( count );
-
         gl.glDrawArrays( mode, first, count );
     }
 

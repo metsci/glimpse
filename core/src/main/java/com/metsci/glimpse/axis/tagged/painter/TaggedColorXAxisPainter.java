@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -225,7 +226,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         pathOutline.lineTo( x + tagHalfWidth, yMax );
         pathOutline.lineTo( x - tagHalfWidth, yMax );
         pathOutline.lineTo( x - tagHalfWidth, yMid );
-        pathOutline.lineTo( x, yMin );
+        pathOutline.closeLoop( );
 
         progOutline.begin( gl3 );
         try

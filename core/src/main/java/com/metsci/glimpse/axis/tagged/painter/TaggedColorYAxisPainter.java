@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -88,7 +89,7 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
 
         this.tagStyle = new LineStyle( );
         this.tagStyle.stippleEnable = false;
-        this.tagStyle.feather_PX = 0.0f;
+        this.tagStyle.feather_PX = 0.9f;
     }
 
     public void setTagColor( float[] color )
@@ -204,39 +205,49 @@ public class TaggedColorYAxisPainter extends ColorYAxisPainter
         tagXyVbo.seal( gl );
 
         GLUtils.enableStandardBlending( gl );
-        flatColorProg.begin( gl3 );
         try
         {
-            flatColorProg.setPixelOrtho( gl3, bounds );
-            flatColorProg.setColor( gl3, color[0], color[1], color[2], 0.3f );
+            flatColorProg.begin( gl3 );
+            try
+            {
+                flatColorProg.setPixelOrtho( gl3, bounds );
+                flatColorProg.setColor( gl3, color[0], color[1], color[2], 0.3f );
 
-            flatColorProg.draw( gl3, GL.GL_TRIANGLES, tagXyVbo, 0, 9 );
+                flatColorProg.draw( gl3, GL.GL_TRIANGLES, tagXyVbo, 0, 9 );
+            }
+            finally
+            {
+                flatColorProg.end( gl3 );
+            }
+
+            tagStyle.rgba = color;
+            tagStyle.rgba[3] = 1.0f;
+            tagStyle.thickness_PX = tagPointerOutlineWidth;
+
+            pathOutline.clear( );
+            pathOutline.moveTo( xMin, y );
+            pathOutline.lineTo( xMid, y + tagHalfWidth );
+            pathOutline.lineTo( xMax, y + tagHalfWidth );
+            pathOutline.lineTo( xMax, y - tagHalfWidth );
+            pathOutline.lineTo( xMid, y - tagHalfWidth );
+            pathOutline.closeLoop( );
+
+            progOutline.begin( gl3 );
+            try
+            {
+                progOutline.setPixelOrtho( gl3, bounds );
+                progOutline.setViewport( gl3, bounds );
+
+                progOutline.draw( gl3, tagStyle, pathOutline );
+            }
+            finally
+            {
+                progOutline.end( gl3 );
+            }
         }
         finally
         {
-            flatColorProg.end( gl3 );
-            gl.glDisable( GL.GL_BLEND );
-        }
-
-        tagStyle.rgba = color;
-        tagStyle.thickness_PX = tagPointerOutlineWidth;
-
-        pathOutline.clear( );
-        pathOutline.moveTo( xMin, y );
-        pathOutline.lineTo( xMid, y + tagHalfWidth );
-        pathOutline.lineTo( xMax, y + tagHalfWidth );
-        pathOutline.lineTo( xMax, y - tagHalfWidth );
-        pathOutline.lineTo( xMid, y - tagHalfWidth );
-        pathOutline.lineTo( xMin, y );
-
-        progOutline.begin( gl3 );
-        try
-        {
-            progOutline.draw( gl3, tagStyle, pathOutline );
-        }
-        finally
-        {
-            progOutline.end( gl3 );
+            GLUtils.disableBlending( gl3 );
         }
     }
 
