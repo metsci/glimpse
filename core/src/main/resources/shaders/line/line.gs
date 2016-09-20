@@ -299,7 +299,7 @@ void main( )
                 // Emit triangle-strip for feather region below line
                 //
 
-                if ( joinB && isLeftTurnB )
+                if ( isLeftTurnB )
                 {
                     gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
@@ -332,7 +332,7 @@ void main( )
                 gFeatherAlpha = 0.0;
                 EmitVertex( );
 
-                if ( joinC && isLeftTurnC )
+                if ( isLeftTurnC )
                 {
                     gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
@@ -351,7 +351,7 @@ void main( )
                 // Emit triangle-strip for feather region above line
                 //
 
-                if ( joinC && !isLeftTurnC )
+                if ( !isLeftTurnC )
                 {
                     gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
@@ -384,7 +384,7 @@ void main( )
                 gFeatherAlpha = 0.0;
                 EmitVertex( );
 
-                if ( joinB && !isLeftTurnB )
+                if ( !isLeftTurnB )
                 {
                     gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
                     gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
