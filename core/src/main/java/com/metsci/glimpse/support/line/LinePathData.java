@@ -61,12 +61,21 @@ public class LinePathData
      *   * = Normal Vertex
      *   ] = Strip Last Vertex
      *   ) = Trailing Phantom Vertex </pre>
-     * The loop differs from the strip in the following ways:
+     * Note the following about the line-strip:
+     * <ul>
+     * <li>The strip's first and last vertices do not have their JOIN flags set
+     * <li>The strip's leading phantom vertex is just a placeholder
+     * <li>The strip's trailing phantom vertex is just a placeholder -- in fact, if there
+     *     are vertices after this strip, then this strip has no trailing phantom vertex,
+     *     and the next strip's leading phantom vertex is used as placeholder instead
+     * </ul>
+     * Note the following about the loop:
      * <ul>
      * <li>The loop's first and last vertices have their JOIN flags set
-     * <li>The loop's leading phantom vertex will have the same position as the loop's last vertex
-     * <li>The loop has a trailing phantom vertex, with the same position as the loop's first vertex
-     * <ul>
+     * <li>The loop's first and last vertices have the same xy
+     * <li>The loop's leading phantom vertex and second-to-last vertex have the same xy
+     * <li>The loop's trailing phantom vertex and second vertex have the same xy
+     * </ul>
      */
     protected ByteBuffer flagsBuffer;
 
