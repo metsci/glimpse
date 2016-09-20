@@ -132,8 +132,7 @@ void main( )
                         float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
                         // Vector for mitering the corners of the feather region
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        vec2 dirFeatherMiter = normalize( dirJoin + normalBC );
                         vec2 featherMiter_PX = ( feather_PX / dot( dirFeatherMiter, normalBC ) ) * dirFeatherMiter;
 
                         // To get triangle_strip to work, vertex order must differ for left and right turns
@@ -218,8 +217,7 @@ void main( )
                         float outerIntrude_PX = min( outerMiter_PX, abs( ( lengthBC_PX + feather_PX ) * maxIntrudeScale ) );
 
                         // Vector for mitering the corners of the feather region
-                        vec2 dirTangent = vec2( -dirJoin.y, dirJoin.x );
-                        vec2 dirFeatherMiter = normalize( dirTangent + dirBC );
+                        vec2 dirFeatherMiter = normalize( dirJoin + normalBC );
                         vec2 featherMiter_PX = ( feather_PX / dot( dirFeatherMiter, normalBC ) ) * dirFeatherMiter;
 
                         // To get triangle_strip to work, vertex order must differ for left and right turns
