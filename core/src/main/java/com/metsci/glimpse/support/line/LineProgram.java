@@ -156,6 +156,17 @@ public class LineProgram
         }
     }
 
+    public void draw( GL2ES3 gl, LineStyle style, StreamingLinePath path )
+    {
+        this.setStyle( gl, style );
+        this.draw( gl, path );
+    }
+
+    public void draw( GL2ES3 gl, StreamingLinePath path )
+    {
+        this.draw( gl, path.xyVbo, path.flagsVbo, path.mileageVbo, 0, path.numVertices( ) );
+    }
+
     public void draw( GL2ES3 gl, LineStyle style, LinePath path )
     {
         this.draw( gl, style, path, 1.0 );
