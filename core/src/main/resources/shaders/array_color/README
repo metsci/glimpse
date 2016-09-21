@@ -3,7 +3,7 @@ array_color
 Applies rgba colors to a set of vertices.
 
 Java Wrappers:
- * com.metsci.glimpse.support.shader.ArrayColorProgram.java
+ * com.metsci.glimpse.support.shader.ArrayColorProgram
  
-Example Usages:
- * com.metsci.glimpse.painter.decoration.MapBorderPainter.java
+Usage Examples:
+ * com.metsci.glimpse.painter.decoration.MapBorderPainter

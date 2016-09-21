@@ -3,7 +3,7 @@ flat_color
 Applies a flat color to a set of vertices.
 
 Java Wrappers:
- * com.metsci.glimpse.support.shader.FLatColorProgram.java
+ * com.metsci.glimpse.support.shader.FlatColorProgram
  
-Example Usages:
- * com.metsci.glimpse.axis.tagged.painter.TaggedColorXAxisPainter.java
+Usage Examples:
+ * com.metsci.glimpse.axis.tagged.painter.TaggedColorXAxisPainter

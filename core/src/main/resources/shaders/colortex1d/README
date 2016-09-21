@@ -3,7 +3,7 @@ colortex1d
 Applies a 1d rgba texture to a set of vertices specified in axis coordinates.
 
 Java Wrappers:
- * com.metsci.glimpse.support.shader.ColorTextureProgram1D.java
+ * com.metsci.glimpse.support.shader.ColorTextureProgram1D
  
-Example Usages:
- * com.metsci.glimpse.axis.painter.ColorXAxisPainter.java
+Usage Examples:
+ * com.metsci.glimpse.axis.painter.ColorXAxisPainter
