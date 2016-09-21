@@ -125,7 +125,7 @@ public class GLUtils
     {
         if ( texUnit > 31 || texUnit < 0 ) throw new IllegalArgumentException( "Only 31 texture units supported." );
 
-        return GL2.GL_TEXTURE0 + texUnit;
+        return GL.GL_TEXTURE0 + texUnit;
     }
 
     public static GLOffscreenAutoDrawable newOffscreenDrawable( )

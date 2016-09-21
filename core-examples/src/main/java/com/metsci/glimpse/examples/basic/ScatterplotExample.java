@@ -272,7 +272,8 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         painter.setDiscardAboveColor( true );
         painter.setDiscardBelowColor( true );
 
-        //painter.setConstantPointSize( 5.0f );
+        painter.useVariableSize( );
+        //painter.setConstantPointSize( 10.0f );
         //painter.setConstantPointColor( GlimpseColor.getRed( ) );
 
         return plot;

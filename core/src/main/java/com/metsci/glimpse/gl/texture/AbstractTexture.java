@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
 
 import java.util.concurrent.locks.ReentrantLock;
 

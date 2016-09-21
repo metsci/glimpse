@@ -47,34 +47,35 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
  * @author ulman
  *
  */
-public class PartialTaggedPointShader extends TaggedPointShader implements AxisListener1D
+public class PartialTaggedPointGradientProgram extends TaggedPointGradientProgram implements AxisListener1D
 {
-    private GLUniformData sizeArg;
+    private GLUniformData lengthArg;
 
-    public PartialTaggedPointShader( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
+    public PartialTaggedPointGradientProgram( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
         super( colorTextureUnit, sizeTextureUnit, colorAxis, sizeAxis );
 
         this.addUniformData( new GLUniformData( "vcoordtex", vertexTexUnit ) );
         this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
-        this.sizeArg = this.addUniformData( new GLUniformData( "size", getSizeArgValue( ) ) );
+        this.lengthArg = this.addUniformData( new GLUniformData( "length", getLengthArgValue( ) ) );
 
-        sizeAxis.addAxisListener( this );
+        this.taggedSizeAxis.addAxisListener( this );
     }
 
     @Override
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "shaders/point/tagged_point_shader.vs" );
+        this.addVertexShader( "shaders/PartialTaggedPointGradientProgram/point.vs" );
+        this.addFragmentShader( "shaders/PartialTaggedPointGradientProgram/point.fs" );
     }
 
     @Override
     public void axisUpdated( Axis1D axis )
     {
-        this.sizeArg.setData( getSizeArgValue( ) );
+        this.lengthArg.setData( getLengthArgValue( ) );
     }
 
-    protected int getSizeArgValue( )
+    protected int getLengthArgValue( )
     {
         List<Tag> tags = taggedColorAxis.getSortedTags( );
         int size = tags.size( );

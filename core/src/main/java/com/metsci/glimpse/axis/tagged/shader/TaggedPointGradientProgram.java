@@ -37,7 +37,7 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.support.shader.PointGradientProgram;
 
-public class TaggedPointShader extends PointGradientProgram
+public class TaggedPointGradientProgram extends PointGradientProgram
 {
     protected TaggedAxis1D taggedColorAxis;
     protected TaggedAxis1D taggedSizeAxis;
@@ -45,7 +45,7 @@ public class TaggedPointShader extends PointGradientProgram
     protected AxisListener1D colorAxisListener;
     protected AxisListener1D sizeAxisListener;
 
-    public TaggedPointShader( int colorTextureUnit, int sizeTextureUnit, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
+    public TaggedPointGradientProgram( int colorTextureUnit, int sizeTextureUnit, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
         super( colorTextureUnit, sizeTextureUnit, colorAxis, sizeAxis );
 

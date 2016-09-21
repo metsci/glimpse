@@ -60,7 +60,7 @@ public class FloatTexture1D extends AbstractTexture
     @Override
     protected void prepare_setData( GL gl )
     {
-        gl.getGL3( ).glTexImage1D( GL3.GL_TEXTURE_1D, 0, GL3.GL_RED, dim[0], 0, GL3.GL_RED, GL3.GL_FLOAT, data.rewind( ) );
+        gl.getGL3( ).glTexImage1D( GL3.GL_TEXTURE_1D, 0, GL3.GL_R32F, dim[0], 0, GL3.GL_RED, GL3.GL_FLOAT, data.rewind( ) );
     }
 
     @Override

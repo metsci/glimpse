@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static java.util.logging.Level.*;
+import static java.util.logging.Level.WARNING;
 
 import java.nio.FloatBuffer;
 import java.util.Collection;
@@ -139,7 +139,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setData( GL gl )
     {
-        gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_RED, dim[0], dim[1], 0, GL3.GL_RED, GL2.GL_FLOAT, data.rewind( ) );
+        gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_R32F, dim[0], dim[1], 0, GL3.GL_RED, GL3.GL_FLOAT, data.rewind( ) );
     }
 
     @Override

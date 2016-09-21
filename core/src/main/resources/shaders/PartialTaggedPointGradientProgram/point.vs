@@ -1,3 +1,4 @@
+#version 150
 
 // texture storing data values associated with each axis tag
 uniform sampler1D vcoordtex;
@@ -6,7 +7,7 @@ uniform sampler1D vcoordtex;
 uniform sampler1D tcoordtex;
 
 // the size of the vcoordtex and tcoordtex textures
-uniform int size;
+uniform int length;
 
 
 // lookup for color
@@ -28,11 +29,15 @@ uniform bool discardAbove_size;
 uniform bool constant_color;
 uniform bool constant_size;
 
+uniform vec4 color;
+uniform float size;
+
  // the attribute
-attribute float valColor;
-attribute float valSize;
+in float valColor;
+in float valSize;
+in vec2 a_position;
 
-
+out vec4 vRgba;
 
 void main()
 {
@@ -42,10 +47,15 @@ void main()
         (!constant_color && discardAbove_color && valColor > valMax_color ) )
     {
     	gl_FrontColor = vec4( 0.0, 0.0, 0.0, 0.0 );
+    	gl_PointSize = 0.0;
     }
     else
     {
-    	if ( !constant_color )
+    	if ( constant_color )
+		{
+			vRgba = color;
+		}
+		else
     	{
 	        float fsize = float(size);
     		float numer = fsize - 0.5;
@@ -76,25 +86,25 @@ void main()
 
  			float normalizedVal = ( ( valColor - dataMin ) / ( dataMax - dataMin ) );
  			normalizedVal = normalizedVal * ( tvalMax - tvalMin ) + tvalMin;
-    		clamp( normalizedVal, 0.0, 1.0 );
+    		normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
    		 	vec4 color = texture1D( valTexture_color, normalizedVal );
-    		gl_FrontColor = color;
+    		vRgba = color;
+		}
 
+		if ( constant_size )
+		{
+		    gl_PointSize = size;
 		}
 		else
 		{
-			gl_FrontColor = gl_Color;
-		}
-
-		if ( !constant_size )
-		{
 			float valInverseWidth_size = valMax_size - valMin_size;
 	        float valNorm_size  = ( valSize - valMin_size ) / valInverseWidth_size;
-	        clamp( valNorm_size, 0.0, 1.0 );
+	        valNorm_size = clamp( valNorm_size, 0.0, 1.0 );
 	        gl_PointSize = texture1D( valTexture_size, valNorm_size ).r;
         }
     }
 
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_Position = gl_ModelViewProjectionMatrix * a_Position;
+    vPointSize_PX = gl_PointSize;
 }

@@ -24,12 +24,13 @@ uniform float size;
 
 uniform mat4 mvpMatrix;
 
- // the attribute
+// the attribute
 in float valColor;
 in float valSize;
 in vec2 a_position;
 
 out vec4 vRgba;
+out float vPointSize_PX;
 
 void main()
 {
@@ -39,6 +40,7 @@ void main()
         (!constant_color && discardAbove_color && valColor > valMax_color ) )
     {
     	vRgba = vec4( 0.0, 0.0, 0.0, 0.0 );
+    	gl_PointSize = 0.0;
     }
     else
     {
@@ -50,7 +52,7 @@ void main()
     	{
 	    	float valInverseWidth_color = valMax_color - valMin_color;
 	        float valNorm_color = ( valColor - valMin_color ) / valInverseWidth_color;
-	        clamp( valNorm_color, 0.0, 1.0 );
+	        valNorm_color = clamp( valNorm_color, 0.0, 1.0 );
 	        vRgba = texture( valTexture_color, valNorm_color );
 		}
 
@@ -62,10 +64,11 @@ void main()
 		{
 			float valInverseWidth_size = valMax_size - valMin_size;
 	        float valNorm_size  = ( valSize - valMin_size ) / valInverseWidth_size;
-	        clamp( valNorm_size, 0.0, 1.0 );
+	        valNorm_size = clamp( valNorm_size, 0.0, 1.0 );
 	        gl_PointSize = texture( valTexture_size, valNorm_size ).r;
         }
     }
 
     gl_Position = mvpMatrix * vec4( a_position, 0, 1 );
+    vPointSize_PX = gl_PointSize;
 }

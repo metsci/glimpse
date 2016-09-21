@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.shader.TaggedPointShader;
+import com.metsci.glimpse.axis.tagged.shader.TaggedPointGradientProgram;
 import com.metsci.glimpse.support.shader.PointGradientProgram;
 
 public class TaggedShadedPointPainter extends ShadedPointPainter
@@ -17,6 +17,6 @@ public class TaggedShadedPointPainter extends ShadedPointPainter
     @Override
     protected PointGradientProgram newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        return new TaggedPointShader( 0, 1, (TaggedAxis1D) colorAxis, (TaggedAxis1D) sizeAxis );
+        return new TaggedPointGradientProgram( 0, 1, (TaggedAxis1D) colorAxis, (TaggedAxis1D) sizeAxis );
     }
 }

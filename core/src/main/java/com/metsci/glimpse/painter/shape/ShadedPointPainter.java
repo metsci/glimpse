@@ -199,7 +199,6 @@ public class ShadedPointPainter extends GlimpsePainterBase
         try
         {
             this.constantSize = true;
-            this.program.setConstantSize( true );
             this.program.setContstantSize( size );
         }
         finally
@@ -214,7 +213,6 @@ public class ShadedPointPainter extends GlimpsePainterBase
         try
         {
             this.constantColor = true;
-            this.program.setConstantSize( true );
             this.program.setContstantColor( color );
         }
         finally
@@ -326,6 +324,8 @@ public class ShadedPointPainter extends GlimpsePainterBase
         {
             program.useProgram( gl, false );
             GLUtils.disableBlending( gl );
+            // Some painters, like TextureRenderer, assume GL_TEXTURE0 is the active texture
+            gl.glActiveTexture( GL.GL_TEXTURE0 );
         }
     }
 
