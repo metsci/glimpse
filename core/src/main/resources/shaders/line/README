@@ -7,3 +7,4 @@ Java Wrappers:
 
 Usage Examples:
  * com.metsci.glimpse.examples.basic.LinePathExample
+ * com.metsci.glimpse.examples.basic.LineJoinExample
