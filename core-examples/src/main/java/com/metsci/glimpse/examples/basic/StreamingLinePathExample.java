@@ -51,7 +51,7 @@ public class StreamingLinePathExample
         leftAngleAxis.setMin( -360 );
         leftAngleAxis.setMax( +360 );
 
-        TaggedAxis1D rightAngleAxis = new TaggedAxis1D( );
+        TaggedAxis1D rightAngleAxis = new TaggedAxis1D( leftAngleAxis );
         AxisInfo rightAngleAxisInfo = plot.createAxisRight( "rightAngleAxis", rightAngleAxis, new TaggedAxisMouseListener1D( ) );
         rightAngleAxisInfo.setAxisPainter( new TaggedPartialColorYAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
         Tag rightAngleTag = rightAngleAxis.addTag( "rightAngle", -90 );
@@ -65,8 +65,15 @@ public class StreamingLinePathExample
         thicknessAxis.setMin( 0 );
         thicknessAxis.setMax( 100 );
 
+        TaggedAxis1D featherAxis = new TaggedAxis1D( thicknessAxis );
+        AxisInfo featherAxisInfo = plot.createAxisBottom( "featherAxis", featherAxis, new TaggedAxisMouseListener1D( ) );
+        featherAxisInfo.setAxisPainter( new TaggedPartialColorXAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
+        Tag featherTag = featherAxis.addTag( "feather", 0.9f );
+        featherAxis.setMin( 0 );
+        featherAxis.setMax( 100 );
+
         plot.addPainter( new BackgroundPainter( ) );
-        plot.addPainter( new CustomLinesPainter( leftAngleTag, rightAngleTag, thicknessTag ) );
+        plot.addPainter( new CustomLinesPainter( leftAngleTag, rightAngleTag, thicknessTag, featherTag ) );
         plot.addPainter( new BorderPainter( ) );
 
         SwingUtilities.invokeLater( new Runnable( )
@@ -98,8 +105,9 @@ public class StreamingLinePathExample
         protected final Tag angleTagB_CWDEG;
         protected final Tag angleTagC_CWDEG;
         protected final Tag thicknessTag_PX;
+        protected final Tag featherTag_PX;
 
-        public CustomLinesPainter( Tag leftAngleTag_CWDEG, Tag rightAngleTag_CWDEG, Tag thicknessTag_PX )
+        public CustomLinesPainter( Tag leftAngleTag_CWDEG, Tag rightAngleTag_CWDEG, Tag thicknessTag_PX, Tag featherTag_PX )
         {
             // Create a path, which will be populated in doPaintTo()
             this.path = new StreamingLinePath( );
@@ -115,6 +123,7 @@ public class StreamingLinePathExample
             this.angleTagB_CWDEG = leftAngleTag_CWDEG;
             this.angleTagC_CWDEG = rightAngleTag_CWDEG;
             this.thicknessTag_PX = thicknessTag_PX;
+            this.featherTag_PX = featherTag_PX;
         }
 
         @Override
@@ -162,6 +171,7 @@ public class StreamingLinePathExample
 
             // Update the style based on axis tags
             this.style.thickness_PX = ( float ) this.thicknessTag_PX.getValue( );
+            this.style.feather_PX = ( float ) this.featherTag_PX.getValue( );
 
             // Draw the path
             enableStandardBlending( gl );
