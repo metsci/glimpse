@@ -32,6 +32,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.line.LineJoinType;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -62,6 +63,7 @@ public class BorderPainter extends GlimpsePainterBase
         this.prog = new LineProgram( );
 
         this.style = new LineStyle( );
+        this.style.joinType = LineJoinType.JOIN_MITER;
         this.style.feather_PX = 0;
         this.style.stippleEnable = false;
         this.style.thickness_PX = 1.0f;
@@ -148,10 +150,12 @@ public class BorderPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
 
-        int x = bounds.getX( );
-        int y = bounds.getY( );
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
+        float inset_PX = 0.5f * style.thickness_PX;
+
+        float x = inset_PX;
+        float y = inset_PX;
+        float width = bounds.getWidth( ) - 2 * inset_PX;
+        float height = bounds.getHeight( ) - 2 * inset_PX;
 
         GLUtils.enableStandardBlending( gl );
         prog.begin( gl );

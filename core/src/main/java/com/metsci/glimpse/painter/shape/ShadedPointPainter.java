@@ -37,9 +37,9 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.SimplePointShader;
+import com.metsci.glimpse.support.shader.PointGradientProgram;
 
 //XXX see: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/demos/es2/RedSquareES2.java
 //XXX see: https://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/com/jogamp/opengl/util/GLArrayDataClient.html
@@ -59,13 +59,10 @@ public class ShadedPointPainter extends GlimpsePainterBase
     protected FloatTexture1D sizeTexture;
     protected ColorTexture1D colorTexture;
 
-    protected SimplePointShader program;
+    protected PointGradientProgram program;
 
     protected boolean constantSize = true;
     protected boolean constantColor = true;
-
-    protected float constantPointSize = 5.0f;
-    protected float[] constantPointColor = GlimpseColor.getBlack( );
 
     protected int vertexCount = 0;
 
@@ -201,8 +198,9 @@ public class ShadedPointPainter extends GlimpsePainterBase
         painterLock.lock( );
         try
         {
-            this.constantPointSize = size;
-            this.setConstantPointSize0( );
+            this.constantSize = true;
+            this.program.setConstantSize( true );
+            this.program.setContstantSize( size );
         }
         finally
         {
@@ -215,8 +213,9 @@ public class ShadedPointPainter extends GlimpsePainterBase
         painterLock.lock( );
         try
         {
-            this.constantPointColor = color;
-            this.setConstantPointColor0( );
+            this.constantColor = true;
+            this.program.setConstantSize( true );
+            this.program.setContstantColor( color );
         }
         finally
         {
@@ -229,7 +228,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
         painterLock.lock( );
         try
         {
-            this.setConstantPointColor0( );
+            this.constantSize = true;
         }
         finally
         {
@@ -242,7 +241,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
         painterLock.lock( );
         try
         {
-            this.setConstantPointSize0( );
+            this.constantColor = true;
         }
         finally
         {
@@ -276,39 +275,21 @@ public class ShadedPointPainter extends GlimpsePainterBase
         }
     }
 
-    protected void setConstantPointColor0( )
-    {
-        this.constantColor = true;
-        this.program.setConstantColor( true );
-    }
-
-    protected void setConstantPointSize0( )
-    {
-        this.constantSize = true;
-        this.program.setConstantSize( true );
-    }
-
     protected void setVariablePointColor0( )
     {
-        if ( this.colorTexture != null )
-        {
-            this.constantColor = false;
-            this.program.setConstantColor( false );
-        }
+        this.constantColor = false;
+        this.program.setConstantColor( false );
     }
 
     protected void setVariablePointSize0( )
     {
-        if ( this.sizeTexture != null )
-        {
-            this.constantSize = false;
-            this.program.setConstantSize( false );
-        }
+        this.constantSize = false;
+        this.program.setConstantSize( false );
     }
 
-    protected SimplePointShader newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    protected PointGradientProgram newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        return new SimplePointShader( 0, 1, colorAxis, sizeAxis );
+        return new PointGradientProgram( 0, 1, colorAxis, sizeAxis );
     }
 
     @Override
@@ -323,40 +304,28 @@ public class ShadedPointPainter extends GlimpsePainterBase
 
         if ( !constantColor && ( colorTexture == null ) ) return;
 
-        if ( constantSize )
-        {
-            gl.glPointSize( constantPointSize );
-        }
-        else
+        if ( !constantSize )
         {
             sizeTexture.prepare( gl, 1 );
-
-            gl.glEnable( GL2.GL_VERTEX_PROGRAM_POINT_SIZE );
         }
 
-        if ( constantColor )
-        {
-            GlimpseColor.glColor( gl, constantPointColor );
-        }
-        else
+        if ( !constantColor )
         {
             colorTexture.prepare( gl, 0 );
         }
 
         program.setProjectionMatrix( axis );
 
+        GLUtils.enableStandardBlending( gl );
         program.useProgram( gl, true );
         try
         {
-            gl.glEnable( GL2.GL_POINT_SMOOTH );
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
             drawArrays( gl );
         }
         finally
         {
             program.useProgram( gl, false );
+            GLUtils.disableBlending( gl );
         }
     }
 
