@@ -1,0 +1,9 @@
+line
+
+Draws 2D lines with feathered edges, stippling, and joins.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.line.LineProgram
+
+Usage Examples:
+ * com.metsci.glimpse.examples.basic.LinePathExample
