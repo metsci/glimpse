@@ -43,10 +43,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.media.opengl.GL2;
 
 import com.google.common.collect.Sets;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.QuadTreeFloatBuffer;
 import com.metsci.glimpse.util.primitives.FloatsArray;
@@ -60,7 +58,7 @@ import com.metsci.glimpse.util.primitives.IntsArray;
  * @author ulman
  * @see com.metsci.glimpse.examples.misc.DynamicPointPainterExample
  */
-public class DynamicPointSetPainter extends GlimpseDataPainter2D
+public class DynamicPointSetPainter extends GlimpsePainterBase
 {
     protected static final double GROWTH_FACTOR = 1.3;
 
@@ -257,33 +255,6 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         }
     }
 
-    @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
-    {
-        //XXX shader needs to be written to replace this
-        //XXX it's a good very basic use case (draw a bunch of points with a specified size)
-        lock.lock( );
-        try
-        {
-            colorBuffer.bind( GLVertexAttribute.ATTRIB_COLOR_4D, gl );
-            pointBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
-            try
-            {
-                gl.glPointSize( pointSize );
-                gl.glDrawArrays( GL2.GL_POINTS, 0, getSize( ) );
-            }
-            finally
-            {
-                colorBuffer.unbind( gl );
-                pointBuffer.unbind( gl );
-            }
-        }
-        finally
-        {
-            lock.unlock( );
-        }
-    }
-
     protected int getSize( )
     {
         return this.idMap.size( );
@@ -344,11 +315,11 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
 
     protected void mutatePosition( final int index, final float posX, final float posY )
     {
-        this.quadTree.removeIndex( index, index+1 );
+        this.quadTree.removeIndex( index, index + 1 );
         this.pointBuffer.position( index * 2 );
         this.pointBuffer.put( posX );
         this.pointBuffer.put( posY );
-        this.quadTree.addIndex( index, index+1 );
+        this.quadTree.addIndex( index, index + 1 );
     }
 
     protected int getIndexArray( List<Object> ids, boolean grow, int[] listIndex )
@@ -552,6 +523,40 @@ public class DynamicPointSetPainter extends GlimpseDataPainter2D
         int getAddedSize( )
         {
             return addedIds.size( );
+        }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void doPaintTo( GlimpseContext context )
+    {
+        //XXX shader needs to be written to replace this
+        //XXX it's a good very basic use case (draw a bunch of points with a specified size)
+        lock.lock( );
+        try
+        {
+            colorBuffer.bind( GLVertexAttribute.ATTRIB_COLOR_4D, gl );
+            pointBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
+            try
+            {
+                gl.glPointSize( pointSize );
+                gl.glDrawArrays( GL2.GL_POINTS, 0, getSize( ) );
+            }
+            finally
+            {
+                colorBuffer.unbind( gl );
+                pointBuffer.unbind( gl );
+            }
+        }
+        finally
+        {
+            lock.unlock( );
         }
     }
 }

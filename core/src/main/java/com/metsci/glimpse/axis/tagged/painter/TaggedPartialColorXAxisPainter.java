@@ -97,8 +97,10 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
             float y1 = getColorBarMinY( height );
             float y2 = getColorBarMaxY( height );
 
+            float inset_PX = 0.5f * style.thickness_PX;
+
             pathOutline.clear( );
-            pathOutline.addRectangle( 0.5f, y1, width, y2 );
+            pathOutline.addRectangle( inset_PX, y1, width - inset_PX, y2 );
 
             GLUtils.enableStandardBlending( gl );
             try

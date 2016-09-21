@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -271,6 +271,9 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // defined by the axis tags (if false, the color would just saturate)
         painter.setDiscardAboveColor( true );
         painter.setDiscardBelowColor( true );
+
+        //painter.setConstantPointSize( 5.0f );
+        //painter.setConstantPointColor( GlimpseColor.getRed( ) );
 
         return plot;
     }

@@ -35,6 +35,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.line.LineJoinType;
 import com.metsci.glimpse.support.line.LinePath;
 import com.metsci.glimpse.support.line.LineProgram;
 import com.metsci.glimpse.support.line.LineStyle;
@@ -70,6 +71,7 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         this.sBuffer = new GLStreamingBufferBuilder( );
 
         this.style = new LineStyle( );
+        this.style.joinType = LineJoinType.JOIN_MITER;
         this.style.stippleEnable = false;
         this.style.thickness_PX = 1.0f;
         this.style.feather_PX = 0.0f;
@@ -132,11 +134,13 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             float y1 = getColorBarMinY( height );
             float y2 = getColorBarMaxY( height );
 
+            float inset_PX = 0.5f * style.thickness_PX;
+
             pathOutline.clear( );
-            pathOutline.addRectangle( 0.5f, y1, width, y2 );
+            pathOutline.addRectangle( inset_PX, y1, width - inset_PX, y2 );
 
             xyBuffer.clear( );
-            xyBuffer.addQuad2f( 0.5f, y1, width, y2 );
+            xyBuffer.addQuad2f( inset_PX, y1, width - inset_PX, y2 );
 
             sBuffer.clear( );
             sBuffer.addQuad1f( 0, 0, 1, 1 );

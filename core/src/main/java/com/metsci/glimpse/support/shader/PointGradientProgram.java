@@ -31,6 +31,7 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
@@ -40,8 +41,9 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.support.color.GlimpseColor;
 
-public class SimplePointShader extends GlimpseShaderProgram
+public class PointGradientProgram extends GlimpseShaderProgram
 {
     protected GLUniformData colorTexUnit;
     protected GLUniformData colorMin;
@@ -59,6 +61,8 @@ public class SimplePointShader extends GlimpseShaderProgram
 
     protected GLUniformData constantSize;
     protected GLUniformData constantColor;
+    protected GLUniformData size;
+    protected GLUniformData color;
 
     protected GLUniformData mvpMatrix;
 
@@ -66,7 +70,7 @@ public class SimplePointShader extends GlimpseShaderProgram
     protected GLArrayDataClient colorAttribute;
     protected GLArrayDataClient sizeAttribute;
 
-    public SimplePointShader( int colorTextureUnit, int sizeTextureUnit, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    public PointGradientProgram( int colorTextureUnit, int sizeTextureUnit, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
         this.addDefaultVertexShader( );
 
@@ -86,6 +90,10 @@ public class SimplePointShader extends GlimpseShaderProgram
 
         this.constantSize = this.addUniformData( new GLUniformData( "constant_color", 1 ) );
         this.constantColor = this.addUniformData( new GLUniformData( "constant_size", 1 ) );
+
+        this.size = this.addUniformData( new GLUniformData( "size", 1.0f ) );
+        this.color = this.addUniformData( GLUniformData.creatEmptyVector( "color", 4 ) );
+        this.color.setData( FloatBuffer.wrap( GlimpseColor.getBlack( ) ) );
 
         this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
 
@@ -114,15 +122,30 @@ public class SimplePointShader extends GlimpseShaderProgram
         } );
     }
 
+    public void useProgram( GL gl, boolean on )
+    {
+        super.useProgram( gl, on );
+
+        if ( on )
+        {
+            gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
+        }
+        else
+        {
+            gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
+        }
+    }
+
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "shaders/point/point_shader.vs" );
+        this.addVertexShader( "shaders/ShadedPointPainter/point.vs" );
+        this.addFragmentShader( "shaders/ShadedPointPainter/point.fs" );
     }
 
     public void setProjectionMatrix( Axis2D axis )
     {
         Matrix4 m = new Matrix4( );
-        m.makeOrtho( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ), -1, 1 );
+        m.makeOrtho( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), -1, 1 );
         this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
     }
 
@@ -138,6 +161,8 @@ public class SimplePointShader extends GlimpseShaderProgram
         this.sizeAttribute.reset( );
         this.sizeAttribute.put( b.rewind( ) );
         this.sizeAttribute.seal( true );
+
+        this.setConstantSize( false );
     }
 
     public void setColorData( Buffer b )
@@ -145,11 +170,25 @@ public class SimplePointShader extends GlimpseShaderProgram
         this.colorAttribute.reset( );
         this.colorAttribute.put( b.rewind( ) );
         this.colorAttribute.seal( true );
+
+        this.setConstantColor( false );
+    }
+
+    public void setContstantColor( float[] color )
+    {
+        this.color.setData( FloatBuffer.wrap( color ) );
+        this.setConstantColor( true );
     }
 
     public void setConstantColor( boolean constant )
     {
         this.constantColor.setData( constant ? 1 : 0 );
+    }
+
+    public void setContstantSize( float size )
+    {
+        this.size.setData( size );
+        this.setConstantSize( true );
     }
 
     public void setConstantSize( boolean constant )

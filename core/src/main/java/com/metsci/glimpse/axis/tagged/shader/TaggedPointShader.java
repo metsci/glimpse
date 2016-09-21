@@ -35,9 +35,9 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.support.shader.SimplePointShader;
+import com.metsci.glimpse.support.shader.PointGradientProgram;
 
-public class TaggedPointShader extends SimplePointShader
+public class TaggedPointShader extends PointGradientProgram
 {
     protected TaggedAxis1D taggedColorAxis;
     protected TaggedAxis1D taggedSizeAxis;

@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import java.util.logging.Logger;
-
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -48,33 +46,6 @@ import com.metsci.glimpse.support.line.LineStyle;
  */
 public class XYLinePainter extends GlimpsePainterBase
 {
-    private static final Logger logger = Logger.getLogger( XYLinePainter.class.getName( ) );
-
-    //    protected float[] lineColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-    //    protected float lineThickness = 1;
-
-    //
-    //    protected float pointSize = 6;
-
-    //    protected int stippleFactor = 1;
-    //    protected short stipplePattern = ( short ) 0x00FF;
-    //    protected boolean stippleOn = false;
-
-    //    protected int[] colorHandle = null;
-    //    protected FloatBuffer colorBuffer = null;
-    //    protected boolean useColorDevice = false;
-    //    protected boolean useColorHost = false;
-
-    //    protected int dataSize = 0;
-    //    
-    //    protected int[] bufferHandle = null;
-    //    protected FloatBuffer dataBuffer = null;
-    //
-    //    protected ReentrantLock dataBufferLock = null;
-    //
-    //    protected volatile boolean newData = false;
-    //    protected volatile boolean bufferInitialized = false;
-
     protected static final float[] defaultColor = GlimpseColor.getBlack( );
 
     protected ColorLinePath path;
