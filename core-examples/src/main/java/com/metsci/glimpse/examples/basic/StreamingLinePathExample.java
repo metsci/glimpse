@@ -25,6 +25,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.line.LineProgram;
@@ -66,6 +67,7 @@ public class StreamingLinePathExample
 
         plot.addPainter( new BackgroundPainter( ) );
         plot.addPainter( new CustomLinesPainter( leftAngleTag, rightAngleTag, thicknessTag ) );
+        plot.addPainter( new BorderPainter( ) );
 
         SwingUtilities.invokeLater( new Runnable( )
         {
