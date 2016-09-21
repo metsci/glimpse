@@ -1,0 +1,16 @@
+DncPainter
+
+Draws DNC chart elements in DNC_RENDER format (as created by com.metsci.glimpse.dnc.convert.Flat2Render).
+Draws areas with highlighting. Draws lines with feathering, stippling, and selection highlighting. Draws
+icons and labels with scaling, alignment, rotation, and selection highlighting.
+
+Java Wrappers:
+ * com.metsci.glimpse.dnc.DncAreaProgram
+ * com.metsci.glimpse.dnc.DncLineProgram
+ * com.metsci.glimpse.dnc.DncIconProgram
+ * com.metsci.glimpse.dnc.DncLabelProgram
+ 
+Usage Examples:
+ * com.metsci.glimpse.dnc.DncPainter
+ * com.metsci.glimpse.examples.dnc.DncPainterExample
+ * com.metsci.glimpse.examples.dnc.DncExplorer

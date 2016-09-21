@@ -34,8 +34,8 @@ import javax.media.opengl.GL2ES2;
 public class DncAreaProgram
 {
 
-    public static final String dncAreaVertShader_GLSL = requireResourceText( "shaders/dnc-area/dnc-area.vs" );
-    public static final String dncAreaFragShader_GLSL = requireResourceText( "shaders/dnc-area/dnc-area.fs" );
+    public static final String dncAreaVertShader_GLSL = requireResourceText( "shaders/DncPainter/area.vs" );
+    public static final String dncAreaFragShader_GLSL = requireResourceText( "shaders/DncPainter/area.fs" );
 
 
     public static class DncAreaProgramHandles

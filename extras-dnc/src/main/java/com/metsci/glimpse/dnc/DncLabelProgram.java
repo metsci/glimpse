@@ -34,9 +34,9 @@ import javax.media.opengl.GL2ES2;
 public class DncLabelProgram
 {
 
-    public static final String dncLabelVertShader_GLSL = requireResourceText( "shaders/dnc-label/dnc-label.vs" );
-    public static final String dncLabelGeomShader_GLSL = requireResourceText( "shaders/dnc-label/dnc-label.gs" );
-    public static final String dncLabelFragShader_GLSL = requireResourceText( "shaders/dnc-label/dnc-label.fs" );
+    public static final String dncLabelVertShader_GLSL = requireResourceText( "shaders/DncPainter/label.vs" );
+    public static final String dncLabelGeomShader_GLSL = requireResourceText( "shaders/DncPainter/label.gs" );
+    public static final String dncLabelFragShader_GLSL = requireResourceText( "shaders/DncPainter/label.fs" );
 
 
     public static class DncLabelProgramHandles
