@@ -1,0 +1,8 @@
+point_attribute_color_size
+
+Draws 2D point with feathered edges and color and size determined by float attributes associated with each point
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.point.PointAttributeColorSizeProgram
+
+Usage Examples:

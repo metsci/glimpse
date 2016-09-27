@@ -1,6 +1,6 @@
 colortex2d
 
-Applies a 2d rgba texture to a set of vertices specified in axis coordinates.
+Applies a 2d rgba texture to triangles specified in axis coordinates.
 
 Java Wrappers:
  * com.metsci.glimpse.support.shader.ColorTextureProgram2D

@@ -11,6 +11,11 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
+/**
+ * Applies a 2d rgba texture to triangles specified in axis coordinates.
+ *
+ * @see com.metsci.glimpse.painter.decoration.WatermarkPainter
+ */
 public class ColorTexture2DProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.vs" );

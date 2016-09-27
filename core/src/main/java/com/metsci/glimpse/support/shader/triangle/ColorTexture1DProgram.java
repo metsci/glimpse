@@ -11,6 +11,11 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.texture.AbstractTexture;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
+/**
+ * Applies a 1d rgba texture to triangles specified in axis coordinates.
+ *
+ * @see com.metsci.glimpse.axis.painter.ColorXAxisPainter
+ */
 public class ColorTexture1DProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex1d/colortex1d.vs" );

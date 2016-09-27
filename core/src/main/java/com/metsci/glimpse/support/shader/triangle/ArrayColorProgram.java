@@ -11,6 +11,11 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
+/**
+ * Applies rgba colors to filled triangles.
+ *
+ * @see com.metsci.glimpse.painter.decoration.MapBorderPainter
+ */
 public class ArrayColorProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/array_color/array_color.vs" );

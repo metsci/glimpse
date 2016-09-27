@@ -1,6 +1,6 @@
 array_color
 
-Applies rgba colors to a set of vertices.
+Applies rgba colors to filled triangles.
 
 Java Wrappers:
  * com.metsci.glimpse.support.shader.ArrayColorProgram

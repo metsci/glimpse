@@ -11,6 +11,11 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
+/**
+ * Applies a flat color to filled triangles.
+ *
+ * @see com.metsci.glimpse.axis.tagged.painter.TaggedColorXAxisPainter
+ */
 public class FlatColorProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/flat_color/flat_color.vs" );

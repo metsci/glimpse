@@ -39,7 +39,7 @@ import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.shader.point.PointGradientProgram;
+import com.metsci.glimpse.support.shader.point.PointAttributeColorSizeProgram;
 
 //XXX see: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/demos/es2/RedSquareES2.java
 //XXX see: https://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/com/jogamp/opengl/util/GLArrayDataClient.html
@@ -59,7 +59,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
     protected FloatTexture1D sizeTexture;
     protected ColorTexture1D colorTexture;
 
-    protected PointGradientProgram program;
+    protected PointAttributeColorSizeProgram program;
 
     protected boolean constantSize = true;
     protected boolean constantColor = true;
@@ -285,9 +285,9 @@ public class ShadedPointPainter extends GlimpsePainterBase
         this.program.setConstantSize( false );
     }
 
-    protected PointGradientProgram newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    protected PointAttributeColorSizeProgram newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        return new PointGradientProgram( 0, 1, colorAxis, sizeAxis );
+        return new PointAttributeColorSizeProgram( 0, 1, colorAxis, sizeAxis );
     }
 
     @Override

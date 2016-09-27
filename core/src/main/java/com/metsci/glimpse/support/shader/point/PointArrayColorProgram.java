@@ -11,6 +11,9 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
+/**
+ * Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.
+ */
 public class PointArrayColorProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.vs" );

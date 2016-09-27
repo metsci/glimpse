@@ -1,6 +1,6 @@
 flat_color
 
-Applies a flat color to a set of vertices.
+Applies a flat color to filled triangles.
 
 Java Wrappers:
  * com.metsci.glimpse.support.shader.FlatColorProgram

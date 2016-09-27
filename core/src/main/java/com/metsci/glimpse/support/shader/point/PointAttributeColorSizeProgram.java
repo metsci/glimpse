@@ -44,7 +44,10 @@ import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
-public class PointGradientProgram extends GlimpseShaderProgram
+/**
+ * Draws 2D point with feathered edges and color and size determined by float attributes associated with each point.
+ */
+public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
 {
     protected GLUniformData colorTexUnit;
     protected GLUniformData colorMin;
@@ -73,7 +76,7 @@ public class PointGradientProgram extends GlimpseShaderProgram
     protected GLArrayDataClient colorAttribute;
     protected GLArrayDataClient sizeAttribute;
 
-    public PointGradientProgram( int colorTextureUnit, int sizeTextureUnit, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    public PointAttributeColorSizeProgram( int colorTextureUnit, int sizeTextureUnit, Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
         this.addDefaultVertexShader( );
 
