@@ -73,7 +73,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
      */
     public void displayTimeRange( double startTime, double endTime )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.startTime = ( float ) startTime;
@@ -83,7 +83,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -93,7 +93,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
      */
     public void useTimeAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.timeAttributeBuffer = attributeBuffer;
@@ -101,13 +101,14 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
+    @Override
     public void useVertexPositionData( FloatBuffer positionBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             super.useVertexPositionData( positionBuffer );
@@ -115,13 +116,14 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
+    @Override
     public void useColorAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setColorData( attributeBuffer );
@@ -129,13 +131,14 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
+    @Override
     public void useSizeAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program.setSizeData( attributeBuffer );
@@ -143,7 +146,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
