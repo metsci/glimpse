@@ -36,11 +36,11 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.PointSetPainter.IdXy;
-import com.metsci.glimpse.support.line.LineJoinType;
-import com.metsci.glimpse.support.line.LinePath;
-import com.metsci.glimpse.support.line.LineProgram;
-import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.line.LineUtils;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 
 /**

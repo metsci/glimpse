@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.shader.line;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static javax.media.opengl.GL.*;
@@ -21,10 +21,9 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 public class LineProgram
 {
 
-    public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/line.vs" );
-    public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/line.gs" );
-    public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/line.fs" );
-
+    public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/line_flat_color/line.vs" );
+    public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/line_flat_color/line.gs" );
+    public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/line_flat_color/line.fs" );
 
     public static class LineProgramHandles
     {
@@ -70,9 +69,7 @@ public class LineProgram
         }
     }
 
-
     protected LineProgramHandles handles;
-
 
     public LineProgram( )
     {

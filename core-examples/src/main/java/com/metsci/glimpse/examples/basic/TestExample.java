@@ -19,10 +19,10 @@ import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.colormap.ColorMapLinear;
-import com.metsci.glimpse.support.line.LineJoinType;
-import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.shader.FlatColorProgram;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 public class TestExample implements GlimpseLayoutProvider
 {

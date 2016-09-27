@@ -1,7 +1,7 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.shader.line;
 
 import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.support.line.LineUtils.*;
+import static com.metsci.glimpse.support.shader.line.LineUtils.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 

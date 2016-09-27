@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.shader.line;
 
 public enum LineJoinType
 {

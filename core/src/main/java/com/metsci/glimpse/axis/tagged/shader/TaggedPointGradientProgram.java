@@ -35,7 +35,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.support.shader.PointGradientProgram;
+import com.metsci.glimpse.support.shader.point.PointGradientProgram;
 
 public class TaggedPointGradientProgram extends PointGradientProgram
 {

@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.support.shader.point;
 
 import java.io.IOException;
 import java.nio.Buffer;
@@ -127,6 +127,7 @@ public class PointGradientProgram extends GlimpseShaderProgram
         } );
     }
 
+    @Override
     public void useProgram( GL gl, boolean on )
     {
         super.useProgram( gl, on );
@@ -147,8 +148,8 @@ public class PointGradientProgram extends GlimpseShaderProgram
 
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "shaders/PointGradientProgram/point.vs" );
-        this.addFragmentShader( "shaders/PointGradientProgram/point.fs" );
+        this.addVertexShader( "shaders/point/PointGradientProgram/point.vs" );
+        this.addFragmentShader( "shaders/point/PointGradientProgram/point.fs" );
     }
 
     public void setProjectionMatrix( Axis2D axis )

@@ -1,11 +1,8 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BYTE;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL3.*;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
@@ -24,9 +21,9 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 public class ColorLineProgram
 {
 
-    public static final String lineVertShader_GLSL = requireResourceText( "shaders/line_multi_color/line_multi_color.vs" );
-    public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line_multi_color/line_multi_color.gs" );
-    public static final String lineFragShader_GLSL = requireResourceText( "shaders/line_multi_color/line_multi_color.fs" );
+    public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/line_multi_color/line_multi_color.vs" );
+    public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/line_multi_color/line_multi_color.gs" );
+    public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/line_multi_color/line_multi_color.fs" );
 
     public static class LineProgramHandles
     {

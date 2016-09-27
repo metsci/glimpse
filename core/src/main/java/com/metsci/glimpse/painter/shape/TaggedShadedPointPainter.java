@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.shader.TaggedPointGradientProgram;
-import com.metsci.glimpse.support.shader.PointGradientProgram;
+import com.metsci.glimpse.support.shader.point.PointGradientProgram;
 
 public class TaggedShadedPointPainter extends ShadedPointPainter
 {

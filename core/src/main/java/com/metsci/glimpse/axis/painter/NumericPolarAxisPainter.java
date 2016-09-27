@@ -41,9 +41,9 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.line.LineJoinType;
-import com.metsci.glimpse.support.line.LinePath;
-import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 public class NumericPolarAxisPainter extends NumericXYAxisPainter
 {

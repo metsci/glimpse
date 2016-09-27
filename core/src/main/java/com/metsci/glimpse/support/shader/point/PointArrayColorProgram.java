@@ -1,10 +1,7 @@
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.support.shader.point;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_TRIANGLES;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static javax.media.opengl.GL.*;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -12,11 +9,12 @@ import javax.media.opengl.GL2ES2;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
-public class ArrayColorProgram
+public class PointArrayColorProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "shaders/array_color/array_color.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/array_color/array_color.fs" );
+    public static final String vertShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.fs" );
 
     public static class ProgramHandles
     {
@@ -25,6 +23,8 @@ public class ArrayColorProgram
         // Uniforms
 
         public final int AXIS_RECT;
+        public final int POINT_SIZE_PX;
+        public final int FEATHER_THICKNESS_PX;
 
         // Vertex attributes
 
@@ -36,6 +36,8 @@ public class ArrayColorProgram
             this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
 
             this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+            this.POINT_SIZE_PX = gl.glGetUniformLocation( this.program, "POINT_SIZE_PX" );
+            this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( this.program, "FEATHER_THICKNESS_PX" );
 
             this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
             this.inRgba = gl.glGetAttribLocation( this.program, "inRgba" );
@@ -44,7 +46,7 @@ public class ArrayColorProgram
 
     protected ProgramHandles handles;
 
-    public ArrayColorProgram( )
+    public PointArrayColorProgram( )
     {
         this.handles = null;
     }
@@ -71,6 +73,16 @@ public class ArrayColorProgram
         gl.glEnableVertexAttribArray( this.handles.inRgba );
     }
 
+    public void setFeatherThickness( GL2ES2 gl, float value )
+    {
+        gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, value );
+    }
+
+    public void setPointSize( GL2ES2 gl, float value )
+    {
+        gl.glUniform1f( this.handles.POINT_SIZE_PX, value );
+    }
+
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
     {
         setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
@@ -88,7 +100,7 @@ public class ArrayColorProgram
 
     public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
     {
-        draw( gl, GL.GL_TRIANGLES, xyVbo, rgbaVbo, first, count );
+        draw( gl, GL.GL_POINTS, xyVbo, rgbaVbo, first, count );
     }
 
     public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
@@ -115,7 +127,7 @@ public class ArrayColorProgram
 
     public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba )
     {
-        draw( gl, GL_TRIANGLES, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
+        draw( gl, GL_POINTS, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )

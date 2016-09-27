@@ -43,11 +43,11 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.line.LinePath;
-import com.metsci.glimpse.support.line.LineProgram;
-import com.metsci.glimpse.support.line.LineStyle;
-import com.metsci.glimpse.support.shader.FlatColorProgram;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * Displays a protractor and ruler when the mouse cursor is locked

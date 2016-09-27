@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.support.shader.triangle;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static javax.media.opengl.GL.*;
@@ -9,11 +9,12 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.texture.AbstractTexture;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 public class ColorTexture1DProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "shaders/colortex1d/colortex1d.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/colortex1d/colortex1d.fs" );
+    public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex1d/colortex1d.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/colortex1d/colortex1d.fs" );
 
     public static class ProgramHandles
     {

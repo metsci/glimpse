@@ -40,7 +40,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.shader.FlatColorProgram;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;

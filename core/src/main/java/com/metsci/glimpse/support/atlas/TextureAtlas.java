@@ -80,8 +80,8 @@ import com.metsci.glimpse.support.atlas.support.ImageDataExternal;
 import com.metsci.glimpse.support.atlas.support.ImageDataInternal;
 import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.atlas.support.TextureAtlasUpdateListener;
-import com.metsci.glimpse.support.shader.ColorTexture2DProgram;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 
 /**
  * Stores a large number of images or icons which are packed into a single

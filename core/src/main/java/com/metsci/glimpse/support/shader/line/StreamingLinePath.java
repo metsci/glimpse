@@ -1,7 +1,7 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.support.line.LinePathData.*;
-import static com.metsci.glimpse.support.line.LineUtils.*;
+import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+import static com.metsci.glimpse.support.shader.line.LineUtils.*;
 import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;

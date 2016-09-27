@@ -2,8 +2,8 @@ package com.metsci.glimpse.examples.basic;
 
 import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.line.LineJoinType.*;
-import static com.metsci.glimpse.support.line.LineUtils.*;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
+import static com.metsci.glimpse.support.shader.line.LineUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static java.lang.System.*;
 import static javax.media.opengl.GLProfile.*;
@@ -23,10 +23,10 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
-import com.metsci.glimpse.support.line.LinePath;
-import com.metsci.glimpse.support.line.LineProgram;
-import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 

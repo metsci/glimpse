@@ -39,7 +39,7 @@ import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.shader.PointGradientProgram;
+import com.metsci.glimpse.support.shader.point.PointGradientProgram;
 
 //XXX see: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/demos/es2/RedSquareES2.java
 //XXX see: https://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/com/jogamp/opengl/util/GLArrayDataClient.html

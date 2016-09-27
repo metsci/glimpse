@@ -1,6 +1,6 @@
-package com.metsci.glimpse.support.line;
+package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.support.line.LineJoinType.JOIN_NONE;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
 

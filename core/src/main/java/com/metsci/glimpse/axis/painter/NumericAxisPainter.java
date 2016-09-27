@@ -38,11 +38,11 @@ import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.line.LinePath;
-import com.metsci.glimpse.support.line.LineProgram;
-import com.metsci.glimpse.support.line.LineStyle;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * A simple axis painter which displays labeled ticks at regular

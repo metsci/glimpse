@@ -26,15 +26,11 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BLEND;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINE_STRIP;
-import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL2ES2.*;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -55,7 +51,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkColorAccumulator;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
@@ -688,9 +684,9 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     public static class LineProgram
     {
 
-        public static final String lineVertShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.vs" );
-        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.gs" );
-        public static final String lineFragShader_GLSL = requireResourceText( "shaders/DynamicLineSetPainter/line.fs" );
+        public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.vs" );
+        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.gs" );
+        public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.fs" );
 
         public static class LineProgramHandles
         {

@@ -35,9 +35,9 @@ import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorMap;
-import com.metsci.glimpse.support.line.ColorLinePath;
-import com.metsci.glimpse.support.line.ColorLineProgram;
-import com.metsci.glimpse.support.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.ColorLinePath;
+import com.metsci.glimpse.support.shader.line.ColorLineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * Plots a simple x-y lineplot. Provides options for modifying line thickness and color.

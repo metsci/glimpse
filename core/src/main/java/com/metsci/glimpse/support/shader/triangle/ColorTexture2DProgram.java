@@ -1,23 +1,20 @@
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_TRIANGLES;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static javax.media.opengl.GL.*;
 
 import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 public class ColorTexture2DProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "shaders/colortex2d/colortex2d.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/colortex2d/colortex2d.fs" );
+    public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.fs" );
 
     public static class ProgramHandles
     {

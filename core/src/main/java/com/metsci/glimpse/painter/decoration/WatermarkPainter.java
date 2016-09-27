@@ -55,8 +55,8 @@ import com.jogamp.opengl.util.texture.awt.AWTTextureData;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.shader.ColorTexture2DProgram;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.util.io.StreamOpener;
 
 public class WatermarkPainter extends GlimpsePainterBase
