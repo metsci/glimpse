@@ -66,11 +66,13 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 {
     protected static final double GROWTH_FACTOR = 1.3;
 
+    protected static final float DEFAULT_FEATHER_SIZE = 2.0f;
     protected static final float DEFAULT_POINT_SIZE = 5.0f;
     protected static final int DEFAULT_INITIAL_SIZE = 2000;
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
 
     protected float pointSize;
+    protected float featherSize;
 
     protected QuadTreeFloatBuffer quadTree;
 
@@ -102,6 +104,7 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
     {
         this.initialSize = initialSize;
         this.pointSize = DEFAULT_POINT_SIZE;
+        this.featherSize = DEFAULT_FEATHER_SIZE;
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
         this.indexMap = new LinkedHashMap<Integer, Object>( );
@@ -137,6 +140,19 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
             }
 
             return resultList;
+        }
+        finally
+        {
+            painterLock.unlock( );
+        }
+    }
+
+    public void setFeatherSize( float size )
+    {
+        painterLock.lock( );
+        try
+        {
+            this.featherSize = size;
         }
         finally
         {
@@ -600,7 +616,7 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
         {
             prog.setAxisOrtho( gl, axis );
             prog.setPointSize( gl, pointSize );
-            prog.setFeatherThickness( gl, 2.0f );
+            prog.setFeatherThickness( gl, featherSize );
 
             prog.draw( gl, GL.GL_POINTS, xyStreamingBuffer, rgbaStreamingBuffer, 0, size );
         }

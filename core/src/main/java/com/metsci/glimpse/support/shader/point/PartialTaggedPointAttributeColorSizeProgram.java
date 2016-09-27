@@ -24,9 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.axis.tagged.shader;
+package com.metsci.glimpse.support.shader.point;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,6 +38,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.support.shader.point.TaggedPointAttributeColorSizeProgram;
 
 /**
  * A point shader attached to a TaggedAxis1D which allows adjusting of the color
@@ -47,11 +48,11 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
  * @author ulman
  *
  */
-public class PartialTaggedPointGradientProgram extends TaggedPointGradientProgram implements AxisListener1D
+public class PartialTaggedPointAttributeColorSizeProgram extends TaggedPointAttributeColorSizeProgram implements AxisListener1D
 {
     private GLUniformData lengthArg;
 
-    public PartialTaggedPointGradientProgram( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
+    public PartialTaggedPointAttributeColorSizeProgram( int colorTextureUnit, int sizeTextureUnit, int vertexTexUnit, int textureTexUnit, int colorAttributeIndex, int sizeAttributeIndex, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
         super( colorTextureUnit, sizeTextureUnit, colorAxis, sizeAxis );
 
@@ -65,8 +66,8 @@ public class PartialTaggedPointGradientProgram extends TaggedPointGradientProgra
     @Override
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "shaders/PartialTaggedPointGradientProgram/point.vs" );
-        this.addFragmentShader( "shaders/PartialTaggedPointGradientProgram/point.fs" );
+        this.addVertexShader( "shaders/point/PartialTaggedPointGradientProgram/point.vs" );
+        this.addFragmentShader( "shaders/point/PartialTaggedPointGradientProgram/point.fs" );
     }
 
     @Override

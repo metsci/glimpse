@@ -1,4 +1,4 @@
-point
+point_array_color
 
 Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.
 
@@ -6,3 +6,4 @@ Java Wrappers:
  * com.metsci.glimpse.support.shader.point.PointArrayColorProgram
 
 Usage Examples:
+ * com.metsci.glimpse.painter.shape.DynamicPointSetPainter

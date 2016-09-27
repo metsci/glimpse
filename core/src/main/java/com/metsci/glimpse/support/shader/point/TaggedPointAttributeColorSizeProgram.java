@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.axis.tagged.shader;
+package com.metsci.glimpse.support.shader.point;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,9 +35,8 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.support.shader.point.PointAttributeColorSizeProgram;
 
-public class TaggedPointGradientProgram extends PointAttributeColorSizeProgram
+public class TaggedPointAttributeColorSizeProgram extends PointAttributeColorSizeProgram
 {
     protected TaggedAxis1D taggedColorAxis;
     protected TaggedAxis1D taggedSizeAxis;
@@ -45,7 +44,7 @@ public class TaggedPointGradientProgram extends PointAttributeColorSizeProgram
     protected AxisListener1D colorAxisListener;
     protected AxisListener1D sizeAxisListener;
 
-    public TaggedPointGradientProgram( int colorTextureUnit, int sizeTextureUnit, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
+    public TaggedPointAttributeColorSizeProgram( int colorTextureUnit, int sizeTextureUnit, TaggedAxis1D colorAxis, TaggedAxis1D sizeAxis ) throws IOException
     {
         super( colorTextureUnit, sizeTextureUnit, colorAxis, sizeAxis );
 
