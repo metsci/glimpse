@@ -13,11 +13,9 @@ import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.shape.PointSetPainter;
+import com.metsci.glimpse.painter.shape.PolygonPainterSimple;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.colormap.ColorMapLinear;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
@@ -134,6 +132,7 @@ public class TestExample implements GlimpseLayoutProvider
         plot.addPainter( xypainter );
         */
 
+        /*
         PointSetPainter pointPainter = new PointSetPainter( true );
 
         pointPainter.setPointColor( GlimpseColor.getRed( ) );
@@ -146,6 +145,16 @@ public class TestExample implements GlimpseLayoutProvider
         pointPainter.setFeatherSize( 1.0f );
 
         plot.addPainter( pointPainter );
+        */
+
+        PolygonPainterSimple painter = new PolygonPainterSimple( );
+
+        painter.addPolygon( 0, new float[] { 0, 1, 1, 0 }, new float[] { 0, 0, 1, 1 }, GlimpseColor.getBlack( ) );
+        painter.addPolygon( 0, new float[] { 3, 4, 4, 3 }, new float[] { 5, 5, 10, 10 }, GlimpseColor.getGreen( ) );
+
+        painter.setShowAll( );
+
+        plot.addPainter( painter );
 
         plot.addPainter( new NumericXYAxisPainter( ) );
 
