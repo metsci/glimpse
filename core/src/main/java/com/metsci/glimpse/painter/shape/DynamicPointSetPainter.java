@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.shift;
-import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.shiftMaps;
+import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -38,15 +38,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.google.common.collect.Sets;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.QuadTreeFloatBuffer;
+import com.metsci.glimpse.support.shader.point.PointArrayColorProgram;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
@@ -70,21 +74,24 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 
     protected QuadTreeFloatBuffer quadTree;
 
-    protected FloatBuffer colorBuffer;
-    protected FloatBuffer pointBuffer;
-
+    protected FloatBuffer rgbaBuffer;
+    protected FloatBuffer xyBuffer;
     protected FloatBuffer tempBuffer;
+
+    protected GLStreamingBuffer rgbaStreamingBuffer;
+    protected GLStreamingBuffer xyStreamingBuffer;
+    protected boolean bufferDirty = false;
 
     // point id (which can be any object) -> index into pointBuffer
     // good place for Guava BiMap here...
     protected Map<Object, Integer> idMap;
     protected Map<Integer, Object> indexMap;
 
-    protected ReentrantLock lock;
-
     protected IntsArray searchResults;
 
     protected int initialSize;
+
+    protected PointArrayColorProgram prog;
 
     public DynamicPointSetPainter( )
     {
@@ -96,21 +103,23 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
         this.initialSize = initialSize;
         this.pointSize = DEFAULT_POINT_SIZE;
 
-        this.lock = new ReentrantLock( );
-
         this.idMap = new LinkedHashMap<Object, Integer>( );
         this.indexMap = new LinkedHashMap<Integer, Object>( );
 
-        this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
-        this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
-        this.quadTree = new QuadTreeFloatBuffer( this.pointBuffer );
+        this.xyBuffer = FloatBuffer.allocate( initialSize * 2 );
+        this.rgbaBuffer = FloatBuffer.allocate( initialSize * 4 );
+        this.quadTree = new QuadTreeFloatBuffer( this.xyBuffer );
 
         this.searchResults = new IntsArray( );
+
+        this.prog = new PointArrayColorProgram( );
+        this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 5 );
+        this.xyStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 5 );
     }
 
     public Collection<Object> getGeoRange( double minX, double maxX, double minY, double maxY )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.searchResults.n = 0; // clear the search results
@@ -131,26 +140,26 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setPointSize( float size )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.pointSize = size;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void putPoints( BulkPointAccumulator accumulator )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             int newPoints = accumulator.getAddedSize( );
@@ -163,23 +172,27 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
             deletePositions( accumulator );
 
             mutatePositions( accumulator );
+
+            bufferDirty = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void putColors( BulkColorAccumulator accumulator )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             mutateColors( accumulator );
+
+            bufferDirty = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -190,7 +203,7 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 
     public void putPoint( Object id, float posX, float posY, float[] color )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             int currentSize = getSize( );
@@ -202,56 +215,64 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
             int index = getIndex( id, true );
             mutatePosition( index, posX, posY );
             mutateColor( index, color );
+
+            bufferDirty = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void putColor( Object id, float[] color )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             int index = getIndex( id, false );
             mutateColor( index, color );
+
+            bufferDirty = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removeAll( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.idMap.clear( );
             this.indexMap.clear( );
-            this.pointBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
-            this.colorBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
-            this.quadTree.setBuffer( this.pointBuffer );
+            this.xyBuffer = FloatBuffer.allocate( initialSize * 2 );
+            this.rgbaBuffer = FloatBuffer.allocate( initialSize * 4 );
+            this.quadTree.setBuffer( this.xyBuffer );
+
+            this.bufferDirty = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removePoint( Object id )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             int index = getIndex( id, false );
             if ( index == -1 ) return; // nothing to remove, the point does not exist
             deletePosition( index );
+
+            bufferDirty = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -264,7 +285,7 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
     {
         // divide by 2 in order to count points, not vertices
         // ( 2 vertices per point )
-        return this.pointBuffer.limit( ) / 2;
+        return this.xyBuffer.limit( ) / 2;
     }
 
     protected void deletePositions( final Set<Integer> indices )
@@ -276,10 +297,10 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 
         shiftMaps( idMap, indexMap, indices, size );
 
-        shift( this.colorBuffer, tempBuffer, 4, size, indices );
+        shift( this.rgbaBuffer, tempBuffer, 4, size, indices );
 
         this.quadTree.removeIndex( first );
-        shift( this.pointBuffer, tempBuffer, 2, size, indices );
+        shift( this.xyBuffer, tempBuffer, 2, size, indices );
         this.quadTree.addIndex( first );
     }
 
@@ -306,19 +327,19 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 
     protected void mutateColor( final int index, final float[] color )
     {
-        this.colorBuffer.position( index * 4 );
-        this.colorBuffer.put( color[0] );
-        this.colorBuffer.put( color[1] );
-        this.colorBuffer.put( color[2] );
-        this.colorBuffer.put( color.length == 4 ? color[3] : 1.0f );
+        this.rgbaBuffer.position( index * 4 );
+        this.rgbaBuffer.put( color[0] );
+        this.rgbaBuffer.put( color[1] );
+        this.rgbaBuffer.put( color[2] );
+        this.rgbaBuffer.put( color.length == 4 ? color[3] : 1.0f );
     }
 
     protected void mutatePosition( final int index, final float posX, final float posY )
     {
         this.quadTree.removeIndex( index, index + 1 );
-        this.pointBuffer.position( index * 2 );
-        this.pointBuffer.put( posX );
-        this.pointBuffer.put( posY );
+        this.xyBuffer.position( index * 2 );
+        this.xyBuffer.put( posX );
+        this.xyBuffer.put( posY );
         this.quadTree.addIndex( index, index + 1 );
     }
 
@@ -339,6 +360,7 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 
     protected void mutatePositions( BulkPointAccumulator accumulator )
     {
+        final int currentSize = getSize( );
         final List<Object> ids = accumulator.getAddedIds( );
         final float[] v = accumulator.getAddedVertices( );
         final int stride = accumulator.getStride( );
@@ -347,18 +369,29 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
         final int[] indexList = new int[size];
         getIndexArray( ids, true, indexList );
 
-        this.quadTree.removeIndices( indexList );
         for ( int i = 0; i < size; i++ )
         {
-            this.pointBuffer.position( indexList[i] * 2 );
-            this.pointBuffer.put( v, i * stride, 2 );
+            int index = indexList[i];
+
+            // If index < currentSize, then the point already existed (was not assiged a new index).
+            // In this case its position is being changed.
+            // Remove it from the quadTree before mutating the position.
+            // It will be re-added after the for loop.
+            // If it is a new point, do nothing here.
+            if ( index < currentSize )
+            {
+                this.quadTree.removeIndex( index, index + 1 );
+            }
+
+            this.xyBuffer.position( index * 2 );
+            this.xyBuffer.put( v, i * stride, 2 );
         }
         this.quadTree.addIndices( indexList );
 
         for ( int i = 0; i < size; i++ )
         {
-            this.colorBuffer.position( indexList[i] * 4 );
-            this.colorBuffer.put( v, i * stride + 2, 4 );
+            this.rgbaBuffer.position( indexList[i] * 4 );
+            this.rgbaBuffer.put( v, i * stride + 2, 4 );
         }
     }
 
@@ -374,8 +407,8 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
 
         for ( int i = 0; i < size; i++ )
         {
-            this.colorBuffer.position( indexList[i] * 4 );
-            this.colorBuffer.put( v, i * stride, 4 );
+            this.rgbaBuffer.position( indexList[i] * 4 );
+            this.rgbaBuffer.put( v, i * stride, 4 );
         }
     }
 
@@ -403,8 +436,10 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
     {
         minSize = Math.max( ( int ) ( getCapacity( ) * GROWTH_FACTOR ), minSize );
 
-        this.pointBuffer = DynamicLineSetPainter.growBuffer( this.pointBuffer, minSize * 2 * 2 );
-        this.colorBuffer = DynamicLineSetPainter.growBuffer( this.colorBuffer, minSize * 4 * 2 );
+        this.xyBuffer = DynamicLineSetPainter.growBuffer( this.xyBuffer, minSize * 2 );
+        this.rgbaBuffer = DynamicLineSetPainter.growBuffer( this.rgbaBuffer, minSize * 4 );
+
+        this.quadTree.setBuffer( this.xyBuffer );
     }
 
     public static class BulkColorAccumulator
@@ -529,34 +564,50 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        // TODO Auto-generated method stub
+        GL3 gl = getGL3( context );
 
+        this.rgbaStreamingBuffer.dispose( gl );
+        this.xyStreamingBuffer.dispose( gl );
+        this.prog.dispose( gl );
     }
 
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        //XXX shader needs to be written to replace this
-        //XXX it's a good very basic use case (draw a bunch of points with a specified size)
-        lock.lock( );
+        GL3 gl = getGL3( context );
+        Axis2D axis = requireAxis2D( context );
+
+        int size = getSize( );
+
+        if ( size == 0 ) return;
+
+        if ( bufferDirty )
+        {
+            rgbaBuffer.position( 0 );
+            rgbaBuffer.limit( size * 4 );
+            rgbaStreamingBuffer.setFloats( gl, rgbaBuffer );
+            rgbaBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
+
+            xyBuffer.position( 0 );
+            xyBuffer.limit( size * 2 );
+            xyStreamingBuffer.setFloats( gl, xyBuffer );
+            xyBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
+        }
+
+        GLUtils.enableStandardBlending( gl );
+        prog.begin( gl );
         try
         {
-            colorBuffer.bind( GLVertexAttribute.ATTRIB_COLOR_4D, gl );
-            pointBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
-            try
-            {
-                gl.glPointSize( pointSize );
-                gl.glDrawArrays( GL2.GL_POINTS, 0, getSize( ) );
-            }
-            finally
-            {
-                colorBuffer.unbind( gl );
-                pointBuffer.unbind( gl );
-            }
+            prog.setAxisOrtho( gl, axis );
+            prog.setPointSize( gl, pointSize );
+            prog.setFeatherThickness( gl, 2.0f );
+
+            prog.draw( gl, GL.GL_POINTS, xyStreamingBuffer, rgbaStreamingBuffer, 0, size );
         }
         finally
         {
-            lock.unlock( );
+            prog.end( gl );
+            GLUtils.disableBlending( gl );
         }
     }
 }

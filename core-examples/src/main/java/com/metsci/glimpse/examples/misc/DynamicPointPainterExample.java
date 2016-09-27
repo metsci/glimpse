@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.misc;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -70,6 +70,8 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
 
         final DynamicPointSetPainter painter = new DynamicPointSetPainter( );
 
+        painter.setPointSize( 10f );
+
         plot.addPainter( painter );
         plot.addPainter( new FpsPainter( ) );
 
@@ -77,6 +79,7 @@ public class DynamicPointPainterExample implements GlimpseLayoutProvider
         {
             int count = 0;
 
+            @Override
             public void run( )
             {
                 try

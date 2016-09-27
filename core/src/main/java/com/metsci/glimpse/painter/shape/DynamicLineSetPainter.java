@@ -53,7 +53,6 @@ import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkColorAccumula
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.util.primitives.FloatsArray;
-import com.metsci.glimpse.util.primitives.IntsArray;
 
 /**
  * Efficiently paints dynamically changing groups of colored lines. Support is provided
@@ -86,8 +85,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     protected Map<Object, Integer> idMap;
     protected Map<Integer, Object> indexMap;
 
-    protected IntsArray searchResults;
-
     protected int initialSize;
 
     protected LineStyle style;
@@ -110,8 +107,6 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         this.xyStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
         this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
-
-        this.searchResults = new IntsArray( );
 
         this.style = new LineStyle( );
 

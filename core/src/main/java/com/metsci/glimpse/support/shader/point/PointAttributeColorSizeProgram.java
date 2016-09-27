@@ -31,6 +31,7 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLES1;
 import javax.media.opengl.GLUniformData;
@@ -101,7 +102,7 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         this.color = this.addUniformData( GLUniformData.creatEmptyVector( "color", 4 ) );
         this.color.setData( FloatBuffer.wrap( GlimpseColor.getBlack( ) ) );
 
-        this.FEATHER_THICKNESS_PX = this.addUniformData( new GLUniformData( "FEATHER_THICKNESS_PX", 2f ) );
+        this.FEATHER_THICKNESS_PX = this.addUniformData( new GLUniformData( "FEATHER_THICKNESS_PX", 4f ) );
 
         this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
 
@@ -151,8 +152,8 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
 
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "shaders/point/PointGradientProgram/point.vs" );
-        this.addFragmentShader( "shaders/point/PointGradientProgram/point.fs" );
+        this.addVertexShader( "shaders/point/point_attribute_color_size/point.vs" );
+        this.addFragmentShader( "shaders/point/point_attribute_color_size/point.fs" );
     }
 
     public void setProjectionMatrix( Axis2D axis )
@@ -228,4 +229,10 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
     {
         this.discardBelowColor.setData( discard ? 1 : 0 );
     }
+    
+    public void setFeatherThickness( float value )
+    {
+        this.FEATHER_THICKNESS_PX.setData( value );
+    }
+
 }

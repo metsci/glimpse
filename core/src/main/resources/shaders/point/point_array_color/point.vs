@@ -24,6 +24,7 @@ vec4 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 }
 
 uniform vec4 AXIS_RECT;
+uniform float POINT_SIZE_PX;
 
 in vec2 inXy;
 in vec4 inRgba;
@@ -33,5 +34,6 @@ out vec4 vRgba;
 void main( )
 {
       gl_Position = axisXyToNdc( inXy, AXIS_RECT );
+      gl_PointSize = POINT_SIZE_PX;
       vRgba = inRgba;
 }
