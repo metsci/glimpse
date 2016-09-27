@@ -44,11 +44,11 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
  *
  * @author ulman
  */
-public class AnimatedPolygonExample implements GlimpseLayoutProvider
+public class PolygonPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new AnimatedPolygonExample( ) );
+        Example.showWithSwing( new PolygonPainterExample( ) );
     }
 
     @Override

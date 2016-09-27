@@ -31,7 +31,6 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLES1;
 import javax.media.opengl.GLUniformData;
@@ -229,7 +228,7 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
     {
         this.discardBelowColor.setData( discard ? 1 : 0 );
     }
-    
+
     public void setFeatherThickness( float value )
     {
         this.FEATHER_THICKNESS_PX.setData( value );

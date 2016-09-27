@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -42,15 +45,20 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.interval.IntervalQuadTree;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
@@ -59,6 +67,7 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
 import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * Paints large collections of arbitrary polygons (including concave polygons).
@@ -67,8 +76,10 @@ import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
  *
  * @author ulman
  */
-public class PolygonPainter extends GlimpsePainter2D
+public class PolygonPainter extends GlimpsePainterBase
 {
+    private static final Logger logger = Logger.getLogger( PolygonPainter.class.getName( ) );
+
     protected static final double DELETE_EXPAND_FACTOR = 1.2;
 
     //@formatter:off
@@ -120,6 +131,8 @@ public class PolygonPainter extends GlimpsePainter2D
     protected Long globalSelectionStart;
     protected Long globalSelectionEnd;
 
+    protected FlatColorProgram triangleFlatProg;
+
     public PolygonPainter( )
     {
         this.tessellator = new PolygonTessellator( );
@@ -129,6 +142,8 @@ public class PolygonPainter extends GlimpsePainter2D
         this.loadedGroups = new LinkedHashMap<Object, LoadedGroup>( );
 
         this.updateLock = new ReentrantLock( );
+
+        this.triangleFlatProg = new FlatColorProgram( );
     }
 
     public void addPolygon( Object groupId, Object polygonId, float[] dataX, float[] dataY, float z )
@@ -609,9 +624,9 @@ public class PolygonPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
 
         // something in a Group has changed so we must copy these
         // changes to the corresponding LoadedGroup (which is accessed
@@ -675,31 +690,25 @@ public class PolygonPainter extends GlimpsePainter2D
                 this.updateLock.unlock( );
             }
 
-            glHandleError( gl, "Update Error" );
+            GLErrorUtils.logGLError( logger, gl, "Update Error" );
         }
 
         if ( loadedGroups.isEmpty( ) ) return;
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1 << 23, 1 );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-        gl.glEnable( GL2.GL_LINE_SMOOTH );
-
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        for ( LoadedGroup loaded : loadedGroups.values( ) )
+        enableStandardBlending( gl );
+        try
         {
-            drawGroup( gl, loaded );
+            for ( LoadedGroup loaded : loadedGroups.values( ) )
+            {
+                drawGroup( context, loaded );
+            }
+        }
+        finally
+        {
+            disableBlending( gl );
         }
 
-        glHandleError( gl, "Draw Error" );
-
-        gl.glDisable( GL2.GL_DEPTH_TEST );
-        gl.glDisable( GL2.GL_BLEND );
-        gl.glDisable( GL2.GL_LINE_SMOOTH );
+        GLErrorUtils.logGLError( logger, gl, "Draw Error" );
     }
 
     protected void updateVertices( GL gl, LoadedGroup loaded, Group group, boolean fill )
@@ -713,7 +722,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
         // the size needed is the current buffer location plus new inserts (we cannot use
         // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
-        // polygons have been deleted
+        // polygons have been deleted)
         int sizeNeeded = currentSize + insertSize;
 
         if ( !initialized || maxSize < sizeNeeded )
@@ -762,9 +771,9 @@ public class PolygonPainter extends GlimpsePainter2D
 
             // copy data from the host buffer into the device buffer
             gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, handle );
-            glHandleError( gl, "glBindBuffer Error  (Case 1)" );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, maxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-            glHandleError( gl, "glBufferData Error" );
+            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 1)" );
+            gl.glBufferData( GL2.GL_ARRAY_BUFFER, maxSize * 3 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+            GLErrorUtils.logGLError( logger, gl, "glBufferData Error" );
 
             if ( fill )
             {
@@ -801,9 +810,9 @@ public class PolygonPainter extends GlimpsePainter2D
 
             // update the device buffer with the new data
             gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, handle );
-            glHandleError( gl, "glBindBuffer Error  (Case 2)" );
-            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-            glHandleError( gl, "glBufferSubData Error" );
+            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 2)" );
+            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, currentSize * 3 * GLUtils.BYTES_PER_FLOAT, insertSize * 3 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+            GLErrorUtils.logGLError( logger, gl, "glBufferSubData Error" );
 
             if ( fill )
             {
@@ -816,70 +825,72 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
-    protected void drawGroup( GL2 gl, LoadedGroup loaded )
+    protected void drawGroup( GlimpseContext context, LoadedGroup loaded )
     {
         if ( !isGroupReady( loaded ) ) return;
 
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
         if ( loaded.fillOn )
         {
-            gl.glColor4fv( loaded.fillColor, 0 );
-
-            if ( loaded.polyStippleOn )
+            triangleFlatProg.begin( gl );
+            try
             {
-                gl.glEnable( GL2.GL_POLYGON_STIPPLE );
-                gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
-            }
+                triangleFlatProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                triangleFlatProg.setColor( gl, loaded.fillColor );
 
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-            gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
+                loaded.glFillOffsetBuffer.rewind( );
+                loaded.glFillCountBuffer.rewind( );
 
-            loaded.glFillOffsetBuffer.rewind( );
-            loaded.glFillCountBuffer.rewind( );
-
-            // A count > 65535 causes problems on some ATI cards, so we must loop through the
-            // groups of primitives and split them up where necessary.  An alternate way would be
-            // to construct the count and offset arrays so that groups are less then 65535 in size.
-            // There is some evidence on web forums that this may provide performance benefits as well
-            // when dynamic data is being used.
-            for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
-            {
-                int fillCountTotal = loaded.glFillCountBuffer.get( i );
-                int fillCountRemaining = fillCountTotal;
-                while ( fillCountRemaining > 0 )
+                // A count > 65535 causes problems on some ATI cards, so we must loop through the
+                // groups of primitives and split them up where necessary.  An alternate way would be
+                // to construct the count and offset arrays so that groups are less then 65535 in size.
+                // There is some evidence on web forums that this may provide performance benefits as well
+                // when dynamic data is being used.
+                for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
                 {
-                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
-                    int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                    gl.glDrawArrays( GL2.GL_TRIANGLES, offset, fillCount );
-                    fillCountRemaining -= fillCount;
+                    int fillCountTotal = loaded.glFillCountBuffer.get( i );
+                    int fillCountRemaining = fillCountTotal;
+                    while ( fillCountRemaining > 0 )
+                    {
+                        int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
+                        int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
+
+                        triangleFlatProg.draw( gl, GL.GL_TRIANGLES, loaded.glFillBufferHandle, offset, fillCount );
+
+                        fillCountRemaining -= fillCount;
+                    }
                 }
+
+                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+                // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
             }
-
-            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-            // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
-
-            if ( loaded.polyStippleOn )
+            finally
             {
-                gl.glDisable( GL2.GL_POLYGON_STIPPLE );
+                triangleFlatProg.end( gl );
             }
         }
 
+        /*
         if ( loaded.linesOn )
         {
             gl.glColor4fv( loaded.lineColor, 0 );
             gl.glLineWidth( loaded.lineWidth );
-
+        
             if ( loaded.lineStippleOn )
             {
                 gl.glEnable( GL2.GL_LINE_STIPPLE );
                 gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
             }
-
+        
             gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
             gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
-
+        
             loaded.glLineOffsetBuffer.rewind( );
             loaded.glLineCountBuffer.rewind( );
-
+        
             // A count > 65535 causes problems on some ATI cards, so we must loop through the
             // groups of primitives and split them up where necessary.  An alternate way would be
             // to construct the count and offset arrays so that groups are less then 65535 in size.
@@ -897,15 +908,16 @@ public class PolygonPainter extends GlimpsePainter2D
                     fillCountRemaining -= fillCount;
                 }
             }
-
+        
             // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
             // gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
-
+        
             if ( loaded.lineStippleOn )
             {
                 gl.glDisable( GL2.GL_LINE_STIPPLE );
             }
         }
+        */
     }
 
     protected boolean isGroupReady( LoadedGroup loaded )
@@ -972,9 +984,9 @@ public class PolygonPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        GL gl = context.getGL( );
+        GL3 gl = getGL3( context );
 
         this.updateLock.lock( );
         try
@@ -1714,6 +1726,142 @@ public class PolygonPainter extends GlimpsePainter2D
             this.polygonsSelected = false;
             this.groupCleared = false;
             this.groupDeleted = false;
+        }
+    }
+
+    public static class FlatColorProgram
+    {
+        public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.vs" );
+        public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.fs" );
+
+        public static class ProgramHandles
+        {
+            public final int program;
+
+            // Uniforms
+
+            public final int NEAR_FAR;
+            public final int AXIS_RECT;
+            public final int RGBA;
+
+            // Vertex attributes
+
+            public final int inXy;
+
+            public ProgramHandles( GL2ES2 gl )
+            {
+                this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+
+                this.NEAR_FAR = gl.glGetUniformLocation( this.program, "NEAR_FAR" );
+                this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+                this.RGBA = gl.glGetUniformLocation( this.program, "RGBA" );
+
+                this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
+            }
+        }
+
+        protected ProgramHandles handles;
+
+        public FlatColorProgram( )
+        {
+            this.handles = null;
+        }
+
+        public ProgramHandles handles( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new ProgramHandles( gl );
+            }
+
+            return this.handles;
+        }
+
+        public void begin( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new ProgramHandles( gl );
+            }
+
+            gl.glUseProgram( this.handles.program );
+            gl.glEnableVertexAttribArray( this.handles.inXy );
+        }
+
+        public void setColor( GL2ES2 gl, float r, float g, float b, float a )
+        {
+            gl.glUniform4f( this.handles.RGBA, r, g, b, a );
+        }
+
+        public void setColor( GL2ES2 gl, float[] vRGBA )
+        {
+            gl.glUniform4fv( this.handles.RGBA, 1, vRGBA, 0 );
+        }
+
+        public void setAxisOrtho( GL2ES2 gl, Axis2D axis, float near, float far )
+        {
+            setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), near, far );
+        }
+
+        public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds, float near, float far )
+        {
+            setOrtho( gl, 0, bounds.getWidth( ), 0, bounds.getHeight( ), near, far );
+        }
+
+        public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax, float near, float far )
+        {
+            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
+            gl.glUniform2f( this.handles.NEAR_FAR, near, far );
+        }
+
+        public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
+        {
+            draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
+        }
+
+        public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
+        {
+            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+            gl.glDrawArrays( mode, first, count );
+        }
+
+        public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
+        {
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, 0 );
+
+            gl.glDrawArrays( mode, first, count );
+        }
+
+        public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
+        {
+            setColor( gl, color );
+
+            draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );
+        }
+
+        public void end( GL2ES2 gl )
+        {
+            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glUseProgram( 0 );
+        }
+
+        /**
+         * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
+         * was first called.
+         * <p>
+         * This object can be safely reused after being disposed, but in most cases there is no
+         * significant advantage to doing so.
+         */
+        public void dispose( GL2ES2 gl )
+        {
+            if ( this.handles != null )
+            {
+                gl.glDeleteProgram( this.handles.program );
+                this.handles = null;
+            }
         }
     }
 }

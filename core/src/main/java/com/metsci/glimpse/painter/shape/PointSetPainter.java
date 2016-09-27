@@ -219,11 +219,16 @@ public class PointSetPainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
+        GL3 gl = getGL3( context );
+
         if ( bufferInitialized )
         {
-            context.getGL( ).glDeleteBuffers( 1, rgbaHandle, 0 );
-            context.getGL( ).glDeleteBuffers( 1, xyHandle, 0 );
+            gl.glDeleteBuffers( 1, rgbaHandle, 0 );
+            gl.glDeleteBuffers( 1, xyHandle, 0 );
         }
+
+        this.arrayProg.dispose( gl );
+        this.flatProg.dispose( gl );
     }
 
     public static class IdXy implements Xy
