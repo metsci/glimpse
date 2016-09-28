@@ -26,17 +26,12 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.jogamp.opengl.util.texture.TextureIO.newTexture;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.LEFT;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.RIGHT;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.BOTTOM;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.TOP;
-import static com.metsci.glimpse.util.GeneralUtils.doubles;
-import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.sqrt;
+import static com.jogamp.opengl.util.texture.TextureIO.*;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.*;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.lang.Math.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -199,6 +194,7 @@ public class WatermarkPainter extends GlimpsePainterBase
     {
         return new Supplier<BufferedImage>( )
         {
+            @Override
             public BufferedImage get( )
             {
                 try
@@ -265,6 +261,7 @@ public class WatermarkPainter extends GlimpsePainterBase
         return doubles( w, h, padding );
     }
 
+    @Override
     protected void doPaintTo( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
@@ -333,17 +330,17 @@ public class WatermarkPainter extends GlimpsePainterBase
         //XXX: this needs to be replaced by shader code
         //gl.glTexEnvi( GL3.GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
-        prog.begin( gl );
+        prog.begin( context );
         try
         {
-            prog.setPixelOrtho( gl, bounds );
-            prog.setTexture( gl, 0 );
+            prog.setPixelOrtho( context, bounds );
+            prog.setTexture( context, 0 );
 
-            prog.draw( gl, texture, inXy, inS );
+            prog.draw( context, texture, inXy, inS );
         }
         finally
         {
-            prog.end( gl );
+            prog.end( context );
             gl.glDisable( GL3.GL_BLEND );
         }
     }
@@ -351,7 +348,7 @@ public class WatermarkPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        prog.dispose( context.getGL( ).getGL3( ) );
+        prog.dispose( context );
         inXy.dispose( context.getGL( ) );
         inS.dispose( context.getGL( ) );
     }
