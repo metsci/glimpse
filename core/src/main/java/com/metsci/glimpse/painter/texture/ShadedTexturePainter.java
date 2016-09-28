@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
@@ -42,7 +41,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.gl.texture.Texture;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 
 /**
  * A painter which applies shaders to textures in order to display
@@ -51,7 +50,7 @@ import com.metsci.glimpse.painter.base.GlimpsePainter2D;
  * @author ulman
  *
  */
-public class ShadedTexturePainter extends GlimpsePainter2D
+public class ShadedTexturePainter extends GlimpsePainterBase
 {
     protected static final int DEFAULT_DRAWABLE_TEXTURE_UNIT = 0;
     protected static final int DEFAULT_NONDRAWABLE_TEXTURE_UNIT = 1;
@@ -200,51 +199,41 @@ public class ShadedTexturePainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
-        lock.lock( );
+        if ( program != null ) program.useProgram( gl, true );
         try
         {
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
-
-            if ( program != null ) program.useProgram( gl, true );
-            try
+            for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures.keySet( ) )
             {
-                for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures.keySet( ) )
-                {
-                    draw( textureUnit, gl );
-                }
-            }
-            finally
-            {
-                if ( program != null ) program.useProgram( gl, false );
+                draw( textureUnit, context );
             }
         }
         finally
         {
-            lock.unlock( );
+            if ( program != null ) program.useProgram( gl, false );
         }
     }
 
-    protected void draw( TextureUnit<DrawableTexture> textureUnit, GL2 gl )
+    protected void draw( TextureUnit<DrawableTexture> textureUnit, GlimpseContext context )
     {
         Set<TextureUnit<Texture>> nonDrawableTextures = Sets.union( this.nonDrawableTextures, this.drawableTextures.get( textureUnit ) );
 
-        textureUnit.texture.draw( gl, textureUnit.textureUnit, nonDrawableTextures );
+        textureUnit.texture.draw( context, textureUnit.textureUnit, nonDrawableTextures );
     }
 
-    protected void prepare( TextureUnit<Texture> textureUnit, GL2 gl )
+    protected void prepare( TextureUnit<Texture> textureUnit, GlimpseContext context )
     {
-        textureUnit.texture.prepare( gl, textureUnit.textureUnit );
+        textureUnit.texture.prepare( context, textureUnit.textureUnit );
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( program != null ) program.dispose( context );
+        if ( program != null ) program.dispose( context.getGLContext( ) );
     }
 }

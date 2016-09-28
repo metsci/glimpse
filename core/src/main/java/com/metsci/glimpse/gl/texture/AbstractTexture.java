@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
+
+import com.metsci.glimpse.context.GlimpseContext;
 
 /**
  * An abstract {@link Texture} implementation which wraps an OpenGL
@@ -104,8 +105,10 @@ public abstract class AbstractTexture implements Texture
     }
 
     @Override
-    public boolean prepare( GL gl, int texUnit )
+    public boolean prepare( GlimpseContext context, int texUnit )
     {
+        GL gl = context.getGL( );
+
         // should we check for dirtiness and allocation before lock to speed up?
         lock.lock( );
         try

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 
 import java.nio.FloatBuffer;
 import java.util.Collection;
@@ -37,6 +37,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 
 /**
@@ -64,21 +65,19 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
         this.centers = centers;
     }
 
+    // multiTextureList is ignored because this type of texture does not currently support multitexturing (but it would be easy to add)
     @Override
-    // multiTextureList is ignored because this type of texture does not currently support
-    // multitexturing (but it would be easy to add)
-    public void draw( GL gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    public void draw( GlimpseContext context, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
-        boolean ready = prepare( gl, texUnit );
+        GL gl = context.getGL( );
+
+        boolean ready = prepare( context, texUnit );
 
         if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
             return;
         }
-
-        gl.glTexEnvf( GL3.GL_TEXTURE_ENV, GL3.GL_TEXTURE_ENV_MODE, GL3.GL_REPLACE );
-        gl.glPolygonMode( GL3.GL_FRONT, GL3.GL_FILL );
 
         double tminmax[][] = computeDrawMinMax( );
         double tmin[] = tminmax[0];

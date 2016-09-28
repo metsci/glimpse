@@ -301,6 +301,10 @@ public class PolygonPainterSimple extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        prog.dispose( gl );
+        buffer.dispose( gl );
     }
 
     private static class PolyStruct

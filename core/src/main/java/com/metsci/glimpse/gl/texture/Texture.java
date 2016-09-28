@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GLContext;
+
+import com.metsci.glimpse.context.GlimpseContext;
 
 /**
  * Wrapper interface for an OpenGL texture. Provides methods
@@ -96,7 +97,7 @@ public interface Texture
      * @param texUnit the texture unit to bind to this texture
      * @return whether the preparation succeeded
      */
-    public boolean prepare( GL gl, int texUnit );
+    public boolean prepare( GlimpseContext context, int texUnit );
 
     /**
      * Disposes all Java heap and GPU resources associated with this texture.
