@@ -26,17 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_SIZE;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_TIP_BUFFER;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.DEFAULT_NUM_ICONS_ROWS;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.calculateDisplayText;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBackgroundColor;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBorderColor;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getIconSizePerpPixels;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getTextAvailableSpace;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isIconOverlapping;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextIntersecting;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextOverfull;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.*;
 
 import java.awt.geom.Rectangle2D;
 import java.nio.FloatBuffer;
@@ -47,12 +37,15 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
@@ -106,9 +99,13 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
     }
 
     @Override
-    public void paint( final GL2 gl, final EventPlotInfo info, final GlimpseBounds bounds, final Axis1D timeAxis, final Collection<EventDrawInfo> events )
+    public void paint( GlimpseContext context, final EventPlotInfo info, final Collection<EventDrawInfo> events )
     {
         final StackedTimePlot2D plot = info.getStackedTimePlot( );
+
+        GlimpseBounds bounds = GlimpsePainterBase.getBounds( context );
+        Axis1D timeAxis = GlimpsePainterBase.requireAxis1D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         final int height = bounds.getHeight( );
         final int width = bounds.getWidth( );
@@ -203,14 +200,14 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     if ( event.isShowBackground( ) )
                     {
                         float[] color = getBackgroundColor( event, info, isSelected );
-                        fillIndex = addVerticesBox( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
+                        fillIndex = addVerticesBox( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax );
                         fillCount++;
                     }
 
                     if ( event.isShowBorder( ) )
                     {
                         float[] color = getBorderColor( event, info, isSelected );
-                        borderIndex = addVerticesBox( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax );
+                        borderIndex = addVerticesBox( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax );
                         borderCount++;
                     }
                 }
@@ -219,14 +216,14 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     if ( event.isShowBackground( ) )
                     {
                         float[] color = getBackgroundColor( event, info, isSelected );
-                        fillIndex = addVerticesArrow( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
+                        fillIndex = addVerticesArrow( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
                         fillCount++;
                     }
 
                     if ( event.isShowBorder( ) )
                     {
                         float[] color = getBorderColor( event, info, isSelected );
-                        borderIndex = addVerticesArrow( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, ( float ) posMin, ( float ) posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
+                        borderIndex = addVerticesArrow( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
                         borderCount++;
                     }
                 }
@@ -241,9 +238,9 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     // the requested size of the icon in the direction perpendicular to the time axis
                     int iconSizePerpPixels = totalIconSizePerpPixels / numRows;
 
-                    int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePerpPixels );
+                    int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / iconSizePerpPixels );
                     int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
-                    int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
+                    int numColumns = Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
 
                     double iconSizePerpValue = iconSizePerpPixels / timeAxis.getPixelsPerValue( );
                     int totalIconWidthPixels = iconSizePerpPixels * numColumns;
@@ -265,14 +262,16 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                                 {
                                     Event child = iter.next( );
                                     Object icon = child.getIconId( );
+                                    float[] color;
                                     if ( icon == null || !atlas.isImageLoaded( icon ) )
                                     {
-                                        GlimpseColor.glColor( gl, getBackgroundColor( child, info, isSelected ), 0.5f );
+                                        color = getBackgroundColor( child, info, isSelected );
+                                        color[3] = 0.5f;
                                         icon = defaultIconId;
                                     }
                                     else
                                     {
-                                        GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
+                                        color = GlimpseColor.getWhite( );
                                     }
 
                                     if ( atlas.isImageLoaded( icon ) )
@@ -290,11 +289,11 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
                                         if ( horiz )
                                         {
-                                            iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, true ) );
+                                            iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, true, color ) );
                                         }
                                         else
                                         {
-                                            iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, false ) );
+                                            iconDrawList.add( new IconDrawInfo( icon, x, y, iconScale, iconScale, 0, iconSizePerp, false, color ) );
                                         }
                                     }
                                 }
@@ -352,11 +351,11 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
                             if ( horiz )
                             {
-                                iconDrawList.add( new IconDrawInfo( icon, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp, true ) );
+                                iconDrawList.add( new IconDrawInfo( icon, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp, true, GlimpseColor.getWhite( ) ) );
                             }
                             else
                             {
-                                iconDrawList.add( new IconDrawInfo( icon, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp, false ) );
+                                iconDrawList.add( new IconDrawInfo( icon, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp, false, GlimpseColor.getWhite( ) ) );
                             }
 
                             remainingSpace -= iconSizeTimeScaledPixels + buffer;
@@ -484,24 +483,24 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
             if ( !iconDrawList.isEmpty( ) )
             {
-                atlas.beginRendering( gl );
+                atlas.beginRendering( context );
                 try
                 {
                     for ( IconDrawInfo iconInfo : iconDrawList )
                     {
                         if ( iconInfo.isX( ) )
                         {
-                            atlas.drawImageAxisX( gl, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY );
+                            atlas.drawImageAxisX( context, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY, iconInfo.color );
                         }
                         else
                         {
-                            atlas.drawImageAxisY( gl, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY );
+                            atlas.drawImageAxisY( context, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY, iconInfo.color );
                         }
                     }
                 }
                 finally
                 {
-                    atlas.endRendering( gl );
+                    atlas.endRendering( context );
                 }
             }
 
@@ -515,11 +514,11 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
                         if ( !horiz )
                         {
-                            gl.glMatrixMode( GL2.GL_PROJECTION );
-
-                            gl.glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
-                            gl.glRotated( 90, 0, 0, 1.0f );
-                            gl.glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
+                            //                            gl.glMatrixMode( GL2.GL_PROJECTION );
+                            //
+                            //                            gl.glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
+                            //                            gl.glRotated( 90, 0, 0, 1.0f );
+                            //                            gl.glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
                         }
 
                         GlimpseColor.setColor( textRenderer, textInfo.getColor( ) );

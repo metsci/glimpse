@@ -475,9 +475,14 @@ public class TextureAtlas
      */
     public void drawImageAxisX( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
+        drawImageAxisX( context, id, axis, positionX, positionY, scaleX, scaleY, centerX, centerY, DEFAULT_COLOR );
+    }
+
+    public void drawImageAxisX( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
+    {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
-        drawImage( context, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( context, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY, rgba );
     }
 
     /**
@@ -507,9 +512,14 @@ public class TextureAtlas
      */
     public void drawImageAxisY( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
+        drawImageAxisX( context, id, axis, positionX, positionY, scaleX, scaleY, centerX, centerY, DEFAULT_COLOR );
+    }
+
+    public void drawImageAxisY( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
+    {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
-        drawImage( context, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( context, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY, rgba );
     }
 
     public void drawImage( GlimpseContext context, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )

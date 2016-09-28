@@ -26,10 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import javax.media.opengl.GL2;
-
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 
@@ -48,14 +45,12 @@ public interface EventPainter
      * is provided only as context to allow the EventPainter to modify its rendering to ensure that
      * it does not overlap with nextEvent.</p>
      *
-     * @param gl OpenGL handle
+     * @param context Glimpse Context, providing access to Axis, GlimpseBounds, and OpenGL context
      * @param Event the Event to be painted
      * @param nextEvent the next Event to be painted (as ordered by start time)
      * @param info parent EventPlotInfo of Event to be painted
-     * @param bounds width, height, and position of GlimpseLayout containing EventPlotInfo
-     * @param timeAxis the plot time axis
      * @param posMin the min y (or x, depending on orientation) in pixel coordinates of the Event
      * @param posMax the max y (or x, depending on orientation) in pixel coordinates of the Event
      */
-    public void paint( GL2 gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, int posMin, int posMax );
+    public void paint( GlimpseContext context, Event event, Event nextEvent, EventPlotInfo info, int posMin, int posMax );
 }

@@ -28,10 +28,7 @@ package com.metsci.glimpse.plot.timeline.event.paint;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL2;
-
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 
 /**
@@ -53,11 +50,11 @@ public class GroupedEventPainterAdapter implements GroupedEventPainter
     }
 
     @Override
-    public void paint( GL2 gl, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, Collection<EventDrawInfo> events )
+    public void paint( GlimpseContext context, EventPlotInfo info, Collection<EventDrawInfo> events )
     {
         for ( EventDrawInfo eventInfo : events )
         {
-            painter.paint( gl, eventInfo.event, eventInfo.nextEvent, info, bounds, timeAxis, eventInfo.posMin, eventInfo.posMax );
+            painter.paint( context, eventInfo.event, eventInfo.nextEvent, info, eventInfo.posMin, eventInfo.posMax );
         }
     }
 }

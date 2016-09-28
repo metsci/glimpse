@@ -26,18 +26,19 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
@@ -50,6 +51,12 @@ import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * <p>Paints the default visualization for provided {@code Event} objects. Paints
@@ -74,6 +81,25 @@ public class DefaultEventPainter implements EventPainter
 
     protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
 
+    protected LineProgram lineProg;
+    protected LinePath linePath;
+    protected LineStyle lineStyle;
+
+    protected FlatColorProgram fillProg;
+    protected GLStreamingBufferBuilder fillPath;
+
+    public DefaultEventPainter( )
+    {
+        this.lineProg = new LineProgram( );
+        this.linePath = new LinePath( );
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.joinType = LineJoinType.JOIN_MITER;
+        this.lineStyle.stippleEnable = false;
+
+        this.fillProg = new FlatColorProgram( );
+        this.fillPath = new GLStreamingBufferBuilder( );
+    }
+
     /**
      * Sets the maximum number of rows used to display icons in aggregate groups.
      *
@@ -90,9 +116,13 @@ public class DefaultEventPainter implements EventPainter
     }
 
     @Override
-    public void paint( GL2 gl, Event event, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, int posMin, int posMax )
+    public void paint( GlimpseContext context, Event event, Event nextEvent, EventPlotInfo info, int posMin, int posMax )
     {
         StackedTimePlot2D plot = info.getStackedTimePlot( );
+
+        GlimpseBounds bounds = GlimpsePainterBase.getBounds( context );
+        Axis1D timeAxis = GlimpsePainterBase.requireAxis1D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         int height = bounds.getHeight( );
         int width = bounds.getWidth( );
@@ -154,56 +184,59 @@ public class DefaultEventPainter implements EventPainter
         {
             if ( event.isShowBackground( ) )
             {
-                GlimpseColor.glColor( gl, getBackgroundColor( event, info, isSelected ) );
-                gl.glBegin( GL2.GL_QUADS );
+                fillProg.begin( gl );
                 try
                 {
+                    fillPath.clear( );
+
                     if ( horiz )
                     {
-                        gl.glVertex2d( timeMin, posMin );
-                        gl.glVertex2d( timeMin, posMax );
-                        gl.glVertex2d( timeMax, posMax );
-                        gl.glVertex2d( timeMax, posMin );
+                        fillProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
+                        fillPath.addQuad2f( ( float ) timeMin, posMin, ( float ) timeMax, posMax );
                     }
                     else
                     {
-                        gl.glVertex2d( posMin, timeMin );
-                        gl.glVertex2d( posMax, timeMin );
-                        gl.glVertex2d( posMax, timeMax );
-                        gl.glVertex2d( posMin, timeMax );
+                        fillProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
+                        fillPath.addQuad2f( posMin, ( float ) timeMin, posMax, ( float ) timeMax );
                     }
+
+                    float[] fillColor = getBackgroundColor( event, info, isSelected );
+
+                    fillProg.draw( gl, fillPath, fillColor );
+
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    fillProg.end( gl );
                 }
             }
 
             if ( event.isShowBorder( ) )
             {
-                GlimpseColor.glColor( gl, getBorderColor( event, info, isSelected ) );
-                gl.glLineWidth( getBorderThickness( event, info, isSelected ) );
-                gl.glBegin( GL2.GL_LINE_LOOP );
+                lineProg.begin( gl );
                 try
                 {
+                    linePath.clear( );
+
                     if ( horiz )
                     {
-                        gl.glVertex2d( timeMin, posMin );
-                        gl.glVertex2d( timeMin, posMax );
-                        gl.glVertex2d( timeMax, posMax );
-                        gl.glVertex2d( timeMax, posMin );
+                        lineProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
+                        linePath.addRectangle( ( float ) timeMin, posMin, ( float ) timeMax, posMax );
                     }
                     else
                     {
-                        gl.glVertex2d( posMin, timeMin );
-                        gl.glVertex2d( posMax, timeMin );
-                        gl.glVertex2d( posMax, timeMax );
-                        gl.glVertex2d( posMin, timeMax );
+                        lineProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
+                        linePath.addRectangle( posMin, ( float ) timeMin, posMax, ( float ) timeMax );
                     }
+
+                    lineStyle.rgba = getBorderColor( event, info, isSelected );
+                    lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
+
+                    lineProg.draw( gl, lineStyle, linePath );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    lineProg.end( gl );
                 }
             }
         }
@@ -211,64 +244,93 @@ public class DefaultEventPainter implements EventPainter
         {
             if ( event.isShowBackground( ) )
             {
-                GlimpseColor.glColor( gl, getBackgroundColor( event, info, isSelected ) );
-                gl.glBegin( GL2.GL_POLYGON );
+                fillProg.begin( gl );
                 try
                 {
+                    fillPath.clear( );
+
                     if ( horiz )
                     {
-                        gl.glVertex2d( arrowBaseMin, posMax );
-                        gl.glVertex2d( arrowBaseMax, posMax );
-                        gl.glVertex2d( timeMax, sizePerpCenter );
-                        gl.glVertex2d( arrowBaseMax, posMin );
-                        gl.glVertex2d( arrowBaseMin, posMin );
-                        gl.glVertex2d( timeMin, sizePerpCenter );
+                        fillProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
+
+                        // center rectangle
+                        fillPath.addQuad2f( ( float ) arrowBaseMin, posMin, ( float ) arrowBaseMax, posMax );
+
+                        // left arrow
+                        fillPath.addVertex2f( ( float ) timeMin, ( float ) sizePerpCenter );
+                        fillPath.addVertex2f( ( float ) arrowBaseMin, posMax );
+                        fillPath.addVertex2f( ( float ) arrowBaseMin, posMin );
+
+                        // right arrow
+                        fillPath.addVertex2f( ( float ) timeMax, ( float ) sizePerpCenter );
+                        fillPath.addVertex2f( ( float ) arrowBaseMax, posMin );
+                        fillPath.addVertex2f( ( float ) arrowBaseMax, posMax );
                     }
                     else
                     {
-                        gl.glVertex2d( posMax, arrowBaseMin );
-                        gl.glVertex2d( posMax, arrowBaseMax );
-                        gl.glVertex2d( sizePerpCenter, timeMax );
-                        gl.glVertex2d( posMin, arrowBaseMax );
-                        gl.glVertex2d( posMin, arrowBaseMin );
-                        gl.glVertex2d( sizePerpCenter, timeMin );
+                        fillProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
+
+                        // center rectangle
+                        fillPath.addQuad2f( posMin, ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax );
+
+                        // left arrow
+                        fillPath.addVertex2f( ( float ) sizePerpCenter, ( float ) timeMin );
+                        fillPath.addVertex2f( posMax, ( float ) arrowBaseMin );
+                        fillPath.addVertex2f( posMin, ( float ) arrowBaseMin );
+
+                        // right arrow
+                        fillPath.addVertex2f( ( float ) sizePerpCenter, ( float ) timeMax );
+                        fillPath.addVertex2f( posMin, ( float ) arrowBaseMax );
+                        fillPath.addVertex2f( posMax, ( float ) arrowBaseMax );
                     }
+
+                    float[] fillColor = getBackgroundColor( event, info, isSelected );
+
+                    fillProg.draw( gl, fillPath, fillColor );
+
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    fillProg.end( gl );
                 }
             }
 
             if ( event.isShowBorder( ) )
             {
-                GlimpseColor.glColor( gl, getBorderColor( event, info, isSelected ) );
-                gl.glLineWidth( getBorderThickness( event, info, isSelected ) );
-                gl.glBegin( GL2.GL_LINE_LOOP );
+                lineProg.begin( gl );
                 try
                 {
+                    linePath.clear( );
+
                     if ( horiz )
                     {
-                        gl.glVertex2d( arrowBaseMin, posMax );
-                        gl.glVertex2d( arrowBaseMax, posMax );
-                        gl.glVertex2d( timeMax, sizePerpCenter );
-                        gl.glVertex2d( arrowBaseMax, posMin );
-                        gl.glVertex2d( arrowBaseMin, posMin );
-                        gl.glVertex2d( timeMin, sizePerpCenter );
+                        lineProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
+                        linePath.addPolygon( ( float ) arrowBaseMin, posMax,
+                                ( float ) arrowBaseMax, posMax,
+                                ( float ) timeMax, ( float ) sizePerpCenter,
+                                ( float ) arrowBaseMax, posMin,
+                                ( float ) arrowBaseMin, posMin,
+                                ( float ) timeMin, ( float ) sizePerpCenter );
                     }
                     else
                     {
-                        gl.glVertex2d( posMax, arrowBaseMin );
-                        gl.glVertex2d( posMax, arrowBaseMax );
-                        gl.glVertex2d( sizePerpCenter, timeMax );
-                        gl.glVertex2d( posMin, arrowBaseMax );
-                        gl.glVertex2d( posMin, arrowBaseMin );
-                        gl.glVertex2d( sizePerpCenter, timeMin );
+                        lineProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
+                        linePath.addPolygon( posMax, ( float ) arrowBaseMin,
+                                posMax, ( float ) arrowBaseMax,
+                                ( float ) sizePerpCenter, ( float ) timeMax,
+                                posMin, ( float ) arrowBaseMax,
+                                posMin, ( float ) arrowBaseMin,
+                                ( float ) sizePerpCenter, ( float ) timeMin );
                     }
+
+                    lineStyle.rgba = getBorderColor( event, info, isSelected );
+                    lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
+
+                    lineProg.draw( gl, lineStyle, linePath );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    lineProg.end( gl );
                 }
             }
         }
@@ -285,9 +347,9 @@ public class DefaultEventPainter implements EventPainter
             // the requested size of the icon in the direction perpendicular to the time axis
             int iconSizePerpPixels = totalIconSizePerpPixels / numRows;
 
-            int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / ( double ) iconSizePerpPixels );
+            int columnsByAvailableSpace = ( int ) Math.floor( remainingSpace / iconSizePerpPixels );
             int columnsByNumberOfIcons = ( int ) Math.ceil( numChildren / ( double ) numRows );
-            int numColumns = ( int ) Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
+            int numColumns = Math.min( columnsByAvailableSpace, columnsByNumberOfIcons );
 
             double iconSizePerpValue = iconSizePerpPixels / timeAxis.getPixelsPerValue( );
             int totalIconWidthPixels = iconSizePerpPixels * numColumns;
@@ -300,7 +362,7 @@ public class DefaultEventPainter implements EventPainter
                 eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
 
                 TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( gl );
+                atlas.beginRendering( context );
                 try
                 {
                     Iterator<Event> iter = event.iterator( );
@@ -313,14 +375,17 @@ public class DefaultEventPainter implements EventPainter
                             {
                                 Event child = iter.next( );
                                 Object icon = child.getIconId( );
+                                float[] color;
                                 if ( icon == null || !atlas.isImageLoaded( icon ) )
                                 {
-                                    GlimpseColor.glColor( gl, getBackgroundColor( child, info, isSelected ), 0.5f );
+                                    color = getBackgroundColor( child, info, isSelected );
+                                    color[3] = 0.5f;
+
                                     icon = defaultIconId;
                                 }
                                 else
                                 {
-                                    GlimpseColor.glColor( gl, GlimpseColor.getWhite( ) );
+                                    color = GlimpseColor.getWhite( );
                                 }
 
                                 ImageData iconData = atlas.getImageData( icon );
@@ -336,11 +401,11 @@ public class DefaultEventPainter implements EventPainter
 
                                 if ( horiz )
                                 {
-                                    atlas.drawImageAxisX( gl, icon, timeAxis, x, y, iconScale, iconScale, 0, iconSizePerp );
+                                    atlas.drawImageAxisX( context, icon, timeAxis, x, y, iconScale, iconScale, 0, iconSizePerp, color );
                                 }
                                 else
                                 {
-                                    atlas.drawImageAxisY( gl, icon, timeAxis, y, x, iconScale, iconScale, 0, iconSizePerp );
+                                    atlas.drawImageAxisY( context, icon, timeAxis, y, x, iconScale, iconScale, 0, iconSizePerp, color );
                                 }
                             }
                             else
@@ -352,7 +417,7 @@ public class DefaultEventPainter implements EventPainter
                 }
                 finally
                 {
-                    atlas.endRendering( gl );
+                    atlas.endRendering( context );
                 }
 
                 remainingSpace -= totalIconWidthPixels + buffer;
@@ -367,7 +432,7 @@ public class DefaultEventPainter implements EventPainter
             if ( eventBounds.isIconVisible( ) )
             {
                 TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( gl );
+                atlas.beginRendering( context );
                 try
                 {
                     Object icon = event.getIconId( );
@@ -404,11 +469,11 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        atlas.drawImageAxisX( gl, icon, timeAxis, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp );
+                        atlas.drawImageAxisX( context, icon, timeAxis, posTime, posPerp, iconScale, iconScale, 0, iconSizePerp );
                     }
                     else
                     {
-                        atlas.drawImageAxisY( gl, icon, timeAxis, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp );
+                        atlas.drawImageAxisY( context, icon, timeAxis, posPerp, posTime, iconScale, iconScale, 0, iconSizePerp );
                     }
 
                     remainingSpace -= iconSizeTimeScaledPixels + buffer;
@@ -416,7 +481,7 @@ public class DefaultEventPainter implements EventPainter
                 }
                 finally
                 {
-                    atlas.endRendering( gl );
+                    atlas.endRendering( context );
                 }
             }
         }
@@ -494,11 +559,11 @@ public class DefaultEventPainter implements EventPainter
                         double shiftY = pixel;
                         int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
 
-                        gl.glMatrixMode( GL2.GL_PROJECTION );
-
-                        gl.glTranslated( shiftX, shiftY, 0 );
-                        gl.glRotated( 90, 0, 0, 1.0f );
-                        gl.glTranslated( -shiftX, -shiftY, 0 );
+                        //                        gl.glMatrixMode( GL2.GL_PROJECTION );
+                        //
+                        //                        gl.glTranslated( shiftX, shiftY, 0 );
+                        //                        gl.glRotated( 90, 0, 0, 1.0f );
+                        //                        gl.glTranslated( -shiftX, -shiftY, 0 );
 
                         textRenderer.draw( displayText, pixelX, pixelY );
 

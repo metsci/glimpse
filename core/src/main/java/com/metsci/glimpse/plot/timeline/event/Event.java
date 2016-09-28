@@ -26,9 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -36,10 +35,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
@@ -236,11 +235,11 @@ public class Event implements Iterable<Event>
     /**
      * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, Axis1D, int, int)
      */
-    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, int posMin, int posMax )
+    public void paint( GlimpseContext context, EventPainter defaultPainter, Event nextEvent, EventPlotInfo info, int posMin, int posMax )
     {
         EventPainter eventPainter = painter != null ? painter : defaultPainter;
 
-        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, timeAxis, posMin, posMax );
+        if ( eventPainter != null ) eventPainter.paint( context, this, nextEvent, info, posMin, posMax );
     }
 
     /**
@@ -305,6 +304,7 @@ public class Event implements Iterable<Event>
      * The individual constituent Events can be accessed via this method.
      * User created Events never have children.
      */
+    @Override
     public Iterator<Event> iterator( )
     {
         return new Iterator<Event>( )
