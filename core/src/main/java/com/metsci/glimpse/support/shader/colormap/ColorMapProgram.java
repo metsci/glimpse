@@ -54,19 +54,19 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
  */
 public class ColorMapProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
-    private GLUniformData dataMin;
-    private GLUniformData dataMax;
+    protected GLUniformData dataMin;
+    protected GLUniformData dataMax;
 
-    private GLUniformData alpha;
-    private GLUniformData dataTexUnit;
-    private GLUniformData colorTexUnit;
-    private GLUniformData discardNaN;
+    protected GLUniformData alpha;
+    protected GLUniformData dataTexUnit;
+    protected GLUniformData colorTexUnit;
+    protected GLUniformData discardNaN;
 
-    private GLUniformData AXIS_RECT;
+    protected GLUniformData AXIS_RECT;
 
-    private Axis1D colorAxis;
+    protected Axis1D colorAxis;
 
-    private ProgramHandles handles;
+    protected ProgramHandles handles;
 
     public static class ProgramHandles
     {
@@ -170,9 +170,9 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
 
         this.useProgram( context.getGL( ), true );
 
-        if ( handles == null )
+        if ( this.handles == null )
         {
-            handles = new ProgramHandles( gl, getShaderProgram( ).id( ) );
+            this.handles = new ProgramHandles( gl, getShaderProgram( ).id( ) );
         }
 
         gl.glEnableVertexAttribArray( this.handles.inXy );

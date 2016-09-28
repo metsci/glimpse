@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.List;
 
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLUniformData;
@@ -50,16 +51,32 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 
 public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
-    private GLUniformData sizeArg;
-    private GLUniformData alphaArg;
+    protected GLUniformData sizeArg;
+    protected GLUniformData alphaArg;
 
-    private GLUniformData discardNaN;
-    private GLUniformData discardAbove;
-    private GLUniformData discardBelow;
+    protected GLUniformData discardNaN;
+    protected GLUniformData discardAbove;
+    protected GLUniformData discardBelow;
 
-    private GLUniformData AXIS_RECT;
+    protected GLUniformData AXIS_RECT;
 
-    private TaggedAxis1D taggedAxis;
+    protected TaggedAxis1D taggedAxis;
+
+    protected ProgramHandles handles;
+
+    public static class ProgramHandles
+    {
+        // Vertex attributes
+
+        public final int inXy;
+        public final int inS;
+
+        public ProgramHandles( GL2ES2 gl, int program )
+        {
+            this.inXy = gl.glGetAttribLocation( program, "inXy" );
+            this.inS = gl.glGetAttribLocation( program, "inS" );
+        }
+    }
 
     public ColorMapTaggedProgram( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
     {
@@ -138,7 +155,17 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     @Override
     public void begin( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         this.useProgram( context.getGL( ), true );
+
+        if ( this.handles == null )
+        {
+            this.handles = new ProgramHandles( gl, getShaderProgram( ).id( ) );
+        }
+
+        gl.glEnableVertexAttribArray( this.handles.inXy );
+        gl.glEnableVertexAttribArray( this.handles.inS );
     }
 
     public void setAxisOrtho( GlimpseContext context, Axis2D axis )
@@ -160,7 +187,15 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     @Override
     public void draw( GlimpseContext context, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
-        draw( context, mode, xyVbo.buffer( ), sVbo.buffer( ), first, count );
+        GL3 gl = context.getGL( ).getGL3( );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( ) );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo.buffer( ) );
+        gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
+
+        gl.glDrawArrays( mode, first, count );
     }
 
     @Override
@@ -169,10 +204,10 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
         GL3 gl = context.getGL( ).getGL3( );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-        gl.glVertexAttribPointer( xyVbo, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
-        gl.glVertexAttribPointer( sVbo, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }
@@ -180,7 +215,12 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     @Override
     public void end( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         this.useProgram( context.getGL( ), false );
+
+        gl.glDisableVertexAttribArray( this.handles.inXy );
+        gl.glDisableVertexAttribArray( this.handles.inS );
     }
 
     @Override
