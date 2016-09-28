@@ -304,12 +304,12 @@ public class ShadedPointPainter extends GlimpsePainterBase
 
         if ( !constantSize )
         {
-            sizeTexture.prepare( gl, 1 );
+            sizeTexture.prepare( context, 1 );
         }
 
         if ( !constantColor )
         {
-            colorTexture.prepare( gl, 0 );
+            colorTexture.prepare( context, 0 );
         }
 
         program.setProjectionMatrix( axis );

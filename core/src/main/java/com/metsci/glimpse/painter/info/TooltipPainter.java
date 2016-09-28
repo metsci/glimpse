@@ -550,7 +550,7 @@ public class TooltipPainter extends SimpleTextPainter
                             int scaleX = ( int ) ( x + borderSize + clampX );
                             int scaleY = ( int ) ( posY + clampY );
 
-                            atlas.drawImage( gl, iconId, scaleX, scaleY, iconScale, iconScale, 0, iconData.getHeight( ), color );
+                            atlas.drawImage( context, iconId, scaleX, scaleY, iconScale, iconScale, 0, iconData.getHeight( ), color );
                             posY = posY - iconSize - iconSpacing;
                         }
                     }
