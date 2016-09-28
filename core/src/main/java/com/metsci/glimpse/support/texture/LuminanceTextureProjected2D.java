@@ -28,12 +28,11 @@ package com.metsci.glimpse.support.texture;
 
 import java.nio.Buffer;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 /**
  * A texture class which stores 16 bit fixed point greyscale values (capped from 0 to 1).
- *
- * Does not require a shader to display greyscale values.
  *
  * @author ulman
  *
@@ -51,7 +50,7 @@ public class LuminanceTextureProjected2D extends FloatTextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {

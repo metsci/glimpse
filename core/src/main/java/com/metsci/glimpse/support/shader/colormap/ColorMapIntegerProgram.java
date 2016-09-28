@@ -24,15 +24,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.support.shader.colormap;
 
 import java.io.IOException;
 
 import com.metsci.glimpse.axis.Axis1D;
 
-public class SampledColorScaleShaderInteger extends SampledColorScaleShader
+public class ColorMapIntegerProgram extends ColorMapProgram
 {
-    public SampledColorScaleShaderInteger( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
+    public ColorMapIntegerProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
         super( colorAxis, targetTexUnit, colorTexUnit );
     }
@@ -40,6 +40,7 @@ public class SampledColorScaleShaderInteger extends SampledColorScaleShader
     @Override
     protected void addShaders( )
     {
+        this.addVertexShader( "shaders/colormap/passthrough.vs" );
         this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader_integer.fs" );
     }
 }

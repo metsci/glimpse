@@ -38,7 +38,7 @@ import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.SampledColorScaleShaderInteger;
+import com.metsci.glimpse.support.shader.colormap.ColorMapIntegerProgram;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -94,8 +94,8 @@ public class RasterNavigationChartExample implements GlimpseLayoutProvider
         MercatorProjection mercatorProjection;
         try
         {
-            SampledColorScaleShaderInteger fragShader = new SampledColorScaleShaderInteger( plot.getAxisZ( ), 0, 1 );
-            painter.setShaderProgram( fragShader );
+            ColorMapIntegerProgram fragShader = new ColorMapIntegerProgram( plot.getAxisZ( ), 0, 1 );
+            painter.setProgram( fragShader );
 
             data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "data/ENCSample.bsb" ) );
             mercatorProjection = new MercatorProjection( );

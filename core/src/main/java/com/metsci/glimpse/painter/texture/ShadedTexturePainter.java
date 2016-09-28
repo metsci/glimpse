@@ -30,17 +30,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL3;
+import javax.media.opengl.GL;
 
 import com.google.common.collect.Sets;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.gl.texture.Texture;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 
 /**
@@ -55,13 +53,11 @@ public class ShadedTexturePainter extends GlimpsePainterBase
     protected static final int DEFAULT_DRAWABLE_TEXTURE_UNIT = 0;
     protected static final int DEFAULT_NONDRAWABLE_TEXTURE_UNIT = 1;
 
-    protected final ReentrantLock lock = new ReentrantLock( );
-
     protected Set<TextureUnit<Texture>> nonDrawableTextures;
     protected Map<TextureUnit<DrawableTexture>, Set<TextureUnit<Texture>>> drawableTextures;
 
     // the shader pipeline
-    protected GlimpseShaderProgram program;
+    protected DrawableTextureProgram program;
 
     public ShadedTexturePainter( )
     {
@@ -69,16 +65,16 @@ public class ShadedTexturePainter extends GlimpsePainterBase
         this.drawableTextures = new HashMap<>( );
     }
 
-    public void setShaderProgram( GlimpseShaderProgram program )
+    public void setProgram( DrawableTextureProgram program )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.program = program;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -89,46 +85,46 @@ public class ShadedTexturePainter extends GlimpsePainterBase
 
     public void addDrawableTexture( DrawableTexture texture, int textureUnit )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.drawableTextures.put( new TextureUnit<>( textureUnit, texture ), Sets.<TextureUnit<Texture>> newHashSet( ) );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removeDrawableTexture( DrawableTexture texture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.drawableTextures.remove( new TextureUnit<DrawableTexture>( texture ) );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removeAllDrawableTextures( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.drawableTextures.clear( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void addNonDrawableTexture( Texture drawableTexture, Texture nonDrawableTexture, int textureUnit )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             Set<TextureUnit<Texture>> nonDrawableTextures = this.drawableTextures.get( new TextureUnit<>( drawableTexture ) );
@@ -136,13 +132,13 @@ public class ShadedTexturePainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removeNonDrawableTexture( Texture drawableTexture, Texture nonDrawableTexture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             Set<TextureUnit<Texture>> nonDrawableTextures = this.drawableTextures.get( new TextureUnit<>( drawableTexture ) );
@@ -150,7 +146,7 @@ public class ShadedTexturePainter extends GlimpsePainterBase
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -161,51 +157,49 @@ public class ShadedTexturePainter extends GlimpsePainterBase
 
     public void addNonDrawableTexture( Texture texture, int textureUnit )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.nonDrawableTextures.add( new TextureUnit<Texture>( textureUnit, texture ) );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removeNonDrawableTexture( Texture texture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.nonDrawableTextures.remove( new TextureUnit<Texture>( texture ) );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void removeAllNonDrawableTextures( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.nonDrawableTextures.clear( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
-        GL3 gl = context.getGL( ).getGL3( );
+        GL gl = context.getGL( );
 
-        if ( program != null ) program.useProgram( gl, true );
+        GLUtils.enableStandardBlending( gl );
         try
         {
             for ( TextureUnit<DrawableTexture> textureUnit : drawableTextures.keySet( ) )
@@ -215,15 +209,15 @@ public class ShadedTexturePainter extends GlimpsePainterBase
         }
         finally
         {
-            if ( program != null ) program.useProgram( gl, false );
+            GLUtils.disableBlending( gl );
         }
     }
 
     protected void draw( TextureUnit<DrawableTexture> textureUnit, GlimpseContext context )
     {
         Set<TextureUnit<Texture>> nonDrawableTextures = Sets.union( this.nonDrawableTextures, this.drawableTextures.get( textureUnit ) );
+        textureUnit.texture.draw( context, program, textureUnit.textureUnit, nonDrawableTextures );
 
-        textureUnit.texture.draw( context, textureUnit.textureUnit, nonDrawableTextures );
     }
 
     protected void prepare( TextureUnit<Texture> textureUnit, GlimpseContext context )
@@ -234,6 +228,6 @@ public class ShadedTexturePainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        if ( program != null ) program.dispose( context.getGLContext( ) );
+        if ( program != null ) program.dispose( context );
     }
 }

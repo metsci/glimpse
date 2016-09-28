@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.nio.Buffer;
 import java.nio.ShortBuffer;
@@ -36,11 +36,9 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 /**
- * A texture class which stores 16 bit integer values (uncapped). Must be used
- * with an OpenGL shader to translate values to colors.
+ * A texture class which stores 16 bit integer values (uncapped).
  *
  * @author ulman
- *
  */
 public class ShortTextureProjected2D extends TextureProjected2D
 {
@@ -71,7 +69,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {

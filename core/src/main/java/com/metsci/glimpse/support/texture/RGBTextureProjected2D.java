@@ -66,7 +66,7 @@ public class RGBTextureProjected2D extends TextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
 
         for ( int i = 0; i < numTextures; i++ )

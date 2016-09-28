@@ -41,6 +41,11 @@ public class GlimpseShaderProgram
         this.arrays = Lists.newArrayList( );
     }
 
+    public ShaderProgram getShaderProgram( )
+    {
+        return this.program;
+    }
+
     public void loadProgram( GL gl )
     {
         load( gl.getGL3( ), this.codes );

@@ -149,16 +149,16 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             try
             {
                 // draw color scale
-                progTex.begin( gl );
+                progTex.begin( context );
                 try
                 {
-                    progTex.setPixelOrtho( gl, bounds );
+                    progTex.setPixelOrtho( context, bounds );
 
-                    progTex.draw( gl, colorTexture, xyBuffer, sBuffer );
+                    progTex.draw( context, colorTexture, xyBuffer, sBuffer );
                 }
                 finally
                 {
-                    progTex.end( gl );
+                    progTex.end( context );
                 }
 
                 // draw outline box

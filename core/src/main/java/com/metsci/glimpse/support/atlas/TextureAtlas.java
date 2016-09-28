@@ -394,28 +394,28 @@ public class TextureAtlas
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY )
+    public void drawImage( GlimpseContext context, Object id, Axis2D axis, double positionX, double positionY )
     {
-        drawImage( gl, id, axis, positionX, positionY, 1.0 );
+        drawImage( context, id, axis, positionX, positionY, 1.0 );
     }
 
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scale )
+    public void drawImage( GlimpseContext context, Object id, Axis2D axis, double positionX, double positionY, double scale )
     {
-        drawImage( gl, id, axis, positionX, positionY, scale, scale );
+        drawImage( context, id, axis, positionX, positionY, scale, scale );
     }
 
     /**
      * @see #drawImage( GL, Object, Axis2D, float, float, float, float, int, int )
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY )
+    public void drawImage( GlimpseContext context, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
         double ppvY = axis.getAxisY( ).getPixelsPerValue( );
-        drawImage( gl, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( context, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
     }
 
     /**
@@ -438,22 +438,22 @@ public class TextureAtlas
      * @param offsetX overrides the image x offset specified when the image was loaded
      * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImage( GL gl, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImage( GlimpseContext context, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getAxisX( ).getPixelsPerValue( );
         double ppvY = axis.getAxisY( ).getPixelsPerValue( );
-        drawImage( gl, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( context, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
 
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY )
+    public void drawImageAxisX( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
-        drawImage( gl, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( context, ppvX, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
 
     /**
@@ -473,11 +473,11 @@ public class TextureAtlas
      * @param offsetX overrides the image x offset specified when the image was loaded
      * @param offsetY overrides the image y offset specified when the image was loaded
      */
-    public void drawImageAxisX( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImageAxisX( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvX = axis.getPixelsPerValue( );
-        drawImage( gl, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( context, ppvX, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
 
     /**
@@ -489,55 +489,55 @@ public class TextureAtlas
      *
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY )
+    public void drawImageAxisY( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
-        drawImage( gl, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( context, 1.0, ppvY, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
 
-    public void drawImage( GL gl, Object id, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
+    public void drawImage( GlimpseContext context, Object id, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
     {
         ImageDataInternal data = getImageDataInternal( id );
-        drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY, rgba );
+        drawImage( context, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY, rgba );
     }
 
     /**
      * @see #drawImageAxisX( GL, Object, Axis1D, float, float, float, float, int, int )
      */
-    public void drawImageAxisY( GL gl, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImageAxisY( GlimpseContext context, Object id, Axis1D axis, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
         double ppvY = axis.getPixelsPerValue( );
-        drawImage( gl, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( context, 1.0, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
 
-    public void drawImage( GL gl, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImage( GlimpseContext context, Object id, int positionX, int positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         ImageDataInternal data = getImageDataInternal( id );
-        drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
+        drawImage( context, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, centerX, centerY );
     }
 
-    public void drawImage( GL gl, Object id, int positionX, int positionY, double scaleX, double scaleY )
+    public void drawImage( GlimpseContext context, Object id, int positionX, int positionY, double scaleX, double scaleY )
     {
         ImageDataInternal data = getImageDataInternal( id );
-        drawImage( gl, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( context, 1.0, 1.0, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
     }
 
-    public void drawImage( GL gl, Object id, int positionX, int positionY )
+    public void drawImage( GlimpseContext context, Object id, int positionX, int positionY )
     {
         ImageDataInternal data = getImageDataInternal( id );
-        drawImage( gl, 1.0, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
+        drawImage( context, 1.0, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
 
-    protected void drawImage( GL gl, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    protected void drawImage( GlimpseContext context, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
-        drawImage( gl, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY, DEFAULT_COLOR );
+        drawImage( context, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY, DEFAULT_COLOR );
     }
 
-    protected void drawImage( GL gl, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
+    protected void drawImage( GlimpseContext context, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
     {
-        GL3 gl3 = gl.getGL3( );
+        GL3 gl3 = context.getGL( ).getGL3( );
 
         double vppX = 1.0 / ppvX;
         double vppY = 1.0 / ppvY;
@@ -567,15 +567,15 @@ public class TextureAtlas
         this.inS.addQuad2f( minX, minY, maxX, maxY );
         this.inS.addQuad2f( texCoords.left( ), texCoords.bottom( ), texCoords.right( ), texCoords.top( ) );
 
-        this.texProgram.begin( gl3 );
+        this.texProgram.begin( context );
         try
         {
-            this.texProgram.setColor( gl3, rgba );
-            this.texProgram.draw( gl3, GL.GL_TRIANGLES, inXy.getBuffer( gl3 ), inS.getBuffer( gl3 ), 0, inXy.numFloats( ) / 2 );
+            this.texProgram.setColor( context, rgba );
+            this.texProgram.draw( context, GL.GL_TRIANGLES, inXy.getBuffer( gl3 ), inS.getBuffer( gl3 ), 0, inXy.numFloats( ) / 2 );
         }
         finally
         {
-            this.texProgram.end( gl3 );
+            this.texProgram.end( context );
         }
     }
 
@@ -591,8 +591,8 @@ public class TextureAtlas
 
         this.currentContext = context;
 
-        this.texProgram.begin( gl );
-        this.texProgram.setPixelOrtho( gl, bounds );
+        this.texProgram.begin( context );
+        this.texProgram.setPixelOrtho( context, bounds );
 
         this.updateImages( );
 
@@ -635,7 +635,7 @@ public class TextureAtlas
         final Texture texture = getBackingStore( ).getTexture( );
         texture.disable( gl );
 
-        this.texProgram.end( gl.getGL3( ) );
+        this.texProgram.end( context );
     }
 
     /**

@@ -5,10 +5,13 @@ import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static javax.media.opengl.GL.*;
 
 import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
@@ -16,7 +19,7 @@ import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
  *
  * @see com.metsci.glimpse.painter.decoration.WatermarkPainter
  */
-public class ColorTexture2DProgram
+public class ColorTexture2DProgram implements DrawableTextureProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.vs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.fs" );
@@ -71,8 +74,11 @@ public class ColorTexture2DProgram
         return this.handles;
     }
 
-    public void begin( GL2ES2 gl )
+    @Override
+    public void begin( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         if ( this.handles == null )
         {
             this.handles = new ProgramHandles( gl );
@@ -85,59 +91,71 @@ public class ColorTexture2DProgram
         gl.glEnableVertexAttribArray( this.handles.inS );
     }
 
-    public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
+    public void setAxisOrtho( GlimpseContext context, Axis2D axis )
     {
-        setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+        setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
-    public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds )
+    public void setPixelOrtho( GlimpseContext context, GlimpseBounds bounds )
     {
-        setOrtho( gl, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
+        setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
-    public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+    @Override
+    public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void setColor( GL2ES2 gl, float[] rgba )
+    public void setColor( GlimpseContext context, float[] rgba )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         gl.glUniform4fv( this.handles.RGBA, 1, rgba, 0 );
     }
 
-    public void setTexture( GL2ES2 gl, int textureUnit )
+    public void setTexture( GlimpseContext context, int textureUnit )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         this.textureUnit = textureUnit;
         gl.glUniform1i( this.handles.TEXTURE2D, textureUnit );
     }
 
-    public void draw( GL2ES2 gl, int mode, com.jogamp.opengl.util.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    public void draw( GlimpseContext context, int mode, com.jogamp.opengl.util.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         gl.glActiveTexture( getGLTextureUnit( this.textureUnit ) );
         texture.bind( gl );
 
-        draw( gl, mode, xyVbo, sVbo, first, count );
+        draw( context, mode, xyVbo, sVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, com.metsci.glimpse.gl.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    public void draw( GlimpseContext context, int mode, com.metsci.glimpse.gl.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
-        texture.prepare( gl, this.textureUnit );
+        texture.prepare( context, this.textureUnit );
 
-        draw( gl, mode, xyVbo, sVbo, first, count );
+        draw( context, mode, xyVbo, sVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, com.jogamp.opengl.util.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    public void draw( GlimpseContext context, com.jogamp.opengl.util.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
-        draw( gl, GL_TRIANGLE_STRIP, texture, xyVbo, sVbo, first, count );
+        draw( context, GL_TRIANGLE_STRIP, texture, xyVbo, sVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, com.metsci.glimpse.gl.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    public void draw( GlimpseContext context, com.metsci.glimpse.gl.texture.Texture texture, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
-        draw( gl, GL_TRIANGLE_STRIP, texture, xyVbo, sVbo, first, count );
+        draw( context, GL_TRIANGLE_STRIP, texture, xyVbo, sVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    @Override
+    public void draw( GlimpseContext context, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
@@ -147,13 +165,16 @@ public class ColorTexture2DProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    public void draw( GlimpseContext context, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
     {
-        draw( gl, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count );
+        draw( context, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, int xyVbo, int sVbo, int first, int count )
+    @Override
+    public void draw( GlimpseContext context, int mode, int xyVbo, int sVbo, int first, int count )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
@@ -163,23 +184,30 @@ public class ColorTexture2DProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, int xyVbo, int sVbo, int first, int count )
+    public void draw( GlimpseContext context, int xyVbo, int sVbo, int first, int count )
     {
-        draw( gl, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count );
+        draw( context, GL_TRIANGLE_STRIP, xyVbo, sVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, com.metsci.glimpse.gl.texture.Texture texture, GLStreamingBufferBuilder xyVertices, GLStreamingBufferBuilder sVertices )
+    public void draw( GlimpseContext context, com.metsci.glimpse.gl.texture.Texture texture, GLStreamingBufferBuilder xyVertices, GLStreamingBufferBuilder sVertices )
     {
-        draw( gl, GL_TRIANGLES, texture, xyVertices.getBuffer( gl ), sVertices.getBuffer( gl ), 0, sVertices.numFloats( ) / 2 );
+        GL2ES2 gl = context.getGL( ).getGL2ES2( );
+
+        draw( context, GL_TRIANGLES, texture, xyVertices.getBuffer( gl ), sVertices.getBuffer( gl ), 0, sVertices.numFloats( ) / 2 );
     }
 
-    public void draw( GL2ES2 gl, com.jogamp.opengl.util.texture.Texture texture, GLStreamingBufferBuilder xyVertices, GLStreamingBufferBuilder sVertices )
+    public void draw( GlimpseContext context, com.jogamp.opengl.util.texture.Texture texture, GLStreamingBufferBuilder xyVertices, GLStreamingBufferBuilder sVertices )
     {
-        draw( gl, GL_TRIANGLES, texture, xyVertices.getBuffer( gl ), sVertices.getBuffer( gl ), 0, sVertices.numFloats( ) / 2 );
+        GL3 gl = context.getGL( ).getGL3( );
+
+        draw( context, GL_TRIANGLES, texture, xyVertices.getBuffer( gl ), sVertices.getBuffer( gl ), 0, sVertices.numFloats( ) / 2 );
     }
 
-    public void end( GL2ES2 gl )
+    @Override
+    public void end( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inS );
         gl.glUseProgram( 0 );
@@ -192,8 +220,11 @@ public class ColorTexture2DProgram
      * This object can be safely reused after being disposed, but in most cases there is no
      * significant advantage to doing so.
      */
-    public void dispose( GL2ES2 gl )
+    @Override
+    public void dispose( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         if ( this.handles != null )
         {
             gl.glDeleteProgram( this.handles.program );

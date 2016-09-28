@@ -42,8 +42,6 @@ import javax.media.opengl.GL2;
  * A texture class which stores 4 channel RGBA colors. Each color channel
  * contains 8 bit fixed point values (capped from 0 to 1).
  *
- * Does not require a shader to display color values.
- *
  * @author ulman
  *
  */
@@ -88,7 +86,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {

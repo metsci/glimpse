@@ -26,15 +26,16 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.SampledColorScaleShader;
+import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
@@ -52,7 +53,7 @@ public class HeatMapPainter extends ShadedTexturePainter
     protected FloatTextureProjected2D heatMap;
     protected ColorTexture1D colorScale;
 
-    protected SampledColorScaleShader program;
+    protected DrawableTextureProgram program;
 
     public HeatMapPainter( Axis1D axis )
     {
@@ -68,39 +69,44 @@ public class HeatMapPainter extends ShadedTexturePainter
 
     protected void loadDefaultPipeline( Axis1D axis ) throws IOException
     {
-        this.program = new SampledColorScaleShader( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
-        this.setShaderProgram( this.program );
+        this.program = new ColorMapProgram( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+        this.setProgram( this.program );
+    }
+
+    private ColorMapProgram getProgram( )
+    {
+        return ( ColorMapProgram ) this.program;
     }
 
     public void setDiscardNaN( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.program.setDiscardNaN( discard );
+            getProgram( ).setDiscardNaN( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setAlpha( float alpha )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.program.setAlpha( alpha );
+            getProgram( ).setAlpha( alpha );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setData( FloatTextureProjected2D texture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.removeDrawableTexture( heatMap );
@@ -109,14 +115,14 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
 
     }
 
     public void setColorScale( ColorTexture1D texture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.removeNonDrawableTexture( colorScale );
@@ -125,13 +131,13 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public ColorTexture1D getColorScale( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             if ( heatMap != null )
@@ -145,13 +151,13 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public FloatTextureProjected2D getData( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             if ( heatMap != null )
@@ -165,13 +171,13 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public Projection getProjection( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             if ( heatMap != null )
@@ -185,7 +191,7 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 }

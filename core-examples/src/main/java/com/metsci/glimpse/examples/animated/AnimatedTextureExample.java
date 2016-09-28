@@ -44,7 +44,7 @@ import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.shader.SampledColorScaleShader;
+import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D;
 
@@ -116,17 +116,17 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
 
         // create a shader which samples from a 1D color texture to
         // color map a 2D data texture
-        SampledColorScaleShader shader;
+        ColorMapProgram shader;
         try
         {
-            shader = new SampledColorScaleShader( plot.getAxisZ( ), dataTextureUnit, colorScaleTextureUnit );
+            shader = new ColorMapProgram( plot.getAxisZ( ), dataTextureUnit, colorScaleTextureUnit );
         }
         catch ( IOException e )
         {
             e.printStackTrace( );
             throw new RuntimeException( e );
         }
-        painter.setShaderProgram( shader );
+        painter.setProgram( shader );
 
         // setup a thread that will mutate the target texture at regular intervals
         new Thread( new Runnable( )

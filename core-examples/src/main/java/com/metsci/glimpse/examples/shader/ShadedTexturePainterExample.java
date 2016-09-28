@@ -36,7 +36,7 @@ import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.SampledColorScaleShader;
+import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
@@ -65,10 +65,10 @@ public class ShadedTexturePainterExample implements GlimpseLayoutProvider
         ShadedTexturePainter painter = new ShadedTexturePainter( );
 
         // create a shader which colors a 2D texture according to a 1D color map
-        SampledColorScaleShader shader = new SampledColorScaleShader( plot.getAxisZ( ), 0, 1 );
+        ColorMapProgram shader = new ColorMapProgram( plot.getAxisZ( ), 0, 1 );
 
         // associated the pipeline with the painter
-        painter.setShaderProgram( shader );
+        painter.setProgram( shader );
 
         // generate some data to display
         double[][] data = HeatMapExample.generateData( 1000, 1000 );

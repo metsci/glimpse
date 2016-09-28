@@ -24,16 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.support.shader.colormap;
+
+import static javax.media.opengl.GL.*;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
-import javax.media.opengl.GLUniformData;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 
 /**
  * A shader which colors a 2D data texture using values sampled from a color
@@ -42,7 +52,7 @@ import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
  * @author ulman
  *
  */
-public class SampledColorScaleShader extends GlimpseShaderProgram implements AxisListener1D
+public class ColorMapProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
     private GLUniformData dataMin;
     private GLUniformData dataMax;
@@ -50,10 +60,27 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
     private GLUniformData alpha;
     private GLUniformData dataTexUnit;
     private GLUniformData colorTexUnit;
+    private GLUniformData discardNaN;
+
+    private GLUniformData AXIS_RECT;
 
     private Axis1D colorAxis;
 
-    private GLUniformData discardNaN;
+    private ProgramHandles handles;
+
+    public static class ProgramHandles
+    {
+        // Vertex attributes
+
+        public final int inXy;
+        public final int inS;
+
+        public ProgramHandles( GL2ES2 gl, int program )
+        {
+            this.inXy = gl.glGetAttribLocation( program, "inXy" );
+            this.inS = gl.glGetAttribLocation( program, "inS" );
+        }
+    }
 
     /**
      * @param colorAxis color axis producing events
@@ -61,13 +88,14 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
      * @param colorTexUnit 1D texture unit containing color-map
      * @throws IOException if the shader source file cannot be read
      */
-    public SampledColorScaleShader( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
+    public ColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
         initialize( colorAxis, targetTexUnit, colorTexUnit );
     }
 
     protected void addShaders( )
     {
+        this.addVertexShader( "shaders/colormap/passthrough.vs" );
         this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader.fs" );
     }
 
@@ -82,6 +110,8 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
 
         this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", targetTexUnit ) );
         this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
+
+        this.AXIS_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "AXIS_RECT", 4 ) );
 
         this.colorAxis = colorAxis;
         this.colorAxis.addAxisListener( this );
@@ -124,10 +154,89 @@ public class SampledColorScaleShader extends GlimpseShaderProgram implements Axi
         return ( float ) axis.getMax( );
     }
 
+    /// DrawableTextureProgram methods
+
     @Override
     public void dispose( GLContext context )
     {
         super.dispose( context );
         this.colorAxis.removeAxisListener( this );
+    }
+
+    @Override
+    public void begin( GlimpseContext context )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        this.useProgram( context.getGL( ), true );
+
+        if ( handles == null )
+        {
+            handles = new ProgramHandles( gl, getShaderProgram( ).id( ) );
+        }
+
+        gl.glEnableVertexAttribArray( this.handles.inXy );
+        gl.glEnableVertexAttribArray( this.handles.inS );
+    }
+
+    public void setAxisOrtho( GlimpseContext context, Axis2D axis )
+    {
+        setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+    }
+
+    public void setPixelOrtho( GlimpseContext context, GlimpseBounds bounds )
+    {
+        setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
+    }
+
+    @Override
+    public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
+    {
+        this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { xMin, xMax, yMin, yMax } ) );
+    }
+
+    @Override
+    public void draw( GlimpseContext context, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( ) );
+        gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo.buffer( ) );
+        gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
+
+        gl.glDrawArrays( mode, first, count );
+    }
+
+    @Override
+    public void draw( GlimpseContext context, int mode, int xyVbo, int sVbo, int first, int count )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+        gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, 0 );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
+        gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, 0 );
+
+        gl.glDrawArrays( mode, first, count );
+    }
+
+    @Override
+    public void end( GlimpseContext context )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        this.useProgram( context.getGL( ), false );
+
+        gl.glDisableVertexAttribArray( this.handles.inXy );
+        gl.glDisableVertexAttribArray( this.handles.inS );
+    }
+
+    @Override
+    public void dispose( GlimpseContext context )
+    {
+        this.dispose( context.getGLContext( ) );
     }
 }

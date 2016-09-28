@@ -24,23 +24,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.axis.tagged.shader;
+package com.metsci.glimpse.support.shader.colormap;
 
 import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static javax.media.opengl.GL.*;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.List;
 
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 
-public class TaggedColorScaleShader extends GlimpseShaderProgram implements AxisListener1D
+public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
     private GLUniformData sizeArg;
     private GLUniformData alphaArg;
@@ -49,10 +57,13 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
     private GLUniformData discardAbove;
     private GLUniformData discardBelow;
 
+    private GLUniformData AXIS_RECT;
+
     private TaggedAxis1D taggedAxis;
 
-    public TaggedColorScaleShader( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
+    public ColorMapTaggedProgram( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
     {
+        this.addVertexShader( "shaders/colormap/passthrough.vs" );
         this.addFragmentShader( "shaders/colormap/tagged_colorscale_shader.fs" );
 
         this.taggedAxis = axis;
@@ -67,6 +78,8 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
         this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
         this.discardAbove = this.addUniformData( new GLUniformData( "discardAbove", 0 ) );
         this.discardBelow = this.addUniformData( new GLUniformData( "discardBelow", 0 ) );
+
+        this.AXIS_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "AXIS_RECT", 4 ) );
 
         this.taggedAxis.addAxisListener( this );
     }
@@ -113,10 +126,66 @@ public class TaggedColorScaleShader extends GlimpseShaderProgram implements Axis
         discardBelow.setData( discard ? 1 : 0 );
     }
 
+    /// DrawableTextureProgram methods
+
     @Override
     public void dispose( GLContext context )
     {
         super.dispose( context );
         this.taggedAxis.removeAxisListener( this );
+    }
+
+    @Override
+    public void begin( GlimpseContext context )
+    {
+        this.useProgram( context.getGL( ), true );
+    }
+
+    public void setAxisOrtho( GlimpseContext context, Axis2D axis )
+    {
+        setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+    }
+
+    public void setPixelOrtho( GlimpseContext context, GlimpseBounds bounds )
+    {
+        setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
+    }
+
+    @Override
+    public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
+    {
+        this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { xMin, xMax, yMin, yMax } ) );
+    }
+
+    @Override
+    public void draw( GlimpseContext context, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    {
+        draw( context, mode, xyVbo.buffer( ), sVbo.buffer( ), first, count );
+    }
+
+    @Override
+    public void draw( GlimpseContext context, int mode, int xyVbo, int sVbo, int first, int count )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+        gl.glVertexAttribPointer( xyVbo, 2, GL_FLOAT, false, 0, 0 );
+
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
+        gl.glVertexAttribPointer( sVbo, 2, GL_FLOAT, false, 0, 0 );
+
+        gl.glDrawArrays( mode, first, count );
+    }
+
+    @Override
+    public void end( GlimpseContext context )
+    {
+        this.useProgram( context.getGL( ), false );
+    }
+
+    @Override
+    public void dispose( GlimpseContext context )
+    {
+        this.dispose( context.getGLContext( ) );
     }
 }

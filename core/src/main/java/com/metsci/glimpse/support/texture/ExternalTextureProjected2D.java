@@ -29,7 +29,6 @@ package com.metsci.glimpse.support.texture;
 import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 /**
  * A wrapper around an OpenGL texture handle which is being handled (allocated, freed,
@@ -57,7 +56,7 @@ public class ExternalTextureProjected2D extends TextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
         // do nothing, loading data into the texture is handled externally
     }

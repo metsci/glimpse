@@ -1,10 +1,8 @@
 package com.metsci.glimpse.support.shader;
 
-import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.ensureAdditionalCapacity;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.flipped;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.common.nio.Buffers.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 
@@ -27,9 +25,9 @@ public class GLStreamingBufferBuilder
         this( 0, 10 );
     }
 
-    public GLStreamingBufferBuilder( int initialNumVertices, int vboBlockSizeFactor )
+    public GLStreamingBufferBuilder( int initialNumFloats, int vboBlockSizeFactor )
     {
-        this.data = new GLStreamingBufferData( initialNumVertices );
+        this.data = new GLStreamingBufferData( initialNumFloats );
 
         this.buffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
         this.dirty = true;
@@ -195,9 +193,9 @@ public class GLStreamingBufferBuilder
     {
         protected FloatBuffer buffer;
 
-        public GLStreamingBufferData( int initialNumVertices )
+        public GLStreamingBufferData( int initialNumFloats )
         {
-            this.buffer = newDirectFloatBuffer( 2 * initialNumVertices );
+            this.buffer = newDirectFloatBuffer( initialNumFloats );
         }
 
         public void clear( )

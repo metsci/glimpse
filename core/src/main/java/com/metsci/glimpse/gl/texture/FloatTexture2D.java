@@ -29,6 +29,7 @@ package com.metsci.glimpse.gl.texture;
 import static java.util.logging.Level.*;
 
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -37,8 +38,11 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.texture.TextureUnit;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * A two dimensional texture storing float values.
@@ -50,7 +54,9 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     private static final Logger logger = Logger.getLogger( FloatTexture2D.class.getName( ) );
 
     protected FloatBuffer data;
-    protected boolean centers;
+    protected GLStreamingBufferBuilder xyBuilder;
+    protected GLStreamingBufferBuilder sBuilder;
+
     protected double[] min;
     protected double[] max;
 
@@ -60,47 +66,71 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
 
         this.data = Buffers.newDirectFloatBuffer( n0 * n1 );
 
-        this.min = min.clone( );
-        this.max = max.clone( );
-        this.centers = centers;
+        this.min = Arrays.copyOf( min, min.length );
+        this.max = Arrays.copyOf( max, max.length );
+
+        double tminmax[][] = computeDrawMinMax( min, max, centers );
+        double tmin[] = tminmax[0];
+        double tmax[] = tminmax[1];
+
+        this.xyBuilder = new GLStreamingBufferBuilder( 12, 1 );
+        this.xyBuilder.addQuad2f( ( float ) tmin[0], ( float ) tmin[1], ( float ) tmax[0], ( float ) tmax[1] );
+
+        this.sBuilder = new GLStreamingBufferBuilder( 12, 1 );
+        this.sBuilder.addQuad2f( 0, 0, 1, 1 );
     }
 
-    // multiTextureList is ignored because this type of texture does not currently support multitexturing (but it would be easy to add)
-    @Override
-    public void draw( GlimpseContext context, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    public int xyVbo( GlimpseContext context )
     {
-        GL gl = context.getGL( );
+        return this.xyBuilder.getBuffer( context.getGL( ) ).buffer( );
+    }
 
-        boolean ready = prepare( context, texUnit );
+    public int sVbo( GlimpseContext context )
+    {
+        return this.sBuilder.getBuffer( context.getGL( ) ).buffer( );
+    }
+
+    public int getMode( )
+    {
+        return GL.GL_TRIANGLES;
+    }
+
+    @Override
+    public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    {
+        boolean ready = true;
+
+        // prepare all the multitextures
+        for ( TextureUnit<Texture> texture : multiTextureList )
+        {
+            if ( !texture.prepare( context ) ) ready = false;
+        }
+
+        if ( !prepare( context, texUnit ) ) ready = false;
 
         if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
+
             return;
         }
 
-        double tminmax[][] = computeDrawMinMax( );
-        double tmin[] = tminmax[0];
-        double tmax[] = tminmax[1];
+        Axis2D axis = GlimpsePainterBase.getAxis2D( context );
 
-        gl.glBegin( GL2.GL_QUADS );
+        program.setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+
+        program.begin( context );
+        try
         {
-            gl.glTexCoord2f( 0.0f, 0.0f );
-            gl.glVertex2d( tmin[0], tmin[1] );
-
-            gl.glTexCoord2f( 1.0f, 0.0f );
-            gl.glVertex2d( tmax[0], tmin[1] );
-
-            gl.glTexCoord2f( 1.0f, 1.0f );
-            gl.glVertex2d( tmax[0], tmax[1] );
-
-            gl.glTexCoord2f( 0.0f, 1.0f );
-            gl.glVertex2d( tmin[0], tmax[1] );
+            program.draw( context, getMode( ), xyVbo( context ), sVbo( context ), 0, this.xyBuilder.numFloats( ) / 2 );
         }
-        gl.glEnd( );
+        finally
+        {
+            program.end( context );
+        }
     }
 
-    private final double[][] computeDrawMinMax( )
+    private final double[][] computeDrawMinMax( double[] min, double[] max, boolean centers )
     {
         double[] texmin = new double[2];
         double[] texmax = new double[2];

@@ -1,5 +1,4 @@
-// this extension is required in order to use integer textures (isampler2D)
-#extension GL_EXT_gpu_shader4 : require
+#version 150
 
 uniform usampler2D datatex;
 uniform sampler1D colortex;
@@ -9,13 +8,17 @@ uniform float dataMax;
 
 uniform float alpha;
 
+in vec2 vS;
+
+out vec4 fRgba;
+
 void main()
 {
-    int dataVal = texture2D( datatex, gl_TexCoord[0].st ).r;
+    int dataVal = texture( datatex, vS.st ).r;
     float normalizedVal = ( float(dataVal) - dataMin ) / ( dataMax - dataMin );
     normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
-    vec4 color = texture1D( colortex, normalizedVal );
-    gl_FragColor = color;
-    gl_FragColor.a = alpha;
+    vec4 color = texture( colortex, normalizedVal );
+    fRgba = color;
+    fRgba.a = alpha;
 }

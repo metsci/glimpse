@@ -26,10 +26,8 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
-import static javax.media.opengl.GL.GL_TRIANGLES;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 import java.util.List;
@@ -97,16 +95,16 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
                 if ( count > 0 )
                 {
                     // draw color scale
-                    progTex.begin( gl );
+                    progTex.begin( context );
                     try
                     {
-                        progTex.setPixelOrtho( gl, bounds );
+                        progTex.setPixelOrtho( context, bounds );
 
-                        progTex.draw( gl, GL_TRIANGLES, colorTexture, vertexCoords, textureCoords, 0, count );
+                        progTex.draw( context, GL_TRIANGLES, colorTexture, vertexCoords, textureCoords, 0, count );
                     }
                     finally
                     {
-                        progTex.end( gl );
+                        progTex.end( context );
                     }
                 }
 
@@ -154,7 +152,7 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
             if ( tag.hasAttribute( TEX_COORD_ATTR ) )
             {
                 float textureCoord = tag.getAttributeFloat( TEX_COORD_ATTR );
-                float vertexCoord = ( float ) taggedAxis.valueToScreenPixel( tag.getValue( ) );
+                float vertexCoord = taggedAxis.valueToScreenPixel( tag.getValue( ) );
 
                 if ( init )
                 {
