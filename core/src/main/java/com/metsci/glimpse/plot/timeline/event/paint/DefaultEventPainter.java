@@ -323,6 +323,8 @@ public class DefaultEventPainter implements EventPainter
                                 ( float ) sizePerpCenter, ( float ) timeMin );
                     }
 
+                    lineProg.setViewport( gl, bounds );
+
                     lineStyle.rgba = getBorderColor( event, info, isSelected );
                     lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
 

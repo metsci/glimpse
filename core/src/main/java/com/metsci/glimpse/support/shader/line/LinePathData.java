@@ -23,7 +23,6 @@ public class LinePathData
      */
     public static final byte FLAGS_JOIN = 1 << 1;
 
-
     /**
      * The index of the first vertex in the current line-strip. Assigned a new
      * value when {@link #moveTo(float, float, float)} is called. Set to -1 when
@@ -107,14 +106,13 @@ public class LinePathData
      */
     protected double mileagePpvAspectRatio;
 
-
     public LinePathData( int initialNumVertices )
     {
         this.stripFirst = -1;
 
-        this.xyBuffer = newDirectFloatBuffer( 2*initialNumVertices );
-        this.flagsBuffer = newDirectByteBuffer( 1*initialNumVertices );
-        this.mileageBuffer = newDirectFloatBuffer( 1*initialNumVertices );
+        this.xyBuffer = newDirectFloatBuffer( 2 * initialNumVertices );
+        this.flagsBuffer = newDirectByteBuffer( 1 * initialNumVertices );
+        this.mileageBuffer = newDirectFloatBuffer( 1 * initialNumVertices );
 
         this.mileageValidCount = 0;
         this.mileagePpvAspectRatio = Double.NaN;
@@ -126,10 +124,9 @@ public class LinePathData
         int stripLast = this.flagsBuffer.position( ) - 1;
         if ( stripLast >= 0 )
         {
-            byte flagsLast = this.flagsBuffer.get( 1*stripLast );
-            this.flagsBuffer.put( 1*stripLast, ( byte ) ( flagsLast & ~FLAGS_JOIN ) );
+            byte flagsLast = this.flagsBuffer.get( 1 * stripLast );
+            this.flagsBuffer.put( 1 * stripLast, ( byte ) ( flagsLast & ~FLAGS_JOIN ) );
         }
-
 
         // Leading phantom vertex, in case this strip is at the start of the VBO,
         // or turns out to be a loop
@@ -163,31 +160,28 @@ public class LinePathData
             throw new RuntimeException( "No current line-strip -- moveTo() must be called after instantiation, and after each call to closeLoop()" );
         }
 
-
         // Read last vertex in strip
         int stripLast = this.flagsBuffer.position( ) - 1;
-        float xLast = this.xyBuffer.get( 2*stripLast + 0 );
-        float yLast = this.xyBuffer.get( 2*stripLast + 1 );
+        float xLast = this.xyBuffer.get( 2 * stripLast + 0 );
+        float yLast = this.xyBuffer.get( 2 * stripLast + 1 );
 
         // Rewrite position of leading phantom vertex
         int stripLeader = this.stripFirst - 1;
-        this.xyBuffer.put( 2*stripLeader + 0, xLast );
-        this.xyBuffer.put( 2*stripLeader + 1, yLast );
+        this.xyBuffer.put( 2 * stripLeader + 0, xLast );
+        this.xyBuffer.put( 2 * stripLeader + 1, yLast );
 
         // Rewrite flags of first vertex in strip
-        this.flagsBuffer.put( 1*stripFirst, FLAGS_JOIN );
-
+        this.flagsBuffer.put( 1 * stripFirst, FLAGS_JOIN );
 
         // Append loop-closing vertex
-        float xFirst = this.xyBuffer.get( 2*stripFirst + 0 );
-        float yFirst = this.xyBuffer.get( 2*stripFirst + 1 );
+        float xFirst = this.xyBuffer.get( 2 * stripFirst + 0 );
+        float yFirst = this.xyBuffer.get( 2 * stripFirst + 1 );
         this.appendVertex( xFirst, yFirst, FLAGS_CONNECT | FLAGS_JOIN );
 
         // Append trailing phantom vertex
-        float xSecond = this.xyBuffer.get( 2*stripFirst + 2 );
-        float ySecond = this.xyBuffer.get( 2*stripFirst + 3 );
+        float xSecond = this.xyBuffer.get( 2 * stripFirst + 2 );
+        float ySecond = this.xyBuffer.get( 2 * stripFirst + 3 );
         this.appendVertex( xSecond, ySecond, 0 );
-
 
         // Next vertex must start a new strip
         this.stripFirst = -1;
@@ -264,15 +258,14 @@ public class LinePathData
 
         // Prepare to read xy, starting at index mileageValidCount
         FloatBuffer xyReadable = flipped( this.xyBuffer );
-        xyReadable.position( 2*mileageValidCount );
+        xyReadable.position( 2 * mileageValidCount );
 
         // Prepare to read flags, starting at index mileageValidCount
         ByteBuffer flagsReadable = flipped( this.flagsBuffer );
-        flagsReadable.position( 1*mileageValidCount );
+        flagsReadable.position( 1 * mileageValidCount );
 
         // Prepare to write mileage, starting at index mileageValidCount
         this.mileageBuffer.position( mileageValidCount );
-
 
         float x;
         float y;
@@ -282,9 +275,9 @@ public class LinePathData
         {
             // If we're starting partway through, initialize loop vars based on last valid values
             int i = this.mileageValidCount - 1;
-            x = xyReadable.get( 2*i + 0 );
-            y = xyReadable.get( 2*i + 1 );
-            mileage = this.mileageBuffer.get( 1*i );
+            x = xyReadable.get( 2 * i + 0 );
+            y = xyReadable.get( 2 * i + 1 );
+            mileage = this.mileageBuffer.get( 1 * i );
         }
         else
         {
@@ -311,7 +304,7 @@ public class LinePathData
                 // okay, though, because the shader doesn't use mileage when CONNECT is false.
 
                 // The value in mileageBuffer here is the strip's initial mileage, so get the
-                // exsting value instead of putting a new one
+                // existing value instead of putting a new one
                 mileage = this.mileageBuffer.get( );
             }
             else
@@ -319,7 +312,7 @@ public class LinePathData
                 // Use the old ppv-aspect-ratio -- NOT the new one passed in -- so that all values
                 // in the mileage buffer were computed with exactly the same ppv-aspect-ratio
                 mileage += distance( x, y, xNew, yNew, this.mileagePpvAspectRatio );
-                this.mileageBuffer.put( ( float ) mileage );
+                this.mileageBuffer.put( mileage );
             }
 
             x = xNew;

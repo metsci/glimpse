@@ -41,7 +41,6 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -198,33 +197,33 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
     protected void setChartData( TimePlotInfo chart, Epoch epoch, TimeStamp startTime, TimeStamp endTime )
     {
-        // create a painter to display data on the plot
-        TrackPainter painter = new TrackPainter( );
-
-        // set colors and sizes for the painter
-        painter.setPointColor( 1, GlimpseColor.getGreen( ) );
-        painter.setPointSize( 1, 5.0f );
-        painter.setShowLines( 1, false );
-
-        // generate some random data
-        double end = endTime.toPosixSeconds( );
-        double time = startTime.toPosixSeconds( );
-        double step = ( end - time ) / 200;
-        float valueX = 0.0f;
-
-        while ( time < end )
-        {
-            time += step;
-            valueX += ( float ) ( Math.random( ) * 2.0 - 1.0 );
-
-            addData( painter, epoch, valueX, TimeStamp.fromPosixSeconds( time ) );
-        }
-
-        // add the painter to the layout
-        chart.addPainter( painter );
-
-        // adjust the axis bounds to fit the data
-        setBounds( chart );
+        //        // create a painter to display data on the plot
+        //        TrackPainter painter = new TrackPainter( );
+        //
+        //        // set colors and sizes for the painter
+        //        painter.setPointColor( 1, GlimpseColor.getGreen( ) );
+        //        painter.setPointSize( 1, 5.0f );
+        //        painter.setShowLines( 1, false );
+        //
+        //        // generate some random data
+        //        double end = endTime.toPosixSeconds( );
+        //        double time = startTime.toPosixSeconds( );
+        //        double step = ( end - time ) / 200;
+        //        float valueX = 0.0f;
+        //
+        //        while ( time < end )
+        //        {
+        //            time += step;
+        //            valueX += ( float ) ( Math.random( ) * 2.0 - 1.0 );
+        //
+        //            addData( painter, epoch, valueX, TimeStamp.fromPosixSeconds( time ) );
+        //        }
+        //
+        //        // add the painter to the layout
+        //        chart.addPainter( painter );
+        //
+        //        // adjust the axis bounds to fit the data
+        //        setBounds( chart );
     }
 
     protected StackedTimePlot2D createPlot( )

@@ -29,18 +29,13 @@ package com.metsci.glimpse.plot.timeline.event.paint;
 import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.*;
 
 import java.awt.geom.Rectangle2D;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -57,15 +52,37 @@ import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.line.ColorLinePath;
+import com.metsci.glimpse.support.shader.line.ColorLineProgram;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.ArrayColorProgram;
 
 public class DefaultGroupedEventPainter implements GroupedEventPainter
 {
     protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
     protected int minimumTextDisplayWidth = 20;
 
+    protected ColorLineProgram lineProg;
+    protected ColorLinePath linePath;
+    protected LineStyle lineStyle;
+
+    protected ArrayColorProgram fillProg;
+    protected GLStreamingBufferBuilder fillPath;
+    protected GLStreamingBufferBuilder fillColor;
+
     public DefaultGroupedEventPainter( )
     {
+        this.lineProg = new ColorLineProgram( );
+        this.linePath = new ColorLinePath( );
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.joinType = LineJoinType.JOIN_MITER;
+        this.lineStyle.stippleEnable = false;
 
+        this.fillProg = new ArrayColorProgram( );
+        this.fillPath = new GLStreamingBufferBuilder( );
+        this.fillColor = new GLStreamingBufferBuilder( );
     }
 
     /**
@@ -118,21 +135,9 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         List<IconDrawInfo> iconDrawList = Lists.newArrayList( );
         List<TextDrawInfo> textDrawList = Lists.newArrayList( );
 
-        // we may need up to 6 vertices per event (although some may need 4 and some may not be displayed at all
-        FloatBuffer fillBuffer = Buffers.newDirectFloatBuffer( events.size( ) * 6 * 2 );
-        FloatBuffer borderBuffer = Buffers.newDirectFloatBuffer( events.size( ) * 6 * 2 );
-        FloatBuffer fillColorBuffer = Buffers.newDirectFloatBuffer( events.size( ) * 6 * 4 );
-        FloatBuffer borderColorBuffer = Buffers.newDirectFloatBuffer( events.size( ) * 6 * 4 );
-        IntBuffer fillCounts = Buffers.newDirectIntBuffer( events.size( ) );
-        IntBuffer borderCounts = Buffers.newDirectIntBuffer( events.size( ) );
-        IntBuffer fillIndices = Buffers.newDirectIntBuffer( events.size( ) );
-        IntBuffer borderIndices = Buffers.newDirectIntBuffer( events.size( ) );
-
-        int fillIndex = 0;
-        int borderIndex = 0;
-
-        int fillCount = 0;
-        int borderCount = 0;
+        this.linePath.clear( );
+        this.fillPath.clear( );
+        this.fillColor.clear( );
 
         Object defaultIconId = info.getDefaultIconId( );
         TextureAtlas atlas = info.getTextureAtlas( );
@@ -200,15 +205,13 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     if ( event.isShowBackground( ) )
                     {
                         float[] color = getBackgroundColor( event, info, isSelected );
-                        fillIndex = addVerticesBox( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax );
-                        fillCount++;
+                        addVerticesBox( horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax );
                     }
 
                     if ( event.isShowBorder( ) )
                     {
                         float[] color = getBorderColor( event, info, isSelected );
-                        borderIndex = addVerticesBox( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax );
-                        borderCount++;
+                        addVerticesBox( horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax );
                     }
                 }
                 else
@@ -216,15 +219,13 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                     if ( event.isShowBackground( ) )
                     {
                         float[] color = getBackgroundColor( event, info, isSelected );
-                        fillIndex = addVerticesArrow( fillCounts, fillIndices, fillIndex, fillBuffer, fillColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
-                        fillCount++;
+                        addVerticesArrow( horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
                     }
 
                     if ( event.isShowBorder( ) )
                     {
                         float[] color = getBorderColor( event, info, isSelected );
-                        borderIndex = addVerticesArrow( borderCounts, borderIndices, borderIndex, borderBuffer, borderColorBuffer, horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
-                        borderCount++;
+                        addVerticesArrow( horiz, color, ( float ) timeMin, ( float ) timeMax, posMin, posMax, ( float ) arrowBaseMin, ( float ) arrowBaseMax, ( float ) sizePerpCenter );
                     }
                 }
 
@@ -413,7 +414,6 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
                         if ( horiz )
                         {
-
                             // use the labelBounds for the height (if the text shortening removed a character which
                             // hangs below the line, we don't want the text position to move)
                             int pixelY = ( int ) ( sizePerpPixels / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
@@ -443,42 +443,44 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 }
             }
 
-            if ( fillCount > 0 )
+            fillProg.begin( gl );
+            try
             {
-                gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-                gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+                if ( horiz )
+                {
+                    fillProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
+                }
+                else
+                {
+                    fillProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
+                }
 
-                fillBuffer.flip( );
-                fillColorBuffer.flip( );
-                fillIndices.flip( );
-                fillCounts.flip( );
-
-                gl.glVertexPointer( 2, GL.GL_FLOAT, 0, fillBuffer );
-                gl.glColorPointer( 4, GL.GL_FLOAT, 0, fillColorBuffer );
-                gl.glMultiDrawArrays( GL2.GL_POLYGON, fillIndices, fillCounts, fillCount );
-
-                gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
-                gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+                fillProg.draw( gl, fillPath, fillColor );
+            }
+            finally
+            {
+                fillProg.end( gl );
             }
 
-            if ( borderCount > 0 )
+            lineProg.begin( gl );
+            try
             {
-                gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-                gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
+                if ( horiz )
+                {
+                    lineProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
+                }
+                else
+                {
+                    lineProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
+                }
 
-                gl.glLineWidth( info.getDefaultEventBorderThickness( ) );
+                lineProg.setViewport( gl, bounds );
 
-                borderBuffer.flip( );
-                borderColorBuffer.flip( );
-                borderIndices.flip( );
-                borderCounts.flip( );
-
-                gl.glVertexPointer( 2, GL.GL_FLOAT, 0, borderBuffer );
-                gl.glColorPointer( 4, GL.GL_FLOAT, 0, borderColorBuffer );
-                gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, borderIndices, borderCounts, borderCount );
-
-                gl.glDisableClientState( GL2.GL_COLOR_ARRAY );
-                gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+                lineProg.draw( gl, lineStyle, linePath );
+            }
+            finally
+            {
+                lineProg.end( gl );
             }
 
             if ( !iconDrawList.isEmpty( ) )
@@ -537,101 +539,74 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         }
     }
 
-    protected int addVerticesBox( IntBuffer countBuffer, IntBuffer countIndices, int countIndex, FloatBuffer vertBuffer, FloatBuffer colorBuffer, boolean horiz, float[] color, float timeMin, float timeMax, float posMin, float posMax )
+    protected void addVerticesBox( boolean horiz, float[] color, float timeMin, float timeMax, float posMin, float posMax )
     {
-        // all four vertices have the same color
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-
         if ( horiz )
         {
-            vertBuffer.put( timeMin );
-            vertBuffer.put( posMin );
-
-            vertBuffer.put( timeMin );
-            vertBuffer.put( posMax );
-
-            vertBuffer.put( timeMax );
-            vertBuffer.put( posMax );
-
-            vertBuffer.put( timeMax );
-            vertBuffer.put( posMin );
+            this.fillPath.addQuad2f( timeMin, posMin, timeMax, posMax );
+            this.linePath.addRectangle( timeMin, posMin, timeMax, posMax, color );
         }
         else
         {
-            vertBuffer.put( posMin );
-            vertBuffer.put( timeMin );
-
-            vertBuffer.put( posMax );
-            vertBuffer.put( timeMin );
-
-            vertBuffer.put( posMax );
-            vertBuffer.put( timeMax );
-
-            vertBuffer.put( posMin );
-            vertBuffer.put( timeMax );
+            this.fillPath.addQuad2f( posMin, timeMin, posMax, timeMax );
+            this.linePath.addRectangle( posMin, timeMin, posMax, timeMax, color );
         }
 
-        countBuffer.put( 4 );
-        countIndices.put( countIndex );
-        return countIndex + 4;
+        this.fillColor.addQuadSolidColor( color );
     }
 
-    protected int addVerticesArrow( IntBuffer countBuffer, IntBuffer countIndices, int countIndex, FloatBuffer vertBuffer, FloatBuffer colorBuffer, boolean horiz, float[] color, float timeMin, float timeMax, float posMin, float posMax, float arrowBaseMin, float arrowBaseMax, float sizePerpCenter )
+    protected void addVerticesArrow( boolean horiz, float[] color, float timeMin, float timeMax, float posMin, float posMax, float arrowBaseMin, float arrowBaseMax, float sizePerpCenter )
     {
-        // all six vertices have the same color
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-        colorBuffer.put( color );
-
         if ( horiz )
         {
-            vertBuffer.put( arrowBaseMin );
-            vertBuffer.put( posMax );
+            // center rectangle
+            fillPath.addQuad2f( arrowBaseMin, posMin, arrowBaseMax, posMax );
 
-            vertBuffer.put( arrowBaseMax );
-            vertBuffer.put( posMax );
+            // left arrow
+            fillPath.addVertex2f( timeMin, sizePerpCenter );
+            fillPath.addVertex2f( arrowBaseMin, posMax );
+            fillPath.addVertex2f( arrowBaseMin, posMin );
 
-            vertBuffer.put( timeMax );
-            vertBuffer.put( sizePerpCenter );
+            // right arrow
+            fillPath.addVertex2f( timeMax, sizePerpCenter );
+            fillPath.addVertex2f( arrowBaseMax, posMin );
+            fillPath.addVertex2f( arrowBaseMax, posMax );
 
-            vertBuffer.put( arrowBaseMax );
-            vertBuffer.put( posMin );
-
-            vertBuffer.put( arrowBaseMin );
-            vertBuffer.put( posMin );
-
-            vertBuffer.put( timeMin );
-            vertBuffer.put( sizePerpCenter );
+            linePath.moveTo( arrowBaseMin, posMax, color );
+            linePath.lineTo( arrowBaseMax, posMax, color );
+            linePath.lineTo( timeMax, sizePerpCenter, color );
+            linePath.lineTo( arrowBaseMax, posMin, color );
+            linePath.lineTo( arrowBaseMin, posMin, color );
+            linePath.lineTo( timeMin, sizePerpCenter, color );
+            linePath.closeLoop( );
         }
         else
         {
-            vertBuffer.put( posMax );
-            vertBuffer.put( arrowBaseMin );
+            // center rectangle
+            fillPath.addQuad2f( posMin, arrowBaseMin, posMax, arrowBaseMax );
 
-            vertBuffer.put( posMax );
-            vertBuffer.put( arrowBaseMax );
+            // left arrow
+            fillPath.addVertex2f( sizePerpCenter, timeMin );
+            fillPath.addVertex2f( posMax, arrowBaseMin );
+            fillPath.addVertex2f( posMin, arrowBaseMin );
 
-            vertBuffer.put( sizePerpCenter );
-            vertBuffer.put( timeMax );
+            // right arrow
+            fillPath.addVertex2f( sizePerpCenter, timeMax );
+            fillPath.addVertex2f( posMin, arrowBaseMax );
+            fillPath.addVertex2f( posMax, arrowBaseMax );
 
-            vertBuffer.put( posMin );
-            vertBuffer.put( arrowBaseMax );
-
-            vertBuffer.put( posMin );
-            vertBuffer.put( arrowBaseMin );
-
-            vertBuffer.put( sizePerpCenter );
-            vertBuffer.put( timeMin );
+            linePath.moveTo( posMax, arrowBaseMin, color );
+            linePath.lineTo( posMax, arrowBaseMax, color );
+            linePath.lineTo( sizePerpCenter, timeMax, color );
+            linePath.lineTo( posMin, arrowBaseMax, color );
+            linePath.lineTo( posMin, arrowBaseMin, color );
+            linePath.lineTo( sizePerpCenter, timeMin, color );
+            linePath.closeLoop( );
         }
 
-        countBuffer.put( 6 );
-        countIndices.put( countIndex );
-        return countIndex + 6;
+        for ( int i = 0; i < 12; i++ )
+        {
+            this.fillColor.addVertex4fv( color );
+        }
     }
 }

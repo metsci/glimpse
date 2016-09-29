@@ -1,11 +1,9 @@
 package com.metsci.glimpse.support.shader.line;
 
-import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
-import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffers;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.flipped;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.grow4fv;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.common.nio.Buffers.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 
@@ -66,7 +64,7 @@ public class ColorLinePath
      * After calling this method, client code must next call {@link #moveTo(float, float, float)},
      * before calling either {@link #lineTo(float, float)} or {@link #closeLoop()} again.
      */
-    public void closeLoop( float[] rgba )
+    public void closeLoop( )
     {
         this.path.closeLoop( );
 
@@ -94,7 +92,7 @@ public class ColorLinePath
         this.lineTo( x2, y1, rgba );
         this.lineTo( x2, y2, rgba );
         this.lineTo( x1, y2, rgba );
-        this.closeLoop( rgba );
+        this.closeLoop( );
     }
 
     protected void setDirty( )

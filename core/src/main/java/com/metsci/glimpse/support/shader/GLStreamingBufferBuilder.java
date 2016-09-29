@@ -74,6 +74,12 @@ public class GLStreamingBufferBuilder
         dirty = true;
     }
 
+    public void addVertex4fv( float[] v )
+    {
+        data.addVertex4fv( v );
+        dirty = true;
+    }
+
     /**
      * Add vertices to form an axis-parallel rectangle defined by its bottom left and upper
      * right vertices. Six x-y vertices are added to the buffer forming two triangles defining the upper left

@@ -30,11 +30,14 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.List;
 
+import javax.media.opengl.GL;
+
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.Event;
@@ -209,6 +212,7 @@ public class EventPainterManager extends GlimpsePainterBase
     {
         GlimpseBounds bounds = getBounds( context );
         Axis1D axis = requireAxis1D( context );
+        GL gl = context.getGL( );
 
         if ( newFont != null )
         {
@@ -219,6 +223,7 @@ public class EventPainterManager extends GlimpsePainterBase
 
         if ( textRenderer == null ) return;
 
+        GLUtils.enableStandardBlending( gl );
         manager.lock( );
         try
         {
@@ -280,6 +285,7 @@ public class EventPainterManager extends GlimpsePainterBase
         finally
         {
             manager.unlock( );
+            GLUtils.disableBlending( gl );
         }
     }
 
