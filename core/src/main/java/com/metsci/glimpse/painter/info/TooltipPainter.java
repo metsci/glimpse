@@ -447,10 +447,15 @@ public class TooltipPainter extends SimpleTextPainter
             // paint background and border
             if ( this.paintBackground || this.paintBorder )
             {
+                float xMin = ( float ) ( x + clampX );
+                float yMin = ( float ) ( y + clampY );
+                float xMax = xMin + boundingWidth;
+                float yMax = yMin - boundingHeight;
+
                 if ( paintBackground )
                 {
                     this.fillBuilder.clear( );
-                    this.fillBuilder.addQuad2f( boundingHeight, boundingWidth, ( float ) ( x + clampX ), ( float ) ( y + clampY ) );
+                    this.fillBuilder.addQuad2f( xMin, yMin, xMax, yMax );
 
                     this.fillProg.begin( gl );
                     try
@@ -468,7 +473,7 @@ public class TooltipPainter extends SimpleTextPainter
                 if ( paintBorder )
                 {
                     this.linePath.clear( );
-                    this.linePath.addRectangle( boundingHeight, boundingWidth, ( float ) ( x + clampX ), ( float ) ( y + clampY ) );
+                    this.linePath.addRectangle( xMin, yMin, xMax, yMax );
 
                     this.lineProg.begin( gl );
                     try
@@ -526,7 +531,7 @@ public class TooltipPainter extends SimpleTextPainter
             // draw icons
             if ( iconIds != null && !iconIds.isEmpty( ) )
             {
-                atlas.beginRendering( context );
+                atlas.beginRenderingPixelOrtho( context, bounds );
                 try
                 {
                     double posY = y - borderSize - iconSize;
@@ -589,7 +594,7 @@ public class TooltipPainter extends SimpleTextPainter
         // will fail if we do not
         if ( iconIds != null )
         {
-            atlas.beginRendering( context );
+            atlas.beginRenderingPixelOrtho( context );
             atlas.endRendering( context );
         }
 

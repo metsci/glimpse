@@ -443,17 +443,27 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 }
             }
 
+            float xMin, yMin, xMax, yMax;
+
+            if ( horiz )
+            {
+                xMin = ( float ) timeAxis.getMin( );
+                xMax = ( float ) timeAxis.getMax( );
+                yMin = 0;
+                yMax = height;
+            }
+            else
+            {
+                xMin = 0;
+                xMax = width;
+                yMin = ( float ) timeAxis.getMin( );
+                yMax = ( float ) timeAxis.getMax( );
+            }
+
             fillProg.begin( gl );
             try
             {
-                if ( horiz )
-                {
-                    fillProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
-                }
-                else
-                {
-                    fillProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
-                }
+                fillProg.setOrtho( gl, xMin, xMax, yMin, yMax );
 
                 fillProg.draw( gl, fillPath, fillColor );
             }
@@ -465,15 +475,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
             lineProg.begin( gl );
             try
             {
-                if ( horiz )
-                {
-                    lineProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
-                }
-                else
-                {
-                    lineProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
-                }
-
+                lineProg.setOrtho( gl, xMin, xMax, yMin, yMax );
                 lineProg.setViewport( gl, bounds );
 
                 lineProg.draw( gl, lineStyle, linePath );
@@ -485,11 +487,13 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
             if ( !iconDrawList.isEmpty( ) )
             {
-                atlas.beginRendering( context );
+                atlas.beginRendering( context, xMin, xMax, yMin, yMax );
                 try
                 {
                     for ( IconDrawInfo iconInfo : iconDrawList )
                     {
+
+                        System.out.println( "draw " + iconInfo.getId( ) );
                         if ( iconInfo.isX( ) )
                         {
                             atlas.drawImageAxisX( context, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY, iconInfo.color );

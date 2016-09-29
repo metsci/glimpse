@@ -180,6 +180,23 @@ public class DefaultEventPainter implements EventPainter
 
         EventBounds eventBounds = info.getEventBounds( event.getId( ) );
 
+        float xMin, yMin, xMax, yMax;
+
+        if ( horiz )
+        {
+            xMin = ( float ) timeAxis.getMin( );
+            xMax = ( float ) timeAxis.getMax( );
+            yMin = 0;
+            yMax = height;
+        }
+        else
+        {
+            xMin = 0;
+            xMax = width;
+            yMin = ( float ) timeAxis.getMin( );
+            yMax = ( float ) timeAxis.getMax( );
+        }
+
         if ( !offEdgeMin && !offEdgeMax )
         {
             if ( event.isShowBackground( ) )
@@ -191,19 +208,18 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        fillProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
                         fillPath.addQuad2f( ( float ) timeMin, posMin, ( float ) timeMax, posMax );
                     }
                     else
                     {
-                        fillProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
                         fillPath.addQuad2f( posMin, ( float ) timeMin, posMax, ( float ) timeMax );
                     }
 
                     float[] fillColor = getBackgroundColor( event, info, isSelected );
 
-                    fillProg.draw( gl, fillPath, fillColor );
+                    fillProg.setOrtho( gl, xMin, xMax, yMin, yMax );
 
+                    fillProg.draw( gl, fillPath, fillColor );
                 }
                 finally
                 {
@@ -220,17 +236,17 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        lineProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
                         linePath.addRectangle( ( float ) timeMin, posMin, ( float ) timeMax, posMax );
                     }
                     else
                     {
-                        lineProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
                         linePath.addRectangle( posMin, ( float ) timeMin, posMax, ( float ) timeMax );
                     }
 
                     lineStyle.rgba = getBorderColor( event, info, isSelected );
                     lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
+
+                    lineProg.setOrtho( gl, xMin, xMax, yMin, yMax );
 
                     lineProg.draw( gl, lineStyle, linePath );
                 }
@@ -251,8 +267,6 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        fillProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
-
                         // center rectangle
                         fillPath.addQuad2f( ( float ) arrowBaseMin, posMin, ( float ) arrowBaseMax, posMax );
 
@@ -268,8 +282,6 @@ public class DefaultEventPainter implements EventPainter
                     }
                     else
                     {
-                        fillProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
-
                         // center rectangle
                         fillPath.addQuad2f( posMin, ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax );
 
@@ -286,8 +298,9 @@ public class DefaultEventPainter implements EventPainter
 
                     float[] fillColor = getBackgroundColor( event, info, isSelected );
 
-                    fillProg.draw( gl, fillPath, fillColor );
+                    fillProg.setOrtho( gl, xMin, xMax, yMin, yMax );
 
+                    fillProg.draw( gl, fillPath, fillColor );
                 }
                 finally
                 {
@@ -304,7 +317,6 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        lineProg.setOrtho( gl, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ), 0, height );
                         linePath.addPolygon( ( float ) arrowBaseMin, posMax,
                                 ( float ) arrowBaseMax, posMax,
                                 ( float ) timeMax, ( float ) sizePerpCenter,
@@ -314,7 +326,6 @@ public class DefaultEventPainter implements EventPainter
                     }
                     else
                     {
-                        lineProg.setOrtho( gl, 0, width, ( float ) timeAxis.getMin( ), ( float ) timeAxis.getMax( ) );
                         linePath.addPolygon( posMax, ( float ) arrowBaseMin,
                                 posMax, ( float ) arrowBaseMax,
                                 ( float ) sizePerpCenter, ( float ) timeMax,
@@ -327,6 +338,8 @@ public class DefaultEventPainter implements EventPainter
 
                     lineStyle.rgba = getBorderColor( event, info, isSelected );
                     lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
+
+                    fillProg.setOrtho( gl, xMin, xMax, yMin, yMax );
 
                     lineProg.draw( gl, lineStyle, linePath );
                 }
@@ -364,7 +377,7 @@ public class DefaultEventPainter implements EventPainter
                 eventBounds.setIconEndTime( eventBounds.getIconStartTime( ).add( totalIconWidthPixels / timeAxis.getPixelsPerValue( ) ) );
 
                 TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( context );
+                atlas.beginRendering( context, xMin, xMax, yMin, yMax );
                 try
                 {
                     Iterator<Event> iter = event.iterator( );
@@ -434,7 +447,7 @@ public class DefaultEventPainter implements EventPainter
             if ( eventBounds.isIconVisible( ) )
             {
                 TextureAtlas atlas = info.getTextureAtlas( );
-                atlas.beginRendering( context );
+                atlas.beginRendering( context, xMin, xMax, yMin, yMax );
                 try
                 {
                     Object icon = event.getIconId( );

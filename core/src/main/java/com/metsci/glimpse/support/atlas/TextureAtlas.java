@@ -574,19 +574,36 @@ public class TextureAtlas
         this.inXy.clear( );
         this.inS.clear( );
 
-        this.inS.addQuad2f( minX, minY, maxX, maxY );
+        this.inXy.addQuad2f( minX, minY, maxX, maxY );
         this.inS.addQuad2f( texCoords.left( ), texCoords.bottom( ), texCoords.right( ), texCoords.top( ) );
 
-        this.texProgram.begin( context );
-        try
-        {
-            this.texProgram.setColor( context, rgba );
-            this.texProgram.draw( context, GL.GL_TRIANGLES, inXy.getBuffer( gl3 ), inS.getBuffer( gl3 ), 0, inXy.numFloats( ) / 2 );
-        }
-        finally
-        {
-            this.texProgram.end( context );
-        }
+        this.texProgram.setColor( context, rgba );
+        this.texProgram.draw( context, GL.GL_TRIANGLES, inXy.getBuffer( gl3 ), inS.getBuffer( gl3 ), 0, inXy.numFloats( ) / 2 );
+    }
+
+    public void beginRenderingAxisOrtho( GlimpseContext context ) throws GLException
+    {
+        beginRenderingAxisOrtho( context, GlimpsePainterBase.requireAxis2D( context ) );
+    }
+
+    public void beginRenderingAxisOrtho( GlimpseContext context, Axis2D axis ) throws GLException
+    {
+        beginRendering0( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), true );
+    }
+
+    public void beginRenderingPixelOrtho( GlimpseContext context ) throws GLException
+    {
+        beginRenderingPixelOrtho( context, GlimpsePainterBase.getBounds( context ) );
+    }
+
+    public void beginRenderingPixelOrtho( GlimpseContext context, GlimpseBounds bounds ) throws GLException
+    {
+        beginRendering0( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ), true );
+    }
+
+    public void beginRendering( GlimpseContext context, float xMin, float xMax, float yMin, float yMax ) throws GLException
+    {
+        beginRendering0( context, xMin, xMax, yMin, yMax, true );
     }
 
     /**
@@ -594,15 +611,14 @@ public class TextureAtlas
      * state is configured for textured quad rendering. {@link drawImage( GL, Object, Axis2D, float, float )}
      * must be called while between calls to {@beginRendering()} and {endRendering()}.
      */
-    public void beginRendering( GlimpseContext context ) throws GLException
+    protected void beginRendering0( GlimpseContext context, float xMin, float xMax, float yMin, float yMax, boolean setOrtho ) throws GLException
     {
         GL3 gl = context.getGL( ).getGL3( );
-        GlimpseBounds bounds = GlimpsePainterBase.getBounds( context );
 
         this.currentContext = context;
 
         this.texProgram.begin( context );
-        this.texProgram.setPixelOrtho( context, bounds );
+        if ( setOrtho ) this.texProgram.setOrtho( context, xMin, xMax, yMin, yMax );
 
         this.updateImages( );
 
@@ -977,7 +993,7 @@ public class TextureAtlas
             // Re-enter the begin / end pair if necessary
             if ( currentContext != null )
             {
-                beginRendering( currentContext );
+                beginRendering0( currentContext, 0, 0, 0, 0, false );
             }
 
             // notify update listeners that the TextureAtlas was reorganized
