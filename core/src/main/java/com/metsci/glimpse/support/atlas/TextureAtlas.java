@@ -131,6 +131,7 @@ public class TextureAtlas
     // endRendering() cycle so we can re-enter the exact same state if
     // we have to reallocate the backing store
     private GlimpseContext currentContext;
+    private boolean useDefaultProgram;
 
     // Whether GL_LINEAR filtering is enabled for the backing store
     private boolean smoothing;
@@ -588,7 +589,7 @@ public class TextureAtlas
 
     public void beginRenderingAxisOrtho( GlimpseContext context, Axis2D axis ) throws GLException
     {
-        beginRendering0( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), true );
+        beginRendering0( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), true, true );
     }
 
     public void beginRenderingPixelOrtho( GlimpseContext context ) throws GLException
@@ -598,12 +599,17 @@ public class TextureAtlas
 
     public void beginRenderingPixelOrtho( GlimpseContext context, GlimpseBounds bounds ) throws GLException
     {
-        beginRendering0( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ), true );
+        beginRendering0( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ), true, true );
     }
 
     public void beginRendering( GlimpseContext context, float xMin, float xMax, float yMin, float yMax ) throws GLException
     {
-        beginRendering0( context, xMin, xMax, yMin, yMax, true );
+        beginRendering0( context, xMin, xMax, yMin, yMax, true, true );
+    }
+
+    public void beginRendering( GlimpseContext context ) throws GLException
+    {
+        beginRendering0( context, 0, 0, 0, 0, false, false );
     }
 
     /**
@@ -611,14 +617,22 @@ public class TextureAtlas
      * state is configured for textured quad rendering. {@link drawImage( GL, Object, Axis2D, float, float )}
      * must be called while between calls to {@beginRendering()} and {endRendering()}.
      */
-    protected void beginRendering0( GlimpseContext context, float xMin, float xMax, float yMin, float yMax, boolean setOrtho ) throws GLException
+    protected void beginRendering0( GlimpseContext context, float xMin, float xMax, float yMin, float yMax, boolean setOrtho, boolean setProgram ) throws GLException
     {
         GL3 gl = context.getGL( ).getGL3( );
 
         this.currentContext = context;
+        this.useDefaultProgram = setProgram;
 
-        this.texProgram.begin( context );
-        if ( setOrtho ) this.texProgram.setOrtho( context, xMin, xMax, yMin, yMax );
+        if ( setProgram )
+        {
+            this.texProgram.begin( context );
+        }
+
+        if ( setOrtho )
+        {
+            this.texProgram.setOrtho( context, xMin, xMax, yMin, yMax );
+        }
 
         this.updateImages( );
 
@@ -993,7 +1007,7 @@ public class TextureAtlas
             // Re-enter the begin / end pair if necessary
             if ( currentContext != null )
             {
-                beginRendering0( currentContext, 0, 0, 0, 0, false );
+                beginRendering0( currentContext, 0, 0, 0, 0, false, useDefaultProgram );
             }
 
             // notify update listeners that the TextureAtlas was reorganized
