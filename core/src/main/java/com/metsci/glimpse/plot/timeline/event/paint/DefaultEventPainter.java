@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
+import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -574,11 +575,11 @@ public class DefaultEventPainter implements EventPainter
                         double shiftY = pixel;
                         int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
 
-                        //                        gl.glMatrixMode( GL2.GL_PROJECTION );
-                        //
-                        //                        gl.glTranslated( shiftX, shiftY, 0 );
-                        //                        gl.glRotated( 90, 0, 0, 1.0f );
-                        //                        gl.glTranslated( -shiftX, -shiftY, 0 );
+                        gl.getGL2( ).glMatrixMode( GL2.GL_PROJECTION );
+
+                        gl.getGL2( ).glTranslated( shiftX, shiftY, 0 );
+                        gl.getGL2( ).glRotated( 90, 0, 0, 1.0f );
+                        gl.getGL2( ).glTranslated( -shiftX, -shiftY, 0 );
 
                         textRenderer.draw( displayText, pixelX, pixelY );
 

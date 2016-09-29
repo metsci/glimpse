@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
@@ -520,11 +521,11 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
                         if ( !horiz )
                         {
-                            //                            gl.glMatrixMode( GL2.GL_PROJECTION );
-                            //
-                            //                            gl.glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
-                            //                            gl.glRotated( 90, 0, 0, 1.0f );
-                            //                            gl.glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
+                            gl.getGL2( ).glMatrixMode( GL2.GL_PROJECTION );
+
+                            gl.getGL2( ).glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
+                            gl.getGL2( ).glRotated( 90, 0, 0, 1.0f );
+                            gl.getGL2( ).glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
                         }
 
                         GlimpseColor.setColor( textRenderer, textInfo.getColor( ) );
