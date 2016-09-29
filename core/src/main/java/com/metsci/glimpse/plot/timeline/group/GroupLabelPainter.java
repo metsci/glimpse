@@ -26,12 +26,9 @@
  */
 package com.metsci.glimpse.plot.timeline.group;
 
-import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
-import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
-
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -43,6 +40,12 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 public class GroupLabelPainter extends GlimpsePainterBase
 {
@@ -58,6 +61,13 @@ public class GroupLabelPainter extends GlimpsePainterBase
     protected boolean showDivider = true;
     protected boolean showArrow = true;
 
+    protected LineProgram lineProg;
+    protected LinePath linePath;
+    protected LineStyle lineStyle;
+
+    protected FlatColorProgram fillProg;
+    protected GLStreamingBufferBuilder fillPath;
+
     public GroupLabelPainter( String name )
     {
         this.textDelegate = new SimpleTextPainter( );
@@ -68,6 +78,17 @@ public class GroupLabelPainter extends GlimpsePainterBase
         this.textDelegate.setVerticalPadding( 0 );
         this.textDelegate.setText( name );
         this.textDelegate.setFont( FontUtils.getDefaultPlain( 14 ), true );
+
+        this.lineProg = new LineProgram( );
+        this.linePath = new LinePath( );
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.joinType = LineJoinType.JOIN_NONE;
+        this.lineStyle.feather_PX = 0;
+        this.lineStyle.thickness_PX = 1;
+        this.lineStyle.stippleEnable = false;
+
+        this.fillProg = new FlatColorProgram( );
+        this.fillPath = new GLStreamingBufferBuilder( );
     }
 
     public SimpleTextPainter getTextPainter( )
@@ -136,75 +157,88 @@ public class GroupLabelPainter extends GlimpsePainterBase
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void doPaintTo( GlimpseContext context )
     {
         this.textDelegate.paintTo( context );
 
+        GlimpseBounds bounds = getBounds( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-
-        GL2 gl = context.getGL( ).getGL2( );
-
-        gl.glMatrixMode( GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
-
-        gl.glMatrixMode( GL_MODELVIEW );
-        gl.glLoadIdentity( );
 
         // Paint Line
         if ( showDivider )
         {
             Rectangle2D textBounds = this.textDelegate.getTextBounds( );
-            float startY = ( float ) height / 2.0f;
+            float startY = height / 2.0f;
             float startX = ( float ) ( padding + this.textDelegate.getHorizontalPadding( ) + textBounds.getWidth( ) + ( textBounds.getMinX( ) ) - 1 );
 
-            gl.glLineWidth( 1.0f );
-            GlimpseColor.glColor( gl, lineColor );
-
-            gl.glBegin( GL2.GL_LINES );
+            lineProg.begin( gl );
             try
             {
-                gl.glVertex2f( startX, startY );
-                gl.glVertex2f( width, startY );
+                linePath.clear( );
+
+                linePath.moveTo( startX, startY );
+                linePath.lineTo( width, startY );
+
+                lineStyle.rgba = lineColor;
+
+                lineProg.draw( gl, lineStyle, linePath );
+
             }
             finally
             {
-                gl.glEnd( );
+                lineProg.end( gl );
             }
+
         }
 
         if ( showArrow )
         {
-            gl.glLineWidth( 1.0f );
-            GlimpseColor.glColor( gl, lineColor );
-
             float halfSize = buttonSize / 2.0f;
             float centerX = halfSize + padding;
             float centerY = height / 2.0f;
 
             // Paint Expand/Collapse Button
-            gl.glBegin( GL2.GL_POLYGON );
+            fillProg.begin( gl );
             try
             {
+                fillPath.clear( );
+
                 if ( isExpanded )
                 {
-                    gl.glVertex2f( centerX - halfSize, centerY + halfSize );
-                    gl.glVertex2f( centerX + halfSize, centerY + halfSize );
-                    gl.glVertex2f( centerX, centerY - halfSize );
+                    fillPath.addVertex2f( centerX - halfSize, centerY + halfSize );
+                    fillPath.addVertex2f( centerX + halfSize, centerY + halfSize );
+                    fillPath.addVertex2f( centerX, centerY - halfSize );
                 }
                 else
                 {
-                    gl.glVertex2f( centerX - halfSize, centerY - halfSize );
-                    gl.glVertex2f( centerX - halfSize, centerY + halfSize );
-                    gl.glVertex2f( centerX + halfSize, centerY );
+                    fillPath.addVertex2f( centerX - halfSize, centerY - halfSize );
+                    fillPath.addVertex2f( centerX - halfSize, centerY + halfSize );
+                    fillPath.addVertex2f( centerX + halfSize, centerY );
                 }
+
+                fillProg.draw( gl, fillPath, lineColor );
             }
             finally
             {
-                gl.glEnd( );
+                fillProg.end( gl );
             }
         }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        this.fillPath.dispose( gl );
+        this.linePath.dispose( gl );
+        this.fillProg.dispose( gl );
+        this.lineProg.dispose( gl );
+
+        this.textDelegate.dispose( context );
     }
 
     @Override
