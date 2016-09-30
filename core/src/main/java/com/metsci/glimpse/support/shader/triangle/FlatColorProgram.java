@@ -119,6 +119,14 @@ public class FlatColorProgram
         gl.glDrawArrays( mode, first, count );
     }
 
+    public void draw( GL2ES2 gl, int mode, int xyVbo, int stride, int offset, int first, int count )
+    {
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, stride, offset );
+
+        gl.glDrawArrays( mode, first, count );
+    }
+
     public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
     {
         setColor( gl, color );

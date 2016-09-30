@@ -61,6 +61,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.interval.IntervalQuadTree;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
@@ -74,6 +75,7 @@ import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.support.shader.line.StreamingLinePath;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * Paints large collections of arbitrary polygons (including concave polygons).
@@ -143,7 +145,8 @@ public class PolygonPainter extends GlimpsePainterBase
 
     protected PolygonPainterFlatColorProgram triangleFlatProg;
 
-    protected PolygonPainterLineProgram lineProg;
+    //protected PolygonPainterLineProgram lineProg;
+    protected FlatColorProgram lineProg;
 
     public PolygonPainter( )
     {
@@ -156,7 +159,8 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock = new ReentrantLock( );
 
         this.triangleFlatProg = new PolygonPainterFlatColorProgram( );
-        this.lineProg = new PolygonPainterLineProgram( );
+        //this.lineProg = new PolygonPainterLineProgram( );
+        this.lineProg = new FlatColorProgram( );
     }
 
     public void addPolygon( Object groupId, Object polygonId, float[] dataX, float[] dataY, float z )
@@ -794,7 +798,7 @@ public class PolygonPainter extends GlimpsePainterBase
             // copy all the track data into a host buffer
             ensureDataBufferSize( maxSize );
 
-            loaded.loadFillVerticesIntoBuffer( group, xyTempBuffer, 0, group.polygonMap.values( ) );
+            loaded.loadFillVerticesIntoBuffer( group.polygonMap.values( ), group, xyTempBuffer, 0 );
             loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
 
             // copy data from the host buffer into the device buffer
@@ -815,7 +819,7 @@ public class PolygonPainter extends GlimpsePainterBase
             // copy all the new track data into a host buffer
             ensureDataBufferSize( insertSize );
 
-            loaded.loadFillVerticesIntoBuffer( group, xyTempBuffer, currentSize, group.newPolygons );
+            loaded.loadFillVerticesIntoBuffer( group.newPolygons, group, xyTempBuffer, currentSize );
             loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
 
             // update the device buffer with the new data
@@ -923,7 +927,7 @@ public class PolygonPainter extends GlimpsePainterBase
             // copy all the new track data into a host buffer
             ensureDataBufferSize( insertSize );
 
-            loaded.loadLineVerticesIntoBuffer( group.polygonMap.values( ), group, xyTempBuffer, flagTempBuffer, mileageTempBuffer, currentSize, ppvAspectRatio );
+            loaded.loadLineVerticesIntoBuffer( group.newPolygons, group, xyTempBuffer, flagTempBuffer, mileageTempBuffer, currentSize, ppvAspectRatio );
             loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
 
             // update the device buffer with the new data
@@ -999,9 +1003,12 @@ public class PolygonPainter extends GlimpsePainterBase
             lineProg.begin( gl );
             try
             {
-                lineProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
-                lineProg.setViewport( gl, bounds );
-                lineProg.setStyle( gl, loaded.lineStyle );
+                //                lineProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                //                lineProg.setViewport( gl, bounds );
+                //                lineProg.setStyle( gl, loaded.lineStyle );
+
+                lineProg.setAxisOrtho( gl, axis );
+                lineProg.setColor( gl, GlimpseColor.getBlack( ) );
 
                 loaded.glLineOffsetBuffer.rewind( );
                 loaded.glLineCountBuffer.rewind( );
@@ -1020,7 +1027,11 @@ public class PolygonPainter extends GlimpsePainterBase
                         int lineCount = Math.min( 60000, lineCountRemaining ); // divisible by 2
                         int offset = loaded.glLineOffsetBuffer.get( i ) + ( lineCountTotal - lineCountRemaining );
 
-                        lineProg.draw( gl, loaded.glLineXyBufferHandle, loaded.glLineFlagBufferHandle, loaded.glLineMileageBufferHandle, offset, lineCount );
+                        System.out.println( offset + " " + lineCount );
+
+                        //lineProg.draw( gl, loaded.glLineXyBufferHandle, loaded.glLineFlagBufferHandle, loaded.glLineMileageBufferHandle, offset, lineCount );
+
+                        lineProg.draw( gl, GL.GL_LINE_STRIP, loaded.glLineXyBufferHandle, 12, 0, offset, lineCount );
 
                         lineCountRemaining -= lineCount;
                     }
@@ -1186,8 +1197,9 @@ public class PolygonPainter extends GlimpsePainterBase
             {
                 Loop loop = iter.next( );
                 int size = loop.size( );
-                // add two phantom vertices expected by LineProgram (see LinePathData)
-                vertexCount += size + 2;
+                // add 2 phantom vertices expected by LineProgram (see LinePathData)
+                // and 1 vertex to close the loop
+                vertexCount += size + 3;
                 primitiveCount += 1;
             }
 
@@ -1226,7 +1238,9 @@ public class PolygonPainter extends GlimpsePainterBase
                 if ( size >= 2 )
                 {
                     // see LinePathData for explanation of phantom vertices in line loops
-                    double[] phantom = loop.get( size - 2 );
+                    // we add the last vertex, not the second to last, as indicated in LinePathData because
+                    // loop does not duplicate the first vertex in the last vertex (closing the loop is implied)
+                    double[] phantom = loop.get( size - 1 );
                     xyBuffer.put( ( float ) phantom[0] ).put( ( float ) phantom[1] ).put( zCoord );
                     mileageBuffer.put( 0 );
                     flagBuffer.put( ( byte ) 0 );
@@ -1246,6 +1260,13 @@ public class PolygonPainter extends GlimpsePainterBase
                         priorVertex = vertex;
                     }
 
+                    // close the loop by adding first vertex again
+                    double[] vertex = loop.get( 0 );
+                    distance += LineUtils.distance( priorVertex[0], priorVertex[1], vertex[0], vertex[1], ppvAspectRatio );
+                    xyBuffer.put( ( float ) vertex[0] ).put( ( float ) vertex[1] ).put( zCoord );
+                    mileageBuffer.put( ( float ) distance );
+                    flagBuffer.put( ( byte ) ( FLAGS_CONNECT & FLAGS_JOIN ) );
+
                     // see LinePathData for explanation of phantom vertices in line loops
                     phantom = loop.get( 1 );
                     xyBuffer.put( ( float ) phantom[0] ).put( ( float ) phantom[1] ).put( zCoord );
@@ -1253,10 +1274,11 @@ public class PolygonPainter extends GlimpsePainterBase
                     flagBuffer.put( ( byte ) 0 );
 
                     lineOffsets[primitiveCount] = offsetVertex + totalSize;
-                    lineSizes[primitiveCount] = size;
+                    // add 2 to account for phantom vertices and 1 to account for the loop closing vertex
+                    lineSizes[primitiveCount] = size + 3;
 
                     primitiveCount++;
-                    totalSize += size;
+                    totalSize += size + 3;
                 }
             }
 
@@ -1532,7 +1554,7 @@ public class PolygonPainter extends GlimpsePainterBase
             }
         }
 
-        public void loadFillVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
+        public void loadFillVerticesIntoBuffer( Collection<IdPolygon> polygons, Group group, FloatBuffer vertexBuffer, int offsetVertex )
         {
             int vertexCount = 0;
             for ( IdPolygon polygon : polygons )
@@ -2046,7 +2068,7 @@ public class PolygonPainter extends GlimpsePainterBase
             {
                 this.program = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
 
-                this.NEAR_FAR = gl.glGetUniformLocation( this.program, "NEAR_FAR" );
+                this.NEAR_FAR = gl.glGetUniformLocation( program, "NEAR_FAR" );
                 this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
                 this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
 

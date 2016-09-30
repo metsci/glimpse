@@ -111,6 +111,10 @@ public class PolygonPainterExample implements GlimpseLayoutProvider
         polygonPainter.setPolyDotted( 4, true );
         polygonPainter.setPolyDotted( 3, true );
 
+        polygonPainter.setShowLines( 3, false );
+        polygonPainter.setShowLines( 4, false );
+        polygonPainter.setShowLines( 5, false );
+
         ( new Thread( )
         {
             @Override
