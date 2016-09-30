@@ -76,7 +76,7 @@ public class PolygonPainterExample implements GlimpseLayoutProvider
         polyplot.setMinZ( 0.0f );
         polyplot.setMaxZ( 1000.0f );
 
-        polyplot.lockAspectRatioXY( 1.0f );
+        //polyplot.lockAspectRatioXY( 1.0f );
 
         polyplot.setSelectionSize( 50000.0f );
 
@@ -94,6 +94,8 @@ public class PolygonPainterExample implements GlimpseLayoutProvider
         {
             polygonPainter.addPolygon( 2, i, i, i, new float[] { 0f, -i, -i, 0f }, new float[] { 0f, 0f, -i, -i }, i + 100 );
         }
+
+        polygonPainter.addPolygon( 2, 0, new float[] { 1000, 2000, 2000, 1000 }, new float[] { 1000, 1000, 2000, 2000 }, 0 );
 
         LineStyle style = new LineStyle( );
         style.joinType = LineJoinType.JOIN_MITER;

@@ -144,6 +144,9 @@ public class PolygonPainter extends GlimpsePainterBase
     protected PolygonPainterFlatColorProgram triangleFlatProg;
     protected PolygonPainterLineProgram lineProg;
 
+    protected double ppvAspectRatio = 0;
+    protected static final double ppvAspectRatioThreshold = 1.0000000001;
+
     public PolygonPainter( )
     {
         this.tessellator = new PolygonTessellator( );
@@ -662,6 +665,10 @@ public class PolygonPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = requireAxis2D( context );
+        double newPpvAspectRatio = LineUtils.ppvAspectRatio( axis );
+        boolean keepPpvAspectRatio = ( newPpvAspectRatio / ppvAspectRatioThreshold <= ppvAspectRatio && ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
+        ppvAspectRatio = newPpvAspectRatio;
 
         // something in a Group has changed so we must copy these
         // changes to the corresponding LoadedGroup (which is accessed
@@ -699,13 +706,17 @@ public class PolygonPainter extends GlimpsePainterBase
                     // if the corresponding LoadedGroup does not exist, create it
                     LoadedGroup loaded = getOrCreateLoadedGroup( id, group );
 
+                    // stippling was off and now it has been turned on
+                    // the mileage values could be outdated, so we need to update the whole group
+                    boolean stippleEnabled = !loaded.lineStyle.stippleEnable && group.lineStyle.stippleEnable;
+
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
 
                     if ( group.polygonsInserted )
                     {
                         updateVerticesFill( gl, loaded, group );
-                        updateVerticesLine( context, loaded, group );
+                        updateVerticesLine( context, loaded, group, stippleEnabled );
                     }
 
                     if ( group.polygonsSelected )
@@ -715,6 +726,22 @@ public class PolygonPainter extends GlimpsePainterBase
                     }
 
                     group.reset( );
+                }
+
+                // if the ppv aspect ratio changed, we need to recreate the mileage array for all polygons
+                // (but we only need to do so for groups with stippling enabled which weren't already updated
+                //  because they were in the updatedGroups list)
+                if ( !keepPpvAspectRatio )
+                {
+                    for ( Object id : loadedGroups.keySet( ) )
+                    {
+                        Group group = groups.get( id );
+                        LoadedGroup loaded = loadedGroups.get( id );
+                        if ( loaded.lineStyle.stippleEnable && !updatedGroups.contains( group ) )
+                        {
+                            updateVerticesLine( context, loaded, group, true );
+                        }
+                    }
                 }
 
                 this.updatedGroups.clear( );
@@ -827,7 +854,7 @@ public class PolygonPainter extends GlimpsePainterBase
         }
     }
 
-    protected void updateVerticesLine( GlimpseContext context, LoadedGroup loaded, Group group )
+    protected void updateVerticesLine( GlimpseContext context, LoadedGroup loaded, Group group, boolean ppvAspectRatioChanged )
     {
         Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
@@ -847,7 +874,7 @@ public class PolygonPainter extends GlimpsePainterBase
         // polygons have been deleted)
         int sizeNeeded = currentSize + insertSize;
 
-        if ( !initialized || maxSize < sizeNeeded )
+        if ( !initialized || maxSize < sizeNeeded || ppvAspectRatioChanged )
         {
             // if we've deleted vertices, but are still close to the max buffer size, then
             // go ahead and expand the max buffer size anyway
@@ -1442,7 +1469,7 @@ public class PolygonPainter extends GlimpsePainterBase
             this.linesOn = group.linesOn;
             this.polyStippleOn = group.polyStippleOn;
 
-            this.lineStyle = group.lineStyle;
+            this.lineStyle = new LineStyle( group.lineStyle );
 
             System.arraycopy( group.polyStipplePattern, 0, this.polyStipplePattern, 0, this.polyStipplePattern.length );
         }
@@ -1885,6 +1912,37 @@ public class PolygonPainter extends GlimpsePainterBase
             this.polygonsSelected = false;
             this.groupCleared = false;
             this.groupDeleted = false;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType( ).hashCode( );
+            result = prime * result + ( ( groupId == null ) ? 0 : groupId.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            Group other = ( Group ) obj;
+            if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
+            if ( groupId == null )
+            {
+                if ( other.groupId != null ) return false;
+            }
+            else if ( !groupId.equals( other.groupId ) ) return false;
+            return true;
+        }
+
+        private PolygonPainter getOuterType( )
+        {
+            return PolygonPainter.this;
         }
     }
 

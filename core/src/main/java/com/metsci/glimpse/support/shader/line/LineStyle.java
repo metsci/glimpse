@@ -2,6 +2,8 @@ package com.metsci.glimpse.support.shader.line;
 
 import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
 
+import java.util.Arrays;
+
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class LineStyle
@@ -71,5 +73,23 @@ public class LineStyle
      * type, only the bottom 16 bits are used. 1 = opaque, 0 = transparent.
      */
     public int stipplePattern = 0b0101010101010101;
+
+    public LineStyle( )
+    {
+
+    }
+
+    public LineStyle( LineStyle source )
+    {
+        this.thickness_PX = source.thickness_PX;
+        this.feather_PX = source.feather_PX;
+        this.joinType = source.joinType;
+        this.miterLimit = source.miterLimit;
+        this.rgba = Arrays.copyOf( source.rgba, source.rgba.length );
+
+        this.stippleEnable = source.stippleEnable;
+        this.stippleScale = source.stippleScale;
+        this.stipplePattern = source.stipplePattern;
+    }
 
 }
