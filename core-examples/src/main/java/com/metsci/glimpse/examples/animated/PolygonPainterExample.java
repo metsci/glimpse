@@ -36,8 +36,11 @@ import com.metsci.glimpse.painter.decoration.CopyrightPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.PolygonPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * Demonstrates usage of Polygon painter to display arbitrary (convex and concave) polygons.
@@ -91,6 +94,12 @@ public class PolygonPainterExample implements GlimpseLayoutProvider
         {
             polygonPainter.addPolygon( 2, i, i, i, new float[] { 0f, -i, -i, 0f }, new float[] { 0f, 0f, -i, -i }, i + 100 );
         }
+
+        LineStyle style = new LineStyle( );
+        style.joinType = LineJoinType.JOIN_MITER;
+
+        polygonPainter.setLineStyle( 1, style );
+        polygonPainter.setLineColor( 1, GlimpseColor.getYellow( ) );
 
         polygonPainter.addPolygon( 4, 1, new float[] { -10f, 0, 10, 10, 0f }, new float[] { -10f, 8, 0f, 10, 10 }, 200 );
 
