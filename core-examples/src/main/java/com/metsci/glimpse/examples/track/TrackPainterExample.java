@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.animated;
+package com.metsci.glimpse.examples.track;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,11 +56,11 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
  *
  * @author ulman
  */
-public class AnimatedGeoPlotExample implements GlimpseLayoutProvider
+public class TrackPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new AnimatedGeoPlotExample( ) );
+        Example.showWithSwing( new TrackPainterExample( ) );
     }
 
     public static final int NUMBER_OF_TRACKS = 2000;

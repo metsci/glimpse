@@ -36,6 +36,11 @@ public class ColorLinePath
         this.rgbaDirty = true;
     }
 
+    public LinePath getLinePath( )
+    {
+        return this.path;
+    }
+
     public void moveTo( float x, float y, float[] rgba )
     {
         this.moveTo( x, y, 0f, rgba );
