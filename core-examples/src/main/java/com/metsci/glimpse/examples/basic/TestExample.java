@@ -9,6 +9,7 @@ import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -16,7 +17,6 @@ import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.PolygonPainterSimple;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 public class TestExample implements GlimpseLayoutProvider

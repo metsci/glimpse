@@ -40,9 +40,9 @@ import javax.media.opengl.GL3;
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.texture.TextureUnit;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * A two dimensional texture storing float values.

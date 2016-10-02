@@ -38,11 +38,11 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**

@@ -9,7 +9,7 @@ import javax.media.opengl.GL2ES2;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 
 /**
  * Applies rgba colors to filled triangles.

@@ -11,7 +11,7 @@ import javax.media.opengl.GLES1;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 
 /**
  * Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.

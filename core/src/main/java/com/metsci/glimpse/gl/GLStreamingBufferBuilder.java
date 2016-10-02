@@ -1,4 +1,4 @@
-package com.metsci.glimpse.support.shader;
+package com.metsci.glimpse.gl;
 
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
@@ -7,8 +7,6 @@ import static javax.media.opengl.GL.*;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-
-import com.metsci.glimpse.gl.GLStreamingBuffer;
 
 /**
  * A buffer used for generating geometry for drawing using glDrawArrays.

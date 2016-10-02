@@ -1,8 +1,10 @@
 package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.support.shader.line.LinePathData.*;
-import static com.metsci.glimpse.support.shader.line.LineUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.support.shader.line.LineUtils.distance;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -38,7 +40,6 @@ public class StreamingLinePath
 
     // Valid only when sealed
     protected int numSealedVertices;
-
 
     public StreamingLinePath( )
     {
@@ -85,7 +86,7 @@ public class StreamingLinePath
 
     public void map( GL gl, int maxVertices, boolean needMileage, double ppvAspectRatio )
     {
-        this.xyBuffer = this.xyVbo.mapFloats( gl, 2*maxVertices );
+        this.xyBuffer = this.xyVbo.mapFloats( gl, 2 * maxVertices );
         this.flagsBuffer = this.flagsVbo.mapBytes( gl, maxVertices );
         this.mileageBuffer = this.mileageVbo.mapFloats( gl, maxVertices );
         this.needMileage = needMileage;
@@ -114,7 +115,7 @@ public class StreamingLinePath
         if ( iLast >= 0 )
         {
             int flagsLast = this.flagsHead;
-            this.flagsBuffer.put( 1*iLast, ( byte ) ( flagsLast & ~FLAGS_JOIN ) );
+            this.flagsBuffer.put( 1 * iLast, ( byte ) ( flagsLast & ~FLAGS_JOIN ) );
         }
 
         // About to start a new strip
@@ -152,12 +153,12 @@ public class StreamingLinePath
         // Rewrite position of leading phantom vertex
         float xSecondToLast = this.xHead;
         float ySecondToLast = this.yHead;
-        this.xyBuffer.put( 2*this.iStrip + 0, xSecondToLast );
-        this.xyBuffer.put( 2*this.iStrip + 1, ySecondToLast );
+        this.xyBuffer.put( 2 * this.iStrip + 0, xSecondToLast );
+        this.xyBuffer.put( 2 * this.iStrip + 1, ySecondToLast );
 
         // Rewrite flags of first vertex in strip
         int iFirst = this.iStrip + 1;
-        this.flagsBuffer.put( 1*iFirst, FLAGS_JOIN );
+        this.flagsBuffer.put( 1 * iFirst, FLAGS_JOIN );
 
         // Append loop-closing vertex
         this.appendVertex( this.xFirst, this.yFirst, FLAGS_CONNECT | FLAGS_JOIN );

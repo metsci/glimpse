@@ -32,6 +32,7 @@ import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
@@ -40,7 +41,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;

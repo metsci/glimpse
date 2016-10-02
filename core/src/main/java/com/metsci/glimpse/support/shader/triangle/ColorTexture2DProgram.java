@@ -11,8 +11,8 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
-import com.metsci.glimpse.support.shader.GLStreamingBufferBuilder;
 
 /**
  * Applies a 2d rgba texture to triangles specified in axis coordinates.
