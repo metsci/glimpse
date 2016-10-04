@@ -531,6 +531,7 @@ public class TooltipPainter extends SimpleTextPainter
             // draw icons
             if ( iconIds != null && !iconIds.isEmpty( ) )
             {
+                GLUtils.enableStandardBlending( gl );
                 atlas.beginRenderingPixelOrtho( context, bounds );
                 try
                 {
@@ -563,6 +564,7 @@ public class TooltipPainter extends SimpleTextPainter
                 finally
                 {
                     atlas.endRendering( context );
+                    GLUtils.disableBlending( gl );
                 }
             }
         }
