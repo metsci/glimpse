@@ -37,7 +37,10 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorMap;
 import com.metsci.glimpse.support.shader.line.ColorLinePath;
 import com.metsci.glimpse.support.shader.line.ColorLineProgram;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
 import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineUtils;
+import com.metsci.glimpse.support.shader.point.PointArrayColorProgram;
 
 /**
  * Plots a simple x-y lineplot. Provides options for modifying line thickness and color.
@@ -51,7 +54,12 @@ public class XYLinePainter extends GlimpsePainterBase
     protected ColorLinePath path;
     protected ColorLineProgram prog;
     protected LineStyle style;
+    
+    protected PointArrayColorProgram pointProg;
 
+    protected float pointSize = 8.0f;
+    protected float pointFeather = 4.0f;
+    
     protected boolean showPoints = true;
     protected boolean showLines = true;
 
@@ -60,6 +68,10 @@ public class XYLinePainter extends GlimpsePainterBase
         this.path = new ColorLinePath( );
         this.prog = new ColorLineProgram( );
         this.style = new LineStyle( );
+        this.style.thickness_PX = 3.5f;
+        this.style.joinType = LineJoinType.JOIN_BEVEL;
+        
+        this.pointProg = new PointArrayColorProgram( );
     }
 
     public void setDataAndColor( double[] dataX, double[] dataY, double[] dataZ, ColorMap scale )
@@ -139,7 +151,12 @@ public class XYLinePainter extends GlimpsePainterBase
         }
     }
 
-    public void setData( double[] dataX, double[] dataY )
+    public void setData( float[] dataX, float[] dataY )
+    {
+        this.setData( dataX, dataY, defaultColor );
+    }
+    
+    public void setData( float[] dataX, float[] dataY, float[] color )
     {
         this.painterLock.lock( );
         try
@@ -151,9 +168,9 @@ public class XYLinePainter extends GlimpsePainterBase
             for ( int i = 0; i < dataSize; i++ )
             {
                 if ( i == 0 )
-                    this.path.moveTo( ( float ) dataX[i], ( float ) dataY[i], defaultColor );
+                    this.path.moveTo( dataX[i], dataY[i], color );
                 else
-                    this.path.lineTo( ( float ) dataX[i], ( float ) dataY[i], defaultColor );
+                    this.path.lineTo( dataX[i], dataY[i], color );
             }
         }
         finally
@@ -184,10 +201,15 @@ public class XYLinePainter extends GlimpsePainterBase
         this.style = style;
     }
 
-    //    public void setPointSize( float pointSize )
-    //    {
-    //        this.pointSize = pointSize;
-    //    }
+    public void setPointSize( float pointSize )
+    {
+        this.pointSize = pointSize;
+    }
+    
+    public void setPointFeather( float pointFeather )
+    {
+        this.pointFeather = pointFeather;
+    }
 
     public void showPoints( boolean show )
     {
@@ -212,6 +234,7 @@ public class XYLinePainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = requireAxis2D( context );
+        double ppvAspectRatio = LineUtils.ppvAspectRatio( axis );
 
         GLUtils.enableStandardBlending( gl );
         try
@@ -224,11 +247,29 @@ public class XYLinePainter extends GlimpsePainterBase
                     this.prog.setAxisOrtho( gl, axis );
                     this.prog.setViewport( gl, bounds );
 
-                    this.prog.draw( gl, style, path );
+                    this.prog.draw( gl, style, path, ppvAspectRatio );
                 }
                 finally
                 {
                     this.prog.end( gl );
+                }
+            }
+            
+            if ( this.showPoints )
+            {
+                this.pointProg.begin( gl );
+                try
+                {
+                    this.pointProg.setAxisOrtho( gl, axis );
+                    this.pointProg.setPointSize( gl, this.pointSize );
+                    this.pointProg.setFeatherThickness( gl, this.pointFeather );
+
+                    // skip the first and last phantom vertices
+                    this.pointProg.draw( gl, path.xyVbo( gl ), path.rgbaVbo( gl ), 1, path.numVertices( )-2 );
+                }
+                finally
+                {
+                    this.pointProg.end( gl );
                 }
             }
         }

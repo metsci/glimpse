@@ -41,6 +41,7 @@ import javax.media.opengl.GL3;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -97,6 +98,8 @@ public abstract class LegendPainter extends GlimpsePainterBase
     private volatile boolean antialias = false;
 
     protected FlatColorProgram flatProg;
+    protected GLStreamingBufferBuilder flatPath;
+    
     protected LineProgram lineProg;
     protected LineStyle style;
     protected LinePath path;
@@ -116,6 +119,7 @@ public abstract class LegendPainter extends GlimpsePainterBase
         this.style.stippleEnable = false;
 
         this.path = new LinePath( );
+        this.flatPath = new GLStreamingBufferBuilder( );
     }
 
     public LegendPainter setFont( Font font )
@@ -322,13 +326,13 @@ public abstract class LegendPainter extends GlimpsePainterBase
                 flatProg.setPixelOrtho( gl, glimpseBounds );
                 flatProg.setColor( gl, GlimpseColor.getWhite( ) );
 
-                path.clear( );
-                path.lineTo( lx, ly );
-                path.lineTo( lx, ly - lh );
-                path.lineTo( lx + lw, ly );
-                path.lineTo( lx + lw, ly - lh );
+                flatPath.clear( );
+                flatPath.addVertex2f( lx, ly );
+                flatPath.addVertex2f( lx, ly - lh );
+                flatPath.addVertex2f( lx + lw, ly );
+                flatPath.addVertex2f( lx + lw, ly - lh );
 
-                flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, path.xyVbo( gl ), 0, 4 );
+                flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 4 );
             }
             finally
             {
@@ -456,13 +460,13 @@ public abstract class LegendPainter extends GlimpsePainterBase
             {
                 flatProg.setColor( gl3, rgba );
 
-                path.clear( );
-                path.lineTo( xpos, ypos );
-                path.lineTo( xpos + itemWidth, ypos );
-                path.lineTo( xpos, ypos - height );
-                path.lineTo( xpos + itemWidth, ypos - height );
+                flatPath.clear( );
+                flatPath.addVertex2f( xpos, ypos );
+                flatPath.addVertex2f( xpos + itemWidth, ypos );
+                flatPath.addVertex2f( xpos, ypos - height );
+                flatPath.addVertex2f( xpos + itemWidth, ypos - height );
 
-                flatProg.draw( gl3, GL.GL_TRIANGLE_STRIP, path.xyVbo( gl ), 0, 4 );
+                flatProg.draw( gl3, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 4 );
             }
             finally
             {
@@ -613,6 +617,7 @@ public abstract class LegendPainter extends GlimpsePainterBase
         this.flatProg.dispose( context.getGL( ).getGL3( ) );
 
         this.path.dispose( context.getGL( ) );
+        this.flatPath.dispose( context.getGL( ) );
     }
 
 }

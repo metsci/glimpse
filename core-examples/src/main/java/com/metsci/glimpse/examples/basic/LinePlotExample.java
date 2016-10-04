@@ -26,13 +26,22 @@
  */
 package com.metsci.glimpse.examples.basic;
 
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.axis.painter.NumericAxisPainter;
+import com.metsci.glimpse.axis.painter.NumericRightYAxisPainter;
+import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.LegendPainter.BlockLegendPainter;
 import com.metsci.glimpse.painter.decoration.LegendPainter.LegendPlacement;
+import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.plot.XYLinePainter;
-import com.metsci.glimpse.plot.EmptyPlot2D;
+import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * A basic x/y line plot with a simple legend.
@@ -49,66 +58,66 @@ public class LinePlotExample implements GlimpseLayoutProvider
     public static int NUM_POINTS = 100;
 
     @Override
-    public EmptyPlot2D getLayout( )
+    public SimplePlot2D getLayout( )
     {
         // create a plot frame
-        EmptyPlot2D plot = new EmptyPlot2D( );
-//        {
-//            // paint the z axis with a custom painter which places tick marks on the left hand side
-//            @Override
-//            protected NumericAxisPainter createAxisPainterZ( AxisLabelHandler tickHandler )
-//            {
-//                return new NumericRightYAxisPainter( tickHandler );
-//            }
-//        };
+        SimplePlot2D plot = new SimplePlot2D( )
+        {
+            // paint the z axis with a custom painter which places tick marks on the left hand side
+            @Override
+            protected NumericAxisPainter createAxisPainterZ( AxisLabelHandler tickHandler )
+            {
+                return new NumericRightYAxisPainter( tickHandler );
+            }
+        };
 
-//        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( plot.getAxisX( ), plot.getAxisZ( ) );
-//        layout.setEventConsumer( false );
-//        plot.getLayoutCenter( ).addLayout( layout );
-//
-//        AxisMouseListener listener = new AxisMouseListener2D( );
-//        layout.addGlimpseMouseAllListener( listener );
-//
-//        // set the size of the custom z axis (which acts as the Y axis
-//        // for the second data series)
-//        plot.setAxisSizeZ( 40 );
-//
-//        // customize the pixel sizes of the y axis and borders
-//        plot.setBorderSize( 15 );
-//        plot.setAxisSizeY( 40 );
-//
-//        // set axis labels and chart title
-//        plot.setTitle( "Line Plot Example" );
-//        plot.setAxisLabelX( "x axis" );
-//        plot.setAxisLabelY( "data series 1" );
-//        plot.setAxisLabelZ( "data series 2" );
-//
-//        // set the x, y initial axis bounds
-//        plot.setMinX( 0.0 );
-//        plot.setMaxX( 100.0 );
-//
-//        plot.setMinY( 0.0 );
-//        plot.setMaxY( 10.0 );
-//
-//        // don't show the square selection box, only the x and y crosshairs
-//        plot.getCrosshairPainter( ).showSelectionBox( false );
-//
-//        // creating a data series painter, passing it the lineplot frame
-//        // this constructor will have the painter draw according to the lineplot x and y axis
-//        XYLinePainter series1 = createXYLinePainter1( );
-//        plot.addPainter( series1 );
-//
-//        // in order for our second data series to use the right hand
-//        // axis as its y axis, we must manually specify the axes which it should use
-//        XYLinePainter series2 = createXYLinePainter2( );
-//        layout.addPainter( series2 );
-//
-//        // add a painter to display the x and y position of the cursor
-//        CursorTextPainter cursorPainter = new CursorTextPainter( );
-//        plot.addPainter( cursorPainter );
-//
-//        // don't offset the text by the size of the selection box, since we aren't showing it
-//        cursorPainter.setOffsetBySelectionSize( false );
+        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( plot.getAxisX( ), plot.getAxisZ( ) );
+        layout.setEventConsumer( false );
+        plot.getLayoutCenter( ).addLayout( layout );
+
+        AxisMouseListener listener = new AxisMouseListener2D( );
+        layout.addGlimpseMouseAllListener( listener );
+
+        // set the size of the custom z axis (which acts as the Y axis
+        // for the second data series)
+        plot.setAxisSizeZ( 40 );
+
+        // customize the pixel sizes of the y axis and borders
+        plot.setBorderSize( 15 );
+        plot.setAxisSizeY( 40 );
+
+        // set axis labels and chart title
+        plot.setTitle( "Line Plot Example" );
+        plot.setAxisLabelX( "x axis" );
+        plot.setAxisLabelY( "data series 1" );
+        plot.setAxisLabelZ( "data series 2" );
+
+        // set the x, y initial axis bounds
+        plot.setMinX( 0.0 );
+        plot.setMaxX( 100.0 );
+
+        plot.setMinY( 0.0 );
+        plot.setMaxY( 10.0 );
+
+        // don't show the square selection box, only the x and y crosshairs
+        plot.getCrosshairPainter( ).showSelectionBox( false );
+
+        // creating a data series painter, passing it the lineplot frame
+        // this constructor will have the painter draw according to the lineplot x and y axis
+        XYLinePainter series1 = createXYLinePainter1( );
+        plot.addPainter( series1 );
+
+        // in order for our second data series to use the right hand
+        // axis as its y axis, we must manually specify the axes which it should use
+        XYLinePainter series2 = createXYLinePainter2( );
+        layout.addPainter( series2 );
+
+        // add a painter to display the x and y position of the cursor
+        CursorTextPainter cursorPainter = new CursorTextPainter( );
+        plot.addPainter( cursorPainter );
+
+        // don't offset the text by the size of the selection box, since we aren't showing it
+        cursorPainter.setOffsetBySelectionSize( false );
 
         BlockLegendPainter legend = new BlockLegendPainter( LegendPlacement.SE );
 
@@ -136,10 +145,16 @@ public class LinePlotExample implements GlimpseLayoutProvider
 
         XYLinePainter series1 = new XYLinePainter( );
         generateData1( dataX, dataY, NUM_POINTS );
-        series1.setData( dataX, dataY );
-        series1.setLineColor( GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 0.8f ) );
-        series1.setLineThickness( 0.5f );
-        series1.showPoints( false );
+        series1.setData( dataX, dataY, GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 1.0f ) );
+        
+        LineStyle style = new LineStyle( );
+        style.thickness_PX = 3.5f;
+        style.joinType = LineJoinType.JOIN_BEVEL;
+        
+        series1.setLineStyle( style );
+        series1.showPoints( true );
+        series1.setPointSize( 8f );
+        series1.setPointFeather( 4.0f );
 
         return series1;
     }
@@ -154,11 +169,11 @@ public class LinePlotExample implements GlimpseLayoutProvider
 
         // setting series2's data and display settings works the same way
         generateData2( dataX, dataY, NUM_POINTS );
-        series2.setData( dataX, dataY );
-        series2.setLineColor( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 1.0f, 0.8f ) );
+        series2.setData( dataX, dataY, GlimpseColor.fromColorRgba( 0.0f, 0.0f, 1.0f, 0.8f ) );
         series2.setLineThickness( 1.5f );
         series2.showPoints( false );
         series2.setLineStipple( true );
+        series2.setLineStipple( 1, (short) 0xFF00 );
 
         return series2;
     }
