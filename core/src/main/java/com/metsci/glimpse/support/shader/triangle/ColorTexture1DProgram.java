@@ -1,7 +1,11 @@
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TRIANGLES;
+import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
@@ -72,6 +76,12 @@ public class ColorTexture1DProgram implements DrawableTextureProgram
     }
 
     @Override
+    public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
+    {
+        this.begin( context );
+        this.setOrtho( context, xMin, xMax, yMin, yMax );
+    }
+
     public void begin( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
@@ -96,7 +106,6 @@ public class ColorTexture1DProgram implements DrawableTextureProgram
         setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
-    @Override
     public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
         GL3 gl = context.getGL( ).getGL3( );

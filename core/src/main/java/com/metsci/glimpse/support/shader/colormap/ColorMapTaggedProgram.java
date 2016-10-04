@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.support.shader.colormap;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -153,6 +154,12 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     }
 
     @Override
+    public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
+    {
+        this.begin( context );
+        this.setOrtho( context, xMin, xMax, yMin, yMax );
+    }
+
     public void begin( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
@@ -178,7 +185,6 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
         setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
-    @Override
     public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
         this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { xMin, xMax, yMin, yMax } ) );

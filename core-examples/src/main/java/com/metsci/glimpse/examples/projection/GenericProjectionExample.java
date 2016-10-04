@@ -61,7 +61,7 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
         ColorAxisPlot2D plot = new ColorAxisPlot2D( );
 
         // set axis labels and chart title
-        plot.setTitle( "Heat Map Example" );
+        plot.setTitle( "Generic Projection Example" );
         plot.setAxisLabelX( "x axis" );
         plot.setAxisLabelY( "y axis" );
 

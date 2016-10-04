@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static java.util.logging.Level.*;
+import static java.util.logging.Level.WARNING;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -119,9 +119,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
 
         Axis2D axis = GlimpsePainterBase.getAxis2D( context );
 
-        program.setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
-
-        program.begin( context );
+        program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         try
         {
             program.draw( context, getMode( ), xyVbo( context ), sVbo( context ), 0, this.xyBuilder.numFloats( ) / 2 );

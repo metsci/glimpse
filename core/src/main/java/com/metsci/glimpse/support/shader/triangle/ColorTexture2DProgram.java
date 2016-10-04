@@ -78,7 +78,6 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         return this.handles;
     }
 
-    @Override
     public void begin( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
@@ -95,6 +94,14 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         gl.glEnableVertexAttribArray( this.handles.inS );
     }
 
+    @Override
+    public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
+    {
+        this.begin( context );
+
+        this.setOrtho( context, xMin, xMax, yMin, yMax );
+    }
+
     public void setAxisOrtho( GlimpseContext context, Axis2D axis )
     {
         setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
@@ -105,7 +112,6 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
-    @Override
     public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
         GL3 gl = context.getGL( ).getGL3( );

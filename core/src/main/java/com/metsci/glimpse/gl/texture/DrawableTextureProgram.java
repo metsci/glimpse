@@ -12,9 +12,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
  */
 public interface DrawableTextureProgram
 {
-    public void begin( GlimpseContext context );
-
-    public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax );
+    public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax );
 
     public void draw( GlimpseContext context, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count );
 

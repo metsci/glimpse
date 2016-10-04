@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.support.shader.colormap;
 
-import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -112,6 +113,9 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
 
         this.AXIS_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "AXIS_RECT", 4 ) );
+        // without setting default data, we will get "javax.media.opengl.GLException: glUniform atom only available for 1i and 1f"
+        // if begin( ) is called before setOrtho( )
+        this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { 0, 1, 0, 1 } ) );
 
         this.colorAxis = colorAxis;
         this.colorAxis.addAxisListener( this );
@@ -164,8 +168,10 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     }
 
     @Override
-    public void begin( GlimpseContext context )
+    public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
+        setOrtho( context, xMin, xMax, yMin, yMax );
+
         GL3 gl = context.getGL( ).getGL3( );
 
         this.useProgram( context.getGL( ), true );
@@ -189,7 +195,6 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
-    @Override
     public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
         this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { xMin, xMax, yMin, yMax } ) );

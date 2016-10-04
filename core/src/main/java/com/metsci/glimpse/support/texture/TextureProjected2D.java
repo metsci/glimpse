@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static java.util.logging.Level.*;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureDim;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static java.util.logging.Level.WARNING;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -287,9 +288,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         Axis2D axis = GlimpsePainterBase.getAxis2D( context );
         GL3 gl = GlimpsePainterBase.getGL3( context );
 
-        program.setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
-
-        program.begin( context );
+        program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         try
         {
             for ( int i = 0; i < numTextures; i++ )

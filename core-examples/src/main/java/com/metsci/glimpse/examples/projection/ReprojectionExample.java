@@ -39,7 +39,6 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
 import com.metsci.glimpse.gl.util.GLUtils;
@@ -50,6 +49,7 @@ import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.projection.PolarProjection;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 
@@ -142,10 +142,8 @@ public class ReprojectionExample
             boolean initialized = false;
 
             @Override
-            public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+            public void doPaintTo( GlimpseContext context )
             {
-                super.paintTo( context, bounds, axis );
-
                 if ( !initialized && offscreenCanvas.getGLDrawable( ).isInitialized( ) )
                 {
                     TextureProjected2D texture = offscreenCanvas.getProjectedTexture( );
@@ -153,8 +151,12 @@ public class ReprojectionExample
                     addDrawableTexture( texture );
                     initialized = true;
                 }
+
+                super.doPaintTo( context );
             }
         };
+
+        painter.setProgram( new ColorTexture2DProgram( ) );
 
         layout2.addPainter( new BackgroundPainter( true ) );
         layout2.addPainter( painter );
