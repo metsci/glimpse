@@ -49,6 +49,34 @@ public class GLEditableBuffer
         return buffer;
     }
 
+    public void setFloats( GL2ES3 gl, long firstFloat, FloatBuffer floats )
+    {
+        FloatBuffer mapped = this.mapFloats( gl, firstFloat, floats.remaining( ) );
+        mapped.put( floats );
+        this.seal( gl );
+    }
+
+    public void setDoubles( GL2ES3 gl, long firstDouble, DoubleBuffer doubles )
+    {
+        DoubleBuffer mapped = this.mapDoubles( gl, firstDouble, doubles.remaining( ) );
+        mapped.put( doubles );
+        this.seal( gl );
+    }
+
+    public void setInts( GL2ES3 gl, long firstInt, IntBuffer ints )
+    {
+        IntBuffer mapped = this.mapInts( gl, firstInt, ints.remaining( ) );
+        mapped.put( ints );
+        this.seal( gl );
+    }
+
+    public void setBytes( GL2ES3 gl, long firstByte, ByteBuffer bytes )
+    {
+        ByteBuffer mapped = this.mapBytes( gl, firstByte, bytes.remaining( ) );
+        mapped.put( bytes );
+        this.seal( gl );
+    }
+
     public FloatBuffer mapFloats( GL gl, long firstFloat, long numFloats )
     {
         return this.mapBytes( gl, firstFloat * SIZEOF_FLOAT, numFloats * SIZEOF_FLOAT ).asFloatBuffer( );
