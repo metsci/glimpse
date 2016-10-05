@@ -129,12 +129,12 @@ public class GLStreamingBuffer
      */
     public int buffer( GL gl )
     {
-        if ( buffer == 0 )
+        if ( this.buffer == 0 )
         {
             this.buffer = genBuffer( gl );
         }
 
-        return buffer;
+        return this.buffer;
     }
 
     /**
@@ -145,7 +145,7 @@ public class GLStreamingBuffer
      */
     public long sealedOffset( )
     {
-        return sealedOffset;
+        return this.sealedOffset;
     }
 
     /**
@@ -156,9 +156,9 @@ public class GLStreamingBuffer
      */
     public void setFloats( GL gl, FloatBuffer floats )
     {
-        FloatBuffer mapped = mapFloats( gl, floats.remaining( ) );
+        FloatBuffer mapped = this.mapFloats( gl, floats.remaining( ) );
         mapped.put( floats );
-        seal( gl );
+        this.seal( gl );
     }
 
     /**
@@ -169,9 +169,9 @@ public class GLStreamingBuffer
      */
     public void setDoubles( GL gl, DoubleBuffer doubles )
     {
-        DoubleBuffer mapped = mapDoubles( gl, doubles.remaining( ) );
+        DoubleBuffer mapped = this.mapDoubles( gl, doubles.remaining( ) );
         mapped.put( doubles );
-        seal( gl );
+        this.seal( gl );
     }
 
     /**
@@ -182,9 +182,9 @@ public class GLStreamingBuffer
      */
     public void setInts( GL gl, IntBuffer ints )
     {
-        IntBuffer mapped = mapInts( gl, ints.remaining( ) );
+        IntBuffer mapped = this.mapInts( gl, ints.remaining( ) );
         mapped.put( ints );
-        seal( gl );
+        this.seal( gl );
     }
 
     /**
@@ -195,9 +195,9 @@ public class GLStreamingBuffer
      */
     public void setBytes( GL gl, ByteBuffer bytes )
     {
-        ByteBuffer mapped = mapBytes( gl, bytes.remaining( ) );
+        ByteBuffer mapped = this.mapBytes( gl, bytes.remaining( ) );
         mapped.put( bytes );
-        seal( gl );
+        this.seal( gl );
     }
 
     /**
@@ -206,7 +206,7 @@ public class GLStreamingBuffer
      */
     public FloatBuffer mapFloats( GL gl, long numFloats )
     {
-        return mapBytes( gl, numFloats * SIZEOF_FLOAT ).asFloatBuffer( );
+        return this.mapBytes( gl, numFloats * SIZEOF_FLOAT ).asFloatBuffer( );
     }
 
     /**
@@ -215,7 +215,7 @@ public class GLStreamingBuffer
      */
     public DoubleBuffer mapDoubles( GL gl, long numDoubles )
     {
-        return mapBytes( gl, numDoubles * SIZEOF_DOUBLE ).asDoubleBuffer( );
+        return this.mapBytes( gl, numDoubles * SIZEOF_DOUBLE ).asDoubleBuffer( );
     }
 
     /**
@@ -224,7 +224,7 @@ public class GLStreamingBuffer
      */
     public IntBuffer mapInts( GL gl, long numInts )
     {
-        return mapBytes( gl, numInts * SIZEOF_INT ).asIntBuffer( );
+        return this.mapBytes( gl, numInts * SIZEOF_INT ).asIntBuffer( );
     }
 
     /**
@@ -241,29 +241,29 @@ public class GLStreamingBuffer
      */
     public ByteBuffer mapBytes( GL gl, long numBytes )
     {
-        if ( mappedSize != 0 )
+        if ( this.mappedSize != 0 )
         {
             throw new RuntimeException( "Buffer is already mapped -- must be sealed before being mapped again" );
         }
 
-        gl.glBindBuffer( target, this.buffer( gl ) );
+        gl.glBindBuffer( this.target, this.buffer( gl ) );
 
         // Seems recommended to map in multiples of 64 ... I guess for alignment reasons?
         this.mappedSize = nextMultiple( numBytes, 64 );
 
-        if ( mappedOffset + mappedSize > blockSize )
+        if ( this.mappedOffset + this.mappedSize > this.blockSize )
         {
             // Allocate a block large enough that we don't have to allocate too frequently
-            this.blockSize = max( blockSize, blockSizeFactor * mappedSize );
+            this.blockSize = max( this.blockSize, this.blockSizeFactor * this.mappedSize );
 
             // Allocate new space, and orphan the old space
-            gl.glBufferData( target, blockSize, null, usage );
+            gl.glBufferData( this.target, this.blockSize, null, this.usage );
 
             // Start at the beginning of the new space
             this.mappedOffset = 0;
         }
 
-        return gl.glMapBufferRange( target, mappedOffset, mappedSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
+        return gl.glMapBufferRange( this.target, this.mappedOffset, this.mappedSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
     }
 
     /**
@@ -279,16 +279,16 @@ public class GLStreamingBuffer
      */
     public void seal( GL gl )
     {
-        if ( mappedSize == 0 )
+        if ( this.mappedSize == 0 )
         {
             throw new RuntimeException( "Buffer is not currently mapped" );
         }
 
-        gl.glBindBuffer( target, buffer );
-        gl.glUnmapBuffer( target );
+        gl.glBindBuffer( this.target, this.buffer );
+        gl.glUnmapBuffer( this.target );
 
-        this.sealedOffset = mappedOffset;
-        this.mappedOffset += mappedSize;
+        this.sealedOffset = this.mappedOffset;
+        this.mappedOffset += this.mappedSize;
         this.mappedSize = 0;
     }
 
