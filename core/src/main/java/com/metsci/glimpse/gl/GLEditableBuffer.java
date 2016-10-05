@@ -2,6 +2,7 @@ package com.metsci.glimpse.gl;
 
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static java.lang.Math.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL2ES2.*;
 import static javax.media.opengl.GL2ES3.*;
@@ -18,8 +19,9 @@ public class GLEditableBuffer
 {
 
     public final int target;
-    public final long numBytes;
+
     protected int buffer;
+    protected long size;
 
     protected final GLStreamingBuffer scratch;
     protected long mappedOffset;
@@ -29,8 +31,9 @@ public class GLEditableBuffer
     public GLEditableBuffer( int target, long numBytes, int scratchBlockSizeFactor )
     {
         this.target = target;
-        this.numBytes = numBytes;
+
         this.buffer = 0;
+        this.size = numBytes;
 
         this.scratch = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, scratchBlockSizeFactor );
         this.mappedOffset = 0;
@@ -43,10 +46,29 @@ public class GLEditableBuffer
         {
             this.buffer = genBuffer( gl );
             gl.glBindBuffer( this.target, this.buffer );
-            gl.glBufferData( this.target, this.numBytes, null, GL_STATIC_COPY );
+            gl.glBufferData( this.target, this.size, null, GL_STATIC_COPY );
         }
 
         return buffer;
+    }
+
+    public void ensureCapacity( GL2ES3 gl, long minBytes )
+    {
+        if ( this.size < minBytes )
+        {
+            int oldBuffer = this.buffer;
+            long oldSize = this.size;
+
+            this.buffer = 0;
+            this.size = max( minBytes, ( long ) ceil( 1.618 * oldSize ) );
+
+            if ( oldBuffer != 0 )
+            {
+                gl.glBindBuffer( GL_COPY_READ_BUFFER, oldBuffer );
+                gl.glBindBuffer( GL_COPY_WRITE_BUFFER, this.buffer( gl ) );
+                gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, oldSize );
+            }
+        }
     }
 
     public void setFloats( GL2ES3 gl, long firstFloat, FloatBuffer floats )
