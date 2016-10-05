@@ -57,6 +57,7 @@ public class TileFactories
         Tile newTile( );
     }
 
+    @SuppressWarnings("serial")
     public static class TileFactoryStandard implements TileFactory
     {
         public final DockingGroup dockingGroup;
@@ -75,6 +76,7 @@ public class TileFactories
 
             final JButton maximizeButton = new JButton( theme.maximizeIcon )
             {
+                @Override
                 public void paintComponent( Graphics g )
                 {
                     Tile tile = tileRef[0];
@@ -88,12 +90,14 @@ public class TileFactories
 
             TabComponentFactory tabCornerComponentFactory = new TabComponentFactory( )
             {
+                @Override
                 public Component createComponent( final Tile tile, final View view )
                 {
                     if ( view.closeable )
                     {
                         JButton closeButton = new JButton( )
                         {
+                            @Override
                             public void paintComponent( Graphics g )
                             {
                                 Icon icon;
@@ -123,6 +127,7 @@ public class TileFactories
 
                         closeButton.addActionListener( new ActionListener( )
                         {
+                            @Override
                             public void actionPerformed( ActionEvent ev )
                             {
                                 dockingGroup.closeView( view );
@@ -162,6 +167,7 @@ public class TileFactories
             //
             tile.getToolkit( ).addAWTEventListener( new AWTEventListener( )
             {
+                @Override
                 public void eventDispatched( AWTEvent ev )
                 {
                     if ( ev instanceof MouseWheelEvent )
@@ -173,6 +179,7 @@ public class TileFactories
 
             maximizeButton.addActionListener( new ActionListener( )
             {
+                @Override
                 public void actionPerformed( ActionEvent ev )
                 {
                     MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );

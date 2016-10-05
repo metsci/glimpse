@@ -45,6 +45,7 @@ import javax.swing.JPanel;
 
 import com.metsci.glimpse.docking.SplitPane.SplitPaneListener;
 
+@SuppressWarnings("serial")
 public class MultiSplitPane extends JPanel
 {
 
@@ -65,26 +66,32 @@ public class MultiSplitPane extends JPanel
 
     public static class MultiSplitPaneAdapter implements MultiSplitPaneListener
     {
+        @Override
         public void addedLeaf( Component leaf )
         {
         }
 
+        @Override
         public void removedLeaf( Component leaf )
         {
         }
 
+        @Override
         public void movedDivider( SplitPane splitPane )
         {
         }
 
+        @Override
         public void maximizedLeaf( Component leaf )
         {
         }
 
+        @Override
         public void unmaximizedLeaf( Component leaf )
         {
         }
 
+        @Override
         public void restoredTree( )
         {
         }
@@ -192,6 +199,7 @@ public class MultiSplitPane extends JPanel
         final SplitPane newSplitPane = new SplitPane( arrangeVertically, splitFrac, gapSize );
         newSplitPane.addListener( new SplitPaneListener( )
         {
+            @Override
             public void movedDivider( )
             {
                 for ( MultiSplitPaneListener listener : listeners )
@@ -416,6 +424,7 @@ public class MultiSplitPane extends JPanel
             final SplitPane splitPane = ( SplitPane ) c;
             splitPane.addListener( new SplitPaneListener( )
             {
+                @Override
                 public void movedDivider( )
                 {
                     for ( MultiSplitPaneListener listener : listeners )

@@ -47,6 +47,7 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class SplitPane extends JPanel
 {
 
@@ -112,6 +113,7 @@ public class SplitPane extends JPanel
         {
             Integer grab = null;
 
+            @Override
             public void mousePressed( MouseEvent ev )
             {
                 if ( ev.getButton( ) == BUTTON1 && isVisible( childA ) && isVisible( childB ) )
@@ -120,6 +122,7 @@ public class SplitPane extends JPanel
                 }
             }
 
+            @Override
             public void mouseDragged( MouseEvent ev )
             {
                 if ( grab != null )
@@ -131,6 +134,7 @@ public class SplitPane extends JPanel
                 }
             }
 
+            @Override
             public void mouseReleased( MouseEvent ev )
             {
                 if ( ev.getButton( ) == BUTTON1 && grab != null )
