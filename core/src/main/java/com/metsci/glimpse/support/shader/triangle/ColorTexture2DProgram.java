@@ -68,11 +68,16 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         this.handles = null;
     }
 
-    public ProgramHandles handles( GL2ES2 gl )
+    public ProgramHandles handles( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+
         if ( this.handles == null )
         {
             this.handles = new ProgramHandles( gl );
+
+            // set default for RGBA color multiplier (identity)
+            this.setColor( context, new float[] { 1.0f, 1.0f, 1.0f, 1.0f } );
         }
 
         return this.handles;
@@ -82,12 +87,7 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        if ( this.handles == null )
-        {
-            this.handles = new ProgramHandles( gl );
-            // set default for RGBA color multiplier (identity)
-            gl.glUniform4f( this.handles.RGBA, 1, 1, 1, 1 );
-        }
+        this.handles( context );
 
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );

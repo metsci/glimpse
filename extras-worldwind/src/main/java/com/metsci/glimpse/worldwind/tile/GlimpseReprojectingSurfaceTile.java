@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.worldwind.tile;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -172,7 +172,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
             int height = offscreenCanvas.getTargetBounds( ).getHeight( );
             int texHandle = offscreenCanvas.getTextureUnit( );
 
-            texture = new ExternalTextureProjected2D( texHandle, width, height, false)
+            texture = new ExternalTextureProjected2D( texHandle, width, height, false )
             {
                 @Override
                 protected void putVertexCoords( int texIndex, double texFracX, double texFracY, float[] temp )

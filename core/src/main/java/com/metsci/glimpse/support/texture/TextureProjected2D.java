@@ -357,9 +357,9 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     protected void prepare_glState( GL gl )
     {
-        gl.glEnable( GL2.GL_TEXTURE_2D );
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
+        // generally does nothing
+        // kept for backwards compatibility for Glimpse-World Wind support
+        // which still relies on GL2 functionality
     }
 
     protected void allocate_calcSizes( GL gl )

@@ -149,6 +149,7 @@ public class ReprojectionExample
                     TextureProjected2D texture = offscreenCanvas.getProjectedTexture( );
                     texture.setProjection( new PolarProjection( 0, 10, 0, 360 ) );
                     addDrawableTexture( texture );
+
                     initialized = true;
                 }
 
@@ -156,7 +157,8 @@ public class ReprojectionExample
             }
         };
 
-        painter.setProgram( new ColorTexture2DProgram( ) );
+        ColorTexture2DProgram program = new ColorTexture2DProgram( );
+        painter.setProgram( program );
 
         layout2.addPainter( new BackgroundPainter( true ) );
         layout2.addPainter( painter );
