@@ -127,10 +127,10 @@ public class ColorTexture1DProgram implements DrawableTextureProgram
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
-        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( sVbo.target, sVbo.buffer( ) );
+        gl.glBindBuffer( sVbo.target, sVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inS, 1, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );

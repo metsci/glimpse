@@ -2038,7 +2038,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
         {
-            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
             gl.glDrawArrays( mode, first, count );
@@ -2248,13 +2248,13 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
         {
-            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-            gl.glBindBuffer( flagsVbo.target, flagsVbo.buffer( ) );
+            gl.glBindBuffer( flagsVbo.target, flagsVbo.buffer( gl ) );
             gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
 
-            gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( ) );
+            gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
 
             gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );

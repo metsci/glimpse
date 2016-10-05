@@ -1,14 +1,9 @@
 package com.metsci.glimpse.gl;
 
-import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
-import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
-import static com.metsci.glimpse.gl.util.GLUtils.deleteBuffers;
-import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
-import static java.lang.Math.max;
-import static javax.media.opengl.GL.GL_MAP_INVALIDATE_RANGE_BIT;
-import static javax.media.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
-import static javax.media.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.common.nio.Buffers.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static java.lang.Math.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
@@ -89,7 +84,7 @@ public class GLStreamingBuffer
     protected final int blockSizeFactor;
 
     /**
-     * Zero until the first call to {@link #map(GL, long)}
+     * Zero until the first call to {@link #buffer(GL)}
      */
     protected int buffer;
 
@@ -131,12 +126,14 @@ public class GLStreamingBuffer
 
     /**
      * Returns the buffer handle, as created by e.g. {@link GL#glGenBuffers(int, java.nio.IntBuffer)}.
-     * <p>
-     * Returns zero if none of the {@code map} methods (e.g. {@link #mapBytes(GL, long)}) have been
-     * called yet.
      */
-    public int buffer( )
+    public int buffer( GL gl )
     {
+        if ( buffer == 0 )
+        {
+            this.buffer = genBuffer( gl );
+        }
+
         return buffer;
     }
 
@@ -249,12 +246,7 @@ public class GLStreamingBuffer
             throw new RuntimeException( "Buffer is already mapped -- must be sealed before being mapped again" );
         }
 
-        if ( buffer == 0 )
-        {
-            this.buffer = genBuffer( gl );
-        }
-
-        gl.glBindBuffer( target, buffer );
+        gl.glBindBuffer( target, this.buffer( gl ) );
 
         // Seems recommended to map in multiples of 64 ... I guess for alignment reasons?
         this.mappedSize = nextMultiple( numBytes, 64 );

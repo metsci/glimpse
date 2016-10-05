@@ -96,10 +96,10 @@ public class ArrayColorProgram
 
     public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
     {
-        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( ) );
+        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( ) );
+        gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );

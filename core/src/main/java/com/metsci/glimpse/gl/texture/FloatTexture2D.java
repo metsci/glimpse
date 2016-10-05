@@ -82,12 +82,14 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
 
     public int xyVbo( GlimpseContext context )
     {
-        return this.xyBuilder.getBuffer( context.getGL( ) ).buffer( );
+        GL gl = context.getGL( );
+        return this.xyBuilder.getBuffer( gl ).buffer( gl );
     }
 
     public int sVbo( GlimpseContext context )
     {
-        return this.sBuilder.getBuffer( context.getGL( ) ).buffer( );
+        GL gl = context.getGL( );
+        return this.sBuilder.getBuffer( gl ).buffer( gl );
     }
 
     public int getMode( )

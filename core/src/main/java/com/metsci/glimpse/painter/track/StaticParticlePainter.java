@@ -207,17 +207,17 @@ public class StaticParticlePainter extends GlimpsePainterBase
             prog.setViewport( gl, bounds );
             prog.setStyle( gl, style );
 
-            gl.glBindBuffer( GL_ARRAY_BUFFER, path.xyVbo( gl ).buffer( ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, path.xyVbo( gl ).buffer( gl ) );
             gl.glVertexAttribPointer( prog.handles( gl ).inXy, 2, GL_FLOAT, false, 0, path.xyVbo( gl ).sealedOffset( ) );
 
-            gl.glBindBuffer( GL_ARRAY_BUFFER, path.flagsVbo( gl ).buffer( ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, path.flagsVbo( gl ).buffer( gl ) );
             gl.glVertexAttribIPointer( prog.handles( gl ).inFlags, 1, GL_BYTE, 0, path.flagsVbo( gl ).sealedOffset( ) );
 
             GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.rawMileageVbo( gl ) );
-            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( gl ) );
             gl.glVertexAttribPointer( prog.handles( gl ).inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
 
-            gl.glBindBuffer( GL_ARRAY_BUFFER, path.rgbaVbo( gl ).buffer( ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, path.rgbaVbo( gl ).buffer( gl ) );
             gl.glVertexAttribPointer( prog.handles( gl ).inRgba, 4, GL_FLOAT, false, 0, path.rgbaVbo( gl ).sealedOffset( ) );
 
             gl.glMultiDrawArrays( GL3.GL_LINE_STRIP_ADJACENCY, firstData, countData, countParticles );

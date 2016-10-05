@@ -1165,7 +1165,7 @@ public class TrackPainter extends GlimpsePainterBase
                     pointProg.setPointSize( gl, loaded.pointSize );
                     pointProg.setRgba( gl, loaded.pointColor );
 
-                    int xyVbo = loaded.path.xyVbo.buffer( );
+                    int xyVbo = loaded.path.xyVbo.buffer( gl );
 
                     // skip the first vertex, which is a phantom vertex
                     pointProg.draw( gl, GL.GL_POINTS, xyVbo, 1, loaded.path.numVertices( ) - 1 );

@@ -200,10 +200,10 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo.buffer( ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo.buffer( gl ) );
         gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );
