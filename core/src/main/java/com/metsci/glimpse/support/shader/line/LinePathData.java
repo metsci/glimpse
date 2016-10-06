@@ -14,14 +14,20 @@ public class LinePathData
     /**
      * Mask for the CONNECT bit, which indicates whether to draw a line segment
      * from the previous vertex to the current vertex.
+     * <p>
+     * Expressed as an {@code int} because bitwise operations with {@code byte}s
+     * are extremely error-prone in Java.
      */
-    public static final byte FLAGS_CONNECT = 1 << 0;
+    public static final int FLAGS_CONNECT = 1 << 0;
 
     /**
      * Mask for the JOIN bit, which indicates whether to use a join (e.g. miter)
      * at the current vertex.
+     * <p>
+     * Expressed as an {@code int} because bitwise operations with {@code byte}s
+     * are extremely error-prone in Java.
      */
-    public static final byte FLAGS_JOIN = 1 << 1;
+    public static final int FLAGS_JOIN = 1 << 1;
 
     /**
      * The index of the first vertex in the current line-strip. Assigned a new
@@ -171,7 +177,7 @@ public class LinePathData
         this.xyBuffer.put( 2 * stripLeader + 1, yLast );
 
         // Rewrite flags of first vertex in strip
-        this.flagsBuffer.put( 1 * stripFirst, FLAGS_JOIN );
+        this.flagsBuffer.put( 1 * stripFirst, ( byte ) FLAGS_JOIN );
 
         // Append loop-closing vertex
         float xFirst = this.xyBuffer.get( 2 * stripFirst + 0 );

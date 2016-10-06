@@ -158,7 +158,7 @@ public class StreamingLinePath
 
         // Rewrite flags of first vertex in strip
         int iFirst = this.iStrip + 1;
-        this.flagsBuffer.put( 1 * iFirst, FLAGS_JOIN );
+        this.flagsBuffer.put( 1 * iFirst, ( byte ) FLAGS_JOIN );
 
         // Append loop-closing vertex
         this.appendVertex( this.xFirst, this.yFirst, FLAGS_CONNECT | FLAGS_JOIN );
