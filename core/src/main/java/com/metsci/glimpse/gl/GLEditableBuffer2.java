@@ -3,6 +3,7 @@ package com.metsci.glimpse.gl;
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static java.lang.Math.*;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
@@ -29,6 +30,63 @@ public class GLEditableBuffer2
         this.dirtyRanges = new IntRangeSet( );
     }
 
+    public int buffer( GL2ES3 gl )
+    {
+        this.dBuffer.ensureCapacity( gl, this.hBuffer.position( ) );
+
+        // XXX: Higher tolerance might be better
+        this.dirtyRanges.coalesce( 1024 );
+
+        SortedInts ranges = this.dirtyRanges.ranges( );
+        for ( int i = 0; i < ranges.n( ); i += 2 )
+        {
+            int rangeStart = ranges.v( i + 0 );
+            int rangeEnd = ranges.v( i + 1 );
+            ByteBuffer rangeBytes = sliced( this.hBuffer, rangeStart, rangeEnd - rangeStart );
+            this.dBuffer.setBytes( gl, rangeStart, rangeBytes );
+        }
+
+        this.dirtyRanges.clear( );
+
+        return this.dBuffer.buffer( gl );
+    }
+
+    public void dispose( GL gl )
+    {
+        deallocateDirectBuffers( this.hBuffer );
+        this.hBuffer = null;
+
+        this.dBuffer.dispose( gl );
+
+        this.dirtyRanges.clear( );
+    }
+
+
+    // Size
+
+    public int numFloats( )
+    {
+        return ( this.numBytes( ) / SIZEOF_FLOAT );
+    }
+
+    public int numDoubles( )
+    {
+        return ( this.numBytes( ) / SIZEOF_DOUBLE );
+    }
+
+    public int numInts( )
+    {
+        return ( this.numBytes( ) / SIZEOF_INT );
+    }
+
+    public int numBytes( )
+    {
+        return this.hBuffer.position( );
+    }
+
+
+    // Grow
+
     public void growFloats( int additionalFloats )
     {
         this.hBuffer = ensureAdditionalCapacity( this.hBuffer, additionalFloats * SIZEOF_FLOAT, true );
@@ -49,115 +107,115 @@ public class GLEditableBuffer2
         this.hBuffer = ensureAdditionalCapacity( this.hBuffer, additionalBytes * SIZEOF_BYTE, true );
     }
 
-    public void appendFloats( FloatBuffer floats )
+
+    // Append
+
+    public void putFloats( float[] floats )
     {
-        int numBytes = floats.remaining( ) * SIZEOF_FLOAT;
-
-        this.dirtyRanges.add( this.hBuffer.position( ), numBytes );
-
-        this.growFloats( floats.remaining( ) );
-        this.hBuffer.asFloatBuffer( ).put( floats );
-        this.hBuffer.position( this.hBuffer.position( ) + numBytes );
+        this.putFloats( floats, 0, floats.length );
     }
 
-    public void appendDoubles( DoubleBuffer doubles )
+    public void putFloats( float[] floats, int offset, int length )
     {
-        int numBytes = doubles.remaining( ) * SIZEOF_DOUBLE;
-
-        this.dirtyRanges.add( this.hBuffer.position( ), numBytes );
-
-        this.growDoubles( doubles.remaining( ) );
-        this.hBuffer.asDoubleBuffer( ).put( doubles );
-        this.hBuffer.position( this.hBuffer.position( ) + numBytes );
+        this.editBytes( this.hBuffer.position( ), ( length - offset ) * SIZEOF_FLOAT ).asFloatBuffer( ).put( floats, offset, length );
     }
 
-    public void appendInts( IntBuffer ints )
+    public void putFloats( FloatBuffer floats )
     {
-        int numBytes = ints.remaining( ) * SIZEOF_INT;
-
-        this.dirtyRanges.add( this.hBuffer.position( ), numBytes );
-
-        this.growInts( ints.remaining( ) );
-        this.hBuffer.asIntBuffer( ).put( ints );
-        this.hBuffer.position( this.hBuffer.position( ) + numBytes );
+        this.editBytes( this.hBuffer.position( ), floats.remaining( ) * SIZEOF_FLOAT ).asFloatBuffer( ).put( floats );
     }
 
-    public void appendBytes( ByteBuffer bytes )
+    public void putDoubles( double[] doubles )
     {
-        this.dirtyRanges.add( this.hBuffer.position( ), bytes.remaining( ) * SIZEOF_BYTE );
-        this.growBytes( bytes.remaining( ) );
-        this.hBuffer.put( bytes );
+        this.putDoubles( doubles, 0, doubles.length );
     }
 
-    public void setFloats( int firstFloat, FloatBuffer floats )
+    public void putDoubles( double[] doubles, int offset, int length )
     {
-        this.dirtyRanges.add( firstFloat * SIZEOF_FLOAT, floats.remaining( ) * SIZEOF_FLOAT );
-
-        ByteBuffer hBuffer2 = this.hBuffer.duplicate( );
-        hBuffer2.position( firstFloat * SIZEOF_FLOAT );
-        hBuffer2.asFloatBuffer( ).put( floats );
+        this.editBytes( this.hBuffer.position( ), ( length - offset ) * SIZEOF_DOUBLE ).asDoubleBuffer( ).put( doubles, offset, length );
     }
 
-    public void setDoubles( int firstDouble, DoubleBuffer doubles )
+    public void putDoubles( DoubleBuffer doubles )
     {
-        this.dirtyRanges.add( firstDouble * SIZEOF_DOUBLE, doubles.remaining( ) * SIZEOF_DOUBLE );
-
-        ByteBuffer hBuffer2 = this.hBuffer.duplicate( );
-        hBuffer2.position( firstDouble * SIZEOF_DOUBLE );
-        hBuffer2.asDoubleBuffer( ).put( doubles );
+        this.editBytes( this.hBuffer.position( ), doubles.remaining( ) * SIZEOF_DOUBLE ).asDoubleBuffer( ).put( doubles );
     }
 
-    public void setInts( int firstInt, IntBuffer ints )
+    public void putInts( int[] ints )
     {
-        this.dirtyRanges.add( firstInt * SIZEOF_INT, ints.remaining( ) * SIZEOF_INT );
-
-        ByteBuffer hBuffer2 = this.hBuffer.duplicate( );
-        hBuffer2.position( firstInt * SIZEOF_INT );
-        hBuffer2.asIntBuffer( ).put( ints );
+        this.putInts( ints, 0, ints.length );
     }
 
-    public void setBytes( int firstByte, ByteBuffer bytes )
+    public void putInts( int[] ints, int offset, int length )
     {
-        this.dirtyRanges.add( firstByte * SIZEOF_BYTE, bytes.remaining( ) * SIZEOF_BYTE );
-
-        ByteBuffer hBuffer2 = this.hBuffer.duplicate( );
-        hBuffer2.position( firstByte );
-        hBuffer2.put( bytes );
+        this.editBytes( this.hBuffer.position( ), ( length - offset ) * SIZEOF_INT ).asIntBuffer( ).put( ints, offset, length );
     }
 
-    public int buffer( GL2ES3 gl )
+    public void putInts( IntBuffer ints )
     {
-        this.dBuffer.ensureCapacity( gl, this.hBuffer.position( ) );
-
-        // XXX: Higher tolerance might be better
-        this.dirtyRanges.coalesce( 1024 );
-
-        SortedInts ranges = this.dirtyRanges.ranges( );
-        for ( int i = 0; i < ranges.n( ); i += 2 )
-        {
-            int rangeStart = ranges.v( i + 0 );
-            int rangeEnd = ranges.v( i + 1 );
-
-            ByteBuffer rangeBytes = this.hBuffer.duplicate( );
-            rangeBytes.limit( rangeEnd );
-            rangeBytes.position( rangeStart );
-
-            this.dBuffer.setBytes( gl, rangeStart, rangeBytes );
-        }
-
-        this.dirtyRanges.clear( );
-
-        return this.dBuffer.buffer( gl );
+        this.editBytes( this.hBuffer.position( ), ints.remaining( ) * SIZEOF_INT ).asIntBuffer( ).put( ints );
     }
 
-    public void dispose( GL gl )
+    public void putBytes( byte[] bytes )
     {
-        deallocateDirectBuffers( this.hBuffer );
-        this.hBuffer = null;
+        this.putBytes( bytes, 0, bytes.length );
+    }
 
-        this.dBuffer.dispose( gl );
+    public void putBytes( byte[] bytes, int offset, int length )
+    {
+        this.editBytes( this.hBuffer.position( ), ( length - offset ) ).put( bytes, offset, length );
+    }
 
-        this.dirtyRanges.clear( );
+    public void putBytes( ByteBuffer bytes )
+    {
+        this.editBytes( this.hBuffer.position( ), bytes.remaining( ) ).put( bytes );
+    }
+
+
+    // Overwrite
+
+    public void putFloats( int firstFloat, FloatBuffer floats )
+    {
+        this.editFloats( firstFloat, floats.remaining( ) ).put( floats );
+    }
+
+    public void putDoubles( int firstDouble, DoubleBuffer doubles )
+    {
+        this.editDoubles( firstDouble, doubles.remaining( ) ).put( doubles );
+    }
+
+    public void putInts( int firstInt, IntBuffer ints )
+    {
+        this.editInts( firstInt, ints.remaining( ) ).put( ints );
+    }
+
+    public void putBytes( int firstByte, ByteBuffer bytes )
+    {
+        this.editBytes( firstByte, bytes.remaining( ) ).put( bytes );
+    }
+
+
+    // Edit
+
+    public FloatBuffer editFloats( int firstFloat, int numFloats )
+    {
+        return this.editBytes( firstFloat * SIZEOF_FLOAT, numFloats * SIZEOF_FLOAT ).asFloatBuffer( );
+    }
+
+    public DoubleBuffer editDoubles( int firstDouble, int numDoubles )
+    {
+        return this.editBytes( firstDouble * SIZEOF_DOUBLE, numDoubles * SIZEOF_DOUBLE ).asDoubleBuffer( );
+    }
+
+    public IntBuffer editInts( int firstInt, int numInts )
+    {
+        return this.editBytes( firstInt * SIZEOF_INT, numInts * SIZEOF_INT ).asIntBuffer( );
+    }
+
+    public ByteBuffer editBytes( int firstByte, int numBytes )
+    {
+        this.dirtyRanges.add( firstByte, numBytes );
+        this.hBuffer.position( max( this.hBuffer.position( ), firstByte + numBytes ) );
+        return sliced( this.hBuffer, firstByte, numBytes );
     }
 
 }
