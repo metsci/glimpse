@@ -172,6 +172,11 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     {
         setOrtho( context, xMin, xMax, yMin, yMax );
 
+        begin( context );
+    }
+
+    public void begin( GlimpseContext context )
+    {
         GL3 gl = context.getGL( ).getGL3( );
 
         this.useProgram( context.getGL( ), true );

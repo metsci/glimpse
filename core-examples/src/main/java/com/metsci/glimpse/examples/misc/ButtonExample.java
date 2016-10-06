@@ -73,7 +73,7 @@ public class ButtonExample implements GlimpseLayoutProvider
         button.addPainter( new SimpleTextPainter( ).setText( "Button" ).setHorizontalPosition( HorizontalPosition.Center ).setVerticalPosition( VerticalPosition.Center ) );
 
         // create a BorderPainter to draw a solid color border around the GlimpseLayout
-        button.addPainter( new BorderPainter( ).setColor( GlimpseColor.fromColorRgb( 0.2f, 0.2f, 0.2f ) ).setLineWidth( 3.0f ) );
+        button.addPainter( new BorderPainter( ).setColor( GlimpseColor.fromColorRgb( 0.2f, 0.2f, 0.2f ) ).setLineWidth( 3.0f ).setDrawBottom( false ) );
 
         // set the MIG Layout constraints for the GlimpseLayout (see http://migcalendar.com/miglayout/cheatsheet.html for
         // a great MIG Layout guide). These constraints will position the GlimpseLayout button floating in the upper

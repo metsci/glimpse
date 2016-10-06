@@ -156,8 +156,9 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     @Override
     public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
-        this.begin( context );
-        this.setOrtho( context, xMin, xMax, yMin, yMax );
+        setOrtho( context, xMin, xMax, yMin, yMax );
+
+        begin( context );
     }
 
     public void begin( GlimpseContext context )
