@@ -17,18 +17,25 @@ public class DirtyIndexSet
     public void add( int first, int count )
     {
         int start = first;
-        int end = first + count;
-
         int iBeforeStart = this.ranges.indexAtOrBefore( start );
-        int iAfterEnd = this.ranges.indexAtOrAfter( end );
-
         boolean startsInExistingRange = ( iBeforeStart % 2 == 0 );
-        boolean endsInExistingRange = ( iAfterEnd % 2 == 1 );
-        boolean entirelyInExistingRange = ( startsInExistingRange && iBeforeStart + 1 == iAfterEnd );
-
-        if ( entirelyInExistingRange )
+        if ( !startsInExistingRange && iBeforeStart >= 0 && start == this.ranges.v( iBeforeStart ) )
         {
-            return;
+            // Broaden to overlap an adjacent existing range
+            start--;
+            iBeforeStart--;
+            startsInExistingRange = true;
+        }
+
+        int end = first + count;
+        int iAfterEnd = this.ranges.indexAtOrAfter( end );
+        boolean endsInExistingRange = ( iAfterEnd % 2 == 1 );
+        if ( !endsInExistingRange && iAfterEnd < this.ranges.n && end == this.ranges.v( iAfterEnd ) )
+        {
+            // Broaden to overlap an adjacent existing range
+            end++;
+            iAfterEnd++;
+            endsInExistingRange = true;
         }
 
         if ( startsInExistingRange && endsInExistingRange )
