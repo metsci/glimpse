@@ -2,14 +2,13 @@ package com.metsci.glimpse.support.shader.line;
 
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.shader.line.LinePathData.*;
-import static com.metsci.glimpse.support.shader.line.LineUtils.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2ES3;
 
 import com.metsci.glimpse.gl.GLEditableBuffer2;
 import com.metsci.glimpse.util.primitives.DoublesArray;
@@ -23,22 +22,17 @@ public class LineStrip
     protected final DoublesArray segmentMileages;
 
 
-    public LineStrip( int initialVertices )
+    public LineStrip( int initialCapacity )
     {
-        this( initialVertices, 10 );
+        this( initialCapacity, 10 );
     }
 
-    public LineStrip( int initialVertices, int scratchBlockSizeFactor )
+    public LineStrip( int initialCapacity, int scratchBlockSizeFactor )
     {
-        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2 * initialVertices * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialVertices * SIZEOF_BYTE, scratchBlockSizeFactor );
-        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialVertices * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.segmentMileages = new DoublesArray( 1 * initialVertices );
-    }
-
-    public int size( )
-    {
-        return this.flagsBuffer.numBytes( );
+        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2 * initialCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
+        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.segmentMileages = new DoublesArray( 1 * initialCapacity );
     }
 
     public void grow( int additionalVertices )
@@ -51,7 +45,7 @@ public class LineStrip
 
     public void put( FloatBuffer xys )
     {
-        int firstVertex = this.flagsBuffer.numBytes( );
+        int firstVertex = this.logicalSize( );
         this.put( firstVertex, xys );
     }
 
@@ -138,9 +132,30 @@ public class LineStrip
                                      this.flagsBuffer.hostBytes( ),
                                      mileageEdit,
                                      false,
-                                     ppvAspectRatio );
+                                     1.0 ); // WIP
             }
         }
+    }
+
+    public int actualSize( )
+    {
+        return this.flagsBuffer.numBytes( );
+    }
+
+    public int logicalSize( )
+    {
+        int actualSize = this.actualSize( );
+        return ( actualSize == 0 ? 0 : actualSize - 2 );
+    }
+
+    public int xyBuffer( GL2ES3 gl )
+    {
+        return this.xyBuffer.deviceBuffer( gl );
+    }
+
+    public int flagsBuffer( GL2ES3 gl )
+    {
+        return this.flagsBuffer.deviceBuffer( gl );
     }
 
     public void dispose( GL gl )
