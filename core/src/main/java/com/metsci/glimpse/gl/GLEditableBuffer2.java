@@ -30,7 +30,7 @@ public class GLEditableBuffer2
         this.dirtyRanges = new IntRangeSet( );
     }
 
-    public int buffer( GL2ES3 gl )
+    public int deviceBuffer( GL2ES3 gl )
     {
         this.dBuffer.ensureCapacity( gl, this.hBuffer.position( ) );
 
@@ -59,6 +59,29 @@ public class GLEditableBuffer2
         this.dBuffer.dispose( gl );
 
         this.dirtyRanges.clear( );
+    }
+
+
+    // Buffer
+
+    public FloatBuffer hostFloats( )
+    {
+        return this.hostBytes( ).asFloatBuffer( );
+    }
+
+    public DoubleBuffer hostDoubles( )
+    {
+        return this.hostBytes( ).asDoubleBuffer( );
+    }
+
+    public IntBuffer hostInts( )
+    {
+        return this.hostBytes( ).asIntBuffer( );
+    }
+
+    public ByteBuffer hostBytes( )
+    {
+        return flipped( this.hBuffer.asReadOnlyBuffer( ) );
     }
 
 

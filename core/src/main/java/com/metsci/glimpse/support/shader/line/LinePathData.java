@@ -262,72 +262,85 @@ public class LinePathData
             this.mileagePpvAspectRatio = ppvAspectRatio;
         }
 
-        // Prepare to read xy, starting at index mileageValidCount
-        FloatBuffer xyReadable = flipped( this.xyBuffer );
-        xyReadable.position( 2 * mileageValidCount );
+        this.mileageBuffer.position( this.mileageValidCount );
 
-        // Prepare to read flags, starting at index mileageValidCount
-        ByteBuffer flagsReadable = flipped( this.flagsBuffer );
-        flagsReadable.position( 1 * mileageValidCount );
+        updateMileageBuffer( flipped( this.xyBuffer ),
+                             flipped( this.flagsBuffer ),
+                             this.mileageBuffer,
+                             true,
+                             this.mileagePpvAspectRatio );
 
-        // Prepare to write mileage, starting at index mileageValidCount
-        this.mileageBuffer.position( mileageValidCount );
+        int oldValidCount = this.mileageValidCount;
+        this.mileageValidCount = this.mileageBuffer.position( );
+        return ( this.mileageValidCount - oldValidCount );
+    }
+
+    public static void updateMileageBuffer( FloatBuffer xyBuffer,
+                                            ByteBuffer flagsBuffer,
+                                            FloatBuffer mileageBuffer,
+                                            boolean useInitialMileages,
+                                            double ppvAspectRatio )
+    {
+        int firstVertex = mileageBuffer.position( );
+        xyBuffer.position( 2 * firstVertex );
+        flagsBuffer.position( 1 * firstVertex );
 
         float x;
         float y;
         float mileage;
 
-        if ( this.mileageValidCount > 0 )
+        if ( firstVertex > 0 )
         {
             // If we're starting partway through, initialize loop vars based on last valid values
-            int i = this.mileageValidCount - 1;
-            x = xyReadable.get( 2 * i + 0 );
-            y = xyReadable.get( 2 * i + 1 );
-            mileage = this.mileageBuffer.get( 1 * i );
+            int i = firstVertex - 1;
+            x = xyBuffer.get( 2*i + 0 );
+            y = xyBuffer.get( 2*i + 1 );
+            mileage = mileageBuffer.get( 1*i );
         }
         else
         {
             // If we're starting from the beginning, the first vertex must be non-connected,
-            // so loop vars' initial values don't matter
+            // so these initial values don't matter
             x = 0;
             y = 0;
             mileage = 0;
         }
 
-        while ( flagsReadable.hasRemaining( ) )
+        while ( flagsBuffer.hasRemaining( ) )
         {
-            float xNew = xyReadable.get( );
-            float yNew = xyReadable.get( );
-            byte flagsNew = flagsReadable.get( );
+            float xNew = xyBuffer.get( );
+            float yNew = xyBuffer.get( );
+            byte flagsNew = flagsBuffer.get( );
 
             boolean connect = ( ( flagsNew & FLAGS_CONNECT ) != 0 );
             if ( !connect )
             {
-                // The intention is to run this block if the vertex starts a new strip -- because
-                // such a vertex has an initial-mileage value. However, this block will also run
-                // if the vertex is the trailing phantom vertex after a loop (because CONNECT will
-                // be false). Such a vertex will have only a placeholder mileage. This works out
-                // okay, though, because the shader doesn't use mileage when CONNECT is false.
+                if ( useInitialMileages )
+                {
+                    // The intention is to run this block if the vertex starts a new strip -- because
+                    // such a vertex has an initial-mileage value. However, this block will also run
+                    // if the vertex is the trailing phantom vertex after a loop (because CONNECT will
+                    // be false). Such a vertex will have only a placeholder mileage. This works out
+                    // okay, though, because the shader doesn't use mileage when CONNECT is false.
 
-                // The value in mileageBuffer here is the strip's initial mileage, so get the
-                // existing value instead of putting a new one
-                mileage = this.mileageBuffer.get( );
+                    // The value in mileageBuffer here is the strip's initial mileage, so get the
+                    // existing value instead of putting a new one
+                    mileage = mileageBuffer.get( );
+                }
+                else
+                {
+                    mileage = 0;
+                }
             }
             else
             {
-                // Use the old ppv-aspect-ratio -- NOT the new one passed in -- so that all values
-                // in the mileage buffer were computed with exactly the same ppv-aspect-ratio
-                mileage += distance( x, y, xNew, yNew, this.mileagePpvAspectRatio );
-                this.mileageBuffer.put( mileage );
+                mileage += distance( x, y, xNew, yNew, ppvAspectRatio );
+                mileageBuffer.put( mileage );
             }
 
             x = xNew;
             y = yNew;
         }
-
-        int oldValidCount = this.mileageValidCount;
-        this.mileageValidCount = this.mileageBuffer.position( );
-        return ( this.mileageValidCount - oldValidCount );
     }
 
 }
