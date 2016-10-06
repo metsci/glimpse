@@ -6,7 +6,9 @@ import static java.nio.ByteBuffer.*;
 import static java.nio.ByteOrder.*;
 
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class DirectBufferUtils
 {
@@ -14,6 +16,22 @@ public class DirectBufferUtils
     public static FloatBuffer sliced( FloatBuffer buffer, int first, int count )
     {
         FloatBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static DoubleBuffer sliced( DoubleBuffer buffer, int first, int count )
+    {
+        DoubleBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static IntBuffer sliced( IntBuffer buffer, int first, int count )
+    {
+        IntBuffer buffer2 = buffer.duplicate( );
         buffer2.limit( first + count );
         buffer2.position( first );
         return buffer2.slice( );
@@ -36,6 +54,32 @@ public class DirectBufferUtils
     public static FloatBuffer flipped( FloatBuffer buffer )
     {
         FloatBuffer flipped = buffer.duplicate( );
+        flipped.flip( );
+        return flipped;
+    }
+
+    /**
+     * Calls {@link DoubleBuffer#duplicate()}, flips the result, and returns it.
+     * <p>
+     * This is a convenient way to get a flipped version of a buffer, without
+     * modifying the original buffer's position or limit.
+     */
+    public static DoubleBuffer flipped( DoubleBuffer buffer )
+    {
+        DoubleBuffer flipped = buffer.duplicate( );
+        flipped.flip( );
+        return flipped;
+    }
+
+    /**
+     * Calls {@link IntBuffer#duplicate()}, flips the result, and returns it.
+     * <p>
+     * This is a convenient way to get a flipped version of a buffer, without
+     * modifying the original buffer's position or limit.
+     */
+    public static IntBuffer flipped( IntBuffer buffer )
+    {
+        IntBuffer flipped = buffer.duplicate( );
         flipped.flip( );
         return flipped;
     }
