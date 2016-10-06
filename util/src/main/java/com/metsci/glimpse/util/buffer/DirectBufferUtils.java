@@ -11,6 +11,22 @@ import java.nio.FloatBuffer;
 public class DirectBufferUtils
 {
 
+    public static FloatBuffer sliced( FloatBuffer buffer, int first, int count )
+    {
+        FloatBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static ByteBuffer sliced( ByteBuffer buffer, int first, int count )
+    {
+        ByteBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
     /**
      * Calls {@link FloatBuffer#duplicate()}, flips the result, and returns it.
      * <p>
