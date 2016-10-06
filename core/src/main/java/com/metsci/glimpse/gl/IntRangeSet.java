@@ -3,13 +3,13 @@ package com.metsci.glimpse.gl;
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 import com.metsci.glimpse.util.primitives.sorted.SortedIntsArray;
 
-public class DirtyIndexSet
+public class IntRangeSet
 {
 
     protected final SortedIntsArray ranges;
 
 
-    public DirtyIndexSet( )
+    public IntRangeSet( )
     {
         this.ranges = new SortedIntsArray( );
     }

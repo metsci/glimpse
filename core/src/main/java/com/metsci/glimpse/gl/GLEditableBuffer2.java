@@ -19,14 +19,14 @@ public class GLEditableBuffer2
 
     protected ByteBuffer hBuffer;
     protected GLEditableBuffer dBuffer;
-    protected final DirtyIndexSet dirtyRanges;
+    protected final IntRangeSet dirtyRanges;
 
 
     public GLEditableBuffer2( int target, int numBytes, int scratchBlockSizeFactor )
     {
         this.hBuffer = newDirectByteBuffer( numBytes );
         this.dBuffer = new GLEditableBuffer( target, numBytes, scratchBlockSizeFactor );
-        this.dirtyRanges = new DirtyIndexSet( );
+        this.dirtyRanges = new IntRangeSet( );
     }
 
     public void growFloats( int additionalFloats )
