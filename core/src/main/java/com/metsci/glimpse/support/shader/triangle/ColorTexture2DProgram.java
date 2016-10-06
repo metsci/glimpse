@@ -123,7 +123,7 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        gl.glUniform4fv( this.handles.RGBA, 1, rgba, 0 );
+        gl.glUniform4f( this.handles.RGBA, rgba[0], rgba[1], rgba[2], rgba[3] );
     }
 
     public void setTexture( GlimpseContext context, int textureUnit )

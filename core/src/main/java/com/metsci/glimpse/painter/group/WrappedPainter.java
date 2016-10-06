@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.painter.group;
 
-import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 
 import com.google.common.collect.Lists;
@@ -45,20 +44,21 @@ import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 
 /**
  * @see WrappedAxis1D
  * @see WrappedLabelHandler
  * @author ulman
  */
-public class WrappedPainter extends GlimpsePainter2D
+public class WrappedPainter extends GlimpsePainterBase
 {
     private static class CustomFBOGlimpseCanvas extends FBOGlimpseCanvas
     {
@@ -111,32 +111,30 @@ public class WrappedPainter extends GlimpsePainter2D
         }
     }
 
-    private List<GlimpsePainter2D> painters;
-
-    private boolean isVisible = true;
-    private boolean isDisposed = false;
+    private List<GlimpsePainter> painters;
 
     private CustomFBOGlimpseCanvas offscreen;
-    private GLFloatBuffer2D vertCoordBuffer;
-    private GLFloatBuffer2D texCoordBuffer;
+    private GLStreamingBufferBuilder vertCoordBuffer;
+    private GLStreamingBufferBuilder texCoordBuffer;
+    private ColorTexture2DProgram prog;
 
     private Axis2D dummyAxis;
     private GlimpseAxisLayout2D dummyLayout;
 
     public WrappedPainter( )
     {
-        this.painters = new CopyOnWriteArrayList<GlimpsePainter2D>( );
+        this.painters = new CopyOnWriteArrayList<GlimpsePainter>( );
 
         this.dummyAxis = new Axis2D( );
         this.dummyLayout = new GlimpseAxisLayout2D( dummyAxis );
     }
 
-    public void addPainter( GlimpsePainter2D painter )
+    public void addPainter( GlimpsePainter painter )
     {
         this.painters.add( painter );
     }
 
-    public void removePainter( GlimpsePainter2D painter )
+    public void removePainter( GlimpsePainter painter )
     {
         this.painters.remove( painter );
     }
@@ -146,32 +144,11 @@ public class WrappedPainter extends GlimpsePainter2D
         this.painters.clear( );
     }
 
-    public boolean isVisible( )
-    {
-        return this.isVisible;
-    }
-
-    public void setVisible( boolean visible )
-    {
-        this.isVisible = visible;
-    }
-
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( !this.isVisible ) return;
-
-        GL2 gl2 = context.getGL( ).getGL2( );
-        gl2.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl2.glEnable( GL2.GL_BLEND );
-
-        gl2.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-        gl2.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
-
-        gl2.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-        gl2.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
-
-        gl2.glEnable( GL.GL_TEXTURE_2D );
+        Axis2D axis = requireAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
 
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
@@ -182,9 +159,9 @@ public class WrappedPainter extends GlimpsePainter2D
         // if no WrappedAxis1D is being used, simply paint normally
         if ( !wrapX && !wrapY )
         {
-            for ( GlimpsePainter2D painter : painters )
+            for ( GlimpsePainter painter : painters )
             {
-                painter.paintTo( context, bounds, axis );
+                painter.paintTo( context );
             }
         }
         else
@@ -199,12 +176,14 @@ public class WrappedPainter extends GlimpsePainter2D
                 this.offscreen = new CustomFBOGlimpseCanvas( context.getGLContext( ) );
                 this.offscreen.addLayout( dummyLayout );
 
-                this.texCoordBuffer = new GLFloatBuffer2D( 4 );
-                this.vertCoordBuffer = new GLFloatBuffer2D( 4 );
+                this.texCoordBuffer = new GLStreamingBufferBuilder( );
+                this.vertCoordBuffer = new GLStreamingBufferBuilder( );
+
+                this.prog = new ColorTexture2DProgram( );
             }
 
             this.dummyLayout.removeAllLayouts( );
-            for ( GlimpsePainter2D painter : this.painters )
+            for ( GlimpsePainter painter : this.painters )
             {
                 this.dummyLayout.addPainter( painter );
             }
@@ -267,77 +246,37 @@ public class WrappedPainter extends GlimpsePainter2D
 
     protected void drawTexture( final GlimpseContext context, final Axis2D axis, final WrappedTextureBounds boundsX, final WrappedTextureBounds boundsY )
     {
-        GL2 gl2 = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
 
         // position the drawn data in non-wrapped coordinates
         // (since we've split up the image such that we don't have to worry about seams)
-        vertCoordBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.rewind( );
-                data.put( ( float ) boundsX.getStartValue( ) );
-                data.put( ( float ) boundsY.getStartValue( ) );
-
-                data.put( ( float ) boundsX.getStartValue( ) );
-                data.put( ( float ) boundsY.getEndValue( ) );
-
-                data.put( ( float ) boundsX.getEndValue( ) );
-                data.put( ( float ) boundsY.getEndValue( ) );
-
-                data.put( ( float ) boundsX.getEndValue( ) );
-                data.put( ( float ) boundsY.getStartValue( ) );
-            }
-        } );
+        vertCoordBuffer.clear( );
+        vertCoordBuffer.addQuad2f( ( float ) boundsX.getStartValue( ), ( float ) boundsY.getStartValue( ), ( float ) boundsX.getEndValue( ), ( float ) boundsY.getEndValue( ) );
 
         // we don't necessarily use the whole texture, so only texture with the part we drew onto
-        texCoordBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                float texEndX = offscreen.getEffectiveWidthFrac( );
-                float texEndY = offscreen.getEffectiveHeightFrac( );
+        texCoordBuffer.clear( );
+        texCoordBuffer.addQuad2f( 0, 0, offscreen.getEffectiveWidthFrac( ), offscreen.getEffectiveHeightFrac( ) );
 
-                data.rewind( );
-                data.put( 0 );
-                data.put( 0 );
+        gl.glActiveTexture( GL.GL_TEXTURE0 );
+        gl.glBindTexture( GL.GL_TEXTURE_2D, offscreen.getTextureUnit( ) );
 
-                data.put( 0 );
-                data.put( texEndY );
-
-                data.put( texEndX );
-                data.put( texEndY );
-
-                data.put( texEndX );
-                data.put( 0 );
-            }
-        } );
-
-        texCoordBuffer.bind( GLVertexAttribute.ATTRIB_TEXCOORD_2D, gl2 );
-        vertCoordBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl2 );
-        gl2.glBindTexture( GL.GL_TEXTURE_2D, offscreen.getTextureUnit( ) );
+        GLUtils.enableStandardBlending( gl );
+        prog.begin( context );
         try
         {
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+            prog.setAxisOrtho( context, axis );
+            prog.setColor( context, GlimpseColor.getWhite( ) );
+            prog.setTexture( context, 0 );
 
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
-
-            gl2.glMatrixMode( GL2.GL_PROJECTION );
-            gl2.glLoadIdentity( );
-            gl2.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
-
-            gl2.glDrawArrays( GL2.GL_QUADS, 0, 4 );
+            prog.draw( context, GL.GL_TRIANGLES, vertCoordBuffer.getBuffer( gl ), texCoordBuffer.getBuffer( gl ), 0, texCoordBuffer.numFloats( ) / 2 );
 
         }
         finally
         {
-            gl2.glBindTexture( GL.GL_TEXTURE_2D, 0 );
-            vertCoordBuffer.unbind( gl2 );
-            texCoordBuffer.unbind( gl2 );
+            prog.end( context );
+            GLUtils.disableBlending( gl );
+
+            gl.glBindTexture( GL.GL_TEXTURE_2D, 0 );
         }
     }
 
@@ -385,23 +324,12 @@ public class WrappedPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GlimpseContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( !this.isDisposed )
+        for ( GlimpsePainter painter : this.painters )
         {
-            this.isDisposed = true;
-
-            for ( GlimpsePainter painter : this.painters )
-            {
-                painter.dispose( context );
-            }
+            painter.dispose( context );
         }
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
     }
 
     @Override
