@@ -39,10 +39,10 @@ public class DirectBufferUtils
 
     public static ByteBuffer sliced( ByteBuffer buffer, int first, int count )
     {
-        ByteBuffer buffer2 = buffer.duplicate( );
+        ByteBuffer buffer2 = buffer.duplicate( ).order( buffer.order( ) );
         buffer2.limit( first + count );
         buffer2.position( first );
-        return buffer2.slice( );
+        return buffer2.slice( ).order( buffer.order( ) );
     }
 
     /**
@@ -92,7 +92,7 @@ public class DirectBufferUtils
      */
     public static ByteBuffer flipped( ByteBuffer buffer )
     {
-        ByteBuffer flipped = buffer.duplicate( );
+        ByteBuffer flipped = buffer.duplicate( ).order( buffer.order( ) );
         flipped.flip( );
         return flipped;
     }
