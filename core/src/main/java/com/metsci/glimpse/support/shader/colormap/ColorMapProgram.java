@@ -31,6 +31,7 @@ import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
@@ -45,6 +46,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
 
 /**
  * A shader which colors a 2D data texture using values sampled from a color
@@ -55,6 +57,8 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
  */
 public class ColorMapProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
+    private static final Logger logger = Logger.getLogger( ColorMapProgram.class.getName( ) );
+
     protected GLUniformData dataMin;
     protected GLUniformData dataMax;
 
@@ -80,6 +84,8 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         {
             this.inXy = gl.glGetAttribLocation( program, "inXy" );
             this.inS = gl.glGetAttribLocation( program, "inS" );
+
+            GLErrorUtils.logGLError( logger, gl, "Trouble in ColorMapProgram ProgramHandles" );
         }
     }
 
@@ -183,7 +189,7 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
 
         if ( this.handles == null )
         {
-            this.handles = new ProgramHandles( gl, getShaderProgram( ).id( ) );
+            this.handles = new ProgramHandles( gl, getShaderProgram( ).program( ) );
         }
 
         gl.glEnableVertexAttribArray( this.handles.inXy );

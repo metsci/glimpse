@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.animated;
+package com.metsci.glimpse.examples.projection;
 
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.HeatMapExample;
@@ -44,11 +44,11 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  *
  * @author ulman
  */
-public class AnimatedProjectionExample implements GlimpseLayoutProvider
+public class AnimatedPolarProjectionExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new AnimatedProjectionExample( ) );
+        Example.showWithSwing( new AnimatedPolarProjectionExample( ) );
     }
 
     @Override

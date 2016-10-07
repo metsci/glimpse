@@ -53,11 +53,11 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D
  *
  * @author ulman
  */
-public class AnimatedTextureExample implements GlimpseLayoutProvider
+public class ShadedTexturePainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new AnimatedTextureExample( ) );
+        Example.showWithSwing( new ShadedTexturePainterExample( ) );
     }
 
     @Override
