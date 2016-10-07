@@ -169,7 +169,7 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
 
         if ( this.handles == null )
         {
-            this.handles = new ProgramHandles( gl, getShaderProgram( ).id( ) );
+            this.handles = new ProgramHandles( gl, getShaderProgram( ).program( ) );
         }
 
         gl.glEnableVertexAttribArray( this.handles.inXy );
