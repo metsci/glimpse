@@ -81,7 +81,7 @@ public class GLEditableBuffer2
 
     public ByteBuffer hostBytes( )
     {
-        return flipped( this.hBuffer.asReadOnlyBuffer( ) );
+        return flipped( readonly( this.hBuffer ) );
     }
 
 

@@ -13,6 +13,26 @@ import java.nio.IntBuffer;
 public class DirectBufferUtils
 {
 
+    public static FloatBuffer readonly( FloatBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static DoubleBuffer readonly( DoubleBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static IntBuffer readonly( IntBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static ByteBuffer readonly( ByteBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( ).order( buffer.order( ) );
+    }
+
     public static FloatBuffer sliced( FloatBuffer buffer, int first, int count )
     {
         FloatBuffer buffer2 = buffer.duplicate( );
