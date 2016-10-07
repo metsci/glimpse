@@ -83,6 +83,11 @@ public class IntRangeSet
         }
     }
 
+    public boolean contains( int x )
+    {
+        return ( this.ranges.indexAtOrBefore( x ) % 2 == 0 );
+    }
+
     public SortedInts ranges( )
     {
         return this.ranges;
