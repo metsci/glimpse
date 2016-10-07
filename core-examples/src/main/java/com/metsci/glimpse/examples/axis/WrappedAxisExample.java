@@ -94,6 +94,8 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
 
         ColorAxisPlot2D plot = example.getLayout( );
 
+        plot.setTitle( "Wrapped Axis Example" );
+
         // don't let the user zoom out too far (especially important with wrapped axes
         // since this will cause the scene to be painted many times)
         plot.getAxis( ).getAxisX( ).setMaxSpan( 3000 );
