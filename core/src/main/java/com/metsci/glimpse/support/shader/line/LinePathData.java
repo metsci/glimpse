@@ -313,28 +313,26 @@ public class LinePathData
             byte flagsNew = flagsBuffer.get( );
 
             boolean connect = ( ( flagsNew & FLAGS_CONNECT ) != 0 );
-            if ( !connect )
+            if ( connect )
             {
-                if ( useInitialMileages )
-                {
-                    // The intention is to run this block if the vertex starts a new strip -- because
-                    // such a vertex has an initial-mileage value. However, this block will also run
-                    // if the vertex is the trailing phantom vertex after a loop (because CONNECT will
-                    // be false). Such a vertex will have only a placeholder mileage. This works out
-                    // okay, though, because the shader doesn't use mileage when CONNECT is false.
+                mileage += distance( x, y, xNew, yNew, ppvAspectRatio );
+                mileageBuffer.put( mileage );
+            }
+            else if ( useInitialMileages )
+            {
+                // The intention is to run this block if the vertex starts a new strip -- because
+                // such a vertex has an initial-mileage value. However, this block will also run
+                // if the vertex is the trailing phantom vertex after a loop (because CONNECT will
+                // be false). Such a vertex will have only a placeholder mileage. This works out
+                // okay, though, because the shader doesn't use mileage when CONNECT is false.
 
-                    // The value in mileageBuffer here is the strip's initial mileage, so get the
-                    // existing value instead of putting a new one
-                    mileage = mileageBuffer.get( );
-                }
-                else
-                {
-                    mileage = 0;
-                }
+                // The value in mileageBuffer here is the strip's initial mileage, so get the
+                // existing value INSTEAD OF putting a new one
+                mileage = mileageBuffer.get( );
             }
             else
             {
-                mileage += distance( x, y, xNew, yNew, ppvAspectRatio );
+                mileage = 0;
                 mileageBuffer.put( mileage );
             }
 
