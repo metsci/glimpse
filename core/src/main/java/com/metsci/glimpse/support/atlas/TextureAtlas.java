@@ -685,7 +685,7 @@ public class TextureAtlas
      */
     public void dispose( ) throws GLException
     {
-        packer.dispose( );
+        if ( packer != null ) packer.dispose( );
         packer = null;
         cachedBackingStore = null;
         cachedGraphics = null;

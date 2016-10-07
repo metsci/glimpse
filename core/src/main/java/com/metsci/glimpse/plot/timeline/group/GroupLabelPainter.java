@@ -177,6 +177,9 @@ public class GroupLabelPainter extends GlimpsePainterBase
             lineProg.begin( gl );
             try
             {
+                lineProg.setPixelOrtho( gl, bounds );
+                lineProg.setViewport( gl, bounds );
+
                 linePath.clear( );
 
                 linePath.moveTo( startX, startY );
@@ -204,6 +207,8 @@ public class GroupLabelPainter extends GlimpsePainterBase
             fillProg.begin( gl );
             try
             {
+                fillProg.setPixelOrtho( gl, bounds );
+
                 fillPath.clear( );
 
                 if ( isExpanded )
