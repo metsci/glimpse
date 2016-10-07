@@ -178,7 +178,7 @@ public class LineProgram
 
         GLStreamingBuffer xyVbo = path.xyVbo( gl );
         GLStreamingBuffer flagsVbo = path.flagsVbo( gl );
-        GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.rawMileageVbo( gl ) );
+        GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : null );
 
         this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, path.numVertices( ) );
     }
