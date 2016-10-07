@@ -37,6 +37,7 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.projection.FlatProjection;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -128,6 +129,8 @@ public class ImageExample implements GlimpseLayoutProvider
 
         // create a painter to display the texture in the plot
         ShadedTexturePainter imagePainter = new ShadedTexturePainter( );
+
+        imagePainter.setProgram( new ColorTexture2DProgram( ) );
 
         // load the textures into the painter
         imagePainter.addDrawableTexture( texture1 );
