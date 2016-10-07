@@ -27,6 +27,9 @@
 package com.metsci.glimpse.support.shader.colormap;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
+
+import javax.media.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
 
@@ -42,5 +45,30 @@ public class ColorMapIntegerProgram extends ColorMapProgram
     {
         this.addVertexShader( "shaders/colormap/passthrough.vs" );
         this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader_integer.fs" );
+    }
+
+    protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
+    {
+        this.addShaders( );
+
+        this.dataMin = this.addUniformData( new GLUniformData( "dataMin", getMin( colorAxis ) ) );
+        this.dataMax = this.addUniformData( new GLUniformData( "dataMax", getMax( colorAxis ) ) );
+        this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
+
+        this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", targetTexUnit ) );
+        this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
+
+        this.AXIS_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "AXIS_RECT", 4 ) );
+        // without setting default data, we will get "javax.media.opengl.GLException: glUniform atom only available for 1i and 1f"
+        // if begin( ) is called before setOrtho( )
+        this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { 0, 1, 0, 1 } ) );
+
+        this.colorAxis = colorAxis;
+        this.colorAxis.addAxisListener( this );
+    }
+
+    public void setDiscardNaN( boolean discard )
+    {
+        // do nothing, shader operates on uint textures
     }
 }

@@ -14,7 +14,7 @@ out vec4 fRgba;
 
 void main()
 {
-    int dataVal = texture( datatex, vS.st ).r;
+    uint dataVal = texture( datatex, vS.st ).r;
     float normalizedVal = ( float(dataVal) - dataMin ) / ( dataMax - dataMin );
     normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
