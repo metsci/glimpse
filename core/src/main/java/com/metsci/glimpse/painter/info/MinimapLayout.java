@@ -234,8 +234,9 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             this.lineStyle.thickness_PX = 1.0f;
 
             this.linePath = new LinePath( );
-            this.fillProg = new FlatColorProgram( );
 
+            this.fillProg = new FlatColorProgram( );
+            this.lineProg = new LineProgram( );
         }
 
         @Override
