@@ -2,6 +2,8 @@ package com.metsci.glimpse.support.shader.line;
 
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static java.lang.Math.*;
 import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
@@ -33,6 +35,32 @@ public class LineStrip
         this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
         this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
         this.segmentMileages = new DoublesArray( 1 * initialCapacity );
+    }
+
+    public int actualSize( )
+    {
+        return this.flagsBuffer.numBytes( );
+    }
+
+    public int logicalSize( )
+    {
+        int actualSize = this.actualSize( );
+        return ( actualSize == 0 ? 0 : actualSize - 2 );
+    }
+
+    public int xyBuffer( GL2ES3 gl )
+    {
+        return this.xyBuffer.deviceBuffer( gl );
+    }
+
+    public int flagsBuffer( GL2ES3 gl )
+    {
+        return this.flagsBuffer.deviceBuffer( gl );
+    }
+
+    public int mileageBuffer( GL2ES3 gl, double ppvAspectRatio )
+    {
+        return this.mileageBuffer.deviceBuffer( gl );
     }
 
     public void grow( int additionalVertices )
@@ -73,8 +101,11 @@ public class LineStrip
             }
 
             // Update xys
-            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2 * putFirst, 2 * putCount );
             {
+                int xyFirst = 2 * putFirst;
+                int xyCount = 2 * putCount;
+                FloatBuffer xyEdit = this.xyBuffer.editFloats( xyFirst, xyCount );
+
                 if ( putLeader )
                 {
                     float xLeader = xys.get( 0 );
@@ -94,68 +125,57 @@ public class LineStrip
             }
 
             // Update flags
-            ByteBuffer flagsEdit = this.flagsBuffer.editBytes( 1 * putFirst, 1 * putCount );
-            int newCount = this.flagsBuffer.numBytes( );
-            for ( int i = putFirst; i < putFirst + putCount; i++ )
             {
-                if ( i == 0 )
+                int flagsFirst = ( putTrailer ? max( 0, min( putFirst, oldCount - 2 ) ) : putFirst );
+                int flagsCount = putFirst + putCount - flagsFirst;
+                ByteBuffer flagsEdit = this.flagsBuffer.editBytes( flagsFirst, flagsCount );
+
+                int newCount = this.flagsBuffer.numBytes( );
+                for ( int i = flagsFirst; i < flagsFirst + flagsCount; i++ )
                 {
-                    // Leading phantom vertex
-                    flagsEdit.put( ( byte ) 0 );
-                }
-                else if ( i == 1 )
-                {
-                    // First visible vertex
-                    flagsEdit.put( ( byte ) 0 );
-                }
-                else if ( i == newCount - 2 )
-                {
-                    // Last visible vertex
-                    flagsEdit.put( ( byte ) FLAGS_CONNECT );
-                }
-                else if ( i == newCount - 1 )
-                {
-                    // Trailing phantom vertex
-                    flagsEdit.put( ( byte ) 0 );
-                }
-                else
-                {
-                    // Regular visible vertex
-                    flagsEdit.put( ( byte ) ( FLAGS_CONNECT | FLAGS_JOIN ) );
+                    if ( i == 0 )
+                    {
+                        // Leading phantom vertex
+                        flagsEdit.put( ( byte ) 0 );
+                    }
+                    else if ( i == 1 )
+                    {
+                        // First visible vertex
+                        flagsEdit.put( ( byte ) 0 );
+                    }
+                    else if ( i == newCount - 2 )
+                    {
+                        // Last visible vertex
+                        flagsEdit.put( ( byte ) FLAGS_CONNECT );
+                    }
+                    else if ( i == newCount - 1 )
+                    {
+                        // Trailing phantom vertex
+                        flagsEdit.put( ( byte ) 0 );
+                    }
+                    else
+                    {
+                        // Regular visible vertex
+                        flagsEdit.put( ( byte ) ( FLAGS_CONNECT | FLAGS_JOIN ) );
+                    }
                 }
             }
 
             // Update mileages, all the way to the end
-            FloatBuffer mileageEdit = this.mileageBuffer.editFloats( 1 * putFirst, 1 * newCount );
             {
-                updateMileageBuffer( this.xyBuffer.hostFloats( ),
-                                     this.flagsBuffer.hostBytes( ),
-                                     mileageEdit,
-                                     false,
-                                     1.0 ); // WIP
+                // Include the previous mileage so updateMileage() can read it, but position after it so that updateMileage() doesn't write it
+                int mileageFirst = max( 0, putFirst - 1 );
+                int mileageCount = this.flagsBuffer.numBytes( ) - mileageFirst;
+                FloatBuffer mileageEdit = this.mileageBuffer.editFloats( mileageFirst, mileageCount );
+                mileageEdit.position( putFirst - mileageFirst );
+
+                FloatBuffer xySlice = sliced( this.xyBuffer.hostFloats( ), 2*mileageFirst, 2*mileageCount );
+                ByteBuffer flagsSlice = sliced( this.flagsBuffer.hostBytes( ), 1*mileageFirst, 1*mileageCount );
+
+                // WIP: ppvAspectRatio
+                updateMileageBuffer( xySlice, flagsSlice, mileageEdit, false, 1.0 );
             }
         }
-    }
-
-    public int actualSize( )
-    {
-        return this.flagsBuffer.numBytes( );
-    }
-
-    public int logicalSize( )
-    {
-        int actualSize = this.actualSize( );
-        return ( actualSize == 0 ? 0 : actualSize - 2 );
-    }
-
-    public int xyBuffer( GL2ES3 gl )
-    {
-        return this.xyBuffer.deviceBuffer( gl );
-    }
-
-    public int flagsBuffer( GL2ES3 gl )
-    {
-        return this.flagsBuffer.deviceBuffer( gl );
     }
 
     public void dispose( GL gl )

@@ -212,7 +212,7 @@ public class LineProgram
 
         int xyVbo = strip.xyBuffer( gl );
         int flagsVbo = strip.flagsBuffer( gl );
-        int mileageVbo = 0; // WIP: ( style.stippleEnable ? strip.mileageBuffer( gl ) : 0 );
+        int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
 
 //        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
 //        FloatBuffer xyRead = gl.glMapBuffer( GL_ARRAY_BUFFER, GL3.GL_READ_ONLY ).asFloatBuffer( );
@@ -235,7 +235,7 @@ public class LineProgram
         {
             int xyVbo = strip.xyBuffer( gl );
             int flagsVbo = strip.flagsBuffer( gl );
-            int mileageVbo = 0; // WIP: ( style.stippleEnable ? strip.mileageBuffer( gl ) : 0 );
+            int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
 
             this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, strip.actualSize( ) );
         }
