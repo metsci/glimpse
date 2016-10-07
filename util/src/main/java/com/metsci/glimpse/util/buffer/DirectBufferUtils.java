@@ -1,17 +1,69 @@
 package com.metsci.glimpse.util.buffer;
 
-import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffers;
-import static java.lang.Math.ceil;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.nio.ByteBuffer.allocateDirect;
-import static java.nio.ByteOrder.nativeOrder;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
+import static java.lang.Math.*;
+import static java.nio.ByteBuffer.*;
+import static java.nio.ByteOrder.*;
 
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class DirectBufferUtils
 {
+
+    public static FloatBuffer readonly( FloatBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static DoubleBuffer readonly( DoubleBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static IntBuffer readonly( IntBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static ByteBuffer readonly( ByteBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( ).order( buffer.order( ) );
+    }
+
+    public static FloatBuffer sliced( FloatBuffer buffer, int first, int count )
+    {
+        FloatBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static DoubleBuffer sliced( DoubleBuffer buffer, int first, int count )
+    {
+        DoubleBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static IntBuffer sliced( IntBuffer buffer, int first, int count )
+    {
+        IntBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static ByteBuffer sliced( ByteBuffer buffer, int first, int count )
+    {
+        ByteBuffer buffer2 = buffer.duplicate( ).order( buffer.order( ) );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( ).order( buffer.order( ) );
+    }
 
     /**
      * Calls {@link FloatBuffer#duplicate()}, flips the result, and returns it.
@@ -27,6 +79,32 @@ public class DirectBufferUtils
     }
 
     /**
+     * Calls {@link DoubleBuffer#duplicate()}, flips the result, and returns it.
+     * <p>
+     * This is a convenient way to get a flipped version of a buffer, without
+     * modifying the original buffer's position or limit.
+     */
+    public static DoubleBuffer flipped( DoubleBuffer buffer )
+    {
+        DoubleBuffer flipped = buffer.duplicate( );
+        flipped.flip( );
+        return flipped;
+    }
+
+    /**
+     * Calls {@link IntBuffer#duplicate()}, flips the result, and returns it.
+     * <p>
+     * This is a convenient way to get a flipped version of a buffer, without
+     * modifying the original buffer's position or limit.
+     */
+    public static IntBuffer flipped( IntBuffer buffer )
+    {
+        IntBuffer flipped = buffer.duplicate( );
+        flipped.flip( );
+        return flipped;
+    }
+
+    /**
      * Calls {@link ByteBuffer#duplicate()}, flips the result, and returns it.
      * <p>
      * This is a convenient way to get a flipped version of a buffer, without
@@ -34,7 +112,7 @@ public class DirectBufferUtils
      */
     public static ByteBuffer flipped( ByteBuffer buffer )
     {
-        ByteBuffer flipped = buffer.duplicate( );
+        ByteBuffer flipped = buffer.duplicate( ).order( buffer.order( ) );
         flipped.flip( );
         return flipped;
     }
@@ -99,24 +177,47 @@ public class DirectBufferUtils
      * native byte ordering. The contents of the original buffer (up to its position)
      * will be copied into the new buffer.
      * <p>
-     * If a new buffer is created, it may be created with a capacity larger than
-     * is required. This is useful for the common situation where, over and over
-     * again, a few values need to be appended, but we don't want to allocate a
-     * new buffer every single time.
+     * If a new buffer is created, it may be created with a capacity larger than is
+     * required. This is useful for the common situation where, over and over again,
+     * a few values need to be appended, but we don't want to allocate a new buffer
+     * every single time.
      */
     public static FloatBuffer ensureAdditionalCapacity( FloatBuffer buffer, int additionalFloats, boolean deallocOldBuffer )
     {
-        int bytesPerFloat = Float.SIZE / Byte.SIZE;
         long minFloats = buffer.position( ) + additionalFloats;
+        if ( minFloats > Integer.MAX_VALUE )
+        {
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT floats: requested-capacity = " + minFloats + " floats" );
+        }
+
+        return ensureCapacity( buffer, ( int ) minFloats, deallocOldBuffer );
+    }
+
+    /**
+     * If the supplied buffer has at least the specified capacity, then the supplied
+     * buffer is returned.
+     * <p>
+     * Otherwise, a new buffer is created, with at least the specified capacity. The
+     * new buffer will be direct, and will have native byte ordering. The contents of
+     * the original buffer (up to its position) will be copied into the new buffer.
+     * <p>
+     * If a new buffer is created, it may be created with a capacity larger than is
+     * required. This is useful for the common situation where, over and over again,
+     * a few values need to be appended, but we don't want to allocate a new buffer
+     * every single time.
+     */
+    public static FloatBuffer ensureCapacity( FloatBuffer buffer, int minFloats, boolean deallocOldBuffer )
+    {
+        int bytesPerFloat = Float.SIZE / Byte.SIZE;
         long minBytes = minFloats * bytesPerFloat;
+        if ( minBytes > Integer.MAX_VALUE )
+        {
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );
+        }
 
         if ( buffer.capacity( ) >= minFloats )
         {
             return buffer;
-        }
-        else if ( minBytes > Integer.MAX_VALUE )
-        {
-            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );
         }
         else
         {
@@ -151,22 +252,40 @@ public class DirectBufferUtils
      * native byte ordering. The contents of the original buffer (up to its position)
      * will be copied into the new buffer.
      * <p>
-     * If a new buffer is created, it may be created with a capacity larger than
-     * is required. This is useful for the common situation where, over and over
-     * again, a few values need to be appended, but we don't want to allocate a
-     * new buffer every single time.
+     * If a new buffer is created, it may be created with a capacity larger than is
+     * required. This is useful for the common situation where, over and over again,
+     * a few values need to be appended, but we don't want to allocate a new buffer
+     * every single time.
      */
     public static ByteBuffer ensureAdditionalCapacity( ByteBuffer buffer, int additionalBytes, boolean deallocOldBuffer )
     {
         long minBytes = buffer.position( ) + additionalBytes;
+        if ( minBytes > Integer.MAX_VALUE )
+        {
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );
+        }
 
+        return ensureCapacity( buffer, ( int ) minBytes, deallocOldBuffer );
+    }
+
+    /**
+     * If the supplied buffer has at least the specified capacity, then the supplied
+     * buffer is returned.
+     * <p>
+     * Otherwise, a new buffer is created, with at least the specified capacity. The
+     * new buffer will be direct, and will have native byte ordering. The contents of
+     * the original buffer (up to its position) will be copied into the new buffer.
+     * <p>
+     * If a new buffer is created, it may be created with a capacity larger than is
+     * required. This is useful for the common situation where, over and over again,
+     * a few values need to be appended, but we don't want to allocate a new buffer
+     * every single time.
+     */
+    public static ByteBuffer ensureCapacity( ByteBuffer buffer, int minBytes, boolean deallocOldBuffer )
+    {
         if ( buffer.capacity( ) >= minBytes )
         {
             return buffer;
-        }
-        else if ( minBytes > Integer.MAX_VALUE )
-        {
-            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );
         }
         else
         {

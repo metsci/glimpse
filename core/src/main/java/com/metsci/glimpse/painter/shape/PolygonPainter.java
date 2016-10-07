@@ -1270,7 +1270,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
                         xyBuffer.put( ( float ) vertex[0] ).put( ( float ) vertex[1] ).put( zCoord );
                         mileageBuffer.put( ( float ) distance );
-                        flagBuffer.put( i == 0 ? FLAGS_JOIN : FLAGS_CONNECT | FLAGS_JOIN );
+                        flagBuffer.put( ( byte ) ( i == 0 ? FLAGS_JOIN : FLAGS_CONNECT | FLAGS_JOIN ) );
 
                         priorVertex = vertex;
                     }

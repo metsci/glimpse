@@ -4,6 +4,8 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL3.*;
 
+import java.util.Collection;
+
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
 
@@ -104,7 +106,6 @@ public class LineProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inFlags );
-        gl.glEnableVertexAttribArray( this.handles.inMileage );
     }
 
     public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
@@ -175,7 +176,7 @@ public class LineProgram
 
         GLStreamingBuffer xyVbo = path.xyVbo( gl );
         GLStreamingBuffer flagsVbo = path.flagsVbo( gl );
-        GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.rawMileageVbo( gl ) );
+        GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : null );
 
         this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, path.numVertices( ) );
     }
@@ -188,10 +189,44 @@ public class LineProgram
         gl.glBindBuffer( flagsVbo.target, flagsVbo.buffer( gl ) );
         gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
+        if ( mileageVbo != null )
+        {
+            gl.glEnableVertexAttribArray( this.handles.inMileage );
+            gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
+        }
 
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
+
+        if ( mileageVbo != null )
+        {
+            gl.glDisableVertexAttribArray( this.handles.inMileage );
+        }
+    }
+
+    public void draw( GL2ES3 gl, LineStyle style, LineStrip strip, double ppvAspectRatio )
+    {
+        this.setStyle( gl, style );
+
+        int xyVbo = strip.xyBuffer( gl );
+        int flagsVbo = strip.flagsBuffer( gl );
+        int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
+
+        this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, strip.actualSize( ) );
+    }
+
+    public void draw( GL2ES3 gl, LineStyle style, Collection<LineStrip> strips, double ppvAspectRatio )
+    {
+        this.setStyle( gl, style );
+
+        for ( LineStrip strip : strips )
+        {
+            int xyVbo = strip.xyBuffer( gl );
+            int flagsVbo = strip.flagsBuffer( gl );
+            int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
+
+            this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, strip.actualSize( ) );
+        }
     }
 
     public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
@@ -202,17 +237,25 @@ public class LineProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
         gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
-        gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
+        if ( mileageVbo != 0 )
+        {
+            gl.glEnableVertexAttribArray( this.handles.inMileage );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
+            gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
+        }
 
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
+
+        if ( mileageVbo != 0 )
+        {
+            gl.glDisableVertexAttribArray( this.handles.inMileage );
+        }
     }
 
     public void end( GL2ES2 gl )
     {
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inFlags );
-        gl.glDisableVertexAttribArray( this.handles.inMileage );
         gl.glUseProgram( 0 );
     }
 
