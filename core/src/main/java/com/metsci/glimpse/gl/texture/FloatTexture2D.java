@@ -117,7 +117,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
             return;
         }
 
-        Axis2D axis = GlimpsePainterBase.getAxis2D( context );
+        Axis2D axis = GlimpsePainterBase.requireAxis2D( context );
 
         program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         try

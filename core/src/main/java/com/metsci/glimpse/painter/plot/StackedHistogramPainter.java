@@ -330,7 +330,7 @@ public class StackedHistogramPainter extends GlimpsePainterBase
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         if ( this.dataSeries == null || this.dataSeries.isEmpty( ) )

@@ -567,7 +567,7 @@ public class IconPainter extends GlimpsePainterBase
     {
         GL3 gl = getGL3( context );
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
 
         // in pick mode the pick color is drawn in place of non-transparent areas of the texture
         this.shader.setPickMode( false );
@@ -621,7 +621,7 @@ public class IconPainter extends GlimpsePainterBase
 
         GL3 gl = getGL3( context );
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GLContext glContext = context.getGLContext( );
 
         Set<PickResult> pickedIcons = new HashSet<PickResult>( );

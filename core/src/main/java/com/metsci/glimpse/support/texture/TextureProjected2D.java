@@ -285,7 +285,7 @@ public abstract class TextureProjected2D implements DrawableTexture
             }
         }
 
-        Axis2D axis = GlimpsePainterBase.getAxis2D( context );
+        Axis2D axis = GlimpsePainterBase.requireAxis2D( context );
         GL3 gl = GlimpsePainterBase.getGL3( context );
 
         program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );

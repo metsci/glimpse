@@ -26,9 +26,10 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.io.Serializable;
 import java.nio.FloatBuffer;
@@ -256,7 +257,7 @@ public class PolygonPainterSimple extends GlimpsePainterBase
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         enableStandardBlending( gl );

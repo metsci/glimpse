@@ -189,7 +189,7 @@ public class CrosshairPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
 
         if ( axis == null || axis.getAxisX( ) == null || axis.getAxisY( ) == null ) return;

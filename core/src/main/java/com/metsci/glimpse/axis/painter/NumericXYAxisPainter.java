@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.*;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -247,7 +247,7 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         GLUtils.enableStandardBlending( gl );

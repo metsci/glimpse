@@ -26,12 +26,18 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.support.shader.line.LinePathData.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL3.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.BYTES_PER_FLOAT;
+import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BYTE;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -977,7 +983,7 @@ public class PolygonPainter extends GlimpsePainterBase
         if ( !isGroupReady( loaded ) ) return;
 
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         if ( loaded.fillOn )

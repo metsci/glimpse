@@ -189,7 +189,7 @@ public class LineSetPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         enableStandardBlending( gl );

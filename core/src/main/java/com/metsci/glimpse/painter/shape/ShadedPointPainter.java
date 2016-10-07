@@ -293,7 +293,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
     @Override
     public void doPaintTo( GlimpseContext context )
     {
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GL2 gl = context.getGL( ).getGL2( );
 
         if ( vertexCount == 0 ) return;

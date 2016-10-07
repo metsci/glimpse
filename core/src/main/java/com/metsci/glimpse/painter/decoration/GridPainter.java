@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static java.lang.Integer.*;
+import static java.lang.Integer.parseInt;
 
 import javax.media.opengl.GL3;
 
@@ -204,7 +204,7 @@ public class GridPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
 
         if ( ticksX == null || ticksY == null ) return;

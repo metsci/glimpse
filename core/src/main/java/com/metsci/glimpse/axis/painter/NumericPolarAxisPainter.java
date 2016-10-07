@@ -101,7 +101,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         if ( this.textRenderer == null ) return;
 
         GL3 gl = context.getGL( ).getGL3( );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
 
         int height = bounds.getHeight( );

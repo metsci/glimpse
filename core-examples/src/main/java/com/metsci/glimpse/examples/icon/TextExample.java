@@ -1,7 +1,6 @@
 package com.metsci.glimpse.examples.icon;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
@@ -29,8 +28,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class TextExample implements GlimpseLayoutProvider
 {
-    private static final Logger logger = Logger.getLogger( TextExample.class.getName( ) );
-
     public static void main( String[] args ) throws Exception
     {
         Example.showWithSwing( new TextExample( ) );
@@ -42,7 +39,6 @@ public class TextExample implements GlimpseLayoutProvider
         EmptyPlot2D plot = new EmptyPlot2D( );
 
         Font loadFont = null;
-        //InputStream fontFile = StreamOpener.fileThenResource.openForRead( "fonts/bitstream/Vera.ttf" );
         try
         {
             loadFont = FontFactory.get( getClass( ), "fonts/bitstream/Vera.ttf", false );
@@ -68,7 +64,7 @@ public class TextExample implements GlimpseLayoutProvider
             @Override
             public void doPaintTo( GlimpseContext context )
             {
-                Axis2D axis = getAxis2D( context );
+                Axis2D axis = requireAxis2D( context );
                 GlimpseBounds bounds = getBounds( context );
                 GL3 gl = context.getGL( ).getGL3( );
 
@@ -120,8 +116,7 @@ public class TextExample implements GlimpseLayoutProvider
             @Override
             protected void doDispose( GlimpseContext context )
             {
-                // TODO Auto-generated method stub
-
+                // do nothing
             }
         };
 

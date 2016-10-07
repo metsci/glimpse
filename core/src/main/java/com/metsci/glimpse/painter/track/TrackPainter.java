@@ -1046,7 +1046,7 @@ public class TrackPainter extends GlimpsePainterBase
     {
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         double ppvAspectRatio = LineUtils.ppvAspectRatio( axis );
 
         int width = bounds.getWidth( );

@@ -377,7 +377,7 @@ public class AnnotationPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );

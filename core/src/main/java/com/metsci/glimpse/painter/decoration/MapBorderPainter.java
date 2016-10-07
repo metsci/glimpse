@@ -201,7 +201,7 @@ public class MapBorderPainter extends GlimpsePainterBase
         if ( ticksX == null || ticksY == null ) return;
 
         GL3 gl = context.getGL( ).getGL3( );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
 
         Axis1D axisX = axis.getAxisX( );

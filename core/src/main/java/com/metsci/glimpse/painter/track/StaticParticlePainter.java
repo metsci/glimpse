@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BYTE;
+import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -189,7 +191,7 @@ public class StaticParticlePainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
-        Axis2D axis = getAxis2D( context );
+        Axis2D axis = requireAxis2D( context );
         double ppvAspectRatio = LineUtils.ppvAspectRatio( axis );
         GL3 gl = context.getGL( ).getGL3( );
 
