@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL2ES2.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_LINE_STRIP;
+import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -176,8 +180,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
             mutatePositions( accumulator );
 
-            xyBufferDirty = true;
-            rgbaBufferDirty = true;
+            this.xyBufferDirty = true;
+            this.rgbaBufferDirty = true;
         }
         finally
         {
@@ -192,7 +196,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         {
             mutateColors( accumulator );
 
-            rgbaBufferDirty = true;
+            this.rgbaBufferDirty = true;
         }
         finally
         {
@@ -220,8 +224,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             mutatePosition( index, posX1, posY1, posX2, posY2 );
             mutateColor( index, color );
 
-            xyBufferDirty = true;
-            rgbaBufferDirty = true;
+            this.xyBufferDirty = true;
+            this.rgbaBufferDirty = true;
         }
         finally
         {
@@ -237,7 +241,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             int index = getIndex( id, false );
             mutateColor( index, color );
 
-            rgbaBufferDirty = true;
+            this.rgbaBufferDirty = true;
         }
         finally
         {
@@ -270,8 +274,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             if ( index == -1 ) return; // nothing to remove, the point does not exist
             deletePosition( index );
 
-            xyBufferDirty = true;
-            rgbaBufferDirty = true;
+            this.xyBufferDirty = true;
+            this.rgbaBufferDirty = true;
         }
         finally
         {
@@ -293,34 +297,34 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
             if ( lineCount == 0 ) return;
 
-            if ( rgbaBufferDirty )
+            if ( this.rgbaBufferDirty )
             {
-                rgbaBuffer.position( 0 );
-                rgbaBuffer.limit( lineCount * 2 * 4 );
-                rgbaStreamingBuffer.setFloats( gl, rgbaBuffer );
-                rgbaBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
+                this.rgbaBuffer.position( 0 );
+                this.rgbaBuffer.limit( lineCount * 2 * 4 );
+                this.rgbaStreamingBuffer.setFloats( gl, rgbaBuffer );
+                this.rgbaBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
             }
 
-            if ( xyBufferDirty )
+            if ( this.xyBufferDirty )
             {
-                xyBuffer.position( 0 );
-                xyBuffer.limit( lineCount * 2 * 2 );
-                xyStreamingBuffer.setFloats( gl, xyBuffer );
-                xyBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
+                this.xyBuffer.position( 0 );
+                this.xyBuffer.limit( lineCount * 2 * 2 );
+                this.xyStreamingBuffer.setFloats( gl, xyBuffer );
+                this.xyBuffer.clear( ); // doesn't actually erase data, just resets position/limit/mark
             }
 
-            prog.begin( gl );
+            this.prog.begin( gl );
             try
             {
-                prog.setViewport( gl, bounds );
-                prog.setAxisOrtho( gl, axis );
-                prog.setStyle( gl, style );
+                this.prog.setViewport( gl, bounds );
+                this.prog.setAxisOrtho( gl, axis );
+                this.prog.setStyle( gl, style );
 
-                prog.draw( gl, xyStreamingBuffer, rgbaStreamingBuffer, 0, lineCount * 2 );
+                this.prog.draw( gl, xyStreamingBuffer, rgbaStreamingBuffer, 0, lineCount * 2 );
             }
             finally
             {
-                prog.end( gl );
+                this.prog.end( gl );
             }
         }
         finally
@@ -778,7 +782,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
         {
-            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, xMax );
+            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
         }
 
         public void setStyle( GL2ES2 gl, LineStyle style )

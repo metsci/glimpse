@@ -31,7 +31,6 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
 import com.metsci.glimpse.plot.EmptyPlot2D;
-import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
