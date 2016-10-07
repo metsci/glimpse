@@ -8,6 +8,8 @@ import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_TRIANGLES;
 import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 
+import java.util.logging.Logger;
+
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 
@@ -17,6 +19,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
 
 /**
  * Applies a 2d rgba texture to triangles specified in axis coordinates.
@@ -25,6 +28,8 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
  */
 public class ColorTexture2DProgram implements DrawableTextureProgram
 {
+    private static final Logger logger = Logger.getLogger( ColorTexture2DProgram.class.getName( ) );
+
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.vs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.fs" );
 
@@ -63,6 +68,8 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
 
     protected ProgramHandles handles;
 
+    protected boolean colorSet = false;
+
     public ColorTexture2DProgram( )
     {
         this.handles = null;
@@ -75,9 +82,6 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         if ( this.handles == null )
         {
             this.handles = new ProgramHandles( gl );
-
-            // set default for RGBA color multiplier (identity)
-            this.setColor( context, new float[] { 1.0f, 1.0f, 1.0f, 1.0f } );
         }
 
         return this.handles;
@@ -92,6 +96,12 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inS );
+
+        if ( !this.colorSet )
+        {
+            this.setColor( context, new float[] { 1.0f, 1.0f, 1.0f, 1.0f } );
+            this.colorSet = true;
+        }
     }
 
     @Override
@@ -123,7 +133,9 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        gl.glUniform4f( this.handles.RGBA, rgba[0], rgba[1], rgba[2], rgba[3] );
+        gl.glUniform4fv( this.handles.RGBA, 1, rgba, 0 );
+
+        this.colorSet = true;
     }
 
     public void setTexture( GlimpseContext context, int textureUnit )
@@ -225,6 +237,9 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         }
 
         gl.glUseProgram( 0 );
+
+        GLErrorUtils.logGLError( logger, gl, "Error in ColorTexture2DProgram.end" );
+
     }
 
     /**
