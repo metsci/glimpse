@@ -86,24 +86,28 @@ public class LineStripExample
                     {
                         public void run( )
                         {
+                            strip.put( 0, wrap( floats( r.nextFloat( ) - 0.5f, r.nextFloat( ) - 0.5f ) ) );
+
                             strip.grow( 2 );
                             strip.put( wrap( floats( x, y ) ) );
-
                             x += r.nextFloat( );
-                            y += r.nextFloat( );
+                            y += 3 * ( r.nextFloat( ) - 0.5f );
                         }
                     } );
                 }
             };
             ScheduledExecutorService scheduler = newSingleThreadScheduledExecutor( new ThreadFactoryBuilder( ).setDaemon( true ).build( ) );
-            scheduler.scheduleWithFixedDelay( addVertex, 1, 1, SECONDS );
+            scheduler.scheduleWithFixedDelay( addVertex, 250, 250, MILLISECONDS );
 
 
             // Set line appearance (except for thickness, which is set in doPaintTo)
             this.style = new LineStyle( );
             style.thickness_PX = 4;
             style.joinType = JOIN_MITER;
-            style.rgba = floats( 0.7f, 0, 0, 0.5f );
+            style.rgba = floats( 0.7f, 0, 0, 1 );
+            style.stippleEnable = true;
+            style.stippleScale = 2;
+            style.stipplePattern = 0b0001010111111111;
 
             // Create the shader program for drawing lines
             this.prog = new LineProgram( );
