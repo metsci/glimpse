@@ -4,6 +4,7 @@ import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.shader.line.LinePathData.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
+import static java.nio.FloatBuffer.*;
 import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
@@ -69,6 +70,16 @@ public class LineStrip
         this.flagsBuffer.growBytes( 1 * additionalVertices );
         this.mileageBuffer.growFloats( 1 * additionalVertices );
         this.segmentMileages.ensureCapacity( this.segmentMileages.n + ( 1 * additionalVertices ) );
+    }
+
+    public void put( float... xys )
+    {
+        this.put( wrap( xys ) );
+    }
+
+    public void put( int firstVertex, float... xys )
+    {
+        this.put( firstVertex, wrap( xys ) );
     }
 
     public void put( FloatBuffer xys )
