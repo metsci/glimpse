@@ -4,12 +4,10 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL3.*;
 
-import java.nio.FloatBuffer;
 import java.util.Collection;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
-import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -213,16 +211,6 @@ public class LineProgram
         int xyVbo = strip.xyBuffer( gl );
         int flagsVbo = strip.flagsBuffer( gl );
         int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
-
-//        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-//        FloatBuffer xyRead = gl.glMapBuffer( GL_ARRAY_BUFFER, GL3.GL_READ_ONLY ).asFloatBuffer( );
-//        for ( int i = 0; i < strip.actualSize( ); i++ )
-//        {
-//            System.err.print( "   " + xyRead.get( ) + "," + xyRead.get( ) );
-//        }
-//        System.err.println( );
-//        gl.glUnmapBuffer( GL_ARRAY_BUFFER );
-
 
         this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, strip.actualSize( ) );
     }
