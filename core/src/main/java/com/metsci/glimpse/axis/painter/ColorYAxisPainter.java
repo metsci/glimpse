@@ -140,10 +140,10 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             float inset_PX = 0.5f * style.thickness_PX;
 
             pathOutline.clear( );
-            pathOutline.addRectangle( x1, inset_PX, x2, height - inset_PX );
+            pathOutline.addRectangle( x1 + inset_PX, inset_PX, x2 - inset_PX, height - inset_PX );
 
             xyBuffer.clear( );
-            xyBuffer.addQuad2f( x1, inset_PX, x2, height - inset_PX );
+            xyBuffer.addQuad2f( x1 + inset_PX, inset_PX, x2 - inset_PX, height - inset_PX );
 
             sBuffer.clear( );
             sBuffer.addQuad1f( 0, 1, 0, 1 );

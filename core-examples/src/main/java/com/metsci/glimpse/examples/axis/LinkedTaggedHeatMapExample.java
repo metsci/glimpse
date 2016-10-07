@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.examples.axis;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
