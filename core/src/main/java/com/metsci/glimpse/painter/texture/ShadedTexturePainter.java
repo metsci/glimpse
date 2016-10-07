@@ -40,6 +40,7 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.gl.texture.Texture;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 
 /**
  * A painter which applies shaders to textures in order to display
@@ -63,6 +64,10 @@ public class ShadedTexturePainter extends GlimpsePainterBase
     {
         this.nonDrawableTextures = new HashSet<>( );
         this.drawableTextures = new HashMap<>( );
+        // default behavior in Glimpse 2.0 (with no shader set)
+        // was to assume texture contained RGBA color data
+        // so set the default program to mimic this behavior
+        this.program = new ColorTexture2DProgram( );
     }
 
     public void setProgram( DrawableTextureProgram program )
