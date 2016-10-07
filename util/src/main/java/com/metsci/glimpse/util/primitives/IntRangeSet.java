@@ -1,4 +1,4 @@
-package com.metsci.glimpse.gl;
+package com.metsci.glimpse.util.primitives;
 
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 import com.metsci.glimpse.util.primitives.sorted.SortedIntsArray;

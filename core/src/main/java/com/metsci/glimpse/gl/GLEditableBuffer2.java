@@ -13,6 +13,7 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES3;
 
+import com.metsci.glimpse.util.primitives.IntRangeSet;
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 
 public class GLEditableBuffer2
