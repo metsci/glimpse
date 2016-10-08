@@ -35,7 +35,6 @@ import java.util.zip.ZipInputStream;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.UpdateMode;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -190,8 +189,9 @@ public class TreeMapExample implements GlimpseLayoutProvider
         }
 
         @Override
-        public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+        public void doPaintTo( GlimpseContext context )
         {
+            Axis2D axis = getAxis2D( context );
             double x = axis.getAxisX( ).getSelectionCenter( );
             double y = axis.getAxisY( ).getSelectionCenter( );
 
@@ -199,7 +199,7 @@ public class TreeMapExample implements GlimpseLayoutProvider
 
             if ( selectedLeafId != null )
             {
-                super.paintTo( context, bounds, axis );
+                super.doPaintTo( context );
             }
         }
 
