@@ -40,6 +40,7 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
+import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.treemap.NestedTreeMap;
 import com.metsci.glimpse.painter.treemap.SimpleTreeMapPainter;
 import com.metsci.glimpse.painter.treemap.SquarifiedLayout;
@@ -110,6 +111,8 @@ public class TreeMapExample implements GlimpseLayoutProvider
         plot.setMaxY( plot.getAxisY( ).getAbsoluteMax( ) );
 
         painter.setLayout( new SquarifiedLayout( ) );
+
+        plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
 
         return plot;
     }

@@ -32,7 +32,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -42,9 +41,9 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
-import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.StreamingLinePath;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
@@ -75,7 +74,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
 
     protected LineStyle borderStyle;
     protected LineProgram lineProg;
-    protected LinePath linePath;
+    protected StreamingLinePath linePath;
 
     public SimpleTreeMapPainter( )
     {
@@ -85,7 +84,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         borderStyle.joinType = LineJoinType.JOIN_MITER;
         borderStyle.stippleEnable = false;
         borderStyle.thickness_PX = 1;
-        linePath = new LinePath( );
+        linePath = new StreamingLinePath( 100 );
 
         flatPath = new GLStreamingBufferBuilder( );
         flatProg = new FlatColorProgram( );
@@ -213,8 +212,13 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             lineProg.setAxisOrtho( gl, axis );
             lineProg.setViewport( gl, layoutBounds );
 
-            linePath.clear( );
-            linePath.addRectangle( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ), ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+            linePath.map( gl, 10 );
+            linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
+            linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
+            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
+            linePath.closeLoop( );
+            linePath.seal( gl );
             lineProg.draw( gl, borderStyle, linePath );
         }
         finally
