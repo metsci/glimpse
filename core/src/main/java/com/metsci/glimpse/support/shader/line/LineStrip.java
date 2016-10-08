@@ -168,6 +168,8 @@ public class LineStrip
         // Update mileage
         if ( needMileage && !xyDirtyByteRanges.isEmpty( ) )
         {
+            // XXX: Recompute all mileages if ppvAspectRatio has changed noticeably
+
             // Include the previous mileage so that updateMileage() can read it,
             // but position after it so that updateMileage() doesn't write it
             int dirtyFirst = xyDirtyByteRanges.first( ) / ( 2 * SIZEOF_FLOAT );
