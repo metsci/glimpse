@@ -95,14 +95,14 @@ public class LineStripExample
                 // Append a vertex
                 float x = strip.logicalSize( );
                 float y = x + 10*( random.nextFloat( ) - 0.5f );
-                strip.grow( 2 );
-                strip.put( x, y );
+                strip.grow( 1 );
+                strip.edit( 1 ).put( x ).put( y );
 
                 // Move an existing vertex
                 int iPerturb = strip.logicalSize( ) / 4;
                 float xPerturb = iPerturb;
                 float yPerturb = xPerturb + 10*( random.nextFloat( ) - 0.5f );
-                strip.put( iPerturb, xPerturb, yPerturb );
+                strip.edit( iPerturb, 1 ).put( xPerturb ).put( yPerturb );
 
                 this.recentChange_PMILLIS = time_PMILLIS;
             }

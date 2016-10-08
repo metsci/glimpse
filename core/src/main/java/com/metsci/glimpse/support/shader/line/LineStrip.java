@@ -4,7 +4,6 @@ import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.shader.line.LinePathData.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
-import static java.nio.FloatBuffer.*;
 import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
@@ -14,179 +13,178 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES3;
 
 import com.metsci.glimpse.gl.GLEditableBuffer2;
+import com.metsci.glimpse.support.shader.line.LineProgram.LineBufferHandles;
 import com.metsci.glimpse.util.primitives.DoublesArray;
+import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
+import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 
 public class LineStrip
 {
+
+    protected static int logicalToActualIndex( int logicalIndex )
+    {
+        return ( logicalIndex + 1 );
+    }
+
+    protected static int logicalToActualSize( int logicalSize )
+    {
+        return ( logicalSize == 0 ? 0 : logicalSize + 2 );
+    }
+
+    protected static int actualToLogicalSize( int actualSize )
+    {
+        return ( actualSize == 0 ? 0 : actualSize - 2 );
+    }
+
 
     protected final GLEditableBuffer2 xyBuffer;
     protected final GLEditableBuffer2 flagsBuffer;
     protected final GLEditableBuffer2 mileageBuffer;
     protected final DoublesArray segmentMileages;
 
+    protected int logicalSize;
 
-    public LineStrip( int initialCapacity )
+
+    public LineStrip( int logicalCapacity )
     {
-        this( initialCapacity, 10 );
+        this( logicalCapacity, 10 );
     }
 
-    public LineStrip( int initialCapacity, int scratchBlockSizeFactor )
+    public LineStrip( int logicalCapacity, int scratchBlockSizeFactor )
     {
-        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2 * initialCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
-        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * initialCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.segmentMileages = new DoublesArray( 1 * initialCapacity );
-    }
+        int actualCapacity = logicalToActualSize( logicalCapacity );
+        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2*actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1*actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
+        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1*actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.segmentMileages = new DoublesArray( 1*actualCapacity );
 
-    public int actualSize( )
-    {
-        return this.flagsBuffer.numBytes( );
+        this.logicalSize = 0;
     }
 
     public int logicalSize( )
     {
-        int actualSize = this.actualSize( );
-        return ( actualSize == 0 ? 0 : actualSize - 2 );
+        return this.logicalSize;
     }
 
-    public int xyBuffer( GL2ES3 gl )
+    public int actualSize( )
     {
-        return this.xyBuffer.deviceBuffer( gl );
+        return logicalToActualSize( this.logicalSize );
     }
 
-    public int flagsBuffer( GL2ES3 gl )
+    public void grow( int logicalAdditional )
     {
-        return this.flagsBuffer.deviceBuffer( gl );
+        int actualAdditional = logicalToActualIndex( logicalAdditional );
+        this.xyBuffer.growFloats( 2*actualAdditional );
+        this.flagsBuffer.growBytes( 1*actualAdditional );
+        this.mileageBuffer.growFloats( 1*actualAdditional );
+        this.segmentMileages.ensureCapacity( this.segmentMileages.n + ( 1*actualAdditional ) );
     }
 
-    public int mileageBuffer( GL2ES3 gl, double ppvAspectRatio )
+    public FloatBuffer edit( int logicalCount )
     {
-        return this.mileageBuffer.deviceBuffer( gl );
+        int logicalFirst = this.logicalSize;
+        return this.edit( logicalFirst, logicalCount );
     }
 
-    public void grow( int additionalVertices )
+    public FloatBuffer edit( int logicalFirst, int logicalCount )
     {
-        this.xyBuffer.growFloats( 2 * additionalVertices );
-        this.flagsBuffer.growBytes( 1 * additionalVertices );
-        this.mileageBuffer.growFloats( 1 * additionalVertices );
-        this.segmentMileages.ensureCapacity( this.segmentMileages.n + ( 1 * additionalVertices ) );
+        this.logicalSize = max( this.logicalSize, logicalFirst + logicalCount );
+
+        int actualFirst = logicalToActualIndex( logicalFirst );
+        int actualCount = logicalCount;
+        return this.xyBuffer.editFloats( 2*actualFirst, 2*actualCount );
     }
 
-    public void put( float... xys )
+    public LineBufferHandles deviceBuffers( GL2ES3 gl, boolean needMileage, double ppvAspectRatio )
     {
-        this.put( wrap( xys ) );
-    }
+        FloatBuffer xyRead = this.xyBuffer.hostFloats( );
+        IntRangeSet xyDirtyByteSet = this.xyBuffer.dirtyByteRanges( );
 
-    public void put( int firstVertex, float... xys )
-    {
-        this.put( firstVertex, wrap( xys ) );
-    }
-
-    public void put( FloatBuffer xys )
-    {
-        int firstVertex = this.logicalSize( );
-        this.put( firstVertex, xys );
-    }
-
-    public void put( int firstVertex, FloatBuffer xys )
-    {
-        if ( xys.remaining( ) >= 2 )
+        // Update leader xy
+        int actualFirstVisible = logicalToActualIndex( 0 );
+        boolean putLeader = xyDirtyByteSet.contains( 2*actualFirstVisible * SIZEOF_FLOAT );
+        if ( putLeader )
         {
-            int putFirst = firstVertex + 1;
-            int putCount = xys.remaining( ) / 2;
+            float xLeader = xyRead.get( 2*actualFirstVisible + 0 );
+            float yLeader = xyRead.get( 2*actualFirstVisible + 1 );
+            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2*( actualFirstVisible - 1 ), 2 );
+            xyEdit.put( xLeader ).put( yLeader );
+        }
 
-            // If we're writing the first visible vertex, we need to write a leader as well
-            boolean putLeader = ( firstVertex == 0 );
-            if ( putLeader )
+        // Update trailer xy
+        int actualLastVisible = logicalToActualIndex( this.logicalSize - 1 );
+        boolean putTrailer = xyDirtyByteSet.contains( 2*actualLastVisible * SIZEOF_FLOAT );
+        if ( putTrailer )
+        {
+            float xTrailer = xyRead.get( 2*actualLastVisible + 0 );
+            float yTrailer = xyRead.get( 2*actualLastVisible + 1 );
+            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2*( actualLastVisible + 1 ), 2 );
+            xyEdit.put( xTrailer ).put( yTrailer );
+        }
+
+        // Update flags
+        int oldActualLastVisible = this.flagsBuffer.sizeBytes( ) - 2;
+        SortedInts xyDirtyByteRanges = xyDirtyByteSet.ranges( );
+        for ( int r = 0; r < xyDirtyByteRanges.n( ); r += 2 )
+        {
+            int xyByteRangeStart = xyDirtyByteRanges.v( r + 0 );
+            int xyByteRangeEnd = xyDirtyByteRanges.v( r + 1 );
+
+            int dirtyFirst = xyByteRangeStart / ( 2 * SIZEOF_FLOAT );
+            int editFirst = ( putTrailer ? max( 0, min( dirtyFirst, oldActualLastVisible ) ) : dirtyFirst );
+            int editCount = ( xyByteRangeEnd / ( 2 * SIZEOF_FLOAT ) ) - editFirst;
+            ByteBuffer flagsEdit = this.flagsBuffer.editBytes( editFirst, editCount );
+
+            for ( int actualIndex = editFirst; actualIndex < editFirst + editCount; actualIndex++ )
             {
-                putFirst--;
-                putCount++;
-            }
-
-            // If we're writing the last visible vertex, we need to write a trailer as well
-            int oldCount = this.flagsBuffer.numBytes( );
-            boolean putTrailer = ( putFirst + putCount >= oldCount - 1 );
-            if ( putTrailer )
-            {
-                putCount++;
-            }
-
-            // Update xys
-            {
-                int xyFirst = 2 * putFirst;
-                int xyCount = 2 * putCount;
-                FloatBuffer xyEdit = this.xyBuffer.editFloats( xyFirst, xyCount );
-
-                if ( putLeader )
+                if ( actualIndex < actualFirstVisible )
                 {
-                    float xLeader = xys.get( 0 );
-                    float yLeader = xys.get( 1 );
-                    xyEdit.put( xLeader ).put( yLeader );
+                    // Leading phantom vertex
+                    flagsEdit.put( ( byte ) 0 );
                 }
-
-                xyEdit.put( xys );
-
-                if ( putTrailer )
+                else if ( actualIndex == actualFirstVisible )
                 {
-                    int iLast = xys.limit( ) - 2;
-                    float xTrailer = xys.get( iLast + 0 );
-                    float yTrailer = xys.get( iLast + 1 );
-                    xyEdit.put( xTrailer ).put( yTrailer );
+                    // First visible vertex
+                    flagsEdit.put( ( byte ) 0 );
                 }
-            }
-
-            // Update flags
-            {
-                int flagsFirst = ( putTrailer ? max( 0, min( putFirst, oldCount - 2 ) ) : putFirst );
-                int flagsCount = putFirst + putCount - flagsFirst;
-                ByteBuffer flagsEdit = this.flagsBuffer.editBytes( flagsFirst, flagsCount );
-
-                int newCount = this.flagsBuffer.numBytes( );
-                for ( int i = flagsFirst; i < flagsFirst + flagsCount; i++ )
+                else if ( actualIndex == actualLastVisible )
                 {
-                    if ( i == 0 )
-                    {
-                        // Leading phantom vertex
-                        flagsEdit.put( ( byte ) 0 );
-                    }
-                    else if ( i == 1 )
-                    {
-                        // First visible vertex
-                        flagsEdit.put( ( byte ) 0 );
-                    }
-                    else if ( i == newCount - 2 )
-                    {
-                        // Last visible vertex
-                        flagsEdit.put( ( byte ) FLAGS_CONNECT );
-                    }
-                    else if ( i == newCount - 1 )
-                    {
-                        // Trailing phantom vertex
-                        flagsEdit.put( ( byte ) 0 );
-                    }
-                    else
-                    {
-                        // Regular visible vertex
-                        flagsEdit.put( ( byte ) ( FLAGS_CONNECT | FLAGS_JOIN ) );
-                    }
+                    // Last visible vertex
+                    flagsEdit.put( ( byte ) FLAGS_CONNECT );
                 }
-            }
-
-            // Update mileages, all the way to the end
-            {
-                // Include the previous mileage so updateMileage() can read it, but position after it so that updateMileage() doesn't write it
-                int mileageFirst = max( 0, putFirst - 1 );
-                int mileageCount = this.flagsBuffer.numBytes( ) - mileageFirst;
-                FloatBuffer mileageEdit = this.mileageBuffer.editFloats( mileageFirst, mileageCount );
-                mileageEdit.position( putFirst - mileageFirst );
-
-                FloatBuffer xySlice = sliced( this.xyBuffer.hostFloats( ), 2*mileageFirst, 2*mileageCount );
-                ByteBuffer flagsSlice = sliced( this.flagsBuffer.hostBytes( ), 1*mileageFirst, 1*mileageCount );
-
-                // WIP: ppvAspectRatio
-                updateMileageBuffer( xySlice, flagsSlice, mileageEdit, false, 1.0 );
+                else if ( actualIndex > actualLastVisible )
+                {
+                    // Trailing phantom vertex
+                    flagsEdit.put( ( byte ) 0 );
+                }
+                else
+                {
+                    // Regular visible vertex
+                    flagsEdit.put( ( byte ) ( FLAGS_CONNECT | FLAGS_JOIN ) );
+                }
             }
         }
+
+        // Update mileage
+        if ( needMileage && !xyDirtyByteRanges.isEmpty( ) )
+        {
+            // Include the previous mileage so that updateMileage() can read it,
+            // but position after it so that updateMileage() doesn't write it
+            int dirtyFirst = xyDirtyByteRanges.first( ) / ( 2 * SIZEOF_FLOAT );
+            int editFirst = max( 0, dirtyFirst - 1 );
+            int editCount = this.actualSize( ) - editFirst;
+            FloatBuffer mileageEdit = this.mileageBuffer.editFloats( editFirst, editCount );
+            mileageEdit.position( dirtyFirst - editFirst );
+
+            FloatBuffer xySlice = sliced( this.xyBuffer.hostFloats( ), 2*editFirst, 2*editCount );
+            ByteBuffer flagsSlice = sliced( this.flagsBuffer.hostBytes( ), 1*editFirst, 1*editCount );
+
+            updateMileageBuffer( xySlice, flagsSlice, mileageEdit, false, ppvAspectRatio );
+        }
+
+        return new LineBufferHandles( this.xyBuffer.deviceBuffer( gl ),
+                                      this.flagsBuffer.deviceBuffer( gl ),
+                                      ( needMileage ? this.mileageBuffer.deviceBuffer( gl ) : 0 ) );
     }
 
     public void dispose( GL gl )

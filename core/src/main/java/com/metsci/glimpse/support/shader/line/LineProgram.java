@@ -71,7 +71,23 @@ public class LineProgram
         }
     }
 
+    public static class LineBufferHandles
+    {
+        public final int inXy;
+        public final int inFlags;
+        public final int inMileage;
+
+        public LineBufferHandles( int inXy, int inFlags, int inMileage )
+        {
+            this.inXy = inXy;
+            this.inFlags = inFlags;
+            this.inMileage = inMileage;
+        }
+    }
+
+
     protected LineProgramHandles handles;
+
 
     public LineProgram( )
     {
@@ -207,46 +223,38 @@ public class LineProgram
     public void draw( GL2ES3 gl, LineStyle style, LineStrip strip, double ppvAspectRatio )
     {
         this.setStyle( gl, style );
-
-        int xyVbo = strip.xyBuffer( gl );
-        int flagsVbo = strip.flagsBuffer( gl );
-        int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
-
-        this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, strip.actualSize( ) );
+        LineBufferHandles buffers = strip.deviceBuffers( gl, style.stippleEnable, ppvAspectRatio );
+        this.draw( gl, buffers, 0, strip.actualSize( ) );
     }
 
     public void draw( GL2ES3 gl, LineStyle style, Collection<LineStrip> strips, double ppvAspectRatio )
     {
         this.setStyle( gl, style );
-
         for ( LineStrip strip : strips )
         {
-            int xyVbo = strip.xyBuffer( gl );
-            int flagsVbo = strip.flagsBuffer( gl );
-            int mileageVbo = ( style.stippleEnable ? strip.mileageBuffer( gl, ppvAspectRatio ) : 0 );
-
-            this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, strip.actualSize( ) );
+            LineBufferHandles buffers = strip.deviceBuffers( gl, style.stippleEnable, ppvAspectRatio );
+            this.draw( gl, buffers, 0, strip.actualSize( ) );
         }
     }
 
-    public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
+    public void draw( GL2ES3 gl, LineBufferHandles buffers, int first, int count )
     {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, buffers.inXy );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, buffers.inFlags );
         gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
 
-        if ( mileageVbo != 0 )
+        if ( buffers.inMileage != 0 )
         {
             gl.glEnableVertexAttribArray( this.handles.inMileage );
-            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, buffers.inMileage );
             gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
         }
 
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
 
-        if ( mileageVbo != 0 )
+        if ( buffers.inMileage != 0 )
         {
             gl.glDisableVertexAttribArray( this.handles.inMileage );
         }

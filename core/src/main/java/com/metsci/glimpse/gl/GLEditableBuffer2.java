@@ -13,7 +13,8 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES3;
 
-import com.metsci.glimpse.util.primitives.IntRangeSet;
+import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
+import com.metsci.glimpse.util.primitives.rangeset.IntRangeSetModifiable;
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 
 public class GLEditableBuffer2
@@ -21,14 +22,19 @@ public class GLEditableBuffer2
 
     protected ByteBuffer hBuffer;
     protected GLEditableBuffer dBuffer;
-    protected final IntRangeSet dirtyRanges;
+    protected final IntRangeSetModifiable dirtyRanges;
 
 
     public GLEditableBuffer2( int target, int numBytes, int scratchBlockSizeFactor )
     {
         this.hBuffer = newDirectByteBuffer( numBytes );
         this.dBuffer = new GLEditableBuffer( target, numBytes, scratchBlockSizeFactor );
-        this.dirtyRanges = new IntRangeSet( );
+        this.dirtyRanges = new IntRangeSetModifiable( );
+    }
+
+    public IntRangeSet dirtyByteRanges( )
+    {
+        return this.dirtyRanges;
     }
 
     public int deviceBuffer( GL2ES3 gl )
@@ -88,22 +94,22 @@ public class GLEditableBuffer2
 
     // Size
 
-    public int numFloats( )
+    public int sizeFloats( )
     {
-        return ( this.numBytes( ) / SIZEOF_FLOAT );
+        return ( this.sizeBytes( ) / SIZEOF_FLOAT );
     }
 
-    public int numDoubles( )
+    public int sizeDoubles( )
     {
-        return ( this.numBytes( ) / SIZEOF_DOUBLE );
+        return ( this.sizeBytes( ) / SIZEOF_DOUBLE );
     }
 
-    public int numInts( )
+    public int sizeInts( )
     {
-        return ( this.numBytes( ) / SIZEOF_INT );
+        return ( this.sizeBytes( ) / SIZEOF_INT );
     }
 
-    public int numBytes( )
+    public int sizeBytes( )
     {
         return this.hBuffer.position( );
     }

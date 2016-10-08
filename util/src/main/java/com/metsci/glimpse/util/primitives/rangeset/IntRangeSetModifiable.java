@@ -1,17 +1,29 @@
-package com.metsci.glimpse.util.primitives;
+package com.metsci.glimpse.util.primitives.rangeset;
 
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 import com.metsci.glimpse.util.primitives.sorted.SortedIntsArray;
 
-public class IntRangeSet
+public class IntRangeSetModifiable implements IntRangeSet
 {
 
     protected final SortedIntsArray ranges;
 
 
-    public IntRangeSet( )
+    public IntRangeSetModifiable( )
     {
         this.ranges = new SortedIntsArray( );
+    }
+
+    @Override
+    public boolean contains( int x )
+    {
+        return ( this.ranges.indexAtOrBefore( x ) % 2 == 0 );
+    }
+
+    @Override
+    public SortedInts ranges( )
+    {
+        return this.ranges;
     }
 
     public void add( int first, int count )
@@ -81,16 +93,6 @@ public class IntRangeSet
                 }
             }
         }
-    }
-
-    public boolean contains( int x )
-    {
-        return ( this.ranges.indexAtOrBefore( x ) % 2 == 0 );
-    }
-
-    public SortedInts ranges( )
-    {
-        return this.ranges;
     }
 
     public void clear( )
