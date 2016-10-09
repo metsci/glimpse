@@ -183,6 +183,25 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     }
 
     @Override
+    protected void doPaintTo( GlimpseContext context )
+    {
+        GL3 gl = getGL3( context );
+        GlimpseBounds layoutBounds = getBounds( context );
+        Axis2D axis = getAxis2D( context );
+
+        lineProg.begin( gl );
+        try
+        {
+            lineProg.setAxisOrtho( gl, axis );
+            lineProg.setViewport( gl, layoutBounds );
+        } finally {
+            lineProg.end( gl );
+        }
+
+        super.doPaintTo( context );
+    }
+
+    @Override
     protected void doDispose( GlimpseContext context )
     {
         lineProg.dispose( getGL3( context ) );
@@ -209,17 +228,14 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         lineProg.begin( gl );
         try
         {
-            lineProg.setAxisOrtho( gl, axis );
-            lineProg.setViewport( gl, layoutBounds );
-
-            linePath.map( gl, 10 );
-            linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
-            linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
-            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
-            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
-            linePath.closeLoop( );
-            linePath.seal( gl );
-            lineProg.draw( gl, borderStyle, linePath );
+//            linePath.map( gl, 10 );
+//            linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
+//            linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
+//            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+//            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
+//            linePath.closeLoop( );
+//            linePath.seal( gl );
+//            lineProg.draw( gl, borderStyle, linePath );
         }
         finally
         {
@@ -251,6 +267,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     @Override
     protected Rectangle2D drawTitle( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D boundary, int nodeId )
     {
+        if (true) return boundary;
         String title = tree.getTitle( nodeId );
         if ( title == null )
         {
@@ -329,6 +346,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     @Override
     protected void drawLeafInterior( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
     {
+        if (true) return;
         String text = tree.getText( leafId );
         if ( text == null )
         {
