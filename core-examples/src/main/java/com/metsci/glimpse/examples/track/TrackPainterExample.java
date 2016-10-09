@@ -44,12 +44,15 @@ import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
+import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.Pulsator;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * Demonstrates the dynamic update capability of the TrackPainter.
@@ -63,7 +66,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         Example.showWithSwing( new TrackPainterExample( ) );
     }
 
-    public static final int NUMBER_OF_TRACKS = 2000;
+    public static final int NUMBER_OF_TRACKS = 500;
 
     @Override
     public GlimpseLayout getLayout( )
@@ -167,6 +170,8 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         } );
 
         plot.addPainter( new NumericXYAxisPainter( ) );
+
+        plot.addPainter( new FpsPainter( ) );
 
         return plot;
     }
@@ -288,7 +293,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
                 trackPainter.setPointColor( trackId, 0.0f, 1.0f, 0.0f, 1.0f );
                 trackPainter.setLineColor( trackId, 0.0f, 1.0f, 0.0f, 1.0f );
                 trackPainter.setShowLabel( trackId, true );
-                trackPainter.setHeadPointSize( trackId, 8.0f );
+                trackPainter.setHeadPointSize( trackId, 14.0f );
             }
 
             // change back to normal the display characteristics of any tracks
@@ -304,7 +309,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
 
                 if ( track != null ) track.setColor( trackPainter );
                 trackPainter.setShowLabel( trackId, false );
-                trackPainter.setHeadPointSize( trackId, 4.0f );
+                trackPainter.setHeadPointSize( trackId, 10.0f );
             }
 
             // swap the sets storing previously selected and newly selected tracks
@@ -332,48 +337,44 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         @Override
         public void run( )
         {
-
-            for ( int i = 0; i < numberOfTracks; i++ )
-            {
-                // add some randomness to the track color
-                float r = ( float ) ( Math.random( ) * 0.2 + 0.7 );
-                float g = ( float ) ( Math.random( ) * 0.2 + 0.3 );
-                float b = ( float ) ( Math.random( ) * 0.2 + 0.3 );
-
-                Track track = new Track( i, r, g, b );
-
-                tracks.put( i, track );
-
-                track.setColor( trackPainter );
-
-                trackPainter.setPointSize( i, 0.5f );
-                trackPainter.setLineWidth( i, 2f );
-
-                trackPainter.setLabel( i, "Track " + i );
-                trackPainter.setLabelColor( i, GlimpseColor.getBlack( ) );
-                trackPainter.setShowLabel( i, false );
-                trackPainter.setShowLabelLine( i, false );
-
-                trackPainter.setHeadPointSize( i, 4.0f );
-                trackPainter.setShowHeadPoint( i, true );
-            }
-
             while ( true )
             {
-                Runnable r = new Runnable( )
-                {
-                    public void run( )
-                    {
-                        time = time + 1;
+                time = time + 1;
 
-                        for ( Track track : tracks.values( ) )
-                        {
-                            track.tick( );
-                            track.addPoint( trackPainter, time );
-                        }
-                    }
-                };
-                r.run( );
+                if ( tracks.size( ) < numberOfTracks )
+                {
+                    int i = tracks.size( );
+
+                    // add some randomness to the track color
+                    float r = ( float ) ( Math.random( ) * 0.2 + 0.7 );
+                    float g = ( float ) ( Math.random( ) * 0.2 + 0.3 );
+                    float b = ( float ) ( Math.random( ) * 0.2 + 0.3 );
+
+                    Track track = new Track( i, r, g, b );
+                    tracks.put( i, track );
+
+                    LineStyle style = new LineStyle( );
+                    style.joinType = LineJoinType.JOIN_NONE;
+                    style.thickness_PX = 1f;
+                    trackPainter.setLineStyle( i, style );
+
+                    track.setColor( trackPainter );
+
+                    trackPainter.setShowPoints( i, false );
+                    trackPainter.setLabel( i, "Track " + i );
+                    trackPainter.setLabelColor( i, GlimpseColor.getBlack( ) );
+                    trackPainter.setShowLabel( i, false );
+                    trackPainter.setShowLabelLine( i, false );
+
+                    trackPainter.setHeadPointSize( i, 10.0f );
+                    trackPainter.setShowHeadPoint( i, true );
+                }
+
+                for ( Track track : tracks.values( ) )
+                {
+                    track.tick( );
+                    track.addPoint( trackPainter, time );
+                }
 
                 try
                 {

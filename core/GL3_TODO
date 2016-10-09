@@ -1,7 +1,5 @@
-ReprojectionExample isn't working (works if "* RGBA" is removed from colortex2d.fs -- it looks like the uniform isn't getting set)
 PolygonPainter polygon stippling
 TextRenderer
 BorderPainter doesn't handle thick lines / mitering correctly, also doesn't work correctly when some border lines are hidden (with thick lines)
 TrackPainter is broken awaiting new LinePath capability
-Slippy painter
 TreeMap

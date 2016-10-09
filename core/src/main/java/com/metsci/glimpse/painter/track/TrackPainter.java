@@ -46,7 +46,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -57,6 +56,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.selection.SpatialSelectionAxisListener;
@@ -64,9 +64,10 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.metsci.glimpse.support.selection.TemporalSelectionListener;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineProgram.LineBufferHandles;
+import com.metsci.glimpse.support.shader.line.LineStrip;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
-import com.metsci.glimpse.support.shader.line.StreamingLinePath;
 import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 
@@ -1082,39 +1083,17 @@ public class TrackPainter extends GlimpsePainterBase
 
                     if ( track.isDataInserted( ) )
                     {
-                        // the insert position is at the end of the currently loaded vertices, so just append
-                        if ( track.getInsertOffset( ) == loaded.path.numVertices( ) )
+
+                        int newCount = track.getSize( ) - loaded.path.logicalSize( );
+
+                        if ( newCount > 0 ) loaded.path.grow( track.getInsertCount( ) );
+
+                        FloatBuffer buffer = loaded.path.edit( track.getInsertOffset( ), track.getInsertCount( ) );
+
+                        for ( int i = track.getInsertOffset( ); i < track.getSize( ); i++ )
                         {
-                            loaded.path.map( gl, track.getInsertCount( ), track.style.stippleEnable, ppvAspectRatio );
-
-                            for ( int i = track.getInsertOffset( ); i < track.getSize( ); i++ )
-                            {
-                                Point point = track.getPoints( ).get( i );
-                                loaded.path.lineTo( point.getX( ), point.getY( ) );
-                            }
-
-                            loaded.path.seal( gl );
-                        }
-                        // StreamingLinePath doesn't yet allow moving backward to overwrite a portion of the vertices
-                        // so we need to overwrite all of them in this case
-                        else
-                        {
-                            loaded.path.map( gl, track.getSize( ), track.style.stippleEnable, ppvAspectRatio );
-
-                            for ( int i = 0; i < track.getSize( ); i++ )
-                            {
-                                Point point = track.getPoints( ).get( i );
-                                if ( i == 0 )
-                                {
-                                    loaded.path.lineTo( point.getX( ), point.getY( ) );
-                                }
-                                else
-                                {
-                                    loaded.path.moveTo( point.getX( ), point.getY( ) );
-                                }
-                            }
-
-                            loaded.path.seal( gl );
+                            Point point = track.getPoints( ).get( i );
+                            buffer.put( point.getX( ) ).put( point.getY( ) );
                         }
                     }
 
@@ -1134,69 +1113,86 @@ public class TrackPainter extends GlimpsePainterBase
 
         if ( loadedTracks.isEmpty( ) ) return;
 
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
         boolean labelOn = false;
 
-        for ( LoadedTrack loaded : loadedTracks.values( ) )
+        GLUtils.enableStandardBlending( gl );
+        try
         {
-            if ( loaded.linesOn )
-            {
-                lineProg.begin( gl );
-                try
-                {
-                    lineProg.setAxisOrtho( gl, axis );
-                    lineProg.setViewport( gl, bounds );
 
-                    lineProg.draw( gl, loaded.style, loaded.path );
-                }
-                finally
+            lineProg.begin( gl );
+            try
+            {
+                lineProg.setAxisOrtho( gl, axis );
+                lineProg.setViewport( gl, bounds );
+
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    lineProg.end( gl );
+                    if ( loaded.linesOn )
+                    {
+                        lineProg.draw( gl, loaded.style, loaded.path, ppvAspectRatio );
+                    }
                 }
             }
-
-            if ( loaded.pointsOn )
+            finally
             {
-                pointProg.begin( gl );
-                try
-                {
-                    pointProg.setAxisOrtho( gl, axis );
-                    pointProg.setPointSize( gl, loaded.pointSize );
-                    pointProg.setRgba( gl, loaded.pointColor );
-
-                    int xyVbo = loaded.path.xyVbo.buffer( gl );
-
-                    // skip the first vertex, which is a phantom vertex
-                    pointProg.draw( gl, GL.GL_POINTS, xyVbo, 1, loaded.path.numVertices( ) - 1 );
-                }
-                finally
-                {
-                    pointProg.end( gl );
-                }
+                lineProg.end( gl );
             }
 
-            if ( loaded.headPointOn )
+            pointProg.begin( gl );
+            try
             {
-                pointProg.begin( gl );
-                try
-                {
-                    pointProg.setAxisOrtho( gl, axis );
-                    pointProg.setPointSize( gl, loaded.headPointSize );
-                    pointProg.setRgba( gl, loaded.headPointColor );
+                pointProg.setAxisOrtho( gl, axis );
+                pointProg.setFeatherThickness( gl, 1.0f );
 
-                    builder.clear( );
-                    builder.addVertex2f( ( float ) loaded.headPosX, ( float ) loaded.headPosY );
-
-                    pointProg.draw( gl, builder.getBuffer( gl ), 0, 1 );
-                }
-                finally
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    pointProg.end( gl );
+                    if ( loaded.pointsOn )
+                    {
+                        pointProg.setPointSize( gl, loaded.pointSize );
+                        pointProg.setRgba( gl, loaded.pointColor );
+
+                        LineBufferHandles deviceBuffers = loaded.path.deviceBuffers( gl, false, ppvAspectRatio );
+
+                        // skip the first vertex, which is a phantom vertex
+                        pointProg.draw( gl, GL.GL_POINTS, deviceBuffers.inXy, 1, loaded.path.logicalSize( ) );
+                    }
                 }
             }
+            finally
+            {
+                pointProg.end( gl );
+            }
 
-            if ( loaded.labelOn ) labelOn = true;
+            pointProg.begin( gl );
+            try
+            {
+                pointProg.setAxisOrtho( gl, axis );
+
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
+                {
+                    if ( loaded.headPointOn )
+                    {
+                        pointProg.setPointSize( gl, loaded.headPointSize );
+                        pointProg.setRgba( gl, loaded.headPointColor );
+
+                        builder.clear( );
+                        builder.addVertex2f( ( float ) loaded.headPosX, ( float ) loaded.headPosY );
+
+                        pointProg.draw( gl, builder.getBuffer( gl ), 0, 1 );
+                    }
+
+                    if ( loaded.labelOn ) labelOn = true;
+                }
+
+            }
+            finally
+            {
+                pointProg.end( gl );
+            }
+        }
+        finally
+        {
+            GLUtils.disableBlending( gl );
         }
 
         // don't bother iterating through all the tracks again if none have labels turned on
@@ -1221,32 +1217,32 @@ public class TrackPainter extends GlimpsePainterBase
                 fontRenderer.endRendering( );
             }
 
-            for ( LoadedTrack loaded : loadedTracks.values( ) )
+            lineProg.begin( gl );
+            try
             {
-                if ( loaded.labelOn && loaded.labelLineOn && loaded.label != null )
+                lineProg.setPixelOrtho( gl, bounds );
+                lineProg.setViewport( gl, bounds );
+
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    int posX = axis.getAxisX( ).valueToScreenPixel( loaded.headPosX );
-                    int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
-
-                    labelLinePath.clear( );
-                    labelLinePath.moveTo( posX, posY );
-                    labelLinePath.lineTo( posX + TRACK_LABEL_OFFSET_X, posY + TRACK_LABEL_OFFSET_Y );
-
-                    labelLineStyle.rgba = loaded.labelLineColor;
-
-                    lineProg.begin( gl );
-                    try
+                    if ( loaded.labelOn && loaded.labelLineOn && loaded.label != null )
                     {
-                        lineProg.setPixelOrtho( gl, bounds );
-                        lineProg.setViewport( gl, bounds );
+                        int posX = axis.getAxisX( ).valueToScreenPixel( loaded.headPosX );
+                        int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
+
+                        labelLinePath.clear( );
+                        labelLinePath.moveTo( posX, posY );
+                        labelLinePath.lineTo( posX + TRACK_LABEL_OFFSET_X, posY + TRACK_LABEL_OFFSET_Y );
+
+                        labelLineStyle.rgba = loaded.labelLineColor;
 
                         lineProg.draw( gl, labelLineStyle, labelLinePath );
                     }
-                    finally
-                    {
-                        lineProg.end( gl );
-                    }
                 }
+            }
+            finally
+            {
+                lineProg.end( gl );
             }
         }
     }
@@ -1310,7 +1306,7 @@ public class TrackPainter extends GlimpsePainterBase
         public float[] headPointColor = new float[4];
         public boolean headPointOn;
 
-        public StreamingLinePath path;
+        public LineStrip path;
         public LineStyle style;
 
         // LoadedTrack isn't intended to be used outside of TrackPainter
@@ -1318,7 +1314,7 @@ public class TrackPainter extends GlimpsePainterBase
         {
             this.trackId = track.trackId;
 
-            this.path = new StreamingLinePath( );
+            this.path = new LineStrip( 100 );
 
             this.loadSettings( track );
         }
