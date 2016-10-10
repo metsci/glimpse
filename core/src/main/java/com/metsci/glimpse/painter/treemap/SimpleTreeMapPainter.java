@@ -46,6 +46,8 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.StreamingLinePath;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
+
 /**
  * A simple implementation of {@code AbstractTreeMapPainter} that has default
  * colors for everything.
@@ -76,6 +78,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     protected LineProgram lineProg;
     protected StreamingLinePath linePath;
 
+    private boolean dirty;
+
     public SimpleTreeMapPainter( )
     {
         lineProg = new LineProgram( );
@@ -84,12 +88,21 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         borderStyle.joinType = LineJoinType.JOIN_MITER;
         borderStyle.stippleEnable = false;
         borderStyle.thickness_PX = 1;
-        linePath = new StreamingLinePath( 100 );
+        linePath = new StreamingLinePath( 1 );
 
         flatPath = new GLStreamingBufferBuilder( );
         flatProg = new FlatColorProgram( );
 
         setBorderColor( new float[] { 0.4f, 0.4f, 0.4f, 1f } );
+        dirty = true;
+    }
+
+    @Override
+    protected void populateLayout( int nodeId, Rectangle2D boundary )
+    {
+        super.populateLayout( nodeId, boundary );
+        dirty = true;
+        needsMapped = true;
     }
 
     public float[] getBorderColor( )
@@ -190,15 +203,17 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         Axis2D axis = getAxis2D( context );
 
         lineProg.begin( gl );
-        try
-        {
-            lineProg.setAxisOrtho( gl, axis );
-            lineProg.setViewport( gl, layoutBounds );
-        } finally {
-            lineProg.end( gl );
-        }
+        lineProg.setAxisOrtho( gl, axis );
+        lineProg.setViewport( gl, layoutBounds );
+        lineProg.end( gl );
 
         super.doPaintTo( context );
+
+        if ( dirty )
+        {
+            linePath.seal( gl );
+            dirty = false;
+        }
     }
 
     @Override
@@ -218,9 +233,31 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         }
     }
 
+    private Int2ObjectAVLTreeMap<int[]> map = new Int2ObjectAVLTreeMap<>( );
+    private boolean needsMapped = true;
+
     @Override
     protected void drawBorder( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
+        if ( dirty && needsMapped )
+        {
+            linePath.map( gl, layoutCache.size( ) * 42 );
+            needsMapped = false;
+        }
+
+        if ( dirty )
+        {
+            int start = linePath.numVertices( );
+            linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
+            linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
+            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
+            linePath.closeLoop( );
+            int count = linePath.numVertices( ) - start;
+            map.put( nodeId, new int[] { start, count } );
+            return;
+        }
+
         float[] color = getBorderColor( nodeId, isSelected( axis, nodeBounds ) );
         borderStyle.rgba = color;
         borderStyle.thickness_PX = 1f;
@@ -228,14 +265,9 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         lineProg.begin( gl );
         try
         {
-//            linePath.map( gl, 10 );
-//            linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
-//            linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
-//            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
-//            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
-//            linePath.closeLoop( );
-//            linePath.seal( gl );
-//            lineProg.draw( gl, borderStyle, linePath );
+            lineProg.setStyle( gl, borderStyle );
+            int[] s = map.get( nodeId );
+            lineProg.draw( gl, linePath.xyVbo, linePath.flagsVbo, null, s[0], s[1] );
         }
         finally
         {
