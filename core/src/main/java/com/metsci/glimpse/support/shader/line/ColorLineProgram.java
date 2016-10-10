@@ -171,16 +171,16 @@ public class ColorLineProgram
 
     public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, GLStreamingBuffer rgbaVbo, int first, int count )
     {
-        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( flagsVbo.target, flagsVbo.buffer( gl ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo.buffer( gl ) );
         gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( mileageVbo.target, mileageVbo.buffer( gl ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
 
-        gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( gl ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );

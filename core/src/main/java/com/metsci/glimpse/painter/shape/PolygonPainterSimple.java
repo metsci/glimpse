@@ -28,7 +28,6 @@ package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.io.Serializable;
@@ -82,7 +81,7 @@ public class PolygonPainterSimple extends GlimpsePainterBase
         this.tessellator = new PolygonTessellator( );
 
         this.prog = new FlatColorProgram( );
-        this.buffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
+        this.buffer = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
     }
 
     public void setShowOn( int[] ids )

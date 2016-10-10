@@ -105,7 +105,7 @@ public class FlatColorProgram
 
     public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
     {
-        gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
         gl.glDrawArrays( mode, first, count );

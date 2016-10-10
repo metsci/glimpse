@@ -68,8 +68,6 @@ import javax.media.opengl.GL;
 public class GLStreamingBuffer
 {
 
-    public final int target;
-
     /**
      * Passed to {@link GL#glBufferData(int, long, java.nio.Buffer, int)}
      * when allocating buffer space
@@ -111,9 +109,8 @@ public class GLStreamingBuffer
      */
     protected long mappedSize;
 
-    public GLStreamingBuffer( int target, int usage, int blockSizeFactor )
+    public GLStreamingBuffer( int usage, int blockSizeFactor )
     {
-        this.target = target;
         this.usage = usage;
         this.blockSizeFactor = blockSizeFactor;
 
@@ -246,7 +243,7 @@ public class GLStreamingBuffer
             throw new RuntimeException( "Buffer is already mapped -- must be sealed before being mapped again" );
         }
 
-        gl.glBindBuffer( this.target, this.buffer( gl ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, this.buffer( gl ) );
 
         // Seems recommended to map in multiples of 64 ... I guess for alignment reasons?
         this.mappedSize = nextMultiple( numBytes, 64 );
@@ -257,13 +254,13 @@ public class GLStreamingBuffer
             this.blockSize = max( this.blockSize, this.blockSizeFactor * this.mappedSize );
 
             // Allocate new space, and orphan the old space
-            gl.glBufferData( this.target, this.blockSize, null, this.usage );
+            gl.glBufferData( GL_ARRAY_BUFFER, this.blockSize, null, this.usage );
 
             // Start at the beginning of the new space
             this.mappedOffset = 0;
         }
 
-        return gl.glMapBufferRange( this.target, this.mappedOffset, this.mappedSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
+        return gl.glMapBufferRange( GL_ARRAY_BUFFER, this.mappedOffset, this.mappedSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT );
     }
 
     /**
@@ -284,8 +281,8 @@ public class GLStreamingBuffer
             throw new RuntimeException( "Buffer is not currently mapped" );
         }
 
-        gl.glBindBuffer( this.target, this.buffer );
-        gl.glUnmapBuffer( this.target );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, this.buffer );
+        gl.glUnmapBuffer( GL_ARRAY_BUFFER );
 
         this.sealedOffset = this.mappedOffset;
         this.mappedOffset += this.mappedSize;
@@ -303,8 +300,8 @@ public class GLStreamingBuffer
     {
         if ( this.mappedSize != 0 )
         {
-            gl.glBindBuffer( this.target, this.buffer );
-            gl.glUnmapBuffer( this.target );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, this.buffer );
+            gl.glUnmapBuffer( GL_ARRAY_BUFFER );
             this.mappedSize = 0;
         }
 

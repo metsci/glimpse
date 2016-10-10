@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.FloatBuffer;
@@ -83,7 +82,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         this.tickBufferSize = 10;
 
-        this.tagXyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
+        this.tagXyVbo = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
 
         this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
 

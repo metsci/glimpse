@@ -1,10 +1,8 @@
 package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
-import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
-import static com.metsci.glimpse.support.shader.line.LineUtils.distance;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
+import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+import static com.metsci.glimpse.support.shader.line.LineUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -48,9 +46,9 @@ public class StreamingLinePath
 
     public StreamingLinePath( int vboBlockSizeFactor )
     {
-        this.xyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
-        this.flagsVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
-        this.mileageVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.xyVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.flagsVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.mileageVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
 
         // Per mapping
         this.xyBuffer = null;

@@ -33,13 +33,13 @@ public class LinePath
     {
         this.data = new LinePathData( initialNumVertices );
 
-        this.xyVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.xyVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
         this.xyDirty = true;
 
-        this.flagsVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.flagsVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
         this.flagsDirty = true;
 
-        this.mileageVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.mileageVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
         this.mileageDirty = true;
     }
 

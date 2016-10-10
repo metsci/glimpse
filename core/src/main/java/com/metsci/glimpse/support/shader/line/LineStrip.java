@@ -55,9 +55,9 @@ public class LineStrip
     public LineStrip( int logicalCapacity, int scratchBlockSizeFactor )
     {
         int actualCapacity = logicalToActualSize( logicalCapacity );
-        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
-        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.xyBuffer = new GLEditableBuffer2( 2 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.flagsBuffer = new GLEditableBuffer2( 1 * actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
+        this.mileageBuffer = new GLEditableBuffer2( 1 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
         this.segmentMileages = new DoublesArray( 1 * actualCapacity );
 
         this.logicalSize = 0;

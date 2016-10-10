@@ -109,8 +109,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         this.xyBuffer = FloatBuffer.allocate( initialSize * 2 * 2 );
         this.rgbaBuffer = FloatBuffer.allocate( initialSize * 2 * 4 );
 
-        this.xyStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
-        this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, 20 );
+        this.xyStreamingBuffer = new GLStreamingBuffer( GL_STREAM_DRAW, 20 );
+        this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_STREAM_DRAW, 20 );
 
         this.style = new LineStyle( );
 
@@ -804,10 +804,10 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
         {
-            gl.glBindBuffer( xyVbo.target, xyVbo.buffer( gl ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
-            gl.glBindBuffer( rgbaVbo.target, rgbaVbo.buffer( gl ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
             gl.glDrawArrays( GL_LINE_STRIP, first, count );

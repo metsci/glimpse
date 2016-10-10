@@ -32,7 +32,7 @@ public class ColorLinePath
         this.path = new LinePath( initialNumVertices, vboBlockSizeFactor );
 
         this.rgbaBuffer = newDirectFloatBuffer( 4 * initialNumVertices );
-        this.rgbaVbo = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.rgbaVbo = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
         this.rgbaDirty = true;
     }
 

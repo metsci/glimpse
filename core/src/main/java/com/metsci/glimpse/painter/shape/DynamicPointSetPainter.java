@@ -116,8 +116,8 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
         this.searchResults = new IntsArray( );
 
         this.prog = new PointArrayColorProgram( );
-        this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 5 );
-        this.xyStreamingBuffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 5 );
+        this.rgbaStreamingBuffer = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 5 );
+        this.xyStreamingBuffer = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 5 );
     }
 
     public Collection<Object> getGeoRange( double minX, double maxX, double minY, double maxY )

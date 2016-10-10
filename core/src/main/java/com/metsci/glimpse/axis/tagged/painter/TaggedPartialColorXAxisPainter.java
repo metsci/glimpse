@@ -72,8 +72,8 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
     {
         super( ticks );
 
-        this.vertexCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
-        this.textureCoords = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, 20 );
+        this.vertexCoords = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
+        this.textureCoords = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
     }
 
     @Override

@@ -27,7 +27,7 @@ public class GLStreamingBufferBuilder
     {
         this.data = new GLStreamingBufferData( initialNumFloats );
 
-        this.buffer = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STATIC_DRAW, vboBlockSizeFactor );
+        this.buffer = new GLStreamingBuffer( GL_STATIC_DRAW, vboBlockSizeFactor );
         this.dirty = true;
     }
 
