@@ -45,14 +45,13 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.track.LineStripPainter;
+import com.metsci.glimpse.painter.track.LineStripTrackPainter;
 import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.Pulsator;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
-import com.metsci.glimpse.support.shader.line.LineJoinType;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
@@ -131,7 +130,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
 
         // create a new TrackPainter which will be used to highlight the point closest to the cursor
-        final LineStripPainter selectionDotPainter = new LineStripPainter( false );
+        final LineStripTrackPainter selectionDotPainter = new LineStripTrackPainter( false );
         plot.addPainter( selectionDotPainter );
         selectionDotPainter.setShowPoints( 0, true );
         selectionDotPainter.setPointSize( 0, 10f );
@@ -358,8 +357,9 @@ public class TrackPainterExample implements GlimpseLayoutProvider
                         tracks.put( i, track );
 
                         LineStyle style = new LineStyle( );
-                        style.joinType = LineJoinType.JOIN_NONE;
-                        style.thickness_PX = 1f;
+                        style.thickness_PX = 5f;
+                        style.stippleEnable = true;
+                        style.stippleScale = 5.0f;
                         trackPainter.setLineStyle( i, style );
 
                         track.setColor( trackPainter );
@@ -370,8 +370,8 @@ public class TrackPainterExample implements GlimpseLayoutProvider
                         trackPainter.setShowLabel( i, false );
                         trackPainter.setShowLabelLine( i, false );
 
-                        trackPainter.setHeadPointSize( i, 10.0f );
-                        trackPainter.setShowHeadPoint( i, true );
+                        //trackPainter.setHeadPointSize( i, 10.0f );
+                        //trackPainter.setShowHeadPoint( i, true );
                     }
                 }
 

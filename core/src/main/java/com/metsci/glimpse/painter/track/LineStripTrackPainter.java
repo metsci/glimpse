@@ -81,9 +81,9 @@ import com.metsci.glimpse.util.quadtree.QuadTreeXys;
  * @author ulman
  * @see com.metsci.glimpse.examples.animated.AnimatedGeoPlotExample
  */
-public class LineStripPainter extends GlimpsePainterBase
+public class LineStripTrackPainter extends GlimpsePainterBase
 {
-    private static final Logger logger = Logger.getLogger( LineStripPainter.class.getName( ) );
+    private static final Logger logger = Logger.getLogger( LineStripTrackPainter.class.getName( ) );
 
     public static final int QUAD_TREE_BIN_MAX = 1000;
 
@@ -129,12 +129,12 @@ public class LineStripPainter extends GlimpsePainterBase
     protected LinePath labelLinePath;
     protected LineStyle labelLineStyle;
 
-    public LineStripPainter( )
+    public LineStripTrackPainter( )
     {
         this( false );
     }
 
-    public LineStripPainter( boolean enableSpatialIndex )
+    public LineStripTrackPainter( boolean enableSpatialIndex )
     {
         if ( enableSpatialIndex ) this.spatialIndex = new QuadTreeXys<Point>( QUAD_TREE_BIN_MAX );
 
@@ -1786,18 +1786,18 @@ public class LineStripPainter extends GlimpsePainterBase
             return true;
         }
 
-        private LineStripPainter getOuterType( )
+        private LineStripTrackPainter getOuterType( )
         {
-            return LineStripPainter.this;
+            return LineStripTrackPainter.this;
         }
     }
 
     public static class SpatialSelectionAxisListener extends RateLimitedAxisListener2D
     {
-        protected LineStripPainter painter;
+        protected LineStripTrackPainter painter;
         protected SpatialSelectionListener<Point> listener;
 
-        public SpatialSelectionAxisListener( LineStripPainter painter, SpatialSelectionListener<Point> listener )
+        public SpatialSelectionAxisListener( LineStripTrackPainter painter, SpatialSelectionListener<Point> listener )
         {
             this.painter = painter;
             this.listener = listener;

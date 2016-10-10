@@ -808,7 +808,7 @@ public class IconPainter extends GlimpsePainterBase
          * instances of the painter draw to different GlimpseTargets. A particular
          * listener might only care about icon selections from one of those GlimpseTargets.
          *
-         * Other painters like {@link com.metsci.glimpse.painter.track.LineStripPainter} have
+         * Other painters like {@link com.metsci.glimpse.painter.track.LineStripTrackPainter} have
          * similar issues. There is not a Glimpse-wide solution to this general problem
          * which was introduced as an ugly side-effect of the painter retargeting
          * changes made in Glimpse 0.8.

@@ -35,7 +35,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.track.LineStripPainter;
+import com.metsci.glimpse.painter.track.LineStripTrackPainter;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
@@ -199,7 +199,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
     protected void setChartData( TimePlotInfo chart, Epoch epoch, TimeStamp startTime, TimeStamp endTime )
     {
         // create a painter to display data on the plot
-        LineStripPainter painter = new LineStripPainter( );
+        LineStripTrackPainter painter = new LineStripTrackPainter( );
 
         // set colors and sizes for the painter
         painter.setPointColor( 1, GlimpseColor.getGreen( ) );
@@ -234,7 +234,7 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         return new StackedTimePlot2D( Orientation.VERTICAL, new Epoch( TimeStamp.currentTime( ) ) );
     }
 
-    protected void addData( LineStripPainter painter, Epoch epoch, double data, TimeStamp time )
+    protected void addData( LineStripTrackPainter painter, Epoch epoch, double data, TimeStamp time )
     {
         painter.addPoint( 1, 0, epoch.fromTimeStamp( time ), data, time.toPosixMillis( ) );
     }

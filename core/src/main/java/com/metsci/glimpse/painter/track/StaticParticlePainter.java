@@ -51,7 +51,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
  * <p>Displays a static set of tracks with associated timestamp, x position, and y position. Unlike
- * {@link LineStripPainter}, each track  must have an xy position for the same set of timestamps. This
+ * {@link LineStripTrackPainter}, each track  must have an xy position for the same set of timestamps. This
  * allows ParticlePainter to be more efficient in this case.</p>
  *
  * <p>The set of particles cannot be modified once ParticlePainter is constructed, but a custom time slice of

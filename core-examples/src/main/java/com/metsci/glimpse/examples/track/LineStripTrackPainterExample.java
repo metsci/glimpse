@@ -45,7 +45,7 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.track.LineStripPainter;
+import com.metsci.glimpse.painter.track.LineStripTrackPainter;
 import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.Pulsator;
 import com.metsci.glimpse.plot.SimplePlot2D;
@@ -59,11 +59,11 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  *
  * @author ulman
  */
-public class LineStripPainterExample implements GlimpseLayoutProvider
+public class LineStripTrackPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new LineStripPainterExample( ) );
+        Example.showWithSwing( new LineStripTrackPainterExample( ) );
     }
 
     public static final int NUMBER_OF_TRACKS = 2000;
@@ -112,7 +112,7 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
 
         // add a painter to manage and draw track data
         //final LineStripPainter trackPainter = new LineStripPainter( true );
-        final LineStripPainter trackPainter = new LineStripPainter( true );
+        final LineStripTrackPainter trackPainter = new LineStripTrackPainter( true );
         plot.addPainter( trackPainter );
 
         // add a custom manager class to keep track of the tracks
@@ -130,7 +130,7 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
         trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
 
         // create a new TrackPainter which will be used to highlight the point closest to the cursor
-        final LineStripPainter selectionDotPainter = new LineStripPainter( false );
+        final LineStripTrackPainter selectionDotPainter = new LineStripTrackPainter( false );
         plot.addPainter( selectionDotPainter );
         selectionDotPainter.setShowPoints( 0, true );
         selectionDotPainter.setPointSize( 0, 10f );
@@ -225,9 +225,9 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
         private long prevMinTime = -1;
         private long prevMaxTime = -1;
         private long prevSelectedTime = -1;
-        private LineStripPainter trackPainter;
+        private LineStripTrackPainter trackPainter;
 
-        public TimeAxisListener( LineStripPainter trackPainter )
+        public TimeAxisListener( LineStripTrackPainter trackPainter )
         {
             this.trackPainter = trackPainter;
         }
@@ -255,10 +255,10 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
     {
         private Set<Object> selectedTrackIds;
         private Set<Object> newSelectedTrackIds;
-        private LineStripPainter trackPainter;
+        private LineStripTrackPainter trackPainter;
         private TrackManager trackManager;
 
-        public TrackSelectionListener( TrackManager trackManager, LineStripPainter trackPainter )
+        public TrackSelectionListener( TrackManager trackManager, LineStripTrackPainter trackPainter )
         {
             this.selectedTrackIds = new HashSet<>( );
             this.newSelectedTrackIds = new HashSet<>( );
@@ -325,10 +325,10 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
     {
         private int time = 0;
         private Map<Object, Track> tracks;
-        private LineStripPainter trackPainter;
+        private LineStripTrackPainter trackPainter;
         private int numberOfTracks;
 
-        public TrackManager( LineStripPainter trackPainter, int numberOfTracks )
+        public TrackManager( LineStripTrackPainter trackPainter, int numberOfTracks )
         {
             this.trackPainter = trackPainter;
             this.numberOfTracks = numberOfTracks;
@@ -369,8 +369,8 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
                         trackPainter.setShowLabel( i, false );
                         trackPainter.setShowLabelLine( i, false );
 
-                        trackPainter.setHeadPointSize( i, 10.0f );
-                        trackPainter.setShowHeadPoint( i, true );
+                        //trackPainter.setHeadPointSize( i, 10.0f );
+                        //trackPainter.setShowHeadPoint( i, true );
                     }
                 }
 
@@ -433,13 +433,13 @@ public class LineStripPainterExample implements GlimpseLayoutProvider
             y += Math.sin( direction ) * speed;
         }
 
-        public void setColor( LineStripPainter trackPainter )
+        public void setColor( LineStripTrackPainter trackPainter )
         {
             trackPainter.setLineColor( trackId, r, g, b, 0.6f );
             trackPainter.setPointColor( trackId, r, g, b, 0.6f );
         }
 
-        public void addPoint( LineStripPainter trackPainter, long time )
+        public void addPoint( LineStripTrackPainter trackPainter, long time )
         {
             trackPainter.addPoint( trackId, pointId++, x, y, time );
         }
