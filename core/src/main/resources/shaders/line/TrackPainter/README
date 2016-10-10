@@ -1,0 +1,6 @@
+TrackPainter
+
+A simplified version of line_flat_color which does not handle mitering
+
+Java Wrappers:
+ * com.metsci.glimpse.painter.track.TrackPainter

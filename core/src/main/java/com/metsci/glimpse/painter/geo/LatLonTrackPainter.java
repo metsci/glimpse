@@ -29,7 +29,7 @@ package com.metsci.glimpse.painter.geo;
 import java.util.Collection;
 
 import com.metsci.glimpse.painter.track.Point;
-import com.metsci.glimpse.painter.track.TrackPainter;
+import com.metsci.glimpse.painter.track.LineStripPainter;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -42,7 +42,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
  *
  * @author ulman
  */
-public class LatLonTrackPainter extends TrackPainter
+public class LatLonTrackPainter extends LineStripPainter
 {
     protected GeoProjection geoProjection;
 

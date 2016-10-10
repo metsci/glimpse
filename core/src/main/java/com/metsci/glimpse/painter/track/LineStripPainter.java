@@ -26,11 +26,6 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINE_STRIP;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.nio.ByteBuffer;
@@ -51,8 +46,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -71,6 +64,8 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.metsci.glimpse.support.selection.TemporalSelectionListener;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineProgram.LineBufferHandles;
+import com.metsci.glimpse.support.shader.line.LineStrip;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
@@ -86,9 +81,9 @@ import com.metsci.glimpse.util.quadtree.QuadTreeXys;
  * @author ulman
  * @see com.metsci.glimpse.examples.animated.AnimatedGeoPlotExample
  */
-public class TrackPainter extends GlimpsePainterBase
+public class LineStripPainter extends GlimpsePainterBase
 {
-    private static final Logger logger = Logger.getLogger( TrackPainter.class.getName( ) );
+    private static final Logger logger = Logger.getLogger( LineStripPainter.class.getName( ) );
 
     public static final int QUAD_TREE_BIN_MAX = 1000;
 
@@ -127,20 +122,19 @@ public class TrackPainter extends GlimpsePainterBase
 
     protected TextRenderer fontRenderer;
 
-    protected TrackPainterLineProgram lineProg;
+    protected LineProgram lineProg;
     protected PointFlatColorProgram pointProg;
-    protected GLStreamingBufferBuilder builder;
 
-    protected LineProgram labelLineProg;
+    protected GLStreamingBufferBuilder builder;
     protected LinePath labelLinePath;
     protected LineStyle labelLineStyle;
 
-    public TrackPainter( )
+    public LineStripPainter( )
     {
         this( false );
     }
 
-    public TrackPainter( boolean enableSpatialIndex )
+    public LineStripPainter( boolean enableSpatialIndex )
     {
         if ( enableSpatialIndex ) this.spatialIndex = new QuadTreeXys<Point>( QUAD_TREE_BIN_MAX );
 
@@ -153,12 +147,10 @@ public class TrackPainter extends GlimpsePainterBase
 
         this.fontRenderer = new TextRenderer( textFont );
 
-        this.lineProg = new TrackPainterLineProgram( );
+        this.lineProg = new LineProgram( );
         this.pointProg = new PointFlatColorProgram( );
-
         this.builder = new GLStreamingBufferBuilder( );
 
-        this.labelLineProg = new LineProgram( );
         this.labelLinePath = new LinePath( );
         this.labelLineStyle = new LineStyle( );
     }
@@ -1089,60 +1081,19 @@ public class TrackPainter extends GlimpsePainterBase
                     LoadedTrack loaded = getOrCreateLoadedTrack( id, track );
                     loaded.loadSettings( track );
 
-                    int trackSize = track.getSize( );
-
                     if ( track.isDataInserted( ) )
                     {
-                        if ( !loaded.glBufferInitialized || loaded.glBufferMaxSize < trackSize )
+
+                        int newCount = track.getSize( ) - loaded.path.logicalSize( );
+
+                        if ( newCount > 0 ) loaded.path.grow( track.getInsertCount( ) );
+
+                        FloatBuffer buffer = loaded.path.edit( track.getInsertOffset( ), track.getInsertCount( ) );
+
+                        for ( int i = track.getInsertOffset( ); i < track.getSize( ); i++ )
                         {
-                            // if the track doesn't have a gl buffer or it is too small we must
-                            // copy all the track's data into a new, larger buffer
-
-                            // if this is the first time we have allocated memory for this track
-                            // don't allocate any extra, it may never get added to
-                            // however, once a track has been updated once, we assume it is likely
-                            // to be updated again and give it extra memory
-                            if ( loaded.glBufferInitialized )
-                            {
-                                gl.glDeleteBuffers( 1, new int[] { loaded.glBufferHandle }, 0 );
-                                loaded.glBufferMaxSize = Math.max( ( int ) ( loaded.glBufferMaxSize * 1.5 ), trackSize );
-                            }
-                            else
-                            {
-                                loaded.glBufferMaxSize = trackSize;
-                            }
-
-                            // copy all the track data into a host buffer
-                            ensureDataBufferSize( loaded.glBufferMaxSize );
-                            dataBuffer.rewind( );
-                            track.loadIntoBuffer( dataBuffer, 0, trackSize );
-
-                            // create a new device buffer handle
-                            int[] bufferHandle = new int[1];
-                            gl.glGenBuffers( 1, bufferHandle, 0 );
-                            loaded.glBufferHandle = bufferHandle[0];
-
-                            loaded.glBufferInitialized = true;
-
-                            // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferData( GL2.GL_ARRAY_BUFFER, loaded.glBufferMaxSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-                        }
-                        else
-                        {
-                            // there is enough empty space in the device buffer to accommodate all the new data
-
-                            int insertOffset = track.getInsertOffset( );
-                            int insertCount = track.getInsertCount( );
-
-                            // copy all the new track data into a host buffer
-                            ensureDataBufferSize( insertCount );
-                            dataBuffer.rewind( );
-                            track.loadIntoBuffer( dataBuffer, insertOffset, trackSize );
-
-                            // update the device buffer with the new data
-                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, insertOffset * 2 * GLUtils.BYTES_PER_FLOAT, insertCount * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+                            Point point = track.getPoints( ).get( i );
+                            buffer.put( point.getX( ) ).put( point.getY( ) );
                         }
                     }
 
@@ -1167,6 +1118,7 @@ public class TrackPainter extends GlimpsePainterBase
         GLUtils.enableStandardBlending( gl );
         try
         {
+
             lineProg.begin( gl );
             try
             {
@@ -1175,10 +1127,13 @@ public class TrackPainter extends GlimpsePainterBase
 
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    if ( loaded.linesOn && loaded.glSelectedSize > 0 )
+                    if ( loaded.linesOn )
                     {
                         lineProg.setStyle( gl, loaded.style );
-                        lineProg.draw( gl, loaded.glBufferHandle, loaded.glSelectedOffset, loaded.glSelectedSize );
+
+                        LineBufferHandles deviceBuffers = loaded.path.deviceBuffers( gl, false, ppvAspectRatio );
+
+                        lineProg.draw( gl, deviceBuffers, LineStrip.logicalToActualIndex( loaded.glSelectedOffset ), LineStrip.logicalToActualSize( loaded.glSelectedSize ) );
                     }
                 }
             }
@@ -1195,12 +1150,15 @@ public class TrackPainter extends GlimpsePainterBase
 
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    if ( loaded.pointsOn && loaded.glSelectedSize > 0 )
+                    if ( loaded.pointsOn )
                     {
                         pointProg.setPointSize( gl, loaded.pointSize );
                         pointProg.setRgba( gl, loaded.pointColor );
 
-                        pointProg.draw( gl, GL.GL_POINTS, loaded.glBufferHandle, loaded.glSelectedOffset, loaded.glSelectedSize );
+                        LineBufferHandles deviceBuffers = loaded.path.deviceBuffers( gl, false, ppvAspectRatio );
+
+                        // skip the first vertex, which is a phantom vertex
+                        pointProg.draw( gl, GL.GL_POINTS, deviceBuffers.inXy, LineStrip.logicalToActualIndex( loaded.glSelectedOffset ), LineStrip.logicalToActualSize( loaded.glSelectedSize ) );
                     }
                 }
             }
@@ -1216,7 +1174,7 @@ public class TrackPainter extends GlimpsePainterBase
 
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    if ( loaded.headPointOn && loaded.glSelectedSize > 0 )
+                    if ( loaded.headPointOn )
                     {
                         pointProg.setPointSize( gl, loaded.headPointSize );
                         pointProg.setRgba( gl, loaded.headPointColor );
@@ -1263,11 +1221,11 @@ public class TrackPainter extends GlimpsePainterBase
                 fontRenderer.endRendering( );
             }
 
-            labelLineProg.begin( gl );
+            lineProg.begin( gl );
             try
             {
-                labelLineProg.setPixelOrtho( gl, bounds );
-                labelLineProg.setViewport( gl, bounds );
+                lineProg.setPixelOrtho( gl, bounds );
+                lineProg.setViewport( gl, bounds );
 
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
@@ -1282,13 +1240,13 @@ public class TrackPainter extends GlimpsePainterBase
 
                         labelLineStyle.rgba = loaded.labelLineColor;
 
-                        labelLineProg.draw( gl, labelLineStyle, labelLinePath );
+                        lineProg.draw( gl, labelLineStyle, labelLinePath );
                     }
                 }
             }
             finally
             {
-                labelLineProg.end( gl );
+                lineProg.end( gl );
             }
         }
     }
@@ -1324,7 +1282,6 @@ public class TrackPainter extends GlimpsePainterBase
 
         this.builder.dispose( gl3 );
         this.labelLinePath.dispose( gl3 );
-        this.labelLineProg.dispose( gl3 );
     }
 
     ////////////////////////////////////////
@@ -1342,7 +1299,6 @@ public class TrackPainter extends GlimpsePainterBase
         public Object trackId;
 
         // track display attributes
-        public LineStyle style;
         public boolean linesOn;
 
         public float[] pointColor = new float[4];
@@ -1362,13 +1318,8 @@ public class TrackPainter extends GlimpsePainterBase
         public float[] headPointColor = new float[4];
         public boolean headPointOn;
 
-        public boolean glBufferInitialized = false;
-        // a reference to the device buffer for this track
-        public int glBufferHandle;
-        // the maximum allocated size of the device buffer for this track
-        public int glBufferMaxSize;
-        // the currently used size of the device buffer for this track
-        public int glBufferCurrentSize;
+        public LineStrip path;
+        public LineStyle style;
 
         // the offset into the device buffer to begin displaying track vertices
         public int glSelectedOffset;
@@ -1379,6 +1330,9 @@ public class TrackPainter extends GlimpsePainterBase
         protected LoadedTrack( Track track )
         {
             this.trackId = track.trackId;
+
+            this.path = new LineStrip( 100 );
+
             this.loadSettings( track );
         }
 
@@ -1396,9 +1350,7 @@ public class TrackPainter extends GlimpsePainterBase
             this.pointsOn = track.pointsOn;
             this.linesOn = track.linesOn;
 
-            this.glBufferCurrentSize = track.getSize( );
-
-            if ( glBufferCurrentSize == 0 || track.selectedSize == 0 || track.trackHead == null )
+            if ( track.selectedSize == 0 || track.trackHead == null )
             {
                 this.headPointOn = false;
                 this.labelOn = false;
@@ -1454,11 +1406,7 @@ public class TrackPainter extends GlimpsePainterBase
 
         public void dispose( GL gl )
         {
-            if ( glBufferInitialized )
-            {
-                glBufferInitialized = false;
-                gl.glDeleteBuffers( 1, new int[] { glBufferHandle }, 0 );
-            }
+            this.path.dispose( gl );
         }
     }
 
@@ -1494,15 +1442,10 @@ public class TrackPainter extends GlimpsePainterBase
         protected Point trackHead;
 
         // track display attributes
-        protected float[] lineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
-        protected float lineWidth = 2;
         protected boolean linesOn = true;
         protected float[] pointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         protected float pointSize = 4;
         protected boolean pointsOn = true;
-        protected int stippleFactor = 1;
-        protected short stipplePattern = ( short ) 0x00FF;
-        protected boolean stippleOn = false;
 
         protected String label = null;
         protected boolean labelOn = false;
@@ -1797,6 +1740,11 @@ public class TrackPainter extends GlimpsePainterBase
             deletePending = false;
         }
 
+        public List<Point> getPoints( )
+        {
+            return points;
+        }
+
         public int getSize( )
         {
             return points.size( );
@@ -1805,14 +1753,6 @@ public class TrackPainter extends GlimpsePainterBase
         public Point getTrackHead( )
         {
             return trackHead;
-        }
-
-        public void loadIntoBuffer( FloatBuffer buffer, int offset, int size )
-        {
-            for ( int i = offset; i < size; i++ )
-            {
-                points.get( i ).loadIntoBuffer( buffer );
-            }
         }
 
         public Object getTrackId( )
@@ -1846,18 +1786,18 @@ public class TrackPainter extends GlimpsePainterBase
             return true;
         }
 
-        private TrackPainter getOuterType( )
+        private LineStripPainter getOuterType( )
         {
-            return TrackPainter.this;
+            return LineStripPainter.this;
         }
     }
 
     public static class SpatialSelectionAxisListener extends RateLimitedAxisListener2D
     {
-        protected TrackPainter painter;
+        protected LineStripPainter painter;
         protected SpatialSelectionListener<Point> listener;
 
-        public SpatialSelectionAxisListener( TrackPainter painter, SpatialSelectionListener<Point> listener )
+        public SpatialSelectionAxisListener( LineStripPainter painter, SpatialSelectionListener<Point> listener )
         {
             this.painter = painter;
             this.listener = listener;
@@ -1886,161 +1826,5 @@ public class TrackPainter extends GlimpsePainterBase
             listener.selectionChanged( selection );
         }
 
-    }
-
-    public static class TrackPainterLineProgram
-    {
-
-        public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/TrackPainter/line.vs" );
-        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/TrackPainter/line.gs" );
-        public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/TrackPainter/line.fs" );
-
-        public static class LineProgramHandles
-        {
-            public final int program;
-
-            public final int AXIS_RECT;
-            public final int VIEWPORT_SIZE_PX;
-
-            public final int RGBA;
-
-            public final int LINE_THICKNESS_PX;
-            public final int FEATHER_THICKNESS_PX;
-
-            public final int STIPPLE_ENABLE;
-            public final int STIPPLE_SCALE;
-            public final int STIPPLE_PATTERN;
-
-            public final int inXy;
-
-            public LineProgramHandles( GL2ES2 gl )
-            {
-                this.program = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
-
-                this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
-                this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
-
-                this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
-                this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( program, "FEATHER_THICKNESS_PX" );
-
-                this.RGBA = gl.glGetUniformLocation( program, "RGBA" );
-
-                this.STIPPLE_ENABLE = gl.glGetUniformLocation( program, "STIPPLE_ENABLE" );
-                this.STIPPLE_SCALE = gl.glGetUniformLocation( program, "STIPPLE_SCALE" );
-                this.STIPPLE_PATTERN = gl.glGetUniformLocation( program, "STIPPLE_PATTERN" );
-
-                this.inXy = gl.glGetAttribLocation( program, "inXy" );
-            }
-        }
-
-        protected LineProgramHandles handles;
-
-        public TrackPainterLineProgram( )
-        {
-            this.handles = null;
-        }
-
-        /**
-         * Returns the raw GL handles for the shader program, uniforms, and attributes. Compiles and
-         * links the program, if necessary.
-         * <p>
-         * It is perfectly acceptable to use these handles directly, rather than calling the convenience
-         * methods in this class. However, the convenience methods are intended to be a fairly stable API,
-         * whereas the handles may change frequently.
-         */
-        public LineProgramHandles handles( GL2ES2 gl )
-        {
-            if ( this.handles == null )
-            {
-                this.handles = new LineProgramHandles( gl );
-            }
-
-            return this.handles;
-        }
-
-        public void begin( GL2ES2 gl )
-        {
-            if ( this.handles == null )
-            {
-                this.handles = new LineProgramHandles( gl );
-            }
-
-            gl.glUseProgram( this.handles.program );
-            gl.glEnableVertexAttribArray( this.handles.inXy );
-        }
-
-        public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
-        {
-            setViewport( gl, bounds.getWidth( ), bounds.getHeight( ) );
-        }
-
-        public void setViewport( GL2ES2 gl, int viewportWidth, int viewportHeight )
-        {
-            gl.glUniform2f( this.handles.VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
-        }
-
-        public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
-        {
-            setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
-        }
-
-        public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds )
-        {
-            setOrtho( gl, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
-        }
-
-        public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
-        {
-            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
-        }
-
-        public void setStyle( GL2ES2 gl, LineStyle style )
-        {
-            if ( style.stippleEnable )
-            {
-                gl.glUniform1i( this.handles.STIPPLE_ENABLE, 1 );
-                gl.glUniform1f( this.handles.STIPPLE_SCALE, style.stippleScale );
-                gl.glUniform1i( this.handles.STIPPLE_PATTERN, style.stipplePattern );
-            }
-            else
-            {
-                gl.glUniform1i( this.handles.STIPPLE_ENABLE, 0 );
-            }
-
-            gl.glUniform4fv( this.handles.RGBA, 1, style.rgba, 0 );
-
-            gl.glUniform1f( this.handles.LINE_THICKNESS_PX, style.thickness_PX );
-            gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
-        }
-
-        public void draw( GL2ES2 gl, int xyVbo, int first, int count )
-        {
-            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyVbo );
-            gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
-
-            gl.glDrawArrays( GL_LINE_STRIP, first, count );
-        }
-
-        public void end( GL2ES2 gl )
-        {
-            gl.glDisableVertexAttribArray( this.handles.inXy );
-            gl.glUseProgram( 0 );
-        }
-
-        /**
-         * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
-         * was first called.
-         * <p>
-         * This object can be safely reused after being disposed, but in most cases there is no
-         * significant advantage to doing so.
-         */
-        public void dispose( GL2ES2 gl )
-        {
-            if ( this.handles != null )
-            {
-                gl.glDeleteProgram( this.handles.program );
-                this.handles = null;
-            }
-        }
     }
 }

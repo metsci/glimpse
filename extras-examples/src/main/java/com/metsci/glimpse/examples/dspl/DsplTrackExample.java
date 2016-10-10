@@ -56,7 +56,7 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.geo.ScalePainter;
-import com.metsci.glimpse.painter.track.TrackPainter;
+import com.metsci.glimpse.painter.track.LineStripPainter;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
@@ -83,7 +83,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
     public GlimpseLayout getLayout( ) throws Exception
     {
         // create a painter for displaying track data
-        final TrackPainter trackPainter = new TrackPainter( );
+        final LineStripPainter trackPainter = new LineStripPainter( );
 
         // TrackPainter requires tracks have integer ids, so we need to keep a
         // map from the dspl track ids to the integer ids we assign
@@ -300,7 +300,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         // data series which we can display on the timeline
 
         // should really use Concept as key, but Concept doesn't have a good hash code at the moment
-        Map<String, Pair<TrackPainter, TimePlotInfo>> plotMap = new HashMap<String, Pair<TrackPainter, TimePlotInfo>>( );
+        Map<String, Pair<LineStripPainter, TimePlotInfo>> plotMap = new HashMap<String, Pair<LineStripPainter, TimePlotInfo>>( );
 
         for ( Slice slice : slicePattern.find( dataset ) )
         {
@@ -329,11 +329,11 @@ public class DsplTrackExample implements GlimpseLayoutProvider
                 if ( type != DataType.FLOAT && type == DataType.INTEGER ) continue;
 
                 // we will create a timeline plot for each additional concept in the data set
-                Pair<TrackPainter, TimePlotInfo> pair = plotMap.get( id );
+                Pair<LineStripPainter, TimePlotInfo> pair = plotMap.get( id );
                 if ( pair == null )
                 {
                     TimePlotInfo plotInfo = timePlot.createTimePlot( id );
-                    TrackPainter plotPainter = new TrackPainter( );
+                    LineStripPainter plotPainter = new LineStripPainter( );
 
                     for ( Integer trackId : trackIdMap.values( ) )
                     {
@@ -344,12 +344,12 @@ public class DsplTrackExample implements GlimpseLayoutProvider
 
                     initializePlot( concept.getNameEnglish( ), plotInfo );
 
-                    pair = new Pair<TrackPainter, TimePlotInfo>( plotPainter, plotInfo );
+                    pair = new Pair<LineStripPainter, TimePlotInfo>( plotPainter, plotInfo );
 
                     plotMap.put( id, pair );
                 }
 
-                TrackPainter plotPainter = pair.first( );
+                LineStripPainter plotPainter = pair.first( );
                 TimePlotInfo plotInfo = pair.second( );
 
                 minY = Double.POSITIVE_INFINITY;
@@ -406,7 +406,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
     }
 
     // setup the visual characteristics (color, thickness, etc...) of the track
-    protected void initializeGeoTrack( TrackPainter trackPainter, int trackId )
+    protected void initializeGeoTrack( LineStripPainter trackPainter, int trackId )
     {
         trackPainter.setLineColor( trackId, GlimpseColor.getBlue( ) );
         trackPainter.setLineWidth( trackId, 2.0f );
@@ -415,7 +415,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         trackPainter.setShowHeadPoint( trackId, false );
     }
 
-    protected void initializeTimelinePlot( TrackPainter trackPainter, int trackId )
+    protected void initializeTimelinePlot( LineStripPainter trackPainter, int trackId )
     {
         trackPainter.setLineColor( trackId, GlimpseColor.getRed( ) );
         trackPainter.setLineWidth( trackId, 2.0f );

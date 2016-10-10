@@ -92,7 +92,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     protected int initialSize;
 
     protected LineStyle style;
-    protected SimpleLineProgram prog;
+    protected DynamicLineSetPainterProgram prog;
 
     public DynamicLineSetPainter( )
     {
@@ -120,7 +120,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         this.style.stippleScale = 1;
         this.style.stipplePattern = ( short ) 0x00FF;
 
-        this.prog = new SimpleLineProgram( );
+        this.prog = new DynamicLineSetPainterProgram( );
     }
 
     public void setDotted( boolean dotted )
@@ -680,7 +680,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         }
     }
 
-    public static class SimpleLineProgram
+    public static class DynamicLineSetPainterProgram
     {
 
         public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.vs" );
@@ -725,7 +725,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         protected LineProgramHandles handles;
 
-        public SimpleLineProgram( )
+        public DynamicLineSetPainterProgram( )
         {
             this.handles = null;
         }

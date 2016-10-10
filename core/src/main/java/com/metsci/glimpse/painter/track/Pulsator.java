@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Pulsator
 {
-    protected TrackPainter painter;
+    protected LineStripPainter painter;
     protected long delayMillis;
     protected float min;
     protected float max;
@@ -52,7 +52,7 @@ public class Pulsator
     protected ReentrantLock lock;
     protected Condition pauseCondition;
 
-    public Pulsator( TrackPainter painter, long delayMillis, float minSize, float stepSize, float maxSize )
+    public Pulsator( LineStripPainter painter, long delayMillis, float minSize, float stepSize, float maxSize )
     {
         this.painter = painter;
 
@@ -74,7 +74,7 @@ public class Pulsator
         this.pauseCondition = this.lock.newCondition( );
     }
 
-    public Pulsator( TrackPainter painter )
+    public Pulsator( LineStripPainter painter )
     {
         this( painter, 10, 10f, 0.1f, 15f );
     }

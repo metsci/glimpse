@@ -48,7 +48,6 @@ import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.track.LineStripPainter;
 import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.Pulsator;
-import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
@@ -60,11 +59,11 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  *
  * @author ulman
  */
-public class TrackPainterExample implements GlimpseLayoutProvider
+public class LineStripPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new TrackPainterExample( ) );
+        Example.showWithSwing( new LineStripPainterExample( ) );
     }
 
     public static final int NUMBER_OF_TRACKS = 2000;
@@ -113,7 +112,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
 
         // add a painter to manage and draw track data
         //final LineStripPainter trackPainter = new LineStripPainter( true );
-        final TrackPainter trackPainter = new TrackPainter( true );
+        final LineStripPainter trackPainter = new LineStripPainter( true );
         plot.addPainter( trackPainter );
 
         // add a custom manager class to keep track of the tracks
@@ -226,9 +225,9 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         private long prevMinTime = -1;
         private long prevMaxTime = -1;
         private long prevSelectedTime = -1;
-        private TrackPainter trackPainter;
+        private LineStripPainter trackPainter;
 
-        public TimeAxisListener( TrackPainter trackPainter )
+        public TimeAxisListener( LineStripPainter trackPainter )
         {
             this.trackPainter = trackPainter;
         }
@@ -256,10 +255,10 @@ public class TrackPainterExample implements GlimpseLayoutProvider
     {
         private Set<Object> selectedTrackIds;
         private Set<Object> newSelectedTrackIds;
-        private TrackPainter trackPainter;
+        private LineStripPainter trackPainter;
         private TrackManager trackManager;
 
-        public TrackSelectionListener( TrackManager trackManager, TrackPainter trackPainter )
+        public TrackSelectionListener( TrackManager trackManager, LineStripPainter trackPainter )
         {
             this.selectedTrackIds = new HashSet<>( );
             this.newSelectedTrackIds = new HashSet<>( );
@@ -326,10 +325,10 @@ public class TrackPainterExample implements GlimpseLayoutProvider
     {
         private int time = 0;
         private Map<Object, Track> tracks;
-        private TrackPainter trackPainter;
+        private LineStripPainter trackPainter;
         private int numberOfTracks;
 
-        public TrackManager( TrackPainter trackPainter, int numberOfTracks )
+        public TrackManager( LineStripPainter trackPainter, int numberOfTracks )
         {
             this.trackPainter = trackPainter;
             this.numberOfTracks = numberOfTracks;
@@ -434,13 +433,13 @@ public class TrackPainterExample implements GlimpseLayoutProvider
             y += Math.sin( direction ) * speed;
         }
 
-        public void setColor( TrackPainter trackPainter )
+        public void setColor( LineStripPainter trackPainter )
         {
             trackPainter.setLineColor( trackId, r, g, b, 0.6f );
             trackPainter.setPointColor( trackId, r, g, b, 0.6f );
         }
 
-        public void addPoint( TrackPainter trackPainter, long time )
+        public void addPoint( LineStripPainter trackPainter, long time )
         {
             trackPainter.addPoint( trackId, pointId++, x, y, time );
         }

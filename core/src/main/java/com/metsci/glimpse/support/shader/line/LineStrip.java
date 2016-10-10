@@ -1,10 +1,14 @@
 package com.metsci.glimpse.support.shader.line;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.support.shader.line.LinePathData.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_BYTE;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.support.shader.line.LinePathData.updateMileageBuffer;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.sliced;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -21,21 +25,20 @@ import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 public class LineStrip
 {
 
-    protected static int logicalToActualIndex( int logicalIndex )
+    public static int logicalToActualIndex( int logicalIndex )
     {
         return ( logicalIndex + 1 );
     }
 
-    protected static int logicalToActualSize( int logicalSize )
+    public static int logicalToActualSize( int logicalSize )
     {
         return ( logicalSize == 0 ? 0 : logicalSize + 2 );
     }
 
-    protected static int actualToLogicalSize( int actualSize )
+    public static int actualToLogicalSize( int actualSize )
     {
         return ( actualSize == 0 ? 0 : actualSize - 2 );
     }
-
 
     protected final GLEditableBuffer2 xyBuffer;
     protected final GLEditableBuffer2 flagsBuffer;
@@ -43,7 +46,6 @@ public class LineStrip
     protected final DoublesArray segmentMileages;
 
     protected int logicalSize;
-
 
     public LineStrip( int logicalCapacity )
     {
@@ -53,10 +55,10 @@ public class LineStrip
     public LineStrip( int logicalCapacity, int scratchBlockSizeFactor )
     {
         int actualCapacity = logicalToActualSize( logicalCapacity );
-        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2*actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1*actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
-        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1*actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.segmentMileages = new DoublesArray( 1*actualCapacity );
+        this.xyBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 2 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.flagsBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
+        this.mileageBuffer = new GLEditableBuffer2( GL_ARRAY_BUFFER, 1 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.segmentMileages = new DoublesArray( 1 * actualCapacity );
 
         this.logicalSize = 0;
     }
@@ -74,10 +76,10 @@ public class LineStrip
     public void grow( int logicalAdditional )
     {
         int actualAdditional = logicalToActualIndex( logicalAdditional );
-        this.xyBuffer.growFloats( 2*actualAdditional );
-        this.flagsBuffer.growBytes( 1*actualAdditional );
-        this.mileageBuffer.growFloats( 1*actualAdditional );
-        this.segmentMileages.ensureCapacity( this.segmentMileages.n + ( 1*actualAdditional ) );
+        this.xyBuffer.growFloats( 2 * actualAdditional );
+        this.flagsBuffer.growBytes( 1 * actualAdditional );
+        this.mileageBuffer.growFloats( 1 * actualAdditional );
+        this.segmentMileages.ensureCapacity( this.segmentMileages.n + ( 1 * actualAdditional ) );
     }
 
     public FloatBuffer edit( int logicalCount )
@@ -92,7 +94,7 @@ public class LineStrip
 
         int actualFirst = logicalToActualIndex( logicalFirst );
         int actualCount = logicalCount;
-        return this.xyBuffer.editFloats( 2*actualFirst, 2*actualCount );
+        return this.xyBuffer.editFloats( 2 * actualFirst, 2 * actualCount );
     }
 
     public LineBufferHandles deviceBuffers( GL2ES3 gl, boolean needMileage, double ppvAspectRatio )
@@ -102,23 +104,23 @@ public class LineStrip
 
         // Update leader xy
         int actualFirstVisible = logicalToActualIndex( 0 );
-        boolean putLeader = xyDirtyByteSet.contains( 2*actualFirstVisible * SIZEOF_FLOAT );
+        boolean putLeader = xyDirtyByteSet.contains( 2 * actualFirstVisible * SIZEOF_FLOAT );
         if ( putLeader )
         {
-            float xLeader = xyRead.get( 2*actualFirstVisible + 0 );
-            float yLeader = xyRead.get( 2*actualFirstVisible + 1 );
-            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2*( actualFirstVisible - 1 ), 2 );
+            float xLeader = xyRead.get( 2 * actualFirstVisible + 0 );
+            float yLeader = xyRead.get( 2 * actualFirstVisible + 1 );
+            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2 * ( actualFirstVisible - 1 ), 2 );
             xyEdit.put( xLeader ).put( yLeader );
         }
 
         // Update trailer xy
         int actualLastVisible = logicalToActualIndex( this.logicalSize - 1 );
-        boolean putTrailer = xyDirtyByteSet.contains( 2*actualLastVisible * SIZEOF_FLOAT );
+        boolean putTrailer = xyDirtyByteSet.contains( 2 * actualLastVisible * SIZEOF_FLOAT );
         if ( putTrailer )
         {
-            float xTrailer = xyRead.get( 2*actualLastVisible + 0 );
-            float yTrailer = xyRead.get( 2*actualLastVisible + 1 );
-            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2*( actualLastVisible + 1 ), 2 );
+            float xTrailer = xyRead.get( 2 * actualLastVisible + 0 );
+            float yTrailer = xyRead.get( 2 * actualLastVisible + 1 );
+            FloatBuffer xyEdit = this.xyBuffer.editFloats( 2 * ( actualLastVisible + 1 ), 2 );
             xyEdit.put( xTrailer ).put( yTrailer );
         }
 
@@ -178,15 +180,13 @@ public class LineStrip
             FloatBuffer mileageEdit = this.mileageBuffer.editFloats( editFirst, editCount );
             mileageEdit.position( dirtyFirst - editFirst );
 
-            FloatBuffer xySlice = sliced( this.xyBuffer.hostFloats( ), 2*editFirst, 2*editCount );
-            ByteBuffer flagsSlice = sliced( this.flagsBuffer.hostBytes( ), 1*editFirst, 1*editCount );
+            FloatBuffer xySlice = sliced( this.xyBuffer.hostFloats( ), 2 * editFirst, 2 * editCount );
+            ByteBuffer flagsSlice = sliced( this.flagsBuffer.hostBytes( ), 1 * editFirst, 1 * editCount );
 
             updateMileageBuffer( xySlice, flagsSlice, mileageEdit, false, ppvAspectRatio );
         }
 
-        return new LineBufferHandles( this.xyBuffer.deviceBuffer( gl ),
-                                      this.flagsBuffer.deviceBuffer( gl ),
-                                      ( needMileage ? this.mileageBuffer.deviceBuffer( gl ) : 0 ) );
+        return new LineBufferHandles( this.xyBuffer.deviceBuffer( gl ), this.flagsBuffer.deviceBuffer( gl ), ( needMileage ? this.mileageBuffer.deviceBuffer( gl ) : 0 ) );
     }
 
     public void dispose( GL gl )
