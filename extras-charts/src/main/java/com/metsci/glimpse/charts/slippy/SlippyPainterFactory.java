@@ -72,38 +72,6 @@ public class SlippyPainterFactory
         return new SlippyMapPainter( painter, "\u00A9 OpenStreetMap contributors" );
     }
 
-    public static SlippyMapPainter getMapQuestMaps( GeoProjection geoProj )
-    {
-        return getMapQuestMaps( geoProj, slippyCacheRoot.resolve( "mapquest-map" ) );
-    }
-
-    public static SlippyMapPainter getMapQuestMaps( GeoProjection geoProj, Path cacheDir )
-    {
-        List<String> prefixes = new ArrayList<String>( );
-        for ( int i = 1; i <= 4; i++ )
-        {
-            prefixes.add( "http://otile" + i + ".mqcdn.com/tiles/1.0.0/osm/" );
-        }
-        SlippyMapTilePainter painter = new SlippyMapTilePainter( geoProj, prefixes, EXEC, cacheDir, 17 );
-        return new SlippyMapPainter( painter, "\u00A9 OpenStreetMap contributors, tiles courtesy of MapQuest" );
-    }
-
-    public static SlippyMapPainter getMapQuestImagery( GeoProjection geoProj, boolean inUS )
-    {
-        return getMapQuestImagery( geoProj, slippyCacheRoot.resolve( "mapquest-sat" ), inUS );
-    }
-
-    public static SlippyMapPainter getMapQuestImagery( GeoProjection geoProj, Path cacheDir, boolean inUS )
-    {
-        List<String> prefixes = new ArrayList<String>( );
-        for ( int i = 1; i <= 4; i++ )
-        {
-            prefixes.add( "http://otile" + i + ".mqcdn.com/tiles/1.0.0/sat/" );
-        }
-        SlippyMapTilePainter painter = new SlippyMapTilePainter( geoProj, prefixes, EXEC, cacheDir, inUS ? 16 : 11 );
-        return new SlippyMapPainter( painter, "\u00A9 OpenStreetMap contributors, tiles courtesy of MapQuest" );
-    }
-
     public static SlippyMapPainter getCartoMap( GeoProjection geoProj, boolean light, boolean labels )
     {
         String cacheStr = "cartodb-" + ( light ? "light" : "dark" ) + ( labels ? "-all" : "-nolabels" );

@@ -80,7 +80,6 @@ public class SlippyTileExample implements GlimpseLayoutProvider
     public GlimpseLayout getLayout( ) throws Exception
     {
         final GeoProjection geoProj = new TangentPlane( LatLonGeo.fromDeg( 38.958374, -77.358548 ) );
-        final boolean inUS = true;
 
         // create a plot with a custom mouse listener that restricts axis mouse wheel zooming
         // to discrete steps where the imagery tiles will appear 1 screen pixel per image pixel
@@ -105,16 +104,12 @@ public class SlippyTileExample implements GlimpseLayoutProvider
         mapPlot.getCenterAxis( ).lockAspectRatioXY( 1 );
         mapPlot.getCenterAxis( ).set( -rad, rad, -rad, rad );
 
-        final SlippyMapPainter mapPainter = SlippyPainterFactory.getMapQuestMaps( geoProj );
+        final SlippyMapPainter mapPainter = SlippyPainterFactory.getOpenStreetMaps( geoProj );
         mapPlot.addPainter( mapPainter );
-
-        final SlippyMapPainter satPainter = SlippyPainterFactory.getMapQuestImagery( geoProj, inUS );
-        mapPlot.addPainter( satPainter );
-        satPainter.setVisible( false );
+        mapPainter.setVisible( false );
 
         final SlippyMapPainter cartoLightPainter = SlippyPainterFactory.getCartoMap( geoProj, true, true );
         mapPlot.addPainter( cartoLightPainter );
-        cartoLightPainter.setVisible( false );
 
         final SlippyMapPainter cartoDarkPainter = SlippyPainterFactory.getCartoMap( geoProj, false, false );
         mapPlot.addPainter( cartoDarkPainter );
@@ -127,13 +122,12 @@ public class SlippyTileExample implements GlimpseLayoutProvider
 
         this.mapToolBar = new JMenuBar( );
         ButtonGroup group = new ButtonGroup( );
-        final JRadioButton mapCheckBox = new JRadioButton( "Map Layer", mapPainter.isVisible( ) );
-        final JRadioButton satcheckBox = new JRadioButton( "Imagery Layer", satPainter.isVisible( ) );
+        final JRadioButton mapCheckBox = new JRadioButton( "OpenStreetMap Layer", mapPainter.isVisible( ) );
         final JRadioButton cartoLightCheckBox = new JRadioButton( "CartoDBLight (Labels)", cartoLightPainter.isVisible( ) );
         final JRadioButton cartoDarkcheckBox = new JRadioButton( "CartoDBDark (No Labels)", cartoDarkPainter.isVisible( ) );
 
         group.add( mapCheckBox );
-        group.add( satcheckBox );
+//        group.add( satcheckBox );
         group.add( cartoLightCheckBox );
         group.add( cartoDarkcheckBox );
 
@@ -143,19 +137,16 @@ public class SlippyTileExample implements GlimpseLayoutProvider
             public void actionPerformed( ActionEvent e )
             {
                 mapPainter.setVisible( mapCheckBox.isSelected( ) );
-                satPainter.setVisible( satcheckBox.isSelected( ) );
                 cartoLightPainter.setVisible( cartoLightCheckBox.isSelected( ) );
                 cartoDarkPainter.setVisible( cartoDarkcheckBox.isSelected( ) );
             }
         };
 
         mapToolBar.add( mapCheckBox );
-        mapToolBar.add( satcheckBox );
         mapToolBar.add( cartoLightCheckBox );
         mapToolBar.add( cartoDarkcheckBox );
 
         mapCheckBox.addActionListener( l );
-        satcheckBox.addActionListener( l );
         cartoLightCheckBox.addActionListener( l );
         cartoDarkcheckBox.addActionListener( l );
 

@@ -38,13 +38,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 import com.metsci.glimpse.support.projection.LatLonProjection;
 import com.metsci.glimpse.support.projection.Projection;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.support.texture.RGBTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -90,13 +91,14 @@ public class SlippyMapTilePainter extends ShadedTexturePainter
             this.slippyProj[zoom] = new SlippyProjection( zoom );
         }
         this.exec = exec;
+        this.setProgram( new ColorTexture2DProgram( ) );
     }
-
+    
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        updateTiles( axis );
-        super.paintTo( context, bounds, axis );
+        updateTiles( GlimpsePainterBase.getAxis2D( context ) );
+        super.doPaintTo( context );
     }
 
     protected void updateTiles( Axis2D axis )
@@ -139,7 +141,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter
         final int tileXmin = ( int ) Math.floor( tileSW.getX( ) );
         final int tileXmax = ( int ) Math.ceil( tileNE.getX( ) );
 
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             for ( int y = tileYmin; y < tileYmax; y++ )
@@ -171,7 +173,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -251,7 +253,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter
                 boundsCheck = lastBounds.get( );
                 if ( zoom == zoomCheck && intersect( boundsCheck, bounds ) )
                 {
-                    lock.lock( );
+                    painterLock.lock( );
                     try
                     {
                         addDrawableTexture( tex );
@@ -259,7 +261,7 @@ public class SlippyMapTilePainter extends ShadedTexturePainter
                     }
                     finally
                     {
-                        lock.unlock( );
+                        painterLock.unlock( );
                     }
                 }
             }
