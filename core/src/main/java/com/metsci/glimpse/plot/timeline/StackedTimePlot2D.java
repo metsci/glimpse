@@ -49,6 +49,7 @@ import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -1048,7 +1049,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         return new DataAxisMouseListener1D( this, plotInfo );
     }
 
-    protected TimeAxisMouseListener1D createTimeAxisListener( )
+    protected TaggedAxisMouseListener1D createTimeAxisListener( )
     {
         return new TimeAxisMouseListener1D( this );
     }
