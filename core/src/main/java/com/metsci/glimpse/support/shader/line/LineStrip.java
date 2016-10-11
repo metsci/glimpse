@@ -1,14 +1,9 @@
 package com.metsci.glimpse.support.shader.line;
 
-import static com.jogamp.common.nio.Buffers.SIZEOF_BYTE;
-import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
-import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
-import static com.metsci.glimpse.support.shader.line.LinePathData.updateMileageBuffer;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.sliced;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.common.nio.Buffers.*;
+import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static java.lang.Math.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -16,9 +11,8 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES3;
 
-import com.metsci.glimpse.gl.GLEditableBuffer2;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.support.shader.line.LineProgram.LineBufferHandles;
-import com.metsci.glimpse.util.primitives.DoublesArray;
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 
@@ -40,10 +34,9 @@ public class LineStrip
         return ( actualSize == 0 ? 0 : actualSize - 2 );
     }
 
-    protected final GLEditableBuffer2 xyBuffer;
-    protected final GLEditableBuffer2 flagsBuffer;
-    protected final GLEditableBuffer2 mileageBuffer;
-    protected final DoublesArray segmentMileages;
+    protected final GLEditableBuffer xyBuffer;
+    protected final GLEditableBuffer flagsBuffer;
+    protected final GLEditableBuffer mileageBuffer;
 
     protected int logicalSize;
 
@@ -55,10 +48,9 @@ public class LineStrip
     public LineStrip( int logicalCapacity, int scratchBlockSizeFactor )
     {
         int actualCapacity = logicalToActualSize( logicalCapacity );
-        this.xyBuffer = new GLEditableBuffer2( 2 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.flagsBuffer = new GLEditableBuffer2( 1 * actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
-        this.mileageBuffer = new GLEditableBuffer2( 1 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
-        this.segmentMileages = new DoublesArray( 1 * actualCapacity );
+        this.xyBuffer = new GLEditableBuffer( 2 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
+        this.flagsBuffer = new GLEditableBuffer( 1 * actualCapacity * SIZEOF_BYTE, scratchBlockSizeFactor );
+        this.mileageBuffer = new GLEditableBuffer( 1 * actualCapacity * SIZEOF_FLOAT, scratchBlockSizeFactor );
 
         this.logicalSize = 0;
     }
@@ -76,10 +68,9 @@ public class LineStrip
     public void grow( int logicalAdditional )
     {
         int actualAdditional = logicalToActualIndex( logicalAdditional );
-        this.xyBuffer.growFloats( 2 * actualAdditional );
-        this.flagsBuffer.growBytes( 1 * actualAdditional );
-        this.mileageBuffer.growFloats( 1 * actualAdditional );
-        this.segmentMileages.ensureCapacity( this.segmentMileages.n + ( 1 * actualAdditional ) );
+        this.xyBuffer.ensureRemainingFloats( 2 * actualAdditional );
+        this.flagsBuffer.ensureRemainingBytes( 1 * actualAdditional );
+        this.mileageBuffer.ensureRemainingFloats( 1 * actualAdditional );
     }
 
     public FloatBuffer edit( int logicalCount )

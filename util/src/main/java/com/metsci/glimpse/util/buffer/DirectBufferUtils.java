@@ -184,7 +184,7 @@ public class DirectBufferUtils
      */
     public static FloatBuffer ensureAdditionalCapacity( FloatBuffer buffer, int additionalFloats, boolean deallocOldBuffer )
     {
-        long minFloats = buffer.position( ) + additionalFloats;
+        long minFloats = ( ( long ) buffer.position( ) ) + additionalFloats;
         if ( minFloats > Integer.MAX_VALUE )
         {
             throw new RuntimeException( "Cannot create a buffer larger than MAX_INT floats: requested-capacity = " + minFloats + " floats" );
@@ -259,7 +259,7 @@ public class DirectBufferUtils
      */
     public static ByteBuffer ensureAdditionalCapacity( ByteBuffer buffer, int additionalBytes, boolean deallocOldBuffer )
     {
-        long minBytes = buffer.position( ) + additionalBytes;
+        long minBytes = ( ( long ) buffer.position( ) ) + additionalBytes;
         if ( minBytes > Integer.MAX_VALUE )
         {
             throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minBytes + " bytes" );

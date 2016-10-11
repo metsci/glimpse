@@ -2,148 +2,195 @@ package com.metsci.glimpse.gl;
 
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL2ES2.*;
 import static javax.media.opengl.GL2ES3.*;
 
 import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES3;
 
+import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
+import com.metsci.glimpse.util.primitives.rangeset.IntRangeSetModifiable;
+import com.metsci.glimpse.util.primitives.sorted.SortedInts;
+
 public class GLEditableBuffer
 {
 
-    public final int target;
+    protected ByteBuffer hBuffer;
 
-    protected int buffer;
-    protected long size;
+    protected int dBuffer;
+    protected long dPosition;
+    protected long dCapacity;
 
-    protected final GLStreamingBuffer scratch;
-    protected long mappedOffset;
-    protected long mappedSize;
+    protected final IntRangeSetModifiable dirtyRanges;
+
+    protected final GLStreamingBuffer dScratch;
 
 
-    public GLEditableBuffer( int target, long numBytes, int scratchBlockSizeFactor )
+    public GLEditableBuffer( int capacityBytes, int scratchBlockSizeFactor )
     {
-        this.target = target;
+        this.hBuffer = newDirectByteBuffer( capacityBytes );
 
-        this.buffer = 0;
-        this.size = numBytes;
+        this.dBuffer = 0;
+        this.dPosition = 0;
+        this.dCapacity = 0;
 
-        this.scratch = new GLStreamingBuffer( GL_ARRAY_BUFFER, GL_STREAM_DRAW, scratchBlockSizeFactor );
-        this.mappedOffset = 0;
-        this.mappedSize = 0;
+        this.dirtyRanges = new IntRangeSetModifiable( );
+
+        this.dScratch = new GLStreamingBuffer( GL_STREAM_DRAW, scratchBlockSizeFactor );
     }
 
-    public int buffer( GL gl )
+    public int sizeBytes( )
     {
-        if ( this.buffer == 0 )
+        return this.hBuffer.position( );
+    }
+
+    public ByteBuffer hostBytes( )
+    {
+        return flipped( readonly( this.hBuffer ) );
+    }
+
+    public IntRangeSet dirtyByteRanges( )
+    {
+        return this.dirtyRanges;
+    }
+
+    public void ensureRemainingBytes( int minRemainingBytes )
+    {
+        long minCapacity = ( ( long ) this.hBuffer.position( ) ) + minRemainingBytes;
+        this.hEnsureCapacity( minCapacity );
+    }
+
+    public void ensureCapacityBytes( int minCapacityBytes )
+    {
+        this.hEnsureCapacity( minCapacityBytes );
+    }
+
+    protected void hEnsureCapacity( long minCapacity )
+    {
+        if ( minCapacity > Integer.MAX_VALUE )
         {
-            this.buffer = genBuffer( gl );
-            gl.glBindBuffer( this.target, this.buffer );
-            gl.glBufferData( this.target, this.size, null, GL_STATIC_COPY );
+            throw new RuntimeException( "Cannot create a buffer larger than MAX_INT bytes: requested-capacity = " + minCapacity + " bytes" );
         }
 
-        return buffer;
+        this.hBuffer = ensureCapacity( this.hBuffer, ( int ) minCapacity, true );
     }
 
-    public void ensureCapacity( GL2ES3 gl, long minBytes )
+    public ByteBuffer editBytes( int firstByte, int countBytes )
     {
-        if ( this.size < minBytes )
+        this.dirtyRanges.add( firstByte, countBytes );
+        this.hBuffer.position( max( this.hBuffer.position( ), firstByte + countBytes ) );
+        return sliced( this.hBuffer, firstByte, countBytes );
+    }
+
+    public int deviceBuffer( GL2ES3 gl )
+    {
+        this.dUpdateCapacity( gl );
+
+        // XXX: Higher tolerance might be better
+        this.dirtyRanges.coalesce( 1024 );
+
+        SortedInts ranges = this.dirtyRanges.ranges( );
+        for ( int i = 0; i < ranges.n( ); i += 2 )
         {
-            int oldBuffer = this.buffer;
-            long oldSize = this.size;
+            int rangeStart = ranges.v( i + 0 );
+            int rangeEnd = ranges.v( i + 1 );
+            ByteBuffer hRange = sliced( this.hBuffer, rangeStart, rangeEnd - rangeStart );
 
-            this.buffer = 0;
-            this.size = max( minBytes, ( long ) ceil( 1.618 * oldSize ) );
+            // XXX: Might get better performance by writing all ranges to one big mapped region of dScratch
+            ByteBuffer dRangeScratch = this.dScratch.mapBytes( gl, rangeEnd - rangeStart );
+            dRangeScratch.put( hRange );
+            this.dScratch.seal( gl );
 
-            if ( oldBuffer != 0 )
+            gl.glBindBuffer( GL_COPY_READ_BUFFER, this.dScratch.buffer( gl ) );
+            gl.glBindBuffer( GL_COPY_WRITE_BUFFER, this.dBuffer );
+            gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, this.dScratch.sealedOffset( ), rangeStart, rangeEnd - rangeStart );
+        }
+
+        this.dirtyRanges.clear( );
+
+        this.dPosition = this.hBuffer.position( );
+
+        return this.dBuffer;
+    }
+
+    /**
+     * Make device-buffer capacity match host-buffer capacity.
+     * <p>
+     * If a new device buffer gets created, data will be copied into it from the old device buffer, using
+     * glCopyBufferSubData(). The amount copied will be the smaller of the device-buffer position and the
+     * host-buffer position.
+     */
+    protected void dUpdateCapacity( GL2ES3 gl )
+    {
+        int dNewCapacity = this.hBuffer.capacity( );
+        if ( dNewCapacity != this.dCapacity )
+        {
+            int dNewBuffer = genBuffer( gl );
+
+            // Allocate new space
+            gl.glBindBuffer( GL_COPY_WRITE_BUFFER, dNewBuffer );
+            gl.glBufferData( GL_COPY_WRITE_BUFFER, dNewCapacity, null, GL_STATIC_COPY );
+
+            // Copy data from old to new
+            if ( this.dBuffer != 0 )
             {
-                gl.glBindBuffer( GL_COPY_READ_BUFFER, oldBuffer );
-                gl.glBindBuffer( GL_COPY_WRITE_BUFFER, this.buffer( gl ) );
-                gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, oldSize );
+                this.dPosition = min( this.dPosition, this.hBuffer.position( ) );
+                gl.glBindBuffer( GL_COPY_READ_BUFFER, this.dBuffer );
+                gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, this.dPosition );
             }
+
+            this.dBuffer = dNewBuffer;
+            this.dCapacity = dNewCapacity;
         }
-    }
-
-    public void setFloats( GL2ES3 gl, long firstFloat, FloatBuffer floats )
-    {
-        FloatBuffer mapped = this.mapFloats( gl, firstFloat, floats.remaining( ) );
-        mapped.put( floats );
-        this.seal( gl );
-    }
-
-    public void setDoubles( GL2ES3 gl, long firstDouble, DoubleBuffer doubles )
-    {
-        DoubleBuffer mapped = this.mapDoubles( gl, firstDouble, doubles.remaining( ) );
-        mapped.put( doubles );
-        this.seal( gl );
-    }
-
-    public void setInts( GL2ES3 gl, long firstInt, IntBuffer ints )
-    {
-        IntBuffer mapped = this.mapInts( gl, firstInt, ints.remaining( ) );
-        mapped.put( ints );
-        this.seal( gl );
-    }
-
-    public void setBytes( GL2ES3 gl, long firstByte, ByteBuffer bytes )
-    {
-        ByteBuffer mapped = this.mapBytes( gl, firstByte, bytes.remaining( ) );
-        mapped.put( bytes );
-        this.seal( gl );
-    }
-
-    public FloatBuffer mapFloats( GL gl, long firstFloat, long numFloats )
-    {
-        return this.mapBytes( gl, firstFloat * SIZEOF_FLOAT, numFloats * SIZEOF_FLOAT ).asFloatBuffer( );
-    }
-
-    public DoubleBuffer mapDoubles( GL gl, long firstDouble, long numDoubles )
-    {
-        return this.mapBytes( gl, firstDouble * SIZEOF_DOUBLE, numDoubles * SIZEOF_DOUBLE ).asDoubleBuffer( );
-    }
-
-    public IntBuffer mapInts( GL gl, long firstInt, long numInts )
-    {
-        return this.mapBytes( gl, firstInt * SIZEOF_INT, numInts * SIZEOF_INT ).asIntBuffer( );
-    }
-
-    public ByteBuffer mapBytes( GL gl, long firstByte, long numBytes )
-    {
-        this.mappedOffset = firstByte;
-        this.mappedSize = numBytes;
-        return this.scratch.mapBytes( gl, numBytes );
-    }
-
-    public void seal( GL2ES3 gl )
-    {
-        this.scratch.seal( gl );
-
-        gl.glBindBuffer( GL_COPY_READ_BUFFER, this.scratch.buffer( gl ) );
-        gl.glBindBuffer( GL_COPY_WRITE_BUFFER, this.buffer( gl ) );
-        gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, this.scratch.sealedOffset( ), this.mappedOffset, this.mappedSize );
-
-        this.mappedOffset = 0;
-        this.mappedSize = 0;
     }
 
     public void dispose( GL gl )
     {
-        this.scratch.dispose( gl );
-        this.mappedOffset = 0;
-        this.mappedSize = 0;
+        deallocateDirectBuffers( this.hBuffer );
+        this.hBuffer = null;
 
-        if ( this.buffer != 0 )
+        if ( this.dBuffer != 0 )
         {
-            deleteBuffers( gl, this.buffer );
-            this.buffer = 0;
+            deleteBuffers( gl, this.dBuffer );
+            this.dBuffer = 0;
         }
+
+        this.dirtyRanges.clear( );
+    }
+
+
+    // Floats
+    //
+
+    public int sizeFloats( )
+    {
+        return this.sizeBytes( ) / SIZEOF_FLOAT;
+    }
+
+    public FloatBuffer hostFloats( )
+    {
+        return this.hostBytes( ).asFloatBuffer( );
+    }
+
+    public void ensureRemainingFloats( int minRemainingFloats )
+    {
+        this.ensureRemainingBytes( minRemainingFloats * SIZEOF_FLOAT );
+    }
+
+    public void ensureCapacityFloats( int minCapacityFloats )
+    {
+        this.ensureCapacityBytes( minCapacityFloats * SIZEOF_FLOAT );
+    }
+
+    public FloatBuffer editFloats( int firstFloat, int countFloats )
+    {
+        return this.editBytes( firstFloat * SIZEOF_FLOAT, countFloats * SIZEOF_FLOAT ).asFloatBuffer( );
     }
 
 }
