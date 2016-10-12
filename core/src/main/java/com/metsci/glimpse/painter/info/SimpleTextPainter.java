@@ -32,10 +32,10 @@ import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.jogamp.opengl.math.Matrix4;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
@@ -58,6 +58,8 @@ import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
  */
 public class SimpleTextPainter extends GlimpsePainterBase
 {
+    private static final float PI_2 = ( float ) ( Math.PI / 2.0f );
+
     public static enum HorizontalPosition
     {
         Left, Center, Right;
@@ -104,6 +106,8 @@ public class SimpleTextPainter extends GlimpsePainterBase
     protected LinePath linePath;
     protected LineStyle lineStyle;
 
+    protected Matrix4 transformMatrix;
+
     public SimpleTextPainter( )
     {
         this.newFont = getDefaultBold( 12 );
@@ -120,6 +124,8 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
         this.linePath = new LinePath( );
         this.fillBuilder = new GLStreamingBufferBuilder( );
+
+        this.transformMatrix = new Matrix4( );
     }
 
     public SimpleTextPainter setHorizontalLabels( boolean horizontal )
@@ -495,18 +501,19 @@ public class SimpleTextPainter extends GlimpsePainterBase
             }
         }
 
-        textRenderer.beginRendering( width, height );
+        textRenderer.begin3DRendering( );
         try
         {
-            GL2 gl2 = gl.getGL2( );
+            float xShift = xText + halfTextWidth;
+            float yShift = yText + halfTextHeight;
 
-            double xShift = xText + halfTextWidth;
-            double yShift = yText + halfTextHeight;
+            transformMatrix.loadIdentity( );
+            transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+            transformMatrix.translate( xShift, yShift, 0 );
+            transformMatrix.rotate( PI_2, 0, 0, 1.0f );
+            transformMatrix.translate( -xShift, -yShift, 0 );
 
-            gl2.glMatrixMode( GL2.GL_PROJECTION );
-            gl2.glTranslated( xShift, yShift, 0 );
-            gl2.glRotated( 90, 0, 0, 1.0f );
-            gl2.glTranslated( -xShift, -yShift, 0 );
+            textRenderer.setTransform( transformMatrix.getMatrix( ) );
 
             if ( !textColorSet && !paintBackground )
             {
@@ -517,11 +524,11 @@ public class SimpleTextPainter extends GlimpsePainterBase
                 GlimpseColor.setColor( textRenderer, textColor );
             }
 
-            textRenderer.draw( text, xText, yText );
+            textRenderer.draw3D( text, xText, yText, 0, 1 );
         }
         finally
         {
-            textRenderer.endRendering( );
+            textRenderer.end3DRendering( );
         }
     }
 

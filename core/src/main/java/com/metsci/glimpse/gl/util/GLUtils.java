@@ -27,7 +27,7 @@
 package com.metsci.glimpse.gl.util;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
@@ -111,11 +111,11 @@ public class GLUtils
         switch ( ndim )
         {
             case 1:
-                return GL2.GL_TEXTURE_1D;
+                return GL3.GL_TEXTURE_1D;
             case 2:
-                return GL2.GL_TEXTURE_2D;
+                return GL3.GL_TEXTURE_2D;
             case 3:
-                return GL2.GL_TEXTURE_3D;
+                return GL3.GL_TEXTURE_3D;
             default:
                 throw new IllegalArgumentException( "Only 1D, 2D, and 3D textures allowed." );
         }

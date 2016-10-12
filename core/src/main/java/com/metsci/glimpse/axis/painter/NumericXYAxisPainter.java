@@ -33,13 +33,13 @@ import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisExponentLabelHandler;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
@@ -348,10 +348,11 @@ public class NumericXYAxisPainter extends GlimpsePainterBase
             boolean[] paintLabelsX = new boolean[positionsX.length];
             boolean[] paintLabelsY = new boolean[positionsY.length];
 
-            GlimpseColor.setColor( textRenderer, textColor );
             this.textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, textColor );
+
                 if ( showHorizontal )
                 {
                     String[] labelsX = ticksX.getTickLabels( axis.getAxisX( ), positionsX );

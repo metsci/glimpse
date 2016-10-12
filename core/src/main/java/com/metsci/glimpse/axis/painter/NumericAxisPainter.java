@@ -31,7 +31,7 @@ import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;

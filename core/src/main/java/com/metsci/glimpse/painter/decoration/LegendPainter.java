@@ -38,7 +38,7 @@ import java.util.Map;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;

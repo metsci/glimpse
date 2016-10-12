@@ -33,7 +33,7 @@ import java.util.List;
 import javax.media.opengl.GL;
 
 import com.google.common.collect.Lists;
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;

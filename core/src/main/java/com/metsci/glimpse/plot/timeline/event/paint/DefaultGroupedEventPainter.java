@@ -26,19 +26,29 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.*;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_SIZE;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_TIP_BUFFER;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.DEFAULT_NUM_ICONS_ROWS;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.calculateDisplayText;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBackgroundColor;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBorderColor;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getIconSizePerpPixels;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getTextAvailableSpace;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isIconOverlapping;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextIntersecting;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextOverfull;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
@@ -62,6 +72,8 @@ import com.metsci.glimpse.support.shader.triangle.ArrayColorProgram;
 
 public class DefaultGroupedEventPainter implements GroupedEventPainter
 {
+    private static final float PI_2 = ( float ) ( Math.PI / 2.0f );
+
     protected int maxIconRows = DEFAULT_NUM_ICONS_ROWS;
     protected int minimumTextDisplayWidth = 20;
 
@@ -72,6 +84,8 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
     protected ArrayColorProgram fillProg;
     protected GLStreamingBufferBuilder fillPath;
     protected GLStreamingBufferBuilder fillColor;
+
+    protected Matrix4 transformMatrix;
 
     public DefaultGroupedEventPainter( )
     {
@@ -84,6 +98,8 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         this.fillProg = new ArrayColorProgram( );
         this.fillPath = new GLStreamingBufferBuilder( );
         this.fillColor = new GLStreamingBufferBuilder( );
+
+        this.transformMatrix = new Matrix4( );
     }
 
     /**
@@ -513,7 +529,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
             if ( !textDrawList.isEmpty( ) )
             {
-                textRenderer.beginRendering( width, height );
+                textRenderer.begin3DRendering( );
                 try
                 {
                     for ( TextDrawInfo textInfo : textDrawList )
@@ -521,20 +537,22 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
                         if ( !horiz )
                         {
-                            gl.getGL2( ).glMatrixMode( GL2.GL_PROJECTION );
+                            transformMatrix.loadIdentity( );
+                            transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                            transformMatrix.translate( ( float ) textInfo.getShiftX( ), ( float ) textInfo.getShiftY( ), 0 );
+                            transformMatrix.rotate( PI_2, 0, 0, 1.0f );
+                            transformMatrix.translate( ( float ) -textInfo.getShiftX( ), ( float ) -textInfo.getShiftY( ), 0 );
 
-                            gl.getGL2( ).glTranslated( textInfo.getShiftX( ), textInfo.getShiftY( ), 0 );
-                            gl.getGL2( ).glRotated( 90, 0, 0, 1.0f );
-                            gl.getGL2( ).glTranslated( -textInfo.getShiftX( ), -textInfo.getShiftY( ), 0 );
+                            textRenderer.setTransform( transformMatrix.getMatrix( ) );
                         }
 
                         GlimpseColor.setColor( textRenderer, textInfo.getColor( ) );
-                        textRenderer.draw( textInfo.getText( ), textInfo.getX( ), textInfo.getY( ) );
+                        textRenderer.draw3D( textInfo.getText( ), textInfo.getX( ), textInfo.getY( ), 0, 1 );
                     }
                 }
                 finally
                 {
-                    textRenderer.endRendering( );
+                    textRenderer.end3DRendering( );
                 }
             }
         }

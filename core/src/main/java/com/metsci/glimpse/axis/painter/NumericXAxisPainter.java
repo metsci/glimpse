@@ -26,12 +26,11 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.*;
+import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -60,7 +59,7 @@ public class NumericXAxisPainter extends NumericAxisPainter
     {
         GlimpseBounds bounds = getBounds( context );
         Axis1D axis = getAxis1D( context );
-        GL2 gl = context.getGL( ).getGL2( );
+        GL gl = context.getGL( );
 
         updateTextRenderer( );
         if ( textRenderer == null ) return;
@@ -142,10 +141,11 @@ public class NumericXAxisPainter extends NumericAxisPainter
         if ( showTickLabels )
         {
             // Tick labels
-            GlimpseColor.setColor( textRenderer, tickLabelColor );
             textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, tickLabelColor );
+
                 // Tick labels
                 for ( int i = min + 1; i < max; i++ )
                 {
@@ -191,10 +191,11 @@ public class NumericXAxisPainter extends NumericAxisPainter
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
-            GlimpseColor.setColor( textRenderer, axisLabelColor );
             textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, axisLabelColor );
+
                 String label = ticks.getAxisLabel( axis );
                 Rectangle2D axisLabelBounds = textRenderer.getBounds( label );
                 int iAxisLabel = round( 0.5f * ( width - ( int ) axisLabelBounds.getWidth( ) ) );

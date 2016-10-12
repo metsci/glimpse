@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.util.units.time.TimeStamp.*;
+import static com.metsci.glimpse.util.units.time.TimeStamp.currentTime;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -115,10 +115,11 @@ public class TimeXAxisPainter extends TimeAxisPainter
             progLine.end( gl3 );
         }
 
-        GlimpseColor.setColor( textRenderer, textColor );
         textRenderer.beginRendering( width, height );
         try
         {
+            GlimpseColor.setColor( textRenderer, textColor );
+
             if ( tickInterval <= Time.fromMinutes( 1 ) )
             {
                 // Time labels
@@ -239,10 +240,11 @@ public class TimeXAxisPainter extends TimeAxisPainter
             progLine.draw( gl3, style, pathLine );
         }
 
-        GlimpseColor.setColor( textRenderer, currentTimeTextColor );
         textRenderer.beginRendering( width, height );
         try
         {
+            GlimpseColor.setColor( textRenderer, currentTimeTextColor );
+
             String text = getCurrentTimeTickText( currentTime );
             textRenderer.draw( text, pixelTime + 3, 0 + 3 );
         }

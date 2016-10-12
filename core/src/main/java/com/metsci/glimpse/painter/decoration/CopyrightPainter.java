@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.decoration;
 
 import java.awt.Font;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;

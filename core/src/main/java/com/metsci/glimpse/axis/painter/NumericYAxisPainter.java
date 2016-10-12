@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static java.lang.Math.*;
+import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
@@ -48,9 +48,15 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  */
 public class NumericYAxisPainter extends NumericAxisPainter
 {
+    protected static final float PI_2 = ( float ) ( Math.PI / 2.0f );
+
+    protected Matrix4 transformMatrix;
+
     public NumericYAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
+
+        this.transformMatrix = new Matrix4( );
     }
 
     @Override
@@ -58,7 +64,7 @@ public class NumericYAxisPainter extends NumericAxisPainter
     {
         GlimpseBounds bounds = getBounds( context );
         Axis1D axis = getAxis1D( context );
-        GL2 gl = context.getGL( ).getGL2( );
+        GL gl = context.getGL( );
 
         updateTextRenderer( );
         if ( textRenderer == null ) return;
@@ -81,10 +87,11 @@ public class NumericYAxisPainter extends NumericAxisPainter
             AxisUnitConverter converter = ticks.getAxisUnitConverter( );
 
             // Tick labels
-            GlimpseColor.setColor( textRenderer, tickLabelColor );
             textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, tickLabelColor );
+
                 for ( int i = info.minIndex + 1; i < info.maxIndex; i++ )
                 {
                     double yTick = info.ticks[i];
@@ -174,29 +181,31 @@ public class NumericYAxisPainter extends NumericAxisPainter
         // Axis label
         if ( showLabel )
         {
-            GL2 gl2 = gl.getGL2( );
-
             int width = bounds.getWidth( );
             int height = bounds.getHeight( );
 
-            GlimpseColor.setColor( textRenderer, axisLabelColor );
-            textRenderer.beginRendering( width, height );
+            textRenderer.begin3DRendering( );
             try
             {
+                GlimpseColor.setColor( textRenderer, axisLabelColor );
+
                 String label = ticks.getAxisLabel( axis );
                 Rectangle2D labelSize = textRenderer.getBounds( label );
                 int iAxisLabel = getAxisLabelPositionX( width, ( int ) labelSize.getHeight( ) );
                 int jAxisLabel = round( 0.5f * ( height - ( int ) labelSize.getWidth( ) ) );
 
-                gl2.glMatrixMode( GL2.GL_PROJECTION );
-                gl2.glTranslatef( iAxisLabel, jAxisLabel, 0 );
-                gl2.glRotatef( 90, 0, 0, 1.0f );
+                transformMatrix.loadIdentity( );
+                transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                transformMatrix.translate( iAxisLabel, jAxisLabel, 0 );
+                transformMatrix.rotate( PI_2, 0, 0, 1.0f );
 
-                textRenderer.draw( label, 0, 0 );
+                textRenderer.setTransform( transformMatrix.getMatrix( ) );
+
+                textRenderer.draw3D( label, 0, 0, 0, 1.0f );
             }
             finally
             {
-                textRenderer.endRendering( );
+                textRenderer.end3DRendering( );
             }
         }
     }

@@ -51,14 +51,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -1125,8 +1124,8 @@ public class TrackPainter extends GlimpsePainterBase
                             loaded.glBufferInitialized = true;
 
                             // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferData( GL2.GL_ARRAY_BUFFER, loaded.glBufferMaxSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glBufferHandle );
+                            gl.glBufferData( GL.GL_ARRAY_BUFFER, loaded.glBufferMaxSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
                         }
                         else
                         {
@@ -1141,8 +1140,8 @@ public class TrackPainter extends GlimpsePainterBase
                             track.loadIntoBuffer( dataBuffer, insertOffset, trackSize );
 
                             // update the device buffer with the new data
-                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, insertOffset * 2 * GLUtils.BYTES_PER_FLOAT, insertCount * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ) );
+                            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.glBufferHandle );
+                            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, insertOffset * 2 * GLUtils.BYTES_PER_FLOAT, insertCount * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ) );
                         }
                     }
 

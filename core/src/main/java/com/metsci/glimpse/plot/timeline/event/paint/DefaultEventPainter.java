@@ -26,17 +26,18 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
@@ -72,6 +73,8 @@ import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
  */
 public class DefaultEventPainter implements EventPainter
 {
+    private static final float PI_2 = ( float ) ( Math.PI / 2.0f );
+
     public static final int DEFAULT_ICON_SIZE = 64;
     public static final Color DEFAULT_ICON_COLOR = Color.BLACK;
     public static final int DEFAULT_NUM_ICONS_ROWS = 3;
@@ -89,6 +92,8 @@ public class DefaultEventPainter implements EventPainter
     protected FlatColorProgram fillProg;
     protected GLStreamingBufferBuilder fillPath;
 
+    protected Matrix4 transformMatrix;
+
     public DefaultEventPainter( )
     {
         this.lineProg = new LineProgram( );
@@ -99,6 +104,8 @@ public class DefaultEventPainter implements EventPainter
 
         this.fillProg = new FlatColorProgram( );
         this.fillPath = new GLStreamingBufferBuilder( );
+
+        this.transformMatrix = new Matrix4( );
     }
 
     /**
@@ -318,21 +325,11 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        linePath.addPolygon( ( float ) arrowBaseMin, posMax,
-                                ( float ) arrowBaseMax, posMax,
-                                ( float ) timeMax, ( float ) sizePerpCenter,
-                                ( float ) arrowBaseMax, posMin,
-                                ( float ) arrowBaseMin, posMin,
-                                ( float ) timeMin, ( float ) sizePerpCenter );
+                        linePath.addPolygon( ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax, posMax, ( float ) timeMax, ( float ) sizePerpCenter, ( float ) arrowBaseMax, posMin, ( float ) arrowBaseMin, posMin, ( float ) timeMin, ( float ) sizePerpCenter );
                     }
                     else
                     {
-                        linePath.addPolygon( posMax, ( float ) arrowBaseMin,
-                                posMax, ( float ) arrowBaseMax,
-                                ( float ) sizePerpCenter, ( float ) timeMax,
-                                posMin, ( float ) arrowBaseMax,
-                                posMin, ( float ) arrowBaseMin,
-                                ( float ) sizePerpCenter, ( float ) timeMin );
+                        linePath.addPolygon( posMax, ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax, ( float ) sizePerpCenter, ( float ) timeMax, posMin, ( float ) arrowBaseMax, posMin, ( float ) arrowBaseMin, ( float ) sizePerpCenter, ( float ) timeMin );
                     }
 
                     lineProg.setViewport( gl, bounds );
@@ -566,29 +563,31 @@ public class DefaultEventPainter implements EventPainter
                 }
                 else
                 {
-                    textRenderer.beginRendering( width, height );
+                    textRenderer.begin3DRendering( );
                     try
                     {
-                        double shiftX = sizePerpPixels / 2.0 + posMin;
+                        float shiftX = ( float ) ( sizePerpPixels / 2.0 + posMin );
                         int pixelX = ( int ) shiftX;
 
-                        double shiftY = pixel;
+                        float shiftY = pixel;
                         int pixelY = ( int ) ( pixel - labelBounds.getHeight( ) * 0.34 );
 
-                        gl.getGL2( ).glMatrixMode( GL2.GL_PROJECTION );
+                        transformMatrix.loadIdentity( );
+                        transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                        transformMatrix.translate( shiftX, shiftY, 0 );
+                        transformMatrix.rotate( PI_2, 0, 0, 1.0f );
+                        transformMatrix.translate( -shiftX, -shiftY, 0 );
 
-                        gl.getGL2( ).glTranslated( shiftX, shiftY, 0 );
-                        gl.getGL2( ).glRotated( 90, 0, 0, 1.0f );
-                        gl.getGL2( ).glTranslated( -shiftX, -shiftY, 0 );
+                        textRenderer.setTransform( transformMatrix.getMatrix( ) );
 
-                        textRenderer.draw( displayText, pixelX, pixelY );
+                        textRenderer.draw3D( displayText, pixelX, pixelY, 0, 1 );
 
                         remainingSpace -= displayBounds.getWidth( ) + buffer;
                         pixel += displayBounds.getWidth( ) + buffer;
                     }
                     finally
                     {
-                        textRenderer.endRendering( );
+                        textRenderer.end3DRendering( );
                     }
                 }
             }

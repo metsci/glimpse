@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;

@@ -36,7 +36,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.support.font.FontUtils;

@@ -28,7 +28,7 @@ package com.metsci.glimpse.axis.painter;
 
 import java.awt.Font;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;

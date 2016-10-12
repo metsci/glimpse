@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -294,7 +293,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         Axis2D axis = requireAxis2D( context );
-        GL2 gl = context.getGL( ).getGL2( );
+        GL gl = context.getGL( );
 
         if ( vertexCount == 0 ) return;
 
@@ -331,7 +330,7 @@ public class ShadedPointPainter extends GlimpsePainterBase
 
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL2.GL_POINTS, 0, vertexCount );
+        gl.glDrawArrays( GL.GL_POINTS, 0, vertexCount );
     }
 
     @Override

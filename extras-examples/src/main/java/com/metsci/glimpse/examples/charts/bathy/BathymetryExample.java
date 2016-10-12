@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.ColorYAxisPainter;

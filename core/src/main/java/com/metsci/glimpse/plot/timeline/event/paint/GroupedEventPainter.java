@@ -39,7 +39,7 @@ import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 public interface GroupedEventPainter
 {
     /**
-     * Draw all the events in the provided collection using the GL2 handle.
+     * Draw all the events in the provided collection using the provided context.
      *
      * @param context Glimpse Context, providing access to Axis, GlimpseBounds, and OpenGL context
      * @param info parent EventPlotInfo of Event to be painted

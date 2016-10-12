@@ -29,14 +29,14 @@ package com.metsci.glimpse.axis.painter;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
@@ -48,6 +48,7 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 public class NumericPolarAxisPainter extends NumericXYAxisPainter
 {
     private static final double TWO_PI = 2d * Math.PI;
+    private static final double PI_2 = Math.PI / 2.0;
 
     // Padding between labels and axis lines
     private int textPadding = 2;
@@ -72,6 +73,8 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
     protected LineStyle styleRadial;
     protected LineStyle styleCircle;
 
+    protected Matrix4 transformMatrix;
+
     public NumericPolarAxisPainter( )
     {
         this.pathRadial = new LinePath( );
@@ -86,6 +89,7 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
         this.styleCircle.joinType = LineJoinType.JOIN_NONE;
         this.styleCircle.rgba = GlimpseColor.getBlack( );
 
+        this.transformMatrix = new Matrix4( );
     }
 
     @Override
@@ -287,21 +291,19 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
             gl.glDisable( GL.GL_BLEND );
         }
 
-        // Draw Labels
-        GlimpseColor.setColor( textRenderer, insideTextColor == null ? textColor : insideTextColor );
-
-        GL2 gl2 = gl.getGL2( );
-
-        /* first - label range rings:
-         * If x-axis is visible, label all intersections with that axis
-         * otherwise, if y-axis is visible, label all intersections with that axis
-         * otherwise, label on the middle radial
-         */
-        for ( int ii = 1; ii < positionsX.length; ++ii )
+        textRenderer.begin3DRendering( );
+        try
         {
-            try
+            // Draw Labels
+            GlimpseColor.setColor( textRenderer, insideTextColor == null ? textColor : insideTextColor );
+
+            /* first - label range rings:
+             * If x-axis is visible, label all intersections with that axis
+             * otherwise, if y-axis is visible, label all intersections with that axis
+             * otherwise, label on the middle radial
+             */
+            for ( int ii = 1; ii < positionsX.length; ++ii )
             {
-                textRenderer.beginRendering( width, height );
                 String label = String.format( "%.3g", convX.fromAxisUnits( positionsX[ii] ) );
                 Rectangle2D textBounds = textRenderer.getBounds( label );
                 if ( xCross ) // x-axis visible
@@ -334,23 +336,26 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
                     int xOffset = ( int ) -textBounds.getWidth( ) - textPadding;
                     int yOffset = textPadding;
 
-                    double rotAngle = Math.toDegrees( theta );
                     if ( Math.cos( theta ) < 0 )
                     {
-                        rotAngle += 180;
+                        theta += Math.PI;
                         yOffset = ( int ) -textBounds.getHeight( ) - textPadding + 2;
                         xOffset = textPadding;
                     }
-                    gl2.glMatrixMode( GL2.GL_PROJECTION );
-                    gl2.glTranslated( labelX, labelY, 0 );
-                    gl2.glRotated( rotAngle, 0, 0, 1 );
-                    textRenderer.draw( label, xOffset, yOffset );
+
+                    transformMatrix.loadIdentity( );
+                    transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                    transformMatrix.translate( labelX, labelY, 0 );
+                    transformMatrix.rotate( ( float ) theta, 0, 0, 1.0f );
+                    textRenderer.setTransform( transformMatrix.getMatrix( ) );
+
+                    textRenderer.draw3D( label, xOffset, yOffset, 0.0f, 1.0f );
                 }
             }
-            finally
-            {
-                textRenderer.endRendering( );
-            }
+        }
+        finally
+        {
+            textRenderer.end3DRendering( );
         }
 
         /*
@@ -370,14 +375,14 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
             labelOutside = ( minX < -maxRadius ) && ( maxX > maxRadius ) && ( minY < -maxRadius ) && ( maxY > maxRadius );
         }
 
-        GlimpseColor.setColor( textRenderer, ( labelOutside && outsideTextColor != null ) ? outsideTextColor : textColor );
-
         double r = labelOutside ? positionsX[positionsX.length - 1] : positionsX[positionsX.length / 2];
 
-        for ( int ii = 0; ii < positionsY.length; ++ii )
+        textRenderer.begin3DRendering( );
+        try
         {
-            textRenderer.beginRendering( width, height );
-            try
+            GlimpseColor.setColor( textRenderer, ( labelOutside && outsideTextColor != null ) ? outsideTextColor : textColor );
+
+            for ( int ii = 0; ii < positionsY.length; ++ii )
             {
                 double degrees = convY.fromAxisUnits( positionsY[ii] );
                 int wholeDegrees = ( int ) Math.floor( degrees );
@@ -402,25 +407,33 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
                 int xOffset = labelOutside ? ( int ) ( -textBounds.getWidth( ) / 2 ) : textPadding;
                 int yOffset = textPadding;
 
-                double rotAngle = Math.toDegrees( positionsY[ii] ) - 90;
-                if ( Math.sin( positionsY[ii] ) < 0 )
+                double angle = positionsY[ii];
+                if ( Math.sin( angle ) < 0 )
                 {
-                    rotAngle += 180;
+                    angle += PI_2;
                     yOffset = ( int ) -textBounds.getHeight( ) - textPadding + 2;
                     if ( !labelOutside )
                     {
                         xOffset = ( int ) -textBounds.getWidth( ) - textPadding;
                     }
                 }
-                gl2.glMatrixMode( GL2.GL_PROJECTION );
-                gl2.glTranslated( labelX, labelY, 0 );
-                gl2.glRotated( rotAngle, 0, 0, 1 );
-                textRenderer.draw( label, xOffset, yOffset );
+                else
+                {
+                    angle -= PI_2;
+                }
+
+                transformMatrix.loadIdentity( );
+                transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                transformMatrix.translate( labelX, labelY, 0 );
+                transformMatrix.rotate( ( float ) angle, 0, 0, 1.0f );
+                textRenderer.setTransform( transformMatrix.getMatrix( ) );
+
+                textRenderer.draw3D( label, xOffset, yOffset, 0.0f, 1.0f );
             }
-            finally
-            {
-                textRenderer.endRendering( );
-            }
+        }
+        finally
+        {
+            textRenderer.end3DRendering( );
         }
     }
 

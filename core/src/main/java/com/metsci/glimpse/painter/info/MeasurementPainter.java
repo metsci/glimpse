@@ -34,7 +34,7 @@ import java.text.DecimalFormat;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;

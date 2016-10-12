@@ -45,7 +45,7 @@ import javax.imageio.ImageIO;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;

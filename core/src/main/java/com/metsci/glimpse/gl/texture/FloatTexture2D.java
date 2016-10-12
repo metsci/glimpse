@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
@@ -174,7 +173,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setPixelStore( GL gl )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
     }
 
     public void mutate( MutatorFloat2D mutator )

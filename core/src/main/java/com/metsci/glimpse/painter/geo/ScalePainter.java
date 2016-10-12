@@ -33,11 +33,11 @@ import java.text.NumberFormat;
 
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
@@ -337,20 +337,14 @@ public class ScalePainter extends GlimpsePainterBase
             double offset1 = totalSize * ( i / ( double ) tickCount );
             double offset2 = totalSize * ( ( i + 1 ) / ( double ) tickCount );
 
-            fillXy.addQuad2f( ( float ) ( width - bufferX - offset1 ),
-                    ( bufferY ),
-                    ( float ) ( width - bufferX - offset2 ),
-                    bufferY + pixelHeight );
+            fillXy.addQuad2f( ( float ) ( width - bufferX - offset1 ), ( bufferY ), ( float ) ( width - bufferX - offset2 ), bufferY + pixelHeight );
 
             fillRgba.addQuadSolidColor( color );
         }
 
         linePath.clear( );
 
-        linePath.addRectangle( width - bufferX,
-                ( bufferY ),
-                ( float ) ( width - bufferX - totalSize ),
-                bufferY + pixelHeight );
+        linePath.addRectangle( width - bufferX, ( bufferY ), ( float ) ( width - bufferX - totalSize ), bufferY + pixelHeight );
 
         GLUtils.enableStandardBlending( gl );
         try
@@ -384,8 +378,6 @@ public class ScalePainter extends GlimpsePainterBase
         {
             GLUtils.disableBlending( gl );
         }
-
-        gl.getGL2( ).glTranslatef( 0.375f, 0.375f, 0 );
 
         if ( order < 2 )
         {
