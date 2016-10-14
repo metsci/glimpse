@@ -12,6 +12,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.
@@ -76,6 +77,7 @@ public class PointFlatColorProgram
             this.handles = new ProgramHandles( gl );
         }
 
+        gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
 
@@ -143,6 +145,7 @@ public class PointFlatColorProgram
 
     public void end( GL2ES2 gl )
     {
+        gl.getGL3( ).glBindVertexArray( 0 );
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
 

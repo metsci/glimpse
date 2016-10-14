@@ -4,7 +4,6 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
 import javax.media.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
@@ -13,6 +12,7 @@ import com.jogamp.opengl.util.GLArrayDataServer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 public class IconShader extends GlimpseShaderProgram
 {
@@ -63,9 +63,9 @@ public class IconShader extends GlimpseShaderProgram
 
         // Geometry Shader
 
-        this.viewportWidth = this.addUniformData( new GLUniformData( "viewportWidth", (float) 1 ) );
-        this.viewportHeight = this.addUniformData( new GLUniformData( "viewportHeight", (float) 1 ) );
-        this.globalScale = this.addUniformData( new GLUniformData( "globalScale", (float) 1 ) );
+        this.viewportWidth = this.addUniformData( new GLUniformData( "viewportWidth", ( float ) 1 ) );
+        this.viewportHeight = this.addUniformData( new GLUniformData( "viewportHeight", ( float ) 1 ) );
+        this.globalScale = this.addUniformData( new GLUniformData( "globalScale", ( float ) 1 ) );
     }
 
     public void setProjectionMatrix( float minX, float maxX, float minY, float maxY )
@@ -77,7 +77,7 @@ public class IconShader extends GlimpseShaderProgram
 
     public void setProjectionMatrix( Axis2D axis )
     {
-        setProjectionMatrix( (float) axis.getMinX( ), (float) axis.getMaxX( ), (float) axis.getMinY( ), (float) axis.getMaxY( ) );
+        setProjectionMatrix( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
     public void setPickMode( boolean pickMode )
@@ -121,13 +121,28 @@ public class IconShader extends GlimpseShaderProgram
 
     public void updateViewport( int width, int height )
     {
-        this.viewportWidth.setData( (float) width );
-        this.viewportHeight.setData( (float) height );
+        this.viewportWidth.setData( ( float ) width );
+        this.viewportHeight.setData( ( float ) height );
     }
 
     public void setGlobalScale( float scale )
     {
         this.globalScale.setData( scale );
+    }
+
+    @Override
+    public void useProgram( GL gl, boolean on )
+    {
+        super.useProgram( gl, on );
+
+        if ( on )
+        {
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
+        }
+        else
+        {
+            gl.getGL3( ).glBindVertexArray( 0 );
+        }
     }
 
 }

@@ -43,6 +43,25 @@ public class GLUtils
 {
     public static final int BYTES_PER_FLOAT = 4;
 
+    protected static int default_vao;
+
+    public static int defaultVertexAttributeArray( GL gl )
+    {
+        if ( default_vao == 0 )
+        {
+            default_vao = genVertexAttributeArray( gl );
+        }
+
+        return default_vao;
+    }
+
+    public static int genVertexAttributeArray( GL gl )
+    {
+        final int[] handles = new int[1];
+        gl.getGL3( ).glGenVertexArrays( 1, handles, 0 );
+        return handles[0];
+    }
+
     public static int genBuffer( GL gl )
     {
         int[] handle = new int[1];
@@ -168,7 +187,7 @@ public class GLUtils
 
     public static GLProfile getDefaultGLProfile( )
     {
-        return GLProfile.getMaxFixedFunc( true );
+        return GLProfile.getMaxFixedFunc( true );//GLProfile.get( GLProfile.GL3 );
     }
 
     public static String profileNameOf( GLContext context )

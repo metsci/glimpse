@@ -77,7 +77,7 @@ public class ByteTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_R8UI, texSizesX[i], texSizesY[i], 0, GL2.GL_RED_INTEGER, GL2.GL_UNSIGNED_BYTE, positionedBuffer );
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_R8UI, texSizesX[i], texSizesY[i], 0, GL2.GL_RED_INTEGER, GL2.GL_UNSIGNED_BYTE, positionedBuffer );
         }
 
         gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );

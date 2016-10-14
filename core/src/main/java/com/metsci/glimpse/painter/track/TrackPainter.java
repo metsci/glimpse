@@ -26,10 +26,8 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINE_STRIP;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -1964,6 +1962,7 @@ public class TrackPainter extends GlimpsePainterBase
                 this.handles = new LineProgramHandles( gl );
             }
 
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl.glUseProgram( this.handles.program );
             gl.glEnableVertexAttribArray( this.handles.inXy );
         }
@@ -2022,6 +2021,7 @@ public class TrackPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
+            gl.getGL3( ).glBindVertexArray( 0 );
             gl.glDisableVertexAttribArray( this.handles.inXy );
             gl.glUseProgram( 0 );
         }

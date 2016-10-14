@@ -33,7 +33,6 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
@@ -491,7 +490,6 @@ public class TooltipPainter extends SimpleTextPainter
                     }
                 }
             }
-            gl.glDisable( GL2.GL_BLEND );
 
             // draw text
             if ( lines != null && textRenderer != null )
@@ -610,15 +608,5 @@ public class TooltipPainter extends SimpleTextPainter
             ImageData icon = iconId != null ? atlas.getImageData( iconId ) : null;
             this.icons.add( icon );
         }
-    }
-
-    // draw the edges of the tooltip bounding box
-    protected void borderVertices( GL2 gl, int height, int width, double x, double y )
-    {
-        //(  x, y ) are the coordinates of the top-left corner of the box
-        gl.glVertex2d( x - insets.left, y + insets.top );
-        gl.glVertex2d( x - insets.left, y - height - insets.bottom );
-        gl.glVertex2d( x + width + insets.right, y - height - insets.bottom );
-        gl.glVertex2d( x + width + insets.right, y + insets.top );
     }
 }

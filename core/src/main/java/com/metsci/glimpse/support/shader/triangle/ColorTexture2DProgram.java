@@ -1,12 +1,8 @@
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_TRIANGLES;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.util.logging.Logger;
 
@@ -20,6 +16,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * Applies a 2d rgba texture to triangles specified in axis coordinates.
@@ -93,6 +90,7 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
 
         this.handles( context );
 
+        gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inS );
@@ -197,8 +195,12 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     {
         GL3 gl = context.getGL( ).getGL3( );
 
+        GLErrorUtils.logGLError( logger, gl, "pre" );
+
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
+
+        GLErrorUtils.logGLError( logger, gl, "post" );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
         gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, 0 );
@@ -229,6 +231,8 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     public void end( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
+
+        gl.getGL3( ).glBindVertexArray( 0 );
 
         if ( this.handles != null )
         {

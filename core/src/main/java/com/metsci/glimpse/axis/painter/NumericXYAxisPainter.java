@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;

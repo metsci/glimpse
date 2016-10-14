@@ -1,11 +1,7 @@
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_TRIANGLES;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static javax.media.opengl.GL.*;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
@@ -17,6 +13,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.texture.AbstractTexture;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * Applies a 1d rgba texture to triangles specified in axis coordinates.
@@ -91,6 +88,7 @@ public class ColorTexture1DProgram implements DrawableTextureProgram
             this.handles = new ProgramHandles( gl );
         }
 
+        gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inS );
@@ -181,6 +179,7 @@ public class ColorTexture1DProgram implements DrawableTextureProgram
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
+        gl.getGL3( ).glBindVertexArray( 0 );
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inS );
         gl.glUseProgram( 0 );

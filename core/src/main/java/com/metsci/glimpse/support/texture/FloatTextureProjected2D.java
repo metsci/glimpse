@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 /**
  * A texture class which stores 32 bit fixed point values (uncapped).
@@ -77,7 +78,7 @@ public class FloatTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, positionedBuffer );
+            gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_R32F, texSizesX[i], texSizesY[i], 0, GL3.GL_RED, GL3.GL_FLOAT, positionedBuffer );
         }
 
         gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );

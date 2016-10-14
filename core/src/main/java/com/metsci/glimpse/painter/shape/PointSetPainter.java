@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
@@ -283,20 +282,20 @@ public class PointSetPainter extends GlimpsePainterBase
 
         if ( newData )
         {
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, xyHandle[0] );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyHandle[0] );
 
             // copy data from the host memory buffer to the device
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
 
             GLErrorUtils.logGLError( logger, gl, "Error allocating buffer in PointSetPainter" );
 
             useColorDevice = useColorHost;
             if ( useColorDevice )
             {
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, rgbaHandle[0] );
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, rgbaHandle[0] );
 
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 4 * GLUtils.BYTES_PER_FLOAT, colorBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 4 * GLUtils.BYTES_PER_FLOAT, colorBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
 
                 GLErrorUtils.logGLError( logger, gl, "Error allocating buffer in PointSetPainter" );
             }

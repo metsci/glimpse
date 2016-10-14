@@ -152,6 +152,7 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer
         return new QuadPipelineGL30( gl3, program );
     }
 
+    @Override
     protected void doDispose( /*@Nonnull*/ final GL gl )
     {
 

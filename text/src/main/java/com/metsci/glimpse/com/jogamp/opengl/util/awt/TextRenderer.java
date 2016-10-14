@@ -505,7 +505,6 @@ public final class TextRenderer
      */
     public void endRendering( )
     {
-
         // Get the current OpenGL context
         final GL gl = GLContext.getCurrentGL( );
 
@@ -638,10 +637,10 @@ public final class TextRenderer
 
         Check.notNull( color, "Color cannot be null" );
 
-        final float r = ( ( float ) color.getRed( ) ) / 255f;
-        final float g = ( ( float ) color.getGreen( ) ) / 255f;
-        final float b = ( ( float ) color.getBlue( ) ) / 255f;
-        final float a = ( ( float ) color.getAlpha( ) ) / 255f;
+        final float r = ( color.getRed( ) ) / 255f;
+        final float g = ( color.getGreen( ) ) / 255f;
+        final float b = ( color.getBlue( ) ) / 255f;
+        final float a = ( color.getAlpha( ) ) / 255f;
         setColor( r, g, b, a );
     }
 

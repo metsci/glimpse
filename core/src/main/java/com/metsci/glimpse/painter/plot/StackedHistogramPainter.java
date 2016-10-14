@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
@@ -345,7 +343,7 @@ public class StackedHistogramPainter extends GlimpsePainterBase
             this.bufferInitialized = true;
         }
 
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
 
         if ( this.newData )
         {
@@ -353,7 +351,7 @@ public class StackedHistogramPainter extends GlimpsePainterBase
             try
             {
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataBuffer.position( ) * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_STATIC_DRAW );
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, dataBuffer.position( ) * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_STATIC_DRAW );
 
                 GLErrorUtils.logGLError( logger, gl, "Error copying HistogramPainter data to device." );
 

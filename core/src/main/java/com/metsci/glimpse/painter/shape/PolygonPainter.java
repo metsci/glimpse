@@ -26,18 +26,12 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.BYTES_PER_FLOAT;
-import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
-import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
-import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BYTE;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL3.*;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -2007,6 +2001,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.handles = new ProgramHandles( gl );
             }
 
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl.glUseProgram( this.handles.program );
             gl.glEnableVertexAttribArray( this.handles.inXy );
         }
@@ -2067,6 +2062,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
+            gl.getGL3( ).glBindVertexArray( 0 );
             gl.glDisableVertexAttribArray( this.handles.inXy );
             gl.glUseProgram( 0 );
         }
@@ -2172,6 +2168,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.handles = new LineProgramHandles( gl );
             }
 
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl.glUseProgram( this.handles.program );
             gl.glEnableVertexAttribArray( this.handles.inXy );
             gl.glEnableVertexAttribArray( this.handles.inFlags );
@@ -2282,6 +2279,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
+            gl.getGL3( ).glBindVertexArray( 0 );
             gl.glDisableVertexAttribArray( this.handles.inXy );
             gl.glDisableVertexAttribArray( this.handles.inFlags );
             gl.glDisableVertexAttribArray( this.handles.inMileage );

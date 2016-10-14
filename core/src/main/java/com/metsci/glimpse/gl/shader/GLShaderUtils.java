@@ -1,17 +1,12 @@
 package com.metsci.glimpse.gl.shader;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.metsci.glimpse.util.GeneralUtils.array;
-import static java.lang.Thread.currentThread;
-import static javax.media.opengl.GL.GL_NO_ERROR;
-import static javax.media.opengl.GL.GL_TRUE;
-import static javax.media.opengl.GL2ES2.GL_COMPILE_STATUS;
-import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static javax.media.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
-import static javax.media.opengl.GL2ES2.GL_LINK_STATUS;
-import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static javax.media.opengl.GL3.GL_GEOMETRY_SHADER;
-import static jogamp.opengl.glu.error.Error.gluErrorString;
+import static com.google.common.base.Charsets.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static java.lang.Thread.*;
+import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL2ES2.*;
+import static javax.media.opengl.GL3.*;
+import static jogamp.opengl.glu.error.Error.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -59,13 +54,12 @@ public class GLShaderUtils
         }
     }
 
-
     public static int createProgram( GL2ES2 gl, String[] vertSources, String[] geomSources, String[] fragSources )
     {
         IntsArray shaders = new IntsArray( );
         try
         {
-            if ( vertSources != null ) shaders.append( compileShader( gl, GL_VERTEX_SHADER,   vertSources ) );
+            if ( vertSources != null ) shaders.append( compileShader( gl, GL_VERTEX_SHADER, vertSources ) );
             if ( geomSources != null ) shaders.append( compileShader( gl, GL_GEOMETRY_SHADER, geomSources ) );
             if ( fragSources != null ) shaders.append( compileShader( gl, GL_FRAGMENT_SHADER, fragSources ) );
             return linkProgram( gl, shaders.a );
@@ -81,7 +75,7 @@ public class GLShaderUtils
         IntsArray shaders = new IntsArray( );
         try
         {
-            if ( vertSource != null ) shaders.append( compileShader( gl, GL_VERTEX_SHADER,   vertSource ) );
+            if ( vertSource != null ) shaders.append( compileShader( gl, GL_VERTEX_SHADER, vertSource ) );
             if ( geomSource != null ) shaders.append( compileShader( gl, GL_GEOMETRY_SHADER, geomSource ) );
             if ( fragSource != null ) shaders.append( compileShader( gl, GL_FRAGMENT_SHADER, fragSource ) );
             return linkProgram( gl, shaders.a );
@@ -103,9 +97,9 @@ public class GLShaderUtils
         gl.glShaderSource( shader, sources.length, sources, null );
 
         gl.glCompileShader( shader );
-        int[] compileStatus = new int[ 1 ];
+        int[] compileStatus = new int[1];
         gl.glGetShaderiv( shader, GL_COMPILE_STATUS, compileStatus, 0 );
-        if ( compileStatus[ 0 ] != GL_TRUE )
+        if ( compileStatus[0] != GL_TRUE )
         {
             throw new RuntimeException( getShaderInfoLog( gl, shader ) );
         }
@@ -115,17 +109,17 @@ public class GLShaderUtils
 
     public static String getShaderInfoLog( GL2ES2 gl, int shader )
     {
-        int[] maxLength = new int[ 1 ];
+        int[] maxLength = new int[1];
         gl.glGetShaderiv( shader, GL_INFO_LOG_LENGTH, maxLength, 0 );
-        if ( maxLength[ 0 ] == 0 )
+        if ( maxLength[0] == 0 )
         {
             return "";
         }
 
-        int[] length = new int[ 1 ];
-        byte[] bytes = new byte[ maxLength[ 0 ] ];
-        gl.glGetShaderInfoLog( shader, maxLength[ 0 ], length, 0, bytes, 0 );
-        return new String( bytes, 0, length[ 0 ], UTF_8 );
+        int[] length = new int[1];
+        byte[] bytes = new byte[maxLength[0]];
+        gl.glGetShaderInfoLog( shader, maxLength[0], length, 0, bytes, 0 );
+        return new String( bytes, 0, length[0], UTF_8 );
     }
 
     public static void requireNoErrors( GL gl )
@@ -145,9 +139,9 @@ public class GLShaderUtils
         {
             gl.glLinkProgram( program );
 
-            int[] linkStatus = new int[ 1 ];
+            int[] linkStatus = new int[1];
             gl.glGetProgramiv( program, GL_LINK_STATUS, linkStatus, 0 );
-            if ( linkStatus[ 0 ] != GL_TRUE )
+            if ( linkStatus[0] != GL_TRUE )
             {
                 throw new RuntimeException( getProgramInfoLog( gl, program ) );
             }
@@ -186,17 +180,16 @@ public class GLShaderUtils
 
     public static String getProgramInfoLog( GL2ES2 gl, int program )
     {
-        int[] maxLength = new int[ 1 ];
+        int[] maxLength = new int[1];
         gl.glGetProgramiv( program, GL_INFO_LOG_LENGTH, maxLength, 0 );
-        if ( maxLength[ 0 ] == 0 )
+        if ( maxLength[0] == 0 )
         {
             return "";
         }
 
-        int[] length = new int[ 1 ];
-        byte[] bytes = new byte[ maxLength[ 0 ] ];
-        gl.glGetProgramInfoLog( program, maxLength[ 0 ], length, 0, bytes, 0 );
-        return new String( bytes, 0, length[ 0 ], UTF_8 );
+        int[] length = new int[1];
+        byte[] bytes = new byte[maxLength[0]];
+        gl.glGetProgramInfoLog( program, maxLength[0], length, 0, bytes, 0 );
+        return new String( bytes, 0, length[0], UTF_8 );
     }
-
 }

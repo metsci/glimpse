@@ -30,6 +30,7 @@ import java.nio.Buffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 /**
  * A texture class which stores 16 bit fixed point greyscale values (capped from 0 to 1).
@@ -37,14 +38,14 @@ import javax.media.opengl.GL2;
  * @author ulman
  *
  */
-public class LuminanceTextureProjected2D extends FloatTextureProjected2D
+public class Float16TextureProjected2D extends FloatTextureProjected2D
 {
-    public LuminanceTextureProjected2D( int dataSizeX, int dataSizeY )
+    public Float16TextureProjected2D( int dataSizeX, int dataSizeY )
     {
         this( dataSizeX, dataSizeY, false );
     }
 
-    public LuminanceTextureProjected2D( int dataSizeX, int dataSizeY, boolean useVertexZCoord )
+    public Float16TextureProjected2D( int dataSizeX, int dataSizeY, boolean useVertexZCoord )
     {
         super( dataSizeX, dataSizeY, useVertexZCoord );
     }
@@ -59,7 +60,8 @@ public class LuminanceTextureProjected2D extends FloatTextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, positionedBuffer );
+            gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_R16F, texSizesX[i], texSizesY[i], 0, GL3.GL_RED, GL3.GL_FLOAT, positionedBuffer );
+
         }
 
         gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
