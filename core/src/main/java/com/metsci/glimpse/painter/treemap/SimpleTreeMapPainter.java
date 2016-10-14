@@ -28,18 +28,18 @@ package com.metsci.glimpse.painter.treemap;
 
 import static java.lang.Math.max;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
 import com.metsci.glimpse.support.shader.line.LineProgram;
@@ -67,8 +67,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     protected TextRenderer titleRenderer;
     protected TextRenderer textRenderer;
 
-    protected Color titleColor = Color.white;
-    protected Color textColor = Color.darkGray;
+    protected float[] titleColor = GlimpseColor.getWhite( );
+    protected float[] textColor = GlimpseColor.getBlack( );
 
     protected Font titleFont = FontUtils.getDefaultBold( 14.0f );
     protected Font textFont = FontUtils.getDefaultItalic( 12.0f );
@@ -90,10 +90,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         borderStyle.thickness_PX = 1;
         linePath = new StreamingLinePath( 10_000 );
 
-        flatPath = new GLStreamingBufferBuilder( );
+        flatPath = new GLStreamingBufferBuilder( 1024, 10_000 );
         flatProg = new FlatColorProgram( );
-
-        setBorderColor( new float[] { 0.4f, 0.4f, 0.4f, 1f } );
     }
 
     public float[] getBorderColor( )
@@ -106,12 +104,12 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         this.borderColor = borderColor;
     }
 
-    public Color getTitleColor( )
+    public float[] getTitleColor( )
     {
         return titleColor;
     }
 
-    public void setTitleColor( Color titleColor )
+    public void setTitleColor( float[] titleColor )
     {
         this.titleColor = titleColor;
     }
@@ -156,12 +154,12 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         this.selectedLeafColor = selectedLeafColor;
     }
 
-    public Color getTextColor( )
+    public float[] getTextColor( )
     {
         return textColor;
     }
 
-    public void setTextColor( Color textColor )
+    public void setTextColor( float[] textColor )
     {
         this.textColor = textColor;
     }
@@ -376,10 +374,16 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         int textPosY = axis.getAxisY( ).valueToScreenPixel( boundary.getMaxY( ) ) - ( int ) borderHeightPx;
 
         // draw title text
-        titleRenderer.setColor( titleColor );
         titleRenderer.beginRendering( layoutBounds.getWidth( ), layoutBounds.getHeight( ) );
-        titleRenderer.draw( title, textPosX + textBorderPx, textPosY + textBorderPx );
-        titleRenderer.endRendering( );
+        try
+        {
+            GlimpseColor.setColor( titleRenderer, titleColor );
+            titleRenderer.draw( title, textPosX + textBorderPx, textPosY + textBorderPx );
+        }
+        finally
+        {
+            titleRenderer.endRendering( );
+        }
 
         Rectangle2D newBoundary = new Rectangle2D.Double( boundary.getMinX( ), boundary.getMinY( ), boundary.getWidth( ), boundary.getHeight( ) - borderHeight );
         return newBoundary;
@@ -413,10 +417,16 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             return;
         }
 
-        textRenderer.setColor( textColor );
-        textRenderer.beginRendering( layoutBounds.getWidth( ), layoutBounds.getHeight( ) );
-        textRenderer.draw( text, textPosX, textPosY );
-        textRenderer.endRendering( );
+        try
+        {
+            textRenderer.beginRendering( layoutBounds.getWidth( ), layoutBounds.getHeight( ) );
+            GlimpseColor.setColor( textRenderer, textColor );
+            textRenderer.draw( text, textPosX, textPosY );
+        }
+        finally
+        {
+            textRenderer.endRendering( );
+        }
     }
 
     /**
