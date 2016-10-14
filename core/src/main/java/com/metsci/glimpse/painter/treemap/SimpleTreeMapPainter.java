@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
@@ -46,8 +47,6 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.StreamingLinePath;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
-
 /**
  * A simple implementation of {@code AbstractTreeMapPainter} that has default
  * colors for everything.
@@ -56,6 +55,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
  */
 public class SimpleTreeMapPainter extends AbstractTreeMapPainter
 {
+    protected int minPixelsBeforeHide = 3;
+    protected int minPixelsBeforeHideText = 15;
+
     protected float[] borderColor = new float[] { 0.4f, 0.4f, 0.4f, 1f };
     protected float[] selectedTitleBackgroundColor = new float[] { 1f, 0.2f, 0.2f, 1f };
     protected float[] leafColor = new float[] { 0.7f, 0.7f, 1.0f, 1f };
@@ -78,8 +80,6 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     protected LineProgram lineProg;
     protected StreamingLinePath linePath;
 
-    private boolean dirty;
-
     public SimpleTreeMapPainter( )
     {
         lineProg = new LineProgram( );
@@ -88,21 +88,12 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         borderStyle.joinType = LineJoinType.JOIN_MITER;
         borderStyle.stippleEnable = false;
         borderStyle.thickness_PX = 1;
-        linePath = new StreamingLinePath( 1 );
+        linePath = new StreamingLinePath( 10_000 );
 
         flatPath = new GLStreamingBufferBuilder( );
         flatProg = new FlatColorProgram( );
 
         setBorderColor( new float[] { 0.4f, 0.4f, 0.4f, 1f } );
-        dirty = true;
-    }
-
-    @Override
-    protected void populateLayout( int nodeId, Rectangle2D boundary )
-    {
-        super.populateLayout( nodeId, boundary );
-        dirty = true;
-        needsMapped = true;
     }
 
     public float[] getBorderColor( )
@@ -203,17 +194,35 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         Axis2D axis = getAxis2D( context );
 
         lineProg.begin( gl );
-        lineProg.setAxisOrtho( gl, axis );
-        lineProg.setViewport( gl, layoutBounds );
-        lineProg.end( gl );
+        try
+        {
+            lineProg.setAxisOrtho( gl, axis );
+            lineProg.setViewport( gl, layoutBounds );
+        }
+        finally
+        {
+            lineProg.end( gl );
+        }
+
+        flatProg.begin( gl );
+        try
+        {
+            /*
+             * When we don't draw really tiny boxes, this gives the illusion
+             * that something is being drawn when we zoom.
+             */
+            flatProg.setAxisOrtho( gl, axis );
+            flatProg.setColor( gl, borderColor );
+            flatPath.clear( );
+            flatPath.addQuad2f( ( float ) axis.getMinX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxX( ), ( float ) axis.getMaxY( ) );
+            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 6 );
+        }
+        finally
+        {
+            flatProg.end( gl );
+        }
 
         super.doPaintTo( context );
-
-        if ( dirty )
-        {
-            linePath.seal( gl );
-            dirty = false;
-        }
     }
 
     @Override
@@ -233,30 +242,30 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         }
     }
 
-    private Int2ObjectAVLTreeMap<int[]> map = new Int2ObjectAVLTreeMap<>( );
-    private boolean needsMapped = true;
+    @Override
+    protected void displayNode( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
+    {
+        if ( axis.getAxisX( ).getPixelsPerValue( ) * nodeBounds.getWidth( ) < minPixelsBeforeHide &&
+                axis.getAxisY( ).getPixelsPerValue( ) * nodeBounds.getHeight( ) < minPixelsBeforeHide )
+        {
+            return;
+        }
+        else
+        {
+            super.displayNode( gl, axis, layoutBounds, nodeBounds, nodeId );
+        }
+    }
 
     @Override
     protected void drawBorder( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
-        if ( dirty && needsMapped )
-        {
-            linePath.map( gl, layoutCache.size( ) * 42 );
-            needsMapped = false;
-        }
-
-        if ( dirty )
-        {
-            int start = linePath.numVertices( );
-            linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
-            linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
-            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
-            linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
-            linePath.closeLoop( );
-            int count = linePath.numVertices( ) - start;
-            map.put( nodeId, new int[] { start, count } );
-            return;
-        }
+        linePath.map( gl, 7 );
+        linePath.moveTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ) );
+        linePath.lineTo( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMaxY( ) );
+        linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+        linePath.lineTo( ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMinY( ) );
+        linePath.closeLoop( );
+        linePath.seal( gl );
 
         float[] color = getBorderColor( nodeId, isSelected( axis, nodeBounds ) );
         borderStyle.rgba = color;
@@ -266,8 +275,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         try
         {
             lineProg.setStyle( gl, borderStyle );
-            int[] s = map.get( nodeId );
-            lineProg.draw( gl, linePath.xyVbo, linePath.flagsVbo, null, s[0], s[1] );
+            lineProg.draw( gl, linePath );
         }
         finally
         {
@@ -278,30 +286,28 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     @Override
     protected void drawLeafBackground( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
     {
-//        flatProg.begin( gl );
-//        try
-//        {
-//            flatProg.setPixelOrtho( gl, layoutBounds );
-//            boolean isLeafSelected = isSelected( axis, nodeBounds );
-//            float[] color = getLeafColor( leafId, isLeafSelected );
-//            flatProg.setColor( gl, color );
-//
-//            flatPath.clear( );
-//            flatPath.addQuad2f( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ), ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
-//            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 4 );
-//        }
-//        finally
-//        {
-//            flatProg.end( gl );
-//        }
+        flatProg.begin( gl );
+        try
+        {
+            boolean isLeafSelected = isSelected( axis, nodeBounds );
+            float[] color = getLeafColor( leafId, isLeafSelected );
+            flatProg.setColor( gl, color );
+
+            flatPath.clear( );
+            flatPath.addQuad2f( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ), ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 6 );
+        }
+        finally
+        {
+            flatProg.end( gl );
+        }
     }
 
     @Override
     protected Rectangle2D drawTitle( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D boundary, int nodeId )
     {
-        if (true) return boundary;
         String title = tree.getTitle( nodeId );
-        if ( title == null )
+        if ( title == null || title.isEmpty( ) || axis.getAxisY( ).getPixelsPerValue( ) * boundary.getHeight( ) < minPixelsBeforeHideText )
         {
             return boundary;
         }
@@ -326,41 +332,45 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             return boundary;
         }
 
-//        flatProg.begin( gl );
-//        try
-//        {
-//            flatProg.setPixelOrtho( gl, layoutBounds );
-//            float[] color = getTitleBackgroundColor( nodeId, selected );
-//            flatProg.setColor( gl, color );
-//
-//            flatPath.clear( );
-//            flatPath.addQuad2f( ( float ) boundary.getMinX( ), ( float ) boundary.getMinY( ), ( float ) boundary.getMaxX( ), ( float ) boundary.getMaxY( ) );
-//            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 4 );
-//        }
-//        finally
-//        {
-//            flatProg.end( gl );
-//        }
-//
-//        // draw title border
-//        lineProg.begin( gl );
-//        try
-//        {
-//            lineProg.setAxisOrtho( gl, axis );
-//            lineProg.setViewport( gl, layoutBounds );
-//
-//            float[] color = getTitleBorderColor( nodeId, selected );
-//            borderStyle.rgba = color;
-//            borderStyle.thickness_PX = 0.5f;
-//
-//            linePath.clear( );
-//            linePath.addRectangle( ( float ) boundary.getMinX( ), ( float ) ( boundary.getMaxY( ) - borderHeight ), ( float ) boundary.getMaxX( ), ( float ) boundary.getMaxY( ) );
-//            lineProg.draw( gl, borderStyle, linePath );
-//        }
-//        finally
-//        {
-//            lineProg.end( gl );
-//        }
+        flatProg.begin( gl );
+        try
+        {
+            float[] color = getTitleBackgroundColor( nodeId, selected );
+            flatProg.setColor( gl, color );
+
+            flatPath.clear( );
+            flatPath.addQuad2f( ( float ) boundary.getMinX( ), ( float ) ( boundary.getMaxY( ) - borderHeight ), ( float ) boundary.getMaxX( ), ( float ) boundary.getMaxY( ) );
+            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 6 );
+        }
+        finally
+        {
+            flatProg.end( gl );
+        }
+
+        // draw title border
+        lineProg.begin( gl );
+        try
+        {
+            lineProg.setAxisOrtho( gl, axis );
+            lineProg.setViewport( gl, layoutBounds );
+
+            float[] color = getTitleBorderColor( nodeId, selected );
+            borderStyle.rgba = color;
+            borderStyle.thickness_PX = 0.5f;
+
+            linePath.map( gl, 7 );
+            linePath.moveTo( ( float ) boundary.getMinX( ), ( float ) boundary.getMaxY( ) );
+            linePath.lineTo( ( float ) boundary.getMinX( ), ( float ) ( boundary.getMaxY( ) - borderHeight ) );
+            linePath.lineTo( ( float ) boundary.getMaxX( ), ( float ) ( boundary.getMaxY( ) - borderHeight ) );
+            linePath.lineTo( ( float ) boundary.getMaxX( ), ( float ) boundary.getMaxY( ) );
+            linePath.closeLoop( );
+            linePath.seal( gl );
+            lineProg.draw( gl, borderStyle, linePath );
+        }
+        finally
+        {
+            lineProg.end( gl );
+        }
 
         int textPosX = axis.getAxisX( ).valueToScreenPixel( boundary.getMinX( ) );
         int textPosY = axis.getAxisY( ).valueToScreenPixel( boundary.getMaxY( ) ) - ( int ) borderHeightPx;
@@ -378,9 +388,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     @Override
     protected void drawLeafInterior( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
     {
-        if (true) return;
         String text = tree.getText( leafId );
-        if ( text == null )
+        if ( text == null || text.isEmpty( ) || axis.getAxisY( ).getPixelsPerValue( ) * nodeBounds.getHeight( ) < minPixelsBeforeHideText )
         {
             return;
         }
