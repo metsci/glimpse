@@ -85,34 +85,34 @@ public class IntRangeSetModifiable implements IntRangeSet
     {
         if ( tolerance > 0 && this.ranges.n >= 4 )
         {
+            // Reuse swapped out array, to avoid allocating a new one
             SortedIntsArray coalesced = this.scratch;
+            coalesced.clear( );
 
+            // Begin a coalesced range, but don't finish it until we see
+            // whether the ranges that follow it can be coalesced with it
+            coalesced.append( this.ranges.v( 0 ) );
+            int pendingEnd = this.ranges.v( 1 );
 
-            int firstStart = this.ranges.v( 0 );
-            int firstEnd = this.ranges.v( 1 );
-
-            coalesced.append( firstStart );
-            int pendingEnd = firstEnd;
             for ( int i = 2; i < this.ranges.n; i += 2 )
             {
+                // If the next range is too far away to coalesce, finish
+                // the current coalesced range and begin a new one
                 int start = this.ranges.v( i + 0 );
-                int end = this.ranges.v( i + 1 );
-
-                // If we can't continue to coalesce, finish the current coalesced range and begin a new one
                 if ( pendingEnd + tolerance < start )
                 {
                     coalesced.append( pendingEnd );
                     coalesced.append( start );
                 }
 
-                pendingEnd = end;
+                pendingEnd = this.ranges.v( i + 1 );
             }
+
+            // Finish the final coalesced range
             coalesced.append( pendingEnd );
 
-
+            // Swap arrays, to avoid allocating a new one on the next coalesce
             this.scratch = this.ranges;
-            this.scratch.clear( );
-
             this.ranges = coalesced;
         }
     }
