@@ -6,12 +6,16 @@ import com.metsci.glimpse.util.primitives.sorted.SortedIntsArray;
 public class IntRangeSetModifiable implements IntRangeSet
 {
 
-    protected final SortedIntsArray ranges;
+    // The coalesce() method is more efficient when it doesn't
+    // have to work in-place, so keep two arrays and swap them
+    protected SortedIntsArray ranges;
+    protected SortedIntsArray scratch;
 
 
     public IntRangeSetModifiable( )
     {
         this.ranges = new SortedIntsArray( );
+        this.scratch = new SortedIntsArray( );
     }
 
     @Override
@@ -79,19 +83,37 @@ public class IntRangeSetModifiable implements IntRangeSet
 
     public void coalesce( int tolerance )
     {
-        if ( tolerance > 0 )
+        if ( tolerance > 0 && this.ranges.n >= 4 )
         {
-            for ( int i = 0; i < this.ranges.n - 2; i += 2 )
-            {
-                int prevEnd = this.ranges.v( i + 1 );
-                int nextStart = this.ranges.v( i + 2 );
+            SortedIntsArray coalesced = this.scratch;
 
-                if ( prevEnd + tolerance >= nextStart )
+
+            int firstStart = this.ranges.v( 0 );
+            int firstEnd = this.ranges.v( 1 );
+
+            coalesced.append( firstStart );
+            int pendingEnd = firstEnd;
+            for ( int i = 2; i < this.ranges.n; i += 2 )
+            {
+                int start = this.ranges.v( i + 0 );
+                int end = this.ranges.v( i + 1 );
+
+                // If we can't continue to coalesce, finish the current coalesced range and begin a new one
+                if ( pendingEnd + tolerance < start )
                 {
-                    // XXX: Not particularly efficient
-                    this.ranges.removeRange( i + 1, i + 3 );
+                    coalesced.append( pendingEnd );
+                    coalesced.append( start );
                 }
+
+                pendingEnd = end;
             }
+            coalesced.append( pendingEnd );
+
+
+            this.scratch = this.ranges;
+            this.scratch.clear( );
+
+            this.ranges = coalesced;
         }
     }
 
