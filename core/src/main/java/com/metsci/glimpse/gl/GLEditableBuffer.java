@@ -80,6 +80,12 @@ public class GLEditableBuffer
         return sliced( this.hBuffer, firstByte, countBytes );
     }
 
+    public void clear( )
+    {
+        this.hBuffer.clear( );
+        this.dirtyRanges.clear( );
+    }
+
     public int deviceBuffer( GL gl )
     {
         if ( this.dBuffer == 0 )
