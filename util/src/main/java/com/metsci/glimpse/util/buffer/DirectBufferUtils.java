@@ -13,6 +13,13 @@ import java.nio.IntBuffer;
 public class DirectBufferUtils
 {
 
+    public static ByteBuffer cleared( ByteBuffer buffer )
+    {
+        ByteBuffer cleared = buffer.duplicate( ).order( buffer.order( ) );
+        cleared.clear( );
+        return cleared;
+    }
+
     public static FloatBuffer readonly( FloatBuffer buffer )
     {
         return buffer.asReadOnlyBuffer( );

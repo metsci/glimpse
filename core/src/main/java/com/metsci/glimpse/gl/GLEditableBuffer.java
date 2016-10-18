@@ -6,13 +6,11 @@ import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
 import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL2ES3.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES3;
 
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSetModifiable;
@@ -24,7 +22,6 @@ public class GLEditableBuffer
     protected ByteBuffer hBuffer;
 
     protected int dBuffer;
-    protected long dPosition;
     protected long dCapacity;
 
     protected final IntRangeSetModifiable dirtyRanges;
@@ -35,7 +32,6 @@ public class GLEditableBuffer
         this.hBuffer = newDirectByteBuffer( capacityBytes );
 
         this.dBuffer = 0;
-        this.dPosition = 0;
         this.dCapacity = 0;
 
         this.dirtyRanges = new IntRangeSetModifiable( );
@@ -84,15 +80,26 @@ public class GLEditableBuffer
         return sliced( this.hBuffer, firstByte, countBytes );
     }
 
-    public int deviceBuffer( GL2ES3 gl )
+    public int deviceBuffer( GL gl )
     {
-        this.dUpdateCapacity( gl );
+        if ( this.dBuffer == 0 )
+        {
+            this.dBuffer = genBuffer( gl );
+        }
+        gl.glBindBuffer( GL_ARRAY_BUFFER, this.dBuffer );
 
-        // glBufferSubData should do some write-combining for us anyway, but it
-        // may help performance to reduce the number of calls to glBufferSubData
+        int hCapacity = this.hBuffer.capacity( );
+        if ( this.dCapacity != hCapacity )
+        {
+            gl.glBufferData( GL_ARRAY_BUFFER, hCapacity, null, GL_DYNAMIC_DRAW );
+            this.dCapacity = hCapacity;
+            this.dirtyRanges.add( 0, this.hBuffer.position( ) );
+        }
+
+        // glBufferSubData should do its own write-combining anyway, but it may
+        // help performance to reduce the number of calls to glBufferSubData
         this.dirtyRanges.coalesce( 1024 );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, this.dBuffer );
         SortedInts ranges = this.dirtyRanges.ranges( );
         for ( int i = 0; i < ranges.n( ); i += 2 )
         {
@@ -104,40 +111,7 @@ public class GLEditableBuffer
 
         this.dirtyRanges.clear( );
 
-        this.dPosition = this.hBuffer.position( );
-
         return this.dBuffer;
-    }
-
-    /**
-     * Make device-buffer capacity match host-buffer capacity.
-     * <p>
-     * If a new device buffer gets created, data will be copied into it from the old device buffer, using
-     * glCopyBufferSubData(). The amount copied will be the smaller of the device-buffer position and the
-     * host-buffer position.
-     */
-    protected void dUpdateCapacity( GL2ES3 gl )
-    {
-        int dNewCapacity = this.hBuffer.capacity( );
-        if ( dNewCapacity != this.dCapacity )
-        {
-            int dNewBuffer = genBuffer( gl );
-
-            // Allocate new space
-            gl.glBindBuffer( GL_COPY_WRITE_BUFFER, dNewBuffer );
-            gl.glBufferData( GL_COPY_WRITE_BUFFER, dNewCapacity, null, GL_STATIC_COPY );
-
-            // Copy data from old to new
-            if ( this.dBuffer != 0 )
-            {
-                this.dPosition = min( this.dPosition, this.hBuffer.position( ) );
-                gl.glBindBuffer( GL_COPY_READ_BUFFER, this.dBuffer );
-                gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, this.dPosition );
-            }
-
-            this.dBuffer = dNewBuffer;
-            this.dCapacity = dNewCapacity;
-        }
     }
 
     public void dispose( GL gl )
