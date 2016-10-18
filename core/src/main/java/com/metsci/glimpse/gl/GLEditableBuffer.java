@@ -27,7 +27,7 @@ public class GLEditableBuffer
     protected final IntRangeSetModifiable dirtyRanges;
 
 
-    public GLEditableBuffer( int capacityBytes, int scratchBlockSizeFactor )
+    public GLEditableBuffer( int capacityBytes )
     {
         this.hBuffer = newDirectByteBuffer( capacityBytes );
 
