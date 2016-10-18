@@ -5,7 +5,7 @@ import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
-import static javax.media.opengl.GL2ES2.*;
+import static javax.media.opengl.GL.*;
 import static javax.media.opengl.GL2ES3.*;
 
 import java.nio.ByteBuffer;
@@ -29,8 +29,6 @@ public class GLEditableBuffer
 
     protected final IntRangeSetModifiable dirtyRanges;
 
-    protected final GLStreamingBuffer dScratch;
-
 
     public GLEditableBuffer( int capacityBytes, int scratchBlockSizeFactor )
     {
@@ -41,8 +39,6 @@ public class GLEditableBuffer
         this.dCapacity = 0;
 
         this.dirtyRanges = new IntRangeSetModifiable( );
-
-        this.dScratch = new GLStreamingBuffer( GL_STREAM_DRAW, scratchBlockSizeFactor );
     }
 
     public int sizeBytes( )
@@ -92,24 +88,18 @@ public class GLEditableBuffer
     {
         this.dUpdateCapacity( gl );
 
-        // XXX: Higher tolerance might be better
+        // glBufferSubData should do some write-combining for us anyway, but it
+        // may help performance to reduce the number of calls to glBufferSubData
         this.dirtyRanges.coalesce( 1024 );
 
+        gl.glBindBuffer( GL_ARRAY_BUFFER, this.dBuffer );
         SortedInts ranges = this.dirtyRanges.ranges( );
         for ( int i = 0; i < ranges.n( ); i += 2 )
         {
-            int rangeStart = ranges.v( i + 0 );
-            int rangeEnd = ranges.v( i + 1 );
-            ByteBuffer hRange = sliced( this.hBuffer, rangeStart, rangeEnd - rangeStart );
-
-            // XXX: Might get better performance by writing all ranges to one big mapped region of dScratch
-            ByteBuffer dRangeScratch = this.dScratch.mapBytes( gl, rangeEnd - rangeStart );
-            dRangeScratch.put( hRange );
-            this.dScratch.seal( gl );
-
-            gl.glBindBuffer( GL_COPY_READ_BUFFER, this.dScratch.buffer( gl ) );
-            gl.glBindBuffer( GL_COPY_WRITE_BUFFER, this.dBuffer );
-            gl.glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, this.dScratch.sealedOffset( ), rangeStart, rangeEnd - rangeStart );
+            int first = ranges.v( i + 0 );
+            int count = ranges.v( i + 1 ) - first;
+            ByteBuffer hRange = sliced( this.hBuffer, first, count );
+            gl.glBufferSubData( GL_ARRAY_BUFFER, first, count, hRange );
         }
 
         this.dirtyRanges.clear( );
