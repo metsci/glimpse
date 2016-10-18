@@ -45,7 +45,6 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.track.LineStripTrackPainter;
 import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.Pulsator;
 import com.metsci.glimpse.painter.track.TrackPainter;
@@ -130,7 +129,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
 
         // create a new TrackPainter which will be used to highlight the point closest to the cursor
-        final LineStripTrackPainter selectionDotPainter = new LineStripTrackPainter( false );
+        final TrackPainter selectionDotPainter = new TrackPainter( false );
         plot.addPainter( selectionDotPainter );
         selectionDotPainter.setShowPoints( 0, true );
         selectionDotPainter.setPointSize( 0, 10f );
@@ -358,7 +357,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
 
                         LineStyle style = new LineStyle( );
                         style.thickness_PX = 5f;
-                        style.stippleEnable = true;
+                        style.stippleEnable = false;
                         style.stippleScale = 5.0f;
                         trackPainter.setLineStyle( i, style );
 
@@ -370,8 +369,9 @@ public class TrackPainterExample implements GlimpseLayoutProvider
                         trackPainter.setShowLabel( i, false );
                         trackPainter.setShowLabelLine( i, false );
 
-                        //trackPainter.setHeadPointSize( i, 10.0f );
-                        //trackPainter.setShowHeadPoint( i, true );
+                        trackPainter.setHeadPointSize( i, ( float ) Math.random( ) * 10.0f );
+                        trackPainter.setHeadPointColor( i, new float[] { r, g, b, 1.0f } );
+                        trackPainter.setShowHeadPoint( i, true );
                     }
                 }
 

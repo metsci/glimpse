@@ -15,12 +15,12 @@ import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
- * Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.
+ * Draws 2D point with feathered edges, and a color and size specified per point.
  */
-public class PointArrayColorProgram
+public class PointArrayColorSizeProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.fs" );
+    public static final String vertShader_GLSL = requireResourceText( "shaders/point/point_array_color_size/point.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/point/point_array_color_size/point.fs" );
 
     public static class ProgramHandles
     {
@@ -29,33 +29,32 @@ public class PointArrayColorProgram
         // Uniforms
 
         public final int AXIS_RECT;
-        public final int POINT_SIZE_PX;
         public final int FEATHER_THICKNESS_PX;
 
         // Vertex attributes
 
         public final int inXy;
         public final int inRgba;
+        public final int inSize;
 
         public ProgramHandles( GL2ES2 gl )
         {
             this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
 
             this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
-            this.POINT_SIZE_PX = gl.glGetUniformLocation( this.program, "POINT_SIZE_PX" );
             this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( this.program, "FEATHER_THICKNESS_PX" );
 
             gl.glUniform1f( this.FEATHER_THICKNESS_PX, 2.0f );
-            gl.glUniform1f( this.POINT_SIZE_PX, 3.0f );
 
             this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
             this.inRgba = gl.glGetAttribLocation( this.program, "inRgba" );
+            this.inSize = gl.glGetAttribLocation( this.program, "inSize" );
         }
     }
 
     protected ProgramHandles handles;
 
-    public PointArrayColorProgram( )
+    public PointArrayColorSizeProgram( )
     {
         this.handles = null;
     }
@@ -81,6 +80,7 @@ public class PointArrayColorProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inRgba );
+        gl.glEnableVertexAttribArray( this.handles.inSize );
 
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
         //XXX this appears to be necessary for gl_PointCoord be set with proper values in the fragment shader
@@ -91,11 +91,6 @@ public class PointArrayColorProgram
     public void setFeatherThickness( GL2ES2 gl, float value )
     {
         gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, value );
-    }
-
-    public void setPointSize( GL2ES2 gl, float value )
-    {
-        gl.glUniform1f( this.handles.POINT_SIZE_PX, value );
     }
 
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
@@ -113,12 +108,12 @@ public class PointArrayColorProgram
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, GLStreamingBuffer sizeVbo, int first, int count )
     {
-        draw( gl, GL.GL_POINTS, xyVbo, rgbaVbo, first, count );
+        draw( gl, GL.GL_POINTS, xyVbo, rgbaVbo, sizeVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, GLStreamingBuffer sizeVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
@@ -126,10 +121,13 @@ public class PointArrayColorProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sizeVbo.buffer( gl ) );
+        gl.glVertexAttribPointer( this.handles.inSize, 1, GL_FLOAT, false, 0, sizeVbo.sealedOffset( ) );
+
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, int xyVbo, int rgbaVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, int xyVbo, int rgbaVbo, int sizeVbo, int first, int count )
     {
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
@@ -137,12 +135,15 @@ public class PointArrayColorProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo );
         gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, 0 );
 
+        gl.glBindBuffer( GL_ARRAY_BUFFER, sizeVbo );
+        gl.glVertexAttribPointer( this.handles.inSize, 1, GL_FLOAT, false, 0, 0 );
+
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba )
+    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba, GLStreamingBufferBuilder size )
     {
-        draw( gl, GL_POINTS, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
+        draw( gl, GL_POINTS, xy.getBuffer( gl ), rgba.getBuffer( gl ), size.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )
@@ -150,6 +151,7 @@ public class PointArrayColorProgram
         gl.getGL3( ).glBindVertexArray( 0 );
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inRgba );
+        gl.glDisableVertexAttribArray( this.handles.inSize );
         gl.glUseProgram( 0 );
 
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
