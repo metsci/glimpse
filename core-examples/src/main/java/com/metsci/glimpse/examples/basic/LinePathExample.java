@@ -1,60 +1,63 @@
 package com.metsci.glimpse.examples.basic;
 
 import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.support.FrameUtils.*;
 import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
 import static com.metsci.glimpse.support.shader.line.LineUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static java.lang.System.*;
+import static javax.media.opengl.GLProfile.*;
+import static javax.swing.WindowConstants.*;
 
 import java.util.Random;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
+import javax.media.opengl.GLAnimatorControl;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.CrosshairPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
+import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-public class LinePathExample implements GlimpseLayoutProvider
+public class LinePathExample
 {
 
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new LinePathExample( ) );
-        //        final EmptyPlot2D plot = new EmptyPlot2D( );
-        //        plot.addPainter( new BackgroundPainter( ) );
-        //        plot.addPainter( new CustomLinesPainter( ) );
-        //
-        //        SwingUtilities.invokeLater( new Runnable( )
-        //        {
-        //            public void run( )
-        //            {
-        //                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GL3 );
-        //                canvas.addLayout( plot );
-        //                canvas.setLookAndFeel( new SwingLookAndFeel( ) );
-        //
-        //                GLAnimatorControl animator = new SwingEDTAnimator( 30 );
-        //                animator.add( canvas.getGLDrawable( ) );
-        //                animator.start( );
-        //
-        //                JFrame frame = newFrame( "LinePathExample", canvas, DISPOSE_ON_CLOSE );
-        //                stopOnWindowClosing( frame, animator );
-        //                disposeOnWindowClosing( frame, canvas );
-        //                showFrameCentered( frame );
-        //            }
-        //        } );
+        final EmptyPlot2D plot = new EmptyPlot2D( );
+        plot.addPainter( new BackgroundPainter( ) );
+        plot.addPainter( new CustomLinesPainter( ) );
+
+        SwingUtilities.invokeLater( new Runnable( )
+        {
+            @Override
+            public void run( )
+            {
+                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GL3 );
+                canvas.addLayout( plot );
+                canvas.setLookAndFeel( new SwingLookAndFeel( ) );
+
+                GLAnimatorControl animator = new SwingEDTAnimator( 30 );
+                animator.add( canvas.getGLDrawable( ) );
+                animator.start( );
+
+                JFrame frame = newFrame( "LinePathExample", canvas, DISPOSE_ON_CLOSE );
+                stopOnWindowClosing( frame, animator );
+                disposeOnWindowClosing( frame, canvas );
+                showFrameCentered( frame );
+            }
+        } );
     }
 
     public static class CustomLinesPainter extends GlimpsePainterBase
@@ -159,18 +162,4 @@ public class LinePathExample implements GlimpseLayoutProvider
             this.prog.dispose( gl );
         }
     }
-
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
-        final EmptyPlot2D plot = new EmptyPlot2D( );
-        plot.addPainter( new BackgroundPainter( ) );
-        plot.addPainter( new CrosshairPainter( ) );
-        plot.addPainter( new GridPainter( ) );
-        plot.addPainter( new NumericXYAxisPainter( ) );
-        plot.addPainter( new CustomLinesPainter( ) );
-
-        return plot;
-    }
-
 }
