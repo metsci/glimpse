@@ -153,8 +153,8 @@ public class IconPainterExample implements GlimpseLayoutProvider
 
         // add painters to the layout
         layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getGray( ) ) );
-        layout.addPainter( new NumericXYAxisPainter( ) );
         layout.addPainter( iconPainter );
+        layout.addPainter( new NumericXYAxisPainter( ) );
         layout.addPainter( new FpsPainter( ) );
 
         return layout;

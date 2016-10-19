@@ -581,35 +581,39 @@ public class IconPainter extends GlimpsePainterBase
             if ( groups.isEmpty( ) ) continue;
 
             atlas.beginRendering( context );
-            atlas.endRendering( context );
-
-            // draw each icon group, if it is visible
-            for ( IconGroup group : groups )
+            try
             {
-                // add any icons waiting to be added to the group
-                // we do this here because texture coordinates might not
-                // be known until the atlas.beginRendering( ) call
-                group.addQueuedIcons( );
-
-                this.shader.setTexCoordData( group.getBufferTexCoords( ) );
-                this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
-                this.shader.setColorCoordData( group.getPickColorCoords( ) );
-                this.shader.setVertexData( group.getBufferIconPlacement( ) );
-
-                atlas.beginRendering( context );
-                this.shader.useProgram( gl, true );
-                try
+                // draw each icon group, if it is visible
+                for ( IconGroup group : groups )
                 {
+                    // add any icons waiting to be added to the group
+                    // we do this here because texture coordinates might not
+                    // be known until the atlas.beginRendering( ) call
+                    group.addQueuedIcons( );
+
+                    this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                    this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                    this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                    this.shader.setVertexData( group.getBufferIconPlacement( ) );
+
                     if ( !group.isVisible( ) || group.getCurrentSize( ) == 0 ) continue;
 
-                    gl.glDrawArrays( GL3.GL_POINTS, 0, group.getCurrentSize( ) );
+                    this.shader.useProgram( gl, true );
+                    try
+                    {
+                        gl.glDrawArrays( GL3.GL_POINTS, 0, group.getCurrentSize( ) );
+                    }
+                    finally
+                    {
+                        this.shader.useProgram( gl, false );
+                    }
+
                     GLErrorUtils.logGLError( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
                 }
-                finally
-                {
-                    this.shader.useProgram( gl, false );
-                    atlas.endRendering( context );
-                }
+            }
+            finally
+            {
+                atlas.endRendering( context );
             }
         }
     }
@@ -632,7 +636,6 @@ public class IconPainter extends GlimpsePainterBase
         this.setPickProjectionMatrix( bounds, axis, this.pickMouseEvent.getX( ), bounds.getHeight( ) - this.pickMouseEvent.getY( ) );
 
         this.pickFrameBuffer.bind( glContext );
-        this.shader.useProgram( gl, true );
         try
         {
             for ( Map.Entry<TextureAtlas, Set<IconGroup>> entry : this.iconGroupsByAtlas.entrySet( ) )
@@ -641,37 +644,42 @@ public class IconPainter extends GlimpsePainterBase
                 Set<IconGroup> groups = entry.getValue( );
                 if ( groups.isEmpty( ) ) continue;
 
-                // draw each icon group, if it is visible
-                for ( IconGroup group : groups )
+                atlas.beginRendering( context );
+                try
                 {
-                    if ( !group.isVisible( ) ) continue;
-
-                    this.shader.setTexCoordData( group.getBufferTexCoords( ) );
-                    this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
-                    this.shader.setColorCoordData( group.getPickColorCoords( ) );
-                    this.shader.setVertexData( group.getBufferIconPlacement( ) );
-
-                    resetPickFrameBuffer( glContext );
-
-                    atlas.beginRendering( context );
-                    this.shader.useProgram( gl, true );
-                    try
+                    // draw each icon group, if it is visible
+                    for ( IconGroup group : groups )
                     {
-                        gl.glDrawArrays( GL3.GL_POINTS, 0, group.getCurrentSize( ) );
-                    }
-                    finally
-                    {
-                        this.shader.useProgram( gl, false );
-                        atlas.endRendering( context );
-                    }
+                        if ( !group.isVisible( ) ) continue;
 
-                    checkPickFrameBuffer( context, group, pickedIcons );
+                        this.shader.setTexCoordData( group.getBufferTexCoords( ) );
+                        this.shader.setPixelCoordData( group.getBufferPixelCoords( ) );
+                        this.shader.setColorCoordData( group.getPickColorCoords( ) );
+                        this.shader.setVertexData( group.getBufferIconPlacement( ) );
+
+                        resetPickFrameBuffer( glContext );
+
+                        this.shader.useProgram( gl, true );
+                        try
+                        {
+                            gl.glDrawArrays( GL3.GL_POINTS, 0, group.getCurrentSize( ) );
+                        }
+                        finally
+                        {
+                            this.shader.useProgram( gl, false );
+                        }
+
+                        checkPickFrameBuffer( context, group, pickedIcons );
+                    }
+                }
+                finally
+                {
+                    atlas.endRendering( context );
                 }
             }
         }
         finally
         {
-            this.shader.useProgram( gl, false );
             this.pickFrameBuffer.unbind( glContext );
         }
 
