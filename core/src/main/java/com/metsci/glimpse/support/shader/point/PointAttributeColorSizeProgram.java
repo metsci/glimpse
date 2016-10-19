@@ -32,7 +32,6 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLES1;
 import javax.media.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
@@ -97,11 +96,11 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         this.constantSize = this.addUniformData( new GLUniformData( "constant_size", 1 ) );
         this.constantColor = this.addUniformData( new GLUniformData( "constant_color", 1 ) );
 
-        this.size = this.addUniformData( new GLUniformData( "size", 1.0f ) );
+        this.size = this.addUniformData( new GLUniformData( "size", 3.0f ) );
         this.color = this.addUniformData( GLUniformData.creatEmptyVector( "color", 4 ) );
         this.color.setData( FloatBuffer.wrap( GlimpseColor.getBlack( ) ) );
 
-        this.FEATHER_THICKNESS_PX = this.addUniformData( new GLUniformData( "FEATHER_THICKNESS_PX", 4f ) );
+        this.FEATHER_THICKNESS_PX = this.addUniformData( new GLUniformData( "FEATHER_THICKNESS_PX", 0.8f ) );
 
         this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
 
@@ -138,14 +137,10 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         if ( on )
         {
             gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-            //XXX this appears to be necessary for gl_PointCoord be set with proper values in the fragment shader
-            //XXX however I don't believe setting it should be necessary (it's deprecated in GL3)
-            gl.glEnable( GLES1.GL_POINT_SPRITE );
         }
         else
         {
             gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-            gl.glDisable( GLES1.GL_POINT_SPRITE );
         }
     }
 

@@ -187,7 +187,7 @@ public class GLUtils
 
     public static GLProfile getDefaultGLProfile( )
     {
-        return GLProfile.getMaxFixedFunc( true );//GLProfile.get( GLProfile.GL3 );
+        return GLProfile.get( GLProfile.GL3 );
     }
 
     public static String profileNameOf( GLContext context )

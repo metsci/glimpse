@@ -6,7 +6,6 @@ import static javax.media.opengl.GL.*;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLES1;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -44,11 +43,13 @@ public class PointArrayColorSizeProgram
             this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
             this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( this.program, "FEATHER_THICKNESS_PX" );
 
-            gl.glUniform1f( this.FEATHER_THICKNESS_PX, 2.0f );
-
             this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
             this.inRgba = gl.glGetAttribLocation( this.program, "inRgba" );
             this.inSize = gl.glGetAttribLocation( this.program, "inSize" );
+
+            // set defaults
+            gl.glUseProgram( this.program );
+            gl.glUniform1f( this.FEATHER_THICKNESS_PX, 0.8f );
         }
     }
 
@@ -83,9 +84,6 @@ public class PointArrayColorSizeProgram
         gl.glEnableVertexAttribArray( this.handles.inSize );
 
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-        //XXX this appears to be necessary for gl_PointCoord be set with proper values in the fragment shader
-        //XXX however I don't believe setting it should be necessary (it's deprecated in GL3)
-        gl.glEnable( GLES1.GL_POINT_SPRITE );
     }
 
     public void setFeatherThickness( GL2ES2 gl, float value )
@@ -155,7 +153,6 @@ public class PointArrayColorSizeProgram
         gl.glUseProgram( 0 );
 
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-        gl.glDisable( GLES1.GL_POINT_SPRITE );
     }
 
     public void dispose( GL2ES2 gl )

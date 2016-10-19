@@ -1,8 +1,7 @@
 PolygonPainter polygon stippling
 BorderPainter doesn't handle thick lines / mitering correctly, also doesn't work correctly when some border lines are hidden (with thick lines)
-TrackPainter is slow
-TreeMap
 In LineProgram (and probably others):
  This call generates an (1282): invalid operation GL Error when using a GL3 profile (but not with the compatibility profile)
  gl.glVertexAttribPointer( this.handles.inXy, 2, GL.GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 TextureAtlas/TextureRenderer doesn't work in GL3 profile (needs same treatment that TextRenderer got)
+ScatterplotExample doesn't display anything
