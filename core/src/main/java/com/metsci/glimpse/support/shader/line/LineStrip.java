@@ -40,6 +40,8 @@ public class LineStrip
 
     protected int logicalSize;
 
+    protected double mileagePpvAspectRatio;
+
     public LineStrip( int logicalCapacity )
     {
         int actualCapacity = logicalToActualSize( logicalCapacity );
@@ -48,6 +50,8 @@ public class LineStrip
         this.mileageBuffer = new GLEditableBuffer( 1 * actualCapacity * SIZEOF_FLOAT );
 
         this.logicalSize = 0;
+
+        this.mileagePpvAspectRatio = Double.NaN;
     }
 
     public int logicalSize( )
@@ -84,6 +88,11 @@ public class LineStrip
     }
 
     public LineBufferHandles deviceBuffers( GL2ES3 gl, boolean needMileage, double ppvAspectRatio )
+    {
+        return deviceBuffers( gl, needMileage, ppvAspectRatio, 1.0000000001 );
+    }
+
+    public LineBufferHandles deviceBuffers( GL2ES3 gl, boolean needMileage, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
     {
         FloatBuffer xyRead = this.xyBuffer.hostFloats( );
         IntRangeSet xyDirtyByteSet = this.xyBuffer.dirtyByteRanges( );
@@ -153,16 +162,28 @@ public class LineStrip
             }
         }
 
-        // Update mileage
-        if ( needMileage && !xyDirtyByteRanges.isEmpty( ) )
-        {
-            // XXX: Recompute all mileages if ppvAspectRatio has changed noticeably
+        boolean keepPpvAspectRatio = ( mileagePpvAspectRatio / ppvAspectRatioChangeThreshold <= ppvAspectRatio && ppvAspectRatio <= mileagePpvAspectRatio * ppvAspectRatioChangeThreshold );
 
-            // Include the previous mileage so that updateMileage() can read it,
-            // but position after it so that updateMileage() doesn't write it
-            int dirtyFirst = xyDirtyByteRanges.first( ) / ( 2 * SIZEOF_FLOAT );
-            int editFirst = max( 0, dirtyFirst - 1 );
+        // Update mileage
+        if ( needMileage && ( !xyDirtyByteRanges.isEmpty( ) || !keepPpvAspectRatio ) )
+        {
+            int editFirst, dirtyFirst;
+            if ( keepPpvAspectRatio )
+            {
+                // Include the previous mileage so that updateMileage() can read it,
+                // but position after it so that updateMileage() doesn't write it
+                dirtyFirst = xyDirtyByteRanges.first( ) / ( 2 * SIZEOF_FLOAT );
+                editFirst = max( 0, dirtyFirst - 1 );
+            }
+            else
+            {
+                dirtyFirst = 0;
+                editFirst = 0;
+                this.mileagePpvAspectRatio = ppvAspectRatio;
+            }
+
             int editCount = this.actualSize( ) - editFirst;
+
             FloatBuffer mileageEdit = this.mileageBuffer.editFloats( editFirst, editCount );
             mileageEdit.position( dirtyFirst - editFirst );
 
