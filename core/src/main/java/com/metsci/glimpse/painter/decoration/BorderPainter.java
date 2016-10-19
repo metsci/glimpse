@@ -30,14 +30,12 @@ import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.metsci.glimpse.support.shader.line.LineJoinType;
-import com.metsci.glimpse.support.shader.line.LinePath;
-import com.metsci.glimpse.support.shader.line.LineProgram;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * Paints a simple solid color line border around the outside
@@ -54,24 +52,17 @@ public class BorderPainter extends GlimpsePainterBase
     protected boolean drawRight = true;
     protected boolean drawLeft = true;
 
-    protected LineProgram prog;
-    protected LineStyle style;
-    protected LinePath path;
+    protected FlatColorProgram prog;
+    protected GLStreamingBufferBuilder builder;
+
+    protected float[] rgba;
+    protected float thickness;
+    protected boolean stippleEnable;
 
     public BorderPainter( )
     {
-        this.prog = new LineProgram( );
-
-        this.style = new LineStyle( );
-        this.style.joinType = LineJoinType.JOIN_MITER;
-        this.style.feather_PX = 0;
-        this.style.stippleEnable = false;
-        this.style.thickness_PX = 1.0f;
-        this.style.stipplePattern = ( short ) 0x00FF;
-        this.style.stippleScale = 1;
-        this.style.rgba = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
-
-        this.path = new LinePath( );
+        this.prog = new FlatColorProgram( );
+        this.builder = new GLStreamingBufferBuilder( );
     }
 
     public BorderPainter setDrawTop( boolean draw )
@@ -100,36 +91,36 @@ public class BorderPainter extends GlimpsePainterBase
 
     public BorderPainter setDotted( boolean dotted )
     {
-        this.style.stippleEnable = dotted;
+        this.stippleEnable = dotted;
         return this;
     }
 
     public BorderPainter setLineWidth( float lineWidth )
     {
-        this.style.thickness_PX = lineWidth;
+        this.thickness = lineWidth;
         return this;
     }
 
     public BorderPainter setColor( float[] rgba )
     {
-        this.style.rgba = rgba;
+        this.rgba = rgba;
         this.colorSet = true;
         return this;
     }
 
     public BorderPainter setColor( float r, float g, float b, float a )
     {
-        this.style.rgba[0] = r;
-        this.style.rgba[1] = g;
-        this.style.rgba[2] = b;
-        this.style.rgba[3] = a;
+        this.rgba[0] = r;
+        this.rgba[1] = g;
+        this.rgba[2] = b;
+        this.rgba[3] = a;
         this.colorSet = true;
         return this;
     }
 
     protected BorderPainter setColor0( float[] rgba )
     {
-        this.style.rgba = rgba;
+        this.rgba = rgba;
         return this;
     }
 
@@ -150,47 +141,71 @@ public class BorderPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
 
-        float inset_PX = 0.5f * style.thickness_PX;
-
-        float x = inset_PX;
-        float y = inset_PX;
-        float width = bounds.getWidth( ) - 2 * inset_PX;
-        float height = bounds.getHeight( ) - 2 * inset_PX;
+        float inset_PX = 0.5f * thickness;
+        float width = bounds.getWidth( );
+        float height = bounds.getHeight( );
 
         GLUtils.enableStandardBlending( gl );
         prog.begin( gl );
         try
         {
             prog.setPixelOrtho( gl, bounds );
-            prog.setViewport( gl, bounds );
 
-            path.clear( );
+            builder.clear( );
 
             if ( drawBottom )
             {
-                path.moveTo( x, y );
-                path.lineTo( x + width, y );
-            }
+                // upper quad
+                builder.addVertex2f( 0, 0 );
+                builder.addVertex2f( drawLeft ? inset_PX : 0, inset_PX );
+                builder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
 
-            if ( drawRight )
-            {
-                path.moveTo( x + width, y );
-                path.lineTo( x + width, y + height );
-            }
-
-            if ( drawTop )
-            {
-                path.moveTo( x + width, y + height );
-                path.lineTo( x, y + height );
+                // lower quad
+                builder.addVertex2f( 0, 0 );
+                builder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
+                builder.addVertex2f( width, 0 );
             }
 
             if ( drawLeft )
             {
-                path.moveTo( x, y + height );
-                path.lineTo( x, y );
+                // upper quad
+                builder.addVertex2f( 0, 0 );
+                builder.addVertex2f( 0, height );
+                builder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+
+                // lower quad
+                builder.addVertex2f( 0, 0 );
+                builder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+                builder.addVertex2f( inset_PX, drawBottom ? inset_PX : 0 );
             }
 
-            prog.draw( gl, style, path );
+            if ( drawTop )
+            {
+                // upper quad
+                builder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                builder.addVertex2f( 0, height );
+                builder.addVertex2f( width, height );
+
+                // lower quad
+                builder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                builder.addVertex2f( width, height );
+                builder.addVertex2f( drawRight ? width - inset_PX : width, height - inset_PX );
+            }
+
+            if ( drawRight )
+            {
+                // upper quad
+                builder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                builder.addVertex2f( width - inset_PX, drawTop ? height - inset_PX : height );
+                builder.addVertex2f( width, height );
+
+                // lower quad
+                builder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                builder.addVertex2f( width, height );
+                builder.addVertex2f( width, 0 );
+            }
+
+            prog.draw( gl, builder, rgba );
 
         }
         finally
@@ -204,6 +219,6 @@ public class BorderPainter extends GlimpsePainterBase
     protected void doDispose( GlimpseContext context )
     {
         prog.dispose( context.getGL( ).getGL3( ) );
-        path.dispose( context.getGL( ) );
+        builder.dispose( context.getGL( ) );
     }
 }
