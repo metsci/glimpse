@@ -47,7 +47,6 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
-import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * A shader which colors a 2D data texture using values sampled from a color
@@ -201,13 +200,11 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
 
         if ( on )
         {
-            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl3.glEnableVertexAttribArray( this.handles.inXy );
             gl3.glEnableVertexAttribArray( this.handles.inS );
         }
         else
         {
-            gl.getGL3( ).glBindVertexArray( 0 );
             gl3.glDisableVertexAttribArray( this.handles.inXy );
             gl3.glDisableVertexAttribArray( this.handles.inS );
         }

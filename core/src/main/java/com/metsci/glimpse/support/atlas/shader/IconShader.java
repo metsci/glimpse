@@ -12,7 +12,6 @@ import com.jogamp.opengl.util.GLArrayDataServer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
-import com.metsci.glimpse.gl.util.GLUtils;
 
 public class IconShader extends GlimpseShaderProgram
 {
@@ -134,15 +133,5 @@ public class IconShader extends GlimpseShaderProgram
     public void useProgram( GL gl, boolean on )
     {
         super.useProgram( gl, on );
-
-        if ( on )
-        {
-            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
-        }
-        else
-        {
-            gl.getGL3( ).glBindVertexArray( 0 );
-        }
     }
-
 }

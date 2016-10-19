@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.icon;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.Collection;
 import java.util.logging.Logger;

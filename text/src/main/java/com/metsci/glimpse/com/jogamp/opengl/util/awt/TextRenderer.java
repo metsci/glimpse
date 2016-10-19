@@ -929,7 +929,7 @@ public final class TextRenderer
      * <em>Proxy</em> for a {@link GlyphRenderer}.
      */
     /*@NotThreadSafe*/
-    private static final class GlyphRendererProxy implements GlyphRenderer
+    protected static final class GlyphRendererProxy implements GlyphRenderer
     {
 
         /**
