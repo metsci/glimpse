@@ -39,7 +39,7 @@ import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
-import com.metsci.glimpse.painter.track.LineStripTrackPainter;
+import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -57,7 +57,7 @@ public class MouseDrawingExample implements GlimpseLayoutProvider
         Example.showWithSwing( new MouseDrawingExample( ) );
     }
 
-    protected LineStripTrackPainter painter;
+    protected TrackPainter painter;
 
     @Override
     public GlimpseLayout getLayout( ) throws Exception
@@ -83,7 +83,7 @@ public class MouseDrawingExample implements GlimpseLayoutProvider
         plot.getCrosshairPainter( ).setVisible( false );
 
         // create a painter to draw lines and dots
-        painter = new LineStripTrackPainter( );
+        painter = new TrackPainter( );
         plot.addPainter( painter );
 
         // setup "track" 1, a track is simply a logical set of vertices which are

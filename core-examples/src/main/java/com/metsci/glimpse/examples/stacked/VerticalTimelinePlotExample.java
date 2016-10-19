@@ -32,7 +32,7 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.painter.track.LineStripTrackPainter;
+import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
@@ -84,7 +84,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     }
 
     @Override
-    protected void addData( LineStripTrackPainter painter, Epoch epoch, double data, TimeStamp time )
+    protected void addData( TrackPainter painter, Epoch epoch, double data, TimeStamp time )
     {
         painter.addPoint( 1, 0, data, epoch.fromTimeStamp( time ), time.toPosixMillis( ) );
     }

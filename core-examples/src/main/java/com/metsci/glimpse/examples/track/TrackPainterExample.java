@@ -94,6 +94,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
         plot.setMinZ( 0.0 );
         plot.setMaxZ( 1000.0 );
         plot.setAxisSizeZ( 65 );
+        plot.getAxisZ( ).setSelectionCenter( 1000.0 );
 
         plot.getAxisX( ).setSelectionCenter( 10 );
         plot.getAxisY( ).setSelectionCenter( 10 );
@@ -341,6 +342,8 @@ public class TrackPainterExample implements GlimpseLayoutProvider
             {
                 time = time + 1;
 
+                if ( time > 1000 ) return;
+
                 if ( tracks.size( ) < numberOfTracks )
                 {
                     for ( int j = 0; j < 20; j++ )
@@ -357,7 +360,7 @@ public class TrackPainterExample implements GlimpseLayoutProvider
 
                         LineStyle style = new LineStyle( );
                         style.thickness_PX = 5f;
-                        style.stippleEnable = false;
+                        style.stippleEnable = true;
                         style.stippleScale = 5.0f;
                         trackPainter.setLineStyle( i, style );
 
