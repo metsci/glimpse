@@ -33,13 +33,13 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
-import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
+import com.metsci.glimpse.support.shader.triangle.FlatColorStippleProgram;
 
 /**
- * Paints a simple solid color line border around the outside
- * of the plot.
+ * Paints a simple colored line border around the outside of the plot.
  *
  * @author ulman
  */
@@ -52,17 +52,36 @@ public class BorderPainter extends GlimpsePainterBase
     protected boolean drawRight = true;
     protected boolean drawLeft = true;
 
-    protected FlatColorProgram prog;
-    protected GLStreamingBufferBuilder builder;
+    protected FlatColorStippleProgram prog;
+    protected GLStreamingBufferBuilder xyBuilder;
+    protected GLStreamingBufferBuilder mileageBuilder;
 
-    protected float[] rgba;
-    protected float thickness;
-    protected boolean stippleEnable;
+    protected float[] rgba = GlimpseColor.getBlack( );
+    protected float thickness = 1.0f;
+    protected boolean stippleEnable = false;
+    protected float stippleFactor = 1.0f;
+    protected short stipplePattern = 0x0F0F;
+
+    protected CornerType cornerType = CornerType.FLAT;
+
+    public static enum CornerType
+    {
+        FLAT,
+        SLANTED;
+    }
 
     public BorderPainter( )
     {
-        this.prog = new FlatColorProgram( );
-        this.builder = new GLStreamingBufferBuilder( );
+        this.prog = new FlatColorStippleProgram( );
+        this.xyBuilder = new GLStreamingBufferBuilder( );
+        this.mileageBuilder = new GLStreamingBufferBuilder( );
+
+    }
+
+    public BorderPainter setCornerType( CornerType cornerType )
+    {
+        this.cornerType = cornerType;
+        return this;
     }
 
     public BorderPainter setDrawTop( boolean draw )
@@ -86,6 +105,14 @@ public class BorderPainter extends GlimpsePainterBase
     public BorderPainter setDrawRight( boolean draw )
     {
         this.drawRight = draw;
+        return this;
+    }
+
+    public BorderPainter setStipple( boolean enable, float factor, short pattern )
+    {
+        this.stippleEnable = enable;
+        this.stippleFactor = factor;
+        this.stipplePattern = pattern;
         return this;
     }
 
@@ -135,13 +162,12 @@ public class BorderPainter extends GlimpsePainterBase
         }
     }
 
-    @Override
-    protected void doPaintTo( GlimpseContext context )
+    protected void drawSlantedCorners( GlimpseContext context )
     {
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
 
-        float inset_PX = 0.5f * thickness;
+        float inset_PX = thickness;
         float width = bounds.getWidth( );
         float height = bounds.getHeight( );
 
@@ -150,62 +176,229 @@ public class BorderPainter extends GlimpsePainterBase
         try
         {
             prog.setPixelOrtho( gl, bounds );
+            prog.setColor( gl, rgba );
+            prog.setStipple( gl, stippleEnable, stippleFactor, stipplePattern );
 
-            builder.clear( );
+            xyBuilder.clear( );
+            mileageBuilder.clear( );
+
+            float mileage = 0;
 
             if ( drawBottom )
             {
                 // upper quad
-                builder.addVertex2f( 0, 0 );
-                builder.addVertex2f( drawLeft ? inset_PX : 0, inset_PX );
-                builder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
+                xyBuilder.addVertex2f( 0, 0 );
+                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, inset_PX );
+                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
+
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawLeft ? mileage + inset_PX : mileage );
+                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
 
                 // lower quad
-                builder.addVertex2f( 0, 0 );
-                builder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
-                builder.addVertex2f( width, 0 );
-            }
+                xyBuilder.addVertex2f( 0, 0 );
+                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
+                xyBuilder.addVertex2f( width, 0 );
 
-            if ( drawLeft )
-            {
-                // upper quad
-                builder.addVertex2f( 0, 0 );
-                builder.addVertex2f( 0, height );
-                builder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( width );
 
-                // lower quad
-                builder.addVertex2f( 0, 0 );
-                builder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
-                builder.addVertex2f( inset_PX, drawBottom ? inset_PX : 0 );
-            }
-
-            if ( drawTop )
-            {
-                // upper quad
-                builder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
-                builder.addVertex2f( 0, height );
-                builder.addVertex2f( width, height );
-
-                // lower quad
-                builder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
-                builder.addVertex2f( width, height );
-                builder.addVertex2f( drawRight ? width - inset_PX : width, height - inset_PX );
+                mileage += width;
             }
 
             if ( drawRight )
             {
                 // upper quad
-                builder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                builder.addVertex2f( width - inset_PX, drawTop ? height - inset_PX : height );
-                builder.addVertex2f( width, height );
+                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuilder.addVertex2f( width - inset_PX, drawTop ? height - inset_PX : height );
+                xyBuilder.addVertex2f( width, height );
+
+                mileageBuilder.addVertex1f( drawBottom ? mileage + inset_PX : mileage );
+                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuilder.addVertex1f( mileage + height );
 
                 // lower quad
-                builder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                builder.addVertex2f( width, height );
-                builder.addVertex2f( width, 0 );
+                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuilder.addVertex2f( width, height );
+                xyBuilder.addVertex2f( width, 0 );
+
+                mileageBuilder.addVertex1f( drawBottom ? mileage + inset_PX : mileage );
+                mileageBuilder.addVertex1f( mileage + height );
+                mileageBuilder.addVertex1f( mileage );
+
+                mileage += height;
             }
 
-            prog.draw( gl, builder, rgba );
+            if ( drawTop )
+            {
+                // upper quad
+                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                xyBuilder.addVertex2f( 0, height );
+                xyBuilder.addVertex2f( width, height );
+
+                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( mileage + width );
+                mileageBuilder.addVertex1f( mileage );
+
+                // lower quad
+                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                xyBuilder.addVertex2f( width, height );
+                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height - inset_PX );
+
+                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawRight ? mileage + inset_PX : mileage );
+
+                mileage += width;
+            }
+
+            if ( drawLeft )
+            {
+                // upper quad
+                xyBuilder.addVertex2f( 0, 0 );
+                xyBuilder.addVertex2f( 0, height );
+                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+
+                mileageBuilder.addVertex1f( mileage + height );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawTop ? mileage + inset_PX : mileage );
+
+                // lower quad
+                xyBuilder.addVertex2f( 0, 0 );
+                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuilder.addVertex2f( inset_PX, drawBottom ? inset_PX : 0 );
+
+                mileageBuilder.addVertex1f( mileage + height );
+                mileageBuilder.addVertex1f( drawTop ? mileage + inset_PX : mileage );
+                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+
+                mileage += height;
+            }
+
+            prog.draw( gl, xyBuilder, mileageBuilder, rgba );
+
+        }
+        finally
+        {
+            prog.end( gl );
+            GLUtils.disableBlending( gl );
+        }
+    }
+
+    protected void drawFlatCorners( GlimpseContext context )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
+
+        float inset_PX = thickness;
+        float width = bounds.getWidth( );
+        float height = bounds.getHeight( );
+
+        GLUtils.enableStandardBlending( gl );
+        prog.begin( gl );
+        try
+        {
+            prog.setPixelOrtho( gl, bounds );
+            prog.setColor( gl, rgba );
+            prog.setStipple( gl, stippleEnable, stippleFactor, stipplePattern );
+
+            xyBuilder.clear( );
+            mileageBuilder.clear( );
+
+            float mileage = 0;
+
+            if ( drawBottom )
+            {
+                // upper quad
+                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, 0 );
+                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, inset_PX );
+                xyBuilder.addVertex2f( width, inset_PX );
+
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+
+                // lower quad
+                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, 0 );
+                xyBuilder.addVertex2f( width, inset_PX );
+                xyBuilder.addVertex2f( width, 0 );
+
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+
+                mileage += drawLeft ? width - inset_PX : width;
+            }
+
+            if ( drawRight )
+            {
+                // upper quad
+                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuilder.addVertex2f( width - inset_PX, height );
+                xyBuilder.addVertex2f( width, height );
+
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+
+                // lower quad
+                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuilder.addVertex2f( width, height );
+                xyBuilder.addVertex2f( width, drawBottom ? inset_PX : 0 );
+
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuilder.addVertex1f( mileage );
+
+                mileage += drawBottom ? height - inset_PX : height;
+            }
+
+            if ( drawTop )
+            {
+                // upper quad
+                xyBuilder.addVertex2f( 0, height - inset_PX );
+                xyBuilder.addVertex2f( 0, height );
+                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height );
+
+                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( mileage );
+
+                // lower quad
+                xyBuilder.addVertex2f( 0, height - inset_PX );
+                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height );
+                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height - inset_PX );
+
+                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( mileage );
+
+                mileage += drawRight ? width - inset_PX : width;
+            }
+
+            if ( drawLeft )
+            {
+                // upper quad
+                xyBuilder.addVertex2f( 0, 0 );
+                xyBuilder.addVertex2f( 0, drawTop ? height - inset_PX : height );
+                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+
+                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( mileage );
+
+                // lower quad
+                xyBuilder.addVertex2f( 0, 0 );
+                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuilder.addVertex2f( inset_PX, 0 );
+
+                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuilder.addVertex1f( mileage );
+                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
+            }
+
+            prog.draw( gl, xyBuilder, mileageBuilder, rgba );
 
         }
         finally
@@ -216,9 +409,25 @@ public class BorderPainter extends GlimpsePainterBase
     }
 
     @Override
+    protected void doPaintTo( GlimpseContext context )
+    {
+        switch ( cornerType )
+        {
+            case SLANTED:
+                drawSlantedCorners( context );
+                break;
+            case FLAT:
+            default:
+                drawFlatCorners( context );
+                break;
+        }
+    }
+
+    @Override
     protected void doDispose( GlimpseContext context )
     {
         prog.dispose( context.getGL( ).getGL3( ) );
-        builder.dispose( context.getGL( ) );
+        mileageBuilder.dispose( context.getGL( ) );
+        xyBuilder.dispose( context.getGL( ) );
     }
 }
