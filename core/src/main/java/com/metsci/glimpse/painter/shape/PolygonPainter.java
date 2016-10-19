@@ -90,6 +90,8 @@ public class PolygonPainter extends GlimpsePainterBase
 
     protected static final int FLOATS_PER_VERTEX = 3;
 
+    protected static final double ppvAspectRatioThreshold = 1.0000000001;
+
     //@formatter:off
     protected byte halftone[] = {
             (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0xAA, (byte) 0x55,
@@ -144,8 +146,7 @@ public class PolygonPainter extends GlimpsePainterBase
     protected PolygonPainterFlatColorProgram triangleFlatProg;
     protected PolygonPainterLineProgram lineProg;
 
-    protected double ppvAspectRatio = 0;
-    protected static final double ppvAspectRatioThreshold = 1.0000000001;
+    double ppvAspectRatio = Double.NaN;
 
     public PolygonPainter( )
     {
@@ -667,8 +668,12 @@ public class PolygonPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         Axis2D axis = requireAxis2D( context );
         double newPpvAspectRatio = LineUtils.ppvAspectRatio( axis );
-        boolean keepPpvAspectRatio = ( newPpvAspectRatio / ppvAspectRatioThreshold <= ppvAspectRatio && ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
-        ppvAspectRatio = newPpvAspectRatio;
+
+        boolean keepPpvAspectRatio = newPpvAspectRatio / ppvAspectRatioThreshold <= this.ppvAspectRatio && this.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold;
+        if ( !keepPpvAspectRatio )
+        {
+            this.ppvAspectRatio = newPpvAspectRatio;
+        }
 
         // something in a Group has changed so we must copy these
         // changes to the corresponding LoadedGroup (which is accessed
@@ -676,7 +681,7 @@ public class PolygonPainter extends GlimpsePainterBase
         // to render the polygon updates without synchronizing on updateLock
         // because the changes have been copied from the Group to its
         // corresponding LoadedGroup).
-        if ( this.newData )
+        if ( this.newData || !keepPpvAspectRatio )
         {
             // groups are modified by the user and protected by updateLock
             this.updateLock.lock( );
@@ -706,17 +711,26 @@ public class PolygonPainter extends GlimpsePainterBase
                     // if the corresponding LoadedGroup does not exist, create it
                     LoadedGroup loaded = getOrCreateLoadedGroup( id, group );
 
-                    // stippling was off and now it has been turned on
-                    // the mileage values could be outdated, so we need to update the whole group
-                    boolean stippleEnabled = !loaded.lineStyle.stippleEnable && group.lineStyle.stippleEnable;
-
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
+
+                    // determine if the ppvAspectRatioChanged
+                    boolean keepPpvAspectRatioLoaded = !loaded.lineStyle.stippleEnable || ( newPpvAspectRatio / ppvAspectRatioThreshold <= loaded.ppvAspectRatio && loaded.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
+
+                    if ( !keepPpvAspectRatioLoaded )
+                    {
+                        loaded.ppvAspectRatio = newPpvAspectRatio;
+                    }
 
                     if ( group.polygonsInserted )
                     {
                         updateVerticesFill( gl, loaded, group );
-                        updateVerticesLine( context, loaded, group, stippleEnabled );
+                        updateVerticesLine( context, loaded, group, !keepPpvAspectRatioLoaded );
+                    }
+                    // if nothing was inserted, but the aspect ratio changed, we still need to update the line vertices
+                    else if ( !keepPpvAspectRatioLoaded )
+                    {
+                        updateVerticesLine( context, loaded, group, true );
                     }
 
                     if ( group.polygonsSelected )
@@ -739,6 +753,7 @@ public class PolygonPainter extends GlimpsePainterBase
                         LoadedGroup loaded = loadedGroups.get( id );
                         if ( loaded.lineStyle.stippleEnable && !updatedGroups.contains( group ) )
                         {
+                            loaded.ppvAspectRatio = newPpvAspectRatio;
                             updateVerticesLine( context, loaded, group, true );
                         }
                     }
@@ -1449,6 +1464,8 @@ public class PolygonPainter extends GlimpsePainterBase
         int glTotalLinePrimitives;
         // the number of elements in glFillOffsetBuffer and glFillCountBuffer
         int glTotalFillPrimitives;
+
+        double ppvAspectRatio = Double.NaN;
 
         public LoadedGroup( Group group )
         {
