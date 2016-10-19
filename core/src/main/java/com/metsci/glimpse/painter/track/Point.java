@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import java.nio.FloatBuffer;
 import java.util.Comparator;
 
 import com.metsci.glimpse.util.quadtree.Xy;
@@ -62,11 +61,6 @@ public class Point implements Xy
         this.x = x;
         this.y = y;
         this.time = time;
-    }
-
-    public void loadIntoBuffer( FloatBuffer buffer )
-    {
-        buffer.put( x ).put( y );
     }
 
     public float getX( )
