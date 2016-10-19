@@ -19,6 +19,8 @@ import com.metsci.glimpse.util.primitives.sorted.SortedInts;
 public class GLEditableBuffer
 {
 
+    public final int usage;
+
     protected ByteBuffer hBuffer;
 
     protected int dBuffer;
@@ -27,8 +29,10 @@ public class GLEditableBuffer
     protected final IntRangeSetModifiable dirtyRanges;
 
 
-    public GLEditableBuffer( int capacityBytes )
+    public GLEditableBuffer( int usage, int capacityBytes )
     {
+        this.usage = usage;
+
         this.hBuffer = newDirectByteBuffer( capacityBytes );
 
         this.dBuffer = 0;
@@ -97,7 +101,7 @@ public class GLEditableBuffer
         int hCapacity = this.hBuffer.capacity( );
         if ( this.dCapacity != hCapacity )
         {
-            gl.glBufferData( GL_ARRAY_BUFFER, hCapacity, null, GL_DYNAMIC_DRAW );
+            gl.glBufferData( GL_ARRAY_BUFFER, hCapacity, null, this.usage );
             this.dCapacity = hCapacity;
             this.dirtyRanges.add( 0, this.hBuffer.position( ) );
         }

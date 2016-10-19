@@ -4,6 +4,7 @@ import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.shader.line.LinePathData.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -45,9 +46,9 @@ public class LineStrip
     public LineStrip( int logicalCapacity )
     {
         int actualCapacity = logicalToActualSize( logicalCapacity );
-        this.xyBuffer = new GLEditableBuffer( 2 * actualCapacity * SIZEOF_FLOAT );
-        this.flagsBuffer = new GLEditableBuffer( 1 * actualCapacity * SIZEOF_BYTE );
-        this.mileageBuffer = new GLEditableBuffer( 1 * actualCapacity * SIZEOF_FLOAT );
+        this.xyBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 2 * actualCapacity * SIZEOF_FLOAT );
+        this.flagsBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 1 * actualCapacity * SIZEOF_BYTE );
+        this.mileageBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 1 * actualCapacity * SIZEOF_FLOAT );
 
         this.logicalSize = 0;
 
