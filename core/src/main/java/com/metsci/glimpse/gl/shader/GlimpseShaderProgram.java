@@ -15,6 +15,7 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.glsl.ShaderState;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * Simple Glimpse-specific convenience wrapper around {@link ShaderProgram}.
@@ -53,19 +54,27 @@ public class GlimpseShaderProgram
 
     public void useProgram( GL gl, boolean on )
     {
+        if ( on )
+        {
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
+        }
+        else
+        {
+            gl.getGL3( ).glBindVertexArray( 0 );
+        }
+
         if ( !load( gl.getGL3( ), this.codes ) ) return;
 
-        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.useProgram( )." );
-
         this.state.useProgram( gl.getGL3( ), on );
-
-        GLErrorUtils.logGLError( logger, gl, "Trouble after GlimpseShaderProgram.useProgram( )." );
 
         if ( on ) this.updateUniformData( gl );
 
         for ( GLArrayDataClient array : arrays )
         {
-            array.enableBuffer( gl, on );
+            if ( array.sealed( ) )
+            {
+                array.enableBuffer( gl, on );
+            }
         }
     }
 

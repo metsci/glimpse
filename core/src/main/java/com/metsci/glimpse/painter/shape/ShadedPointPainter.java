@@ -40,11 +40,6 @@ import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.shader.point.PointAttributeColorSizeProgram;
 
-//XXX see: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/demos/es2/RedSquareES2.java
-//XXX see: https://jogamp.org/deployment/webstart/javadoc/jogl/javadoc/com/jogamp/opengl/util/GLArrayDataClient.html
-//XXX allowing multithreaded set of attribute data at the same time rendering is occurring on another thread needs to be worked out
-//XXX GLBuffer handled this, but GLArrayDataClient requires stateful seal( boolean ) to be called
-
 /**
  * A painter, similar to {@link PointSetPainter}, which allows visualization
  * of large clouds of points or particles. Unlike {@link PointSetPainter},
@@ -323,8 +318,6 @@ public class ShadedPointPainter extends GlimpsePainterBase
         {
             program.useProgram( gl, false );
             GLUtils.disableBlending( gl );
-            // Some painters, like TextureRenderer, assume GL_TEXTURE0 is the active texture
-            gl.glActiveTexture( GL.GL_TEXTURE0 );
         }
     }
 

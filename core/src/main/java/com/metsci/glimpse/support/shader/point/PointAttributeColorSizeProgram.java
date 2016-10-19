@@ -103,6 +103,7 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         this.FEATHER_THICKNESS_PX = this.addUniformData( new GLUniformData( "FEATHER_THICKNESS_PX", 0.8f ) );
 
         this.mvpMatrix = this.addUniformData( GLUniformData.creatEmptyMatrix( "mvpMatrix", 4, 4 ) );
+        this.setProjectionMatrix( 0, 1, 0, 1 );
 
         this.vertexAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "a_position", 2, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
         this.colorAttribute = this.addArrayData( GLArrayDataServer.createGLSL( "valColor", 1, GL.GL_FLOAT, false, 0, GL.GL_STATIC_DRAW ) );
@@ -150,11 +151,16 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         this.addFragmentShader( "shaders/point/point_attribute_color_size/point.fs" );
     }
 
-    public void setProjectionMatrix( Axis2D axis )
+    public void setProjectionMatrix( float minX, float maxX, float minY, float maxY )
     {
         Matrix4 m = new Matrix4( );
-        m.makeOrtho( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), -1, 1 );
+        m.makeOrtho( minX, maxX, minY, maxY, -1, 1 );
         this.mvpMatrix.setData( FloatBuffer.wrap( m.getMatrix( ) ) );
+    }
+
+    public void setProjectionMatrix( Axis2D axis )
+    {
+        setProjectionMatrix( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
     public void setVertexData( Buffer b )

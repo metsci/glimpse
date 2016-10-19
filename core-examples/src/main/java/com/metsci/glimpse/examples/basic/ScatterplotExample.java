@@ -26,10 +26,12 @@
  */
 package com.metsci.glimpse.examples.basic;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -204,7 +206,7 @@ public class ScatterplotExample implements GlimpseLayoutProvider
                 for ( int i = 0; i < data.capacity( ); i++ )
                 {
                     float step = ( ( float ) i / ( float ) data.capacity( ) );
-                    float size = ( float ) ( minSize + dSize * step * step );
+                    float size = minSize + dSize * step * step;
                     data.put( size );
                 }
             }
@@ -227,11 +229,17 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // random number generator for points
         final Random r = new Random( );
 
+        ArrayList<Integer> order = new ArrayList<>( NUM_POINTS );
+        for ( int i = 0; i < NUM_POINTS; i++ )
+            order.add( i );
+        Collections.shuffle( order );
+
         // setup the x y position data for the points
         xyValues = FloatBuffer.allocate( NUM_POINTS * 2 );
         for ( int i = 0; i < NUM_POINTS; i++ )
         {
-            float x = 6.0f * i / ( float ) NUM_POINTS;
+            int index = order.get( i );
+            float x = 6.0f * index / NUM_POINTS;
             float y = ( float ) ( Math.exp( x ) * 10.0 + 15 + 20 * r.nextGaussian( ) * x );
 
             xyValues.put( x );
@@ -243,7 +251,8 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         colorValues = FloatBuffer.allocate( NUM_POINTS );
         for ( int i = 0; i < NUM_POINTS; i++ )
         {
-            float x = 6.0f * i / ( float ) NUM_POINTS;
+            int index = order.get( i );
+            float x = 6.0f * index / NUM_POINTS;
             float y = ( float ) ( Math.exp( x ) * 10.0 + r.nextDouble( ) * 500 );
 
             colorValues.put( ( float ) ( x * ( y + r.nextDouble( ) * 500 ) ) );
@@ -271,10 +280,6 @@ public class ScatterplotExample implements GlimpseLayoutProvider
         // defined by the axis tags (if false, the color would just saturate)
         painter.setDiscardAboveColor( true );
         painter.setDiscardBelowColor( true );
-
-        painter.useVariableSize( );
-        //painter.setConstantPointSize( 10.0f );
-        //painter.setConstantPointColor( GlimpseColor.getRed( ) );
 
         return plot;
     }
