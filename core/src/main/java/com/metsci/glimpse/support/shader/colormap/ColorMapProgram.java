@@ -43,7 +43,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
@@ -226,21 +226,10 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     }
 
     @Override
-    public void draw( GlimpseContext context, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer sVbo, int first, int count )
+    public void draw( GlimpseContext context, int mode, GLEditableBuffer xyVbo, GLEditableBuffer sVbo, int first, int count )
     {
-        GL3 gl = context.getGL( ).getGL3( );
-
-        GLErrorUtils.logGLError( logger, gl, "pre" );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-        GLErrorUtils.logGLError( logger, gl, "post" );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
-
-        gl.glDrawArrays( mode, first, count );
+        GL gl = context.getGL( );
+        draw( context, mode, xyVbo.deviceBuffer( gl ), sVbo.deviceBuffer( gl ), first, count );
     }
 
     @Override
@@ -248,25 +237,13 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        GLErrorUtils.logGLError( logger, gl, "pre" );
-
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-
-        GLErrorUtils.logGLError( logger, gl, "post0" );
-
         gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, 0 );
-
-        GLErrorUtils.logGLError( logger, gl, "post1" );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
         gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, 0 );
 
-        GLErrorUtils.logGLError( logger, gl, "post2" );
-
         gl.glDrawArrays( mode, first, count );
-
-        GLErrorUtils.logGLError( logger, gl, "post3" );
-
     }
 
     @Override

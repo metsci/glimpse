@@ -26,19 +26,19 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -100,7 +100,7 @@ public class SimpleTextPainter extends GlimpsePainterBase
     protected volatile boolean antialias = false;
 
     protected FlatColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillBuilder;
+    protected GLEditableBuffer fillBuffer;
 
     protected LineProgram lineProg;
     protected LinePath linePath;
@@ -123,7 +123,7 @@ public class SimpleTextPainter extends GlimpsePainterBase
         this.lineStyle.feather_PX = 0f;
 
         this.linePath = new LinePath( );
-        this.fillBuilder = new GLStreamingBufferBuilder( );
+        this.fillBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.transformMatrix = new Matrix4( );
     }
@@ -353,15 +353,15 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
             if ( paintBackground )
             {
-                this.fillBuilder.clear( );
-                this.fillBuilder.addQuad2f( xText - 0.5f - 2, yText - 0.5f - 2, xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
+                this.fillBuffer.clear( );
+                this.fillBuffer.growQuad2f( xText - 0.5f - 2, yText - 0.5f - 2, xTextMax + 0.5f + 2, yTextMax + 0.5f + 2 );
 
                 this.fillProg.begin( gl );
                 try
                 {
                     this.fillProg.setPixelOrtho( gl, bounds );
 
-                    this.fillProg.draw( gl, this.fillBuilder, this.backgroundColor );
+                    this.fillProg.draw( gl, this.fillBuffer, this.backgroundColor );
                 }
                 finally
                 {
@@ -463,15 +463,15 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
             if ( paintBackground )
             {
-                this.fillBuilder.clear( );
-                this.fillBuilder.addQuad2f( xTextMin, yTextMin, xTextMax, yTextMax );
+                this.fillBuffer.clear( );
+                this.fillBuffer.growQuad2f( xTextMin, yTextMin, xTextMax, yTextMax );
 
                 this.fillProg.begin( gl );
                 try
                 {
                     this.fillProg.setPixelOrtho( gl, bounds );
 
-                    this.fillProg.draw( gl, this.fillBuilder, this.backgroundColor );
+                    this.fillProg.draw( gl, this.fillBuffer, this.backgroundColor );
                 }
                 finally
                 {
@@ -581,6 +581,6 @@ public class SimpleTextPainter extends GlimpsePainterBase
         this.fillProg.dispose( context.getGL( ).getGL3( ) );
 
         this.linePath.dispose( context.getGL( ) );
-        this.fillBuilder.dispose( context.getGL( ) );
+        this.fillBuffer.dispose( context.getGL( ) );
     }
 }

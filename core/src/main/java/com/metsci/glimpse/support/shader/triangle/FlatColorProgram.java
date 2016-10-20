@@ -8,8 +8,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -100,17 +99,14 @@ public class FlatColorProgram
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, int first, int count )
     {
         draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, GLEditableBuffer xyVbo, int first, int count )
     {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-        gl.glDrawArrays( mode, first, count );
+        draw( gl, mode, xyVbo.deviceBuffer( gl ), first, count );
     }
 
     public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
@@ -129,11 +125,11 @@ public class FlatColorProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
+    public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, float[] color )
     {
         setColor( gl, color );
 
-        draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );
+        draw( gl, GL.GL_TRIANGLES, xyVbo.deviceBuffer( gl ), 0, xyVbo.sizeFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )

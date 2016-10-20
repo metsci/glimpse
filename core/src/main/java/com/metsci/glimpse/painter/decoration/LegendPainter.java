@@ -41,7 +41,7 @@ import javax.media.opengl.GL3;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -98,8 +98,8 @@ public abstract class LegendPainter extends GlimpsePainterBase
     private volatile boolean antialias = false;
 
     protected FlatColorProgram flatProg;
-    protected GLStreamingBufferBuilder flatPath;
-    
+    protected GLEditableBuffer flatPath;
+
     protected LineProgram lineProg;
     protected LineStyle style;
     protected LinePath path;
@@ -119,7 +119,7 @@ public abstract class LegendPainter extends GlimpsePainterBase
         this.style.stippleEnable = false;
 
         this.path = new LinePath( );
-        this.flatPath = new GLStreamingBufferBuilder( );
+        this.flatPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public LegendPainter setFont( Font font )
@@ -327,12 +327,12 @@ public abstract class LegendPainter extends GlimpsePainterBase
                 flatProg.setColor( gl, GlimpseColor.getWhite( ) );
 
                 flatPath.clear( );
-                flatPath.addVertex2f( lx, ly );
-                flatPath.addVertex2f( lx, ly - lh );
-                flatPath.addVertex2f( lx + lw, ly );
-                flatPath.addVertex2f( lx + lw, ly - lh );
+                flatPath.grow2f( lx, ly );
+                flatPath.grow2f( lx, ly - lh );
+                flatPath.grow2f( lx + lw, ly );
+                flatPath.grow2f( lx + lw, ly - lh );
 
-                flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 4 );
+                flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath, 0, 4 );
             }
             finally
             {
@@ -461,12 +461,12 @@ public abstract class LegendPainter extends GlimpsePainterBase
                 flatProg.setColor( gl3, rgba );
 
                 flatPath.clear( );
-                flatPath.addVertex2f( xpos, ypos );
-                flatPath.addVertex2f( xpos + itemWidth, ypos );
-                flatPath.addVertex2f( xpos, ypos - height );
-                flatPath.addVertex2f( xpos + itemWidth, ypos - height );
+                flatPath.grow2f( xpos, ypos );
+                flatPath.grow2f( xpos + itemWidth, ypos );
+                flatPath.grow2f( xpos, ypos - height );
+                flatPath.grow2f( xpos + itemWidth, ypos - height );
 
-                flatProg.draw( gl3, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 4 );
+                flatProg.draw( gl3, GL.GL_TRIANGLE_STRIP, flatPath, 0, 4 );
             }
             finally
             {

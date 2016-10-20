@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.treemap;
 
-import static java.lang.Math.max;
+import static java.lang.Math.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -38,7 +38,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
@@ -74,7 +74,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     protected Font textFont = FontUtils.getDefaultItalic( 12.0f );
 
     protected FlatColorProgram flatProg;
-    protected GLStreamingBufferBuilder flatPath;
+    protected GLEditableBuffer flatPath;
 
     protected LineStyle borderStyle;
     protected LineProgram lineProg;
@@ -90,7 +90,7 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
         borderStyle.thickness_PX = 1;
         linePath = new StreamingLinePath( 10_000 );
 
-        flatPath = new GLStreamingBufferBuilder( 1024, 10_000 );
+        flatPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 1024 );
         flatProg = new FlatColorProgram( );
     }
 
@@ -212,8 +212,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             flatProg.setAxisOrtho( gl, axis );
             flatProg.setColor( gl, borderColor );
             flatPath.clear( );
-            flatPath.addQuad2f( ( float ) axis.getMinX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxX( ), ( float ) axis.getMaxY( ) );
-            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 6 );
+            flatPath.growQuad2f( ( float ) axis.getMinX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxX( ), ( float ) axis.getMaxY( ) );
+            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath, 0, 6 );
         }
         finally
         {
@@ -292,8 +292,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             flatProg.setColor( gl, color );
 
             flatPath.clear( );
-            flatPath.addQuad2f( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ), ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
-            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 6 );
+            flatPath.growQuad2f( ( float ) nodeBounds.getMinX( ), ( float ) nodeBounds.getMinY( ), ( float ) nodeBounds.getMaxX( ), ( float ) nodeBounds.getMaxY( ) );
+            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath, 0, 6 );
         }
         finally
         {
@@ -337,8 +337,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
             flatProg.setColor( gl, color );
 
             flatPath.clear( );
-            flatPath.addQuad2f( ( float ) boundary.getMinX( ), ( float ) ( boundary.getMaxY( ) - borderHeight ), ( float ) boundary.getMaxX( ), ( float ) boundary.getMaxY( ) );
-            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath.getBuffer( gl ), 0, 6 );
+            flatPath.growQuad2f( ( float ) boundary.getMinX( ), ( float ) ( boundary.getMaxY( ) - borderHeight ), ( float ) boundary.getMaxX( ), ( float ) boundary.getMaxY( ) );
+            flatProg.draw( gl, GL.GL_TRIANGLE_STRIP, flatPath, 0, 6 );
         }
         finally
         {

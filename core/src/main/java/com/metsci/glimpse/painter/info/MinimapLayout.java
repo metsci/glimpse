@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.context.TargetStackUtil.*;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -41,7 +42,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -217,7 +218,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         protected float[] shadeColor = new float[] { 0.0f, 0.769f, 1.0f, 0.25f };
 
         protected FlatColorProgram fillProg;
-        protected GLStreamingBufferBuilder fillBuilder;
+        protected GLEditableBuffer fillBuffer;
 
         protected LineProgram lineProg;
         protected LinePath linePath;
@@ -225,7 +226,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
 
         public MiniMapBoundsPainter( )
         {
-            this.fillBuilder = new GLStreamingBufferBuilder( );
+            this.fillBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
             this.lineStyle = new LineStyle( );
             this.lineStyle.stippleEnable = false;
@@ -256,14 +257,14 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             GLUtils.enableStandardBlending( gl );
             try
             {
-                this.fillBuilder.clear( );
-                this.fillBuilder.addQuad2f( minX, minY, maxX, maxY );
+                this.fillBuffer.clear( );
+                this.fillBuffer.growQuad2f( minX, minY, maxX, maxY );
 
                 this.fillProg.begin( gl );
                 try
                 {
                     this.fillProg.setAxisOrtho( gl, miniMapAxis );
-                    this.fillProg.draw( gl, this.fillBuilder, this.shadeColor );
+                    this.fillProg.draw( gl, this.fillBuffer, this.shadeColor );
                 }
                 finally
                 {
@@ -298,7 +299,7 @@ public class MinimapLayout extends GlimpseAxisLayout2D
             this.lineProg.dispose( context.getGL( ).getGL3( ) );
             this.fillProg.dispose( context.getGL( ).getGL3( ) );
 
-            this.fillBuilder.dispose( context.getGL( ) );
+            this.fillBuffer.dispose( context.getGL( ) );
             this.linePath.dispose( context.getGL( ) );
         }
     }

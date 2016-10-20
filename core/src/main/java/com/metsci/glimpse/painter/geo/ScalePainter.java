@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.painter.geo;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -41,7 +42,7 @@ import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
@@ -83,8 +84,8 @@ public class ScalePainter extends GlimpsePainterBase
     protected boolean showOverallLength = true;
 
     protected ArrayColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillXy;
-    protected GLStreamingBufferBuilder fillRgba;
+    protected GLEditableBuffer fillXy;
+    protected GLEditableBuffer fillRgba;
 
     protected LineProgram lineProg;
     protected LineStyle lineStyle;
@@ -131,8 +132,8 @@ public class ScalePainter extends GlimpsePainterBase
         this.lineStyle.rgba = borderColor;
 
         this.linePath = new LinePath( );
-        this.fillXy = new GLStreamingBufferBuilder( );
-        this.fillRgba = new GLStreamingBufferBuilder( );
+        this.fillXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.fillRgba = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     protected TextRenderer createTickTextRenderer( )
@@ -337,9 +338,9 @@ public class ScalePainter extends GlimpsePainterBase
             double offset1 = totalSize * ( i / ( double ) tickCount );
             double offset2 = totalSize * ( ( i + 1 ) / ( double ) tickCount );
 
-            fillXy.addQuad2f( ( float ) ( width - bufferX - offset1 ), ( bufferY ), ( float ) ( width - bufferX - offset2 ), bufferY + pixelHeight );
+            fillXy.growQuad2f( ( float ) ( width - bufferX - offset1 ), ( bufferY ), ( float ) ( width - bufferX - offset2 ), bufferY + pixelHeight );
 
-            fillRgba.addQuadSolidColor( color );
+            fillRgba.growQuadSolidColor( color );
         }
 
         linePath.clear( );

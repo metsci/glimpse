@@ -26,19 +26,19 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -67,13 +67,13 @@ public class CursorTextPainter extends GlimpsePainterBase
     protected float[] textBackgroundColor = new float[] { 0.2f, 0.2f, 0.2f, 0.7f };
 
     protected FlatColorProgram prog;
-    protected GLStreamingBufferBuilder builder;
+    protected GLEditableBuffer buffer;
 
     public CursorTextPainter( Font font )
     {
         this.prog = new FlatColorProgram( );
         this.textRenderer = new TextRenderer( font );
-        this.builder = new GLStreamingBufferBuilder( );
+        this.buffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public CursorTextPainter( )
@@ -224,7 +224,7 @@ public class CursorTextPainter extends GlimpsePainterBase
         this.textRenderer.dispose( );
 
         this.prog.dispose( context.getGL( ).getGL3( ) );
-        this.builder.dispose( context.getGL( ) );
+        this.buffer.dispose( context.getGL( ) );
     }
 
     @Override
@@ -255,13 +255,13 @@ public class CursorTextPainter extends GlimpsePainterBase
         GLUtils.enableStandardBlending( gl );
         try
         {
-            this.builder.clear( );
-            this.builder.addQuad2f( corners[0], corners[1], corners[0] + ( float ) xBackBounds.getWidth( ), corners[1] + ( float ) xBackBounds.getHeight( ) );
-            this.builder.addQuad2f( corners[2], corners[3], corners[2] + ( float ) yBackBounds.getWidth( ), corners[3] + ( float ) yBackBounds.getHeight( ) );
+            this.buffer.clear( );
+            this.buffer.growQuad2f( corners[0], corners[1], corners[0] + ( float ) xBackBounds.getWidth( ), corners[1] + ( float ) xBackBounds.getHeight( ) );
+            this.buffer.growQuad2f( corners[2], corners[3], corners[2] + ( float ) yBackBounds.getWidth( ), corners[3] + ( float ) yBackBounds.getHeight( ) );
 
             if ( zText != null )
             {
-                this.builder.addQuad2f( corners[4], corners[5], corners[4] + ( float ) zBackBounds.getWidth( ), corners[5] + ( float ) zBackBounds.getHeight( ) );
+                this.buffer.growQuad2f( corners[4], corners[5], corners[4] + ( float ) zBackBounds.getWidth( ), corners[5] + ( float ) zBackBounds.getHeight( ) );
             }
 
             this.prog.begin( gl );
@@ -269,7 +269,7 @@ public class CursorTextPainter extends GlimpsePainterBase
             {
                 this.prog.setPixelOrtho( gl, bounds );
 
-                this.prog.draw( gl, this.builder, this.textBackgroundColor );
+                this.prog.draw( gl, this.buffer, this.textBackgroundColor );
             }
             finally
             {

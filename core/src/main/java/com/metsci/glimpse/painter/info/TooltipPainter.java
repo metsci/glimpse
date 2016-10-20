@@ -453,15 +453,15 @@ public class TooltipPainter extends SimpleTextPainter
 
                 if ( paintBackground )
                 {
-                    this.fillBuilder.clear( );
-                    this.fillBuilder.addQuad2f( xMin, yMin, xMax, yMax );
+                    this.fillBuffer.clear( );
+                    this.fillBuffer.growQuad2f( xMin, yMin, xMax, yMax );
 
                     this.fillProg.begin( gl );
                     try
                     {
                         this.fillProg.setPixelOrtho( gl, bounds );
 
-                        this.fillProg.draw( gl, this.fillBuilder, this.backgroundColor );
+                        this.fillProg.draw( gl, this.fillBuffer, this.backgroundColor );
                     }
                     finally
                     {

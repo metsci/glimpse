@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.io.Serializable;
 import java.nio.FloatBuffer;
@@ -42,7 +42,7 @@ import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.polygon.Polygon;
@@ -74,14 +74,14 @@ public class PolygonPainterSimple extends GlimpsePainterBase
     private boolean allShown = false;
 
     protected FlatColorProgram prog;
-    protected GLStreamingBuffer buffer;
+    protected GLEditableBuffer buffer;
 
     public PolygonPainterSimple( )
     {
         this.tessellator = new PolygonTessellator( );
 
         this.prog = new FlatColorProgram( );
-        this.buffer = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
+        this.buffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
     }
 
     public void setShowOn( int[] ids )
@@ -280,9 +280,10 @@ public class PolygonPainterSimple extends GlimpsePainterBase
 
                     prog.setColor( gl, color );
 
-                    FloatBuffer floatBuffer = buffer.mapFloats( gl, data.length );
+                    // XXX: Repeated edit-after-draw may cause GL pipeline stalls
+                    buffer.clear( );
+                    FloatBuffer floatBuffer = buffer.editFloats( 0, data.length );
                     floatBuffer.put( data );
-                    buffer.seal( gl );
 
                     prog.draw( gl, buffer, 0, data.length / 2 );
                 }

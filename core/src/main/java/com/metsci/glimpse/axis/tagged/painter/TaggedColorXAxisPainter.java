@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.common.nio.Buffers.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -41,7 +42,7 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
@@ -68,7 +69,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
     protected boolean tagColorSet = false;
 
     protected FlatColorProgram flatColorProg;
-    protected GLStreamingBuffer tagXyVbo;
+    protected GLEditableBuffer tagXyVbo;
     protected LineStyle tagStyle;
 
     protected int tagHalfWidth = DEFAULT_TAG_HALFBASE;
@@ -82,7 +83,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         this.tickBufferSize = 10;
 
-        this.tagXyVbo = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
+        this.tagXyVbo = new GLEditableBuffer( GL_DYNAMIC_DRAW, 18 * SIZEOF_FLOAT );
 
         this.setTagColor0( GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 0.2f ) );
 
@@ -185,7 +186,7 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
 
         GL3 gl3 = gl.getGL3( );
 
-        FloatBuffer xy = tagXyVbo.mapFloats( gl, 18 );
+        FloatBuffer xy = tagXyVbo.editFloats( 0, 18 );
 
         xy.put( x ).put( yMin );
         xy.put( x - tagHalfWidth ).put( yMid );
@@ -198,8 +199,6 @@ public class TaggedColorXAxisPainter extends ColorXAxisPainter
         xy.put( x + tagHalfWidth ).put( yMid );
         xy.put( x + tagHalfWidth ).put( yMax );
         xy.put( x - tagHalfWidth ).put( yMax );
-
-        tagXyVbo.seal( gl );
 
         GLUtils.enableStandardBlending( gl );
         flatColorProg.begin( gl3 );

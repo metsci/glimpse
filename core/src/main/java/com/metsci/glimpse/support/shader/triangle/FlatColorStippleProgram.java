@@ -8,8 +8,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -126,18 +125,18 @@ public class FlatColorStippleProgram
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer mileageVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, GLEditableBuffer mileageVbo, int first, int count )
     {
         draw( gl, GL.GL_TRIANGLES, xyVbo, mileageVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer mileageVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, GLEditableBuffer xyVbo, GLEditableBuffer mileageVbo, int first, int count )
     {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.deviceBuffer( gl ) );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.deviceBuffer( gl ) );
+        gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }
@@ -153,11 +152,11 @@ public class FlatColorStippleProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyBuilder, GLStreamingBufferBuilder mileageBuilder, float[] color )
+    public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, GLEditableBuffer mileageVbo, float[] color )
     {
         setColor( gl, color );
 
-        draw( gl, GL.GL_TRIANGLES, xyBuilder.getBuffer( gl ), mileageBuilder.getBuffer( gl ), 0, mileageBuilder.numFloats( ) );
+        draw( gl, GL.GL_TRIANGLES, xyVbo, mileageVbo, 0, mileageVbo.sizeFloats( ) );
     }
 
     public void end( GL2ES2 gl )

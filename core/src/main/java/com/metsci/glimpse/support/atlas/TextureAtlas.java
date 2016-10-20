@@ -74,7 +74,7 @@ import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextureRenderer;
 import com.metsci.glimpse.com.jogamp.opengl.util.packrect.RectanglePacker;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.atlas.support.ImageData;
 import com.metsci.glimpse.support.atlas.support.ImageDataExternal;
@@ -139,8 +139,8 @@ public class TextureAtlas
     private boolean haveMaxSize;
 
     protected ColorTexture2DProgram texProgram;
-    protected GLStreamingBufferBuilder inXy;
-    protected GLStreamingBufferBuilder inS;
+    protected GLEditableBuffer inXy;
+    protected GLEditableBuffer inS;
 
     /**
      * Constructs a new TextureAtlas with the provided initial width and height
@@ -168,8 +168,8 @@ public class TextureAtlas
         this.smoothing = smoothing;
 
         this.texProgram = new ColorTexture2DProgram( );
-        this.inXy = new GLStreamingBufferBuilder( );
-        this.inS = new GLStreamingBufferBuilder( );
+        this.inXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.inS = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
     }
 
@@ -575,11 +575,11 @@ public class TextureAtlas
         this.inXy.clear( );
         this.inS.clear( );
 
-        this.inXy.addQuad2f( minX, minY, maxX, maxY );
-        this.inS.addQuad2f( texCoords.left( ), texCoords.bottom( ), texCoords.right( ), texCoords.top( ) );
+        this.inXy.growQuad2f( minX, minY, maxX, maxY );
+        this.inS.growQuad2f( texCoords.left( ), texCoords.bottom( ), texCoords.right( ), texCoords.top( ) );
 
         this.texProgram.setColor( context, rgba );
-        this.texProgram.draw( context, GL.GL_TRIANGLES, inXy.getBuffer( gl3 ), inS.getBuffer( gl3 ), 0, inXy.numFloats( ) / 2 );
+        this.texProgram.draw( context, GL.GL_TRIANGLES, inXy, inS, 0, inXy.sizeFloats( ) / 2 );
     }
 
     public void beginRenderingAxisOrtho( GlimpseContext context ) throws GLException

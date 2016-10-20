@@ -124,6 +124,16 @@ public class DirectBufferUtils
         return flipped;
     }
 
+    public static FloatBuffer put1f( FloatBuffer buffer, float a )
+    {
+        return buffer.put( a );
+    }
+
+    public static FloatBuffer put2f( FloatBuffer buffer, float a, float b )
+    {
+        return buffer.put( a ).put( b );
+    }
+
     public static FloatBuffer grow1f( FloatBuffer buffer, float a )
     {
         buffer = ensureAdditionalCapacity( buffer, 1, true );

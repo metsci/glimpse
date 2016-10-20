@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.axis.painter;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -51,8 +52,8 @@ import com.metsci.glimpse.support.shader.triangle.ColorTexture1DProgram;
 public class ColorYAxisPainter extends NumericYAxisPainter
 {
     protected ColorTexture1DProgram progTex;
-    protected GLStreamingBufferBuilder xyBuffer;
-    protected GLStreamingBufferBuilder sBuffer;
+    protected GLEditableBuffer xyBuffer;
+    protected GLEditableBuffer sBuffer;
     protected ColorTexture1D colorTexture;
 
     protected LineProgram progOutline;
@@ -68,8 +69,8 @@ public class ColorYAxisPainter extends NumericYAxisPainter
         super( ticks );
 
         this.pathOutline = new LinePath( );
-        this.xyBuffer = new GLStreamingBufferBuilder( );
-        this.sBuffer = new GLStreamingBufferBuilder( );
+        this.xyBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.sBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.style = new LineStyle( );
         this.style.joinType = LineJoinType.JOIN_MITER;
@@ -143,10 +144,10 @@ public class ColorYAxisPainter extends NumericYAxisPainter
             pathOutline.addRectangle( x1 + inset_PX, inset_PX, x2 - inset_PX, height - inset_PX );
 
             xyBuffer.clear( );
-            xyBuffer.addQuad2f( x1 + inset_PX, inset_PX, x2 - inset_PX, height - inset_PX );
+            xyBuffer.growQuad2f( x1 + inset_PX, inset_PX, x2 - inset_PX, height - inset_PX );
 
             sBuffer.clear( );
-            sBuffer.addQuad1f( 0, 1, 0, 1 );
+            sBuffer.growQuad1f( 0, 1, 0, 1 );
 
             GLUtils.enableStandardBlending( gl );
             try

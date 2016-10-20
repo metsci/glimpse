@@ -57,8 +57,8 @@ import javax.media.opengl.GL3;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
@@ -2049,17 +2049,14 @@ public class PolygonPainter extends GlimpsePainterBase
             gl.glUniform2f( this.handles.NEAR_FAR, near, far );
         }
 
-        public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
+        public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, int first, int count )
         {
             draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
         }
 
-        public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
+        public void draw( GL2ES2 gl, int mode, GLEditableBuffer xyVbo, int first, int count )
         {
-            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-            gl.glDrawArrays( mode, first, count );
+            draw( gl, mode, xyVbo.deviceBuffer( gl ), first, count );
         }
 
         public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
@@ -2070,11 +2067,11 @@ public class PolygonPainter extends GlimpsePainterBase
             gl.glDrawArrays( mode, first, count );
         }
 
-        public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
+        public void draw( GL2ES2 gl, GLEditableBuffer xyVertices, float[] color )
         {
             setColor( gl, color );
 
-            draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );
+            draw( gl, GL.GL_TRIANGLES, xyVertices, 0, xyVertices.sizeFloats( ) / 2 );
         }
 
         public void end( GL2ES2 gl )
@@ -2266,18 +2263,9 @@ public class PolygonPainter extends GlimpsePainterBase
             this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, path.numVertices( ) );
         }
 
-        public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
+        public void draw( GL2ES3 gl, GLEditableBuffer xyVbo, GLEditableBuffer flagsVbo, GLEditableBuffer mileageVbo, int first, int count )
         {
-            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-            gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo.buffer( gl ) );
-            gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
-
-            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( gl ) );
-            gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
-
-            gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
+            draw( gl, xyVbo.deviceBuffer( gl ), flagsVbo.deviceBuffer( gl ), mileageVbo.deviceBuffer( gl ), first, count );
         }
 
         public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
