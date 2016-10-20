@@ -26,23 +26,14 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_SIZE;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.ARROW_TIP_BUFFER;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.DEFAULT_NUM_ICONS_ROWS;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.calculateDisplayText;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBackgroundColor;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getBorderColor;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getIconSizePerpPixels;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.getTextAvailableSpace;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isIconOverlapping;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextIntersecting;
-import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.isTextOverfull;
+import static com.metsci.glimpse.plot.timeline.event.paint.DefaultEventPainter.*;
 
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
@@ -51,7 +42,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
@@ -82,8 +73,8 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
     protected LineStyle lineStyle;
 
     protected ArrayColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillPath;
-    protected GLStreamingBufferBuilder fillColor;
+    protected GLEditableBuffer fillPath;
+    protected GLEditableBuffer fillColor;
 
     protected Matrix4 transformMatrix;
 
@@ -96,8 +87,8 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         this.lineStyle.stippleEnable = false;
 
         this.fillProg = new ArrayColorProgram( );
-        this.fillPath = new GLStreamingBufferBuilder( );
-        this.fillColor = new GLStreamingBufferBuilder( );
+        this.fillPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.fillColor = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.transformMatrix = new Matrix4( );
     }
@@ -566,16 +557,16 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
     {
         if ( horiz )
         {
-            this.fillPath.addQuad2f( timeMin, posMin, timeMax, posMax );
+            this.fillPath.growQuad2f( timeMin, posMin, timeMax, posMax );
             this.linePath.addRectangle( timeMin, posMin, timeMax, posMax, color );
         }
         else
         {
-            this.fillPath.addQuad2f( posMin, timeMin, posMax, timeMax );
+            this.fillPath.growQuad2f( posMin, timeMin, posMax, timeMax );
             this.linePath.addRectangle( posMin, timeMin, posMax, timeMax, color );
         }
 
-        this.fillColor.addQuadSolidColor( color );
+        this.fillColor.growQuadSolidColor( color );
     }
 
     protected void addVerticesArrow( boolean horiz, float[] color, float timeMin, float timeMax, float posMin, float posMax, float arrowBaseMin, float arrowBaseMax, float sizePerpCenter )
@@ -583,17 +574,17 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         if ( horiz )
         {
             // center rectangle
-            fillPath.addQuad2f( arrowBaseMin, posMin, arrowBaseMax, posMax );
+            fillPath.growQuad2f( arrowBaseMin, posMin, arrowBaseMax, posMax );
 
             // left arrow
-            fillPath.addVertex2f( timeMin, sizePerpCenter );
-            fillPath.addVertex2f( arrowBaseMin, posMax );
-            fillPath.addVertex2f( arrowBaseMin, posMin );
+            fillPath.grow2f( timeMin, sizePerpCenter );
+            fillPath.grow2f( arrowBaseMin, posMax );
+            fillPath.grow2f( arrowBaseMin, posMin );
 
             // right arrow
-            fillPath.addVertex2f( timeMax, sizePerpCenter );
-            fillPath.addVertex2f( arrowBaseMax, posMin );
-            fillPath.addVertex2f( arrowBaseMax, posMax );
+            fillPath.grow2f( timeMax, sizePerpCenter );
+            fillPath.grow2f( arrowBaseMax, posMin );
+            fillPath.grow2f( arrowBaseMax, posMax );
 
             linePath.moveTo( arrowBaseMin, posMax, color );
             linePath.lineTo( arrowBaseMax, posMax, color );
@@ -606,17 +597,17 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
         else
         {
             // center rectangle
-            fillPath.addQuad2f( posMin, arrowBaseMin, posMax, arrowBaseMax );
+            fillPath.growQuad2f( posMin, arrowBaseMin, posMax, arrowBaseMax );
 
             // left arrow
-            fillPath.addVertex2f( sizePerpCenter, timeMin );
-            fillPath.addVertex2f( posMax, arrowBaseMin );
-            fillPath.addVertex2f( posMin, arrowBaseMin );
+            fillPath.grow2f( sizePerpCenter, timeMin );
+            fillPath.grow2f( posMax, arrowBaseMin );
+            fillPath.grow2f( posMin, arrowBaseMin );
 
             // right arrow
-            fillPath.addVertex2f( sizePerpCenter, timeMax );
-            fillPath.addVertex2f( posMin, arrowBaseMax );
-            fillPath.addVertex2f( posMax, arrowBaseMax );
+            fillPath.grow2f( sizePerpCenter, timeMax );
+            fillPath.grow2f( posMin, arrowBaseMax );
+            fillPath.grow2f( posMax, arrowBaseMax );
 
             linePath.moveTo( posMax, arrowBaseMin, color );
             linePath.lineTo( posMax, arrowBaseMax, color );
@@ -629,7 +620,7 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
 
         for ( int i = 0; i < 12; i++ )
         {
-            this.fillColor.addVertex4fv( color );
+            this.fillColor.growNfv( color, 0, 4 );
         }
     }
 }

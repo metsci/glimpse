@@ -28,11 +28,12 @@ package com.metsci.glimpse.plot.timeline.group;
 
 import java.awt.geom.Rectangle2D;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
@@ -66,7 +67,7 @@ public class GroupLabelPainter extends GlimpsePainterBase
     protected LineStyle lineStyle;
 
     protected FlatColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillPath;
+    protected GLEditableBuffer fillPath;
 
     public GroupLabelPainter( String name )
     {
@@ -88,7 +89,7 @@ public class GroupLabelPainter extends GlimpsePainterBase
         this.lineStyle.stippleEnable = false;
 
         this.fillProg = new FlatColorProgram( );
-        this.fillPath = new GLStreamingBufferBuilder( );
+        this.fillPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public SimpleTextPainter getTextPainter( )
@@ -213,15 +214,15 @@ public class GroupLabelPainter extends GlimpsePainterBase
 
                 if ( isExpanded )
                 {
-                    fillPath.addVertex2f( centerX - halfSize, centerY + halfSize );
-                    fillPath.addVertex2f( centerX + halfSize, centerY + halfSize );
-                    fillPath.addVertex2f( centerX, centerY - halfSize );
+                    fillPath.grow2f( centerX - halfSize, centerY + halfSize );
+                    fillPath.grow2f( centerX + halfSize, centerY + halfSize );
+                    fillPath.grow2f( centerX, centerY - halfSize );
                 }
                 else
                 {
-                    fillPath.addVertex2f( centerX - halfSize, centerY - halfSize );
-                    fillPath.addVertex2f( centerX - halfSize, centerY + halfSize );
-                    fillPath.addVertex2f( centerX + halfSize, centerY );
+                    fillPath.grow2f( centerX - halfSize, centerY - halfSize );
+                    fillPath.grow2f( centerX - halfSize, centerY + halfSize );
+                    fillPath.grow2f( centerX + halfSize, centerY );
                 }
 
                 fillProg.draw( gl, fillPath, lineColor );
