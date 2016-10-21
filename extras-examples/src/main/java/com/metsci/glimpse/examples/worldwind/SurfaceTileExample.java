@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;

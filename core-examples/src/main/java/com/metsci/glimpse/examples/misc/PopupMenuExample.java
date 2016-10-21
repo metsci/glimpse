@@ -28,92 +28,111 @@ package com.metsci.glimpse.examples.misc;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
-import com.metsci.glimpse.examples.heatmap.HeatMapExample;
+import com.metsci.glimpse.examples.layout.SimpleLayoutExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
- * Tests the capability of SwingGlimpseCanvas to move between JFrames.
- * This capability can be important when using Glimpse with docking
- * frameworks.
+ * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
  *
- * @author borkholder
+ * @author ulman
  */
-public class SwingMoveCanvasTest
+public class PopupMenuExample
 {
+    private static final Logger logger = Logger.getLogger( PopupMenuExample.class.getName( ) );
+
     public static void main( String[] args ) throws Exception
     {
-        // create a canvas and a plot
         final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( );
-        GlimpseLayout plot = new HeatMapExample( ).getLayout( );
+        GlimpseLayout plot = buildPlot( canvas );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         // attach a repaint manager which repaints the canvas in a loop
         new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
 
-        // create two frames
-        final JFrame frame = makeFrame( 0, 0, 800, 800 );
-        final JFrame frame2 = makeFrame( 800, 0, 800, 800 );
+        final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
 
-        // add the GlimpseCanvas to one of the frames
-        // this must be done on the Swing EDT to avoid JOGL crashes
-        // when removing the canvas from the frame
-        SwingUtilities.invokeAndWait( new Runnable( )
+        frame.addWindowListener( new WindowAdapter( )
         {
             @Override
-            public void run( )
+            public void windowClosing( WindowEvent e )
             {
-                frame.add( canvas );
+                canvas.disposeAttached( );
             }
         } );
 
-        // periodically switch the canvas between the frames
-        // Swing actions must be called on the EventDispatch thread
-        new Timer( 1000, new ActionListener( )
-        {
-            boolean toc = true;
-
-            @Override
-            public void actionPerformed( ActionEvent e )
-            {
-                if ( toc )
-                {
-                    frame.remove( canvas );
-                    frame2.add( canvas );
-
-                }
-                else
-                {
-                    frame2.remove( canvas );
-                    frame.add( canvas );
-                }
-
-                frame2.validate( );
-                frame.validate( );
-
-                toc = !toc;
-            }
-        } ).start( );
-    }
-
-    public static JFrame makeFrame( int x, int y, int width, int height )
-    {
-        JFrame frame = new JFrame( "Glimpse Example (Swing)" );
+        frame.add( canvas );
 
         frame.pack( );
-        frame.setSize( width, height );
-        frame.setLocation( x, y );
+        frame.setSize( 800, 800 );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible( true );
 
-        return frame;
+        return;
     }
+
+    protected static GlimpseLayout buildPlot( final NewtSwingGlimpseCanvas canvas ) throws Exception
+    {
+        GlimpseLayout layout = new SimpleLayoutExample( ).getLayout( );
+
+        final JPopupMenu _popupMenu = createPopupMenu( );
+
+        canvas.getGLWindow( ).addMouseListener( new MouseAdapter( )
+        {
+            @Override
+            public void mouseClicked( MouseEvent event )
+            {
+                if ( event.getButton( ) == MouseEvent.BUTTON3 )
+                {
+                    _popupMenu.show( canvas, event.getX( ), event.getY( ) );
+                }
+            }
+        } );
+
+        return layout;
+    }
+
+    private static JPopupMenu createPopupMenu( )
+    {
+        JPopupMenu popupMenu = new JPopupMenu( );
+
+        final JRadioButtonMenuItem item1 = new JRadioButtonMenuItem( "Item1", false );
+        item1.addActionListener( new ActionListener( )
+        {
+            @Override
+            public void actionPerformed( ActionEvent actionEvent )
+            {
+                logger.info( "clicked item1" );
+            }
+        } );
+
+        final JRadioButtonMenuItem item2 = new JRadioButtonMenuItem( "Item2", false );
+        item2.addActionListener( new ActionListener( )
+        {
+            @Override
+            public void actionPerformed( ActionEvent actionEvent )
+            {
+                logger.info( "clicked item2" );
+            }
+        } );
+
+        popupMenu.add( item1 );
+        popupMenu.add( item2 );
+
+        return popupMenu;
+    }
+
 }

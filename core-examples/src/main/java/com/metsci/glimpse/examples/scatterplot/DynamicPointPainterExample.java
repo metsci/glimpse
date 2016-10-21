@@ -24,64 +24,78 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.misc;
+package com.metsci.glimpse.examples.scatterplot;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+
+import java.util.Collection;
+import java.util.logging.Logger;
+
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
-import com.metsci.glimpse.plot.EmptyPlot2D;
+import com.metsci.glimpse.painter.info.FpsPainter;
+import com.metsci.glimpse.painter.shape.DynamicPointSetPainter;
+import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkPointAccumulator;
+import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
+ * <p>Demonstrates use of DynamicPointSetPainter. This painter is useful when painting
+ * large sets of points which can change dynamically and must be individually colored.</p>
+ *
+ * <p>TrackPainter is another option for painting large numbers of points, but it can only
+ * efficiently draw large groups of points with a single color. ShadedPointPainter allows
+ * even more control over the coloring of points (via a shader)  but does not allow easy
+ * dynamic addition and removal of points.</p>
+ *
  * @author ulman
- * @see com.metsci.glimpse.examples.scatterplot.DynamicPointPainterExample
  */
-public class DynamicLinePainterExample implements GlimpseLayoutProvider
+public class DynamicPointPainterExample implements GlimpseLayoutProvider
 {
+    private static final Logger logger = Logger.getLogger( DynamicPointPainterExample.class.getName( ) );
+
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new DynamicLinePainterExample( ) );
+        Example.showWithSwing( new DynamicPointPainterExample( ) );
     }
 
     @Override
-    public EmptyPlot2D getLayout( )
+    public SimplePlot2D getLayout( )
     {
-        // create a simple pre-built Glimpse plot
-        EmptyPlot2D plot = new EmptyPlot2D( );
+        SimplePlot2D plot = new SimplePlot2D( );
 
-        // set the x and y axis bounds
         plot.getAxis( ).set( -1, 2, -1, 2 );
 
-        // create a painter to display dynamically colored lines
-        final DynamicLineSetPainter painter = new DynamicLineSetPainter( );
+        final DynamicPointSetPainter painter = new DynamicPointSetPainter( );
 
-        // tell the painter to display dotted lines with the provided stipple pattern
-        painter.setDotted( 2, ( short ) 0xAAAA );
+        painter.setPointSize( 10f );
 
         plot.addPainter( painter );
+        plot.addPainter( new FpsPainter( ) );
 
         ( new Thread( )
         {
             int count = 0;
 
+            @Override
             public void run( )
             {
                 try
                 {
-
-                    while ( true )
+                    while ( count < 50000 )
                     {
-                        BulkLineAccumulator accum = new BulkLineAccumulator( );
+                        BulkPointAccumulator accum = new BulkPointAccumulator( );
 
                         float[] color = GlimpseColor.fromColorRgba( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) );
 
-                        for ( int i = 0; i < 20; i++ )
+                        for ( int i = 0; i < 500; i++ )
                         {
-                            accum.add( count++, ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), color );
+                            accum.add( count++, ( float ) Math.random( ), ( float ) Math.random( ), color );
                         }
 
-                        painter.putLines( accum );
+                        painter.putPoints( accum );
 
                         try
                         {
@@ -90,8 +104,9 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
                         catch ( InterruptedException e )
                         {
                         }
-                    }
 
+                        logger.info( "Total Points: " + count );
+                    }
                 }
                 catch ( Exception e )
                 {
@@ -99,6 +114,23 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
                 }
             }
         } ).start( );
+
+        plot.addAxisListener( new RateLimitedAxisListener2D( )
+        {
+            @Override
+            public void axisUpdatedRateLimited( Axis2D axis )
+            {
+                double centerX = axis.getAxisX( ).getSelectionCenter( );
+                double sizeX = axis.getAxisX( ).getSelectionSize( );
+
+                double centerY = axis.getAxisY( ).getSelectionCenter( );
+                double sizeY = axis.getAxisY( ).getSelectionSize( );
+
+                Collection<Object> selection = painter.getGeoRange( centerX - sizeX / 2.0, centerX + sizeX / 2.0, centerY - sizeY / 2.0, centerY + sizeY / 2.0 );
+
+                logInfo( logger, "Selected Ids: %s", selection );
+            }
+        } );
 
         return plot;
     }

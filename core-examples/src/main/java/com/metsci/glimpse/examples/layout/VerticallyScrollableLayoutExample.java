@@ -42,7 +42,7 @@ import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
-import com.metsci.glimpse.examples.stacked.CollapsibleTimelinePlotExample;
+import com.metsci.glimpse.examples.timeline.CollapsibleTimelinePlotExample;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;

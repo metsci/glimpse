@@ -24,46 +24,75 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.projection;
+package com.metsci.glimpse.examples.heatmap;
 
+import static com.metsci.glimpse.axis.tagged.Tag.TAG_COLOR_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+
+import java.util.Arrays;
+
+import com.google.common.collect.Lists;
+import com.metsci.glimpse.axis.tagged.OrderedConstraint;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
-import com.metsci.glimpse.painter.texture.HeatMapPainter;
+import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.plot.TaggedColorAxisPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.GenericProjection;
+import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
- * Demonstrates the ability to provide an array of arbitrary data
- * coordinates to use to position a Glimpse texture. Glimpse also
- * provides a number of specialized texture transformations (such
- * as polar and flat tangent plane).
+ * A variant of the basic HeatMapExample with tagged axes for controlling the color scale.
  *
  * @author ulman
+ * @see HeatMapExample
  */
-public class GenericProjectionExample implements GlimpseLayoutProvider
+public class TaggedHeatMapExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new GenericProjectionExample( ) );
+        Example.showWithSwing( new TaggedHeatMapExample( ) );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
-        // create a premade heat map window
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
+    TaggedHeatMapPainter heatmap;
 
-        // set axis labels and chart title
-        plot.setTitle( "Generic Projection Example" );
-        plot.setAxisLabelX( "x axis" );
-        plot.setAxisLabelY( "y axis" );
+    public ColorAxisPlot2D getLayout( ColorGradient colorGradient )
+    {
+        // create a heat map plot with three custom modifications:
+        // 1) Use a TaggedAxis1D for the z axis, allowing the addition of custom, draggable tag points
+        // 2) Use a MouseAdapter which knows about tagged axes for the z axis
+        // 3) Use a painter which knows about tagged axes for the z axis painter
+        TaggedColorAxisPlot2D plot = new TaggedColorAxisPlot2D( );
+
+        // get the tagged z axis
+        TaggedAxis1D axisZ = plot.getAxisZ( );
+
+        // add some named tags at specific points along the axis
+        // also add a custom "attribute" to each tag which specifies the relative (0 to 1)
+        // point along the color scale which the tag is attached to
+        // also add a custom "attribute" which defines the display color of the tag
+        axisZ.addTag( "T1", 50.0 ).setAttribute( TEX_COORD_ATTR, 0.0f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
+        axisZ.addTag( "T2", 300.0 ).setAttribute( TEX_COORD_ATTR, 0.3f );
+        axisZ.addTag( "T3", 500.0 ).setAttribute( TEX_COORD_ATTR, 0.6f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getBlue( ) );
+        axisZ.addTag( "T4", 600.0 ).setAttribute( TEX_COORD_ATTR, 0.8f );
+        axisZ.addTag( "T5", 800.0 ).setAttribute( TEX_COORD_ATTR, 1.0f ).setAttribute( TAG_COLOR_ATTR, GlimpseColor.getRed( ) );
+
+        // add a constraint which prevents dragging the tags past one another
+        axisZ.addConstraint( new OrderedConstraint( "C1", 20.0, Arrays.asList( "T1", "T2", "T3", "T4", "T5" ) ) );
+
+        // set border and offset sizes in pixels
+        plot.setBorderSize( 15 );
+        plot.setAxisSizeX( 30 );
+        plot.setAxisSizeY( 40 );
+        plot.setTitleHeight( 0 );
 
         // set the x, y, and z initial axis bounds
         plot.setMinX( 0.0f );
@@ -85,28 +114,7 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
         double[][] data = HeatMapExample.generateData( 1000, 1000 );
 
         // generate a projection indicating how the data should be mapped to plot coordinates
-        // here we use a GenericProjection which simply specifies a grid of vertex coordinates
-        // between which the texture data should be linearly interpolated
-        // the grid below consists of six points: (-10, 30), (1200, 100), (0, 1000),
-        // (1000, 1000), (-100, 1500), and (500, 2500).
-
-        double[][] vertexX = new double[2][3];
-        vertexX[0][0] = -10;
-        vertexX[1][0] = 1200;
-        vertexX[0][1] = 0;
-        vertexX[1][1] = 1000;
-        vertexX[0][2] = -100;
-        vertexX[1][2] = 500;
-
-        double[][] vertexY = new double[2][3];
-        vertexY[0][0] = 30;
-        vertexY[1][0] = 100;
-        vertexY[0][1] = 1000;
-        vertexY[1][1] = 2000;
-        vertexY[0][2] = 1500;
-        vertexY[1][2] = 2500;
-
-        Projection projection = new GenericProjection( vertexX, vertexY );
+        Projection projection = new FlatProjection( 0, 1000, 0, 1000 );
 
         // create an OpenGL texture wrapper object
         FloatTextureProjected2D texture = new FloatTextureProjected2D( 1000, 1000 );
@@ -117,10 +125,13 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
 
         // setup the color map for the painter
         ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
+        colors.setColorGradient( colorGradient );
 
         // create a painter to display the heatmap data
-        HeatMapPainter heatmap = new HeatMapPainter( plot.getAxisZ( ) );
+        // this heatmap painter knows about axis tags
+        heatmap = new TaggedHeatMapPainter( axisZ );
+        heatmap.setDiscardAbove( true );
+        heatmap.setDiscardBelow( true );
 
         // add the heatmap data and color scale to the painter
         heatmap.setData( texture );
@@ -139,9 +150,26 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
         CursorTextZPainter cursorPainter = new CursorTextZPainter( );
         plot.addPainter( cursorPainter );
 
+        // offset the text by the size of the selection box
+        cursorPainter.setOffsetBySelectionSize( true );
+
         // tell the cursor painter what texture to report data values from
         cursorPainter.setTexture( texture );
 
         return plot;
+    }
+
+    @Override
+    public ColorAxisPlot2D getLayout( )
+    {
+        // demonstrates three possible color maps, see ColorGradients for others
+        return getLayout( ColorGradients.customMap( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ), GlimpseColor.getMagenta( ) ) ) );
+        //return getLayout( ColorGradients.lighten( ColorGradients.winter, .25 ) );
+        //return getLayout( ColorGradients.nColorFade( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ) ) ) );
+    }
+
+    public GlimpsePainter getPainter( )
+    {
+        return heatmap;
     }
 }

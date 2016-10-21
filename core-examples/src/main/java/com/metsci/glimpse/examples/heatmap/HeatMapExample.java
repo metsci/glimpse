@@ -24,46 +24,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.projection;
+package com.metsci.glimpse.examples.heatmap;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.GenericProjection;
+import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
- * Demonstrates the ability to provide an array of arbitrary data
- * coordinates to use to position a Glimpse texture. Glimpse also
- * provides a number of specialized texture transformations (such
- * as polar and flat tangent plane).
+ * A square heat map plot with adjustable color scale. Uses GLSL shaders
+ * and textures to provide dynamic adjustment of mapping from data value
+ * to color.
  *
  * @author ulman
  */
-public class GenericProjectionExample implements GlimpseLayoutProvider
+public class HeatMapExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new GenericProjectionExample( ) );
+        Example.showWithSwing( new HeatMapExample( ) );
     }
 
+    protected HeatMapPainter heatmapPainter;
+    protected CursorTextZPainter cursorPainter;
+
     @Override
-    public GlimpseLayout getLayout( ) throws Exception
+    public ColorAxisPlot2D getLayout( )
     {
         // create a premade heat map window
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
+        ColorAxisPlot2D plot = newPlot( );
 
         // set axis labels and chart title
-        plot.setTitle( "Generic Projection Example" );
+        plot.setTitle( "Heat Map Example" );
         plot.setAxisLabelX( "x axis" );
         plot.setAxisLabelY( "y axis" );
+
+        // set border and offset sizes in pixels
+        plot.setBorderSize( 30 );
+        plot.setAxisSizeX( 40 );
+        plot.setAxisSizeY( 60 );
 
         // set the x, y, and z initial axis bounds
         plot.setMinX( 0.0f );
@@ -75,38 +81,90 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
         plot.setMinZ( 0.0f );
         plot.setMaxZ( 1000.0f );
 
+        //plot.setAbsoluteMinY( 0 );
+
         // lock the aspect ratio of the x and y axis to 1 to 1
         plot.lockAspectRatioXY( 1.0f );
 
         // set the size of the selection box to 100.0 units
         plot.setSelectionSize( 100.0f );
 
+        // show minor tick marks on all the plot axes
+        plot.setShowMinorTicks( true );
+        plot.setMinorTickCount( 9 );
+
+        // create a heat map painter
+        heatmapPainter = newHeatMapPainter( plot.getAxisZ( ) );
+
+        // add the painter to the plot
+        plot.addPainter( heatmapPainter );
+
+        // load the color map into the plot (so the color scale is displayed on the z axis)
+        plot.setColorScale( heatmapPainter.getColorScale( ) );
+
+        // create a painter which displays the cursor position and data value under the cursor
+        // add it to the foreground layer so that it draws on top of the plot data
+        // this is equivalent to: plot.addPainter( cursorPainter, Plot2D.FOREGROUND_LAYER )
+        cursorPainter = new CursorTextZPainter( );
+        plot.addPainterForeground( cursorPainter );
+
+        // tell the cursor painter what texture to report data values from
+        cursorPainter.setTexture( heatmapPainter.getData( ) );
+
+        return plot;
+    }
+
+    protected ColorAxisPlot2D newPlot( )
+    {
+        return new ColorAxisPlot2D( );
+    }
+
+    public CursorTextZPainter getCursorPainter( )
+    {
+        return cursorPainter;
+    }
+
+    public HeatMapPainter getPainter( )
+    {
+        return heatmapPainter;
+    }
+
+    public static double[][] generateData( int sizeX, int sizeY )
+    {
+        double[][] data = new double[sizeX][sizeY];
+
+        for ( int x = 0; x < sizeX; x++ )
+        {
+            for ( int y = 0; y < sizeY; y++ )
+            {
+                data[x][y] = Math.random( ) * 100 + ( x * y ) / 1000d;
+            }
+        }
+
+        return data;
+    }
+
+    public static ColorTexture1D newColorTexture( )
+    {
+        // setup the color map for the painter
+        ColorTexture1D colors = new ColorTexture1D( 1024 );
+        colors.setColorGradient( ColorGradients.accent );
+
+        return colors;
+    }
+
+    public static HeatMapPainter newHeatMapPainter( Axis1D axis )
+    {
+        return newHeatMapPainter( newColorTexture( ), axis );
+    }
+
+    public static HeatMapPainter newHeatMapPainter( ColorTexture1D colorScale, Axis1D axis )
+    {
         // generate some data to display
-        double[][] data = HeatMapExample.generateData( 1000, 1000 );
+        double[][] data = generateData( 1000, 1000 );
 
         // generate a projection indicating how the data should be mapped to plot coordinates
-        // here we use a GenericProjection which simply specifies a grid of vertex coordinates
-        // between which the texture data should be linearly interpolated
-        // the grid below consists of six points: (-10, 30), (1200, 100), (0, 1000),
-        // (1000, 1000), (-100, 1500), and (500, 2500).
-
-        double[][] vertexX = new double[2][3];
-        vertexX[0][0] = -10;
-        vertexX[1][0] = 1200;
-        vertexX[0][1] = 0;
-        vertexX[1][1] = 1000;
-        vertexX[0][2] = -100;
-        vertexX[1][2] = 500;
-
-        double[][] vertexY = new double[2][3];
-        vertexY[0][0] = 30;
-        vertexY[1][0] = 100;
-        vertexY[0][1] = 1000;
-        vertexY[1][1] = 2000;
-        vertexY[0][2] = 1500;
-        vertexY[1][2] = 2500;
-
-        Projection projection = new GenericProjection( vertexX, vertexY );
+        Projection projection = new FlatProjection( 0, 1000, 0, 1000 );
 
         // create an OpenGL texture wrapper object
         FloatTextureProjected2D texture = new FloatTextureProjected2D( 1000, 1000 );
@@ -115,33 +173,13 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
         texture.setProjection( projection );
         texture.setData( data );
 
-        // setup the color map for the painter
-        ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
-
         // create a painter to display the heatmap data
-        HeatMapPainter heatmap = new HeatMapPainter( plot.getAxisZ( ) );
+        HeatMapPainter heatmapPainter = new HeatMapPainter( axis );
 
         // add the heatmap data and color scale to the painter
-        heatmap.setData( texture );
-        heatmap.setColorScale( colors );
+        heatmapPainter.setData( texture );
+        heatmapPainter.setColorScale( colorScale );
 
-        // add the painter to the plot
-        plot.addPainter( heatmap );
-
-        // load the color map into the plot (so the color scale is displayed on the z axis)
-        plot.setColorScale( colors );
-
-        // add the painter to the plot
-        plot.addPainter( heatmap );
-
-        // create a painter which displays the cursor position and data value under the cursor
-        CursorTextZPainter cursorPainter = new CursorTextZPainter( );
-        plot.addPainter( cursorPainter );
-
-        // tell the cursor painter what texture to report data values from
-        cursorPainter.setTexture( texture );
-
-        return plot;
+        return heatmapPainter;
     }
 }

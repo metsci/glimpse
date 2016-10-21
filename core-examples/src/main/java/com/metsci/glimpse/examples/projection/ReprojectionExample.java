@@ -40,7 +40,7 @@ import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;

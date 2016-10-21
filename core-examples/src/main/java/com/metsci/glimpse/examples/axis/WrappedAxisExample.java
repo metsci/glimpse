@@ -35,7 +35,7 @@ import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;

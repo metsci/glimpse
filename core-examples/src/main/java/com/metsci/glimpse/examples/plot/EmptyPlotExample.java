@@ -24,59 +24,62 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.layout;
+package com.metsci.glimpse.examples.plot;
 
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.info.MinimapLayout;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.painter.decoration.BorderPainter;
+import com.metsci.glimpse.painter.decoration.CrosshairPainter;
+import com.metsci.glimpse.painter.decoration.GridPainter;
+import com.metsci.glimpse.plot.Plot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
- * Demonstrates use of MinimapLayout to create a miniature navigation
- * area for any plot. This navigation area can be used to re-center the
- * main plot and displays a selection box indicating the axis bounds
- * of the main plot.
+ * Demonstrates construction of a plot from scratch, starting with
+ * an EmptyFrame and adding custom painters to create a basic plot
+ * with no data.
+ *
+ * This approach is a good one if the default painters that the
+ * other frames in the com.metsci.glimpse.frame.swt package have
+ * unwanted painters.
  *
  * @author ulman
  */
-public class MiniMapLayoutExample implements GlimpseLayoutProvider
+public class EmptyPlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new MiniMapLayoutExample( ) );
+        Example.showWithSwing( new EmptyPlotExample( ) );
     }
 
     @Override
     public GlimpseLayout getLayout( )
     {
-        // create a plot using the HeatMapExample
-        TaggedHeatMapExample example = new TaggedHeatMapExample( );
-        ColorAxisPlot2D plot = example.getLayout( );
+        Plot2D plot = new Plot2D( "plot" );
 
-        // turn off the selection painter
-        plot.getCrosshairPainter( ).showSelectionBox( false );
+        GlimpseLayout plotLayout = plot.getLayoutCenter( );
 
-        // create a MinimapLayout
-        MinimapLayout mini = new MinimapLayout( );
+        // add a painter to paint a solid dark background on the plot
+        plotLayout.addPainter( new BackgroundPainter( false ) );
 
-        // add the MinimapLayout to the center Layout of the ColorAxisPlot2D
-        plot.getLayoutCenter( ).addLayout( mini );
+        // add a painter to display grid lines
+        GridPainter gridPainter = new GridPainter( plot.getLabelHandlerX( ), plot.getLabelHandlerY( ) );
+        plotLayout.addPainter( gridPainter );
 
-        // set the axis bounds of the Minimap
-        // (the Minimap will always be fixed at 0 to 1000 regardless of how
-        //  the main plot is zoomed)
-        mini.setBounds( 0, 1000, 0, 1000 );
+        // add a painter to display mouse selection crosshairs
+        CrosshairPainter crosshairPainter = new CrosshairPainter( );
+        crosshairPainter.setCursorColor( GlimpseColor.getBlack( ) );
+        plotLayout.addPainter( crosshairPainter );
 
-        // set the position and size of the Minimap in pixels
-        // within the ColorAxisPlot2D
-        mini.setPosition( 10, 10, 100, 100 );
+        // add a painter to paint a simple line border on the plot
+        plotLayout.addPainter( new BorderPainter( ).setColor( GlimpseColor.getBlack( ) ) );
 
-        // add the painter to display in the Minimap
-        // in this case we reuse the painter displaying the heat map
-        // in the main ColorAxisPlot2D
-        mini.addPainter( example.getPainter( ) );
+        // add axis and plot labels
+        plot.setAxisLabelX( "Axis X" );
+        plot.setAxisLabelY( "Axis Y" );
+        plot.setTitle( "Plot Title" );
 
         return plot;
     }

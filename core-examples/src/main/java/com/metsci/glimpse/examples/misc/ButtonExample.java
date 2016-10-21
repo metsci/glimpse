@@ -29,7 +29,7 @@ package com.metsci.glimpse.examples.misc;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -73,7 +73,7 @@ public class ButtonExample implements GlimpseLayoutProvider
         button.addPainter( new SimpleTextPainter( ).setText( "Button" ).setHorizontalPosition( HorizontalPosition.Center ).setVerticalPosition( VerticalPosition.Center ) );
 
         // create a BorderPainter to draw a solid color border around the GlimpseLayout
-        button.addPainter( new BorderPainter( ).setColor( GlimpseColor.fromColorRgb( 0.2f, 0.2f, 0.2f ) ).setLineWidth( 3.0f ).setDrawBottom( false ) );
+        button.addPainter( new BorderPainter( ).setColor( GlimpseColor.fromColorRgb( 0.2f, 0.2f, 0.2f ) ).setLineWidth( 3.0f ) );
 
         // set the MIG Layout constraints for the GlimpseLayout (see http://migcalendar.com/miglayout/cheatsheet.html for
         // a great MIG Layout guide). These constraints will position the GlimpseLayout button floating in the upper

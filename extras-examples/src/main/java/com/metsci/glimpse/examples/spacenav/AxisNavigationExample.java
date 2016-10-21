@@ -27,7 +27,7 @@
 package com.metsci.glimpse.examples.spacenav;
 
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;

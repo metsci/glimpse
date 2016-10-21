@@ -24,20 +24,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.examples.swt;
+package com.metsci.glimpse.examples.timeline;
 
-import com.metsci.glimpse.examples.heatmap.HeatMapExample;
+import java.util.TimeZone;
 
-/**
- * Demonstrates how any example class which implements GlimpseLayoutProvider
- * can be used inside SWT as well as Swing.
- *
- * @author ulman
- */
-public class SwtHeatMapExample extends HeatMapExample
+import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
+import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
+
+public class MultipleTimelineExample extends CollapsibleTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception
     {
-        SwtExample.showWithSwt( new SwtHeatMapExample( ) );
+        Example.showWithSwing( new MultipleTimelineExample( ) );
+    }
+
+    @Override
+    public StackedTimePlot2D getLayout( )
+    {
+        StackedTimePlot2D plot = super.getLayout( );
+
+        // set up two timelines, one showing EST and one showing GMT time
+        TimelineInfo gmtTimeline = plot.getDefaultTimeline( );
+        gmtTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
+        gmtTimeline.getTimeZonePainter( ).setSizeText( "EST" );
+        // don't show the date labels for the GMT timeline
+        gmtTimeline.getAxisPainter( ).setShowDateLabels( false );
+        gmtTimeline.setSize( 25 );
+
+        // set up the additional timeline showing EST
+        TimelineInfo estTimeline = plot.createTimeline( );
+        estTimeline.setTimeZone( TimeZone.getTimeZone( "GMT-4:00" ) );
+        estTimeline.getTimeZonePainter( ).setText( "EST" );
+        estTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
+        estTimeline.getTimeZonePainter( ).setSizeText( "EST" );
+        estTimeline.setSize( 35 );
+
+        return plot;
     }
 }
