@@ -38,6 +38,7 @@ import javax.media.opengl.GL;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -129,24 +130,6 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         this.memberMap = new LinkedHashMap<GlimpsePainter, Member>( );
     }
 
-    protected GlimpseBounds getClippedBounds( GlimpseContext context )
-    {
-        int minX = Integer.MIN_VALUE;
-        int maxX = Integer.MAX_VALUE;
-        int minY = Integer.MIN_VALUE;
-        int maxY = Integer.MAX_VALUE;
-
-        for ( GlimpseBounds parentBounds : context.getTargetStack( ).getBoundsList( ) )
-        {
-            minX = Math.max( parentBounds.getX( ), minX );
-            maxX = Math.min( parentBounds.getX( ) + parentBounds.getWidth( ), maxX );
-            minY = Math.max( parentBounds.getY( ), minY );
-            maxY = Math.min( parentBounds.getY( ) + parentBounds.getHeight( ), maxY );
-        }
-
-        return new GlimpseBounds( minX, minY, maxX - minX, maxY - minY );
-    }
-
     public void paintTo( GlimpseContext context )
     {
         final int[] scale = context.getSurfaceScale( );
@@ -155,7 +138,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         GL gl = context.getGL( );
 
         GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
-        GlimpseBounds clippedBounds = getClippedBounds( context );
+        GlimpseBounds clippedBounds = GLUtils.getClippedBounds( context );
 
         if ( !clippedBounds.isValid( ) ) return;
 

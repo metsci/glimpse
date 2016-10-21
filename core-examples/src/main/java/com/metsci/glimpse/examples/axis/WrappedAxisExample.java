@@ -128,6 +128,7 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
                 }
             }
 
+            @Override
             public void doPaintTo( GlimpseContext context )
             {
                 GL3 gl = context.getGL( ).getGL3( );

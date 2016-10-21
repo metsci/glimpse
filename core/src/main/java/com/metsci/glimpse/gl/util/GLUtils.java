@@ -36,6 +36,8 @@ import javax.media.opengl.GLProfile;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -232,5 +234,39 @@ public class GLUtils
         {
             target.setLookAndFeel( laf );
         }
+    }
+
+    public static void setViewportAndScissor( GlimpseContext context )
+    {
+        final int[] scale = context.getSurfaceScale( );
+        final int scaleX = scale[0];
+        final int scaleY = scale[1];
+        GL gl = context.getGL( );
+
+        GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
+        GlimpseBounds clippedBounds = getClippedBounds( context );
+
+        gl.glEnable( GL.GL_SCISSOR_TEST );
+
+        gl.glViewport( bounds.getX( ) * scaleX, bounds.getY( ) * scaleY, bounds.getWidth( ) * scaleX, bounds.getHeight( ) * scaleY );
+        gl.glScissor( clippedBounds.getX( ) * scaleX, clippedBounds.getY( ) * scaleY, clippedBounds.getWidth( ) * scaleX, clippedBounds.getHeight( ) * scaleY );
+    }
+
+    public static GlimpseBounds getClippedBounds( GlimpseContext context )
+    {
+        int minX = Integer.MIN_VALUE;
+        int maxX = Integer.MAX_VALUE;
+        int minY = Integer.MIN_VALUE;
+        int maxY = Integer.MAX_VALUE;
+
+        for ( GlimpseBounds parentBounds : context.getTargetStack( ).getBoundsList( ) )
+        {
+            minX = Math.max( parentBounds.getX( ), minX );
+            maxX = Math.min( parentBounds.getX( ) + parentBounds.getWidth( ), maxX );
+            minY = Math.max( parentBounds.getY( ), minY );
+            maxY = Math.min( parentBounds.getY( ) + parentBounds.getHeight( ), maxY );
+        }
+
+        return new GlimpseBounds( minX, minY, maxX - minX, maxY - minY );
     }
 }
