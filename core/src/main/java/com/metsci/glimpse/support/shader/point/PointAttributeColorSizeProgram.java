@@ -32,6 +32,7 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLES1;
 import javax.media.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
@@ -138,10 +139,12 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         if ( on )
         {
             gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
+            if ( gl.isGL2( ) ) gl.glEnable( GLES1.GL_POINT_SPRITE );
         }
         else
         {
             gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
+            if ( gl.isGL2( ) ) gl.glDisable( GLES1.GL_POINT_SPRITE );
         }
     }
 

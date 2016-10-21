@@ -6,6 +6,7 @@ import static javax.media.opengl.GL.*;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLES1;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -82,6 +83,7 @@ public class PointFlatColorProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
+        if ( gl.isGL2( ) ) gl.glEnable( GLES1.GL_POINT_SPRITE );
     }
 
     public void setRgba( GL2ES2 gl, float[] rgba )
@@ -146,6 +148,7 @@ public class PointFlatColorProgram
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
+        if ( gl.isGL2( ) ) gl.glDisable( GLES1.GL_POINT_SPRITE );
     }
 
     public void dispose( GL2ES2 gl )
