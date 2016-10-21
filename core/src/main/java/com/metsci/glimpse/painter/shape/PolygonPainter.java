@@ -840,9 +840,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             // copy data from the host buffer into the device buffer
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 1)" );
             gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * 3 * GLUtils.BYTES_PER_FLOAT, xyTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-            GLErrorUtils.logGLError( logger, gl, "glBufferData Error" );
 
             loaded.glFillBufferInitialized = true;
             loaded.glFillBufferCurrentSize = totalSize;
@@ -861,9 +859,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             // update the device buffer with the new data
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 2)" );
             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * GLUtils.BYTES_PER_FLOAT, insertSize * 3 * GLUtils.BYTES_PER_FLOAT, xyTempBuffer.rewind( ) );
-            GLErrorUtils.logGLError( logger, gl, "glBufferSubData Error" );
 
             loaded.glFillBufferCurrentSize = sizeNeeded;
         }
@@ -936,19 +932,13 @@ public class PolygonPainter extends GlimpsePainterBase
 
             // copy data from the host buffer into the device buffer
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyHandle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 1)" );
             gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * FLOATS_PER_VERTEX * BYTES_PER_FLOAT, xyTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-            GLErrorUtils.logGLError( logger, gl, "glBufferData Error" );
 
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, flagHandle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 1)" );
             gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize, flagTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-            GLErrorUtils.logGLError( logger, gl, "glBufferData Error" );
 
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mileageHandle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 1)" );
             gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * BYTES_PER_FLOAT, mileageTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-            GLErrorUtils.logGLError( logger, gl, "glBufferData Error" );
 
             loaded.glLineBufferInitialized = true;
             loaded.glLineBufferCurrentSize = totalSize;
@@ -969,19 +959,13 @@ public class PolygonPainter extends GlimpsePainterBase
 
             // update the device buffer with the new data
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyHandle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 2)" );
             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * FLOATS_PER_VERTEX * BYTES_PER_FLOAT, insertSize * FLOATS_PER_VERTEX * BYTES_PER_FLOAT, xyTempBuffer.rewind( ) );
-            GLErrorUtils.logGLError( logger, gl, "glBufferSubData Error" );
 
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, flagHandle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 2)" );
             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize, insertSize, flagTempBuffer.rewind( ) );
-            GLErrorUtils.logGLError( logger, gl, "glBufferSubData Error" );
 
             gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mileageHandle );
-            GLErrorUtils.logGLError( logger, gl, "glBindBuffer Error  (Case 2)" );
             gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * BYTES_PER_FLOAT, insertSize * BYTES_PER_FLOAT, mileageTempBuffer.rewind( ) );
-            GLErrorUtils.logGLError( logger, gl, "glBufferSubData Error" );
 
             loaded.glLineBufferCurrentSize = sizeNeeded;
         }

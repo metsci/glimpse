@@ -46,7 +46,6 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -206,7 +205,6 @@ public class WrappedPainter extends GlimpsePainterBase
     protected void drawTexture( final GlimpseContext context, final Axis2D axis, final WrappedTextureBounds boundsX, final WrappedTextureBounds boundsY )
     {
         GL3 gl = context.getGL( ).getGL3( );
-        GLErrorUtils.logGLError( logger, gl, "Error in drawTexture 1" );
 
         // position the drawn data in non-wrapped coordinates
         // (since we've split up the image such that we don't have to worry about seams)
@@ -216,8 +214,6 @@ public class WrappedPainter extends GlimpsePainterBase
         // we don't necessarily use the whole texture, so only texture with the part we drew onto
         this.texCoordBuffer.clear( );
         this.texCoordBuffer.addQuad2f( 0, 0, ( float ) boundsX.getTextureSize( ) / ( float ) this.fbo.getWidth( ), ( float ) boundsY.getTextureSize( ) / ( float ) fbo.getHeight( ) );
-
-        GLErrorUtils.logGLError( logger, gl, "Error in drawTexture 2" );
 
         GLUtils.enableStandardBlending( gl );
         this.fbo.use( gl, this.fboTextureAttachment );

@@ -15,7 +15,6 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -195,12 +194,8 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        GLErrorUtils.logGLError( logger, gl, "pre" );
-
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
-
-        GLErrorUtils.logGLError( logger, gl, "post" );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
         gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, 0 );
@@ -241,9 +236,6 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         }
 
         gl.glUseProgram( 0 );
-
-        GLErrorUtils.logGLError( logger, gl, "Error in ColorTexture2DProgram.end" );
-
     }
 
     /**

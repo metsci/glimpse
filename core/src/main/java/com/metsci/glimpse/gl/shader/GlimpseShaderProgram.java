@@ -129,12 +129,9 @@ public class GlimpseShaderProgram
     {
         GL3 gl3 = gl.getGL3( );
 
-        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( )." );
-
         for ( GLUniformData uniform : uniforms )
         {
             this.state.uniform( gl3, uniform );
-            GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.uniform( ): " + uniform.getName( ) );
         }
     }
 

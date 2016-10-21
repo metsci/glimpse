@@ -36,7 +36,6 @@ import javax.media.opengl.GL3;
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.colormap.ColorMap;
@@ -287,8 +286,6 @@ public class PointSetPainter extends GlimpsePainterBase
             // copy data from the host memory buffer to the device
             gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
 
-            GLErrorUtils.logGLError( logger, gl, "Error allocating buffer in PointSetPainter" );
-
             useColorDevice = useColorHost;
             if ( useColorDevice )
             {
@@ -296,8 +293,6 @@ public class PointSetPainter extends GlimpsePainterBase
 
                 // copy data from the host memory buffer to the device
                 gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 4 * GLUtils.BYTES_PER_FLOAT, colorBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
-
-                GLErrorUtils.logGLError( logger, gl, "Error allocating buffer in PointSetPainter" );
             }
         }
 

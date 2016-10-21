@@ -46,7 +46,6 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 
 /**
  * A shader which colors a 2D data texture using values sampled from a color
@@ -84,8 +83,6 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         {
             this.inXy = gl.glGetAttribLocation( program, "inXy" );
             this.inS = gl.glGetAttribLocation( program, "inS" );
-
-            GLErrorUtils.logGLError( logger, gl, "Trouble in ColorMapProgram ProgramHandles" );
         }
     }
 
@@ -230,12 +227,8 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        GLErrorUtils.logGLError( logger, gl, "pre" );
-
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
         gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-        GLErrorUtils.logGLError( logger, gl, "post" );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo.buffer( gl ) );
         gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, sVbo.sealedOffset( ) );
@@ -248,25 +241,13 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        GLErrorUtils.logGLError( logger, gl, "pre" );
-
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-
-        GLErrorUtils.logGLError( logger, gl, "post0" );
-
         gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, 0 );
-
-        GLErrorUtils.logGLError( logger, gl, "post1" );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
         gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, 0 );
 
-        GLErrorUtils.logGLError( logger, gl, "post2" );
-
         gl.glDrawArrays( mode, first, count );
-
-        GLErrorUtils.logGLError( logger, gl, "post3" );
-
     }
 
     @Override
