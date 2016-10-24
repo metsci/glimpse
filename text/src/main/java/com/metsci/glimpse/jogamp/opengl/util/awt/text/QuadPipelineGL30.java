@@ -27,8 +27,12 @@
  */
 package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLContext;
 
 /**
  * {@link QuadPipeline} for use with OpenGL 3.
@@ -48,7 +52,6 @@ import javax.media.opengl.GL3;
 /*@NotThreadSafe*/
 public final class QuadPipelineGL30 extends AbstractQuadPipeline
 {
-
     /**
      * Name of point attribute in shader program.
      */
@@ -83,7 +86,9 @@ public final class QuadPipelineGL30 extends AbstractQuadPipeline
      * Vertex Array Object with vertex attribute state.
      */
     /*@Nonnegative*/
-    private final int vao;
+    private final Map<GLContext, Integer> vaoMap = new HashMap<>( );
+
+    private final int shaderProgram;
 
     /**
      * Constructs a {@link QuadPipelineGL30}.
@@ -96,27 +101,25 @@ public final class QuadPipelineGL30 extends AbstractQuadPipeline
     /*@VisibleForTesting*/
     public QuadPipelineGL30( /*@Nonnull*/ final GL3 gl, /*@Nonnegative*/ final int shaderProgram )
     {
-
         super( VERTS_PER_PRIM, PRIMS_PER_QUAD );
 
         Check.notNull( gl, "GL cannot be null" );
         Check.argument( shaderProgram > 0, "Shader program cannot be less than one" );
 
+        this.shaderProgram = shaderProgram;
         this.vbo = createVertexBufferObject( gl, BYTES_PER_BUFFER );
-        this.vao = createVertexArrayObject( gl, shaderProgram, vbo );
     }
 
     @Override
     public void beginRendering( /*@Nonnull*/ final GL gl )
     {
-
         super.beginRendering( gl );
 
         final GL3 gl3 = gl.getGL3( );
 
         // Bind the VBO and VAO
-        gl3.glBindBuffer( GL3.GL_ARRAY_BUFFER, vbo );
-        gl3.glBindVertexArray( vao );
+        gl3.glBindVertexArray( getVertexArrayObject( gl3, this.shaderProgram, this.vbo ) );
+        gl3.glBindBuffer( GL3.GL_ARRAY_BUFFER, this.vbo );
     }
 
     /**
@@ -128,51 +131,57 @@ public final class QuadPipelineGL30 extends AbstractQuadPipeline
      * @return OpenGL handle to resulting VAO
      */
     /*@Nonnegative*/
-    private static int createVertexArrayObject( /*@Nonnull*/ final GL3 gl, /*@Nonnegative*/ final int program, /*@Nonnegative*/ final int vbo )
+    private int getVertexArrayObject( /*@Nonnull*/ final GL3 gl, /*@Nonnegative*/ final int program, /*@Nonnegative*/ final int vbo )
     {
-
-        // Generate
-        final int[] handles = new int[1];
-        gl.glGenVertexArrays( 1, handles, 0 );
-        final int vao = handles[0];
-
-        // Bind
-        gl.glBindVertexArray( vao );
-        gl.glBindBuffer( GL3.GL_ARRAY_BUFFER, vbo );
-
-        // Points
-        final int pointLoc = gl.glGetAttribLocation( program, POINT_ATTRIB_NAME );
-        if ( pointLoc == -1 )
+        Integer vao = this.vaoMap.get( gl.getContext( ) );
+        if ( vao == null )
         {
-            throw new IllegalStateException( "Could not find point attribute location!" );
-        }
-        else
-        {
-            gl.glEnableVertexAttribArray( pointLoc );
-            gl.glVertexAttribPointer( pointLoc, // location
-                    FLOATS_PER_POINT, // number of components
-                    GL3.GL_FLOAT, // type
-                    false, // normalized
-                    STRIDE, // stride
-                    POINT_OFFSET ); // offset
-        }
+            // Generate
+            final int[] handles = new int[1];
+            gl.glGenVertexArrays( 1, handles, 0 );
+            final int vaoHandle = handles[0];
 
-        // Coords
-        final int coordLoc = gl.glGetAttribLocation( program, COORD_ATTRIB_NAME );
-        if ( coordLoc != -1 )
-        {
-            gl.glEnableVertexAttribArray( coordLoc );
-            gl.glVertexAttribPointer( coordLoc, // location
-                    FLOATS_PER_COORD, // number of components
-                    GL3.GL_FLOAT, // type
-                    false, // normalized
-                    STRIDE, // stride
-                    COORD_OFFSET ); // offset
-        }
+            // Bind
+            gl.glBindVertexArray( vaoHandle );
+            gl.glBindBuffer( GL3.GL_ARRAY_BUFFER, vbo );
 
-        // Unbind
-        gl.glBindBuffer( GL3.GL_ARRAY_BUFFER, 0 );
-        gl.glBindVertexArray( 0 );
+            // Points
+            final int pointLoc = gl.glGetAttribLocation( program, POINT_ATTRIB_NAME );
+            if ( pointLoc == -1 )
+            {
+                throw new IllegalStateException( "Could not find point attribute location!" );
+            }
+            else
+            {
+                gl.glEnableVertexAttribArray( pointLoc );
+                gl.glVertexAttribPointer( pointLoc, // location
+                        FLOATS_PER_POINT, // number of components
+                        GL3.GL_FLOAT, // type
+                        false, // normalized
+                        STRIDE, // stride
+                        POINT_OFFSET ); // offset
+            }
+
+            // Coords
+            final int coordLoc = gl.glGetAttribLocation( program, COORD_ATTRIB_NAME );
+            if ( coordLoc != -1 )
+            {
+                gl.glEnableVertexAttribArray( coordLoc );
+                gl.glVertexAttribPointer( coordLoc, // location
+                        FLOATS_PER_COORD, // number of components
+                        GL3.GL_FLOAT, // type
+                        false, // normalized
+                        STRIDE, // stride
+                        COORD_OFFSET ); // offset
+            }
+
+            // Unbind
+            gl.glBindVertexArray( 0 );
+            gl.glBindBuffer( GL3.GL_ARRAY_BUFFER, 0 );
+
+            this.vaoMap.put( gl.getContext( ), vaoHandle );
+            vao = vaoHandle;
+        }
 
         return vao;
     }
@@ -185,18 +194,33 @@ public final class QuadPipelineGL30 extends AbstractQuadPipeline
 
         final GL3 gl3 = gl.getGL3( );
 
-        // Delete VBO and VAO
+        // Delete VBO
         final int[] handles = new int[1];
         handles[0] = vbo;
         gl3.glDeleteBuffers( 1, handles, 0 );
-        handles[0] = vao;
-        gl3.glDeleteVertexArrays( 1, handles, 0 );
+
+        // Delete the VAO in each context where the QuadPipeline has been used
+        if ( !this.vaoMap.isEmpty( ) )
+        {
+            try
+            {
+                for ( GLContext context : this.vaoMap.keySet( ) )
+                {
+                    context.makeCurrent( );
+                    handles[0] = this.vaoMap.get( context );
+                    gl3.glDeleteVertexArrays( 1, handles, 0 );
+                }
+            }
+            finally
+            {
+                gl.getContext( ).makeCurrent( );
+            }
+        }
     }
 
     @Override
     protected void doAddQuad( /*@Nonnull*/ final Quad quad )
     {
-
         Check.notNull( quad, "Quad cannot be null" );
 
         // Add upper-left triangle
@@ -219,7 +243,6 @@ public final class QuadPipelineGL30 extends AbstractQuadPipeline
     @Override
     protected void doFlush( /*@Nonnull*/ final GL gl )
     {
-
         Check.notNull( gl, "GL cannot be null" );
 
         final GL3 gl3 = gl.getGL3( );
@@ -235,13 +258,13 @@ public final class QuadPipelineGL30 extends AbstractQuadPipeline
         gl3.glDrawArrays( GL3.GL_TRIANGLES, // mode
                 0, // first
                 getSizeInVertices( ) ); // count
+
         clear( );
     }
 
     @Override
     public void endRendering( /*@Nonnull*/ final GL gl )
     {
-
         super.endRendering( gl );
 
         final GL3 gl3 = gl.getGL3( );

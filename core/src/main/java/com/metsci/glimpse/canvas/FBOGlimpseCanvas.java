@@ -132,7 +132,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
 
     //XXX this link probably no longer relevant to 2.2.0
     // see: http://forum.jogamp.org/querying-textures-bound-to-default-draw-read-framebuffers-td4026564.html
-    public int getTextureUnit( )
+    public int getTextureName( )
     {
         return drawable.getColorbuffer( GL.GL_FRONT ).getName( );
     }
@@ -140,7 +140,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     public TextureProjected2D getProjectedTexture( )
     {
         Colorbuffer b = drawable.getColorbuffer( GL.GL_FRONT );
-        return new ExternalTextureProjected2D( getTextureUnit( ), b.getWidth( ), b.getHeight( ), false );
+        return new ExternalTextureProjected2D( b.getName( ), b.getWidth( ), b.getHeight( ), false );
     }
 
     public Texture getTexture( )

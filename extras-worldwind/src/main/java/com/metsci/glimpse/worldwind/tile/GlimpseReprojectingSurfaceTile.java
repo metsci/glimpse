@@ -111,7 +111,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
     @Override
     protected int getTextureHandle( )
     {
-        return reprojectCanvas.getTextureUnit( );
+        return reprojectCanvas.getTextureName( );
     }
 
     @Override
@@ -170,7 +170,7 @@ public class GlimpseReprojectingSurfaceTile extends GlimpseResizingSurfaceTile
 
             int width = offscreenCanvas.getTargetBounds( ).getWidth( );
             int height = offscreenCanvas.getTargetBounds( ).getHeight( );
-            int texHandle = offscreenCanvas.getTextureUnit( );
+            int texHandle = offscreenCanvas.getTextureName( );
 
             texture = new ExternalTextureProjected2D( texHandle, width, height, false )
             {

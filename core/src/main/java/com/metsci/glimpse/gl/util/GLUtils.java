@@ -49,12 +49,7 @@ public class GLUtils
 
     public static int defaultVertexAttributeArray( GL gl )
     {
-        if ( default_vao == 0 )
-        {
-            default_vao = genVertexAttributeArray( gl );
-        }
-
-        return default_vao;
+        return gl.getContext( ).getDefaultVAO( );
     }
 
     public static int genVertexAttributeArray( GL gl )

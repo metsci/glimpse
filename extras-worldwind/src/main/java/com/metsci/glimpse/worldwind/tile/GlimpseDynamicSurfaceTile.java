@@ -232,7 +232,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected int getTextureHandle( )
     {
-        return offscreenCanvas.getTextureUnit( );
+        return offscreenCanvas.getTextureName( );
     }
 
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )
