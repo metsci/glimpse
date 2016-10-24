@@ -125,8 +125,6 @@ public class LinkedHeatMapExample
         plot.setAbsoluteMinZ( -1000.0f );
         plot.setAbsoluteMaxZ( 2000.0f );
 
-        plot.lockAspectRatioXY( 1.0f );
-
         plot.setSelectionSize( 100.0f );
 
         // setup the color-map for the painter
