@@ -10,8 +10,8 @@ import javax.media.opengl.GLES1;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -140,9 +140,9 @@ public class PointArrayColorProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba )
+    public void draw( GL2ES2 gl, GLEditableBuffer xy, GLEditableBuffer rgba )
     {
-        draw( gl, GL_POINTS, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
+        draw( gl, GL_POINTS, xy.deviceBuffer( gl ), rgba.deviceBuffer( gl ), 0, xy.sizeFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )

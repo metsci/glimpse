@@ -57,7 +57,7 @@ import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
@@ -135,9 +135,9 @@ public class TrackPainter extends GlimpsePainterBase
     protected PointArrayColorSizeProgram pointArrayProg;
     protected PointFlatColorProgram pointFlatProg;
 
-    protected GLStreamingBufferBuilder pointXy;
-    protected GLStreamingBufferBuilder pointColor;
-    protected GLStreamingBufferBuilder pointSize;
+    protected GLEditableBuffer pointXy;
+    protected GLEditableBuffer pointColor;
+    protected GLEditableBuffer pointSize;
 
     protected ColorLineProgram labelLineProg;
     protected ColorLinePath labelLinePath;
@@ -167,9 +167,9 @@ public class TrackPainter extends GlimpsePainterBase
 
         this.pointFlatProg = new PointFlatColorProgram( );
         this.pointArrayProg = new PointArrayColorSizeProgram( );
-        this.pointXy = new GLStreamingBufferBuilder( );
-        this.pointColor = new GLStreamingBufferBuilder( );
-        this.pointSize = new GLStreamingBufferBuilder( );
+        this.pointXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.pointColor = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.pointSize = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.labelLineProg = new ColorLineProgram( );
         this.labelLinePath = new ColorLinePath( );
@@ -1219,15 +1219,15 @@ public class TrackPainter extends GlimpsePainterBase
                 {
                     if ( loaded.headPointOn )
                     {
-                        pointXy.addVertex2f( ( float ) loaded.headPosX, ( float ) loaded.headPosY );
-                        pointColor.addVertex4fv( loaded.headPointColor );
-                        pointSize.addVertex1f( loaded.headPointSize );
+                        pointXy.grow2f( ( float ) loaded.headPosX, ( float ) loaded.headPosY );
+                        pointColor.growNfv( loaded.headPointColor, 0, 4 );
+                        pointSize.grow1f( loaded.headPointSize );
                     }
 
                     if ( loaded.labelOn ) labelOn = true;
                 }
 
-                pointArrayProg.draw( gl, pointXy.getBuffer( gl ), pointColor.getBuffer( gl ), pointSize.getBuffer( gl ), 0, pointSize.numFloats( ) );
+                pointArrayProg.draw( gl, pointXy, pointColor, pointSize, 0, pointSize.sizeFloats( ) );
             }
             finally
             {

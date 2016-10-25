@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -33,7 +34,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
@@ -63,8 +64,8 @@ public class MapBorderPainter extends GlimpsePainterBase
     protected boolean savedOrientY = false;
 
     protected ArrayColorProgram fillProg;
-    protected GLStreamingBufferBuilder inXys;
-    protected GLStreamingBufferBuilder inRgba;
+    protected GLEditableBuffer inXys;
+    protected GLEditableBuffer inRgba;
 
     protected LineProgram lineProg;
     protected LineStyle lineStyle;
@@ -77,8 +78,8 @@ public class MapBorderPainter extends GlimpsePainterBase
 
         this.fillProg = new ArrayColorProgram( );
 
-        this.inXys = new GLStreamingBufferBuilder( );
-        this.inRgba = new GLStreamingBufferBuilder( );
+        this.inXys = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.inRgba = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.lineProg = new LineProgram( );
 
@@ -228,13 +229,13 @@ public class MapBorderPainter extends GlimpsePainterBase
             int pos1X = axisX.valueToScreenPixel( xPositions[i] );
             int pos2X = i == xPositions.length - 1 ? width : axisX.valueToScreenPixel( xPositions[i + 1] );
 
-            inXys.addQuad2f( pos1X, 0, pos2X, borderSize );
-            inRgba.addQuadSolidColor( color1 );
+            inXys.growQuad2f( pos1X, 0, pos2X, borderSize );
+            inRgba.growQuadSolidColor( color1 );
 
             float[] color2 = getColor( i, !orientX );
 
-            inXys.addQuad2f( pos1X, height - borderSize, pos2X, height );
-            inRgba.addQuadSolidColor( color2 );
+            inXys.growQuad2f( pos1X, height - borderSize, pos2X, height );
+            inRgba.growQuadSolidColor( color2 );
         }
 
         for ( int i = 0; i < yPositions.length; i++ )
@@ -244,13 +245,13 @@ public class MapBorderPainter extends GlimpsePainterBase
             int pos1Y = axisY.valueToScreenPixel( yPositions[i] );
             int pos2Y = i == yPositions.length - 1 ? height : axisY.valueToScreenPixel( yPositions[i + 1] );
 
-            inXys.addQuad2f( 0, pos1Y, borderSize, pos2Y );
-            inRgba.addQuadSolidColor( color1 );
+            inXys.growQuad2f( 0, pos1Y, borderSize, pos2Y );
+            inRgba.growQuadSolidColor( color1 );
 
             float[] color2 = getColor( i, !orientY );
 
-            inXys.addQuad2f( width - borderSize, pos1Y, width, pos2Y );
-            inRgba.addQuadSolidColor( color2 );
+            inXys.growQuad2f( width - borderSize, pos1Y, width, pos2Y );
+            inRgba.growQuadSolidColor( color2 );
         }
 
         addFillCorners( width, height );
@@ -308,15 +309,15 @@ public class MapBorderPainter extends GlimpsePainterBase
 
     private void addFillCorners( int width, int height )
     {
-        inXys.addQuad2f( 0, 0, borderSize, borderSize );
-        inXys.addQuad2f( 0, height, borderSize, height - borderSize );
-        inXys.addQuad2f( width, 0, width - borderSize, borderSize );
-        inXys.addQuad2f( width - borderSize, height - borderSize, width, height );
+        inXys.growQuad2f( 0, 0, borderSize, borderSize );
+        inXys.growQuad2f( 0, height, borderSize, height - borderSize );
+        inXys.growQuad2f( width, 0, width - borderSize, borderSize );
+        inXys.growQuad2f( width - borderSize, height - borderSize, width, height );
 
-        inRgba.addQuadSolidColor( innerColor );
-        inRgba.addQuadSolidColor( innerColor );
-        inRgba.addQuadSolidColor( innerColor );
-        inRgba.addQuadSolidColor( innerColor );
+        inRgba.growQuadSolidColor( innerColor );
+        inRgba.growQuadSolidColor( innerColor );
+        inRgba.growQuadSolidColor( innerColor );
+        inRgba.growQuadSolidColor( innerColor );
     }
 
     @Override

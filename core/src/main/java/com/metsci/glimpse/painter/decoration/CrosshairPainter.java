@@ -33,7 +33,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
@@ -71,7 +71,7 @@ public class CrosshairPainter extends GlimpsePainterBase
     protected boolean colorSet = false;
 
     protected FlatColorProgram flatProg;
-    protected GLStreamingBufferBuilder flatPath;
+    protected GLEditableBuffer flatPath;
 
     protected LineProgram lineProg;
     protected LineStyle lineStyle;
@@ -89,7 +89,7 @@ public class CrosshairPainter extends GlimpsePainterBase
         this.lineStyle.joinType = LineJoinType.JOIN_MITER;
 
         this.linePath = new LinePath( );
-        this.flatPath = new GLStreamingBufferBuilder( );
+        this.flatPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public void setCursorColor( float[] rgba )
@@ -242,7 +242,7 @@ public class CrosshairPainter extends GlimpsePainterBase
                     flatProg.setAxisOrtho( gl, axis );
 
                     flatPath.clear( );
-                    flatPath.addQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
+                    flatPath.growQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
 
                     flatProg.draw( gl, flatPath, shadeColor );
                 }

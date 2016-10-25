@@ -45,7 +45,7 @@ import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -69,8 +69,8 @@ public class WrappedPainter extends GlimpsePainterBase
     private TextureAttachment fboTextureAttachment;
     private int fboTextureUnit = 0;
 
-    private GLStreamingBufferBuilder vertCoordBuffer;
-    private GLStreamingBufferBuilder texCoordBuffer;
+    private GLEditableBuffer vertCoordBuffer;
+    private GLEditableBuffer texCoordBuffer;
     private ColorTexture2DProgram prog;
 
     private Axis2D dummyAxis;
@@ -132,8 +132,8 @@ public class WrappedPainter extends GlimpsePainterBase
                 this.fboTextureAttachment = this.fbo.attachTexture2D( gl, this.fboTextureUnit, true );
                 this.fbo.unbind( gl );
 
-                this.texCoordBuffer = new GLStreamingBufferBuilder( );
-                this.vertCoordBuffer = new GLStreamingBufferBuilder( );
+                this.texCoordBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+                this.vertCoordBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
                 this.prog = new ColorTexture2DProgram( );
             }
@@ -209,11 +209,11 @@ public class WrappedPainter extends GlimpsePainterBase
         // position the drawn data in non-wrapped coordinates
         // (since we've split up the image such that we don't have to worry about seams)
         this.vertCoordBuffer.clear( );
-        this.vertCoordBuffer.addQuad2f( ( float ) boundsX.getStartValue( ), ( float ) boundsY.getStartValue( ), ( float ) boundsX.getEndValue( ), ( float ) boundsY.getEndValue( ) );
+        this.vertCoordBuffer.growQuad2f( ( float ) boundsX.getStartValue( ), ( float ) boundsY.getStartValue( ), ( float ) boundsX.getEndValue( ), ( float ) boundsY.getEndValue( ) );
 
         // we don't necessarily use the whole texture, so only texture with the part we drew onto
         this.texCoordBuffer.clear( );
-        this.texCoordBuffer.addQuad2f( 0, 0, ( float ) boundsX.getTextureSize( ) / ( float ) this.fbo.getWidth( ), ( float ) boundsY.getTextureSize( ) / ( float ) fbo.getHeight( ) );
+        this.texCoordBuffer.growQuad2f( 0, 0, ( float ) boundsX.getTextureSize( ) / ( float ) this.fbo.getWidth( ), ( float ) boundsY.getTextureSize( ) / ( float ) fbo.getHeight( ) );
 
         GLUtils.enableStandardBlending( gl );
         this.fbo.use( gl, this.fboTextureAttachment );
@@ -224,7 +224,7 @@ public class WrappedPainter extends GlimpsePainterBase
             this.prog.setColor( context, GlimpseColor.getWhite( ) );
             this.prog.setTexture( context, fboTextureUnit );
 
-            this.prog.draw( context, GL.GL_TRIANGLES, this.vertCoordBuffer.getBuffer( gl ), this.texCoordBuffer.getBuffer( gl ), 0, this.texCoordBuffer.numFloats( ) / 2 );
+            this.prog.draw( context, GL.GL_TRIANGLES, this.vertCoordBuffer, this.texCoordBuffer, 0, this.texCoordBuffer.sizeFloats( ) / 2 );
         }
         finally
         {

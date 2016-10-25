@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -53,8 +54,8 @@ public class BorderPainter extends GlimpsePainterBase
     protected boolean drawLeft = true;
 
     protected FlatColorStippleProgram prog;
-    protected GLStreamingBufferBuilder xyBuilder;
-    protected GLStreamingBufferBuilder mileageBuilder;
+    protected GLEditableBuffer xyBuffer;
+    protected GLEditableBuffer mileageBuffer;
 
     protected float[] rgba = GlimpseColor.getBlack( );
     protected float thickness = 1.0f;
@@ -73,9 +74,8 @@ public class BorderPainter extends GlimpsePainterBase
     public BorderPainter( )
     {
         this.prog = new FlatColorStippleProgram( );
-        this.xyBuilder = new GLStreamingBufferBuilder( );
-        this.mileageBuilder = new GLStreamingBufferBuilder( );
-
+        this.xyBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.mileageBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public BorderPainter setCornerType( CornerType cornerType )
@@ -179,30 +179,30 @@ public class BorderPainter extends GlimpsePainterBase
             prog.setColor( gl, rgba );
             prog.setStipple( gl, stippleEnable, stippleFactor, stipplePattern );
 
-            xyBuilder.clear( );
-            mileageBuilder.clear( );
+            xyBuffer.clear( );
+            mileageBuffer.clear( );
 
             float mileage = 0;
 
             if ( drawBottom )
             {
                 // upper quad
-                xyBuilder.addVertex2f( 0, 0 );
-                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, inset_PX );
-                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, inset_PX );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, inset_PX );
 
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawLeft ? mileage + inset_PX : mileage );
-                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
 
                 // lower quad
-                xyBuilder.addVertex2f( 0, 0 );
-                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, inset_PX );
-                xyBuilder.addVertex2f( width, 0 );
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, inset_PX );
+                xyBuffer.grow2f( width, 0 );
 
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( width );
 
                 mileage += width;
             }
@@ -210,22 +210,22 @@ public class BorderPainter extends GlimpsePainterBase
             if ( drawRight )
             {
                 // upper quad
-                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuilder.addVertex2f( width - inset_PX, drawTop ? height - inset_PX : height );
-                xyBuilder.addVertex2f( width, height );
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width - inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( width, height );
 
-                mileageBuilder.addVertex1f( drawBottom ? mileage + inset_PX : mileage );
-                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
-                mileageBuilder.addVertex1f( mileage + height );
+                mileageBuffer.grow1f( drawBottom ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage + height );
 
                 // lower quad
-                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuilder.addVertex2f( width, height );
-                xyBuilder.addVertex2f( width, 0 );
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width, height );
+                xyBuffer.grow2f( width, 0 );
 
-                mileageBuilder.addVertex1f( drawBottom ? mileage + inset_PX : mileage );
-                mileageBuilder.addVertex1f( mileage + height );
-                mileageBuilder.addVertex1f( mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( mileage + height );
+                mileageBuffer.grow1f( mileage );
 
                 mileage += height;
             }
@@ -233,22 +233,22 @@ public class BorderPainter extends GlimpsePainterBase
             if ( drawTop )
             {
                 // upper quad
-                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
-                xyBuilder.addVertex2f( 0, height );
-                xyBuilder.addVertex2f( width, height );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                xyBuffer.grow2f( 0, height );
+                xyBuffer.grow2f( width, height );
 
-                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( mileage + width );
-                mileageBuilder.addVertex1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage + width );
+                mileageBuffer.grow1f( mileage );
 
                 // lower quad
-                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, height - inset_PX );
-                xyBuilder.addVertex2f( width, height );
-                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height - inset_PX );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                xyBuffer.grow2f( width, height );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height - inset_PX );
 
-                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawRight ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + inset_PX : mileage );
 
                 mileage += width;
             }
@@ -256,27 +256,27 @@ public class BorderPainter extends GlimpsePainterBase
             if ( drawLeft )
             {
                 // upper quad
-                xyBuilder.addVertex2f( 0, 0 );
-                xyBuilder.addVertex2f( 0, height );
-                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( 0, height );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
 
-                mileageBuilder.addVertex1f( mileage + height );
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawTop ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + inset_PX : mileage );
 
                 // lower quad
-                xyBuilder.addVertex2f( 0, 0 );
-                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
-                xyBuilder.addVertex2f( inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( inset_PX, drawBottom ? inset_PX : 0 );
 
-                mileageBuilder.addVertex1f( mileage + height );
-                mileageBuilder.addVertex1f( drawTop ? mileage + inset_PX : mileage );
-                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage + height );
+                mileageBuffer.grow1f( drawTop ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
 
                 mileage += height;
             }
 
-            prog.draw( gl, xyBuilder, mileageBuilder, rgba );
+            prog.draw( gl, xyBuffer, mileageBuffer, rgba );
 
         }
         finally
@@ -303,30 +303,30 @@ public class BorderPainter extends GlimpsePainterBase
             prog.setColor( gl, rgba );
             prog.setStipple( gl, stippleEnable, stippleFactor, stipplePattern );
 
-            xyBuilder.clear( );
-            mileageBuilder.clear( );
+            xyBuffer.clear( );
+            mileageBuffer.clear( );
 
             float mileage = 0;
 
             if ( drawBottom )
             {
                 // upper quad
-                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, 0 );
-                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, inset_PX );
-                xyBuilder.addVertex2f( width, inset_PX );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, 0 );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, inset_PX );
+                xyBuffer.grow2f( width, inset_PX );
 
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
 
                 // lower quad
-                xyBuilder.addVertex2f( drawLeft ? inset_PX : 0, 0 );
-                xyBuilder.addVertex2f( width, inset_PX );
-                xyBuilder.addVertex2f( width, 0 );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, 0 );
+                xyBuffer.grow2f( width, inset_PX );
+                xyBuffer.grow2f( width, 0 );
 
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
 
                 mileage += drawLeft ? width - inset_PX : width;
             }
@@ -334,22 +334,22 @@ public class BorderPainter extends GlimpsePainterBase
             if ( drawRight )
             {
                 // upper quad
-                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuilder.addVertex2f( width - inset_PX, height );
-                xyBuilder.addVertex2f( width, height );
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width - inset_PX, height );
+                xyBuffer.grow2f( width, height );
 
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
-                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
 
                 // lower quad
-                xyBuilder.addVertex2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuilder.addVertex2f( width, height );
-                xyBuilder.addVertex2f( width, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width, height );
+                xyBuffer.grow2f( width, drawBottom ? inset_PX : 0 );
 
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawBottom ? mileage + height - inset_PX : mileage + height );
-                mileageBuilder.addVertex1f( mileage );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
 
                 mileage += drawBottom ? height - inset_PX : height;
             }
@@ -357,22 +357,22 @@ public class BorderPainter extends GlimpsePainterBase
             if ( drawTop )
             {
                 // upper quad
-                xyBuilder.addVertex2f( 0, height - inset_PX );
-                xyBuilder.addVertex2f( 0, height );
-                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height );
+                xyBuffer.grow2f( 0, height - inset_PX );
+                xyBuffer.grow2f( 0, height );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height );
 
-                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
 
                 // lower quad
-                xyBuilder.addVertex2f( 0, height - inset_PX );
-                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height );
-                xyBuilder.addVertex2f( drawRight ? width - inset_PX : width, height - inset_PX );
+                xyBuffer.grow2f( 0, height - inset_PX );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height - inset_PX );
 
-                mileageBuilder.addVertex1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( mileage );
 
                 mileage += drawRight ? width - inset_PX : width;
             }
@@ -380,25 +380,25 @@ public class BorderPainter extends GlimpsePainterBase
             if ( drawLeft )
             {
                 // upper quad
-                xyBuilder.addVertex2f( 0, 0 );
-                xyBuilder.addVertex2f( 0, drawTop ? height - inset_PX : height );
-                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( 0, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
 
-                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( mileage );
 
                 // lower quad
-                xyBuilder.addVertex2f( 0, 0 );
-                xyBuilder.addVertex2f( inset_PX, drawTop ? height - inset_PX : height );
-                xyBuilder.addVertex2f( inset_PX, 0 );
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( inset_PX, 0 );
 
-                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
-                mileageBuilder.addVertex1f( mileage );
-                mileageBuilder.addVertex1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
             }
 
-            prog.draw( gl, xyBuilder, mileageBuilder, rgba );
+            prog.draw( gl, xyBuffer, mileageBuffer, rgba );
 
         }
         finally
@@ -427,7 +427,7 @@ public class BorderPainter extends GlimpsePainterBase
     protected void doDispose( GlimpseContext context )
     {
         prog.dispose( context.getGL( ).getGL3( ) );
-        mileageBuilder.dispose( context.getGL( ) );
-        xyBuilder.dispose( context.getGL( ) );
+        mileageBuffer.dispose( context.getGL( ) );
+        xyBuffer.dispose( context.getGL( ) );
     }
 }

@@ -10,8 +10,7 @@ import javax.media.opengl.GLES1;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -108,23 +107,14 @@ public class PointArrayColorSizeProgram
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, GLStreamingBuffer sizeVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, GLEditableBuffer rgbaVbo, GLEditableBuffer sizeVbo, int first, int count )
     {
         draw( gl, GL.GL_POINTS, xyVbo, rgbaVbo, sizeVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, GLStreamingBuffer sizeVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, GLEditableBuffer xyVbo, GLEditableBuffer rgbaVbo, GLEditableBuffer sizeVbo, int first, int count )
     {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, sizeVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inSize, 1, GL_FLOAT, false, 0, sizeVbo.sealedOffset( ) );
-
-        gl.glDrawArrays( mode, first, count );
+        draw( gl, mode, xyVbo.deviceBuffer( gl ), rgbaVbo.deviceBuffer( gl ), sizeVbo.deviceBuffer( gl ), first, count );
     }
 
     public void draw( GL2ES2 gl, int mode, int xyVbo, int rgbaVbo, int sizeVbo, int first, int count )
@@ -141,9 +131,9 @@ public class PointArrayColorSizeProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba, GLStreamingBufferBuilder size )
+    public void draw( GL2ES2 gl, GLEditableBuffer xy, GLEditableBuffer rgba, GLEditableBuffer size )
     {
-        draw( gl, GL_POINTS, xy.getBuffer( gl ), rgba.getBuffer( gl ), size.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
+        draw( gl, GL_POINTS, xy, rgba, size, 0, xy.sizeFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )

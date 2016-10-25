@@ -29,15 +29,16 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.Font;
 import java.util.List;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
@@ -69,7 +70,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
     protected LineStyle lineStyle;
 
     protected FlatColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillPath;
+    protected GLEditableBuffer fillPath;
 
     public SimpleSelectedTimeRegionPainter( Orientation orientation )
     {
@@ -88,7 +89,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
         this.lineStyle.stippleEnable = false;
 
         this.fillProg = new FlatColorProgram( );
-        this.fillPath = new GLStreamingBufferBuilder( );
+        this.fillPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public void setSelectionFillColor( float[] color )
@@ -175,11 +176,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
 
             if ( orientation == Orientation.VERTICAL )
             {
-                fillPath.addQuad2f( min, 0, max, height - 1 );
+                fillPath.growQuad2f( min, 0, max, height - 1 );
             }
             else
             {
-                fillPath.addQuad2f( 0, min, width, max );
+                fillPath.growQuad2f( 0, min, width, max );
             }
 
             fillProg.draw( gl, fillPath, selectionFillColor );

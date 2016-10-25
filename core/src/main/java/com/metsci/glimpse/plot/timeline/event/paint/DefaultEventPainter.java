@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.jogamp.opengl.math.Matrix4;
@@ -40,7 +40,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
@@ -90,7 +90,7 @@ public class DefaultEventPainter implements EventPainter
     protected LineStyle lineStyle;
 
     protected FlatColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillPath;
+    protected GLEditableBuffer fillPath;
 
     protected Matrix4 transformMatrix;
 
@@ -103,7 +103,7 @@ public class DefaultEventPainter implements EventPainter
         this.lineStyle.stippleEnable = false;
 
         this.fillProg = new FlatColorProgram( );
-        this.fillPath = new GLStreamingBufferBuilder( );
+        this.fillPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.transformMatrix = new Matrix4( );
     }
@@ -216,11 +216,11 @@ public class DefaultEventPainter implements EventPainter
 
                     if ( horiz )
                     {
-                        fillPath.addQuad2f( ( float ) timeMin, posMin, ( float ) timeMax, posMax );
+                        fillPath.growQuad2f( ( float ) timeMin, posMin, ( float ) timeMax, posMax );
                     }
                     else
                     {
-                        fillPath.addQuad2f( posMin, ( float ) timeMin, posMax, ( float ) timeMax );
+                        fillPath.growQuad2f( posMin, ( float ) timeMin, posMax, ( float ) timeMax );
                     }
 
                     float[] fillColor = getBackgroundColor( event, info, isSelected );
@@ -276,32 +276,32 @@ public class DefaultEventPainter implements EventPainter
                     if ( horiz )
                     {
                         // center rectangle
-                        fillPath.addQuad2f( ( float ) arrowBaseMin, posMin, ( float ) arrowBaseMax, posMax );
+                        fillPath.growQuad2f( ( float ) arrowBaseMin, posMin, ( float ) arrowBaseMax, posMax );
 
                         // left arrow
-                        fillPath.addVertex2f( ( float ) timeMin, ( float ) sizePerpCenter );
-                        fillPath.addVertex2f( ( float ) arrowBaseMin, posMax );
-                        fillPath.addVertex2f( ( float ) arrowBaseMin, posMin );
+                        fillPath.grow2f( ( float ) timeMin, ( float ) sizePerpCenter );
+                        fillPath.grow2f( ( float ) arrowBaseMin, posMax );
+                        fillPath.grow2f( ( float ) arrowBaseMin, posMin );
 
                         // right arrow
-                        fillPath.addVertex2f( ( float ) timeMax, ( float ) sizePerpCenter );
-                        fillPath.addVertex2f( ( float ) arrowBaseMax, posMin );
-                        fillPath.addVertex2f( ( float ) arrowBaseMax, posMax );
+                        fillPath.grow2f( ( float ) timeMax, ( float ) sizePerpCenter );
+                        fillPath.grow2f( ( float ) arrowBaseMax, posMin );
+                        fillPath.grow2f( ( float ) arrowBaseMax, posMax );
                     }
                     else
                     {
                         // center rectangle
-                        fillPath.addQuad2f( posMin, ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax );
+                        fillPath.growQuad2f( posMin, ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax );
 
                         // left arrow
-                        fillPath.addVertex2f( ( float ) sizePerpCenter, ( float ) timeMin );
-                        fillPath.addVertex2f( posMax, ( float ) arrowBaseMin );
-                        fillPath.addVertex2f( posMin, ( float ) arrowBaseMin );
+                        fillPath.grow2f( ( float ) sizePerpCenter, ( float ) timeMin );
+                        fillPath.grow2f( posMax, ( float ) arrowBaseMin );
+                        fillPath.grow2f( posMin, ( float ) arrowBaseMin );
 
                         // right arrow
-                        fillPath.addVertex2f( ( float ) sizePerpCenter, ( float ) timeMax );
-                        fillPath.addVertex2f( posMin, ( float ) arrowBaseMax );
-                        fillPath.addVertex2f( posMax, ( float ) arrowBaseMax );
+                        fillPath.grow2f( ( float ) sizePerpCenter, ( float ) timeMax );
+                        fillPath.grow2f( posMin, ( float ) arrowBaseMax );
+                        fillPath.grow2f( posMax, ( float ) arrowBaseMax );
                     }
 
                     float[] fillColor = getBackgroundColor( event, info, isSelected );

@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.axis.painter;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -51,8 +52,8 @@ import com.metsci.glimpse.support.shader.triangle.ColorTexture1DProgram;
 public class ColorXAxisPainter extends NumericXAxisPainter
 {
     protected ColorTexture1DProgram progTex;
-    protected GLStreamingBufferBuilder xyBuffer;
-    protected GLStreamingBufferBuilder sBuffer;
+    protected GLEditableBuffer xyBuffer;
+    protected GLEditableBuffer sBuffer;
     protected ColorTexture1D colorTexture;
 
     protected LineProgram progOutline;
@@ -67,8 +68,8 @@ public class ColorXAxisPainter extends NumericXAxisPainter
         super( ticks );
 
         this.pathOutline = new LinePath( );
-        this.xyBuffer = new GLStreamingBufferBuilder( );
-        this.sBuffer = new GLStreamingBufferBuilder( );
+        this.xyBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.sBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.style = new LineStyle( );
         this.style.joinType = LineJoinType.JOIN_MITER;
@@ -140,10 +141,10 @@ public class ColorXAxisPainter extends NumericXAxisPainter
             pathOutline.addRectangle( inset_PX, y1, width - inset_PX, y2 );
 
             xyBuffer.clear( );
-            xyBuffer.addQuad2f( inset_PX, y1, width - inset_PX, y2 );
+            xyBuffer.growQuad2f( inset_PX, y1, width - inset_PX, y2 );
 
             sBuffer.clear( );
-            sBuffer.addQuad1f( 0, 0, 1, 1 );
+            sBuffer.growQuad1f( 0, 0, 1, 1 );
 
             GLUtils.enableStandardBlending( gl );
             try

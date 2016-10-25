@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -36,7 +37,7 @@ import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -113,17 +114,17 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
         wrappedPainter.addPainter( new GlimpsePainterBase( )
         {
             protected PointFlatColorProgram prog;
-            protected GLStreamingBufferBuilder builder;
+            protected GLEditableBuffer buffer;
 
             {
                 prog = new PointFlatColorProgram( );
-                builder = new GLStreamingBufferBuilder( );
+                buffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
                 for ( int x = 0; x < 5; x++ )
                 {
                     for ( int y = 0; y < 5; y++ )
                     {
-                        builder.addVertex2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
+                        buffer.grow2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
                     }
                 }
             }
@@ -142,7 +143,7 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
                     prog.setRgba( gl, GlimpseColor.getWhite( ) );
                     prog.setPointSize( gl, 20.0f );
 
-                    prog.draw( gl, builder );
+                    prog.draw( gl, buffer );
                 }
                 finally
                 {
@@ -157,7 +158,7 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
                 GL3 gl = context.getGL( ).getGL3( );
 
                 prog.dispose( gl );
-                builder.dispose( gl );
+                buffer.dispose( gl );
             }
         } );
 

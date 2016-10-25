@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ import javax.media.opengl.GL3;
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 
@@ -53,8 +53,8 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     private static final Logger logger = Logger.getLogger( FloatTexture2D.class.getName( ) );
 
     protected FloatBuffer data;
-    protected GLStreamingBufferBuilder xyBuilder;
-    protected GLStreamingBufferBuilder sBuilder;
+    protected GLEditableBuffer xyBuffer;
+    protected GLEditableBuffer sBuffer;
 
     protected double[] min;
     protected double[] max;
@@ -72,23 +72,23 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
         double tmin[] = tminmax[0];
         double tmax[] = tminmax[1];
 
-        this.xyBuilder = new GLStreamingBufferBuilder( 12, 1 );
-        this.xyBuilder.addQuad2f( ( float ) tmin[0], ( float ) tmin[1], ( float ) tmax[0], ( float ) tmax[1] );
+        this.xyBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 12 * Buffers.SIZEOF_FLOAT );
+        this.xyBuffer.growQuad2f( ( float ) tmin[0], ( float ) tmin[1], ( float ) tmax[0], ( float ) tmax[1] );
 
-        this.sBuilder = new GLStreamingBufferBuilder( 12, 1 );
-        this.sBuilder.addQuad2f( 0, 0, 1, 1 );
+        this.sBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 12 * Buffers.SIZEOF_FLOAT );
+        this.sBuffer.growQuad2f( 0, 0, 1, 1 );
     }
 
     public int xyVbo( GlimpseContext context )
     {
         GL gl = context.getGL( );
-        return this.xyBuilder.getBuffer( gl ).buffer( gl );
+        return this.xyBuffer.deviceBuffer( gl );
     }
 
     public int sVbo( GlimpseContext context )
     {
         GL gl = context.getGL( );
-        return this.sBuilder.getBuffer( gl ).buffer( gl );
+        return this.sBuffer.deviceBuffer( gl );
     }
 
     public int getMode( )
@@ -121,7 +121,7 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
         program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         try
         {
-            program.draw( context, getMode( ), xyVbo( context ), sVbo( context ), 0, this.xyBuilder.numFloats( ) / 2 );
+            program.draw( context, getMode( ), xyVbo( context ), sVbo( context ), 0, this.xyBuffer.sizeFloats( ) / 2 );
         }
         finally
         {

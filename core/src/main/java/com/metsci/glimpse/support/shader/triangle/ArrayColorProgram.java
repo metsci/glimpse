@@ -8,8 +8,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -91,20 +90,14 @@ public class ArrayColorProgram
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
+    public void draw( GL2ES2 gl, GLEditableBuffer xyVbo, GLEditableBuffer rgbaVbo, int first, int count )
     {
         draw( gl, GL.GL_TRIANGLES, xyVbo, rgbaVbo, first, count );
     }
 
-    public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
+    public void draw( GL2ES2 gl, int mode, GLEditableBuffer xyVbo, GLEditableBuffer rgbaVbo, int first, int count )
     {
-        gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
-        gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
-
-        gl.glDrawArrays( mode, first, count );
+        draw( gl, mode, xyVbo.deviceBuffer( gl ), rgbaVbo.deviceBuffer( gl ), first, count );
     }
 
     public void draw( GL2ES2 gl, int mode, int xyVbo, int rgbaVbo, int first, int count )
@@ -118,9 +111,9 @@ public class ArrayColorProgram
         gl.glDrawArrays( mode, first, count );
     }
 
-    public void draw( GL2ES2 gl, GLStreamingBufferBuilder xy, GLStreamingBufferBuilder rgba )
+    public void draw( GL2ES2 gl, GLEditableBuffer xy, GLEditableBuffer rgba )
     {
-        draw( gl, GL_TRIANGLES, xy.getBuffer( gl ), rgba.getBuffer( gl ), 0, xy.numFloats( ) / 2 );
+        draw( gl, GL_TRIANGLES, xy, rgba, 0, xy.sizeFloats( ) / 2 );
     }
 
     public void end( GL2ES2 gl )

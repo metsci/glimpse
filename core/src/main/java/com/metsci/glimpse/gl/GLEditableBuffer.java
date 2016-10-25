@@ -56,6 +56,12 @@ public class GLEditableBuffer
         return this.dirtyRanges;
     }
 
+    public ByteBuffer growBytes( int countBytes )
+    {
+        this.ensureRemainingBytes( countBytes );
+        return this.editBytes( this.sizeBytes( ), countBytes );
+    }
+
     public void ensureRemainingBytes( int minRemainingBytes )
     {
         long minCapacity = ( ( long ) this.hBuffer.position( ) ) + minRemainingBytes;
@@ -152,6 +158,36 @@ public class GLEditableBuffer
         return this.hostBytes( ).asFloatBuffer( );
     }
 
+    public void grow1f( float a )
+    {
+        this.growFloats( 1 ).put( a );
+    }
+
+    public void grow2f( float a, float b )
+    {
+        this.growFloats( 2 ).put( a ).put( b );
+    }
+
+    public void grow3f( float a, float b, float c )
+    {
+        this.growFloats( 3 ).put( a ).put( b ).put( c );
+    }
+
+    public void grow4f( float a, float b, float c, float d )
+    {
+        this.growFloats( 4 ).put( a ).put( b ).put( c ).put( d );
+    }
+
+    public void growNfv( float[] array, int offset, int length )
+    {
+        this.growFloats( length ).put( array, offset, length );
+    }
+
+    public FloatBuffer growFloats( int countFloats )
+    {
+        return this.growBytes( countFloats * SIZEOF_FLOAT ).asFloatBuffer( );
+    }
+
     public void ensureRemainingFloats( int minRemainingFloats )
     {
         this.ensureRemainingBytes( minRemainingFloats * SIZEOF_FLOAT );
@@ -165,6 +201,49 @@ public class GLEditableBuffer
     public FloatBuffer editFloats( int firstFloat, int countFloats )
     {
         return this.editBytes( firstFloat * SIZEOF_FLOAT, countFloats * SIZEOF_FLOAT ).asFloatBuffer( );
+    }
+
+
+    // Convenience methods
+    //
+
+    public void growQuad2f( float left, float bottom, float right, float top )
+    {
+        FloatBuffer floats = this.growFloats( 12 );
+
+        put2f( floats, left,  bottom );
+        put2f( floats, left,  top    );
+        put2f( floats, right, bottom );
+
+        put2f( floats, right, bottom );
+        put2f( floats, left,  top    );
+        put2f( floats, right, top    );
+    }
+
+    public void growQuad1f( float leftBottom, float leftTop, float rightBottom, float rightTop )
+    {
+        FloatBuffer floats = this.growFloats( 6 );
+
+        put1f( floats, leftBottom  );
+        put1f( floats, leftTop     );
+        put1f( floats, rightBottom );
+
+        put1f( floats, rightBottom );
+        put1f( floats, leftTop     );
+        put1f( floats, rightTop    );
+    }
+
+    public void growQuadSolidColor( float[] color )
+    {
+        FloatBuffer floats = this.growFloats( 24 );
+
+        floats.put( color );
+        floats.put( color );
+        floats.put( color );
+
+        floats.put( color );
+        floats.put( color );
+        floats.put( color );
     }
 
 }

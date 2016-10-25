@@ -41,7 +41,7 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -54,15 +54,15 @@ import com.metsci.glimpse.gl.util.GLUtils;
  */
 public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
 {
-    protected GLStreamingBuffer vertexCoords;
-    protected GLStreamingBuffer textureCoords;
+    protected GLEditableBuffer vertexCoords;
+    protected GLEditableBuffer textureCoords;
 
     public TaggedPartialColorYAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
 
-        this.vertexCoords = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
-        this.textureCoords = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 20 );
+        this.vertexCoords = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
+        this.textureCoords = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
     }
 
     @Override
@@ -136,8 +136,10 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
 
         if ( size <= 1 ) return 0;
 
-        FloatBuffer v = vertexCoords.mapFloats( gl, 12 * ( size - 1 ) );
-        FloatBuffer t = textureCoords.mapFloats( gl, 6 * ( size - 1 ) );
+        vertexCoords.clear( );
+        textureCoords.clear( );
+        FloatBuffer v = vertexCoords.growFloats( 12 * ( size - 1 ) );
+        FloatBuffer t = textureCoords.growFloats( 6 * ( size - 1 ) );
 
         float x1 = getColorBarMinX( width );
         float x2 = getColorBarMaxX( width );
@@ -180,9 +182,6 @@ public class TaggedPartialColorYAxisPainter extends TaggedColorYAxisPainter
                 init = true;
             }
         }
-
-        vertexCoords.seal( gl );
-        textureCoords.seal( gl );
 
         return count;
     }

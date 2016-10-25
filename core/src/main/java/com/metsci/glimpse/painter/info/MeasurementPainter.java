@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
@@ -34,14 +34,14 @@ import java.text.DecimalFormat;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.line.LinePath;
@@ -79,7 +79,7 @@ public class MeasurementPainter extends GlimpsePainterBase
     protected AxisUnitConverter distanceUnitConverter;
 
     protected FlatColorProgram fillProg;
-    protected GLStreamingBufferBuilder fillBuilder;
+    protected GLEditableBuffer fillBuffer;
 
     protected LineProgram lineProg;
     protected LinePath linePath;
@@ -110,7 +110,7 @@ public class MeasurementPainter extends GlimpsePainterBase
         this.lineStyle.feather_PX = 0.8f;
 
         this.linePath = new LinePath( );
-        this.fillBuilder = new GLStreamingBufferBuilder( );
+        this.fillBuffer= new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public void setDistanceUnitConverter( AxisUnitConverter converter )
@@ -171,7 +171,7 @@ public class MeasurementPainter extends GlimpsePainterBase
         this.fillProg.dispose( context.getGL( ).getGL3( ) );
 
         this.linePath.dispose( context.getGL( ) );
-        this.fillBuilder.dispose( context.getGL( ) );
+        this.fillBuffer.dispose( context.getGL( ) );
     }
 
     @Override
@@ -230,20 +230,20 @@ public class MeasurementPainter extends GlimpsePainterBase
             this.lineProg.end( gl );
         }
 
-        this.fillBuilder.clear( );
+        this.fillBuffer.clear( );
 
-        this.fillBuilder.addVertex2f( lockX, lockY );
+        this.fillBuffer.grow2f( lockX, lockY );
 
         for ( double a = 0; a < angle * sign; a += step )
         {
             double x = lockX + Math.cos( a * sign ) * radius;
             double y = lockY + Math.sin( a * sign ) * radius;
-            this.fillBuilder.addVertex2f( ( float ) x, ( float ) y );
+            this.fillBuffer.grow2f( ( float ) x, ( float ) y );
         }
 
         double x = lockX + Math.cos( angle ) * radius;
         double y = lockY + Math.sin( angle ) * radius;
-        this.fillBuilder.addVertex2f( ( float ) x, ( float ) y );
+        this.fillBuffer.grow2f( ( float ) x, ( float ) y );
 
         this.fillProg.begin( gl );
         try
@@ -251,7 +251,7 @@ public class MeasurementPainter extends GlimpsePainterBase
             this.fillProg.setAxisOrtho( gl, axis );
             this.fillProg.setColor( gl, protractorColor );
 
-            this.fillProg.draw( gl, GL.GL_TRIANGLE_FAN, this.fillBuilder.getBuffer( gl ), 0, this.fillBuilder.numFloats( ) / 2 );
+            this.fillProg.draw( gl, GL.GL_TRIANGLE_FAN, this.fillBuffer, 0, this.fillBuffer.sizeFloats( ) / 2 );
         }
         finally
         {

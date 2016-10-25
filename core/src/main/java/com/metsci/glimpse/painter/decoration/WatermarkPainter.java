@@ -49,7 +49,7 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureData;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.util.io.StreamOpener;
@@ -150,8 +150,8 @@ public class WatermarkPainter extends GlimpsePainterBase
     protected boolean initialized;
 
     protected ColorTexture2DProgram prog;
-    protected GLStreamingBufferBuilder inXy;
-    protected GLStreamingBufferBuilder inS;
+    protected GLEditableBuffer inXy;
+    protected GLEditableBuffer inS;
 
     public WatermarkPainter( BufferedImage image )
     {
@@ -186,8 +186,8 @@ public class WatermarkPainter extends GlimpsePainterBase
         this.initialized = false;
 
         this.prog = new ColorTexture2DProgram( );
-        this.inXy = new GLStreamingBufferBuilder( );
-        this.inS = new GLStreamingBufferBuilder( );
+        this.inXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.inS = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public static Supplier<BufferedImage> newImageLoader( final StreamOpener opener, final String location )
@@ -314,10 +314,10 @@ public class WatermarkPainter extends GlimpsePainterBase
         }
 
         inXy.clear( );
-        inXy.addQuad2f( xLeft, yBottom, xRight, yTop );
+        inXy.growQuad2f( xLeft, yBottom, xRight, yTop );
 
         inS.clear( );
-        inS.addQuad2f( 0, 1, 1, 0 );
+        inS.growQuad2f( 0, 1, 1, 0 );
 
         texture.setTexParameteri( gl, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR );
         texture.setTexParameteri( gl, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR );

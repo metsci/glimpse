@@ -57,8 +57,8 @@ import javax.media.opengl.GL3;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.gl.GLStreamingBufferBuilder;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
@@ -2054,11 +2054,11 @@ public class PolygonPainter extends GlimpsePainterBase
             gl.glDrawArrays( mode, first, count );
         }
 
-        public void draw( GL2ES2 gl, GLStreamingBufferBuilder xyVertices, float[] color )
+        public void draw( GL2ES2 gl, GLEditableBuffer xyVertices, float[] color )
         {
             setColor( gl, color );
 
-            draw( gl, GL.GL_TRIANGLES, xyVertices.getBuffer( gl ), 0, xyVertices.numFloats( ) / 2 );
+            draw( gl, GL.GL_TRIANGLES, xyVertices.deviceBuffer( gl ), 0, xyVertices.sizeFloats( ) / 2 );
         }
 
         public void end( GL2ES2 gl )
