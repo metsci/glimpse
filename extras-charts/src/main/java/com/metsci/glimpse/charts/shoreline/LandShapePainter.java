@@ -35,14 +35,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.media.opengl.GLContext;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.charts.shoreline.LandShape.VertexConverter;
 import com.metsci.glimpse.charts.shoreline.ndgc.NgdcFile2;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.PolygonPainter;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
@@ -54,7 +51,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
 /**
  * Originally designed to display shoreline data available from the NOAA/NGDC Coastline Extractor
  * tool at http://www.ngdc.noaa.gov/mgg_coastline/</p>
- * 
+ *
  * Now capable of painting all LandShapes, NdgcFile shapes as wells as Gshhs shapes.
  *
  * When downloading ndgc data, choose the following options:
@@ -62,12 +59,12 @@ import com.metsci.glimpse.util.vector.Vector2d;
  * Compression Method: None
  * Coast Format: Mapgen
  * Coast Preview: No Preview
- * 
- * 
+ *
+ *
  * @author ulman
  * @author cunningham
  */
-public class LandShapePainter extends GlimpsePainter2D
+public class LandShapePainter extends GlimpsePainterBase
 {
     protected static final int LAND_GROUP_ID = 1337;
 
@@ -86,10 +83,10 @@ public class LandShapePainter extends GlimpsePainter2D
 
     /**
      * Deprecated in favor of loadNdgcLandFile( InputStream in, GeoProjection geoProjection )
-     *  
+     *
      * @param in
      * @param geoProjection
-     * @throws IOException    
+     * @throws IOException
      */
     @Deprecated
     public void loadLandFile( InputStream in, GeoProjection geoProjection ) throws IOException
@@ -104,7 +101,7 @@ public class LandShapePainter extends GlimpsePainter2D
 
     /**
      * Deprecated in favor of loadNgdcLandFile( String file, GeoProjection geoProjection )
-     * 
+     *
      * @param file
      * @param geoProjection
      * @throws IOException
@@ -325,14 +322,14 @@ public class LandShapePainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        polygonPainter.dispose( context );
+        polygonPainter.doDispose( context );
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        polygonPainter.paintTo( context, bounds, axis );
+        polygonPainter.doPaintTo( context );
     }
 }

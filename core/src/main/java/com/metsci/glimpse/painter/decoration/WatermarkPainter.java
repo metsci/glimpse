@@ -26,30 +26,12 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.jogamp.opengl.util.texture.TextureIO.newTexture;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.LEFT;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.RIGHT;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.BOTTOM;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.TOP;
-import static com.metsci.glimpse.util.GeneralUtils.doubles;
-import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.sqrt;
-import static javax.media.opengl.GL.GL_BLEND;
-import static javax.media.opengl.GL.GL_LINEAR;
-import static javax.media.opengl.GL.GL_ONE;
-import static javax.media.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
-import static javax.media.opengl.GL.GL_REPLACE;
-import static javax.media.opengl.GL.GL_TEXTURE;
-import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static javax.media.opengl.GL2ES1.GL_TEXTURE_ENV;
-import static javax.media.opengl.GL2ES1.GL_TEXTURE_ENV_MODE;
-import static javax.media.opengl.GL2GL3.GL_QUADS;
-import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
-import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
+import static com.jogamp.opengl.util.texture.TextureIO.*;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.*;
+import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.lang.Math.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -58,7 +40,7 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLProfile;
 
 import com.google.common.base.Supplier;
@@ -67,10 +49,12 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureData;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-public class WatermarkPainter extends GlimpsePainterImpl
+public class WatermarkPainter extends GlimpsePainterBase
 {
     private static final Logger logger = getLogger( WatermarkPainter.class );
 
@@ -165,6 +149,10 @@ public class WatermarkPainter extends GlimpsePainterImpl
     protected Texture texture;
     protected boolean initialized;
 
+    protected ColorTexture2DProgram prog;
+    protected GLEditableBuffer inXy;
+    protected GLEditableBuffer inS;
+
     public WatermarkPainter( BufferedImage image )
     {
         this( image, defaultConfig );
@@ -196,12 +184,17 @@ public class WatermarkPainter extends GlimpsePainterImpl
         this.config = config;
         this.texture = null;
         this.initialized = false;
+
+        this.prog = new ColorTexture2DProgram( );
+        this.inXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.inS = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public static Supplier<BufferedImage> newImageLoader( final StreamOpener opener, final String location )
     {
         return new Supplier<BufferedImage>( )
         {
+            @Override
             public BufferedImage get( )
             {
                 try
@@ -225,7 +218,7 @@ public class WatermarkPainter extends GlimpsePainterImpl
         };
     }
 
-    protected void initIfNecessary( GL2 gl )
+    protected void initIfNecessary( GL gl )
     {
         if ( initialized ) return;
 
@@ -268,97 +261,95 @@ public class WatermarkPainter extends GlimpsePainterImpl
         return doubles( w, h, padding );
     }
 
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    @Override
+    protected void doPaintTo( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
 
         initIfNecessary( gl );
         if ( texture == null ) return;
 
-        gl.glMatrixMode( GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
+        double[] quadGeometry = computeQuadGeometry( texture.getWidth( ), texture.getHeight( ), bounds.getWidth( ), bounds.getHeight( ) );
+        double wQuad = quadGeometry[0];
+        double hQuad = quadGeometry[1];
+        double padding = quadGeometry[2];
 
-        gl.glMatrixMode( GL_TEXTURE );
-        gl.glActiveTexture( GL.GL_TEXTURE0 );
-        gl.glLoadIdentity( );
+        float xLeft;
+        float xRight;
+        switch ( config.horizontalPos )
+        {
+            case LEFT:
+            {
+                xLeft = ( float ) ( padding );
+                xRight = ( float ) ( xLeft + wQuad );
+            }
+                break;
 
-        gl.glMatrixMode( GL_MODELVIEW );
-        gl.glLoadIdentity( );
+            default:
+            {
+                xRight = ( float ) ( bounds.getWidth( ) - padding );
+                xLeft = ( float ) ( xRight - wQuad );
+            }
+                break;
+        }
 
-        texture.setTexParameteri( gl, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        texture.setTexParameteri( gl, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        float yTop;
+        float yBottom;
+        switch ( config.verticalPos )
+        {
+            case TOP:
+            {
+                yTop = ( float ) ( bounds.getHeight( ) - padding );
+                yBottom = ( float ) ( yTop - hQuad );
+            }
+                break;
+
+            default:
+            {
+                yBottom = ( float ) ( padding );
+                yTop = ( float ) ( yBottom + hQuad );
+            }
+                break;
+        }
+
+        inXy.clear( );
+        inXy.growQuad2f( xLeft, yBottom, xRight, yTop );
+
+        inS.clear( );
+        inS.growQuad2f( 0, 1, 1, 0 );
+
+        texture.setTexParameteri( gl, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_LINEAR );
+        texture.setTexParameteri( gl, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_LINEAR );
         texture.enable( gl );
         texture.bind( gl );
 
         // See the "Alpha premultiplication" section in Texture's class comment
-        gl.glEnable( GL_BLEND );
-        gl.glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        gl.glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+        gl.glEnable( GL3.GL_BLEND );
+        gl.glBlendFunc( GL3.GL_ONE, GL3.GL_ONE_MINUS_SRC_ALPHA );
+        //XXX: this needs to be replaced by shader code
+        //gl.glTexEnvi( GL3.GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
-        gl.glBegin( GL_QUADS );
+        prog.begin( context );
         try
         {
-            double[] quadGeometry = computeQuadGeometry( texture.getWidth( ), texture.getHeight( ), bounds.getWidth( ), bounds.getHeight( ) );
-            double wQuad = quadGeometry[0];
-            double hQuad = quadGeometry[1];
-            double padding = quadGeometry[2];
+            prog.setPixelOrtho( context, bounds );
+            prog.setTexture( context, 0 );
 
-            float xLeft;
-            float xRight;
-            switch ( config.horizontalPos )
-            {
-                case LEFT:
-                {
-                    xLeft = ( float ) ( padding );
-                    xRight = ( float ) ( xLeft + wQuad );
-                }
-                    break;
-
-                default:
-                {
-                    xRight = ( float ) ( bounds.getWidth( ) - padding );
-                    xLeft = ( float ) ( xRight - wQuad );
-                }
-                    break;
-            }
-
-            float yTop;
-            float yBottom;
-            switch ( config.verticalPos )
-            {
-                case TOP:
-                {
-                    yTop = ( float ) ( bounds.getHeight( ) - padding );
-                    yBottom = ( float ) ( yTop - hQuad );
-                }
-                    break;
-
-                default:
-                {
-                    yBottom = ( float ) ( padding );
-                    yTop = ( float ) ( yBottom + hQuad );
-                }
-                    break;
-            }
-
-            gl.glTexCoord2f( 0, 1 );
-            gl.glVertex2f( xLeft, yBottom );
-
-            gl.glTexCoord2f( 1, 1 );
-            gl.glVertex2f( xRight, yBottom );
-
-            gl.glTexCoord2f( 1, 0 );
-            gl.glVertex2f( xRight, yTop );
-
-            gl.glTexCoord2f( 0, 0 );
-            gl.glVertex2f( xLeft, yTop );
+            prog.draw( context, texture, inXy, inS );
         }
         finally
         {
-            gl.glEnd( );
-            texture.disable( gl );
+            prog.end( context );
+            gl.glDisable( GL3.GL_BLEND );
         }
     }
 
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        prog.dispose( context );
+        inXy.dispose( context.getGL( ) );
+        inS.dispose( context.getGL( ) );
+    }
 }

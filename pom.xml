@@ -53,6 +53,7 @@
     <modules>
 
         <module>util</module>
+        <module>text</module>
 
         <module>platform-fixes</module>
 
@@ -65,7 +66,6 @@
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>
-        <module>extras-spacenav</module>
         <module>extras-swt</module>
         <module>extras-examples</module>
         <module>extras-worldwind</module>

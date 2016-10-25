@@ -45,14 +45,14 @@ public class Axis2D
 {
     protected Axis1D x;
     protected Axis1D y;
-    
+
     protected Map<AxisListener2D,AxisListener1D> listeners;
 
     public Axis2D( final Axis1D x, final Axis1D y )
     {
         this.x = x;
         this.y = y;
-        
+
         this.listeners = new HashMap<>( );
     }
 
@@ -79,7 +79,7 @@ public class Axis2D
 
         return new Axis2D( newX, newY );
     }
-    
+
     // synchronize to maintain thread safe access to listeners map
     public synchronized void removeAxisListener( final AxisListener2D listener )
     {
@@ -87,7 +87,7 @@ public class Axis2D
         x.removeAxisListener( listener1D );
         y.removeAxisListener( listener1D );
     }
-    
+
     // synchronize to maintain thread safe access to listeners map
     public synchronized void addAxisListener( final AxisListener2D listener )
     {
@@ -99,7 +99,7 @@ public class Axis2D
                 listener.axisUpdated( Axis2D.this );
             }
         };
-        
+
         listeners.put( listener, listener1D );
         x.addAxisListener( listener1D );
         y.addAxisListener( listener1D );

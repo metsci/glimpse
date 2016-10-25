@@ -61,7 +61,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  * which should be used for most Swing applications. The underlying {@link NewtCanvasAWT} is
  * being actively developed, whereas the underlying canvas for {@link SwingGlimpseCanvas} is
  * no longer supported and has fewer features.
- * 
+ *
  * @author ulman
  */
 public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas

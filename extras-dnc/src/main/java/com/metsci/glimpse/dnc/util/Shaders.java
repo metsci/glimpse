@@ -39,14 +39,14 @@ import static javax.media.opengl.GL3.GL_GEOMETRY_SHADER;
 import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.util.primitives.IntsArray;
 
 public class Shaders
 {
 
-    public static int createProgram( GL2 gl, String vertSource, String geomSource, String fragSource )
+    public static int createProgram( GL2ES2 gl, String vertSource, String geomSource, String fragSource )
     {
         IntsArray shaders = new IntsArray( );
         try
@@ -65,12 +65,12 @@ public class Shaders
         }
     }
 
-    public static int compileShader( GL2 gl, int shaderType, String source )
+    public static int compileShader( GL2ES2 gl, int shaderType, String source )
     {
         return compileShader( gl, shaderType, array( source ) );
     }
 
-    public static int compileShader( GL2 gl, int shaderType, String[] sources )
+    public static int compileShader( GL2ES2 gl, int shaderType, String[] sources )
     {
         int shader = gl.glCreateShader( shaderType );
         gl.glShaderSource( shader, 1, sources, null );
@@ -83,7 +83,7 @@ public class Shaders
         return shader;
     }
 
-    public static String getShaderInfoLog( GL2 gl, int shader )
+    public static String getShaderInfoLog( GL2ES2 gl, int shader )
     {
         int[] maxLength = new int[ 1 ];
         gl.glGetShaderiv( shader, GL_INFO_LOG_LENGTH, maxLength, 0 );
@@ -104,7 +104,7 @@ public class Shaders
         }
     }
 
-    public static int linkProgram( GL2 gl, int... shaders )
+    public static int linkProgram( GL2ES2 gl, int... shaders )
     {
         int program = gl.glCreateProgram( );
         for ( int s : shaders ) gl.glAttachShader( program, s );
@@ -123,7 +123,7 @@ public class Shaders
         }
     }
 
-    public static String getProgramInfoLog( GL2 gl, int program )
+    public static String getProgramInfoLog( GL2ES2 gl, int program )
     {
         int[] maxLength = new int[ 1 ];
         gl.glGetProgramiv( program, GL_INFO_LOG_LENGTH, maxLength, 0 );

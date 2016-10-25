@@ -27,7 +27,7 @@
 package com.metsci.glimpse.examples.projection;
 
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -61,7 +61,7 @@ public class GenericProjectionExample implements GlimpseLayoutProvider
         ColorAxisPlot2D plot = new ColorAxisPlot2D( );
 
         // set axis labels and chart title
-        plot.setTitle( "Heat Map Example" );
+        plot.setTitle( "Generic Projection Example" );
         plot.setAxisLabelX( "x axis" );
         plot.setAxisLabelY( "y axis" );
 

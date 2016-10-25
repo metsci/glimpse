@@ -87,7 +87,7 @@ public interface PlotInfo
      * <p>Sets the plot to fill all available space. First, fixed size plots
      * are given their space (set by {@link #setSize(int)}) and then
      * all plots set to grow fill the remaining space.</p>
-     * 
+     *
      * <p>Setting the plot size to a negative value is the same as setting
      * grow to true (but this behavior is deprecated and {@link #setGrow(boolean)}
      * should be used). Setting size to a positive value will set grow to
@@ -202,7 +202,7 @@ public interface PlotInfo
     public void setIndentLevel( int level );
 
     /**
-     * 
+     *
      * @see #setIndentLevel(int)
      */
     public int getIndentLevel( );
@@ -212,16 +212,16 @@ public interface PlotInfo
      * StackedPlot2D. Normally, calling this method is not necessary because
      * the StackedPlot2D automatically positions its PlotInfo. However, this method
      * can be used to override this default position.</p>
-     * 
+     *
      * <p>Calling {@link #setLayoutData(String)} with {@code null} as the argument
      * will cause the StackedPlot2D to resume automatically positioning this PlotInfo.
-     * 
+     *
      * @param layoutData
      */
     public void setLayoutData( String layoutData );
 
     /**
-     * 
+     *
      * @see #setLayoutData(String)
      */
     public String getLayoutData( );

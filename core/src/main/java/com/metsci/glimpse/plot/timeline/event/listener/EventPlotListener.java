@@ -36,14 +36,14 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 /**
  * Listener interface for receiving notifications when the mouse interacts with Events or when
  * Event start and end times are updated.
- * 
+ *
  * @author ulman
  */
 public interface EventPlotListener
 {
     /**
      * Indicates the mouse moved outside of the events contained in the EventSelection Set.
-     * 
+     *
      * @param e the original MouseEvent which caused this eventsExited call
      * @param events the events which the mouse moved outside of
      * @param time the time corresponding to the mouse's current position
@@ -52,7 +52,7 @@ public interface EventPlotListener
 
     /**
      * Indicates the mouse moved into of the Events contained in the EventSelection Set.
-     * 
+     *
      * @see EventPlotListener#eventsExited(GlimpseMouseEvent, Set, TimeStamp)
      */
     public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
@@ -61,14 +61,14 @@ public interface EventPlotListener
      * Indicates that the mouse moved while inside the Events contained in the EventSelection Set.
      * EventSelection also provides information about what part of each Event the mouse is near
      * (the start or end edge, the icon, the text label, etc...).
-     * 
+     *
      * @see EventPlotListener#eventsExited(GlimpseMouseEvent, Set, TimeStamp)
      */
     public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
 
     /**
      * Indicates the mouse clicked on the Events contained in the EventSelection Set.
-     * 
+     *
      * @see EventPlotListener#eventsExited(GlimpseMouseEvent, Set, TimeStamp)
      */
     public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time );
@@ -77,11 +77,11 @@ public interface EventPlotListener
      * <p>Indicates that the provided Event was updated by the user. If enabled, the user can click
      * and drag to change the start and/or end time of Events. When the user does this, eventUpdated
      * is called.</p>
-     * 
+     *
      * <p>If the update was caused by user mouse actions, the GlimpseMouseEvent argument will contain
-     * the mouse event which moved the event. If the event was modified programatically, then the 
+     * the mouse event which moved the event. If the event was modified programatically, then the
      * GlimpseMouseEvent will be null.</p>
-     * 
+     *
      * @param event The updated Event
      * @param e The GlimpseMouseEvent which caused the Event update, or null if the Event was updated programatically
      */

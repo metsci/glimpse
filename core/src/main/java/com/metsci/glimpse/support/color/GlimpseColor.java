@@ -30,9 +30,8 @@ import java.awt.Color;
 import java.text.ParseException;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * A simple color utility class for converting various color wrapper classes/formats
@@ -152,18 +151,6 @@ public class GlimpseColor
     public static void setColor( TextRenderer renderer, float[] color )
     {
         renderer.setColor( color[0], color[1], color[2], color[3] );
-    }
-
-    // a convenience method wrapper for glColor4fv
-    public static void glColor( GL2 gl, float[] color )
-    {
-        gl.glColor4fv( color, 0 );
-    }
-
-    // a convenience method wrapper for glColor4fv (with alpha override)
-    public static void glColor( GL2 gl, float[] color, float alphaOverride )
-    {
-        gl.glColor4f( color[0], color[1], color[2], alphaOverride );
     }
 
     // a toString method to convert colors into a format parseable by com.metsci.util.params.param.StringArrayParam

@@ -26,27 +26,32 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.gl.util.GLUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static javax.media.opengl.GL.*;
 
 import java.io.Serializable;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
 import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * A simpler/alternate implementation of {@link PolygonPainter} which allows
@@ -54,9 +59,9 @@ import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
  *
  * @author osborn
  */
-public class PolygonPainterSimple extends GlimpseDataPainter2D
+public class PolygonPainterSimple extends GlimpsePainterBase
 {
-    protected ReentrantLock lock = new ReentrantLock( );
+    private static final Logger logger = Logger.getLogger( PolygonPainterSimple.class.getName( ) );
 
     protected PolygonTessellator tessellator;
 
@@ -68,14 +73,20 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
     private ArrayList<PolyStruct> polyById = new ArrayList<PolyStruct>( );
     private boolean allShown = false;
 
+    protected FlatColorProgram prog;
+    protected GLEditableBuffer buffer;
+
     public PolygonPainterSimple( )
     {
         this.tessellator = new PolygonTessellator( );
+
+        this.prog = new FlatColorProgram( );
+        this.buffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
     }
 
     public void setShowOn( int[] ids )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             for ( int i = 0; i < ids.length; i++ )
@@ -85,13 +96,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setShowOff( int[] ids )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             for ( int i = 0; i < ids.length; i++ )
@@ -103,13 +114,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setShowAll( )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             if ( allShown ) return;
@@ -123,13 +134,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setShowNone( )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             for ( int i = 0; i < polyById.size( ); i++ )
@@ -141,13 +152,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setTimeRangeToDraw( long startTime, long endTime )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.startTime = startTime;
@@ -155,13 +166,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setShowAllTimeRange( )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             startTime = Long.MIN_VALUE;
@@ -169,13 +180,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void clear( )
     {
-        lock.lock( );
+        this.painterLock.lock( );
         try
         {
             polyByTime.clear( );
@@ -184,13 +195,13 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public int addPolygon( long time, float[] dataX, float[] dataY, float[] color )
     {
-        lock.lock( );
+        this.painterLock.lock( );
 
         try
         {
@@ -215,7 +226,7 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            this.painterLock.unlock( );
         }
 
         return nextPolyId++;
@@ -243,14 +254,19 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        lock.lock( );
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
+        enableStandardBlending( gl );
         try
         {
-            gl.glBegin( GL2.GL_TRIANGLES );
+            prog.begin( gl );
             try
             {
+                prog.setAxisOrtho( gl, axis );
+
                 for ( PolyStruct p : polyByTime )
                 {
                     float[] color = p.color;
@@ -262,28 +278,34 @@ public class PolygonPainterSimple extends GlimpseDataPainter2D
 
                     if ( p.time < startTime ) continue;
 
-                    gl.glColor4f( color[0], color[1], color[2], color[3] );
-                    for ( int i = 0; i < data.length; i += 2 )
-                    {
-                        gl.glVertex2f( data[i], data[i + 1] );
-                    }
+                    prog.setColor( gl, color );
+
+                    // XXX: Repeated edit-after-draw may cause GL pipeline stalls
+                    buffer.clear( );
+                    FloatBuffer floatBuffer = buffer.editFloats( 0, data.length );
+                    floatBuffer.put( data );
+
+                    prog.draw( gl, buffer, 0, data.length / 2 );
                 }
             }
             finally
             {
-                gl.glEnd( );
+                prog.end( gl );
             }
         }
         finally
         {
-            lock.unlock( );
+            GLUtils.disableBlending( gl );
         }
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        // nothing to dispose
+        GL3 gl = context.getGL( ).getGL3( );
+
+        prog.dispose( gl );
+        buffer.dispose( gl );
     }
 
     private static class PolyStruct

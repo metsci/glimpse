@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -53,6 +53,7 @@ import com.metsci.glimpse.support.texture.ExternalTextureProjected2D;
 import com.metsci.glimpse.support.texture.TextureProjected2D;
 
 // example JOGL FBO Usage: https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/acore/TestFBOOffThreadSharedContextMix2DemosES2NEWT.java
+//                         https://github.com/sgothel/jogl/blob/master/src/test/com/jogamp/opengl/test/junit/jogl/acore/TestFBOAutoDrawableFactoryNEWT.java
 public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
 {
     private static final Logger logger = Logger.getLogger( FBOGlimpseCanvas.class.getName( ) );
@@ -81,6 +82,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     /**
      * @deprecated Use {@link #FBOGlimpseCanvas(GLContext,int,int)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public FBOGlimpseCanvas( String glProfileName, GLContext glContext, int width, int height )
     {
         this( GLProfile.get( glProfileName ), glContext, width, height );
@@ -89,6 +91,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     /**
      * @deprecated Use {@link #FBOGlimpseCanvas(GLContext,int,int)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public FBOGlimpseCanvas( GLProfile glProfile, GLContext glContext, int width, int height )
     {
         init( glProfile, glContext, width, height, true );
@@ -129,7 +132,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
 
     //XXX this link probably no longer relevant to 2.2.0
     // see: http://forum.jogamp.org/querying-textures-bound-to-default-draw-read-framebuffers-td4026564.html
-    public int getTextureUnit( )
+    public int getTextureName( )
     {
         return drawable.getColorbuffer( GL.GL_FRONT ).getName( );
     }
@@ -137,7 +140,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     public TextureProjected2D getProjectedTexture( )
     {
         Colorbuffer b = drawable.getColorbuffer( GL.GL_FRONT );
-        return new ExternalTextureProjected2D( getTextureUnit( ), b.getWidth( ), b.getHeight( ), false );
+        return new ExternalTextureProjected2D( b.getName( ), b.getWidth( ), b.getHeight( ), false );
     }
 
     public Texture getTexture( )

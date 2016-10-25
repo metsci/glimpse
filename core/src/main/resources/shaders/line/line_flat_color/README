@@ -1,0 +1,10 @@
+line_flat_color
+
+Draws 2D lines with feathered edges, stippling, and joins.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.line.LineProgram
+
+Usage Examples:
+ * com.metsci.glimpse.examples.basic.LinePathExample
+ * com.metsci.glimpse.examples.basic.LineJoinExample

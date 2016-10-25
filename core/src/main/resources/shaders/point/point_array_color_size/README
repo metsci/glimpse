@@ -1,0 +1,9 @@
+point_array_color_size
+
+Draws 2D point with feathered edges and a color and size specified per point.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.point.PointArrayColorSizeProgram
+
+Usage Examples:
+ * com.metsci.glimpse.painter.track.TrackPainter

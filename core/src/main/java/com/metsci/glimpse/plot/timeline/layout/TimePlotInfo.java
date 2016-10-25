@@ -46,7 +46,7 @@ import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
  * A handle to one of the plotting areas making up a {@link StackedTimePlot2D}.
  * TimePlotInfo can be used to modify the look and feel of the plot, change its
  * ordering or size within the overall StackedTimePlot2D, or add painters to the plot.
- * 
+ *
  * @author ulman
  */
 public interface TimePlotInfo extends PlotInfo

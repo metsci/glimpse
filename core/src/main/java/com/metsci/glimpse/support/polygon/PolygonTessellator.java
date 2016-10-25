@@ -28,7 +28,7 @@ package com.metsci.glimpse.support.polygon;
 
 import java.util.Iterator;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 import javax.media.opengl.glu.GLUtessellatorCallback;
@@ -116,11 +116,11 @@ public class PolygonTessellator
         @Override
         public void begin( int type )
         {
-            if ( type == GL2.GL_TRIANGLE_FAN ) currentAdapter = new TriangleFanAdapter( );
+            if ( type == GL3.GL_TRIANGLE_FAN ) currentAdapter = new TriangleFanAdapter( );
 
-            if ( type == GL2.GL_TRIANGLE_STRIP ) currentAdapter = new TriangleStripAdapter( );
+            if ( type == GL3.GL_TRIANGLE_STRIP ) currentAdapter = new TriangleStripAdapter( );
 
-            if ( type == GL2.GL_TRIANGLES ) currentAdapter = new TriangleAdapter( );
+            if ( type == GL3.GL_TRIANGLES ) currentAdapter = new TriangleAdapter( );
 
             if ( currentAdapter == null ) errorFlag = true;
         }

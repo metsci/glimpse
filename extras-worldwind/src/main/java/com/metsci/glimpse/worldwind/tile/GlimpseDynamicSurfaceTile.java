@@ -63,7 +63,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
  * Displays the content of a GlimpseLayout onto the surface of the Worldwind globe
  * and dynamically adjusts the surface area of the tile to just fill the screen (and no more)
  * to ensure that the visible areas receive maximum texture resolution.
- * 
+ *
  * @author ulman
  */
 public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseSurfaceTile, Renderable, PreRenderable
@@ -113,7 +113,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
         this.background.addPainter( new BackgroundPainter( ).setColor( 0f, 0f, 0f, 0f ) );
         this.background.addLayout( mask );
     }
-    
+
     @Override
     public void setOpacity( double opacity )
     {
@@ -232,7 +232,7 @@ public class GlimpseDynamicSurfaceTile extends AbstractLayer implements GlimpseS
 
     protected int getTextureHandle( )
     {
-        return offscreenCanvas.getTextureUnit( );
+        return offscreenCanvas.getTextureName( );
     }
 
     protected TextureSurfaceTile newTextureSurfaceTile( int textureHandle, Iterable<? extends LatLon> corners )

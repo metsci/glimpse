@@ -30,11 +30,12 @@ import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -48,114 +49,62 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  */
 public class NumericRotatedYAxisPainter extends NumericYAxisPainter
 {
-
     public NumericRotatedYAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
     }
 
     @Override
-    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintTickLabels( GL gl, Axis1D axis, GlimpseBounds bounds, TickInfo info )
     {
-        double[] yTicks = ticks.getTickPositions( axis );
-        String[] yLabels = ticks.getTickLabels( axis, yTicks );
-
-        AxisUnitConverter converter = ticks.getAxisUnitConverter( );
-
-        // Tick marks
-        double iTick0 = getTickRightX( width, tickSize );
-        double iTick1 = getTickLeftX( width, tickSize );
-        int min = -1;
-        int max = yTicks.length;
-
-        // Tick marks
-        GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL2.GL_LINES );
-        try
-        {
-            for ( int i = 0; i < yTicks.length; i++ )
-            {
-                double jTick = converter.fromAxisUnits( yTicks[i] );
-
-                // don't draw ticks off the screen
-                if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
-                {
-                    max = i;
-                    break;
-                }
-                else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
-                {
-                    min = i;
-                    continue;
-                }
-                else
-                {
-                    if ( jTick == height ) jTick = height - 1;
-
-                    gl.glVertex2d( iTick0, jTick );
-                    gl.glVertex2d( iTick1, jTick );
-                }
-            }
-
-            if ( showMinorTicks )
-            {
-                double[] xMinor = ticks.getMinorTickPositions( yTicks );
-                iTick0 = getTickRightX( width, tickSize / 2 );
-                iTick1 = getTickLeftX( width, tickSize / 2 );
-
-                for ( int i = 0; i < xMinor.length; i++ )
-                {
-                    double jTick = converter.fromAxisUnits( xMinor[i] );
-
-                    gl.glVertex2d( iTick0, jTick );
-                    gl.glVertex2d( iTick1, jTick );
-                }
-            }
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
+        int width = bounds.getWidth( );
+        int height = bounds.getHeight( );
 
         if ( showTickLabels )
         {
-            // Tick labels
-            GlimpseColor.setColor( textRenderer, tickLabelColor );
-            for ( int i = min + 1; i < max; i++ )
+            AxisUnitConverter converter = ticks.getAxisUnitConverter( );
+
+            textRenderer.begin3DRendering( );
+            try
             {
-                double yTick = yTicks[i];
-                String yLabel = yLabels[i];
-                Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
+                // Tick labels
+                GlimpseColor.setColor( textRenderer, tickLabelColor );
 
-                int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getHeight( ) );
-                int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) + tickTextBounds.getWidth( ) / 2 );
-
-                if ( keepLabelsForExtremaFullyVisible )
+                for ( int i = info.minIndex + 1; i < info.maxIndex; i++ )
                 {
-                    if ( jTickText < tickTextBounds.getWidth( ) )
+                    double yTick = info.ticks[i];
+                    String yLabel = info.labels[i];
+                    Rectangle2D tickTextBounds = textRenderer.getBounds( yLabel );
+
+                    int iTickText = getTickTextPositionX( width, ( int ) tickTextBounds.getHeight( ) );
+                    int jTickText = ( int ) round( axis.valueToScreenPixel( converter.fromAxisUnits( yTick ) ) + tickTextBounds.getWidth( ) / 2 );
+
+                    if ( keepLabelsForExtremaFullyVisible )
                     {
-                        jTickText = ( int ) tickTextBounds.getWidth( );
+                        if ( jTickText < tickTextBounds.getWidth( ) )
+                        {
+                            jTickText = ( int ) tickTextBounds.getWidth( );
+                        }
+
+                        if ( jTickText > height )
+                        {
+                            jTickText = height;
+                        }
                     }
 
-                    if ( jTickText > height )
-                    {
-                        jTickText = height;
-                    }
-                }
+                    transformMatrix.loadIdentity( );
+                    transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                    transformMatrix.translate( iTickText, jTickText, 0 );
+                    transformMatrix.rotate( -PI_2, 0, 0, 1.0f );
 
-                textRenderer.beginRendering( width, height );
-                try
-                {
-                    gl.glMatrixMode( GL2.GL_PROJECTION );
-                    gl.glTranslatef( iTickText, jTickText, 0 );
-                    gl.glRotatef( -90, 0, 0, 1.0f );
+                    textRenderer.setTransform( transformMatrix.getMatrix( ) );
 
-                    textRenderer.draw( yLabel, 0, 0 );
+                    textRenderer.draw3D( yLabel, 0, 0, 0, 1 );
                 }
-                finally
-                {
-                    textRenderer.endRendering( );
-                }
+            }
+            finally
+            {
+                textRenderer.end3DRendering( );
             }
         }
     }

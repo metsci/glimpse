@@ -29,14 +29,12 @@ package com.metsci.glimpse.painter.info;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
-
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -47,7 +45,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * Displays text annotations at specified locations on a plot.
  * @author ulman
  */
-public class AnnotationPainter extends GlimpseDataPainter2D
+public class AnnotationPainter extends GlimpsePainterBase
 {
     public static class Annotation
     {
@@ -248,7 +246,6 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
 
     protected Collection<Annotation> annotations;
-    protected ReentrantLock lock;
 
     protected long minTime = Long.MIN_VALUE;
     protected long maxTime = Long.MAX_VALUE;
@@ -263,7 +260,6 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     public AnnotationPainter( TextRenderer textRenderer )
     {
         this.annotations = new ArrayList<Annotation>( );
-        this.lock = new ReentrantLock( );
         this.textRenderer = textRenderer;
     }
 
@@ -274,7 +270,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
 
     public Annotation addAnnotation( String text, float x, float y )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             Annotation annotation = new Annotation( text, x, y );
@@ -283,13 +279,13 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public Annotation addAnnotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             Annotation annotation = new Annotation( text, x, y, offset_x, offset_y, hPos, vPos, color );
@@ -298,13 +294,13 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public Annotation addAnnotation( Annotation annotation )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.annotations.add( annotation );
@@ -312,20 +308,20 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void clearAnnotations( )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.annotations.clear( );
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -341,7 +337,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     @Deprecated
     public void displayTime( long time )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.minTime = time;
@@ -349,7 +345,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -365,7 +361,7 @@ public class AnnotationPainter extends GlimpseDataPainter2D
     @Deprecated
     public void displayTimeRange( long minTime, long maxTime )
     {
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.minTime = minTime;
@@ -373,20 +369,23 @@ public class AnnotationPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        this.lock.lock( );
+        this.painterLock.lock( );
         try
         {
-            textRenderer.beginRendering( width, height );
+            this.textRenderer.beginRendering( width, height );
             try
             {
                 for ( Annotation annotation : annotations )
@@ -432,23 +431,30 @@ public class AnnotationPainter extends GlimpseDataPainter2D
                             break;
                     }
 
-                    textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
-                    textRenderer.draw( annotation.text, x + annotation.offset_x, y + annotation.offset_y );
+                    this.textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
+                    this.textRenderer.draw( annotation.text, x + annotation.offset_x, y + annotation.offset_y );
                 }
             }
             finally
             {
-                textRenderer.endRendering( );
+                this.textRenderer.endRendering( );
             }
         }
         finally
         {
-            this.lock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     protected boolean inTimeRange( Annotation annotation )
     {
         return ( annotation.getStartTime( ) <= maxTime && annotation.getEndTime( ) >= minTime ) || ( minTime <= annotation.getEndTime( ) && maxTime >= annotation.getStartTime( ) );
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        if ( textRenderer != null ) textRenderer.dispose( );
+        textRenderer = null;
     }
 }

@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.info;
 
 /**
  * Helper data structure for FpsPainter.
- * 
+ *
  * @see FpsPainter
  * @author sindhwani
  */

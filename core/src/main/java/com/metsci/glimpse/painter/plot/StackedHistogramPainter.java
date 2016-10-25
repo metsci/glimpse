@@ -26,21 +26,24 @@
  */
 package com.metsci.glimpse.painter.plot;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatMap;
 import it.unimi.dsi.fastutil.floats.Float2FloatOpenHashMap;
@@ -56,9 +59,11 @@ import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
  *
  * @author borkholder
  */
-public class StackedHistogramPainter extends GlimpseDataPainter2D
+public class StackedHistogramPainter extends GlimpsePainterBase
 {
-    public static final int FLOATS_PER_BAR = 8;
+    private static final Logger logger = Logger.getLogger( StackedHistogramPainter.class.getName( ) );
+
+    public static final int FLOATS_PER_BAR = 12;
 
     protected float[] defaultSeriesColor = new float[] { 1.0f, 0.0f, 0.0f, 0.6f };
 
@@ -77,9 +82,13 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
     protected float minX;
     protected float maxX;
 
+    protected FlatColorProgram fillProg;
+
     public StackedHistogramPainter( )
     {
         dataBufferLock = new ReentrantLock( );
+
+        this.fillProg = new FlatColorProgram( );
     }
 
     public void setDefaultSeriesColor( float[] rgba )
@@ -245,7 +254,10 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
                     dataBuffer.put( bin ).put( lastHeight );
                     dataBuffer.put( bin ).put( top );
                     dataBuffer.put( bin + this.binSize ).put( top );
+
+                    dataBuffer.put( bin + this.binSize ).put( top );
                     dataBuffer.put( bin + this.binSize ).put( lastHeight );
+                    dataBuffer.put( bin ).put( lastHeight );
 
                     lastBarHeights.put( bin, top );
                 }
@@ -269,32 +281,32 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
 
     public float getBinSize( )
     {
-        return binSize;
+        return this.binSize;
     }
 
     public float getBinStart( )
     {
-        return binStart;
+        return this.binStart;
     }
 
     public float getMinY( )
     {
-        return minY;
+        return this.minY;
     }
 
     public float getMaxY( )
     {
-        return maxY;
+        return this.maxY;
     }
 
     public float getMinX( )
     {
-        return minX;
+        return this.minX;
     }
 
     public float getMaxX( )
     {
-        return maxX;
+        return this.maxX;
     }
 
     protected static float getBin( double data, double binSize, double binStart )
@@ -303,57 +315,71 @@ public class StackedHistogramPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( bufferInitialized )
+        if ( this.bufferInitialized )
         {
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
+            context.getGL( ).glDeleteBuffers( 1, this.bufferHandle, 0 );
         }
+
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( dataSeries == null || dataSeries.isEmpty( ) )
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
+        if ( this.dataSeries == null || this.dataSeries.isEmpty( ) )
         {
             return;
         }
 
-        if ( !bufferInitialized )
+        if ( !this.bufferInitialized )
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-            bufferInitialized = true;
+            this.bufferHandle = new int[1];
+            gl.glGenBuffers( 1, this.bufferHandle, 0 );
+            this.bufferInitialized = true;
         }
 
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+        gl.glBindBuffer( GL.GL_ARRAY_BUFFER, bufferHandle[0] );
 
-        if ( newData )
+        if ( this.newData )
         {
-            dataBufferLock.lock( );
+            this.dataBufferLock.lock( );
             try
             {
                 // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataBuffer.position( ) * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_STATIC_DRAW );
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, dataBuffer.position( ) * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_STATIC_DRAW );
 
-                glHandleError( gl );
+                GLErrorUtils.logGLError( logger, gl, "Error copying HistogramPainter data to device." );
 
-                newData = false;
+                this.newData = false;
             }
             finally
             {
-                dataBufferLock.unlock( );
+                this.dataBufferLock.unlock( );
             }
         }
 
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        for ( HistogramEntry entry : dataSeries )
+        this.fillProg.begin( gl );
+        GLUtils.enableStandardBlending( gl );
+        try
         {
-            gl.glColor4fv( entry.color, 0 );
-            gl.glDrawArrays( GL2.GL_QUADS, entry.quadsFloatStart, entry.numQuads * 4 );
+            this.fillProg.setAxisOrtho( gl, axis );
+
+            for ( HistogramEntry entry : this.dataSeries )
+            {
+                this.fillProg.setColor( gl, entry.color );
+
+                this.fillProg.draw( gl, GL.GL_TRIANGLES, bufferHandle[0], entry.quadsFloatStart, entry.numQuads * 6 );
+            }
+        }
+        finally
+        {
+            GLUtils.disableBlending( gl );
+            this.fillProg.end( gl );
         }
     }
 

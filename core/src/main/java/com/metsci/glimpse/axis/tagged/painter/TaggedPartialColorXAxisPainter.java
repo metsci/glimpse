@@ -26,18 +26,23 @@
  */
 package com.metsci.glimpse.axis.tagged.painter;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static javax.media.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 import java.util.List;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
-import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
  * A horizontal (x) axis painter which displays positions of tags in addition
@@ -60,68 +65,99 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
  */
 public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
 {
-    protected FloatBuffer vertexCoords;
-    protected FloatBuffer textureCoords;
+    protected GLEditableBuffer vertexCoords;
+    protected GLEditableBuffer textureCoords;
 
     public TaggedPartialColorXAxisPainter( AxisLabelHandler ticks )
     {
         super( ticks );
+
+        this.vertexCoords = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
+        this.textureCoords = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
     }
 
     @Override
-    protected void paintColorScale( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintColorScale( GlimpseContext context )
     {
+        Axis1D axis = getAxis1D( context );
+
         if ( colorTexture != null && axis instanceof TaggedAxis1D )
         {
             TaggedAxis1D taggedAxis = ( TaggedAxis1D ) axis;
+            GlimpseBounds bounds = getBounds( context );
+            GL3 gl = context.getGL( ).getGL3( );
 
-            colorTexture.prepare( gl, 0 );
+            int height = bounds.getHeight( );
+            int width = bounds.getWidth( );
 
-            int count = updateCoordinateBuffers( taggedAxis, width, height );
+            int count = updateCoordinateBuffers( gl, taggedAxis, width, height );
 
-            gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-            gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+            float y1 = getColorBarMinY( height );
+            float y2 = getColorBarMaxY( height );
 
-            gl.glEnable( GL2.GL_TEXTURE_1D );
+            float inset_PX = 0.5f * style.thickness_PX;
 
-            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-            gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
+            pathOutline.clear( );
+            pathOutline.addRectangle( inset_PX, y1, width - inset_PX, y2 );
 
-            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, vertexCoords.rewind( ) );
-            gl.glTexCoordPointer( 1, GL2.GL_FLOAT, 0, textureCoords.rewind( ) );
-
+            GLUtils.enableStandardBlending( gl );
             try
             {
-                gl.glDrawArrays( GL2.GL_QUAD_STRIP, 0, count );
+                if ( count > 0 )
+                {
+                    // draw color scale
+                    progTex.begin( context );
+                    try
+                    {
+                        progTex.setPixelOrtho( context, bounds );
+
+                        progTex.draw( context, GL_TRIANGLES, colorTexture, vertexCoords, textureCoords, 0, count );
+                    }
+                    finally
+                    {
+                        progTex.end( context );
+                    }
+                }
+
+                // draw outline box
+                progOutline.begin( gl );
+                try
+                {
+                    progOutline.setPixelOrtho( gl, bounds );
+                    progOutline.setViewport( gl, bounds );
+
+                    progOutline.draw( gl, style, pathOutline );
+                }
+                finally
+                {
+                    progOutline.end( gl );
+                }
             }
             finally
             {
-                gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
-                gl.glDisableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
-                gl.glDisable( GL2.GL_TEXTURE_1D );
+                gl.glDisable( GL.GL_BLEND );
             }
         }
-
-        gl.glDisable( GL2.GL_TEXTURE_1D );
-
-        outlineColorQuad( gl, axis, width, height );
     }
 
-    protected int updateCoordinateBuffers( TaggedAxis1D taggedAxis, int width, int height )
+    protected int updateCoordinateBuffers( GL gl, TaggedAxis1D taggedAxis, int width, int height )
     {
         List<Tag> tags = taggedAxis.getSortedTags( );
-
         int size = tags.size( );
 
-        if ( vertexCoords == null || vertexCoords.capacity( ) < size * 4 ) vertexCoords = Buffers.newDirectFloatBuffer( size * 4 );
+        if ( size <= 1 ) return 0;
 
-        if ( textureCoords == null || textureCoords.capacity( ) < size * 2 ) textureCoords = Buffers.newDirectFloatBuffer( size * 2 );
+        vertexCoords.clear( );
+        textureCoords.clear( );
+        FloatBuffer v = vertexCoords.growFloats( 12 * ( size - 1 ) );
+        FloatBuffer t = textureCoords.growFloats( 6 * ( size - 1 ) );
 
-        vertexCoords.rewind( );
-        textureCoords.rewind( );
+        float y1 = getColorBarMinY( height );
+        float y2 = getColorBarMaxY( height );
 
-        int y1 = getColorBarMinY( height );
-        int y2 = getColorBarMaxY( height );
+        float prevVertexCoord = 0;
+        float prevTextureCoord = 0;
+        boolean init = false;
 
         int count = 0;
         for ( Tag tag : tags )
@@ -129,12 +165,32 @@ public class TaggedPartialColorXAxisPainter extends TaggedColorXAxisPainter
             if ( tag.hasAttribute( TEX_COORD_ATTR ) )
             {
                 float textureCoord = tag.getAttributeFloat( TEX_COORD_ATTR );
-                float vertexCoord = ( float ) taggedAxis.valueToScreenPixel( tag.getValue( ) );
+                float vertexCoord = taggedAxis.valueToScreenPixel( tag.getValue( ) );
 
-                vertexCoords.put( vertexCoord ).put( y1 ).put( vertexCoord ).put( y2 );
-                textureCoords.put( textureCoord ).put( textureCoord );
+                if ( init )
+                {
+                    v.put( prevVertexCoord ).put( y1 );
+                    v.put( vertexCoord ).put( y2 );
+                    v.put( vertexCoord ).put( y1 );
 
-                count += 2;
+                    v.put( vertexCoord ).put( y2 );
+                    v.put( prevVertexCoord ).put( y2 );
+                    v.put( prevVertexCoord ).put( y1 );
+
+                    t.put( prevTextureCoord );
+                    t.put( textureCoord );
+                    t.put( textureCoord );
+
+                    t.put( textureCoord );
+                    t.put( prevTextureCoord );
+                    t.put( prevTextureCoord );
+
+                    count += 6;
+                }
+
+                prevVertexCoord = vertexCoord;
+                prevTextureCoord = textureCoord;
+                init = true;
             }
         }
 

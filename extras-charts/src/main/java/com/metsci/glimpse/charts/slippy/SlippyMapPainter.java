@@ -34,7 +34,7 @@ import com.metsci.glimpse.support.font.FontUtils;
 
 /**
  * This just wraps a tile painter and an attribution text painter (if one is specified).
- * 
+ *
  * @author oren
  *
  */

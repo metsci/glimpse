@@ -30,8 +30,9 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
+import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.time.AbsoluteTimeAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
@@ -50,7 +51,10 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  */
 public class TimeYAxisPainter extends TimeAxisPainter
 {
+    protected static final float PI_2 = ( float ) ( Math.PI / 2.0f );
     protected static final double dateTextRightPadding = 4;
+
+    protected Matrix4 transformMatrix = new Matrix4( );
 
     public TimeYAxisPainter( TimeZone timeZone, Epoch epoch )
     {
@@ -68,91 +72,131 @@ public class TimeYAxisPainter extends TimeAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        super.paintTo( context, bounds, axis );
+        super.doPaintTo( context );
 
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl3 = context.getGL( ).getGL3( );
+        Axis1D axis = getAxis1D( context );
+        GlimpseBounds bounds = getBounds( context );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
         if ( width == 0 || height == 0 ) return;
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( -0.5, width - 1 + 0.5f, axis.getMin( ), axis.getMax( ), -1, 1 );
+        List<TimeStamp> tickTimes = handler.tickTimes( axis, height );
+        double tickInterval = handler.tickInterval( tickTimes );
 
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
-
-        gl.glColor4fv( tickColor, 0 );
-
-        List<TimeStamp> tickTimes = handler.getTickPositions( axis, height );
-
-        // Tick marks
-        gl.glBegin( GL2.GL_LINES );
-        for ( TimeStamp t : tickTimes )
+        progLine.begin( gl3 );
+        try
         {
-            double y = fromTimeStamp( t );
-            gl.glVertex2d( width, y );
-            gl.glVertex2d( width - tickLineLength, y );
+            pathLine.clear( );
+            for ( TimeStamp t : tickTimes )
+            {
+                float y = ( float ) fromTimeStamp( t );
+
+                pathLine.moveTo( width, y );
+                pathLine.lineTo( width - tickSize, y );
+            }
+
+            style.thickness_PX = tickLineWidth;
+            style.rgba = tickColor;
+
+            progLine.setViewport( gl3, bounds );
+            progLine.setOrtho( gl3, -0.5f, width - 0.5f, ( float ) axis.getMin( ), ( float ) axis.getMax( ) );
+
+            progLine.draw( gl3, style, pathLine );
         }
-        gl.glEnd( );
+        finally
+        {
+            progLine.end( gl3 );
+        }
 
-        GlimpseColor.setColor( textRenderer, textColor );
+        if ( tickInterval <= Time.fromMinutes( 1 ) )
+        {
+            // Time labels
+            double jTimeText = printTickLabels( tickTimes, axis, handler.getSecondMinuteFormat( ), width, height );
 
-        List<String> tickLabels = handler.getTickLabels( axis, tickTimes );
+            // Date labels
+            printHoverLabels( gl3, tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
+        }
+        else if ( tickInterval <= Time.fromHours( 12 ) )
+        {
+            // Time labels
+            double jTimeText = printTickLabels( tickTimes, axis, handler.getHourMinuteFormat( ), width, height );
 
-        double iTimeText = printTickLabels( tickLabels, tickTimes, axis, width, height );
-        if ( isShowDateLabels( ) ) printHoverLabels( gl, tickTimes, axis, iTimeText, width, height );
+            // Date labels
+            printHoverLabels( gl3, tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
+        }
+        else if ( tickInterval <= Time.fromDays( 10 ) )
+        {
+            // Date labels
+            double jTimeText = printTickLabels( tickTimes, axis, handler.getDayFormat( ), width, height );
+
+            // Year labels
+            printHoverLabels( gl3, tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
+        }
+        else if ( tickInterval <= Time.fromDays( 60 ) )
+        {
+            // Date labels
+            double jTimeText = printTickLabels( tickTimes, axis, handler.getMonthFormat( ), width, height );
+
+            // Year labels
+            printHoverLabels( gl3, tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
+        }
+        else
+        {
+            // Date labels
+            printTickLabels( tickTimes, axis, handler.getYearFormat( ), width, height );
+        }
     }
 
-    private void printHoverLabels( GL2 gl, List<TimeStamp> tickTimes, Axis1D axis, double iTimeText, int width, int height )
+    private void printHoverLabels( GL3 gl, List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, TimeStructFactory factory, double iTimeText, int width, int height )
     {
-        // Date labels
-        List<TimeStruct> timeStructs = handler.getTimeStructs( axis, tickTimes );
-        for ( TimeStruct timeStruct : timeStructs )
+        textRenderer.begin3DRendering( );
+        try
         {
-            String text = timeStruct.text;
-            Rectangle2D textBounds = textRenderer.getBounds( text );
+            GlimpseColor.setColor( textRenderer, textColor );
 
-            // Text will be drawn rotated 90 degrees, so height
-            // is the *width* of the bounds rectangle
-            //
-            double halfTextHeight = 0.5 * textBounds.getWidth( );
-
-            // To make translate/rotate work right, we need j
-            // to be the vertical *center* of the text
-            //
-            int jMin = ( int ) Math.ceil( axis.valueToScreenPixel( fromTimeStamp( timeStruct.start ) ) + halfTextHeight );
-            int jMax = ( int ) Math.floor( axis.valueToScreenPixel( fromTimeStamp( timeStruct.end ) ) - halfTextHeight );
-            int jApprox = axis.valueToScreenPixel( fromTimeStamp( timeStruct.textCenter ) );
-            int j = Math.max( jMin, Math.min( jMax, jApprox ) );
-            if ( j - halfTextHeight < 0 || j + halfTextHeight > height ) continue;
-
-            int i = ( int ) Math.floor( iTimeText - dateTextRightPadding - 1 );
-
-            // Getting rotated text out of TextRenderer is tricky ...
-            // begin, matrix-mode, push, draw, end, and pop must be
-            // called in exactly this order
-            //
-            textRenderer.beginRendering( width, height );
-            gl.glMatrixMode( GL2.GL_MODELVIEW );
-            gl.glPushMatrix( );
-            try
+            // Date labels
+            List<TimeStruct> days = handler.timeStructs( axis, tickTimes, factory );
+            for ( TimeStruct day : days )
             {
-                gl.glTranslatef( i, j, 0 );
-                gl.glRotatef( 90, 0, 0, 1 );
-                textRenderer.draw( text, ( int ) Math.round( -halfTextHeight ), 0 );
+                String text = day.textCenter.toString( format );
+                Rectangle2D textBounds = textRenderer.getBounds( text );
+
+                // Text will be drawn rotated 90 degrees, so height
+                // is the *width* of the bounds rectangle
+                //
+                double halfTextHeight = 0.5 * textBounds.getWidth( );
+
+                // To make translate/rotate work right, we need j
+                // to be the vertical *center* of the text
+                //
+                int jMin = ( int ) Math.ceil( axis.valueToScreenPixel( fromTimeStamp( day.start ) ) + halfTextHeight );
+                int jMax = ( int ) Math.floor( axis.valueToScreenPixel( fromTimeStamp( day.end ) ) - halfTextHeight );
+                int jApprox = axis.valueToScreenPixel( fromTimeStamp( day.textCenter ) );
+                int j = Math.max( jMin, Math.min( jMax, jApprox ) );
+                if ( j - halfTextHeight < 0 || j + halfTextHeight > height ) continue;
+
+                int i = ( int ) Math.floor( iTimeText - dateTextRightPadding - 1 );
+
+                transformMatrix.loadIdentity( );
+                transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                transformMatrix.translate( i, j, 0 );
+                transformMatrix.rotate( PI_2, 0, 0, 1.0f );
+
+                textRenderer.setTransform( transformMatrix.getMatrix( ) );
+
+                textRenderer.draw3D( text, ( int ) Math.round( -halfTextHeight ), 0, 0, 1 );
             }
-            finally
-            {
-                textRenderer.endRendering( );
-                gl.glPopMatrix( );
-            }
+        }
+        finally
+        {
+            textRenderer.end3DRendering( );
         }
     }
 
@@ -162,7 +206,9 @@ public class TimeYAxisPainter extends TimeAxisPainter
         textRenderer.beginRendering( width, height );
         try
         {
-            for ( int index = 0; index < tickLabels.size( ); index++ )
+            GlimpseColor.setColor( textRenderer, textColor );
+
+            for ( TimeStamp t : tickTimes )
             {
                 TimeStamp t = tickTimes.get( index );
                 String string = tickLabels.get( index );
@@ -172,7 +218,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
                 int j = ( int ) Math.round( axis.valueToScreenPixel( fromTimeStamp( t ) ) - 0.5 * Math.max( 1, textHeight - 2 ) );
                 if ( j < 0 || j + textHeight > height ) continue;
 
-                int i = ( int ) Math.round( width - tickLineLength - textBounds.getWidth( ) ) - 1;
+                int i = ( int ) Math.round( width - tickSize - textBounds.getWidth( ) ) - 1;
                 iTimeText = Math.min( iTimeText, i );
 
                 textRenderer.draw( string, i, j );

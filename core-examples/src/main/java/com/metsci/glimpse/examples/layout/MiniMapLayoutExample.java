@@ -27,7 +27,7 @@
 package com.metsci.glimpse.examples.layout;
 
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.TaggedHeatMapExample;
+import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.MinimapLayout;

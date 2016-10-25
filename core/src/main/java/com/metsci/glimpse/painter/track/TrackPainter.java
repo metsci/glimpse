@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.painter.track;
 
+import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.nio.ByteBuffer;
@@ -43,21 +45,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.selection.SpatialSelectionAxisListener;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.metsci.glimpse.support.selection.TemporalSelectionListener;
+import com.metsci.glimpse.support.shader.line.ColorLinePath;
+import com.metsci.glimpse.support.shader.line.ColorLineProgram;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineUtils;
+import com.metsci.glimpse.support.shader.point.PointArrayColorSizeProgram;
+import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 
 /**
@@ -70,8 +83,12 @@ import com.metsci.glimpse.util.quadtree.QuadTreeXys;
  * @author ulman
  * @see com.metsci.glimpse.examples.animated.AnimatedGeoPlotExample
  */
-public class TrackPainter extends GlimpseDataPainter2D
+public class TrackPainter extends GlimpsePainterBase
 {
+    private static final Logger logger = Logger.getLogger( TrackPainter.class.getName( ) );
+
+    public static final int FLOATS_PER_VERTEX = 2;
+
     public static final int QUAD_TREE_BIN_MAX = 1000;
 
     public static final long SPATIAL_SELECTION_UPDATE_RATE = 50;
@@ -84,8 +101,13 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     public static final Font textFont = FontUtils.getDefaultBold( 12 );
 
-    protected int dataBufferSize = 0;
-    protected FloatBuffer dataBuffer = null;
+    protected static final double ppvAspectRatioThreshold = 1.0000000001;
+
+    protected int tempBufferSize = 0;
+    protected FloatBuffer xyTempBuffer = null;
+    protected ByteBuffer flagTempBuffer = null;
+    protected FloatBuffer mileageTempBuffer = null;
+
     protected ReentrantLock trackUpdateLock = null;
 
     // mapping from id to Track
@@ -109,6 +131,20 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     protected TextRenderer fontRenderer;
 
+    protected LineProgram lineProg;
+    protected PointArrayColorSizeProgram pointArrayProg;
+    protected PointFlatColorProgram pointFlatProg;
+
+    protected GLEditableBuffer pointXy;
+    protected GLEditableBuffer pointColor;
+    protected GLEditableBuffer pointSize;
+
+    protected ColorLineProgram labelLineProg;
+    protected ColorLinePath labelLinePath;
+    protected LineStyle labelLineStyle;
+
+    protected double ppvAspectRatio = Double.NaN;
+
     public TrackPainter( )
     {
         this( false );
@@ -126,6 +162,18 @@ public class TrackPainter extends GlimpseDataPainter2D
         this.trackUpdateLock = new ReentrantLock( );
 
         this.fontRenderer = new TextRenderer( textFont );
+
+        this.lineProg = new LineProgram( );
+
+        this.pointFlatProg = new PointFlatColorProgram( );
+        this.pointArrayProg = new PointArrayColorSizeProgram( );
+        this.pointXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.pointColor = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.pointSize = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+
+        this.labelLineProg = new ColorLineProgram( );
+        this.labelLinePath = new ColorLinePath( );
+        this.labelLineStyle = new LineStyle( );
     }
 
     public void addTemporalSelectionListener( TemporalSelectionListener<Point> listener )
@@ -319,6 +367,24 @@ public class TrackPainter extends GlimpseDataPainter2D
             Track track = getOrCreateTrack( trackId );
 
             track.setLineWidth( width );
+
+            this.updatedTracks.add( track );
+            this.newData = true;
+        }
+        finally
+        {
+            this.trackUpdateLock.unlock( );
+        }
+    }
+
+    public void setLineStyle( Object trackId, LineStyle style )
+    {
+        this.trackUpdateLock.lock( );
+        try
+        {
+            Track track = getOrCreateTrack( trackId );
+
+            track.setLineStyle( style );
 
             this.updatedTracks.add( track );
             this.newData = true;
@@ -875,8 +941,8 @@ public class TrackPainter extends GlimpseDataPainter2D
         this.trackUpdateLock.lock( );
         try
         {
-            this.dataBuffer = null;
-            this.dataBufferSize = 0;
+            this.xyTempBuffer = null;
+            this.tempBufferSize = 0;
         }
         finally
         {
@@ -970,11 +1036,17 @@ public class TrackPainter extends GlimpseDataPainter2D
 
     protected void ensureDataBufferSize( int needed )
     {
-        if ( dataBuffer == null || dataBufferSize < needed )
+        if ( xyTempBuffer == null || tempBufferSize < needed )
         {
-            dataBufferSize = needed;
-            dataBuffer = ByteBuffer.allocateDirect( needed * 2 * 4 ).order( ByteOrder.nativeOrder( ) ).asFloatBuffer( );
+            tempBufferSize = needed;
+            xyTempBuffer = ByteBuffer.allocateDirect( needed * FLOATS_PER_VERTEX * GLUtils.BYTES_PER_FLOAT ).order( ByteOrder.nativeOrder( ) ).asFloatBuffer( );
+            flagTempBuffer = ByteBuffer.allocateDirect( needed ).order( ByteOrder.nativeOrder( ) );
+            mileageTempBuffer = ByteBuffer.allocateDirect( needed * GLUtils.BYTES_PER_FLOAT ).order( ByteOrder.nativeOrder( ) ).asFloatBuffer( );
         }
+
+        xyTempBuffer.rewind( );
+        flagTempBuffer.rewind( );
+        mileageTempBuffer.rewind( );
     }
 
     protected void notifyTemporalSelectionListeners( Map<Object, Point> newTrackHeads )
@@ -998,13 +1070,23 @@ public class TrackPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        double newPpvAspectRatio = LineUtils.ppvAspectRatio( axis );
+        boolean keepPpvAspectRatio = ( newPpvAspectRatio / ppvAspectRatioThreshold <= this.ppvAspectRatio && this.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
+
+        if ( !keepPpvAspectRatio )
+        {
+            this.ppvAspectRatio = newPpvAspectRatio;
+        }
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        if ( this.newData )
+        if ( this.newData || !keepPpvAspectRatio )
         {
             this.trackUpdateLock.lock( );
             try
@@ -1032,64 +1114,33 @@ public class TrackPainter extends GlimpseDataPainter2D
                     LoadedTrack loaded = getOrCreateLoadedTrack( id, track );
                     loaded.loadSettings( track );
 
-                    int trackSize = track.getSize( );
+                    // determine if the ppvAspectRatioChanged
+                    boolean keepPpvAspectRatioLoaded = !loaded.style.stippleEnable || ( newPpvAspectRatio / ppvAspectRatioThreshold <= loaded.ppvAspectRatio && loaded.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
 
-                    if ( track.isDataInserted( ) )
+                    if ( !keepPpvAspectRatioLoaded )
                     {
-                        if ( !loaded.glBufferInitialized || loaded.glBufferMaxSize < trackSize )
-                        {
-                            // if the track doesn't have a gl buffer or it is too small we must
-                            // copy all the track's data into a new, larger buffer
-
-                            // if this is the first time we have allocated memory for this track
-                            // don't allocate any extra, it may never get added to
-                            // however, once a track has been updated once, we assume it is likely
-                            // to be updated again and give it extra memory
-                            if ( loaded.glBufferInitialized )
-                            {
-                                gl.glDeleteBuffers( 1, new int[] { loaded.glBufferHandle }, 0 );
-                                loaded.glBufferMaxSize = Math.max( ( int ) ( loaded.glBufferMaxSize * 1.5 ), trackSize );
-                            }
-                            else
-                            {
-                                loaded.glBufferMaxSize = trackSize;
-                            }
-
-                            // copy all the track data into a host buffer
-                            ensureDataBufferSize( loaded.glBufferMaxSize );
-                            dataBuffer.rewind( );
-                            track.loadIntoBuffer( dataBuffer, 0, trackSize );
-
-                            // create a new device buffer handle
-                            int[] bufferHandle = new int[1];
-                            gl.glGenBuffers( 1, bufferHandle, 0 );
-                            loaded.glBufferHandle = bufferHandle[0];
-
-                            loaded.glBufferInitialized = true;
-
-                            // copy data from the host buffer into the device buffer
-                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferData( GL2.GL_ARRAY_BUFFER, loaded.glBufferMaxSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-                        }
-                        else
-                        {
-                            // there is enough empty space in the device buffer to accommodate all the new data
-
-                            int insertOffset = track.getInsertOffset( );
-                            int insertCount = track.getInsertCount( );
-
-                            // copy all the new track data into a host buffer
-                            ensureDataBufferSize( insertCount );
-                            dataBuffer.rewind( );
-                            track.loadIntoBuffer( dataBuffer, insertOffset, trackSize );
-
-                            // update the device buffer with the new data
-                            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-                            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, insertOffset * 2 * BYTES_PER_FLOAT, insertCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-                        }
+                        loaded.ppvAspectRatio = newPpvAspectRatio;
                     }
 
-                    track.reset( );
+                    updateVerticesTrack( gl, track, loaded, keepPpvAspectRatioLoaded );
+                }
+
+                // if the ppv aspect ratio changed, we need to recreate the mileage array for all tracks
+                // (but we only need to do so for tracks with stippling enabled which weren't already updated
+                //  because they were in the updatedTracks list)
+                if ( !keepPpvAspectRatio )
+                {
+                    for ( Object id : loadedTracks.keySet( ) )
+                    {
+                        Track track = tracks.get( id );
+                        LoadedTrack loaded = loadedTracks.get( id );
+
+                        if ( loaded.style.stippleEnable && !updatedTracks.contains( track ) )
+                        {
+                            loaded.ppvAspectRatio = newPpvAspectRatio;
+                            updateVerticesTrack( gl, track, loaded, false );
+                        }
+                    }
                 }
 
                 this.updatedTracks.clear( );
@@ -1100,67 +1151,92 @@ public class TrackPainter extends GlimpseDataPainter2D
                 this.trackUpdateLock.unlock( );
             }
 
-            glHandleError( gl );
+            GLErrorUtils.logGLError( logger, gl, "TrackPainter Error" );
         }
 
         if ( loadedTracks.isEmpty( ) ) return;
 
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
         boolean labelOn = false;
 
-        for ( LoadedTrack loaded : loadedTracks.values( ) )
+        GLUtils.enableStandardBlending( gl );
+        try
         {
-            if ( !loaded.glBufferInitialized ) continue;
-
-            int glOffset = loaded.glSelectedOffset;
-            int glSize = loaded.glSelectedSize;
-
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glBufferHandle );
-            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-
-            if ( loaded.linesOn )
+            lineProg.begin( gl );
+            try
             {
-                gl.glColor4fv( loaded.lineColor, 0 );
-                gl.glLineWidth( loaded.lineWidth );
+                lineProg.setAxisOrtho( gl, axis );
+                lineProg.setViewport( gl, bounds );
 
-                if ( loaded.stippleOn )
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    gl.glEnable( GL2.GL_LINE_STIPPLE );
-                    gl.glLineStipple( loaded.stippleFactor, loaded.stipplePattern );
-                }
+                    if ( loaded.linesOn && loaded.glSelectedSize > 0 )
+                    {
+                        lineProg.setStyle( gl, loaded.style );
 
-                gl.glDrawArrays( GL2.GL_LINE_STRIP, glOffset, glSize );
-
-                if ( loaded.stippleOn )
-                {
-                    gl.glDisable( GL2.GL_LINE_STIPPLE );
+                        // add 2 to account for trailing and leading phantom vertices
+                        lineProg.draw( gl, loaded.xyHandle, loaded.flagHandle, loaded.mileageHandle, loaded.glSelectedOffset, loaded.glSelectedSize + 2 );
+                    }
                 }
             }
-
-            if ( loaded.pointsOn )
+            finally
             {
-                gl.glColor4fv( loaded.pointColor, 0 );
-                gl.glPointSize( loaded.pointSize );
-                gl.glDrawArrays( GL2.GL_POINTS, glOffset, glSize );
+                lineProg.end( gl );
             }
 
-            if ( loaded.headPointOn )
+            pointFlatProg.begin( gl );
+            try
             {
-                gl.glColor4fv( loaded.headPointColor, 0 );
-                gl.glPointSize( loaded.headPointSize );
-                gl.glBegin( GL2.GL_POINTS );
-                try
+                pointFlatProg.setAxisOrtho( gl, axis );
+                pointFlatProg.setFeatherThickness( gl, 1.0f );
+
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
                 {
-                    gl.glVertex2d( loaded.headPosX, loaded.headPosY );
-                }
-                finally
-                {
-                    gl.glEnd( );
+                    if ( loaded.pointsOn && loaded.glSelectedSize > 0 )
+                    {
+                        pointFlatProg.setPointSize( gl, loaded.pointSize );
+                        pointFlatProg.setRgba( gl, loaded.pointColor );
+
+                        // add 1 to skip past phantom vertex
+                        pointFlatProg.draw( gl, GL.GL_POINTS, loaded.xyHandle, loaded.glSelectedOffset + 1, loaded.glSelectedSize );
+                    }
                 }
             }
+            finally
+            {
+                pointFlatProg.end( gl );
+            }
 
-            if ( loaded.labelOn ) labelOn = true;
+            pointArrayProg.begin( gl );
+            try
+            {
+                pointArrayProg.setAxisOrtho( gl, axis );
+
+                pointXy.clear( );
+                pointColor.clear( );
+                pointSize.clear( );
+
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
+                {
+                    if ( loaded.headPointOn )
+                    {
+                        pointXy.grow2f( ( float ) loaded.headPosX, ( float ) loaded.headPosY );
+                        pointColor.growNfv( loaded.headPointColor, 0, 4 );
+                        pointSize.grow1f( loaded.headPointSize );
+                    }
+
+                    if ( loaded.labelOn ) labelOn = true;
+                }
+
+                pointArrayProg.draw( gl, pointXy, pointColor, pointSize, 0, pointSize.sizeFloats( ) );
+            }
+            finally
+            {
+                pointArrayProg.end( gl );
+            }
+        }
+        finally
+        {
+            GLUtils.disableBlending( gl );
         }
 
         // don't bother iterating through all the tracks again if none have labels turned on
@@ -1185,37 +1261,127 @@ public class TrackPainter extends GlimpseDataPainter2D
                 fontRenderer.endRendering( );
             }
 
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( 0, width, 0, height, -1, 1 );
-            gl.glMatrixMode( GL2.GL_MODELVIEW );
-            gl.glLoadIdentity( );
-
-            for ( LoadedTrack loaded : loadedTracks.values( ) )
+            labelLineProg.begin( gl );
+            try
             {
-                if ( loaded.labelOn && loaded.labelLineOn && loaded.label != null )
-                {
-                    int posX = axis.getAxisX( ).valueToScreenPixel( loaded.headPosX );
-                    int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
+                labelLineProg.setPixelOrtho( gl, bounds );
+                labelLineProg.setViewport( gl, bounds );
 
-                    gl.glColor3fv( loaded.labelLineColor, 0 );
-                    gl.glBegin( GL2.GL_LINES );
-                    try
+                labelLinePath.clear( );
+
+                for ( LoadedTrack loaded : loadedTracks.values( ) )
+                {
+                    if ( loaded.labelOn && loaded.labelLineOn && loaded.label != null )
                     {
-                        gl.glVertex2i( posX, posY );
-                        gl.glVertex2i( posX + TRACK_LABEL_OFFSET_X, posY + TRACK_LABEL_OFFSET_Y );
-                    }
-                    finally
-                    {
-                        gl.glEnd( );
+                        int posX = axis.getAxisX( ).valueToScreenPixel( loaded.headPosX );
+                        int posY = axis.getAxisY( ).valueToScreenPixel( loaded.headPosY );
+
+                        labelLinePath.moveTo( posX, posY, loaded.labelLineColor );
+                        labelLinePath.lineTo( posX + TRACK_LABEL_OFFSET_X, posY + TRACK_LABEL_OFFSET_Y, loaded.labelLineColor );
                     }
                 }
+
+                labelLineProg.draw( gl, labelLineStyle, labelLinePath );
+            }
+            finally
+            {
+                labelLineProg.end( gl );
             }
         }
     }
 
+    protected void updateVerticesTrack( GL3 gl, Track track, LoadedTrack loaded, boolean keepPpvAspectRatioLoaded )
+    {
+        int trackSize = track.getSize( );
+
+        boolean updateBuffer = track.isDataInserted( ) || !keepPpvAspectRatioLoaded;
+        boolean allocateBuffer = !loaded.glBufferInitialized || loaded.glBufferMaxSize < trackSize;
+
+        if ( updateBuffer )
+        {
+            if ( allocateBuffer || !keepPpvAspectRatioLoaded )
+            {
+                if ( allocateBuffer )
+                {
+                    // if the track doesn't have a gl buffer or it is too small we must
+                    // copy all the track's data into a new, larger buffer
+
+                    // if this is the first time we have allocated memory for this track
+                    // don't allocate any extra, it may never get added to
+                    // however, once a track has been updated once, we assume it is likely
+                    // to be updated again and give it extra memory
+                    if ( loaded.glBufferInitialized )
+                    {
+                        gl.glDeleteBuffers( 1, new int[] { loaded.xyHandle }, 0 );
+                        loaded.glBufferMaxSize = Math.max( ( int ) ( loaded.glBufferMaxSize * 1.5 ), trackSize );
+                    }
+                    else
+                    {
+                        loaded.glBufferMaxSize = trackSize;
+                    }
+
+                    // create a new device buffer handle
+                    int[] bufferHandle = new int[1];
+
+                    gl.glGenBuffers( 1, bufferHandle, 0 );
+                    loaded.xyHandle = bufferHandle[0];
+
+                    gl.glGenBuffers( 1, bufferHandle, 0 );
+                    loaded.flagHandle = bufferHandle[0];
+
+                    gl.glGenBuffers( 1, bufferHandle, 0 );
+                    loaded.mileageHandle = bufferHandle[0];
+
+                    loaded.glBufferInitialized = true;
+                }
+
+                // copy all the track data into a host buffer
+                // add 2 to account for trailing and leading phantom vertices
+                ensureDataBufferSize( loaded.glBufferMaxSize + 2 );
+                track.loadIntoBuffer( xyTempBuffer, flagTempBuffer, mileageTempBuffer, true, ppvAspectRatio, 0, trackSize );
+
+                // copy data from the host buffer into the device buffer
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.xyHandle );
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, ( loaded.glBufferMaxSize + 2 ) * FLOATS_PER_VERTEX * GLUtils.BYTES_PER_FLOAT, xyTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.flagHandle );
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, ( loaded.glBufferMaxSize + 2 ), flagTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.mileageHandle );
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, ( loaded.glBufferMaxSize + 2 ) * GLUtils.BYTES_PER_FLOAT, mileageTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+            }
+            else
+            {
+                // there is enough empty space in the device buffer to accommodate all the new data
+
+                // add 1 to account for phantom vertex at end
+                int insertOffset = track.getInsertOffset( );
+                int insertCount = track.getInsertCount( );
+
+                // copy all the new track data into a host buffer
+                // add 1 to account for trailing phantom vertices
+                ensureDataBufferSize( insertCount + 1 );
+                track.loadIntoBuffer( xyTempBuffer, flagTempBuffer, mileageTempBuffer, false, ppvAspectRatio, insertOffset, trackSize );
+
+                // update the device buffer with the new data
+                // add 1 to insertOffset to skip leading phantom vertex
+                // add 1 to insertCount to account for trailing phantom vertex
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.xyHandle );
+                gl.glBufferSubData( GL.GL_ARRAY_BUFFER, ( insertOffset + 1 ) * FLOATS_PER_VERTEX * GLUtils.BYTES_PER_FLOAT, ( insertCount + 1 ) * FLOATS_PER_VERTEX * GLUtils.BYTES_PER_FLOAT, xyTempBuffer.rewind( ) );
+
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.flagHandle );
+                gl.glBufferSubData( GL.GL_ARRAY_BUFFER, ( insertOffset + 1 ), ( insertCount + 1 ), flagTempBuffer.rewind( ) );
+
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, loaded.mileageHandle );
+                gl.glBufferSubData( GL.GL_ARRAY_BUFFER, ( insertOffset + 1 ) * GLUtils.BYTES_PER_FLOAT, ( insertCount + 1 ) * GLUtils.BYTES_PER_FLOAT, mileageTempBuffer.rewind( ) );
+            }
+        }
+
+        track.reset( );
+    }
+
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
         GL gl = context.getGL( );
 
@@ -1237,6 +1403,18 @@ public class TrackPainter extends GlimpseDataPainter2D
             fontRenderer.dispose( );
             fontRenderer = null;
         }
+
+        GL3 gl3 = gl.getGL3( );
+
+        this.lineProg.dispose( gl3 );
+        this.labelLineProg.dispose( gl3 );
+        this.pointFlatProg.dispose( gl3 );
+        this.pointArrayProg.dispose( gl3 );
+
+        this.pointXy.dispose( gl3 );
+        this.pointColor.dispose( gl3 );
+        this.pointSize.dispose( gl3 );
+        this.labelLinePath.dispose( gl3 );
     }
 
     ////////////////////////////////////////
@@ -1254,17 +1432,12 @@ public class TrackPainter extends GlimpseDataPainter2D
         public Object trackId;
 
         // track display attributes
-        public float[] lineColor = new float[4];
-        public float lineWidth;
+        public LineStyle style;
         public boolean linesOn;
 
         public float[] pointColor = new float[4];
         public float pointSize;
         public boolean pointsOn;
-
-        public int stippleFactor;
-        public short stipplePattern;
-        public boolean stippleOn;
 
         public String label;
         public boolean labelOn;
@@ -1281,7 +1454,9 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         public boolean glBufferInitialized = false;
         // a reference to the device buffer for this track
-        public int glBufferHandle;
+        public int xyHandle;
+        public int flagHandle;
+        public int mileageHandle;
         // the maximum allocated size of the device buffer for this track
         public int glBufferMaxSize;
         // the currently used size of the device buffer for this track
@@ -1292,6 +1467,8 @@ public class TrackPainter extends GlimpseDataPainter2D
         // the number of bytes from the device buffer to display
         public int glSelectedSize;
 
+        double ppvAspectRatio = Double.NaN;
+
         // LoadedTrack isn't intended to be used outside of TrackPainter
         protected LoadedTrack( Track track )
         {
@@ -1301,22 +1478,17 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         public void loadSettings( Track track )
         {
+            this.style = new LineStyle( track.style );
 
             this.glSelectedSize = track.selectedSize;
             this.glSelectedOffset = track.selectedOffset;
 
-            this.copyColor( this.lineColor, track.lineColor );
             this.copyColor( this.pointColor, track.pointColor );
 
-            this.lineWidth = track.lineWidth;
             this.pointSize = track.pointSize;
 
             this.pointsOn = track.pointsOn;
             this.linesOn = track.linesOn;
-            this.stippleOn = track.stippleOn;
-
-            this.stippleFactor = track.stippleFactor;
-            this.stipplePattern = track.stipplePattern;
 
             this.glBufferCurrentSize = track.getSize( );
 
@@ -1379,7 +1551,7 @@ public class TrackPainter extends GlimpseDataPainter2D
             if ( glBufferInitialized )
             {
                 glBufferInitialized = false;
-                gl.glDeleteBuffers( 1, new int[] { glBufferHandle }, 0 );
+                gl.glDeleteBuffers( 3, new int[] { xyHandle, flagHandle, mileageHandle }, 0 );
             }
         }
     }
@@ -1439,11 +1611,17 @@ public class TrackPainter extends GlimpseDataPainter2D
         protected float[] headPointColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         protected boolean headPointOn = false;
 
+        protected LineStyle style;
+
+        // the current cumulative mileage of the track
+        protected double endMileage;
+
         // Track isn't intended to be used outside of TrackPainter
         protected Track( Object trackId )
         {
             this.trackId = trackId;
             this.points = new ArrayList<Point>( TRACK_SIZE_ESTIMATE );
+            this.style = new LineStyle( );
         }
 
         public void setTimeRange( Point startPoint, Point endPoint, Point selectedPoint )
@@ -1490,6 +1668,11 @@ public class TrackPainter extends GlimpseDataPainter2D
             }
         }
 
+        public void setLineStyle( LineStyle style )
+        {
+            this.style = new LineStyle( style );
+        }
+
         public void setHeadPointColor( float r, float g, float b, float a )
         {
             headPointColor[0] = r;
@@ -1528,15 +1711,12 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         public void setLineColor( float r, float g, float b, float a )
         {
-            lineColor[0] = r;
-            lineColor[1] = g;
-            lineColor[2] = b;
-            lineColor[3] = a;
+            style.rgba = new float[] { r, g, b, a };
         }
 
         public void setLineWidth( float width )
         {
-            lineWidth = width;
+            style.thickness_PX = width;
         }
 
         public void setShowLines( boolean show )
@@ -1546,13 +1726,13 @@ public class TrackPainter extends GlimpseDataPainter2D
 
         public void setTrackStipple( boolean activate )
         {
-            this.stippleOn = activate;
+            style.stippleEnable = activate;
         }
 
         public void setTrackStipple( int stippleFactor, short stipplePattern )
         {
-            this.stippleFactor = stippleFactor;
-            this.stipplePattern = stipplePattern;
+            style.stippleScale = stippleFactor;
+            style.stipplePattern = stipplePattern;
         }
 
         public void setLabelColor( float r, float g, float b, float a )
@@ -1724,12 +1904,52 @@ public class TrackPainter extends GlimpseDataPainter2D
             return trackHead;
         }
 
-        public void loadIntoBuffer( FloatBuffer buffer, int offset, int size )
+        public void loadIntoBuffer( FloatBuffer xyBuffer, ByteBuffer flagBuffer, FloatBuffer mileageBuffer, boolean addLeading, double ppvAspectRatio, int offset, int size )
         {
+            double mileage = offset == 0 ? 0 : endMileage;
+
+            // add leading dummy vertex
+            if ( addLeading )
+            {
+                xyBuffer.put( 0 ).put( 0 );
+                flagBuffer.put( ( byte ) 0 );
+                mileageBuffer.put( 0 );
+            }
+
             for ( int i = offset; i < size; i++ )
             {
-                points.get( i ).loadIntoBuffer( buffer );
+                Point point = points.get( i );
+
+                if ( i > 0 )
+                {
+                    Point priorPoint = points.get( i - 1 );
+
+                    mileage += LineUtils.distance( priorPoint.getX( ), priorPoint.getY( ), point.getX( ), point.getY( ), ppvAspectRatio );
+                }
+
+                xyBuffer.put( point.getX( ) ).put( point.getY( ) );
+                mileageBuffer.put( ( float ) mileage );
+
+                if ( i == 0 )
+                {
+                    flagBuffer.put( ( byte ) 0 );
+                }
+                else if ( i == size - 1 )
+                {
+                    flagBuffer.put( ( byte ) ( FLAGS_CONNECT ) );
+                }
+                else
+                {
+                    flagBuffer.put( ( byte ) ( FLAGS_CONNECT | FLAGS_JOIN ) );
+                }
             }
+
+            // always add trailing dummy vertex
+            xyBuffer.put( 0 ).put( 0 );
+            flagBuffer.put( ( byte ) 0 );
+            mileageBuffer.put( 0 );
+
+            this.endMileage = mileage;
         }
 
         public Object getTrackId( )
@@ -1767,5 +1987,41 @@ public class TrackPainter extends GlimpseDataPainter2D
         {
             return TrackPainter.this;
         }
+    }
+
+    public static class SpatialSelectionAxisListener extends RateLimitedAxisListener2D
+    {
+        protected TrackPainter painter;
+        protected SpatialSelectionListener<Point> listener;
+
+        public SpatialSelectionAxisListener( TrackPainter painter, SpatialSelectionListener<Point> listener )
+        {
+            this.painter = painter;
+            this.listener = listener;
+        }
+
+        @Override
+        public void axisUpdatedRateLimited( Axis2D axis )
+        {
+            Axis1D axisX = axis.getAxisX( );
+            Axis1D axisY = axis.getAxisY( );
+
+            double centerX = axisX.getSelectionCenter( );
+            double sizeX = axisX.getSelectionSize( ) / 2.0f;
+
+            double centerY = axisY.getSelectionCenter( );
+            double sizeY = axisY.getSelectionSize( ) / 2.0f;
+
+            double minX = centerX - sizeX;
+            double maxX = centerX + sizeX;
+
+            double minY = centerY - sizeY;
+            double maxY = centerY + sizeY;
+
+            Collection<Point> selection = Collections.unmodifiableCollection( painter.getTimeGeoRange( minX, maxX, minY, maxY ) );
+
+            listener.selectionChanged( selection );
+        }
+
     }
 }

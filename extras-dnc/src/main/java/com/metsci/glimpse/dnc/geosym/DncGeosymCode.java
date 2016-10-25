@@ -28,13 +28,13 @@ package com.metsci.glimpse.dnc.geosym;
 
 public class DncGeosymCode
 {
-    
+
     public final String filename;
     public final String attribute;
     public final int value;
     public final String description;
-    
-    
+
+
     public DncGeosymCode(String filename, String attribute, int value, String description)
     {
         this.filename = filename;
@@ -42,5 +42,5 @@ public class DncGeosymCode
         this.value = value;
         this.description = description;
     }
-    
+
 }

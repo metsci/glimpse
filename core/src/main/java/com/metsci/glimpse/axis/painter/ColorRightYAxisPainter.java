@@ -68,13 +68,13 @@ public class ColorRightYAxisPainter extends ColorYAxisPainter
     }
 
     @Override
-    public int getColorBarMinX( int width )
+    public float getColorBarMinX( int width )
     {
         return 0;
     }
 
     @Override
-    public int getColorBarMaxX( int width )
+    public float getColorBarMaxX( int width )
     {
         return colorBarSize;
     }

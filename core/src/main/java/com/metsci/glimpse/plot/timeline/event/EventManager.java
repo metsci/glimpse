@@ -54,7 +54,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
  * Helper class which maintains sorted Event data structures for {@code EventPlotInfo}.
- * 
+ *
  * @author ulman
  */
 public class EventManager
@@ -329,7 +329,7 @@ public class EventManager
     /**
      * Sets the maximum pixel size above which an Event will not be aggregated
      * with nearby Events (in order to reduce visual clutter).
-     * 
+     *
      * @see #setAggregateNearbyEvents(boolean)
      */
     public void setMaxAggregatedGroupSize( int size )
@@ -347,7 +347,7 @@ public class EventManager
      * Sets the maximum pixel distance between adjacent events above which
      * events will not be aggregated into a single Event (in order to reduce
      * visual clutter).
-     * 
+     *
      * @param size
      */
     public void setMaxAggregatedEventGapSize( int size )

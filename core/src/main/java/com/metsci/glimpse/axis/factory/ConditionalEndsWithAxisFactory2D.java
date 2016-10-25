@@ -33,7 +33,7 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 /**
  * A {@link ConditionalAxisFactory2D} which chooses the AxisFactory2D to use based on
  * whether the query GlimpseTargetStack ends with the associated GlimpseTargetStack.
- * 
+ *
  * @author ulman
  */
 public class ConditionalEndsWithAxisFactory2D extends ConditionalAxisFactory2D

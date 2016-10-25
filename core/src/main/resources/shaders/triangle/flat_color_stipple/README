@@ -1,0 +1,9 @@
+flat_color_stipple
+
+Applies a flat color to filled triangles with 1d stippling.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.FlatColorStippleProgram
+ 
+Usage Examples:
+ * com.metsci.glimpse.painter.decoration.BorderPainter

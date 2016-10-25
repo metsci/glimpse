@@ -26,23 +26,32 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import java.nio.FloatBuffer;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BYTE;
+import static javax.media.opengl.GL.GL_FLOAT;
+
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.shader.line.ColorLinePath;
+import com.metsci.glimpse.support.shader.line.ColorLineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineUtils;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 import com.metsci.glimpse.util.primitives.LongsArray;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
  * <p>Displays a static set of tracks with associated timestamp, x position, and y position. Unlike
- * {@link TrackPainter}, each track  must have an xy position for the same set of timestamps. This
+ * {@link LineStripTrackPainter}, each track  must have an xy position for the same set of timestamps. This
  * allows ParticlePainter to be more efficient in this case.</p>
  *
  * <p>The set of particles cannot be modified once ParticlePainter is constructed, but a custom time slice of
@@ -51,12 +60,10 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * @author ulman
  *
  */
-public class StaticParticlePainter extends GlimpseDataPainter2D
+public class StaticParticlePainter extends GlimpsePainterBase
 {
     protected IntBuffer firstData;
     protected IntBuffer countData;
-    protected FloatBuffer positionData;
-    protected FloatBuffer colorData;
     protected LongsArray timeData;
     protected int countTimes;
     protected int countParticles;
@@ -67,48 +74,72 @@ public class StaticParticlePainter extends GlimpseDataPainter2D
     protected int startIndex;
     protected int endIndex;
 
-    protected int glBufferHandleData = -1;
-    protected int glBufferHandleColor = -1;
-    protected boolean glInitialized;
+    protected ColorLineProgram prog;
+    protected ColorLinePath path;
+    protected LineStyle style;
 
-    protected float[] color;
-    protected float lineWidth;
+    protected FlatColorProgram flatProg;
+
+    protected static long[] toLongArray( TimeStamp[] time )
+    {
+        long[] array = new long[time.length];
+
+        for ( int t = 0; t < time.length; t++ )
+        {
+            array[t] = time[t].toPosixMillis( );
+        }
+
+        return array;
+    }
+
+    public StaticParticlePainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
+    {
+        this( toLongArray( time ), xPositions, yPositions, colors );
+    }
 
     public StaticParticlePainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions )
+    {
+        this( toLongArray( time ), xPositions, yPositions );
+    }
+
+    public StaticParticlePainter( long[] time, float[][] xPositions, float[][] yPositions )
     {
         this( time, xPositions, yPositions, null );
     }
 
     /**
-     * 
+     *
      * @param time common array of times (each particle must have an x/y position for each time)
      * @param xPositions square array of x positions indexed as [particleIndex][timeIndex] (second index must match size of time array)
      * @param yPositions square array of y positions indexed as [particleIndex][timeIndex] (second index must match size of time array)
      * @param colors color values indexed as [particleIndex][timeIndex][rgba]
      */
-    public StaticParticlePainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
+    public StaticParticlePainter( long[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
     {
+        this.prog = new ColorLineProgram( );
+        this.style = new LineStyle( );
+        this.path = new ColorLinePath( );
+
+        this.flatProg = new FlatColorProgram( );
+
         this.countTimes = time.length;
-        this.countParticles = xPositions[0].length;
+        this.countParticles = xPositions.length;
 
-        assert ( countTimes == xPositions.length && countTimes == yPositions.length );
-
-        this.positionData = FloatBuffer.allocate( countTimes * countParticles * 2 );
-        this.timeData = new LongsArray( countTimes );
-
-        // load data into time array
-        for ( int t = 0; t < countTimes; t++ )
-        {
-            this.timeData.append( time[t].toPosixMillis( ) );
-        }
+        this.timeData = new LongsArray( time );
 
         // load data into array particle-wise (x/y positions for each particle are contiguous)
         for ( int p = 0; p < countParticles; p++ )
         {
             for ( int t = 0; t < countTimes; t++ )
             {
-                this.positionData.put( xPositions[p][t] );
-                this.positionData.put( yPositions[p][t] );
+                if ( t == 0 )
+                {
+                    this.path.moveTo( xPositions[p][t], yPositions[p][t], colors[p][t] );
+                }
+                else
+                {
+                    this.path.lineTo( xPositions[p][t], yPositions[p][t], colors[p][t] );
+                }
             }
         }
 
@@ -120,32 +151,11 @@ public class StaticParticlePainter extends GlimpseDataPainter2D
             this.countData.put( 0 );
             this.firstData.put( 0 );
         }
-
-        if ( colors != null )
-        {
-            this.colorData = FloatBuffer.allocate( countTimes * countParticles * 4 );
-
-            for ( int p = 0; p < countParticles; p++ )
-            {
-                for ( int t = 0; t < countTimes; t++ )
-                {
-                    for ( int c = 0; c < 4; c++ )
-                    {
-                        this.colorData.put( colors[p][t][c] );
-                    }
-                }
-            }
-        }
     }
 
-    public void setColor( float[] color )
+    public LineStyle getLineStyle( )
     {
-        this.color = color;
-    }
-
-    public void setLineWidth( float lineWidth )
-    {
-        this.lineWidth = lineWidth;
+        return this.style;
     }
 
     public void displayTimeRange( long startMillis, long endMillis )
@@ -162,10 +172,12 @@ public class StaticParticlePainter extends GlimpseDataPainter2D
 
         int size = endIndex - startIndex + 1;
 
+        // each particle contains countTimes+1 vertices because of the placeholder vertex added by LinePathData
         for ( int p = 0; p < countParticles; p++ )
         {
-            this.firstData.put( p, ( countTimes * p + startIndex ) );
-            this.countData.put( p, size );
+            this.firstData.put( p, ( ( countTimes + 1 ) * p + startIndex ) );
+            // account for two phantom vertices in the line strip (see LinePathData)
+            this.countData.put( p, size + 2 );
         }
 
     }
@@ -176,61 +188,56 @@ public class StaticParticlePainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        double ppvAspectRatio = LineUtils.ppvAspectRatio( axis );
+        GL3 gl = context.getGL( ).getGL3( );
+
         if ( startIndex == 0 && endIndex == 0 ) return;
         if ( startIndex == countParticles - 1 && endIndex == countParticles - 1 ) return;
 
-        if ( !glInitialized )
-        {
-            // create a new device buffer handle
-            int[] bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-            glBufferHandleData = bufferHandle[0];
-
-            // copy data from the host buffer into the device buffer
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, glBufferHandleData );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, countTimes * countParticles * 2 * BYTES_PER_FLOAT, positionData.rewind( ), GL2.GL_STATIC_DRAW );
-
-            if ( colorData != null )
-            {
-                // create a new device buffer handle
-                int[] bufferHandleColor = new int[1];
-                gl.glGenBuffers( 1, bufferHandleColor, 0 );
-                glBufferHandleColor = bufferHandleColor[0];
-
-                // copy data from the host buffer into the device buffer
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, glBufferHandleColor );
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, countTimes * countParticles * 4 * BYTES_PER_FLOAT, colorData.rewind( ), GL2.GL_STATIC_DRAW );
-
-            }
-
-            glInitialized = true;
-
-            // we no longer need the buffers once data is loaded onto gpu
-            positionData = null;
-            colorData = null;
-        }
-
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, glBufferHandleData );
-        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-
-        if ( glBufferHandleColor != -1 )
-        {
-            gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, glBufferHandleColor );
-            gl.glColorPointer( 4, GL2.GL_FLOAT, 0, 0 );
-        }
-        else
-        {
-            GlimpseColor.glColor( gl, color );
-        }
-
-        gl.glLineWidth( lineWidth );
-
         firstData.rewind( );
         countData.rewind( );
-        gl.glMultiDrawArrays( GL.GL_LINE_STRIP, firstData, countData, countParticles );
+
+        GLUtils.enableStandardBlending( gl );
+        prog.begin( gl );
+        try
+        {
+            prog.setAxisOrtho( gl, axis );
+            prog.setViewport( gl, bounds );
+            prog.setStyle( gl, style );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, path.xyVbo( gl ).buffer( gl ) );
+            gl.glVertexAttribPointer( prog.handles( gl ).inXy, 2, GL_FLOAT, false, 0, path.xyVbo( gl ).sealedOffset( ) );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, path.flagsVbo( gl ).buffer( gl ) );
+            gl.glVertexAttribIPointer( prog.handles( gl ).inFlags, 1, GL_BYTE, 0, path.flagsVbo( gl ).sealedOffset( ) );
+
+            GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.rawMileageVbo( gl ) );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( prog.handles( gl ).inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, path.rgbaVbo( gl ).buffer( gl ) );
+            gl.glVertexAttribPointer( prog.handles( gl ).inRgba, 4, GL_FLOAT, false, 0, path.rgbaVbo( gl ).sealedOffset( ) );
+
+            gl.glMultiDrawArrays( GL3.GL_LINE_STRIP_ADJACENCY, firstData, countData, countParticles );
+
+        }
+        finally
+        {
+            prog.end( gl );
+            GLUtils.disableBlending( gl );
+        }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+
+        this.prog.dispose( gl );
+        this.path.dispose( gl );
     }
 }

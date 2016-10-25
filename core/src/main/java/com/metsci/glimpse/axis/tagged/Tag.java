@@ -30,9 +30,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.metsci.glimpse.axis.tagged.shader.TaggedColorScaleShader;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.support.colormap.ColorGradient;
+import com.metsci.glimpse.support.shader.colormap.ColorMapTaggedProgram;
 
 /**
  * A labeled marker on a {@link TaggedAxis1D}. Tags have a name and a
@@ -53,9 +53,9 @@ public class Tag
     /**
      * Special tag value used by TaggedHeatMapPainter to indicate which part
      * of a {@link ColorGradient} a Tag should be associated with.
-     * 
+     *
      * @see TaggedHeatMapPainter
-     * @see TaggedColorScaleShader
+     * @see ColorMapTaggedProgram
      */
     public static final String TEX_COORD_ATTR = "TexCoord";
 

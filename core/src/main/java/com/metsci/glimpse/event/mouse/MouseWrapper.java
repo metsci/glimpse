@@ -67,12 +67,12 @@ public abstract class MouseWrapper<I>
 
         return result;
     }
-    
+
     protected GlimpseCanvas getCanvas( )
     {
         return this.canvas;
     }
-    
+
     protected GlimpseContext getContext( )
     {
         // create a new context using the context associated with this mouse wrapper

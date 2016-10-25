@@ -29,7 +29,7 @@ package com.metsci.glimpse.gl.texture;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
 
@@ -51,22 +51,22 @@ public class FloatTexture1D extends AbstractTexture
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+        gl.glTexParameteri( GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST );
+        gl.glTexParameteri( GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST );
 
-        gl.glTexParameteri( GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL3.GL_TEXTURE_1D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE );
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
-        gl.glTexImage1D( GL2.GL_TEXTURE_1D, 0, GL2.GL_LUMINANCE32F, dim[0], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, data.rewind( ) );
+        gl.getGL3( ).glTexImage1D( GL3.GL_TEXTURE_1D, 0, GL3.GL_R32F, dim[0], 0, GL3.GL_RED, GL3.GL_FLOAT, data.rewind( ) );
     }
 
     @Override
     protected void prepare_setPixelStore( GL gl )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL3.GL_UNPACK_ALIGNMENT, 1 );
     }
 
     public void mutate( MutatorFloat1D mutator )

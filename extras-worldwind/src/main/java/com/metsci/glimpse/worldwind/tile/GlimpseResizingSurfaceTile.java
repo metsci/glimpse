@@ -51,7 +51,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
     protected int currentHeight;
 
     // the dimensions of the offscreen canvas currently being used
-    // invariant: maxWidth >= currentWidth >= requestedWidth 
+    // invariant: maxWidth >= currentWidth >= requestedWidth
     protected int calculatedWidth;
     protected int calculatedHeight;
 
@@ -88,7 +88,7 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         this.maxHeight = maxHeight;
         this.preferredPixelCount = width * height;
     }
-    
+
     public void setPreferredDimensions( int width, int height )
     {
         this.width = width;
@@ -109,15 +109,15 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
         {
             double latSpan = bounds.maxLat - bounds.minLat;
             double lonSpan = bounds.maxLon - bounds.minLon;
-    
+
             double ratio = ( latSpan / lonSpan );
-    
+
             double fcalculatedHeight = Math.sqrt( preferredPixelCount * ratio );
             double fcalculatedWidth = preferredPixelCount / fcalculatedHeight;
-    
+
             calculatedHeight = ( int ) fcalculatedHeight;
             calculatedWidth = ( int ) fcalculatedWidth;
-    
+
             if ( calculatedHeight > maxHeight )
             {
                 calculatedHeight = maxHeight;
@@ -128,24 +128,24 @@ public class GlimpseResizingSurfaceTile extends GlimpseDynamicSurfaceTile
                 calculatedWidth = maxWidth;
                 calculatedHeight = ( int ) Math.min( maxHeight, calculatedWidth * ( 1 / ratio ) );
             }
-    
+
             if ( currentWidth < calculatedWidth || currentHeight < calculatedHeight )
             {
                 // when we have to resize the canvas, do a bit more than necessary
                 // to leave room for possible future growth
                 int bufferedWidth = ( int ) ( Math.max( currentWidth, calculatedWidth ) * 1.1 );
                 int bufferedHeight = ( int ) ( Math.max( currentHeight, calculatedHeight ) * 1.1 );
-    
+
                 currentWidth = Math.min( maxWidth, bufferedWidth );
                 currentHeight = Math.min( maxHeight, bufferedHeight );
                 resizeCanvas( currentWidth, currentHeight );
             }
-    
+
             resizeLayout( calculatedWidth, calculatedHeight );
-    
+
             scaleX = ( float ) calculatedWidth / ( float ) currentWidth;
             scaleY = ( float ) calculatedHeight / ( float ) currentHeight;
-    
+
             setTextureScale( tile );
         }
     }

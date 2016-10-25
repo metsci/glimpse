@@ -26,18 +26,21 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.concurrent.locks.ReentrantLock;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
-import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.PointSetPainter.IdXy;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 
 /**
@@ -47,26 +50,17 @@ import com.metsci.glimpse.util.quadtree.QuadTreeXys;
  *
  * @author ulman
  */
-public class LineSetPainter extends GlimpseDataPainter2D
+public class LineSetPainter extends GlimpsePainterBase
 {
     public static final int QUAD_TREE_BIN_MAX = 1000;
-
-    protected float[] lineColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-    protected float lineWidth = 1;
-
-    protected int totalPointCount = 0;
-    protected int lineCount = 0;
-    protected int[] bufferHandle = null;
-    protected FloatBuffer dataBuffer = null;
-    protected IntBuffer offsetBuffer = null;
-    protected IntBuffer sizeBuffer = null;
-    protected ReentrantLock dataBufferLock = null;
-    protected volatile boolean newData = false;
-    protected volatile boolean bufferInitialized = false;
 
     // spatial index on Points
     protected QuadTreeXys<IdXy> spatialIndex;
     protected boolean enableSpatialIndex;
+
+    protected LineProgram prog;
+    protected LinePath path;
+    protected LineStyle style;
 
     public LineSetPainter( )
     {
@@ -75,8 +69,23 @@ public class LineSetPainter extends GlimpseDataPainter2D
 
     public LineSetPainter( boolean enableSpatialIndex )
     {
-        this.dataBufferLock = new ReentrantLock( );
         this.enableSpatialIndex = enableSpatialIndex;
+
+        this.prog = new LineProgram( );
+        this.path = new LinePath( );
+        this.style = new LineStyle( );
+
+        this.style.rgba = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+        this.style.joinType = LineJoinType.JOIN_MITER;
+        this.style.thickness_PX = 1.0f;
+        this.style.stippleEnable = false;
+        this.style.stippleScale = 1;
+        this.style.stipplePattern = ( short ) 0x00FF;
+    }
+
+    public void setLineStyle( LineStyle style )
+    {
+        this.style = style;
     }
 
     public void setData( float[] dataX, float[] dataY )
@@ -103,35 +112,13 @@ public class LineSetPainter extends GlimpseDataPainter2D
      */
     public void setData( float[][] dataX, float[][] dataY )
     {
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            lineCount = Math.min( dataX.length, dataY.length );
+            int lineCount = Math.min( dataX.length, dataY.length );
 
-            totalPointCount = 0;
-            for ( int trackId = 0; trackId < lineCount; trackId++ )
-            {
-                int pointCount = Math.min( dataX[trackId].length, dataY[trackId].length );
-                totalPointCount += pointCount;
-            }
+            this.path.clear( );
 
-            if ( dataBuffer == null || dataBuffer.rewind( ).capacity( ) < totalPointCount * 2 )
-            {
-                this.dataBuffer = Buffers.newDirectFloatBuffer( totalPointCount * 2 );
-            }
-
-            if ( sizeBuffer == null || sizeBuffer.rewind( ).capacity( ) < lineCount )
-            {
-                this.sizeBuffer = Buffers.newDirectIntBuffer( lineCount );
-            }
-
-            if ( offsetBuffer == null || offsetBuffer.rewind( ).capacity( ) < lineCount )
-            {
-                this.offsetBuffer = Buffers.newDirectIntBuffer( lineCount );
-            }
-
-            // copy data from the provided arrays into the host memory buffer
-            int pointCount = 0;
             for ( int trackId = 0; trackId < lineCount; trackId++ )
             {
                 float[] trackX = dataX[trackId];
@@ -139,22 +126,20 @@ public class LineSetPainter extends GlimpseDataPainter2D
 
                 int trackLength = Math.min( dataX[trackId].length, dataY[trackId].length );
 
-                this.offsetBuffer.put( pointCount );
-                this.sizeBuffer.put( trackLength );
-
-                pointCount += trackLength;
-
                 for ( int i = 0; i < trackLength; i++ )
                 {
-                    this.dataBuffer.put( trackX[i] ).put( trackY[i] );
+                    if ( i == 0 )
+                        this.path.moveTo( trackX[i], trackY[i] );
+                    else
+                        this.path.lineTo( trackX[i], trackY[i] );
                 }
             }
 
-            pointCount = 0;
             if ( this.enableSpatialIndex )
             {
                 this.spatialIndex = new QuadTreeXys<IdXy>( QUAD_TREE_BIN_MAX );
 
+                int pointCount = 0;
                 for ( int trackId = 0; trackId < lineCount; trackId++ )
                 {
                     float[] trackX = dataX[trackId];
@@ -168,84 +153,65 @@ public class LineSetPainter extends GlimpseDataPainter2D
                     }
                 }
             }
-
-            this.newData = true;
         }
         finally
         {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setLineColor( float r, float g, float b, float a )
     {
-        this.lineColor[0] = r;
-        this.lineColor[1] = g;
-        this.lineColor[2] = b;
-        this.lineColor[3] = a;
+        this.style.rgba[0] = r;
+        this.style.rgba[1] = g;
+        this.style.rgba[2] = b;
+        this.style.rgba[3] = a;
     }
 
     public void setLineColor( float[] color )
     {
-        this.lineColor = color;
+        this.style.rgba = color;
     }
 
-    public void setLineWidth( float width )
+    public void setLineWidth( float size )
     {
-        this.lineWidth = width;
-    }
-
-    @Override
-    public void dispose( GLContext context )
-    {
-        if ( bufferInitialized )
-        {
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
-        }
+        this.style.thickness_PX = size;
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doDispose( GlimpseContext context )
     {
-        if ( lineCount == 0 ) return;
+        this.prog.dispose( context.getGL( ).getGL3( ) );
+        this.path.dispose( context.getGL( ) );
+    }
 
-        if ( !bufferInitialized )
-        {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-            bufferInitialized = true;
-        }
+    @Override
+    public void doPaintTo( GlimpseContext context )
+    {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-
-        dataBufferLock.lock( );
+        enableStandardBlending( gl );
         try
         {
-            if ( newData )
+            prog.begin( gl );
+            try
             {
-                // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+                prog.setViewport( gl, bounds );
+                prog.setAxisOrtho( gl, axis );
+                prog.setStyle( gl, style );
 
-                glHandleError( gl );
-
-                newData = false;
+                prog.draw( gl, style, path, LineUtils.ppvAspectRatio( axis ) );
             }
-
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-            gl.glColor4fv( lineColor, 0 );
-            gl.glLineWidth( lineWidth );
-
-            offsetBuffer.rewind( );
-            sizeBuffer.rewind( );
-
-            gl.glMultiDrawArrays( GL2.GL_LINE_STRIP, offsetBuffer, sizeBuffer, lineCount );
+            finally
+            {
+                prog.end( gl );
+            }
         }
         finally
         {
-            dataBufferLock.unlock( );
+            GLUtils.disableBlending( gl );
         }
     }
 }

@@ -32,16 +32,13 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.shader.Pipeline;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
  * A Scatterplot point painter which associates a time with each data point. A subset of
  * the points can be displayed based on these time values.
- * 
+ *
  * @author ulman
  */
 public class TimeShadedPointPainter extends ShadedPointPainter
@@ -53,11 +50,6 @@ public class TimeShadedPointPainter extends ShadedPointPainter
 
     protected int startIndex;
     protected int endIndex;
-
-    public TimeShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis, Pipeline pipeline ) throws IOException
-    {
-        super( colorAxis, sizeAxis, pipeline );
-    }
 
     public TimeShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
@@ -81,7 +73,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
      */
     public void displayTimeRange( double startTime, double endTime )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.startTime = ( float ) startTime;
@@ -91,7 +83,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -101,7 +93,7 @@ public class TimeShadedPointPainter extends ShadedPointPainter
      */
     public void useTimeAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.timeAttributeBuffer = attributeBuffer;
@@ -109,13 +101,14 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
-    public void useVertexPositionData( GLFloatBuffer2D positionBuffer )
+    @Override
+    public void useVertexPositionData( FloatBuffer positionBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             super.useVertexPositionData( positionBuffer );
@@ -123,35 +116,37 @@ public class TimeShadedPointPainter extends ShadedPointPainter
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
-    public void useColorAttribData( GLFloatBuffer attributeBuffer )
+    @Override
+    public void useColorAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            super.useColorAttribData( attributeBuffer );
-            updateSelectedTime( );
+            this.program.setColorData( attributeBuffer );
+            this.setVariablePointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
-    public void useSizeAttribData( GLFloatBuffer attributeBuffer )
+    @Override
+    public void useSizeAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            super.useSizeAttribData( attributeBuffer );
-            updateSelectedTime( );
+            this.program.setSizeData( attributeBuffer );
+            this.setVariablePointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -193,10 +188,10 @@ public class TimeShadedPointPainter extends ShadedPointPainter
                 endIndex = lastIndex0( timeAttributeBuffer, endIndex, endTime ) + 1;
             }
         }
-        else if ( positionBuffer != null )
+        else
         {
             startIndex = 0;
-            endIndex = positionBuffer.getNumVertices( );
+            endIndex = vertexCount;
         }
     }
 

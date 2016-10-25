@@ -26,22 +26,24 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * Displays a text box which follows the cursor and displays the
@@ -49,7 +51,7 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-public class CursorTextPainter extends GlimpsePainter2D
+public class CursorTextPainter extends GlimpsePainterBase
 {
     protected TextRenderer textRenderer;
     protected int textSpacerX = 1;
@@ -64,9 +66,14 @@ public class CursorTextPainter extends GlimpsePainter2D
     protected float[] fontColor = new float[] { 0.85f, 0.85f, 0.85f, 1.0f };
     protected float[] textBackgroundColor = new float[] { 0.2f, 0.2f, 0.2f, 0.7f };
 
+    protected FlatColorProgram prog;
+    protected GLEditableBuffer buffer;
+
     public CursorTextPainter( Font font )
     {
+        this.prog = new FlatColorProgram( );
         this.textRenderer = new TextRenderer( font );
+        this.buffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     public CursorTextPainter( )
@@ -212,42 +219,27 @@ public class CursorTextPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
+        this.textRenderer.dispose( );
+
+        this.prog.dispose( context.getGL( ).getGL3( ) );
+        this.buffer.dispose( context.getGL( ) );
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( textRenderer == null ) return;
-
-        GL2 gl = context.getGL( ).getGL2( );
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-
         String xText = getTextX( axis );
         String yText = getTextY( axis );
         String zText = getTextZ( axis );
-
-        // Draw Coordinate Values
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glPushMatrix( );
-        gl.glLoadIdentity( );
-
-        // Draw Text Background
-        gl.glColor4fv( textBackgroundColor, 0 );
 
         Rectangle2D xTextBounds = textRenderer.getBounds( xText );
         Rectangle2D yTextBounds = textRenderer.getBounds( yText );
@@ -260,36 +252,34 @@ public class CursorTextPainter extends GlimpsePainter2D
 
         float[] corners = getCorners( axis, xBackBounds, yBackBounds, zBackBounds );
 
-        gl.glBegin( GL2.GL_QUADS );
+        GLUtils.enableStandardBlending( gl );
         try
         {
-            // CW from SW
-            gl.glVertex2f( corners[0], corners[1] );
-            gl.glVertex2f( corners[0], corners[1] + ( float ) xBackBounds.getHeight( ) );
-            gl.glVertex2f( corners[0] + ( float ) xBackBounds.getWidth( ), corners[1] + ( float ) xBackBounds.getHeight( ) );
-            gl.glVertex2f( corners[0] + ( float ) xBackBounds.getWidth( ), corners[1] );
-
-            gl.glVertex2f( corners[2], corners[3] );
-            gl.glVertex2f( corners[2], corners[3] + ( float ) yBackBounds.getHeight( ) );
-            gl.glVertex2f( corners[2] + ( float ) yBackBounds.getWidth( ), corners[3] + ( float ) yBackBounds.getHeight( ) );
-            gl.glVertex2f( corners[2] + ( float ) yBackBounds.getWidth( ), corners[3] );
+            this.buffer.clear( );
+            this.buffer.growQuad2f( corners[0], corners[1], corners[0] + ( float ) xBackBounds.getWidth( ), corners[1] + ( float ) xBackBounds.getHeight( ) );
+            this.buffer.growQuad2f( corners[2], corners[3], corners[2] + ( float ) yBackBounds.getWidth( ), corners[3] + ( float ) yBackBounds.getHeight( ) );
 
             if ( zText != null )
             {
-                gl.glVertex2f( corners[4], corners[5] );
-                gl.glVertex2f( corners[4], corners[5] + ( float ) zBackBounds.getHeight( ) );
-                gl.glVertex2f( corners[4] + ( float ) zBackBounds.getWidth( ), corners[5] + ( float ) zBackBounds.getHeight( ) );
-                gl.glVertex2f( corners[4] + ( float ) zBackBounds.getWidth( ), corners[5] );
+                this.buffer.growQuad2f( corners[4], corners[5], corners[4] + ( float ) zBackBounds.getWidth( ), corners[5] + ( float ) zBackBounds.getHeight( ) );
+            }
+
+            this.prog.begin( gl );
+            try
+            {
+                this.prog.setPixelOrtho( gl, bounds );
+
+                this.prog.draw( gl, this.buffer, this.textBackgroundColor );
+            }
+            finally
+            {
+                this.prog.end( gl );
             }
         }
         finally
         {
-            gl.glEnd( );
+            GLUtils.disableBlending( gl );
         }
-
-        gl.glDisable( GL2.GL_BLEND );
-
-        gl.glTranslatef( 0.375f, 0.375f, 0 );
 
         textRenderer.beginRendering( width, height );
         try
@@ -305,9 +295,6 @@ public class CursorTextPainter extends GlimpsePainter2D
         finally
         {
             textRenderer.endRendering( );
-
-            gl.glMatrixMode( GL2.GL_MODELVIEW );
-            gl.glPopMatrix( );
         }
     }
 }

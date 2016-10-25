@@ -1,0 +1,6 @@
+DynamicLineSetPainter
+
+A simplified version of line_multi_color which does not handle mitering (only draws GL_LINES)
+
+Java Wrappers:
+ * com.metsci.glimpse.painter.shape.DynamicLineSetPainter.SimpleLineProgram

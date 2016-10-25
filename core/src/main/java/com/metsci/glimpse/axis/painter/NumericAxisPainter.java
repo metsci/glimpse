@@ -31,12 +31,18 @@ import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
-
-import com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.painter.base.GlimpsePainter1D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * A simple axis painter which displays labeled ticks at regular
@@ -45,7 +51,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  *
  * @author ulman
  */
-public abstract class NumericAxisPainter extends GlimpsePainter1D
+public abstract class NumericAxisPainter extends GlimpsePainterBase
 {
     protected int tickBufferSize = 0;
     protected int tickSize = 8;
@@ -73,12 +79,72 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
 
-    public NumericAxisPainter( )
-    {
+    protected LinePath pathLine;
+    protected LineStyle style;
+    protected LineProgram progLine;
 
+    public NumericAxisPainter( AxisLabelHandler ticks )
+    {
         resetFont( );
         resetLabelColors( );
         resetTickColor( );
+        initShaders( );
+    }
+
+    protected class TickInfo
+    {
+        public double[] ticks;
+        public String[] labels;
+        public int minIndex;
+        public int maxIndex;
+    }
+
+    public TickInfo getTickInfo( Axis1D axis, GlimpseBounds bounds )
+    {
+        double[] tickValues = ticks.getTickPositions( axis );
+        String[] tickLabels = ticks.getTickLabels( axis, tickValues );
+
+        AxisUnitConverter converter = ticks.getAxisUnitConverter( );
+
+        // Tick marks
+        int min = -1;
+        int max = tickValues.length;
+
+        for ( int i = 0; i < tickValues.length; i++ )
+        {
+            double jTick = converter.fromAxisUnits( tickValues[i] );
+
+            // don't draw ticks off the screen
+            if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
+            {
+                max = i;
+                break;
+            }
+            else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
+            {
+                min = i;
+                continue;
+            }
+        }
+
+        TickInfo info = new TickInfo( );
+        info.ticks = tickValues;
+        info.labels = tickLabels;
+        info.minIndex = min;
+        info.maxIndex = max;
+
+        return info;
+    }
+
+    protected void initShaders( )
+    {
+        this.pathLine = new LinePath( );
+
+        this.style = new LineStyle( );
+        this.style.feather_PX = 0;
+        this.style.stippleEnable = false;
+
+        this.progLine = new LineProgram( );
     }
 
     public void setShowLabelsForOffscreenTicks( boolean show )
@@ -212,10 +278,13 @@ public abstract class NumericAxisPainter extends GlimpsePainter1D
     }
 
     @Override
-    public void dispose( GLContext context )
+    protected void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
+
+        progLine.dispose( context.getGL( ).getGL3( ) );
+        pathLine.dispose( context.getGL( ) );
     }
 
     public void updateTextRenderer( )

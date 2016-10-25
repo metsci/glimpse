@@ -28,12 +28,8 @@ package com.metsci.glimpse.axis.painter;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
-
-import com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -67,7 +63,6 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
     protected float currentTimeLineThickness;
 
     protected int hoverLabelOffset = 4;
-    protected int tickLineLength = 4;
 
     protected boolean fontSet = false;
     protected boolean tickColorSet = false;
@@ -152,11 +147,13 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
         this.showCurrentTimeLabel = show;
     }
 
+    @Override
     public void setFont( Font font )
     {
         setFont( font, true );
     }
 
+    @Override
     public void setTickColor( float[] color )
     {
         this.tickColor = color;
@@ -169,6 +166,7 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
         this.labelColorSet = true;
     }
 
+    @Override
     public void setFont( Font font, boolean antialias )
     {
         this.newFont = font;
@@ -202,14 +200,7 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
     }
 
     @Override
-    public void dispose( GLContext context )
-    {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
-    }
-
-    @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
         if ( newFont != null )
         {
