@@ -87,8 +87,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
 
         if ( width == 0 || height == 0 ) return;
 
-        List<TimeStamp> tickTimes = handler.tickTimes( axis, height );
-        double tickInterval = handler.tickInterval( tickTimes );
+        List<TimeStamp> tickTimes = handler.getTickPositions( axis, height );
 
         progLine.begin( gl3 );
         try
@@ -115,46 +114,13 @@ public class TimeYAxisPainter extends TimeAxisPainter
             progLine.end( gl3 );
         }
 
-        if ( tickInterval <= Time.fromMinutes( 1 ) )
-        {
-            // Time labels
-            double jTimeText = printTickLabels( tickTimes, axis, handler.getSecondMinuteFormat( ), width, height );
+        List<String> tickLabels = handler.getTickLabels( axis, tickTimes );
 
-            // Date labels
-            printHoverLabels( gl3, tickTimes, axis, handler.getHourDayMonthFormat( ), handler.getHourStructFactory( ), jTimeText, width, height );
-        }
-        else if ( tickInterval <= Time.fromHours( 12 ) )
-        {
-            // Time labels
-            double jTimeText = printTickLabels( tickTimes, axis, handler.getHourMinuteFormat( ), width, height );
-
-            // Date labels
-            printHoverLabels( gl3, tickTimes, axis, handler.getDayMonthYearFormat( ), handler.getDayStructFactory( ), jTimeText, width, height );
-        }
-        else if ( tickInterval <= Time.fromDays( 10 ) )
-        {
-            // Date labels
-            double jTimeText = printTickLabels( tickTimes, axis, handler.getDayFormat( ), width, height );
-
-            // Year labels
-            printHoverLabels( gl3, tickTimes, axis, handler.getMonthYearFormat( ), handler.getMonthStructFactory( ), jTimeText, width, height );
-        }
-        else if ( tickInterval <= Time.fromDays( 60 ) )
-        {
-            // Date labels
-            double jTimeText = printTickLabels( tickTimes, axis, handler.getMonthFormat( ), width, height );
-
-            // Year labels
-            printHoverLabels( gl3, tickTimes, axis, handler.getYearFormat( ), handler.getYearStructFactory( ), jTimeText, width, height );
-        }
-        else
-        {
-            // Date labels
-            printTickLabels( tickTimes, axis, handler.getYearFormat( ), width, height );
-        }
+        double iTimeText = printTickLabels( tickLabels, tickTimes, axis, width, height );
+        if ( isShowDateLabels( ) ) printHoverLabels( gl3, tickTimes, axis, iTimeText, width, height );
     }
 
-    private void printHoverLabels( GL3 gl, List<TimeStamp> tickTimes, Axis1D axis, TimeStampFormat format, TimeStructFactory factory, double iTimeText, int width, int height )
+    private void printHoverLabels( GL3 gl, List<TimeStamp> tickTimes, Axis1D axis, double iTimeText, int width, int height )
     {
         textRenderer.begin3DRendering( );
         try
@@ -162,10 +128,10 @@ public class TimeYAxisPainter extends TimeAxisPainter
             GlimpseColor.setColor( textRenderer, textColor );
 
             // Date labels
-            List<TimeStruct> days = handler.timeStructs( axis, tickTimes, factory );
-            for ( TimeStruct day : days )
+            List<TimeStruct> timeStructs = handler.getTimeStructs( axis, tickTimes );
+            for ( TimeStruct timeStruct : timeStructs )
             {
-                String text = day.textCenter.toString( format );
+                String text = timeStruct.text;
                 Rectangle2D textBounds = textRenderer.getBounds( text );
 
                 // Text will be drawn rotated 90 degrees, so height
@@ -176,13 +142,13 @@ public class TimeYAxisPainter extends TimeAxisPainter
                 // To make translate/rotate work right, we need j
                 // to be the vertical *center* of the text
                 //
-                int jMin = ( int ) Math.ceil( axis.valueToScreenPixel( fromTimeStamp( day.start ) ) + halfTextHeight );
-                int jMax = ( int ) Math.floor( axis.valueToScreenPixel( fromTimeStamp( day.end ) ) - halfTextHeight );
-                int jApprox = axis.valueToScreenPixel( fromTimeStamp( day.textCenter ) );
-                int j = Math.max( jMin, Math.min( jMax, jApprox ) );
+                float jMin = ( float ) ( axis.valueToScreenPixel( fromTimeStamp( timeStruct.start ) ) + halfTextHeight );
+                float jMax = ( float ) ( axis.valueToScreenPixel( fromTimeStamp( timeStruct.end ) ) - halfTextHeight );
+                float jApprox = axis.valueToScreenPixel( fromTimeStamp( timeStruct.textCenter ) );
+                float j = Math.max( jMin, Math.min( jMax, jApprox ) );
                 if ( j - halfTextHeight < 0 || j + halfTextHeight > height ) continue;
 
-                int i = ( int ) Math.floor( iTimeText - dateTextRightPadding - 1 );
+                float i = ( float ) ( iTimeText - dateTextRightPadding - 1 );
 
                 transformMatrix.loadIdentity( );
                 transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
@@ -200,28 +166,26 @@ public class TimeYAxisPainter extends TimeAxisPainter
         }
     }
 
-    private double printTickLabels( List<String> tickLabels, List<TimeStamp> tickTimes, Axis1D axis, int width, int height )
+    private float printTickLabels( List<String> tickLabels, List<TimeStamp> tickTimes, Axis1D axis, int width, int height )
     {
-        int iTimeText = Integer.MAX_VALUE;
+        float iTimeText = Float.POSITIVE_INFINITY;
         textRenderer.beginRendering( width, height );
         try
         {
-            GlimpseColor.setColor( textRenderer, textColor );
-
-            for ( TimeStamp t : tickTimes )
+            for ( int index = 0; index < tickLabels.size( ); index++ )
             {
                 TimeStamp t = tickTimes.get( index );
                 String string = tickLabels.get( index );
                 Rectangle2D textBounds = textRenderer.getBounds( string );
 
                 double textHeight = textBounds.getHeight( );
-                int j = ( int ) Math.round( axis.valueToScreenPixel( fromTimeStamp( t ) ) - 0.5 * Math.max( 1, textHeight - 2 ) );
+                float j = ( float ) ( axis.valueToScreenPixel( fromTimeStamp( t ) ) - 0.5 * Math.max( 1, textHeight - 2 ) );
                 if ( j < 0 || j + textHeight > height ) continue;
 
-                int i = ( int ) Math.round( width - tickSize - textBounds.getWidth( ) ) - 1;
+                float i = ( float ) ( width - tickSize - textBounds.getWidth( ) - 1 - textBufferSize - tickBufferSize );
                 iTimeText = Math.min( iTimeText, i );
 
-                textRenderer.draw( string, i, j );
+                textRenderer.draw3D( string, i, j, 0, 1 );
             }
         }
         finally

@@ -28,8 +28,8 @@ package com.metsci.glimpse.axis.painter;
 
 import java.awt.Font;
 
+import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -70,6 +70,8 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
 
     public TimeAxisPainter( TimeAxisLabelHandler handler )
     {
+        super( handler );
+
         this.handler = handler;
 
         this.newFont = FontUtils.getBitstreamVeraSansPlain( 12.0f );
@@ -100,11 +102,6 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
     public void setLabelHandler( TimeAxisLabelHandler handler )
     {
         this.handler = handler;
-    }
-    
-    public void setTickLineLength( int pixels )
-    {
-        this.tickLineLength = pixels;
     }
 
     public void setPixelsBetweenTicks( int pixels )
