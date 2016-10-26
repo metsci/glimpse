@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -526,28 +527,13 @@ public class DefaultEventPainter implements EventPainter
                 eventBounds.setTextStartTime( epoch.toTimeStamp( value ) );
                 eventBounds.setTextEndTime( eventBounds.getTextStartTime( ).add( displayBounds.getWidth( ) / timeAxis.getPixelsPerValue( ) ) );
 
-                // use this event's text color if it has been set
-                if ( event.getLabelColor( ) != null )
-                {
-                    GlimpseColor.setColor( textRenderer, event.getLabelColor( ) );
-                }
-                // otherwise, use the default no background color if the background is not showing
-                // and if a color has not been explicitly set for the EventPainter
-                else if ( !info.isTextColorSet( ) && !event.isShowBackground( ) )
-                {
-                    GlimpseColor.setColor( textRenderer, info.getTextColorNoBackground( ) );
-                }
-                // otherwise use the EventPainter's default text color
-                else
-                {
-                    GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
-                }
-
                 if ( horiz )
                 {
                     textRenderer.beginRendering( width, height );
                     try
                     {
+                        setTextRendererColor( event, info, textRenderer );
+
                         // use the labelBounds for the height (if the text shortening removed a character which
                         // hangs below the line, we don't want the text position to move)
                         int pixelY = ( int ) ( sizePerpPixels / 2.0 - labelBounds.getHeight( ) * 0.3 + posMin );
@@ -566,6 +552,8 @@ public class DefaultEventPainter implements EventPainter
                     textRenderer.begin3DRendering( );
                     try
                     {
+                        setTextRendererColor( event, info, textRenderer );
+
                         float shiftX = ( float ) ( sizePerpPixels / 2.0 + posMin );
                         int pixelX = ( int ) shiftX;
 
@@ -595,6 +583,26 @@ public class DefaultEventPainter implements EventPainter
         else
         {
             eventBounds.setTextVisible( false );
+        }
+    }
+
+    protected void setTextRendererColor( Event event, EventPlotInfo info, TextRenderer textRenderer )
+    {
+        // use this event's text color if it has been set
+        if ( event.getLabelColor( ) != null )
+        {
+            GlimpseColor.setColor( textRenderer, event.getLabelColor( ) );
+        }
+        // otherwise, use the default no background color if the background is not showing
+        // and if a color has not been explicitly set for the EventPainter
+        else if ( !info.isTextColorSet( ) && !event.isShowBackground( ) )
+        {
+            GlimpseColor.setColor( textRenderer, info.getTextColorNoBackground( ) );
+        }
+        // otherwise use the EventPainter's default text color
+        else
+        {
+            GlimpseColor.setColor( textRenderer, info.getTextColor( ) );
         }
     }
 
