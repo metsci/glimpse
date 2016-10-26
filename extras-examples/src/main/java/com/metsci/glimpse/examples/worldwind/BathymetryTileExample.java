@@ -26,9 +26,13 @@
  */
 package com.metsci.glimpse.examples.worldwind;
 
-import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.*;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkAxisToWorldWind;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkMouseEvents;
+import static com.metsci.glimpse.worldwind.util.WorldWindGlimpseUtils.linkWorldWindToAxis;
 
 import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,7 +149,8 @@ public class BathymetryTileExample
         glimpseFrame.add( glimpseCanvas );
 
         // attach a repaint manager which repaints the canvas in a loop
-        new FPSAnimator( glimpseCanvas.getGLDrawable( ), 120 ).start( );
+        final FPSAnimator animator = new FPSAnimator( glimpseCanvas.getGLDrawable( ), 120 );
+        animator.start( );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );
@@ -180,5 +185,22 @@ public class BathymetryTileExample
                 }
             }
         } ).start( );
+
+        WindowAdapter closeListener = new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // stop the animation thread before exiting
+                animator.stop( );
+                // dispose of GlimpseLayouts and GlimpsePainters attached to GlimpseCanvas
+                glimpseCanvas.disposeAttached( );
+                // destroy heavyweight canvas and GLContext
+                glimpseCanvas.destroy( );
+            }
+        };
+
+        worldwindFrame.addWindowListener( closeListener );
+        glimpseFrame.addWindowListener( closeListener );
     }
 }
