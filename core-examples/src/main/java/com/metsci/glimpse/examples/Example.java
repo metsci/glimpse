@@ -108,7 +108,7 @@ public class Example
         // attach an animator which repaints the canvas in a loop
         // usually only one FPSAnimator is necessary (multiple GlimpseCanvas
         // can be repainted from the same FPSAnimator)
-        GLAnimatorControl animator = new FPSAnimator( 120 );
+        final GLAnimatorControl animator = new FPSAnimator( 120 );
         animator.add( canvas.getGLDrawable( ) );
         animator.start( );
 
@@ -123,6 +123,8 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
+                // stop the animation thread before exiting
+                animator.stop( );
                 // dispose of GlimpseLayouts and GlimpsePainters attached to GlimpseCanvas
                 canvas.disposeAttached( );
                 // destroy heavyweight canvas and GLContext
@@ -177,7 +179,7 @@ public class Example
         final NewtSwingGlimpseCanvas rightPanel = new NewtSwingGlimpseCanvas( context );
         rightPanel.addLayout( layoutProviderB.getLayout( ) );
 
-        FPSAnimator animator = new FPSAnimator( 120 );
+        final FPSAnimator animator = new FPSAnimator( 120 );
         animator.add( leftPanel.getGLDrawable( ) );
         animator.add( rightPanel.getGLDrawable( ) );
         animator.start( );
@@ -187,6 +189,8 @@ public class Example
             @Override
             public void windowClosing( WindowEvent e )
             {
+                animator.stop( );
+                
                 leftPanel.disposeAttached( );
                 rightPanel.disposeAttached( );
                 leftPanel.destroy( );
