@@ -500,8 +500,6 @@ public class DefaultGroupedEventPainter implements GroupedEventPainter
                 {
                     for ( IconDrawInfo iconInfo : iconDrawList )
                     {
-
-                        System.out.println( "draw " + iconInfo.getId( ) );
                         if ( iconInfo.isX( ) )
                         {
                             atlas.drawImageAxisX( context, iconInfo.id, timeAxis, iconInfo.positionX, iconInfo.positionY, iconInfo.scaleX, iconInfo.scaleY, iconInfo.centerX, iconInfo.centerY, iconInfo.color );

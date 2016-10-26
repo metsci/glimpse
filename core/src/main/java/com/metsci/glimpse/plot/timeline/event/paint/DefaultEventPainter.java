@@ -255,6 +255,7 @@ public class DefaultEventPainter implements EventPainter
                     lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
 
                     lineProg.setOrtho( gl, xMin, xMax, yMin, yMax );
+                    lineProg.setViewport( gl, bounds );
 
                     lineProg.draw( gl, lineStyle, linePath );
                 }
@@ -332,12 +333,11 @@ public class DefaultEventPainter implements EventPainter
                         linePath.addPolygon( posMax, ( float ) arrowBaseMin, posMax, ( float ) arrowBaseMax, ( float ) sizePerpCenter, ( float ) timeMax, posMin, ( float ) arrowBaseMax, posMin, ( float ) arrowBaseMin, ( float ) sizePerpCenter, ( float ) timeMin );
                     }
 
-                    lineProg.setViewport( gl, bounds );
-
                     lineStyle.rgba = getBorderColor( event, info, isSelected );
                     lineStyle.thickness_PX = getBorderThickness( event, info, isSelected );
 
-                    fillProg.setOrtho( gl, xMin, xMax, yMin, yMax );
+                    lineProg.setOrtho( gl, xMin, xMax, yMin, yMax );
+                    lineProg.setViewport( gl, bounds );
 
                     lineProg.draw( gl, lineStyle, linePath );
                 }
