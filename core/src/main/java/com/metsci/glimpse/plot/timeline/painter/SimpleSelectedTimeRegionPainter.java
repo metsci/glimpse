@@ -146,7 +146,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
         GLUtils.enableStandardBlending( gl );
         try
         {
-            paint( gl, taggedAxis, tags, min, max, current, width, height );
+            paint( context, taggedAxis, tags, min, max, current, width, height );
         }
         finally
         {
@@ -167,8 +167,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
         this.textRenderer.dispose( );
     }
 
-    protected void paint( GL3 gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
+    protected void paint( GlimpseContext context, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
+
         fillProg.begin( gl );
         try
         {
@@ -176,10 +179,12 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
 
             if ( orientation == Orientation.VERTICAL )
             {
+                fillProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
                 fillPath.growQuad2f( min, 0, max, height - 1 );
             }
             else
             {
+                fillProg.setOrtho( gl, 0, width, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ) );
                 fillPath.growQuad2f( 0, min, width, max );
             }
 
@@ -193,14 +198,20 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
         lineProg.begin( gl );
         try
         {
+            lineProg.setViewport( gl, bounds );
+
             linePath.clear( );
 
             if ( orientation == Orientation.VERTICAL )
             {
+                lineProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
+
                 linePath.addRectangle( min, 0, max, height - 1 );
             }
             else
             {
+                lineProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
+
                 linePath.addRectangle( 0, min, width, max );
             }
 
