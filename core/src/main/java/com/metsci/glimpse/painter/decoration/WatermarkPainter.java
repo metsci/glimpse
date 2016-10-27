@@ -26,12 +26,18 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import static com.jogamp.opengl.util.texture.TextureIO.*;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.HorizontalPosition.*;
-import static com.metsci.glimpse.painter.decoration.WatermarkPainter.VerticalPosition.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.lang.Math.*;
+import static com.jogamp.opengl.util.texture.TextureIO.newTexture;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Center;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Left;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition.Bottom;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition.Top;
+import static com.metsci.glimpse.util.GeneralUtils.doubles;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -51,22 +57,14 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.util.io.StreamOpener;
 
 public class WatermarkPainter extends GlimpsePainterBase
 {
     private static final Logger logger = getLogger( WatermarkPainter.class );
-
-    public static enum HorizontalPosition
-    {
-        LEFT, RIGHT
-    }
-
-    public static enum VerticalPosition
-    {
-        TOP, BOTTOM
-    }
 
     public static class WatermarkConfig
     {
@@ -137,12 +135,12 @@ public class WatermarkPainter extends GlimpsePainterBase
         }
     }
 
-    public static final WatermarkConfig defaultConfig = new WatermarkConfig( 350, 350, 0.04, 0.28, 0.28, 10, BOTTOM, RIGHT );
+    public static final WatermarkConfig defaultConfig = new WatermarkConfig( 350, 350, 0.04, 0.28, 0.28, 10, Bottom, Center );
 
-    public static final WatermarkConfig bottomRight = defaultConfig.withPos( BOTTOM, RIGHT );
-    public static final WatermarkConfig bottomLeft = defaultConfig.withPos( BOTTOM, LEFT );
-    public static final WatermarkConfig topRight = defaultConfig.withPos( TOP, RIGHT );
-    public static final WatermarkConfig topLeft = defaultConfig.withPos( TOP, LEFT );
+    public static final WatermarkConfig bottomRight = defaultConfig.withPos( Bottom, Right );
+    public static final WatermarkConfig bottomLeft = defaultConfig.withPos( Bottom, Left );
+    public static final WatermarkConfig topRight = defaultConfig.withPos( Top, Right );
+    public static final WatermarkConfig topLeft = defaultConfig.withPos( Top, Left );
 
     protected final Supplier<BufferedImage> imageSupplier;
     protected final WatermarkConfig config;
@@ -279,13 +277,21 @@ public class WatermarkPainter extends GlimpsePainterBase
         float xRight;
         switch ( config.horizontalPos )
         {
-            case LEFT:
+            case Left:
             {
                 xLeft = ( float ) ( padding );
                 xRight = ( float ) ( xLeft + wQuad );
             }
                 break;
 
+            case Center:
+            {
+                xLeft = ( float) ( bounds.getWidth( ) / 2f - wQuad / 2f );
+                xRight = ( float ) ( xLeft + wQuad );
+            }
+                break;
+
+            case Right:
             default:
             {
                 xRight = ( float ) ( bounds.getWidth( ) - padding );
@@ -298,13 +304,21 @@ public class WatermarkPainter extends GlimpsePainterBase
         float yBottom;
         switch ( config.verticalPos )
         {
-            case TOP:
+            case Top:
             {
                 yTop = ( float ) ( bounds.getHeight( ) - padding );
                 yBottom = ( float ) ( yTop - hQuad );
             }
                 break;
 
+            case Center:
+            {
+                yBottom = ( float) ( bounds.getHeight( ) / 2f - hQuad / 2f );
+                yTop = ( float ) ( yBottom + hQuad );
+            }
+                break;
+
+            case Bottom:
             default:
             {
                 yBottom = ( float ) ( padding );
