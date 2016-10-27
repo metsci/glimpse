@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.painter.shape;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL2ES2.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BLEND;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_LINE_STRIP;
+import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -813,10 +817,10 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
-            gl.getGL3( ).glBindVertexArray( 0 );
             gl.glDisableVertexAttribArray( this.handles.inXy );
             gl.glDisableVertexAttribArray( this.handles.inRgba );
             gl.glUseProgram( 0 );
+            gl.getGL3( ).glBindVertexArray( 0 );
         }
 
         /**

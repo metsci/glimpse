@@ -142,7 +142,7 @@ public class GlimpseShaderProgram
         GL3 gl3 = gl.getGL3( );
 
         this.state = new ShaderState( );
-        this.state.setVerbose( true );
+        this.state.setVerbose( false );
         this.program = new ShaderProgram( );
 
         GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( )." );

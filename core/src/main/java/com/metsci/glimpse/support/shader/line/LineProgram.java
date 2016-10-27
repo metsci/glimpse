@@ -1,8 +1,11 @@
 package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL3.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BYTE;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import java.util.Collection;
 
@@ -278,10 +281,10 @@ public class LineProgram
 
     public void end( GL2ES2 gl )
     {
-        gl.getGL3( ).glBindVertexArray( 0 );
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inFlags );
         gl.glUseProgram( 0 );
+        gl.getGL3( ).glBindVertexArray( 0 );
     }
 
     /**
