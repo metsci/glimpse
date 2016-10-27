@@ -5,16 +5,16 @@ import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.track.StaticParticlePainter;
+import com.metsci.glimpse.painter.track.StaticTrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
 
-public class StaticParticlePainterExample implements GlimpseLayoutProvider
+public class StaticTrackPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new StaticParticlePainterExample( ) );
+        Example.showWithSwing( new StaticTrackPainterExample( ) );
     }
 
     public static final int ParticleCount = 2000;
@@ -53,7 +53,7 @@ public class StaticParticlePainterExample implements GlimpseLayoutProvider
             }
         }
 
-        final StaticParticlePainter painter = new StaticParticlePainter( timeArray, xPositions, yPositions, colors );
+        final StaticTrackPainter painter = new StaticTrackPainter( timeArray, xPositions, yPositions, colors );
 
         painter.getLineStyle( ).joinType = LineJoinType.JOIN_MITER;
         painter.getLineStyle( ).thickness_PX = 4.0f;

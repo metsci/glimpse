@@ -51,16 +51,16 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
  * <p>Displays a static set of tracks with associated timestamp, x position, and y position. Unlike
- * {@link LineStripTrackPainter}, each track  must have an xy position for the same set of timestamps. This
- * allows ParticlePainter to be more efficient in this case.</p>
+ * {@link TrackPainter}, each track  must have an xy position for the same set of timestamps. This
+ * allows StaticTrackPainter to be more efficient in this case.</p>
  *
- * <p>The set of particles cannot be modified once ParticlePainter is constructed, but a custom time slice of
- * the particles may be displayed via {@code StaticParticlePainter#displayTimeRange(long, long)}.</p>
+ * <p>The set of tracks cannot be modified once StaticTrackPainter is constructed, but a custom time slice of
+ * the particles may be displayed via {@code StaticTrackPainter#displayTimeRange(long, long)}.</p>
  *
  * @author ulman
  *
  */
-public class StaticParticlePainter extends GlimpsePainterBase
+public class StaticTrackPainter extends GlimpsePainterBase
 {
     protected IntBuffer firstData;
     protected IntBuffer countData;
@@ -92,17 +92,17 @@ public class StaticParticlePainter extends GlimpsePainterBase
         return array;
     }
 
-    public StaticParticlePainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
+    public StaticTrackPainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
     {
         this( toLongArray( time ), xPositions, yPositions, colors );
     }
 
-    public StaticParticlePainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions )
+    public StaticTrackPainter( TimeStamp[] time, float[][] xPositions, float[][] yPositions )
     {
         this( toLongArray( time ), xPositions, yPositions );
     }
 
-    public StaticParticlePainter( long[] time, float[][] xPositions, float[][] yPositions )
+    public StaticTrackPainter( long[] time, float[][] xPositions, float[][] yPositions )
     {
         this( time, xPositions, yPositions, null );
     }
@@ -114,7 +114,7 @@ public class StaticParticlePainter extends GlimpsePainterBase
      * @param yPositions square array of y positions indexed as [particleIndex][timeIndex] (second index must match size of time array)
      * @param colors color values indexed as [particleIndex][timeIndex][rgba]
      */
-    public StaticParticlePainter( long[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
+    public StaticTrackPainter( long[] time, float[][] xPositions, float[][] yPositions, float[][][] colors )
     {
         this.prog = new ColorLineProgram( );
         this.style = new LineStyle( );
