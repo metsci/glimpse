@@ -1,7 +1,11 @@
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TRIANGLES;
+import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -170,10 +174,10 @@ public class ColorTexture1DProgram implements DrawableTextureProgram
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
-        gl.getGL3( ).glBindVertexArray( 0 );
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glDisableVertexAttribArray( this.handles.inS );
         gl.glUseProgram( 0 );
+        gl.getGL3( ).glBindVertexArray( 0 );
     }
 
     @Override

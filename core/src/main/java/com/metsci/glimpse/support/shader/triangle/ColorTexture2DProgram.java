@@ -1,10 +1,12 @@
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static javax.media.opengl.GL.*;
-
-import java.util.logging.Logger;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.getGLTextureUnit;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TRIANGLES;
+import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -24,8 +26,6 @@ import com.metsci.glimpse.gl.util.GLUtils;
  */
 public class ColorTexture2DProgram implements DrawableTextureProgram
 {
-    private static final Logger logger = Logger.getLogger( ColorTexture2DProgram.class.getName( ) );
-
     public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.vs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/colortex2d/colortex2d.fs" );
 
@@ -216,8 +216,6 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
     {
         GL3 gl = context.getGL( ).getGL3( );
 
-        gl.getGL3( ).glBindVertexArray( 0 );
-
         if ( this.handles != null )
         {
             gl.glDisableVertexAttribArray( this.handles.inXy );
@@ -225,6 +223,8 @@ public class ColorTexture2DProgram implements DrawableTextureProgram
         }
 
         gl.glUseProgram( 0 );
+
+        gl.getGL3( ).glBindVertexArray( 0 );
     }
 
     /**
