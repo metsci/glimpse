@@ -1,7 +1,6 @@
 package com.metsci.glimpse.gl.shader;
 
 import java.util.Collection;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
@@ -14,7 +13,6 @@ import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.glsl.ShaderState;
-import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
@@ -24,8 +22,6 @@ import com.metsci.glimpse.gl.util.GLUtils;
  */
 public class GlimpseShaderProgram
 {
-    private static final Logger logger = Logger.getLogger( GlimpseShaderProgram.class.getName( ) );
-
     protected Collection<ShaderCode> codes;
     protected Collection<GLUniformData> uniforms;
     protected Collection<GLArrayDataClient> arrays;
@@ -146,13 +142,9 @@ public class GlimpseShaderProgram
         this.state.setVerbose( false );
         this.program = new ShaderProgram( );
 
-        GLErrorUtils.logGLError( logger, gl, "Trouble before GlimpseShaderProgram.load( )." );
-
         for ( ShaderCode code : codes )
         {
             boolean success = this.program.add( gl3, code, System.err );
-            GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ): " + code );
-            GLErrorUtils.logGLShaderInfoLog( logger, gl3, code.shader( ).get( 0 ), "Trouble in GlimpseShaderProgram.load( ). ShaderProgram.add( ) Log:" );
 
             if ( !success )
             {
@@ -161,19 +153,15 @@ public class GlimpseShaderProgram
         }
 
         this.state.attachShaderProgram( gl3, this.program, true );
-        GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( )" );
-        GLErrorUtils.logGLProgramInfoLog( logger, gl3, this.program.program( ), "Trouble in GlimpseShaderProgram.load( ). ShaderState.attachShaderProgram( ) Log:" );
 
         for ( GLArrayData array : arrays )
         {
             this.state.ownAttribute( array, true );
-            GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.ownAttribute( ): " + array.getName( ) );
         }
 
         for ( GLUniformData uniform : uniforms )
         {
             this.state.ownUniform( uniform );
-            GLErrorUtils.logGLError( logger, gl, "Trouble in GlimpseShaderProgram.load( ). ShaderState.ownUniform( ): " + uniform.getName( ) );
         }
 
         this.loaded = true;
