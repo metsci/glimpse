@@ -116,6 +116,7 @@ import com.metsci.glimpse.dnc.geosym.DncGeosymLineAreaStyle;
 import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -127,7 +128,6 @@ public class DncPainter implements GlimpsePainter
 {
 
     protected static final Logger logger = getLogger( DncPainter.class );
-
 
     // XXX: Maybe move these to settings
 
@@ -152,7 +152,6 @@ public class DncPainter implements GlimpsePainter
     protected static final long labelAtlasXferTimeLimit_MILLIS = 1;
     protected static final int guaranteedLabelAtlasXfersPerFrame = 1;
 
-
     protected static class RasterizeArgs
     {
         public final int maxTextureDim;
@@ -165,7 +164,6 @@ public class DncPainter implements GlimpsePainter
         }
     }
 
-
     protected final Object mutex;
     protected final ExecutorService asyncExec;
     protected final ExecutorService iconsExec;
@@ -175,19 +173,19 @@ public class DncPainter implements GlimpsePainter
     protected final DncPainterSettings settings;
     protected final Collection<DncLibrary> allLibraries;
 
-    protected final Map<DncChunkKey,DncHostChunk> hChunks;
-    protected final Map<DncChunkKey,DncDeviceChunk> dChunks;
+    protected final Map<DncChunkKey, DncHostChunk> hChunks;
+    protected final Map<DncChunkKey, DncDeviceChunk> dChunks;
     protected final List<DncDeviceChunk> dChunksToDispose;
 
-    protected final Map<DncChunkKey,DncHostIconAtlas> hIconAtlases;
-    protected final Map<DncChunkKey,DncDeviceIconAtlas> dIconAtlases;
+    protected final Map<DncChunkKey, DncHostIconAtlas> hIconAtlases;
+    protected final Map<DncChunkKey, DncDeviceIconAtlas> dIconAtlases;
     protected final List<DncDeviceIconAtlas> dIconAtlasesToDispose;
 
-    protected final Map<DncChunkKey,DncHostLabelAtlas> hLabelAtlases;
-    protected final Map<DncChunkKey,DncDeviceLabelAtlas> dLabelAtlases;
+    protected final Map<DncChunkKey, DncHostLabelAtlas> hLabelAtlases;
+    protected final Map<DncChunkKey, DncDeviceLabelAtlas> dLabelAtlases;
     protected final List<DncDeviceLabelAtlas> dLabelAtlasesToDispose;
 
-    protected final Map<DncChunkKey,IndexSetTexture> highlightSets;
+    protected final Map<DncChunkKey, IndexSetTexture> highlightSets;
     protected final List<IndexSetTexture> highlightSetsToDispose;
 
     protected final DncAreaProgram areaProgram;
@@ -200,18 +198,16 @@ public class DncPainter implements GlimpsePainter
     protected final Set<DncLibrary> activeLibraries;
     protected final Set<DncCoverage> activeCoverages;
     protected final CopyOnWriteArrayList<Runnable> activeChunksListeners;
-    public final Function<DncChunkKey,DncChunkPriority> chunkPriorityFunc;
+    public final Function<DncChunkKey, DncChunkPriority> chunkPriorityFunc;
 
     protected boolean visible;
     protected DncGeosymTheme theme;
-    protected Map<String,DncGeosymLineAreaStyle> lineAreaStyles;
+    protected Map<String, DncGeosymLineAreaStyle> lineAreaStyles;
     protected RasterizeArgs rasterizeArgs;
 
     // Accessed only on the labels thread
     protected Int2ObjectMap<Color> labelColors;
     protected String labelColorsFile;
-
-
 
     public DncPainter( RenderCache cache, DncPainterSettings settings )
     {
@@ -260,7 +256,7 @@ public class DncPainter implements GlimpsePainter
         this.activeLibraries = new HashSet<>( );
         this.activeCoverages = new HashSet<>( );
         this.activeChunksListeners = new CopyOnWriteArrayList<>( );
-        this.chunkPriorityFunc = new Function<DncChunkKey,DncChunkPriority>( )
+        this.chunkPriorityFunc = new Function<DncChunkKey, DncChunkPriority>( )
         {
             public DncChunkPriority apply( DncChunkKey chunkKey )
             {
@@ -389,7 +385,7 @@ public class DncPainter implements GlimpsePainter
                 {
                     public void runThrows( ) throws Exception
                     {
-                        Map<String,DncGeosymLineAreaStyle> newLineAreaStyles = readGeosymLineAreaStyles( newLineAreaStylesFile );
+                        Map<String, DncGeosymLineAreaStyle> newLineAreaStyles = readGeosymLineAreaStyles( newLineAreaStylesFile );
                         synchronized ( mutex )
                         {
                             lineAreaStyles = newLineAreaStyles;
@@ -569,7 +565,7 @@ public class DncPainter implements GlimpsePainter
                                         // Bail out if chunk is no longer active
                                         synchronized ( mutex )
                                         {
-                                            if ( !( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
+                                            if ( ! ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
                                             {
                                                 return;
                                             }
@@ -601,7 +597,7 @@ public class DncPainter implements GlimpsePainter
                                                 // Bail out if chunk is no longer active
                                                 synchronized ( mutex )
                                                 {
-                                                    if ( !( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
+                                                    if ( ! ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
                                                     {
                                                         return;
                                                     }
@@ -643,7 +639,7 @@ public class DncPainter implements GlimpsePainter
                                                 // Bail out if chunk is no longer active
                                                 synchronized ( mutex )
                                                 {
-                                                    if ( !( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
+                                                    if ( ! ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
                                                     {
                                                         return;
                                                     }
@@ -717,7 +713,8 @@ public class DncPainter implements GlimpsePainter
                     mutex.wait( );
                 }
                 catch ( InterruptedException e )
-                { }
+                {
+                }
             }
         }
     }
@@ -766,28 +763,35 @@ public class DncPainter implements GlimpsePainter
             if ( asyncExec.isShutdown( ) ) return;
 
             // Chunks
-            for ( DncDeviceChunk dChunk : dChunksToDispose ) dChunk.dispose( gl );
-            for ( DncDeviceChunk dChunk : dChunks.values( ) ) dChunk.dispose( gl );
+            for ( DncDeviceChunk dChunk : dChunksToDispose )
+                dChunk.dispose( gl );
+            for ( DncDeviceChunk dChunk : dChunks.values( ) )
+                dChunk.dispose( gl );
             dChunksToDispose.clear( );
             dChunks.clear( );
             hChunks.clear( );
 
             // Icon-atlases
-            for ( DncDeviceIconAtlas dIconAtlas : dIconAtlasesToDispose ) dIconAtlas.dispose( gl );
-            for ( DncDeviceIconAtlas dIconAtlas : dIconAtlases.values( ) ) dIconAtlas.dispose( gl );
+            for ( DncDeviceIconAtlas dIconAtlas : dIconAtlasesToDispose )
+                dIconAtlas.dispose( gl );
+            for ( DncDeviceIconAtlas dIconAtlas : dIconAtlases.values( ) )
+                dIconAtlas.dispose( gl );
             dIconAtlasesToDispose.clear( );
             dIconAtlases.clear( );
             hIconAtlases.clear( );
 
             // Label-atlases
-            for ( DncDeviceLabelAtlas dLabelAtlas : dLabelAtlasesToDispose ) dLabelAtlas.dispose( gl );
-            for ( DncDeviceLabelAtlas dLabelAtlas : dLabelAtlases.values( ) ) dLabelAtlas.dispose( gl );
+            for ( DncDeviceLabelAtlas dLabelAtlas : dLabelAtlasesToDispose )
+                dLabelAtlas.dispose( gl );
+            for ( DncDeviceLabelAtlas dLabelAtlas : dLabelAtlases.values( ) )
+                dLabelAtlas.dispose( gl );
             dLabelAtlasesToDispose.clear( );
             dLabelAtlases.clear( );
             hLabelAtlases.clear( );
 
             // Highlight-sets
-            for ( IndexSetTexture highlightSet : highlightSets.values( ) ) highlightSet.freeDeviceResources( gl );
+            for ( IndexSetTexture highlightSet : highlightSets.values( ) )
+                highlightSet.freeDeviceResources( gl );
             highlightSetsToDispose.clear( );
             highlightSets.clear( );
 
@@ -836,7 +840,8 @@ public class DncPainter implements GlimpsePainter
 
     @Override
     public void setLookAndFeel( LookAndFeel laf )
-    { }
+    {
+    }
 
     @Override
     public boolean isVisible( )
@@ -868,6 +873,8 @@ public class DncPainter implements GlimpsePainter
         // Premultiplied alpha
         gl.glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 
+        gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
+
         synchronized ( mutex )
         {
             if ( !visible ) return;
@@ -875,17 +882,15 @@ public class DncPainter implements GlimpsePainter
             // Don't try to paint after disposal
             if ( asyncExec.isShutdown( ) ) return;
 
-
             // Store values used in rasterizing icons and labels
             if ( rasterizeArgs == null )
             {
-                int[] maxTextureDim = new int[ 1 ];
+                int[] maxTextureDim = new int[1];
                 gl.glGetIntegerv( GL_MAX_TEXTURE_SIZE, maxTextureDim, 0 );
-                this.rasterizeArgs = new RasterizeArgs( maxTextureDim[ 0 ], context.getDPI( ) );
+                this.rasterizeArgs = new RasterizeArgs( maxTextureDim[0], context.getDPI( ) );
                 logger.fine( "Rasterization args: max-texture-dim = " + rasterizeArgs.maxTextureDim + ", screen-dpi = " + rasterizeArgs.screenDpi );
                 mutex.notifyAll( );
             }
-
 
             // Dispose of deactivated chunks
             int chunkDisposeCount = 0;
@@ -900,7 +905,6 @@ public class DncPainter implements GlimpsePainter
                 chunkDisposeCount++;
             }
 
-
             // Dispose of deactivated icon-atlases
             int iconAtlasDisposeCount = 0;
             long iconAtlasDisposeStart_PMILLIS = System.currentTimeMillis( );
@@ -913,7 +917,6 @@ public class DncPainter implements GlimpsePainter
                 dIconAtlas.dispose( gl );
                 iconAtlasDisposeCount++;
             }
-
 
             // Dispose of deactivated label-atlases
             int labelAtlasDisposeCount = 0;
@@ -928,7 +931,6 @@ public class DncPainter implements GlimpsePainter
                 labelAtlasDisposeCount++;
             }
 
-
             // Dispose of deactivated highlight-sets
             int highlightSetDisposeCount = 0;
             long highlightSetDisposeStart_PMILLIS = System.currentTimeMillis( );
@@ -941,7 +943,6 @@ public class DncPainter implements GlimpsePainter
                 highlightSet.freeDeviceResources( gl );
                 highlightSetDisposeCount++;
             }
-
 
             // Identify chunks to draw
             Collection<DncChunkKey> chunksToDraw = new ArrayList<>( );
@@ -962,7 +963,6 @@ public class DncPainter implements GlimpsePainter
                 }
             }
 
-
             // Transfer chunks to the graphics device
             int chunkXferCount = 0;
             long chunkXferStart_PMILLIS = System.currentTimeMillis( );
@@ -980,7 +980,6 @@ public class DncPainter implements GlimpsePainter
                     }
                 }
             }
-
 
             // Transfer icon-atlases to the graphics device
             int iconAtlasXferCount = 0;
@@ -1000,7 +999,6 @@ public class DncPainter implements GlimpsePainter
                 }
             }
 
-
             // Transfer label-atlases to the graphics device
             int labelAtlasXferCount = 0;
             long labelAtlasXferStart_PMILLIS = System.currentTimeMillis( );
@@ -1018,7 +1016,6 @@ public class DncPainter implements GlimpsePainter
                     }
                 }
             }
-
 
             // Do the actual drawing
             boolean areasVisible = settings.areAreasVisible( axis );
@@ -1040,12 +1037,11 @@ public class DncPainter implements GlimpsePainter
                 long pulsatePeriod_MILLIS = 1100;
                 long currentTime_PMILLIS = currentTimeMillis( );
                 double pulsatePeriodFrac = ( ( double ) ( currentTime_PMILLIS % pulsatePeriod_MILLIS ) ) / ( ( double ) pulsatePeriod_MILLIS );
-                double pulsateScale = 0.5*( 1.0 + cos( 2.0 * PI * pulsatePeriodFrac ) );
+                double pulsateScale = 0.5 * ( 1.0 + cos( 2.0 * PI * pulsatePeriodFrac ) );
 
-                float lineHighlightExtraThickness_PX = ( float ) ( 2.0*pulsateScale );
-                float iconHighlightScale = ( float ) ( 1.0 + 0.75*pulsateScale );
-                float labelHighlightScale = ( float ) ( 1.0 + 0.75*pulsateScale );
-
+                float lineHighlightExtraThickness_PX = ( float ) ( 2.0 * pulsateScale );
+                float iconHighlightScale = ( float ) ( 1.0 + 0.75 * pulsateScale );
+                float labelHighlightScale = ( float ) ( 1.0 + 0.75 * pulsateScale );
 
                 for ( DncGroup group : groupsToDraw )
                 {
@@ -1189,11 +1185,11 @@ public class DncPainter implements GlimpsePainter
                     }
                 }
 
-
                 gl.glUseProgram( 0 );
+                gl.getGL3( ).glBindVertexArray( 0 );
+
             }
         }
     }
-
 
 }
