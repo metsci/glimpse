@@ -33,6 +33,7 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class NestedTimelinePlotExample implements GlimpseLayoutProvider
 {
@@ -48,6 +49,8 @@ public class NestedTimelinePlotExample implements GlimpseLayoutProvider
     public StackedTimePlot2D getLayout( )
     {
         final CollapsibleTimePlot2D plot = new CollapsibleTimePlot2D( );
+
+        plot.getDefaultTimeline( ).setAxisColor( GlimpseColor.getBlack( ) );
 
         plot.setShowLabels( true );
         plot.setLabelSize( 30 );

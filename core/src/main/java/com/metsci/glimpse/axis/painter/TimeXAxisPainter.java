@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.util.units.time.TimeStamp.*;
+import static com.metsci.glimpse.util.units.time.TimeStamp.currentTime;
 
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -133,6 +133,8 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
     protected void printHoverLabels( List<TimeStamp> tickTimes, Axis1D axis, double jTimeText, int width, int height )
     {
+        GlimpseColor.setColor( textRenderer, textColor );
+
         // text heights vary slightly, making the labels appear unevenly spaced in height
         // just use the height of a fixed sample character
         Rectangle2D fixedBounds = textRenderer.getBounds( "M" );
@@ -159,6 +161,8 @@ public class TimeXAxisPainter extends TimeAxisPainter
 
     protected double printTickLabels( List<String> tickLabels, List<TimeStamp> tickTimes, Axis1D axis, int width, int height )
     {
+        GlimpseColor.setColor( textRenderer, textColor );
+
         // text heights vary slightly, making the labels appear unevenly spaced in height
         // just use the height of a fixed sample character
         Rectangle2D fixedBounds = textRenderer.getBounds( "M" );

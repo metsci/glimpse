@@ -172,6 +172,8 @@ public class TimeYAxisPainter extends TimeAxisPainter
         textRenderer.beginRendering( width, height );
         try
         {
+            GlimpseColor.setColor( textRenderer, textColor );
+
             for ( int index = 0; index < tickLabels.size( ); index++ )
             {
                 TimeStamp t = tickTimes.get( index );
