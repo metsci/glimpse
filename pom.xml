@@ -185,11 +185,17 @@
                     <aggregate>true</aggregate>
                     <includes>
                         <include>src/main/java/**</include>
+                        <include>**/*.fs</include>
+                        <include>**/*.vs</include>
+                        <include>**/*.gs</include>
                     </includes>
                     <mapping>
                         <!-- using JAVADOC_STYLE can sometimes cause the 
                             license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
                         <java>SLASHSTAR_STYLE</java>
+                        <fs>DOUBLESLASH_STYLE</fs>
+                        <vs>DOUBLESLASH_STYLE</vs>
+                        <gs>DOUBLESLASH_STYLE</gs>
                     </mapping>
                     <excludes>
                         <exclude>target/**</exclude>
