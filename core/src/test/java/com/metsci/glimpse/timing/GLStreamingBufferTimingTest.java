@@ -23,6 +23,7 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram.ProgramHandles;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
@@ -91,14 +92,21 @@ public class GLStreamingBufferTimingTest
 
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
-                    mappedFloats.put( v ).put( v );
+                    float x = 2 + v + 3*i;
+                    float y = 2 + v;
+                    mappedFloats.put( x ).put( y );
                 }
 
                 this.buffer.seal( gl );
 
                 int b = this.buffer.buffer( gl );
+                gl.glBindBuffer( GL_ARRAY_BUFFER, b );
+
+                ProgramHandles h = this.prog.handles( gl );
+                gl.glVertexAttribPointer( h.inXy, 2, GL_FLOAT, false, 0, this.buffer.sealedOffset( ) );
+
                 int n = verticesPerIteration;
-                this.prog.draw( gl, GL_POINTS, b, 0, n );
+                gl.glDrawArrays( GL_POINTS, 0, n );
             }
 
             this.prog.end( gl );

@@ -74,7 +74,7 @@ public class ImmediateModeTimingTest
 
             gl.glMatrixMode( GL_PROJECTION );
             gl.glLoadIdentity( );
-            gl.glOrtho( -0.5, bounds.getWidth( ) + 0.5, -0.5, bounds.getHeight( ) + 0.5, -1, 1 );
+            gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
 
             for ( int i = 0; i < numIterations; i++ )
             {
@@ -82,7 +82,9 @@ public class ImmediateModeTimingTest
 
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
-                    gl.glVertex2f( v, v );
+                    float x = 2 + v + 3*i;
+                    float y = 2 + v;
+                    gl.glVertex2f( x, y );
                 }
 
                 gl.glEnd( );

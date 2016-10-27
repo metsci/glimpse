@@ -95,7 +95,9 @@ public class GLEditableBufferTimingTest
 
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
-                    mappedFloats.put( v ).put( v );
+                    float x = 2 + v + 3*i;
+                    float y = 2 + v;
+                    mappedFloats.put( x ).put( y );
                 }
 
                 int b = this.buffer.deviceBuffer( gl );
