@@ -58,10 +58,6 @@ public class GlimpseShaderProgram
         {
             gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
         }
-        else
-        {
-            gl.getGL3( ).glBindVertexArray( 0 );
-        }
 
         if ( !load( gl.getGL3( ), this.codes ) ) return;
 
@@ -75,6 +71,11 @@ public class GlimpseShaderProgram
             {
                 array.enableBuffer( gl, on );
             }
+        }
+
+        if ( !on )
+        {
+            gl.getGL3( ).glBindVertexArray( 0 );
         }
     }
 
