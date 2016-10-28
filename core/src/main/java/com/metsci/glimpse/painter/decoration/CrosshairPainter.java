@@ -219,11 +219,7 @@ public class CrosshairPainter extends GlimpsePainterBase
                 lineProg.setViewport( gl, bounds );
 
                 linePath.clear( );
-                linePath.moveTo( centerX - sizeX, centerY - sizeY );
-                linePath.lineTo( centerX - sizeX, centerY + sizeY );
-                linePath.lineTo( centerX + sizeX, centerY + sizeY );
-                linePath.lineTo( centerX + sizeX, centerY - sizeY );
-                linePath.lineTo( centerX - sizeX, centerY - sizeY );
+                linePath.addRectangle( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
 
                 lineProg.draw( gl, lineStyle, linePath );
             }
