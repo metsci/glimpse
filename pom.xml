@@ -213,6 +213,7 @@
                         <exclude>**/TextureAtlas.java</exclude>
                         <exclude>**/ElevatedSurfaceTileRenderer.java</exclude>
                         <exclude>**/ElevatedSectorGeometryList.java</exclude>
+                        <exclude>**/RectanglePacker.java</exclude>
                     </excludes>
                     <useDefaultExcludes>true</useDefaultExcludes>
                     <useDefaultMapping>true</useDefaultMapping>
