@@ -53,5 +53,5 @@ void main( )
         st = ( st_PX + 0.5 ) / atlasSize_PX;
     }
 
-    outRgba = texture2D( ATLAS, st );
+    outRgba = texture( ATLAS, st );
 }

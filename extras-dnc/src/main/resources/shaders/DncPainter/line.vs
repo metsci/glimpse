@@ -55,7 +55,7 @@ bool setContains( isampler2D setTexture, float index )
         float j = floor( index / textureSize.x );
         float i = index - ( j * textureSize.x );
         vec2 st = vec2( i, j ) / textureSize;
-        int value = texture2D( setTexture, st ).r;
+        int value = texture( setTexture, st ).r;
         return ( value != 0 );
     }
 }

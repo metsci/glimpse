@@ -35,5 +35,5 @@ out vec4 outRgba;
 
 void main( )
 {
-    outRgba = texture2D( ATLAS, gAtlasCoords );
+    outRgba = texture( ATLAS, gAtlasCoords );
 }
