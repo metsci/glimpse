@@ -95,7 +95,7 @@ void main()
     		for ( ; i < fsize ; i += 1.0 )
     		{
      			float float_index = i / fsize;
-    			float val = texture1D( vcoordtex, float_index ).r;
+    			float val = texture( vcoordtex, float_index ).r;
     			if ( valColor > val )
     				break;
     		}
@@ -105,17 +105,17 @@ void main()
     		float i1 = (i-1.0) / fsize;
  			float i2 = (i) / fsize;
 
- 			float tvalMin = texture1D( tcoordtex, i1 ).r;
- 			float tvalMax = texture1D( tcoordtex, i2 ).r;
+ 			float tvalMin = texture( tcoordtex, i1 ).r;
+ 			float tvalMax = texture( tcoordtex, i2 ).r;
 
- 			float dataMin = texture1D( vcoordtex, i1 ).r;
- 			float dataMax = texture1D( vcoordtex, i2 ).r;
+ 			float dataMin = texture( vcoordtex, i1 ).r;
+ 			float dataMax = texture( vcoordtex, i2 ).r;
 
  			float normalizedVal = ( ( valColor - dataMin ) / ( dataMax - dataMin ) );
  			normalizedVal = normalizedVal * ( tvalMax - tvalMin ) + tvalMin;
     		normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
-   		 	vec4 color = texture1D( valTexture_color, normalizedVal );
+   		 	vec4 color = texture( valTexture_color, normalizedVal );
     		vRgba = color;
 		}
 
@@ -128,7 +128,7 @@ void main()
 			float valInverseWidth_size = valMax_size - valMin_size;
 	        float valNorm_size  = ( valSize - valMin_size ) / valInverseWidth_size;
 	        valNorm_size = clamp( valNorm_size, 0.0, 1.0 );
-	        gl_PointSize = texture1D( valTexture_size, valNorm_size ).r;
+	        gl_PointSize = texture( valTexture_size, valNorm_size ).r;
         }
     }
 
