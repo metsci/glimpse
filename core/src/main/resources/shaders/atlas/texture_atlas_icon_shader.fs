@@ -39,7 +39,7 @@ out vec4 outRgba;
 
 void main()
 {
-    vec4 texColor = texture2D( tex, VertexIn.texCoord.st );
+    vec4 texColor = texture( tex, VertexIn.texCoord.st );
     
     if ( isPickMode )
     {
