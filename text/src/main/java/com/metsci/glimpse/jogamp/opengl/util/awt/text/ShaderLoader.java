@@ -67,7 +67,7 @@ public final class ShaderLoader
      * @param shader OpenGL handle to a shader
      * @return True if shader was compiled without errors
      */
-    private static boolean isShaderCompiled( /*@Nonnull*/ final GL2ES2 gl, final int shader )
+    public static boolean isShaderCompiled( /*@Nonnull*/ final GL2ES2 gl, final int shader )
     {
         return ShaderUtil.isShaderStatusValid( gl, shader, GL2ES2.GL_COMPILE_STATUS, null );
     }
@@ -79,7 +79,7 @@ public final class ShaderLoader
      * @param program OpenGL handle to a shader program
      * @return True if program was linked successfully
      */
-    private static boolean isProgramLinked( /*@Nonnull*/ final GL2ES2 gl, final int program )
+    public static boolean isProgramLinked( /*@Nonnull*/ final GL2ES2 gl, final int program )
     {
         return ShaderUtil.isProgramStatusValid( gl, program, GL2ES2.GL_LINK_STATUS );
     }
@@ -91,7 +91,7 @@ public final class ShaderLoader
      * @param program OpenGL handle to a shader program
      * @return True if program was validated successfully
      */
-    private static boolean isProgramValidated( /*@Nonnull*/ final GL2ES2 gl, final int program )
+    public static boolean isProgramValidated( /*@Nonnull*/ final GL2ES2 gl, final int program )
     {
         return ShaderUtil.isProgramStatusValid( gl, program, GL2ES2.GL_VALIDATE_STATUS );
     }
@@ -126,10 +126,9 @@ public final class ShaderLoader
         gl.glAttachShader( program, vs );
         gl.glAttachShader( program, fs );
 
-        // Link and validate the program
+        // Link the program
         gl.glLinkProgram( program );
-        gl.glValidateProgram( program );
-        if ( ( !isProgramLinked( gl, program ) ) || ( !isProgramValidated( gl, program ) ) )
+        if ( !isProgramLinked( gl, program ) )
         {
             final String log = ShaderUtil.getProgramInfoLog( gl, program );
             throw new GLException( log );
