@@ -80,8 +80,8 @@ public class GLMultiTimingTest
         {
             this.prog = new FlatColorProgram( );
             this.buffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, bytesPerIteration * numIterations );
-            this.firsts = newDirectIntBuffer( verticesPerIteration * numIterations );
-            this.counts = newDirectIntBuffer( verticesPerIteration * numIterations );
+            this.firsts = newDirectIntBuffer( numIterations );
+            this.counts = newDirectIntBuffer( numIterations );
         }
 
         @Override
@@ -99,12 +99,12 @@ public class GLMultiTimingTest
                 firsts.put( i * verticesPerIteration );
                 counts.put( verticesPerIteration );
 
-                FloatBuffer mappedFloats = this.buffer.editFloats( i * floatsPerIteration, floatsPerIteration );
+                FloatBuffer editFloats = this.buffer.editFloats( i * floatsPerIteration, floatsPerIteration );
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
                     float x = 2 + v + 3*i;
                     float y = 2 + v;
-                    mappedFloats.put( x ).put( y );
+                    editFloats.put( x ).put( y );
                 }
             }
 

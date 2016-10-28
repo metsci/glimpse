@@ -74,7 +74,7 @@ public class GLEditableBufferTimingTest
         public TestPainter( )
         {
             this.prog = new FlatColorProgram( );
-            this.buffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, bytesPerIteration );
+            this.buffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, bytesPerIteration * numIterations );
         }
 
         @Override
@@ -87,22 +87,21 @@ public class GLEditableBufferTimingTest
             this.prog.setColor( gl, 0, 0, 0, 1 );
             this.prog.setPixelOrtho( gl, bounds );
 
+            this.buffer.clear( );
+
             for ( int i = 0; i < numIterations; i++ )
             {
-                this.buffer.clear( );
-
-                FloatBuffer mappedFloats = this.buffer.editFloats( 0, floatsPerIteration );
-
+                FloatBuffer editFloats = this.buffer.editFloats( i * floatsPerIteration, floatsPerIteration );
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
                     float x = 2 + v + 3*i;
                     float y = 2 + v;
-                    mappedFloats.put( x ).put( y );
+                    editFloats.put( x ).put( y );
                 }
 
                 int b = this.buffer.deviceBuffer( gl );
                 int n = verticesPerIteration;
-                this.prog.draw( gl, GL_POINTS, b, 0, n );
+                this.prog.draw( gl, GL_POINTS, b, i * verticesPerIteration, n );
             }
 
             this.prog.end( gl );
