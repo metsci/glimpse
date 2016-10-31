@@ -42,6 +42,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -139,15 +140,12 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         if ( on )
         {
             gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-            // this shouldn't be necessary (it is deprecated in GL3)
-            // however it appears necessary in order for setting gl_PointSize in a vertex shader
-            // to have an effect on certain cards/systems/gpus
-            gl.glEnable( GLES1.GL_POINT_SPRITE );
+            if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
         }
         else
         {
             gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-            gl.glDisable( GLES1.GL_POINT_SPRITE );
+            if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
         }
     }
 

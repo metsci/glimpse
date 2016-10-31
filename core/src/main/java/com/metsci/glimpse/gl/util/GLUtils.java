@@ -43,9 +43,12 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GLUtils
 {
-    public static final int BYTES_PER_FLOAT = 4;
+    // GLES1.GL_POINT_SPRITE shouldn't be necessary (it is deprecated in GL3)
+    // however it appears necessary in order for setting gl_PointSize in a vertex shader
+    // to have an effect on certain cards/systems/gpus
+    public static final boolean ENABLE_POINT_SPRITE = System.getProperty( "com.metsci.glimpse.enablePointSprite" ) != null;
 
-    protected static int default_vao;
+    public static final int BYTES_PER_FLOAT = 4;
 
     public static int defaultVertexAttributeArray( GL gl )
     {

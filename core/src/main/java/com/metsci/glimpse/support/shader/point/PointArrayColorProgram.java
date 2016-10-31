@@ -111,10 +111,7 @@ public class PointArrayColorProgram
         gl.glEnableVertexAttribArray( this.handles.inRgba );
 
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-        // this shouldn't be necessary (it is deprecated in GL3)
-        // however it appears necessary in order for setting gl_PointSize in a vertex shader
-        // to have an effect on certain cards/systems/gpus
-        gl.glEnable( GLES1.GL_POINT_SPRITE );
+        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
     }
 
     public void setFeatherThickness( GL2ES2 gl, float value )
@@ -181,7 +178,7 @@ public class PointArrayColorProgram
         gl.glUseProgram( 0 );
 
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-        gl.glDisable( GLES1.GL_POINT_SPRITE );
+        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
 
         gl.getGL3( ).glBindVertexArray( 0 );
     }

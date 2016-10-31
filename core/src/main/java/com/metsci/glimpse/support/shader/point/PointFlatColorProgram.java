@@ -109,10 +109,7 @@ public class PointFlatColorProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-        // this shouldn't be necessary (it is deprecated in GL3)
-        // however it appears necessary in order for setting gl_PointSize in a vertex shader
-        // to have an effect on certain cards/systems/gpus
-        gl.glEnable( GLES1.GL_POINT_SPRITE );
+        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
     }
 
     public void setRgba( GL2ES2 gl, float[] rgba )
@@ -176,7 +173,7 @@ public class PointFlatColorProgram
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-        gl.glDisable( GLES1.GL_POINT_SPRITE );
+        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
         gl.getGL3( ).glBindVertexArray( 0 );
     }
 
