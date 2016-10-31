@@ -65,8 +65,21 @@ public class GarbledTextTest
         @Override
         public void doPaintTo( GlimpseContext context )
         {
-            // At 7500 the glyph atlas will get repacked, resulting in several
-            // garbled glyphs, mostly prominently in the top line of text
+            // At some point the glyph atlas will get repacked, resulting in
+            // some garbled glyphs. It's helpful to stop incrementing offset
+            // at that point, so that the garbled glyphs stay visible on the
+            // screen.
+            //
+            // However, the atlas's initial size varies from system to system,
+            // so the point at which a repack becomes necessary varies as well.
+            //
+            // One way to tell when the repack happens is to set a breakpoint
+            // in com.jogamp.opengl.util.packrect.Level.compact(), where it
+            // calls Rect.setPosition(). Then comment out the "if" line here,
+            // so that offset will keep increasing until the breakpoint is hit.
+            // Then replace the "7500" here with the offset value at which the
+            // repack occurred.
+            //
             if ( this.offset < 7500 )
             {
                 this.offset = ( this.offset + 1 ) % 15000;
