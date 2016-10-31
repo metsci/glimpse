@@ -1,6 +1,8 @@
 package com.metsci.glimpse.timing;
 
 import static com.metsci.glimpse.support.FrameUtils.*;
+import static com.metsci.glimpse.timing.GLVersionLogger.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.*;
 import static javax.swing.WindowConstants.*;
@@ -26,6 +28,8 @@ public class ImmediateModeTimingTest
 
     public static void main( String[] args )
     {
+        initializeLogging( "timing/logging.properties" );
+
         final EmptyPlot2D plot = new EmptyPlot2D( );
         plot.addPainter( new BackgroundPainter( ) );
         plot.addPainter( new TestPainter( ) );
@@ -36,6 +40,7 @@ public class ImmediateModeTimingTest
             public void run( )
             {
                 NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GLProfile.GL2 );
+                addGLVersionLogger( canvas );
                 canvas.addLayout( plot );
                 canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
@@ -69,7 +74,7 @@ public class ImmediateModeTimingTest
 
             gl.glMatrixMode( GL_PROJECTION );
             gl.glLoadIdentity( );
-            gl.glOrtho( -0.5, bounds.getWidth( ) + 0.5, -0.5, bounds.getHeight( ) + 0.5, -1, 1 );
+            gl.glOrtho( 0, bounds.getWidth( ), 0, bounds.getHeight( ), -1, 1 );
 
             for ( int i = 0; i < numIterations; i++ )
             {
@@ -77,7 +82,9 @@ public class ImmediateModeTimingTest
 
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
-                    gl.glVertex2f( v, v );
+                    float x = 2 + v + 3*i;
+                    float y = 2 + v;
+                    gl.glVertex2f( x, y );
                 }
 
                 gl.glEnd( );

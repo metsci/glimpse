@@ -1,12 +1,15 @@
 package com.metsci.glimpse.timing;
 
+import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.support.FrameUtils.*;
 import static com.metsci.glimpse.timing.GLVersionLogger.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static javax.media.opengl.GL.*;
 import static javax.swing.WindowConstants.*;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
@@ -17,7 +20,7 @@ import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
@@ -28,7 +31,7 @@ import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 
-public class GLStreamingBufferTimingTest
+public class GLMultiTimingTest
 {
 
     public static void main( String[] args )
@@ -53,7 +56,7 @@ public class GLStreamingBufferTimingTest
                 animator.add( canvas.getGLDrawable( ) );
                 animator.start( );
 
-                JFrame frame = newFrame( "GLStreamingBufferTimingTest", canvas, DISPOSE_ON_CLOSE );
+                JFrame frame = newFrame( "GLMultiTimingTest", canvas, DISPOSE_ON_CLOSE );
                 stopOnWindowClosing( frame, animator );
                 disposeOnWindowClosing( frame, canvas );
                 showFrameCentered( frame );
@@ -66,14 +69,19 @@ public class GLStreamingBufferTimingTest
         protected static final int numIterations = 10000;
         protected static final int verticesPerIteration = 4;
         protected static final int floatsPerIteration = 2 * verticesPerIteration;
+        protected static final int bytesPerIteration = SIZEOF_FLOAT * floatsPerIteration;
 
         protected final FlatColorProgram prog;
-        protected final GLStreamingBuffer buffer;
+        protected final GLEditableBuffer buffer;
+        protected final IntBuffer firsts;
+        protected final IntBuffer counts;
 
         public TestPainter( )
         {
             this.prog = new FlatColorProgram( );
-            this.buffer = new GLStreamingBuffer( GL_DYNAMIC_DRAW, 5*numIterations );
+            this.buffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, bytesPerIteration * numIterations );
+            this.firsts = newDirectIntBuffer( numIterations );
+            this.counts = newDirectIntBuffer( numIterations );
         }
 
         @Override
@@ -82,32 +90,35 @@ public class GLStreamingBufferTimingTest
             GL3 gl = context.getGL( ).getGL3( );
             GlimpseBounds bounds = getBounds( context );
 
-            this.prog.begin( gl );
-            this.prog.setColor( gl, 0, 0, 0, 1 );
-            this.prog.setPixelOrtho( gl, bounds );
+            this.buffer.clear( );
+            this.firsts.clear( );
+            this.counts.clear( );
 
             for ( int i = 0; i < numIterations; i++ )
             {
-                FloatBuffer mappedFloats = this.buffer.mapFloats( gl, floatsPerIteration );
+                firsts.put( i * verticesPerIteration );
+                counts.put( verticesPerIteration );
 
+                FloatBuffer editFloats = this.buffer.editFloats( i * floatsPerIteration, floatsPerIteration );
                 for ( int v = 0; v < verticesPerIteration; v++ )
                 {
                     float x = 2 + v + 3*i;
                     float y = 2 + v;
-                    mappedFloats.put( x ).put( y );
+                    editFloats.put( x ).put( y );
                 }
-
-                this.buffer.seal( gl );
-
-                int b = this.buffer.buffer( gl );
-                gl.glBindBuffer( GL_ARRAY_BUFFER, b );
-
-                ProgramHandles h = this.prog.handles( gl );
-                gl.glVertexAttribPointer( h.inXy, 2, GL_FLOAT, false, 0, this.buffer.sealedOffset( ) );
-
-                int n = verticesPerIteration;
-                gl.glDrawArrays( GL_POINTS, 0, n );
             }
+
+            this.prog.begin( gl );
+            this.prog.setColor( gl, 0, 0, 0, 1 );
+            this.prog.setPixelOrtho( gl, bounds );
+
+            int b = this.buffer.deviceBuffer( gl );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, b );
+
+            ProgramHandles h = this.prog.handles( gl );
+            gl.glVertexAttribPointer( h.inXy, 2, GL_FLOAT, false, 0, 0 );
+
+            gl.glMultiDrawArrays( GL_POINTS, flipped( this.firsts ), flipped( this.counts ), numIterations );
 
             this.prog.end( gl );
         }
