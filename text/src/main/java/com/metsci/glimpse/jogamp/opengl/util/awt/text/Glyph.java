@@ -212,10 +212,24 @@ public final class Glyph {
     public Rect location;
 
     /**
-     * Coordinates of this glyph in texture.
+     * Coordinates of this glyph in texture, and all inputs used to compute
+     * the texture coords.
+     *
+     * The inputs must be stored because some of them can change without
+     * notification (e.g. when the glyph atlas gets repacked), and we need
+     * to detect such a change. When one or more inputs change, the coords
+     * get recomputed, and the result and the inputs used get stored.
+     *
+     * Would be nice to find a more elegant way to do this.
      */
     /*@CheckForNull*/
-    TextureCoords coordinates;
+    private TextureCoords recentTextureCoords;
+    private float recentLeft;
+    private float recentBottom;
+    private float recentWidth;
+    private float recentHeight;
+    private int recentTextureWidth;
+    private int recentTextureHeight;
 
     /**
      * Cached bounding box of glyph.
@@ -242,6 +256,8 @@ public final class Glyph {
         this.advance = gv.getGlyphMetrics(0).getAdvance();
         this.glyphVector = gv;
         this.character = (char) id;
+
+        this.recentTextureCoords = null;
     }
 
     /**
@@ -262,6 +278,48 @@ public final class Glyph {
         this.advance = 0;
         this.glyphVector = gv;
         this.character = '\0';
+    }
+
+    public void clearTextureCoordinates( )
+    {
+        this.recentTextureCoords = null;
+    }
+
+    public TextureCoords getTextureCoordinates( int textureWidth, int textureHeight )
+    {
+        // Determine dimensions in pixels
+        float width = this.width;
+        float height = this.height;
+        float left = this.location.x( ) + this.margin.left;
+        float bottom = ( int ) ( this.location.y( ) + this.margin.top + this.height );
+
+        if ( this.recentTextureCoords == null
+          || width != this.recentWidth
+          || height != this.recentHeight
+          || left != this.recentLeft
+          || bottom != this.recentBottom
+          || textureWidth != this.recentTextureWidth
+          || textureHeight != this.recentTextureHeight )
+        {
+            // Convert to normalized texture coordinates
+            float l = left / textureWidth;
+            float b = bottom / textureHeight;
+            float r = ( left + width ) / textureWidth;
+            float t = ( bottom - height ) / textureHeight;
+
+            // Store result
+            this.recentTextureCoords = new TextureCoords( l, b, r, t );
+
+            // Store inputs
+            this.recentLeft = left;
+            this.recentBottom = bottom;
+            this.recentWidth = width;
+            this.recentHeight = height;
+            this.recentTextureWidth = textureWidth;
+            this.recentTextureHeight = textureHeight;
+        }
+
+        return this.recentTextureCoords;
     }
 
     /*@Nonnull*/

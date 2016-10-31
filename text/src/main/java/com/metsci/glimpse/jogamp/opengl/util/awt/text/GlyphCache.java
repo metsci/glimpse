@@ -219,7 +219,7 @@ public final class GlyphCache implements TextureBackingStore.EventListener
             public void visit( /*@Nonnull*/ final Rect rect )
             {
                 final Glyph glyph = ( ( TextData ) rect.getUserData( ) ).glyph;
-                glyph.coordinates = null;
+                glyph.clearTextureCoordinates( );
             }
         } );
     }
@@ -280,30 +280,6 @@ public final class GlyphCache implements TextureBackingStore.EventListener
         {
             bs.mark( 0, 0, bs.getWidth( ), bs.getHeight( ) );
         }
-    }
-
-    /**
-     * Computes the normalized coordinates of a glyph's location.
-     *
-     * @param glyph Glyph being uploaded, assumed not null
-     */
-    private void computeCoordinates( /*@Nonnull*/ final Glyph glyph )
-    {
-
-        // Determine dimensions in pixels
-        final int cacheWidth = getWidth( );
-        final int cacheHeight = getHeight( );
-        final float left = getLeftBorderLocation( glyph );
-        final float bottom = getBottomBorderLocation( glyph );
-
-        // Convert to normalized texture coordinates
-        final float l = left / cacheWidth;
-        final float b = bottom / cacheHeight;
-        final float r = ( left + glyph.width ) / cacheWidth;
-        final float t = ( bottom - glyph.height ) / cacheHeight;
-
-        // Store in glyph
-        glyph.coordinates = new TextureCoords( l, b, r, t );
     }
 
     /**
@@ -433,11 +409,7 @@ public final class GlyphCache implements TextureBackingStore.EventListener
         markGlyphLocationUsed( glyph );
 
         // Find the coordinates, recalculating if necessary
-        if ( glyph.coordinates == null )
-        {
-            computeCoordinates( glyph );
-        }
-        return glyph.coordinates;
+        return glyph.getTextureCoordinates( this.getWidth( ), this.getHeight( ) );
     }
 
     /**
@@ -524,18 +496,6 @@ public final class GlyphCache implements TextureBackingStore.EventListener
     }
 
     /**
-     * Determines the location of a glyph's bottom border.
-     *
-     * @param glyph Glyph to determine bottom border for, assumed not null
-     * @return Location of glyph's bottom border, which may be negative
-     */
-    /*@CheckForSigned*/
-    private int getBottomBorderLocation( /*@Nonnull*/ final Glyph glyph )
-    {
-        return ( int ) ( glyph.location.y( ) + glyph.margin.top + glyph.height );
-    }
-
-    /**
      * Returns the font render context used for text size computations by this {@link GlyphCache}.
      *
      * <p>
@@ -571,18 +531,6 @@ public final class GlyphCache implements TextureBackingStore.EventListener
     private int getLeftBaselineLocation( /*@Nonnull*/ final Glyph glyph )
     {
         return ( int ) ( glyph.location.x( ) + glyph.margin.left - glyph.kerning );
-    }
-
-    /**
-     * Determines the location of a glyph's left border.
-     *
-     * @param glyph Glyph to determine left border for, assumed not null
-     * @return Location of glyph's left border, which may be negative
-     */
-    /*@CheckForSigned*/
-    private int getLeftBorderLocation( /*@Nonnull*/ final Glyph glyph )
-    {
-        return glyph.location.x( ) + glyph.margin.left;
     }
 
     /**
@@ -794,7 +742,6 @@ public final class GlyphCache implements TextureBackingStore.EventListener
 
         // Perform upload steps
         findLocation( glyph );
-        computeCoordinates( glyph );
         drawInBackingStore( glyph );
 
         // Make sure it's marked as used
