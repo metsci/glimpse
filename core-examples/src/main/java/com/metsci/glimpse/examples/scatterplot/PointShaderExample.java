@@ -75,6 +75,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         plot.setBackgroundColor( GlimpseColor.getBlack( ) );
         plot.setAxisColor( GlimpseColor.getWhite( ) );
         plot.setTitleColor( GlimpseColor.getWhite( ) );
+        plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
 
         plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
         plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );

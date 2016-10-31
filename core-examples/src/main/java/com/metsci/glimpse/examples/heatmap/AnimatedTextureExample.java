@@ -76,7 +76,8 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
         plot.setAxisLabelZ( "z axis" );
         plot.setTitle( "Animated Texture" );
         plot.setTitleColor( GlimpseColor.getWhite( ) );
-
+        plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
+        
         plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
         plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );
         plot.getCrosshairPainter( ).setShadeSelectionBox( true );
