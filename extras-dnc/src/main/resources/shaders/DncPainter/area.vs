@@ -45,7 +45,7 @@ vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 
 bool setContains( isampler2D setTexture, float index )
 {
-    ivec2 textureSize = textureSize2D( setTexture, 0 );
+    ivec2 textureSize = textureSize( setTexture, 0 );
     if ( textureSize.x == 0 || textureSize.y == 0 )
     {
         return false;

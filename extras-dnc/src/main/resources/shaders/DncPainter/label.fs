@@ -48,7 +48,7 @@ void main( )
     }
     else
     {
-        vec2 atlasSize_PX = textureSize2D( ATLAS, 0 );
+        vec2 atlasSize_PX = textureSize( ATLAS, 0 );
         vec2 st_PX = floor( gAtlasCoords * atlasSize_PX + 0.5 );
         st = ( st_PX + 0.5 ) / atlasSize_PX;
     }
