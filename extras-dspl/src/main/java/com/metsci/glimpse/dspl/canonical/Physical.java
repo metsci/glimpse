@@ -37,7 +37,7 @@ import com.metsci.glimpse.dspl.util.DsplException;
 
 public class Physical
 {
-    public final static String datasetPath = "src/main/resources/dspl/canonical/metron/physical.xml";
+    public final static String datasetPath = "src/main/resources/dspl/canonical/metron/physical_units.xml";
 
     public static final class PhysicalPropertyConcept
     {
