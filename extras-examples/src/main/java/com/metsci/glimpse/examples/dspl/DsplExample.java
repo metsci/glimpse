@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.dspl;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,9 +43,6 @@ import com.metsci.glimpse.dspl.schema.Info;
 import com.metsci.glimpse.dspl.schema.Slice;
 import com.metsci.glimpse.dspl.schema.SliceConceptRef;
 import com.metsci.glimpse.dspl.schema.Value;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.util.logging.LoggerUtils;
 
 /**
@@ -53,22 +50,16 @@ import com.metsci.glimpse.util.logging.LoggerUtils;
  *
  * DsplExample demonstrates loading data and meta-data from a DSPL dataset.
  *
- * XXX: Needs cleanup.
  * @author ulman
  */
-public class DsplExample implements GlimpseLayoutProvider
+public class DsplExample
 {
     public static final Logger logger = Logger.getLogger( DsplExample.class.getName( ) );
 
     public static void main( String[] args ) throws Exception
     {
         LoggerUtils.setTerseConsoleLogger( Level.INFO );
-        Example.showWithSwing( new DsplExample( ) );
-    }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
         // dspl xml metadata and data files can be packaged into a single zip file or stored as separate files
         final String datasetString = "src/main/resources/dspl/lite/person_table.csv";
         //final String datasetString = "src/main/resources/dspl/lite/person_lite.xml";
@@ -146,21 +137,19 @@ public class DsplExample implements GlimpseLayoutProvider
                 logDataMetric( tableData, concept );
             }
         }
-
-        return new GlimpseLayout( );
     }
 
-    protected void logDataMetric( SliceTableData table, Concept concept )
+    protected static void logDataMetric( SliceTableData table, Concept concept )
     {
         logData( table.getMetricColumn( concept ), concept );
     }
 
-    protected void logDataDimension( SliceTableData table, Concept concept )
+    protected static void logDataDimension( SliceTableData table, Concept concept )
     {
         logData( table.getDimensionColumn( concept ), concept );
     }
 
-    protected void logData( TableColumn column, Concept concept )
+    protected static void logData( TableColumn column, Concept concept )
     {
         switch ( concept.getType( ).getRef( ) )
         {
