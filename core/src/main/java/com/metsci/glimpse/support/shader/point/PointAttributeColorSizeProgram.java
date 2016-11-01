@@ -140,12 +140,12 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         if ( on )
         {
             gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-            if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
+            if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
         }
         else
         {
             gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-            if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
+            if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
         }
     }
 

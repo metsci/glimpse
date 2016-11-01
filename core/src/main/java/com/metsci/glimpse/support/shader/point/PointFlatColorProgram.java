@@ -109,7 +109,7 @@ public class PointFlatColorProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
+        if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
     }
 
     public void setRgba( GL2ES2 gl, float[] rgba )
@@ -173,7 +173,7 @@ public class PointFlatColorProgram
         gl.glDisableVertexAttribArray( this.handles.inXy );
         gl.glUseProgram( 0 );
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
+        if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
         gl.getGL3( ).glBindVertexArray( 0 );
     }
 

@@ -46,7 +46,24 @@ public class GLUtils
     // GLES1.GL_POINT_SPRITE shouldn't be necessary (it is deprecated in GL3)
     // however it appears necessary in order for setting gl_PointSize in a vertex shader
     // to have an effect on certain cards/systems/gpus
-    public static final boolean ENABLE_POINT_SPRITE = System.getProperty( "glimpse.enablePointSprite" ) != null;
+    public static final boolean DISABLE_POINT_SPRITE = getBooleanProperty( "glimpse.disablePointSprite", false );
+
+    // - unsetValue specifies the default value if the property is not set
+    // - setting the property without specifying a value ("0", "1", "true", "false") sets
+    //   the property to the negation of the unset value
+    // - an invalid property value falls back on the unsetValue
+    public static boolean getBooleanProperty( String name, boolean unsetValue )
+    {
+        String prop = System.getProperty( name );
+        if ( prop == null )
+            return !unsetValue;
+        else if ( prop.equals( "1" ) || prop.equalsIgnoreCase( "true" ) )
+            return true;
+        else if ( prop.equals( "0" ) || prop.equalsIgnoreCase( "false" ) )
+            return false;
+        else
+            return unsetValue;
+    }
 
     public static final int BYTES_PER_FLOAT = 4;
 

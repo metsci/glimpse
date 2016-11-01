@@ -111,7 +111,7 @@ public class PointArrayColorProgram
         gl.glEnableVertexAttribArray( this.handles.inRgba );
 
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
+        if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
     }
 
     public void setFeatherThickness( GL2ES2 gl, float value )
@@ -178,7 +178,7 @@ public class PointArrayColorProgram
         gl.glUseProgram( 0 );
 
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-        if ( GLUtils.ENABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
+        if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
 
         gl.getGL3( ).glBindVertexArray( 0 );
     }
