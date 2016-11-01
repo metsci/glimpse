@@ -26,25 +26,41 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static jogamp.opengl.glu.error.Error.gluErrorString;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static jogamp.opengl.glu.error.Error.*;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 
 public class GLErrorUtils
 {
-    private GLErrorUtils( )
+    public static void logGLShaderInfoLog( Logger logger, GL2ES2 gl, int shaderObject, String prefix )
     {
-    };
+        String log = getShaderInfoLog( gl, shaderObject );
 
-    public static boolean logGLError( Logger logger, Level level, GL gl, String prefix )
+        if ( log != null && !log.isEmpty( ) )
+        {
+            logWarning( logger, "%s: %s", prefix, log );
+        }
+    }
+
+    public static void logGLProgramInfoLog( Logger logger, GL2ES2 gl, int programObject, String prefix )
+    {
+        String log = getProgramInfoLog( gl, programObject );
+
+        if ( log != null && !log.isEmpty( ) )
+        {
+            logWarning( logger, "%s: %s", prefix, log );
+        }
+    }
+
+    public static boolean logGLError( Logger logger, GL gl, String prefix )
     {
         int error = gl.glGetError( );
-        if ( error != GL2.GL_NO_ERROR )
+        if ( error != GL.GL_NO_ERROR )
         {
             StackTraceElement[] traceArray = Thread.currentThread( ).getStackTrace( );
             StringBuilder traceString = new StringBuilder( );

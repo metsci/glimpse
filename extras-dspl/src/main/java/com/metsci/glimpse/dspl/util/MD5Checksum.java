@@ -1,6 +1,6 @@
 /*
  * Adapted from: http://www.rgagnon.com/javadetails/java-0416.html
- * 
+ *
  * According to the site FAQ (http://www.rgagnon.com/varia/faq-e.htm#license)
  * while the site is licensed under CC (http://creativecommons.org/licenses/by-nc-sa/2.0/)
  * the individual how-to articles have no restriction on use.

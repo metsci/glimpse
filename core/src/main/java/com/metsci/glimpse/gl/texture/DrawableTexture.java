@@ -28,8 +28,7 @@ package com.metsci.glimpse.gl.texture;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL2;
-
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 
 /**
@@ -41,9 +40,13 @@ import com.metsci.glimpse.painter.texture.TextureUnit;
 public interface DrawableTexture extends Texture
 {
     /**
-     * @param gl OpenGL context for drawing
+     * Draw the texture using the provided program.
+     *
+     * @param context GlimpseContext for drawing
+     * @param program
      * @param texUnit Texture unit to use while drawing
      * @param multiTextureList Other textures to activate (and their texture units) for multitexturing purposes
+     * @return true if the texture is ready to draw
      */
-    public abstract void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList );
+    public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit, Collection<TextureUnit<Texture>> multiTextureList );
 }

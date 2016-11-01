@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.swt;
 
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 
 /**
  * Demonstrates how any example class which implements GlimpseLayoutProvider

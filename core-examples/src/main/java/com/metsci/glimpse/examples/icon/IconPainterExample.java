@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.icon;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -51,8 +51,8 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 
 /**
  * Demonstrates how to use IconPainter.
- * 
- * IconPainter can efficiently render large numbers of icons in fixed 
+ *
+ * IconPainter can efficiently render large numbers of icons in fixed
  * locations in data space by leveraging a TextureAtlas to store the icon images.
  *
  * Picking support is also provided, allowing the IconPainter to report on
@@ -153,8 +153,8 @@ public class IconPainterExample implements GlimpseLayoutProvider
 
         // add painters to the layout
         layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getGray( ) ) );
-        layout.addPainter( new NumericXYAxisPainter( ) );
         layout.addPainter( iconPainter );
+        layout.addPainter( new NumericXYAxisPainter( ) );
         layout.addPainter( new FpsPainter( ) );
 
         return layout;

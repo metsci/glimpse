@@ -70,6 +70,7 @@ import javax.swing.JToolBar;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 
+@SuppressWarnings("serial")
 public class TileImpl extends Tile
 {
 
@@ -283,6 +284,7 @@ public class TileImpl extends Tile
 
         this.topBar = new JPanel( )
         {
+            @Override
             protected void paintComponent( Graphics g0 )
             {
                 Graphics2D g = ( Graphics2D ) g0;
@@ -322,6 +324,7 @@ public class TileImpl extends Tile
 
         topBar.setLayout( new LayoutManager( )
         {
+            @Override
             public void layoutContainer( Container parent )
             {
 
@@ -413,14 +416,17 @@ public class TileImpl extends Tile
 
             }
 
+            @Override
             public void addLayoutComponent( String name, Component comp )
             {
             }
 
+            @Override
             public void removeLayoutComponent( Component comp )
             {
             }
 
+            @Override
             public Dimension preferredLayoutSize( Container parent )
             {
                 int wTile = getWidth( );
@@ -428,6 +434,7 @@ public class TileImpl extends Tile
                 return new Dimension( wTile, hBars );
             }
 
+            @Override
             public Dimension minimumLayoutSize( Container parent )
             {
                 int wTab = 0;
@@ -489,6 +496,7 @@ public class TileImpl extends Tile
         CustomTab tab = new CustomTab( view );
         tab.addMouseListener( new MouseAdapter( )
         {
+            @Override
             public void mousePressed( MouseEvent ev )
             {
                 selectViewById( view.viewId );
@@ -504,6 +512,7 @@ public class TileImpl extends Tile
         overflowMenuItem.setToolTipText( view.tooltip );
         overflowMenuItem.addActionListener( new ActionListener( )
         {
+            @Override
             public void actionPerformed( ActionEvent ev )
             {
                 selectViewById( view.viewId );

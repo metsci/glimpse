@@ -35,12 +35,12 @@ import java.util.zip.ZipInputStream;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.UpdateMode;
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
+import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.treemap.NestedTreeMap;
 import com.metsci.glimpse.painter.treemap.SimpleTreeMapPainter;
 import com.metsci.glimpse.painter.treemap.SquarifiedLayout;
@@ -111,6 +111,8 @@ public class TreeMapExample implements GlimpseLayoutProvider
         plot.setMaxY( plot.getAxisY( ).getAbsoluteMax( ) );
 
         painter.setLayout( new SquarifiedLayout( ) );
+
+        plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
 
         return plot;
     }
@@ -190,8 +192,9 @@ public class TreeMapExample implements GlimpseLayoutProvider
         }
 
         @Override
-        public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+        public void doPaintTo( GlimpseContext context )
         {
+            Axis2D axis = getAxis2D( context );
             double x = axis.getAxisX( ).getSelectionCenter( );
             double y = axis.getAxisY( ).getSelectionCenter( );
 
@@ -199,7 +202,7 @@ public class TreeMapExample implements GlimpseLayoutProvider
 
             if ( selectedLeafId != null )
             {
-                super.paintTo( context, bounds, axis );
+                super.doPaintTo( context );
             }
         }
 

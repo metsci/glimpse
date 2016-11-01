@@ -47,7 +47,7 @@ import com.metsci.glimpse.plot.timeline.group.GroupUtilities;
  * do not mutate DragManager's state should be placed here. This simplifies the DragManager
  * code so that it only contains high level drag control methods (what to do when the drag
  * starts, ends, the user moves the mouse, etc...).
- * 
+ *
  * @author ulman
  */
 public class DragUtils

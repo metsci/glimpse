@@ -44,10 +44,12 @@ import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.time.AbsoluteTimeAxisLabelHandler;
+import com.metsci.glimpse.axis.painter.label.time.TimeAxisLabelHandler;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
@@ -193,7 +195,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.plotMouseListeners = new CopyOnWriteArrayList<PlotMouseListener>( );
 
         this.setBorderSize( 0 );
-        this.timeTickHandler = new TimeAxisLabelHandler( TimeZone.getTimeZone( "GMT-0:00" ), epoch );
+        this.timeTickHandler = new AbsoluteTimeAxisLabelHandler( TimeZone.getTimeZone( "GMT-0:00" ), epoch );
 
         this.initializeTimeAxis( );
         this.defaultTimelineInfo = this.createTimeline( );
@@ -203,6 +205,15 @@ public class StackedTimePlot2D extends StackedPlot2D
     public void setTimeAxisLabelHandler( TimeAxisLabelHandler handler )
     {
         this.timeTickHandler = handler;
+        this.timeTickHandler.setEpoch( this.epoch );
+        
+        for ( PlotInfo info : getAllPlots( ) )
+        {
+            if ( info instanceof TimelineInfo )
+            {
+                ( (TimelineInfo) info ).getAxisPainter( ).setLabelHandler( handler );
+            }
+        }
     }
 
     public TimeAxisLabelHandler getTimeAxisLabelHandler( )
@@ -284,7 +295,7 @@ public class StackedTimePlot2D extends StackedPlot2D
      * all the underlying plots and timeline. By default, it passes through mouse
      * events to the underlying GlimpseLayouts and is used to display the blue
      * time selection interval box.
-     * 
+     *
      * However, it can be used to perform arbitrary drawing on the timeline which
      * must stretch across multiple plots.
      */
@@ -309,9 +320,9 @@ public class StackedTimePlot2D extends StackedPlot2D
     }
 
     /**
-     * <p>Returns only the TimePlotInfo handles for plotting areas created with 
+     * <p>Returns only the TimePlotInfo handles for plotting areas created with
      * {@link #createTimePlot(String)}.</p>
-     * 
+     *
      * Note, this may not be all the plotting areas for this StackedPlot2D if some
      * vanilla plots were created using {@link #createPlot(String)}.
      */
@@ -337,7 +348,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     /**
      * Returns the timeline handle for the timeline identified via its unique string identifier.
-     * 
+     *
      * @param id a timeline unique identifier
      * @return the TimelineInfo handle
      */
@@ -365,7 +376,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     /**
      * Returns the time plot handle for the plot identified via its unique string identifier.
-     * 
+     *
      * @param id a plot unique identifier
      * @return the TimePlotInfo handle
      */
@@ -393,7 +404,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
     /**
      * Returns the event plot handle for the plot identified via its unique string identifier.
-     * 
+     *
      * @param id a plot unique identifier
      * @return the EventPlotInfo handle
      */
@@ -465,7 +476,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not locking of the selected region is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow locking of the selected region
      * @see AxisMouseListener#setAllowSelectionLock(boolean)
      */
@@ -492,7 +503,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not zooming of the Y axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow zooming of the Y axis
      * @see AxisMouseListener#setAllowZoomY(boolean)
      */
@@ -525,7 +536,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not zooming of the X axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow zooming of the X axis
      * @see AxisMouseListener#setAllowZoomX(boolean)
      */
@@ -558,7 +569,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not panning of the Y axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow panning of the Y axis
      * @see AxisMouseListener#setAllowPanY(boolean)
      */
@@ -591,7 +602,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     /**
      * Sets whether or not panning of the X axis is allowed for all
      * timeline and plot axes. This setting will also affect newly created plots.
-     * 
+     *
      * @param lock whether to allow panning of the X axis
      * @see AxisMouseListener#setAllowPanX(boolean)
      */
@@ -1038,7 +1049,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         return new DataAxisMouseListener1D( this, plotInfo );
     }
 
-    protected TimeAxisMouseListener1D createTimeAxisListener( )
+    protected TaggedAxisMouseListener1D createTimeAxisListener( )
     {
         return new TimeAxisMouseListener1D( this );
     }

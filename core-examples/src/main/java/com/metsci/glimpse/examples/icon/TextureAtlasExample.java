@@ -31,17 +31,18 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageDrawer;
@@ -78,7 +79,7 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
         return layout;
     }
 
-    public class SimpleIconPainter extends GlimpseDataPainter2D
+    public class SimpleIconPainter extends GlimpsePainterBase
     {
         protected TextureAtlas atlas;
 
@@ -88,20 +89,31 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
         }
 
         @Override
-        public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+        public void doPaintTo( GlimpseContext context )
         {
-            this.atlas.beginRendering( );
+            Axis2D axis = requireAxis2D( context );
+            GL gl = context.getGL( );
+
+            GLUtils.enableStandardBlending( gl );
+            this.atlas.beginRenderingAxisOrtho( context, axis );
             try
             {
-                this.atlas.drawImage( gl, "image1", axis, 0, 0, 0.5f, 1.0f );
-                this.atlas.drawImage( gl, "glimpse", axis, 0, 0, 0.5f );
-                this.atlas.drawImage( gl, "glimpse", axis, 5, 4, 0.5f );
+                this.atlas.drawImage( context, "image1", axis, 0, 0, 0.5, 1.0 );
+                this.atlas.drawImage( context, "glimpse", axis, 0, 0, 0.5, 0.5 );
+                this.atlas.drawImage( context, "glimpse", axis, 5, 4, 0.5, 0.5 );
             }
             finally
             {
-                this.atlas.endRendering( );
+                this.atlas.endRendering( context );
+                GLUtils.disableBlending( gl );
             }
 
+        }
+
+        @Override
+        protected void doDispose( GlimpseContext context )
+        {
+            this.atlas.dispose( );
         }
     }
 

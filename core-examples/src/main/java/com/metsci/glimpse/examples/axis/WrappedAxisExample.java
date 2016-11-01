@@ -27,23 +27,26 @@
 package com.metsci.glimpse.examples.axis;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.group.WrappedPainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
 
 public class WrappedAxisExample implements GlimpseLayoutProvider
 {
@@ -92,6 +95,8 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
 
         ColorAxisPlot2D plot = example.getLayout( );
 
+        plot.setTitle( "Wrapped Axis Example" );
+
         // don't let the user zoom out too far (especially important with wrapped axes
         // since this will cause the scene to be painted many times)
         plot.getAxis( ).getAxisX( ).setMaxSpan( 3000 );
@@ -106,22 +111,54 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
 
         // add a painter that paints things in pixel-space (round dots should stay round
         // regardless of zooming, wrapping, and canvas-resizing)
-        wrappedPainter.addPainter( new GlimpseDataPainter2D( )
+        wrappedPainter.addPainter( new GlimpsePainterBase( )
         {
-            public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
-            {
-                gl.glColor4fv( GlimpseColor.getWhite( ), 0 );
-                gl.glPointSize( 20f );
+            protected PointFlatColorProgram prog;
+            protected GLEditableBuffer buffer;
 
-                gl.glBegin( GL.GL_POINTS );
+            {
+                prog = new PointFlatColorProgram( );
+                buffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+
                 for ( int x = 0; x < 5; x++ )
                 {
                     for ( int y = 0; y < 5; y++ )
                     {
-                        gl.glVertex2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
+                        buffer.grow2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
                     }
                 }
-                gl.glEnd( );
+            }
+
+            @Override
+            public void doPaintTo( GlimpseContext context )
+            {
+                GL3 gl = context.getGL( ).getGL3( );
+                Axis2D axis = requireAxis2D( context );
+
+                GLUtils.enableStandardBlending( gl );
+                prog.begin( gl );
+                try
+                {
+                    prog.setAxisOrtho( gl, axis );
+                    prog.setRgba( gl, GlimpseColor.getWhite( ) );
+                    prog.setPointSize( gl, 20.0f );
+
+                    prog.draw( gl, buffer );
+                }
+                finally
+                {
+                    prog.end( gl );
+                    GLUtils.disableBlending( gl );
+                }
+            }
+
+            @Override
+            protected void doDispose( GlimpseContext context )
+            {
+                GL3 gl = context.getGL( ).getGL3( );
+
+                prog.dispose( gl );
+                buffer.dispose( gl );
             }
         } );
 

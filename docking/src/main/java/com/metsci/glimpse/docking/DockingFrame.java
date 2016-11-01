@@ -34,6 +34,7 @@ import java.awt.event.WindowStateListener;
 
 import javax.swing.JFrame;
 
+@SuppressWarnings("serial")
 public class DockingFrame extends JFrame
 {
 
@@ -50,11 +51,14 @@ public class DockingFrame extends JFrame
         this.normalBounds = getBounds( );
         addWindowStateListener( new WindowStateListener( )
         {
+            @Override
             public void windowStateChanged( WindowEvent ev ) { updateNormalBounds( ); }
         } );
         addComponentListener( new ComponentAdapter( )
         {
+            @Override
             public void componentMoved( ComponentEvent ev ) { updateNormalBounds( ); }
+            @Override
             public void componentResized( ComponentEvent ev ) { updateNormalBounds( ); }
         } );
     }

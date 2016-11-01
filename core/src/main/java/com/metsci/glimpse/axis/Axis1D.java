@@ -210,12 +210,12 @@ public class Axis1D
     {
         this.children.add( child );
     }
-    
+
     public Axis1D getParent( )
     {
         return this.parentAxis;
     }
-    
+
     public Set<Axis1D> getChildren( )
     {
         return Collections.unmodifiableSet( this.children );
@@ -1104,7 +1104,7 @@ public class Axis1D
     {
         broadcastAxisUpdateUp0( source, visited );
     }
-    
+
     // walk up the chain of parents until we reach the top level
     protected void broadcastAxisUpdateUp0( Axis1D source, Set<Axis1D> visited )
     {

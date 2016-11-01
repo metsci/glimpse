@@ -69,7 +69,7 @@ import com.metsci.glimpse.plot.timeline.listener.PlotMouseListener.PlotLocation;
  * <p>Attaches to an existing {@link StackedTimePlot2D} to allow animated rearrangement
  * of the {@link PlotInfo} by the user. The user can click and drag {@link GroupInfo}
  * headers or {@link TimePlotInfo} labels to rearrange them.</p>
- * 
+ *
  * @author ulman
  */
 public class DragManager

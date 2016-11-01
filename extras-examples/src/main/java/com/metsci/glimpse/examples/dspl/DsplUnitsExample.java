@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.dspl;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -72,7 +72,7 @@ public class DsplUnitsExample
         parser.setCacheMode( false );
 
         // load the example dataset
-        DataSet dataset = parser.loadDataset( Physical.datasetPath );
+        DataSet dataset = parser.loadDataset( "http://www.metsci.com/dspl/physical_units", Physical.datasetPath );
 
         Info info = dataset.getInfo( );
 

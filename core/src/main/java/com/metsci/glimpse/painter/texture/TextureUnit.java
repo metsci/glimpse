@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import javax.media.opengl.GL2;
-
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.Texture;
 
 public class TextureUnit<D extends Texture>
@@ -46,9 +45,9 @@ public class TextureUnit<D extends Texture>
         this.texture = texture;
     }
 
-    public boolean prepare( GL2 gl )
+    public boolean prepare( GlimpseContext context )
     {
-        return texture.prepare( gl, textureUnit );
+        return texture.prepare( context, textureUnit );
     }
 
     public int getTextureUnit( )

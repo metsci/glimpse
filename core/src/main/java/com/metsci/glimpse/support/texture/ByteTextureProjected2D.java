@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -36,8 +36,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 /**
- * A texture class which stores 8 bit integer values (uncapped). Must be used
- * with an OpenGL shader to translate values to colors.
+ * A texture class which stores 8 bit integer values (uncapped).
  *
  * @author ulman
  *
@@ -69,7 +68,7 @@ public class ByteTextureProjected2D extends TextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {
@@ -78,7 +77,7 @@ public class ByteTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_R8UI, texSizesX[i], texSizesY[i], 0, GL2.GL_RED_INTEGER, GL2.GL_UNSIGNED_BYTE, positionedBuffer );
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_R8UI, texSizesX[i], texSizesY[i], 0, GL2.GL_RED_INTEGER, GL2.GL_UNSIGNED_BYTE, positionedBuffer );
         }
 
         gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );

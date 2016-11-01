@@ -1,0 +1,9 @@
+flat_color
+
+Applies a flat color to filled triangles.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.FlatColorProgram
+ 
+Usage Examples:
+ * com.metsci.glimpse.axis.tagged.painter.TaggedColorXAxisPainter

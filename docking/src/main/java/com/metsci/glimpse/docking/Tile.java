@@ -31,6 +31,7 @@ import java.awt.event.MouseAdapter;
 
 import javax.swing.JComponent;
 
+@SuppressWarnings("serial")
 public abstract class Tile extends JComponent
 {
 
@@ -45,14 +46,17 @@ public abstract class Tile extends JComponent
 
     public static class TileAdapter implements TileListener
     {
+        @Override
         public void addedView( View view )
         {
         }
 
+        @Override
         public void removedView( View view )
         {
         }
 
+        @Override
         public void selectedView( View view )
         {
         }
@@ -71,7 +75,7 @@ public abstract class Tile extends JComponent
     public abstract void addView( final View view, int viewNum );
 
     public abstract void updateView( View view );
-    
+
     public abstract void removeView( View view );
 
     public abstract boolean hasView( View view );

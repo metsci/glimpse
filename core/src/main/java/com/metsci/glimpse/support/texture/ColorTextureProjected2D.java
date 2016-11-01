@@ -36,13 +36,11 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 /**
  * A texture class which stores 4 channel RGBA colors. Each color channel
  * contains 8 bit fixed point values (capped from 0 to 1).
- *
- * Does not require a shader to display color values.
  *
  * @author ulman
  *
@@ -77,9 +75,9 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
     @Override
     protected Buffer prepare_setPixelStore( GL gl, int i )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, dataSizeX );
+        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL3.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
+        gl.glPixelStorei( GL3.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
         //gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
@@ -88,7 +86,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
         for ( int i = 0; i < numTextures; i++ )
         {
@@ -97,12 +95,12 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, texSizesX[i], texSizesY[i], 0, GL2.GL_RGBA, GL2.GL_FLOAT, positionBuffer );
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL3.GL_RGBA, texSizesX[i], texSizesY[i], 0, GL3.GL_RGBA, GL3.GL_FLOAT, positionBuffer );
         }
 
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, 0 );
+        gl.glPixelStorei( GL3.GL_UNPACK_SKIP_PIXELS, 0 );
+        gl.glPixelStorei( GL3.GL_UNPACK_SKIP_ROWS, 0 );
+        gl.glPixelStorei( GL3.GL_UNPACK_ROW_LENGTH, 0 );
     }
 
     public void setData( InputStream in ) throws IOException

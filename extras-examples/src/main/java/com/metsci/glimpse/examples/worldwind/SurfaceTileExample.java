@@ -27,6 +27,8 @@
 package com.metsci.glimpse.examples.worldwind;
 
 import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -35,7 +37,7 @@ import javax.swing.JPanel;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
-import com.metsci.glimpse.examples.basic.HeatMapExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.worldwind.tile.GlimpseStaticSurfaceTile;
@@ -50,7 +52,7 @@ import gov.nasa.worldwindx.examples.ApplicationTemplate;
 /**
  * Demonstrates rendering the contents of a Glimpse plot onto
  * the surface of a WorldWind globe.
- * 
+ *
  * @author ulman
  */
 public class SurfaceTileExample
@@ -95,7 +97,8 @@ public class SurfaceTileExample
         glimpseFrame.add( glimpseCanvas );
 
         // attach a repaint manager which repaints the canvas in a loop
-        new FPSAnimator( glimpseCanvas.getGLDrawable( ), 120 ).start( );
+        final FPSAnimator animator = new FPSAnimator( glimpseCanvas.getGLDrawable( ), 120 );
+        animator.start( );
 
         glimpseFrame.pack( );
         glimpseFrame.setSize( 800, 800 );
@@ -123,5 +126,22 @@ public class SurfaceTileExample
                 }
             }
         } ).start( );
+
+        WindowAdapter closeListener = new WindowAdapter( )
+        {
+            @Override
+            public void windowClosing( WindowEvent e )
+            {
+                // stop the animation thread before exiting
+                animator.stop( );
+                // dispose of GlimpseLayouts and GlimpsePainters attached to GlimpseCanvas
+                glimpseCanvas.disposeAttached( );
+                // destroy heavyweight canvas and GLContext
+                glimpseCanvas.destroy( );
+            }
+        };
+
+        worldwindFrame.addWindowListener( closeListener );
+        glimpseFrame.addWindowListener( closeListener );
     }
 }

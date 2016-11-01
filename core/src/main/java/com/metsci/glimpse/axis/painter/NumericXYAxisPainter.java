@@ -26,27 +26,30 @@
  */
 package com.metsci.glimpse.axis.painter;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.painter.label.GridAxisExponentLabelHandler;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * A floating axis plot with axes, tick marks, and labels drawn along
@@ -57,7 +60,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  * @author ulman
  * @see com.metsci.glimpse.examples.basic.FunctionPlotExample
  */
-public class NumericXYAxisPainter extends GlimpsePainter2D
+public class NumericXYAxisPainter extends GlimpsePainterBase
 {
     protected TextRenderer textRenderer;
     protected Font font;
@@ -93,6 +96,11 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     protected boolean tickColorSet = false;
     protected boolean labelColorSet = false;
 
+    protected LinePath pathTick;
+    protected LinePath pathLeader;
+    protected LineStyle style;
+    protected LineProgram prog;
+
     public NumericXYAxisPainter( AxisLabelHandler ticksX, AxisLabelHandler ticksY )
     {
         this.ticksX = ticksX;
@@ -102,11 +110,24 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
         this.textColor = GlimpseColor.getBlack( );
         this.lineColor = GlimpseColor.getBlack( );
+
+        this.initLineShader( );
     }
 
     public NumericXYAxisPainter( )
     {
         this( new GridAxisExponentLabelHandler( ), new GridAxisExponentLabelHandler( ) );
+    }
+
+    protected void initLineShader( )
+    {
+        this.pathTick = new LinePath( );
+        this.pathLeader = new LinePath( );
+
+        this.style = new LineStyle( );
+        this.style.stippleEnable = false;
+
+        this.prog = new LineProgram( );
     }
 
     public void setLabelHandlerX( AxisLabelHandler ticksX )
@@ -151,10 +172,10 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
 
     public NumericXYAxisPainter setLineColor( float r, float g, float b, float a )
     {
-        lineColor[0] = r;
-        lineColor[1] = g;
-        lineColor[2] = b;
-        lineColor[3] = a;
+        this.lineColor[0] = r;
+        this.lineColor[1] = g;
+        this.lineColor[2] = b;
+        this.lineColor[3] = a;
 
         this.tickColorSet = true;
 
@@ -223,258 +244,278 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( this.newFont != null )
-        {
-            if ( this.textRenderer != null ) this.textRenderer.dispose( );
-            this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
-            this.newFont = null;
-        }
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
-        if ( this.textRenderer == null ) return;
-
-        GL2 gl = context.getGL( ).getGL2( );
-
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
-
-        Axis1D axisX = axis.getAxisX( );
-        Axis1D axisY = axis.getAxisY( );
-
-        double[] positionsX = ticksX.getTickPositions( axis.getAxisX( ) );
-        double[] positionsY = ticksY.getTickPositions( axis.getAxisY( ) );
-
-        AxisUnitConverter convX = ticksX.getAxisUnitConverter( );
-        convX = convX == null ? AxisUnitConverters.identity : convX;
-
-        AxisUnitConverter convY = ticksY.getAxisUnitConverter( );
-        convY = convY == null ? AxisUnitConverters.identity : convY;
-
-        int originY = axisY.valueToScreenPixel( 0.0 );
-        if ( originY < 0 || lockBottom ) originY = 0;
-        if ( originY > height || lockTop ) originY = height;
-
-        int originX = axisX.valueToScreenPixel( 0.0 );
-        if ( originX < 0 || lockLeft ) originX = 0;
-        if ( originX > width || lockRight ) originX = width;
-
-        boolean rightCornerX = false;
-        boolean leftCornerX = false;
-        boolean topCornerY = false;
-        boolean bottomCornerY = false;
-
-        double doriginX;
-        if ( lockLeft )
-        {
-            doriginX = 0;
-            leftCornerX = true;
-        }
-        else if ( lockRight )
-        {
-            doriginX = 1.0;
-            rightCornerX = true;
-        }
-        else if ( 0.0 <= axisX.getMin( ) )
-        {
-            doriginX = 0;
-            leftCornerX = true;
-        }
-        else if ( 0.0 > axisX.getMax( ) )
-        {
-            doriginX = 1.0;
-            rightCornerX = true;
-        }
-        else
-        {
-            doriginX = axisX.valueToScreenPixelUnits( 0.0 ) / ( double ) width;
-        }
-
-        double doriginY;
-        if ( lockBottom )
-        {
-            doriginY = 0;
-            topCornerY = true;
-        }
-        else if ( lockTop )
-        {
-            doriginY = 1.0;
-            bottomCornerY = true;
-        }
-        else if ( 0.0 <= axisY.getMin( ) )
-        {
-            doriginY = 0;
-            topCornerY = true;
-        }
-        else if ( 0.0 > axisY.getMax( ) )
-        {
-            doriginY = 1.0;
-            bottomCornerY = true;
-        }
-        else
-        {
-            doriginY = axisY.valueToScreenPixelUnits( 0.0 ) / ( double ) height;
-        }
-
-        boolean labelRight = width - originX > rightBuffer;
-        boolean labelTop = height - originY > topBuffer;
-
-        boolean[] paintLabelsX = new boolean[positionsX.length];
-        boolean[] paintLabelsY = new boolean[positionsY.length];
-
-        GlimpseColor.setColor( textRenderer, textColor );
-        textRenderer.beginRendering( width, height );
+        GLUtils.enableStandardBlending( gl );
         try
         {
-            if ( showHorizontal )
+            if ( this.newFont != null )
             {
-                String[] labelsX = ticksX.getTickLabels( axis.getAxisX( ), positionsX );
-
-                // the y offset of the x axis labels is different depending on whether
-                // the labels are being drawn above or below the axis
-                int offsetY;
-                if ( labelTop )
-                {
-                    offsetY = tickWidth + labelBuffer;
-                }
-                else
-                {
-                    Rectangle2D textBounds = textRenderer.getBounds( labelsX[0] );
-                    offsetY = ( int ) - ( textBounds.getHeight( ) + tickWidth + labelBuffer );
-                }
-
-                for ( int i = 0; i < positionsX.length; i++ )
-                {
-                    String label = labelsX[i];
-                    double valueX = convX.fromAxisUnits( positionsX[i] );
-
-                    if ( valueX == 0.0 && !showZero ) continue;
-
-                    int posX = axisX.valueToScreenPixel( valueX );
-
-                    paintLabelsX[i] = shouldPaintLabel( rightCornerX, leftCornerX, posX, width, rightBuffer );
-                    if ( paintLabelsX[i] ) textRenderer.draw( label, posX + labelBuffer, originY + offsetY );
-                }
+                if ( this.textRenderer != null ) this.textRenderer.dispose( );
+                this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
+                this.newFont = null;
             }
 
-            if ( showVertical )
+            if ( this.textRenderer == null ) return;
+
+            int width = bounds.getWidth( );
+            int height = bounds.getHeight( );
+
+            Axis1D axisX = axis.getAxisX( );
+            Axis1D axisY = axis.getAxisY( );
+
+            double[] positionsX = ticksX.getTickPositions( axis.getAxisX( ) );
+            double[] positionsY = ticksY.getTickPositions( axis.getAxisY( ) );
+
+            AxisUnitConverter convX = ticksX.getAxisUnitConverter( );
+            convX = convX == null ? AxisUnitConverters.identity : convX;
+
+            AxisUnitConverter convY = ticksY.getAxisUnitConverter( );
+            convY = convY == null ? AxisUnitConverters.identity : convY;
+
+            int originY = axisY.valueToScreenPixel( 0.0 );
+            if ( originY < 0 || lockBottom ) originY = 0;
+            if ( originY > height || lockTop ) originY = height;
+
+            int originX = axisX.valueToScreenPixel( 0.0 );
+            if ( originX < 0 || lockLeft ) originX = 0;
+            if ( originX > width || lockRight ) originX = width;
+
+            boolean rightCornerX = false;
+            boolean leftCornerX = false;
+            boolean topCornerY = false;
+            boolean bottomCornerY = false;
+
+            double doriginX;
+            if ( lockLeft )
             {
-                String[] labelsY = ticksY.getTickLabels( axis.getAxisY( ), positionsY );
+                doriginX = 0;
+                leftCornerX = true;
+            }
+            else if ( lockRight )
+            {
+                doriginX = 1.0;
+                rightCornerX = true;
+            }
+            else if ( 0.0 <= axisX.getMin( ) )
+            {
+                doriginX = 0;
+                leftCornerX = true;
+            }
+            else if ( 0.0 > axisX.getMax( ) )
+            {
+                doriginX = 1.0;
+                rightCornerX = true;
+            }
+            else
+            {
+                doriginX = axisX.valueToScreenPixelUnits( 0.0 ) / width;
+            }
 
-                for ( int i = 0; i < positionsY.length; i++ )
+            double doriginY;
+            if ( lockBottom )
+            {
+                doriginY = 0;
+                topCornerY = true;
+            }
+            else if ( lockTop )
+            {
+                doriginY = 1.0;
+                bottomCornerY = true;
+            }
+            else if ( 0.0 <= axisY.getMin( ) )
+            {
+                doriginY = 0;
+                topCornerY = true;
+            }
+            else if ( 0.0 > axisY.getMax( ) )
+            {
+                doriginY = 1.0;
+                bottomCornerY = true;
+            }
+            else
+            {
+                doriginY = axisY.valueToScreenPixelUnits( 0.0 ) / height;
+            }
+
+            boolean labelRight = width - originX > rightBuffer;
+            boolean labelTop = height - originY > topBuffer;
+
+            boolean[] paintLabelsX = new boolean[positionsX.length];
+            boolean[] paintLabelsY = new boolean[positionsY.length];
+
+            this.textRenderer.beginRendering( width, height );
+            try
+            {
+                GlimpseColor.setColor( textRenderer, textColor );
+
+                if ( showHorizontal )
                 {
-                    String label = labelsY[i];
-                    Rectangle2D textBounds = textRenderer.getBounds( label );
+                    String[] labelsX = ticksX.getTickLabels( axis.getAxisX( ), positionsX );
 
-                    double valueY = convY.fromAxisUnits( positionsY[i] );
-
-                    if ( valueY == 0.0 && !showZero ) continue;
-
-                    // the x offset of the y axis labels is different depending on whether
-                    // the labels are being drawn to the right or left of the axis
-                    int offsetX;
-                    if ( labelRight )
+                    // the y offset of the x axis labels is different depending on whether
+                    // the labels are being drawn above or below the axis
+                    int offsetY;
+                    if ( labelTop )
                     {
-                        offsetX = tickWidth + labelBuffer;
+                        offsetY = tickWidth + labelBuffer;
                     }
                     else
                     {
-                        offsetX = ( int ) - ( textBounds.getWidth( ) + tickWidth + labelBuffer );
+                        Rectangle2D textBounds = textRenderer.getBounds( labelsX[0] );
+                        offsetY = ( int ) - ( textBounds.getHeight( ) + tickWidth + labelBuffer );
                     }
 
-                    int posY = axisY.valueToScreenPixel( valueY );
-
-                    paintLabelsY[i] = shouldPaintLabel( bottomCornerY, topCornerY, posY, height, topBuffer );
-                    if ( paintLabelsY[i] ) textRenderer.draw( label, originX + offsetX, posY + labelBuffer );
-                }
-            }
-        }
-        finally
-        {
-            textRenderer.endRendering( );
-        }
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, 1, 0, 1, -1, 1 );
-
-        GlimpseColor.glColor( gl, lineColor );
-
-        double labelBufferX = labelBuffer / ( double ) width;
-        double labelBufferY = labelBuffer / ( double ) height;
-
-        gl.glBegin( GL2.GL_LINES );
-        try
-        {
-            if ( showHorizontal )
-            {
-                double tickWidthY = tickWidth / ( double ) height;
-
-                for ( int i = 0; i < positionsX.length; i++ )
-                {
-                    if ( paintLabelsX[i] )
+                    for ( int i = 0; i < positionsX.length; i++ )
                     {
-                        double valueX = axis.getAxisX( ).valueToScreenPixelUnits( convX.fromAxisUnits( positionsX[i] ) ) / ( double ) width;
+                        String label = labelsX[i];
+                        double valueX = convX.fromAxisUnits( positionsX[i] );
 
-                        gl.glVertex2d( valueX, doriginY - tickWidthY );
-                        gl.glVertex2d( valueX, doriginY + tickWidthY );
+                        if ( valueX == 0.0 && !showZero ) continue;
 
-                        if ( labelTop )
-                        {
-                            gl.glVertex2d( valueX, doriginY + tickWidthY );
-                            gl.glVertex2d( valueX + labelBufferX, doriginY + tickWidthY + labelBufferY );
-                        }
-                        else
-                        {
-                            gl.glVertex2d( valueX, doriginY - tickWidthY );
-                            gl.glVertex2d( valueX + labelBufferX, doriginY - tickWidthY - labelBufferY );
-                        }
+                        int posX = axisX.valueToScreenPixel( valueX );
+
+                        paintLabelsX[i] = shouldPaintLabel( rightCornerX, leftCornerX, posX, width, rightBuffer );
+                        if ( paintLabelsX[i] ) textRenderer.draw( label, posX + labelBuffer, originY + offsetY );
                     }
                 }
-            }
 
-            if ( showVertical )
-            {
-                double tickWidthX = tickWidth / ( double ) width;
-
-                for ( int i = 0; i < positionsY.length; i++ )
+                if ( showVertical )
                 {
-                    if ( paintLabelsY[i] )
+                    String[] labelsY = ticksY.getTickLabels( axis.getAxisY( ), positionsY );
+
+                    for ( int i = 0; i < positionsY.length; i++ )
                     {
-                        double valueY = axis.getAxisY( ).valueToScreenPixelUnits( convY.fromAxisUnits( positionsY[i] ) ) / ( double ) height;
+                        String label = labelsY[i];
+                        Rectangle2D textBounds = textRenderer.getBounds( label );
 
-                        gl.glVertex2d( doriginX - tickWidthX, valueY );
-                        gl.glVertex2d( doriginX + tickWidthX, valueY );
+                        double valueY = convY.fromAxisUnits( positionsY[i] );
 
+                        if ( valueY == 0.0 && !showZero ) continue;
+
+                        // the x offset of the y axis labels is different depending on whether
+                        // the labels are being drawn to the right or left of the axis
+                        int offsetX;
                         if ( labelRight )
                         {
-                            gl.glVertex2d( doriginX + tickWidthX, valueY );
-                            gl.glVertex2d( doriginX + tickWidthX + labelBufferX, valueY + labelBufferY );
+                            offsetX = tickWidth + labelBuffer;
                         }
                         else
                         {
-                            gl.glVertex2d( doriginX - tickWidthX, valueY );
-                            gl.glVertex2d( doriginX - tickWidthX - labelBufferX, valueY + labelBufferY );
+                            offsetX = ( int ) - ( textBounds.getWidth( ) + tickWidth + labelBuffer );
                         }
+
+                        int posY = axisY.valueToScreenPixel( valueY );
+
+                        paintLabelsY[i] = shouldPaintLabel( bottomCornerY, topCornerY, posY, height, topBuffer );
+                        if ( paintLabelsY[i] ) textRenderer.draw( label, originX + offsetX, posY + labelBuffer );
                     }
                 }
             }
-
-            if ( showHorizontal && showOrigin )
+            finally
             {
-                gl.glVertex2d( 0, doriginY );
-                gl.glVertex2d( 1, doriginY );
+                this.textRenderer.endRendering( );
             }
 
-            if ( showVertical && showOrigin )
+            double labelBufferX = labelBuffer / ( double ) width;
+            double labelBufferY = labelBuffer / ( double ) height;
+
+            prog.begin( gl );
+            try
             {
-                gl.glVertex2d( doriginX, 0 );
-                gl.glVertex2d( doriginX, 1 );
+                pathLeader.clear( );
+                pathTick.clear( );
+                style.rgba = lineColor;
+
+                if ( showHorizontal )
+                {
+                    double tickWidthY = tickWidth / ( double ) height;
+
+                    for ( int i = 0; i < positionsX.length; i++ )
+                    {
+                        if ( paintLabelsX[i] )
+                        {
+                            double valueX = axis.getAxisX( ).valueToScreenPixelUnits( convX.fromAxisUnits( positionsX[i] ) ) / width;
+
+                            pathTick.moveTo( ( float ) valueX, ( float ) ( doriginY - tickWidthY ) );
+                            pathTick.lineTo( ( float ) valueX, ( float ) ( doriginY + tickWidthY ) );
+
+                            if ( labelTop )
+                            {
+                                pathLeader.moveTo( ( float ) valueX, ( float ) ( doriginY + tickWidthY ) );
+                                pathLeader.lineTo( ( float ) ( valueX + labelBufferX ), ( float ) ( doriginY + tickWidthY + labelBufferY ) );
+                            }
+                            else
+                            {
+                                pathLeader.moveTo( ( float ) valueX, ( float ) ( doriginY - tickWidthY ) );
+                                pathLeader.lineTo( ( float ) ( valueX + labelBufferX ), ( float ) ( doriginY - tickWidthY - labelBufferY ) );
+                            }
+                        }
+                    }
+                }
+
+                if ( showVertical )
+                {
+                    double tickWidthX = tickWidth / ( double ) width;
+
+                    for ( int i = 0; i < positionsY.length; i++ )
+                    {
+                        if ( paintLabelsY[i] )
+                        {
+                            double valueY = axis.getAxisY( ).valueToScreenPixelUnits( convY.fromAxisUnits( positionsY[i] ) ) / height;
+
+                            pathTick.moveTo( ( float ) ( doriginX - tickWidthX ), ( float ) valueY );
+                            pathTick.lineTo( ( float ) ( doriginX + tickWidthX ), ( float ) valueY );
+
+                            if ( labelRight )
+                            {
+                                pathLeader.moveTo( ( float ) ( doriginX + tickWidthX ), ( float ) valueY );
+                                pathLeader.lineTo( ( float ) ( doriginX + tickWidthX + labelBufferX ), ( float ) ( valueY + labelBufferY ) );
+                            }
+                            else
+                            {
+                                pathLeader.moveTo( ( float ) ( doriginX - tickWidthX ), ( float ) valueY );
+                                pathLeader.lineTo( ( float ) ( doriginX - tickWidthX - labelBufferX ), ( float ) ( valueY + labelBufferY ) );
+                            }
+                        }
+                    }
+                }
+
+                if ( showHorizontal && showOrigin )
+                {
+                    pathTick.moveTo( 0f, ( float ) doriginY );
+                    pathTick.lineTo( 1f, ( float ) doriginY );
+                }
+
+                if ( showVertical && showOrigin )
+                {
+                    pathTick.moveTo( ( float ) doriginX, 0f );
+                    pathTick.lineTo( ( float ) doriginX, 1f );
+                }
+
+                prog.setViewport( gl, bounds );
+                prog.setOrtho( gl, 0, 1, 0, 1 );
+
+                // feathering makes horizontal/vertical lines look bad, so draw them separately
+
+                style.feather_PX = 0.5f;
+                prog.draw( gl, style, pathLeader );
+
+                style.feather_PX = 0f;
+                prog.draw( gl, style, pathTick );
+            }
+            finally
+            {
+                prog.end( gl );
             }
         }
         finally
         {
-            gl.glEnd( );
+            GLUtils.disableBlending( gl );
         }
     }
 
@@ -507,9 +548,13 @@ public class NumericXYAxisPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
+
+        prog.dispose( context.getGL( ).getGL3( ) );
+        pathTick.dispose( context.getGL( ) );
+        pathLeader.dispose( context.getGL( ) );
     }
 }

@@ -26,35 +26,63 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.triangle.FlatColorStippleProgram;
 
 /**
- * Paints a simple solid color line border around the outside
- * of the plot.
+ * Paints a simple colored line border around the outside of the plot.
  *
  * @author ulman
  */
-public class BorderPainter extends GlimpsePainterImpl
+public class BorderPainter extends GlimpsePainterBase
 {
-    protected float[] borderColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
     protected boolean colorSet = false;
-
-    protected float lineWidth = 1.0f;
-
-    protected int stippleFactor = 1;
-    protected short stipplePattern = ( short ) 0x00FF;
-    protected boolean stippleOn = false;
 
     protected boolean drawTop = true;
     protected boolean drawBottom = true;
     protected boolean drawRight = true;
     protected boolean drawLeft = true;
+
+    protected FlatColorStippleProgram prog;
+    protected GLEditableBuffer xyBuffer;
+    protected GLEditableBuffer mileageBuffer;
+
+    protected float[] rgba = GlimpseColor.getBlack( );
+    protected float thickness = 1.0f;
+    protected boolean stippleEnable = false;
+    protected float stippleFactor = 1.0f;
+    protected short stipplePattern = 0x0F0F;
+
+    protected CornerType cornerType = CornerType.FLAT;
+
+    public static enum CornerType
+    {
+        FLAT,
+        SLANTED;
+    }
+
+    public BorderPainter( )
+    {
+        this.prog = new FlatColorStippleProgram( );
+        this.xyBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.mileageBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+    }
+
+    public BorderPainter setCornerType( CornerType cornerType )
+    {
+        this.cornerType = cornerType;
+        return this;
+    }
 
     public BorderPainter setDrawTop( boolean draw )
     {
@@ -80,31 +108,46 @@ public class BorderPainter extends GlimpsePainterImpl
         return this;
     }
 
+    public BorderPainter setStipple( boolean enable, float factor, short pattern )
+    {
+        this.stippleEnable = enable;
+        this.stippleFactor = factor;
+        this.stipplePattern = pattern;
+        return this;
+    }
+
     public BorderPainter setDotted( boolean dotted )
     {
-        this.stippleOn = dotted;
+        this.stippleEnable = dotted;
         return this;
     }
 
     public BorderPainter setLineWidth( float lineWidth )
     {
-        this.lineWidth = lineWidth;
+        this.thickness = lineWidth;
         return this;
     }
 
     public BorderPainter setColor( float[] rgba )
     {
-        borderColor = rgba;
+        this.rgba = rgba;
+        this.colorSet = true;
         return this;
     }
 
     public BorderPainter setColor( float r, float g, float b, float a )
     {
-        borderColor[0] = r;
-        borderColor[1] = g;
-        borderColor[2] = b;
-        borderColor[3] = a;
-        colorSet = true;
+        this.rgba[0] = r;
+        this.rgba[1] = g;
+        this.rgba[2] = b;
+        this.rgba[3] = a;
+        this.colorSet = true;
+        return this;
+    }
+
+    protected BorderPainter setColor0( float[] rgba )
+    {
+        this.rgba = rgba;
         return this;
     }
 
@@ -114,68 +157,277 @@ public class BorderPainter extends GlimpsePainterImpl
         // ignore the look and feel if a color has been manually set
         if ( !colorSet )
         {
-            setColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
+            setColor0( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
             colorSet = false;
         }
     }
 
-    @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void drawSlantedCorners( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
 
-        int x = bounds.getX( );
-        int y = bounds.getY( );
-        int width = bounds.getWidth( );
-        int height = bounds.getHeight( );
+        float inset_PX = thickness;
+        float width = bounds.getWidth( );
+        float height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( x - 0.5, x + width + 0.5f, y - 0.5, y + height + 0.5f, -1, 1 );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-
-        gl.glLineWidth( lineWidth );
-        gl.glColor4fv( borderColor, 0 );
-
-        if ( stippleOn )
-        {
-            gl.glEnable( GL2.GL_LINE_STIPPLE );
-            gl.glLineStipple( stippleFactor, stipplePattern );
-        }
-
-        gl.glBegin( GL2.GL_LINES );
+        GLUtils.enableStandardBlending( gl );
+        prog.begin( gl );
         try
         {
+            prog.setPixelOrtho( gl, bounds );
+            prog.setColor( gl, rgba );
+            prog.setStipple( gl, stippleEnable, stippleFactor, stipplePattern );
+
+            xyBuffer.clear( );
+            mileageBuffer.clear( );
+
+            float mileage = 0;
+
             if ( drawBottom )
             {
-                gl.glVertex2f( x, y );
-                gl.glVertex2f( x + width, y );
+                // upper quad
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, inset_PX );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, inset_PX );
+
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+
+                // lower quad
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, inset_PX );
+                xyBuffer.grow2f( width, 0 );
+
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( width );
+
+                mileage += width;
             }
 
             if ( drawRight )
             {
-                gl.glVertex2f( x + width, y );
-                gl.glVertex2f( x + width, y + height );
+                // upper quad
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width - inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( width, height );
+
+                mileageBuffer.grow1f( drawBottom ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage + height );
+
+                // lower quad
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width, height );
+                xyBuffer.grow2f( width, 0 );
+
+                mileageBuffer.grow1f( drawBottom ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( mileage + height );
+                mileageBuffer.grow1f( mileage );
+
+                mileage += height;
             }
 
             if ( drawTop )
             {
-                gl.glVertex2f( x + width, y + height );
-                gl.glVertex2f( x, y + height );
+                // upper quad
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                xyBuffer.grow2f( 0, height );
+                xyBuffer.grow2f( width, height );
+
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage + width );
+                mileageBuffer.grow1f( mileage );
+
+                // lower quad
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, height - inset_PX );
+                xyBuffer.grow2f( width, height );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height - inset_PX );
+
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawRight ? mileage + inset_PX : mileage );
+
+                mileage += width;
             }
 
             if ( drawLeft )
             {
-                gl.glVertex2f( x, y + height );
-                gl.glVertex2f( x, y );
+                // upper quad
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( 0, height );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+
+                mileageBuffer.grow1f( mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + inset_PX : mileage );
+
+                // lower quad
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( inset_PX, drawBottom ? inset_PX : 0 );
+
+                mileageBuffer.grow1f( mileage + height );
+                mileageBuffer.grow1f( drawTop ? mileage + inset_PX : mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+
+                mileage += height;
             }
+
+            prog.draw( gl, xyBuffer, mileageBuffer, rgba );
 
         }
         finally
         {
-            gl.glEnd( );
+            prog.end( gl );
+            GLUtils.disableBlending( gl );
         }
+    }
+
+    protected void drawFlatCorners( GlimpseContext context )
+    {
+        GL3 gl = context.getGL( ).getGL3( );
+        GlimpseBounds bounds = getBounds( context );
+
+        float inset_PX = thickness;
+        float width = bounds.getWidth( );
+        float height = bounds.getHeight( );
+
+        GLUtils.enableStandardBlending( gl );
+        prog.begin( gl );
+        try
+        {
+            prog.setPixelOrtho( gl, bounds );
+            prog.setColor( gl, rgba );
+            prog.setStipple( gl, stippleEnable, stippleFactor, stipplePattern );
+
+            xyBuffer.clear( );
+            mileageBuffer.clear( );
+
+            float mileage = 0;
+
+            if ( drawBottom )
+            {
+                // upper quad
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, 0 );
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, inset_PX );
+                xyBuffer.grow2f( width, inset_PX );
+
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+
+                // lower quad
+                xyBuffer.grow2f( drawLeft ? inset_PX : 0, 0 );
+                xyBuffer.grow2f( width, inset_PX );
+                xyBuffer.grow2f( width, 0 );
+
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+
+                mileage += drawLeft ? width - inset_PX : width;
+            }
+
+            if ( drawRight )
+            {
+                // upper quad
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width - inset_PX, height );
+                xyBuffer.grow2f( width, height );
+
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+
+                // lower quad
+                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
+                xyBuffer.grow2f( width, height );
+                xyBuffer.grow2f( width, drawBottom ? inset_PX : 0 );
+
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
+
+                mileage += drawBottom ? height - inset_PX : height;
+            }
+
+            if ( drawTop )
+            {
+                // upper quad
+                xyBuffer.grow2f( 0, height - inset_PX );
+                xyBuffer.grow2f( 0, height );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height );
+
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+
+                // lower quad
+                xyBuffer.grow2f( 0, height - inset_PX );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height );
+                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height - inset_PX );
+
+                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( mileage );
+
+                mileage += drawRight ? width - inset_PX : width;
+            }
+
+            if ( drawLeft )
+            {
+                // upper quad
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( 0, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( mileage );
+
+                // lower quad
+                xyBuffer.grow2f( 0, 0 );
+                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+                xyBuffer.grow2f( inset_PX, 0 );
+
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                mileageBuffer.grow1f( mileage );
+                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+            }
+
+            prog.draw( gl, xyBuffer, mileageBuffer, rgba );
+
+        }
+        finally
+        {
+            prog.end( gl );
+            GLUtils.disableBlending( gl );
+        }
+    }
+
+    @Override
+    protected void doPaintTo( GlimpseContext context )
+    {
+        switch ( cornerType )
+        {
+            case SLANTED:
+                drawSlantedCorners( context );
+                break;
+            case FLAT:
+            default:
+                drawFlatCorners( context );
+                break;
+        }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        prog.dispose( context.getGL( ).getGL3( ) );
+        mileageBuffer.dispose( context.getGL( ) );
+        xyBuffer.dispose( context.getGL( ) );
     }
 }

@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layout.GlimpseLayoutCache;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -79,7 +78,7 @@ public class FpsPainter extends SimpleTextPainter
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void doPaintTo( GlimpseContext context )
     {
         if ( cache.getValue( context ) == null ) cache.setValue( context, new FpsHelper( ) );
 
@@ -105,6 +104,6 @@ public class FpsPainter extends SimpleTextPainter
 
         setText( text );
 
-        super.paintTo( context, bounds );
+        super.doPaintTo( context );
     }
 }

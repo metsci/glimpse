@@ -27,14 +27,22 @@
 package com.metsci.glimpse.painter.decoration;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * Displays crosshairs and a selection box centered over the position
@@ -47,13 +55,11 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  *
  * @author ulman
  */
-public class CrosshairPainter extends GlimpseDataPainter2D
+public class CrosshairPainter extends GlimpsePainterBase
 {
     protected float[] xorColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
     protected float[] cursorColor = new float[] { 0.0f, 0.769f, 1.0f, 1.0f };
     protected float[] shadeColor = new float[] { 0.0f, 0.769f, 1.0f, 0.25f };
-
-    protected float lineWidth = 2.0f;
 
     protected boolean showSelectionBox = true;
     protected boolean shadeSelectionBox = false;
@@ -63,6 +69,28 @@ public class CrosshairPainter extends GlimpseDataPainter2D
     protected boolean paintXor = false;
 
     protected boolean colorSet = false;
+
+    protected FlatColorProgram flatProg;
+    protected GLEditableBuffer flatPath;
+
+    protected LineProgram lineProg;
+    protected LineStyle lineStyle;
+    protected LinePath linePath;
+
+    public CrosshairPainter( )
+    {
+        this.lineProg = new LineProgram( );
+        this.flatProg = new FlatColorProgram( );
+
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.feather_PX = 0;
+        this.lineStyle.stippleEnable = false;
+        this.lineStyle.thickness_PX = 1.0f;
+        this.lineStyle.joinType = LineJoinType.JOIN_MITER;
+
+        this.linePath = new LinePath( );
+        this.flatPath = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+    }
 
     public void setCursorColor( float[] rgba )
     {
@@ -104,7 +132,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
 
     public void setLineWidth( float width )
     {
-        this.lineWidth = width;
+        this.lineStyle.thickness_PX = width;
     }
 
     public void showSelectionBox( boolean show )
@@ -129,12 +157,12 @@ public class CrosshairPainter extends GlimpseDataPainter2D
         this.paintXor = xor;
     }
 
-    private void conditionallyEnableXor( GL2 gl )
+    private void conditionallyEnableXor( GL3 gl )
     {
         if ( paintXor )
         {
-            gl.glEnable( GL2.GL_COLOR_LOGIC_OP );
-            gl.glLogicOp( GL2.GL_XOR );
+            gl.glEnable( GL3.GL_COLOR_LOGIC_OP );
+            gl.glLogicOp( GL3.GL_XOR );
         }
     }
 
@@ -142,7 +170,7 @@ public class CrosshairPainter extends GlimpseDataPainter2D
     {
         if ( paintXor )
         {
-            gl.glDisable( GL2.GL_COLOR_LOGIC_OP );
+            gl.glDisable( GL3.GL_COLOR_LOGIC_OP );
         }
     }
 
@@ -158,58 +186,66 @@ public class CrosshairPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = requireAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
+
         if ( axis == null || axis.getAxisX( ) == null || axis.getAxisY( ) == null ) return;
 
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
-        double minX = Math.min( axisX.getMax( ), axisX.getMin( ) );
-        double maxX = Math.max( axisX.getMax( ), axisX.getMin( ) );
-        double minY = Math.min( axisY.getMax( ), axisY.getMin( ) );
-        double maxY = Math.max( axisY.getMax( ), axisY.getMin( ) );
+        float minX = ( float ) Math.min( axisX.getMax( ), axisX.getMin( ) );
+        float maxX = ( float ) Math.max( axisX.getMax( ), axisX.getMin( ) );
+        float minY = ( float ) Math.min( axisY.getMax( ), axisY.getMin( ) );
+        float maxY = ( float ) Math.max( axisY.getMax( ), axisY.getMin( ) );
 
-        double centerX = axisX.getSelectionCenter( );
-        double sizeX = axisX.getSelectionSize( ) / 2;
+        float centerX = ( float ) axisX.getSelectionCenter( );
+        float sizeX = ( float ) axisX.getSelectionSize( ) / 2;
 
-        double centerY = axisY.getSelectionCenter( );
-        double sizeY = axisY.getSelectionSize( ) / 2;
+        float centerY = ( float ) axisY.getSelectionCenter( );
+        float sizeY = ( float ) axisY.getSelectionSize( ) / 2;
 
         if ( showSelectionBox )
         {
-            gl.glLineWidth( lineWidth );
-            gl.glColor4fv( paintXor ? xorColor : cursorColor, 0 );
+            lineStyle.rgba = paintXor ? xorColor : cursorColor;
 
             conditionallyEnableXor( gl );
-
-            gl.glBegin( GL2.GL_LINE_LOOP );
+            lineProg.begin( gl );
             try
             {
-                gl.glVertex2d( centerX - sizeX, centerY - sizeY );
-                gl.glVertex2d( centerX - sizeX, centerY + sizeY );
-                gl.glVertex2d( centerX + sizeX, centerY + sizeY );
-                gl.glVertex2d( centerX + sizeX, centerY - sizeY );
+                lineProg.setAxisOrtho( gl, axis );
+                lineProg.setViewport( gl, bounds );
+
+                linePath.clear( );
+                linePath.addRectangle( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
+
+                lineProg.draw( gl, lineStyle, linePath );
             }
             finally
             {
-                gl.glEnd( );
+                lineProg.end( gl );
                 conditionallyDisableXor( gl );
             }
 
             if ( shadeSelectionBox )
             {
-                gl.glColor4fv( shadeColor, 0 );
-                gl.glBegin( GL2.GL_QUADS );
+                GLUtils.enableStandardBlending( gl );
+                flatProg.begin( gl );
                 try
                 {
-                    gl.glVertex2d( centerX - sizeX, centerY - sizeY );
-                    gl.glVertex2d( centerX - sizeX, centerY + sizeY );
-                    gl.glVertex2d( centerX + sizeX, centerY + sizeY );
-                    gl.glVertex2d( centerX + sizeX, centerY - sizeY );
+                    flatProg.setAxisOrtho( gl, axis );
+
+                    flatPath.clear( );
+                    flatPath.growQuad2f( centerX - sizeX, centerY - sizeY, centerX + sizeX, centerY + sizeY );
+
+                    flatProg.draw( gl, flatPath, shadeColor );
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    flatProg.end( gl );
+                    GLUtils.disableBlending( gl );
                 }
             }
         }
@@ -218,66 +254,88 @@ public class CrosshairPainter extends GlimpseDataPainter2D
         {
             if ( showSelectionBox )
             {
-                gl.glLineWidth( lineWidth );
-                gl.glColor4fv( paintXor ? xorColor : cursorColor, 0 );
+                lineStyle.rgba = paintXor ? xorColor : cursorColor;
 
                 conditionallyEnableXor( gl );
-
-                gl.glBegin( GL2.GL_LINES );
+                lineProg.begin( gl );
                 try
                 {
+                    lineProg.setAxisOrtho( gl, axis );
+                    lineProg.setViewport( gl, bounds );
+
+                    linePath.clear( );
+
                     if ( !hideVerticalHairs )
                     {
-                        gl.glVertex2d( centerX, minY );
-                        gl.glVertex2d( centerX, centerY - sizeY );
+                        linePath.moveTo( centerX, minY );
+                        linePath.lineTo( centerX, centerY - sizeY );
 
-                        gl.glVertex2d( centerX, centerY + sizeY );
-                        gl.glVertex2d( centerX, maxY );
+                        linePath.moveTo( centerX, centerY + sizeY );
+                        linePath.lineTo( centerX, maxY );
                     }
 
                     if ( !hideHorizontalHairs )
                     {
-                        gl.glVertex2d( minX, centerY );
-                        gl.glVertex2d( centerX - sizeX, centerY );
+                        linePath.moveTo( minX, centerY );
+                        linePath.lineTo( centerX - sizeX, centerY );
 
-                        gl.glVertex2d( centerX + sizeX, centerY );
-                        gl.glVertex2d( maxX, centerY );
+                        linePath.moveTo( centerX + sizeX, centerY );
+                        linePath.lineTo( maxX, centerY );
                     }
+
+                    lineProg.draw( gl, lineStyle, linePath );
+
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    lineProg.end( gl );
                     conditionallyDisableXor( gl );
                 }
             }
             else
             {
-                gl.glLineWidth( lineWidth );
-                gl.glColor4fv( paintXor ? xorColor : cursorColor, 0 );
+                lineStyle.rgba = paintXor ? xorColor : cursorColor;
 
                 conditionallyEnableXor( gl );
-
-                gl.glBegin( GL2.GL_LINES );
+                lineProg.begin( gl );
                 try
                 {
+                    lineProg.setAxisOrtho( gl, axis );
+                    lineProg.setViewport( gl, bounds );
+
+                    linePath.clear( );
+
                     if ( !hideVerticalHairs )
                     {
-                        gl.glVertex2d( centerX, minY );
-                        gl.glVertex2d( centerX, maxY );
+                        linePath.moveTo( centerX, minY );
+                        linePath.lineTo( centerX, maxY );
                     }
 
                     if ( !hideHorizontalHairs )
                     {
-                        gl.glVertex2d( minX, centerY );
-                        gl.glVertex2d( maxX, centerY );
+                        linePath.moveTo( minX, centerY );
+                        linePath.lineTo( maxX, centerY );
                     }
+
+                    lineProg.draw( gl, lineStyle, linePath );
+
                 }
                 finally
                 {
-                    gl.glEnd( );
+                    lineProg.end( gl );
                     conditionallyDisableXor( gl );
                 }
             }
         }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        lineProg.dispose( context.getGL( ).getGL3( ) );
+        linePath.dispose( context.getGL( ) );
+
+        flatProg.dispose( context.getGL( ).getGL3( ) );
+        flatPath.dispose( context.getGL( ) );
     }
 }

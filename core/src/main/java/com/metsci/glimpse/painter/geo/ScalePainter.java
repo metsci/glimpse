@@ -26,26 +26,32 @@
  */
 package com.metsci.glimpse.painter.geo;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisNotSetException;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.ArrayColorProgram;
 import com.metsci.glimpse.util.units.Length;
 
 /**
@@ -53,7 +59,7 @@ import com.metsci.glimpse.util.units.Length;
  *
  * @author ulman
  */
-public class ScalePainter extends GlimpsePainterImpl
+public class ScalePainter extends GlimpsePainterBase
 {
     protected float[] borderColor = GlimpseColor.fromColorRgba( 0.0f, 0.0f, 0.0f, 1.0f );
     protected float[] primaryColor = GlimpseColor.fromColorRgba( 1.0f, 1.0f, 1.0f, 0.5f );
@@ -76,6 +82,14 @@ public class ScalePainter extends GlimpsePainterImpl
 
     protected boolean showTickLength = true;
     protected boolean showOverallLength = true;
+
+    protected ArrayColorProgram fillProg;
+    protected GLEditableBuffer fillXy;
+    protected GLEditableBuffer fillRgba;
+
+    protected LineProgram lineProg;
+    protected LineStyle lineStyle;
+    protected LinePath linePath;
 
     public ScalePainter( )
     {
@@ -107,6 +121,19 @@ public class ScalePainter extends GlimpsePainterImpl
         this.bufferY = 0;
         this.pixelHeight = 20;
         this.pixelWidth = 300;
+
+        this.lineProg = new LineProgram( );
+        this.fillProg = new ArrayColorProgram( );
+
+        this.lineStyle = new LineStyle( );
+        this.lineStyle.feather_PX = 0;
+        this.lineStyle.stippleEnable = false;
+        this.lineStyle.thickness_PX = 1.0f;
+        this.lineStyle.rgba = borderColor;
+
+        this.linePath = new LinePath( );
+        this.fillXy = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+        this.fillRgba = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
     protected TextRenderer createTickTextRenderer( )
@@ -127,6 +154,7 @@ public class ScalePainter extends GlimpsePainterImpl
     public void setBorderColor( float[] borderColor )
     {
         this.borderColor = borderColor;
+        this.lineStyle.rgba = borderColor;
     }
 
     public float[] getPrimaryColor( )
@@ -230,20 +258,27 @@ public class ScalePainter extends GlimpsePainterImpl
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( tickTextRenderer != null ) tickTextRenderer.dispose( );
-        if ( overallTextRenderer != null ) overallTextRenderer.dispose( );
+        if ( this.tickTextRenderer != null ) this.tickTextRenderer.dispose( );
+        if ( this.overallTextRenderer != null ) this.overallTextRenderer.dispose( );
 
-        overallTextRenderer = null;
-        tickTextRenderer = null;
+        this.overallTextRenderer = null;
+        this.tickTextRenderer = null;
+
+        this.linePath.dispose( context.getGL( ) );
+        this.fillXy.dispose( context.getGL( ) );
+        this.fillRgba.dispose( context.getGL( ) );
+
+        this.lineProg.dispose( context.getGL( ).getGL3( ) );
+        this.fillProg.dispose( context.getGL( ).getGL3( ) );
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void doPaintTo( GlimpseContext context )
     {
-        if ( tickTextRenderer == null ) return;
-        if ( overallTextRenderer == null ) return;
+        if ( this.tickTextRenderer == null ) return;
+        if ( this.overallTextRenderer == null ) return;
 
         Axis1D axis = null;
 
@@ -265,10 +300,10 @@ public class ScalePainter extends GlimpsePainterImpl
             throw new AxisNotSetException( this, context );
         }
 
+        GlimpseBounds bounds = getBounds( context );
+
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-
-        context.getTargetStack( );
 
         double diff = axis.getMax( ) - axis.getMin( );
         double ratio = axis.getSizePixels( ) / converter.toAxisUnits( diff );
@@ -291,59 +326,59 @@ public class ScalePainter extends GlimpsePainterImpl
 
         double totalSize = scalePixelSize * tickCount;
 
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( 0, width, 0, height, -1, 1 );
-        gl.glMatrixMode( GL2.GL_MODELVIEW );
-        gl.glLoadIdentity( );
+        fillXy.clear( );
+        fillRgba.clear( );
 
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
+        for ( int i = 0; i < tickCount; i++ )
+        {
+            float[] color = i % 2 == 0 ? secondaryColor : primaryColor;
 
-        gl.glBegin( GL2.GL_QUADS );
+            double offset1 = totalSize * ( i / ( double ) tickCount );
+            double offset2 = totalSize * ( ( i + 1 ) / ( double ) tickCount );
+
+            fillXy.growQuad2f( ( float ) ( width - bufferX - offset1 ), ( bufferY ), ( float ) ( width - bufferX - offset2 ), bufferY + pixelHeight );
+
+            fillRgba.growQuadSolidColor( color );
+        }
+
+        linePath.clear( );
+
+        linePath.addRectangle( width - bufferX, ( bufferY ), ( float ) ( width - bufferX - totalSize ), bufferY + pixelHeight );
+
+        GLUtils.enableStandardBlending( gl );
         try
         {
-            for ( int i = 0; i < tickCount; i++ )
+            fillProg.begin( gl );
+            try
             {
-                if ( i % 2 == 0 )
-                    gl.glColor4fv( secondaryColor, 0 );
-                else
-                    gl.glColor4fv( primaryColor, 0 );
+                fillProg.setPixelOrtho( gl, bounds );
 
-                double offset1 = totalSize * ( i / ( double ) tickCount );
-                double offset2 = totalSize * ( ( i + 1 ) / ( double ) tickCount );
+                fillProg.draw( gl, fillXy, fillRgba );
+            }
+            finally
+            {
+                fillProg.end( gl );
+            }
 
-                gl.glVertex2d( width - bufferX - offset1, bufferY );
-                gl.glVertex2d( width - bufferX - offset2, bufferY );
-                gl.glVertex2d( width - bufferX - offset2, bufferY + pixelHeight );
-                gl.glVertex2d( width - bufferX - offset1, bufferY + pixelHeight );
+            lineProg.begin( gl );
+            try
+            {
+                lineProg.setPixelOrtho( gl, bounds );
+                lineProg.setViewport( gl, bounds );
+
+                lineProg.draw( gl, lineStyle, linePath );
+            }
+            finally
+            {
+                lineProg.end( gl );
             }
         }
         finally
         {
-            gl.glEnd( );
+            GLUtils.disableBlending( gl );
         }
-
-        gl.glLineWidth( 1f );
-        gl.glColor4fv( borderColor, 0 );
-
-        gl.glBegin( GL2.GL_LINE_LOOP );
-        try
-        {
-            gl.glVertex2d( width - bufferX, bufferY );
-            gl.glVertex2d( width - bufferX - totalSize, bufferY );
-            gl.glVertex2d( width - bufferX - totalSize, bufferY + pixelHeight );
-            gl.glVertex2d( width - bufferX, bufferY + pixelHeight );
-        }
-        finally
-        {
-            gl.glEnd( );
-        }
-
-        gl.glDisable( GL2.GL_BLEND );
-        gl.glTranslatef( 0.375f, 0.375f, 0 );
 
         if ( order < 2 )
         {

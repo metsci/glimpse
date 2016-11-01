@@ -26,117 +26,70 @@
  */
 package com.metsci.glimpse.painter.group;
 
-import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
 import com.google.common.collect.Lists;
+import com.jogamp.opengl.FBObject;
+import com.jogamp.opengl.FBObject.TextureAttachment;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
-import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer.Mutator;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 
 /**
  * @see WrappedAxis1D
  * @see WrappedLabelHandler
  * @author ulman
  */
-public class WrappedPainter extends GlimpsePainter2D
+public class WrappedPainter extends GlimpsePainterBase
 {
-    private static class CustomFBOGlimpseCanvas extends FBOGlimpseCanvas
-    {
-        private int canvasWidth;
-        private int canvasHeight;
-        private GlimpseBounds effectiveGlimpseBounds;
+    private static final Logger logger = Logger.getLogger( WrappedPainter.class.getName( ) );
 
-        public CustomFBOGlimpseCanvas( GLContext glContext )
-        {
-            super( glContext, 0, 0, false );
-            this.canvasWidth = 0;
-            this.canvasHeight = 0;
-            this.effectiveGlimpseBounds = new GlimpseBounds( 0, 0, 0, 0 );
-        }
+    private List<GlimpsePainter> painters;
 
-        public float getEffectiveWidthFrac( )
-        {
-            return ( canvasWidth == 0 ? 0 : effectiveGlimpseBounds.getWidth( ) / ( float ) canvasWidth );
-        }
+    private FBObject fbo;
+    private TextureAttachment fboTextureAttachment;
+    private int fboTextureUnit = 0;
 
-        public float getEffectiveHeightFrac( )
-        {
-            return ( canvasHeight == 0 ? 0 : effectiveGlimpseBounds.getHeight( ) / ( float ) canvasHeight );
-        }
-
-        public void paintWithEffectiveSize( int effectiveWidth, int effectiveHeight )
-        {
-            if ( effectiveWidth > canvasWidth || effectiveHeight > canvasHeight )
-            {
-                this.canvasWidth = Math.max( canvasWidth, effectiveWidth );
-                this.canvasHeight = Math.max( canvasHeight, effectiveHeight );
-                this.resize( this.canvasWidth, this.canvasHeight );
-            }
-
-            // the offscreen canvas may be larger than we need, only draw on the portion that we need
-            this.getGLContext( ).getGL( ).glViewport( 0, 0, effectiveWidth, effectiveHeight );
-
-            // remember the effective bounds, so they can be used to create the target-stack down inside the paint() call
-            this.effectiveGlimpseBounds = new GlimpseBounds( 0, 0, effectiveWidth, effectiveHeight );
-
-            this.paint( );
-        }
-
-        @Override
-        public GlimpseContext getGlimpseContext( )
-        {
-            GlimpseContext glimpseContext = new GlimpseContextImpl( getGLContext( ), getSurfaceScale( ) );
-            glimpseContext.getTargetStack( ).push( this, effectiveGlimpseBounds );
-            return glimpseContext;
-        }
-    }
-
-    private List<GlimpsePainter2D> painters;
-
-    private boolean isVisible = true;
-    private boolean isDisposed = false;
-
-    private CustomFBOGlimpseCanvas offscreen;
-    private GLFloatBuffer2D vertCoordBuffer;
-    private GLFloatBuffer2D texCoordBuffer;
+    private GLEditableBuffer vertCoordBuffer;
+    private GLEditableBuffer texCoordBuffer;
+    private ColorTexture2DProgram prog;
 
     private Axis2D dummyAxis;
     private GlimpseAxisLayout2D dummyLayout;
 
     public WrappedPainter( )
     {
-        this.painters = new CopyOnWriteArrayList<GlimpsePainter2D>( );
+        this.painters = new CopyOnWriteArrayList<GlimpsePainter>( );
 
         this.dummyAxis = new Axis2D( );
         this.dummyLayout = new GlimpseAxisLayout2D( dummyAxis );
     }
 
-    public void addPainter( GlimpsePainter2D painter )
+    public void addPainter( GlimpsePainter painter )
     {
         this.painters.add( painter );
     }
 
-    public void removePainter( GlimpsePainter2D painter )
+    public void removePainter( GlimpsePainter painter )
     {
         this.painters.remove( painter );
     }
@@ -146,32 +99,12 @@ public class WrappedPainter extends GlimpsePainter2D
         this.painters.clear( );
     }
 
-    public boolean isVisible( )
-    {
-        return this.isVisible;
-    }
-
-    public void setVisible( boolean visible )
-    {
-        this.isVisible = visible;
-    }
-
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        if ( !this.isVisible ) return;
-
-        GL2 gl2 = context.getGL( ).getGL2( );
-        gl2.glBlendFuncSeparate( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl2.glEnable( GL2.GL_BLEND );
-
-        gl2.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-        gl2.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
-
-        gl2.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-        gl2.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
-
-        gl2.glEnable( GL.GL_TEXTURE_2D );
+        Axis2D axis = requireAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
+        GL3 gl = context.getGL( ).getGL3( );
 
         Axis1D axisX = axis.getAxisX( );
         Axis1D axisY = axis.getAxisY( );
@@ -182,9 +115,9 @@ public class WrappedPainter extends GlimpsePainter2D
         // if no WrappedAxis1D is being used, simply paint normally
         if ( !wrapX && !wrapY )
         {
-            for ( GlimpsePainter2D painter : painters )
+            for ( GlimpsePainter painter : painters )
             {
-                painter.paintTo( context, bounds, axis );
+                painter.paintTo( context );
             }
         }
         else
@@ -192,19 +125,21 @@ public class WrappedPainter extends GlimpsePainter2D
             if ( !axisX.isInitialized( ) || !axisY.isInitialized( ) || bounds.getHeight( ) == 0 || bounds.getWidth( ) == 0 ) return;
 
             // lazily allocate offscreen buffer if necessary
-            //
-
-            if ( this.offscreen == null )
+            if ( this.fbo == null )
             {
-                this.offscreen = new CustomFBOGlimpseCanvas( context.getGLContext( ) );
-                this.offscreen.addLayout( dummyLayout );
+                this.fbo = new FBObject( );
+                this.fbo.init( gl, 0, 0, 0 );
+                this.fboTextureAttachment = this.fbo.attachTexture2D( gl, this.fboTextureUnit, true );
+                this.fbo.unbind( gl );
 
-                this.texCoordBuffer = new GLFloatBuffer2D( 4 );
-                this.vertCoordBuffer = new GLFloatBuffer2D( 4 );
+                this.texCoordBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+                this.vertCoordBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+
+                this.prog = new ColorTexture2DProgram( );
             }
 
             this.dummyLayout.removeAllLayouts( );
-            for ( GlimpsePainter2D painter : this.painters )
+            for ( GlimpsePainter painter : this.painters )
             {
                 this.dummyLayout.addPainter( painter );
             }
@@ -234,32 +169,34 @@ public class WrappedPainter extends GlimpsePainter2D
     {
         if ( boundsX.isRedraw( ) || boundsY.isRedraw( ) || forceRedraw )
         {
+            GL3 gl = context.getGL( ).getGL3( );
+
             // when we draw offscreen, do so in "wrapped coordinates" (if the wrapped axis is
             // bounded from 0 to 10, it should be because that is the domain that the painters
             // are set up to draw in)
             this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
             this.dummyAxis.validate( );
 
-            // release the onscreen context and make the offscreen context current
-            context.getGLContext( ).release( );
+            if ( this.fbo.getWidth( ) < boundsX.getTextureSize( ) || this.fbo.getHeight( ) < boundsY.getTextureSize( ) )
+            {
+                this.fbo.reset( gl, boundsX.getTextureSize( ), boundsY.getTextureSize( ), 0 );
+            }
+
+            GlimpseContext glimpseContext = new GlimpseContextImpl( context.getGLContext( ), new int[] { 1, 1 } );
+            glimpseContext.getTargetStack( ).push( this.dummyLayout, new GlimpseBounds( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) ) );
+
+            this.fbo.bind( gl );
             try
             {
-                GLContext glContext = this.offscreen.getGLDrawable( ).getContext( );
-                glContext.makeCurrent( );
-                try
-                {
-                    // draw the dummy layout onto the offscreen canvas
-                    this.offscreen.paintWithEffectiveSize( boundsX.getTextureSize( ), boundsY.getTextureSize( ) );
-                }
-                finally
-                {
-                    glContext.release( );
-                }
+                this.dummyLayout.paintTo( glimpseContext );
             }
             finally
             {
-                context.getGLContext( ).makeCurrent( );
+                this.fbo.unbind( gl );
             }
+
+            // reset the viewport and scissor (which will be modified by dummyLayout.paintTo( )
+            GLUtils.setViewportAndScissor( context );
         }
 
         drawTexture( context, axis, boundsX, boundsY );
@@ -267,77 +204,33 @@ public class WrappedPainter extends GlimpsePainter2D
 
     protected void drawTexture( final GlimpseContext context, final Axis2D axis, final WrappedTextureBounds boundsX, final WrappedTextureBounds boundsY )
     {
-        GL2 gl2 = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
 
         // position the drawn data in non-wrapped coordinates
         // (since we've split up the image such that we don't have to worry about seams)
-        vertCoordBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                data.rewind( );
-                data.put( ( float ) boundsX.getStartValue( ) );
-                data.put( ( float ) boundsY.getStartValue( ) );
-
-                data.put( ( float ) boundsX.getStartValue( ) );
-                data.put( ( float ) boundsY.getEndValue( ) );
-
-                data.put( ( float ) boundsX.getEndValue( ) );
-                data.put( ( float ) boundsY.getEndValue( ) );
-
-                data.put( ( float ) boundsX.getEndValue( ) );
-                data.put( ( float ) boundsY.getStartValue( ) );
-            }
-        } );
+        this.vertCoordBuffer.clear( );
+        this.vertCoordBuffer.growQuad2f( ( float ) boundsX.getStartValue( ), ( float ) boundsY.getStartValue( ), ( float ) boundsX.getEndValue( ), ( float ) boundsY.getEndValue( ) );
 
         // we don't necessarily use the whole texture, so only texture with the part we drew onto
-        texCoordBuffer.mutate( new Mutator( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int length )
-            {
-                float texEndX = offscreen.getEffectiveWidthFrac( );
-                float texEndY = offscreen.getEffectiveHeightFrac( );
+        this.texCoordBuffer.clear( );
+        this.texCoordBuffer.growQuad2f( 0, 0, ( float ) boundsX.getTextureSize( ) / ( float ) this.fbo.getWidth( ), ( float ) boundsY.getTextureSize( ) / ( float ) fbo.getHeight( ) );
 
-                data.rewind( );
-                data.put( 0 );
-                data.put( 0 );
-
-                data.put( 0 );
-                data.put( texEndY );
-
-                data.put( texEndX );
-                data.put( texEndY );
-
-                data.put( texEndX );
-                data.put( 0 );
-            }
-        } );
-
-        texCoordBuffer.bind( GLVertexAttribute.ATTRIB_TEXCOORD_2D, gl2 );
-        vertCoordBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl2 );
-        gl2.glBindTexture( GL.GL_TEXTURE_2D, offscreen.getTextureUnit( ) );
+        GLUtils.enableStandardBlending( gl );
+        this.fbo.use( gl, this.fboTextureAttachment );
+        this.prog.begin( context );
         try
         {
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+            this.prog.setAxisOrtho( context, axis );
+            this.prog.setColor( context, GlimpseColor.getWhite( ) );
+            this.prog.setTexture( context, fboTextureUnit );
 
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-            gl2.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
-
-            gl2.glMatrixMode( GL2.GL_PROJECTION );
-            gl2.glLoadIdentity( );
-            gl2.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
-
-            gl2.glDrawArrays( GL2.GL_QUADS, 0, 4 );
-
+            this.prog.draw( context, GL.GL_TRIANGLES, this.vertCoordBuffer, this.texCoordBuffer, 0, this.texCoordBuffer.sizeFloats( ) / 2 );
         }
         finally
         {
-            gl2.glBindTexture( GL.GL_TEXTURE_2D, 0 );
-            vertCoordBuffer.unbind( gl2 );
-            texCoordBuffer.unbind( gl2 );
+            this.prog.end( context );
+            this.fbo.unuse( gl );
+            GLUtils.disableBlending( gl );
         }
     }
 
@@ -385,23 +278,12 @@ public class WrappedPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GlimpseContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( !this.isDisposed )
+        for ( GlimpsePainter painter : this.painters )
         {
-            this.isDisposed = true;
-
-            for ( GlimpsePainter painter : this.painters )
-            {
-                painter.dispose( context );
-            }
+            painter.dispose( context );
         }
-    }
-
-    @Override
-    public boolean isDisposed( )
-    {
-        return this.isDisposed;
     }
 
     @Override

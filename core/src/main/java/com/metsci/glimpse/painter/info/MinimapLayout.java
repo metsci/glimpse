@@ -26,9 +26,10 @@
  */
 package com.metsci.glimpse.painter.info;
 
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.context.TargetStackUtil.*;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.factory.DefaultAxisFactory2D;
@@ -41,12 +42,18 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
 import com.metsci.glimpse.event.mouse.MouseButton;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.plot.Plot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 
 /**
  * A {@link com.metsci.glimpse.layout.GlimpseLayout} which
@@ -115,11 +122,13 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         } );
     }
 
+    @Override
     public void addPainter( GlimpsePainter painter )
     {
         this.delegateLayer.addPainter( painter );
     }
 
+    @Override
     public void removePainter( GlimpsePainter painter )
     {
         this.delegateLayer.removePainter( painter );
@@ -203,65 +212,95 @@ public class MinimapLayout extends GlimpseAxisLayout2D
         axis.getAxisY( ).lockMax( maxY );
     }
 
-    public class MiniMapBoundsPainter extends GlimpsePainter2D
+    public class MiniMapBoundsPainter extends GlimpsePainterBase
     {
         protected float[] cursorColor = GlimpseColor.getBlack( ); //new float[] { 0.0f, 0.769f, 1.0f, 1.0f };
         protected float[] shadeColor = new float[] { 0.0f, 0.769f, 1.0f, 0.25f };
 
+        protected FlatColorProgram fillProg;
+        protected GLEditableBuffer fillBuffer;
+
+        protected LineProgram lineProg;
+        protected LinePath linePath;
+        protected LineStyle lineStyle;
+
         public MiniMapBoundsPainter( )
         {
+            this.fillBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+
+            this.lineStyle = new LineStyle( );
+            this.lineStyle.stippleEnable = false;
+            this.lineStyle.feather_PX = 0.5f;
+            this.lineStyle.rgba = cursorColor;
+            this.lineStyle.thickness_PX = 1.0f;
+
+            this.linePath = new LinePath( );
+
+            this.fillProg = new FlatColorProgram( );
+            this.lineProg = new LineProgram( );
         }
 
         @Override
-        public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+        public void doPaintTo( GlimpseContext context )
         {
+            GlimpseBounds bounds = getBounds( context );
             Axis2D miniMapAxis = getMiniMapAxis0( context );
             Axis2D mainMapAxis = getMainMapAxis0( context );
 
-            GL2 gl = context.getGL( ).getGL2( );
+            GL3 gl = context.getGL( ).getGL3( );
 
-            gl.glMatrixMode( GL2.GL_PROJECTION );
-            gl.glLoadIdentity( );
-            gl.glOrtho( miniMapAxis.getMinX( ), miniMapAxis.getMaxX( ), miniMapAxis.getMinY( ), miniMapAxis.getMaxY( ), -1, 1 );
+            float minX = ( float ) mainMapAxis.getMinX( );
+            float maxX = ( float ) mainMapAxis.getMaxX( );
+            float minY = ( float ) mainMapAxis.getMinY( );
+            float maxY = ( float ) mainMapAxis.getMaxY( );
 
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
-            double minX = mainMapAxis.getMinX( );
-            double maxX = mainMapAxis.getMaxX( );
-            double minY = mainMapAxis.getMinY( );
-            double maxY = mainMapAxis.getMaxY( );
-
-            float lineWidth = 1.0f;
-
-            gl.glLineWidth( lineWidth );
-            gl.glColor4fv( cursorColor, 0 );
-            gl.glBegin( GL2.GL_LINE_LOOP );
+            GLUtils.enableStandardBlending( gl );
             try
             {
-                gl.glVertex2d( minX, minY );
-                gl.glVertex2d( minX, maxY );
-                gl.glVertex2d( maxX, maxY );
-                gl.glVertex2d( maxX, minY );
+                this.fillBuffer.clear( );
+                this.fillBuffer.growQuad2f( minX, minY, maxX, maxY );
+
+                this.fillProg.begin( gl );
+                try
+                {
+                    this.fillProg.setAxisOrtho( gl, miniMapAxis );
+                    this.fillProg.draw( gl, this.fillBuffer, this.shadeColor );
+                }
+                finally
+                {
+                    this.fillProg.end( gl );
+                }
+
+                this.linePath.clear( );
+                this.linePath.addRectangle( minX, minY, maxX, maxY );
+
+                this.lineProg.begin( gl );
+                try
+                {
+                    this.lineProg.setAxisOrtho( gl, miniMapAxis );
+                    this.lineProg.setViewport( gl, bounds );
+
+                    this.lineProg.draw( gl, lineStyle, linePath );
+                }
+                finally
+                {
+                    this.lineProg.end( gl );
+                }
             }
             finally
             {
-                gl.glEnd( );
+                GLUtils.disableBlending( gl );
             }
+        }
 
-            gl.glColor4fv( shadeColor, 0 );
-            gl.glBegin( GL2.GL_QUADS );
-            try
-            {
-                gl.glVertex2d( minX, minY );
-                gl.glVertex2d( minX, maxY );
-                gl.glVertex2d( maxX, maxY );
-                gl.glVertex2d( maxX, minY );
-            }
-            finally
-            {
-                gl.glEnd( );
-            }
+        @Override
+        protected void doDispose( GlimpseContext context )
+        {
+            this.lineProg.dispose( context.getGL( ).getGL3( ) );
+            this.fillProg.dispose( context.getGL( ).getGL3( ) );
+
+            this.fillBuffer.dispose( context.getGL( ) );
+            this.linePath.dispose( context.getGL( ) );
         }
     }
 

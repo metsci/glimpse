@@ -37,7 +37,7 @@ import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 /**
  * A simple plotting area which takes up its entire parent GlimpseLayout
  * (leaving no room for a plot title or axis tick marks).
- * 
+ *
  * @author ulman
  */
 public class EmptyPlot2D extends GlimpseAxisLayout2D

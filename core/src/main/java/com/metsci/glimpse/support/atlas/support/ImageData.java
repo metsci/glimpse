@@ -31,7 +31,7 @@ import com.jogamp.opengl.util.texture.TextureCoords;
 /**
  * An immutable wrapper around {@link ImageDataInternal} used to pass data about
  * images stored in the TextureAtlas to the user.
- * 
+ *
  * @author ulman
  */
 public class ImageData

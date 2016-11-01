@@ -30,7 +30,8 @@ import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
@@ -44,7 +45,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class NumericXAxisPainter extends NumericAxisPainter
+public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
 {
     protected boolean packLabel = false;
 
@@ -54,27 +55,27 @@ public class NumericXAxisPainter extends NumericAxisPainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis1D axis = getAxis1D( context );
+        GL gl = context.getGL( );
+
         updateTextRenderer( );
         if ( textRenderer == null ) return;
 
-        GL2 gl = context.getGL( ).getGL2( );
+        paintTicks( gl, axis, bounds );
+        paintAxisLabel( gl, axis, bounds );
+        paintSelectionLine( gl, axis, bounds );
+    }
+
+    protected void paintTicks( GL gl, Axis1D axis, GlimpseBounds bounds )
+    {
+        GL3 gl3 = gl.getGL3( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMin( ), axis.getMax( ), -0.5, height - 1 + 0.5f, -1, 1 );
-
-        paintTicks( gl, axis, width, height );
-        paintAxisLabel( gl, axis, width, height );
-        paintSelectionLine( gl, axis, width, height );
-    }
-
-    protected void paintTicks( GL2 gl, Axis1D axis, int width, int height )
-    {
         double[] xTicks = ticks.getTickPositions( axis );
         String[] xLabels = ticks.getTickLabels( axis, xTicks );
 
@@ -85,11 +86,13 @@ public class NumericXAxisPainter extends NumericAxisPainter
         double jTick0 = getTickTopY( height, tickSize );
         double jTick1 = getTickBottomY( height, tickSize );
 
-        // Tick marks
-        GlimpseColor.glColor( gl, tickColor );
-        gl.glBegin( GL2.GL_LINES );
+        progLine.begin( gl3 );
         try
         {
+            pathLine.clear( );
+            style.thickness_PX = tickLineWidth;
+            style.rgba = tickColor;
+
             for ( int i = 0; i < xTicks.length; i++ )
             {
                 double iTick = converter.fromAxisUnits( xTicks[i] );
@@ -106,8 +109,8 @@ public class NumericXAxisPainter extends NumericAxisPainter
                     break;
                 }
 
-                gl.glVertex2d( iTick, jTick0 );
-                gl.glVertex2d( iTick, jTick1 );
+                pathLine.moveTo( ( float ) iTick, ( float ) jTick0 );
+                pathLine.lineTo( ( float ) iTick, ( float ) jTick1 );
             }
 
             if ( showMinorTicks )
@@ -120,23 +123,29 @@ public class NumericXAxisPainter extends NumericAxisPainter
                 {
                     double iTick = converter.fromAxisUnits( xMinor[i] );
 
-                    gl.glVertex2d( iTick, jTick0 );
-                    gl.glVertex2d( iTick, jTick1 );
+                    pathLine.moveTo( ( float ) iTick, ( float ) jTick0 );
+                    pathLine.lineTo( ( float ) iTick, ( float ) jTick1 );
                 }
             }
+
+            progLine.setViewport( gl3, bounds );
+            progLine.setOrtho( gl3, ( float ) axis.getMin( ), ( float ) axis.getMax( ), -0.5f, height - 0.5f );
+
+            progLine.draw( gl3, style, pathLine, 1.0 );
         }
         finally
         {
-            gl.glEnd( );
+            progLine.end( gl3 );
         }
 
         if ( showTickLabels )
         {
             // Tick labels
-            GlimpseColor.setColor( textRenderer, tickLabelColor );
             textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, tickLabelColor );
+
                 // Tick labels
                 for ( int i = min + 1; i < max; i++ )
                 {
@@ -174,15 +183,19 @@ public class NumericXAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintAxisLabel( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintAxisLabel( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
         // Axis Label
         if ( showLabel )
         {
-            GlimpseColor.setColor( textRenderer, axisLabelColor );
+            int width = bounds.getWidth( );
+            int height = bounds.getHeight( );
+
             textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, axisLabelColor );
+
                 String label = ticks.getAxisLabel( axis );
                 Rectangle2D axisLabelBounds = textRenderer.getBounds( label );
                 int iAxisLabel = round( 0.5f * ( width - ( int ) axisLabelBounds.getWidth( ) ) );
@@ -197,24 +210,31 @@ public class NumericXAxisPainter extends NumericAxisPainter
         }
     }
 
-    protected void paintSelectionLine( GL2 gl, Axis1D axis, int width, int height )
+    protected void paintSelectionLine( GL gl, Axis1D axis, GlimpseBounds bounds )
     {
         // Selection line
         if ( showSelectionLine )
         {
-            gl.glLineWidth( markerWidth );
+            GL3 gl3 = gl.getGL3( );
 
-            double x0 = axis.getSelectionCenter( );
+            int height = bounds.getHeight( );
+            float x0 = ( float ) axis.getSelectionCenter( );
 
-            gl.glBegin( GL2.GL_LINES );
+            progLine.begin( gl3 );
             try
             {
-                gl.glVertex2d( x0, 0 );
-                gl.glVertex2d( x0, height );
+                pathLine.clear( );
+                style.thickness_PX = markerWidth;
+                style.rgba = tickColor;
+
+                pathLine.moveTo( x0, 0 );
+                pathLine.lineTo( x0, height );
+
+                progLine.draw( gl3, style, pathLine, 1.0 );
             }
             finally
             {
-                gl.glEnd( );
+                progLine.end( gl3 );
             }
         }
     }

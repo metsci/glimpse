@@ -38,7 +38,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
 /**
  * Locks the Axis2D so that zoom events always go up/down a single zoom level.
  * This is more important for the map tiles than for the imagery.
- * 
+ *
  * @author oren
  */
 public class SlippyAxisMouseListener2D extends AxisMouseListener2D
@@ -121,7 +121,7 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
 
         double lonTileSizeDeg = 360 / zoomFactor;
         double latTileSizeDeg = 170.1022 / zoomFactor;
-        
+
         double dLat = ( yTileDim / 2. ) * latTileSizeDeg;
         double dLon = ( xTileDim / 2. ) * lonTileSizeDeg;
         Vector2d maxVec = geoProj.project( LatLonGeo.fromDeg( center.getLatDeg( ) + dLat, center.getLonDeg( ) + dLon ) );

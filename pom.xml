@@ -53,6 +53,7 @@
     <modules>
 
         <module>util</module>
+        <module>text</module>
 
         <module>platform-fixes</module>
 
@@ -65,7 +66,6 @@
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>
-        <module>extras-spacenav</module>
         <module>extras-swt</module>
         <module>extras-examples</module>
         <module>extras-worldwind</module>
@@ -185,11 +185,18 @@
                     <aggregate>true</aggregate>
                     <includes>
                         <include>src/main/java/**</include>
+                        <include>src/test/java/**</include>
+                        <include>**/*.fs</include>
+                        <include>**/*.vs</include>
+                        <include>**/*.gs</include>
                     </includes>
                     <mapping>
                         <!-- using JAVADOC_STYLE can sometimes cause the 
                             license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
                         <java>SLASHSTAR_STYLE</java>
+                        <fs>DOUBLESLASH_STYLE</fs>
+                        <vs>DOUBLESLASH_STYLE</vs>
+                        <gs>DOUBLESLASH_STYLE</gs>
                     </mapping>
                     <excludes>
                         <exclude>target/**</exclude>
@@ -207,6 +214,7 @@
                         <exclude>**/TextureAtlas.java</exclude>
                         <exclude>**/ElevatedSurfaceTileRenderer.java</exclude>
                         <exclude>**/ElevatedSectorGeometryList.java</exclude>
+                        <exclude>**/RectanglePacker.java</exclude>
                     </excludes>
                     <useDefaultExcludes>true</useDefaultExcludes>
                     <useDefaultMapping>true</useDefaultMapping>

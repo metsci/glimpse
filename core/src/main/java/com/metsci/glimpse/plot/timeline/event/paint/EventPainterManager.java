@@ -30,13 +30,15 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.List;
 
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL;
 
 import com.google.common.collect.Lists;
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter1D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.Event;
 import com.metsci.glimpse.plot.timeline.event.EventManager;
@@ -50,10 +52,10 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
  * Paints 1D events with associated color, time span, icon, and label information.
- * 
+ *
  * @author ulman
  */
-public class EventPainterManager extends GlimpseDataPainter1D
+public class EventPainterManager extends GlimpsePainterBase
 {
     protected EventPlotInfo plot;
     protected EventManager manager;
@@ -206,8 +208,12 @@ public class EventPainterManager extends GlimpseDataPainter1D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis1D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GlimpseBounds bounds = getBounds( context );
+        Axis1D axis = requireAxis1D( context );
+        GL gl = context.getGL( );
+
         if ( newFont != null )
         {
             if ( textRenderer != null ) textRenderer.dispose( );
@@ -217,6 +223,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
 
         if ( textRenderer == null ) return;
 
+        GLUtils.enableStandardBlending( gl );
         manager.lock( );
         try
         {
@@ -248,7 +255,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
                         }
                         else
                         {
-                            prev.getEventPainter( ).paint( gl, prev, next, plot, bounds, axis, ( int ) posMin, ( int ) posMax );
+                            prev.getEventPainter( ).paint( context, prev, next, plot, ( int ) posMin, ( int ) posMax );
                         }
                     }
 
@@ -264,7 +271,7 @@ public class EventPainterManager extends GlimpseDataPainter1D
                     }
                     else
                     {
-                        prev.getEventPainter( ).paint( gl, prev, null, plot, bounds, axis, ( int ) posMin, ( int ) posMax );
+                        prev.getEventPainter( ).paint( context, prev, null, plot, ( int ) posMin, ( int ) posMax );
                     }
                 }
 
@@ -273,11 +280,12 @@ public class EventPainterManager extends GlimpseDataPainter1D
             }
 
             // paint all the events which did not have a custom painter
-            defaultPainter.paint( gl, plot, bounds, axis, events );
+            defaultPainter.paint( context, plot, events );
         }
         finally
         {
             manager.unlock( );
+            GLUtils.disableBlending( gl );
         }
     }
 
@@ -303,5 +311,12 @@ public class EventPainterManager extends GlimpseDataPainter1D
             setBorderColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
             borderColorSet = false;
         }
+    }
+
+    @Override
+    protected void doDispose( GlimpseContext context )
+    {
+        this.atlas.dispose( );
+        this.textRenderer.dispose( );
     }
 }

@@ -30,7 +30,7 @@ import com.metsci.glimpse.charts.shoreline.LandShapePainter;
 
 /**
  * Deprecated in favor of com.metsci.glimpse.charts.shoreline.LandShapePainter.
- * 
+ *
  * Displays shoreline data available from the NOAA/NGDC Coastline Extractor
  * tool at http://www.ngdc.noaa.gov/mgg_coastline/</p>
  *

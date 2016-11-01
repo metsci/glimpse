@@ -1,0 +1,8 @@
+line_multi_color
+
+Draws 2D lines with feathered edges, stippling, and joins and segment colors specified in an attribute array
+
+Java Wrappers:
+ * com.metsci.glimpse.support.line.ColorLineProgram
+
+Usage Examples:

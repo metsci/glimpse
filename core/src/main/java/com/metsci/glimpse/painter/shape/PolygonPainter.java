@@ -26,7 +26,18 @@
  */
 package com.metsci.glimpse.painter.shape;
 
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.BYTES_PER_FLOAT;
+import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_BYTE;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -42,15 +53,21 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GL2ES3;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
+import com.metsci.glimpse.gl.util.GLErrorUtils;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.interval.IntervalQuadTree;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
@@ -59,6 +76,10 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
 import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.support.shader.line.LineUtils;
+import com.metsci.glimpse.support.shader.line.StreamingLinePath;
 
 /**
  * Paints large collections of arbitrary polygons (including concave polygons).
@@ -67,9 +88,15 @@ import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
  *
  * @author ulman
  */
-public class PolygonPainter extends GlimpsePainter2D
+public class PolygonPainter extends GlimpsePainterBase
 {
+    private static final Logger logger = Logger.getLogger( PolygonPainter.class.getName( ) );
+
     protected static final double DELETE_EXPAND_FACTOR = 1.2;
+
+    protected static final int FLOATS_PER_VERTEX = 3;
+
+    protected static final double ppvAspectRatioThreshold = 1.0000000001;
 
     //@formatter:off
     protected byte halftone[] = {
@@ -103,8 +130,10 @@ public class PolygonPainter extends GlimpsePainter2D
 
     protected PolygonTessellator tessellator;
 
-    protected int dataBufferSize = 0;
-    protected FloatBuffer dataBuffer = null;
+    protected int tempBufferSize = 0;
+    protected FloatBuffer xyTempBuffer = null;
+    protected ByteBuffer flagTempBuffer = null;
+    protected FloatBuffer mileageTempBuffer = null;
 
     // mapping from id to Group
     protected Map<Object, Group> groups;
@@ -120,6 +149,11 @@ public class PolygonPainter extends GlimpsePainter2D
     protected Long globalSelectionStart;
     protected Long globalSelectionEnd;
 
+    protected PolygonPainterFlatColorProgram triangleFlatProg;
+    protected PolygonPainterLineProgram lineProg;
+
+    double ppvAspectRatio = Double.NaN;
+
     public PolygonPainter( )
     {
         this.tessellator = new PolygonTessellator( );
@@ -129,6 +163,9 @@ public class PolygonPainter extends GlimpsePainter2D
         this.loadedGroups = new LinkedHashMap<Object, LoadedGroup>( );
 
         this.updateLock = new ReentrantLock( );
+
+        this.triangleFlatProg = new PolygonPainterFlatColorProgram( );
+        this.lineProg = new PolygonPainterLineProgram( );
     }
 
     public void addPolygon( Object groupId, Object polygonId, float[] dataX, float[] dataY, float z )
@@ -461,6 +498,24 @@ public class PolygonPainter extends GlimpsePainter2D
         }
     }
 
+    public void setLineStyle( Object groupId, LineStyle style )
+    {
+        this.updateLock.lock( );
+        try
+        {
+            Group group = getOrCreateGroup( groupId );
+
+            group.setLineStyle( style );
+
+            this.updatedGroups.add( group );
+            this.newData = true;
+        }
+        finally
+        {
+            this.updateLock.unlock( );
+        }
+    }
+
     /**
      * Deletes all Polygon groups, removing their display settings and reclaiming memory.
      */
@@ -588,13 +643,18 @@ public class PolygonPainter extends GlimpsePainter2D
     // must be called while holding trackUpdateLock
     protected void ensureDataBufferSize( int needed )
     {
-        if ( dataBuffer == null || dataBufferSize < needed )
+        if ( xyTempBuffer == null || tempBufferSize < needed )
         {
-            dataBufferSize = needed;
-            dataBuffer = ByteBuffer.allocateDirect( needed * 3 * 4 ).order( ByteOrder.nativeOrder( ) ).asFloatBuffer( );
+            tempBufferSize = needed;
+            xyTempBuffer = ByteBuffer.allocateDirect( needed * FLOATS_PER_VERTEX * BYTES_PER_FLOAT ).order( ByteOrder.nativeOrder( ) ).asFloatBuffer( );
+            flagTempBuffer = ByteBuffer.allocateDirect( needed ).order( ByteOrder.nativeOrder( ) );
+            mileageTempBuffer = ByteBuffer.allocateDirect( needed * BYTES_PER_FLOAT ).order( ByteOrder.nativeOrder( ) ).asFloatBuffer( );
+
         }
 
-        dataBuffer.rewind( );
+        xyTempBuffer.rewind( );
+        flagTempBuffer.rewind( );
+        mileageTempBuffer.rewind( );
     }
 
     protected LoadedGroup getOrCreateLoadedGroup( Object id, Group group )
@@ -609,9 +669,17 @@ public class PolygonPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = requireAxis2D( context );
+        double newPpvAspectRatio = LineUtils.ppvAspectRatio( axis );
+
+        boolean keepPpvAspectRatio = newPpvAspectRatio / ppvAspectRatioThreshold <= this.ppvAspectRatio && this.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold;
+        if ( !keepPpvAspectRatio )
+        {
+            this.ppvAspectRatio = newPpvAspectRatio;
+        }
 
         // something in a Group has changed so we must copy these
         // changes to the corresponding LoadedGroup (which is accessed
@@ -619,7 +687,7 @@ public class PolygonPainter extends GlimpsePainter2D
         // to render the polygon updates without synchronizing on updateLock
         // because the changes have been copied from the Group to its
         // corresponding LoadedGroup).
-        if ( this.newData )
+        if ( this.newData || !keepPpvAspectRatio )
         {
             // groups are modified by the user and protected by updateLock
             this.updateLock.lock( );
@@ -652,10 +720,23 @@ public class PolygonPainter extends GlimpsePainter2D
                     // copy settings from the Group to the LoadedGroup
                     loaded.loadSettings( group );
 
+                    // determine if the ppvAspectRatioChanged
+                    boolean keepPpvAspectRatioLoaded = !loaded.lineStyle.stippleEnable || ( newPpvAspectRatio / ppvAspectRatioThreshold <= loaded.ppvAspectRatio && loaded.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
+
+                    if ( !keepPpvAspectRatioLoaded )
+                    {
+                        loaded.ppvAspectRatio = newPpvAspectRatio;
+                    }
+
                     if ( group.polygonsInserted )
                     {
-                        updateVertices( gl, loaded, group, true );
-                        updateVertices( gl, loaded, group, false );
+                        updateVerticesFill( gl, loaded, group );
+                        updateVerticesLine( context, loaded, group, !keepPpvAspectRatioLoaded );
+                    }
+                    // if nothing was inserted, but the aspect ratio changed, we still need to update the line vertices
+                    else if ( !keepPpvAspectRatioLoaded )
+                    {
+                        updateVerticesLine( context, loaded, group, true );
                     }
 
                     if ( group.polygonsSelected )
@@ -667,6 +748,23 @@ public class PolygonPainter extends GlimpsePainter2D
                     group.reset( );
                 }
 
+                // if the ppv aspect ratio changed, we need to recreate the mileage array for all polygons
+                // (but we only need to do so for groups with stippling enabled which weren't already updated
+                //  because they were in the updatedGroups list)
+                if ( !keepPpvAspectRatio )
+                {
+                    for ( Object id : loadedGroups.keySet( ) )
+                    {
+                        Group group = groups.get( id );
+                        LoadedGroup loaded = loadedGroups.get( id );
+                        if ( loaded.lineStyle.stippleEnable && !updatedGroups.contains( group ) )
+                        {
+                            loaded.ppvAspectRatio = newPpvAspectRatio;
+                            updateVerticesLine( context, loaded, group, true );
+                        }
+                    }
+                }
+
                 this.updatedGroups.clear( );
                 this.newData = false;
             }
@@ -675,45 +773,39 @@ public class PolygonPainter extends GlimpsePainter2D
                 this.updateLock.unlock( );
             }
 
-            glHandleError( gl, "Update Error" );
+            GLErrorUtils.logGLError( logger, gl, "Update Error" );
         }
 
         if ( loadedGroups.isEmpty( ) ) return;
 
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1 << 23, 1 );
-
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-        gl.glEnable( GL2.GL_LINE_SMOOTH );
-
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        for ( LoadedGroup loaded : loadedGroups.values( ) )
+        enableStandardBlending( gl );
+        try
         {
-            drawGroup( gl, loaded );
+            for ( LoadedGroup loaded : loadedGroups.values( ) )
+            {
+                drawGroup( context, loaded );
+            }
+        }
+        finally
+        {
+            disableBlending( gl );
         }
 
-        glHandleError( gl, "Draw Error" );
-
-        gl.glDisable( GL2.GL_DEPTH_TEST );
-        gl.glDisable( GL2.GL_BLEND );
-        gl.glDisable( GL2.GL_LINE_SMOOTH );
+        GLErrorUtils.logGLError( logger, gl, "Draw Error" );
     }
 
-    protected void updateVertices( GL gl, LoadedGroup loaded, Group group, boolean fill )
+    protected void updateVerticesFill( GL gl, LoadedGroup loaded, Group group )
     {
-        boolean initialized = fill ? loaded.glFillBufferInitialized : loaded.glLineBufferInitialized;
-        int maxSize = fill ? loaded.glFillBufferMaxSize : loaded.glLineBufferMaxSize;
-        int currentSize = fill ? loaded.glFillBufferCurrentSize : loaded.glLineBufferCurrentSize;
-        int insertSize = fill ? group.fillInsertVertexCount : group.lineInsertVertexCount;
-        int totalSize = fill ? group.totalFillVertexCount : group.totalLineVertexCount;
-        int handle = fill ? loaded.glFillBufferHandle : loaded.glLineBufferHandle;
+        boolean initialized = loaded.glFillBufferInitialized;
+        int maxSize = loaded.glFillBufferMaxSize;
+        int currentSize = loaded.glFillBufferCurrentSize;
+        int insertSize = group.fillInsertVertexCount;
+        int totalSize = group.totalFillVertexCount;
+        int handle = loaded.glFillBufferHandle;
 
         // the size needed is the current buffer location plus new inserts (we cannot use
         // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
-        // polygons have been deleted
+        // polygons have been deleted)
         int sizeNeeded = currentSize + insertSize;
 
         if ( !initialized || maxSize < sizeNeeded )
@@ -749,37 +841,17 @@ public class PolygonPainter extends GlimpsePainter2D
             // copy all the track data into a host buffer
             ensureDataBufferSize( maxSize );
 
-            if ( fill )
-            {
-                loaded.loadFillVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
-                loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
-            }
-            else
-            {
-                loaded.loadLineVerticesIntoBuffer( group, dataBuffer, 0, group.polygonMap.values( ) );
-                loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
-            }
+            loaded.loadFillVerticesIntoBuffer( group.polygonMap.values( ), group, xyTempBuffer, 0 );
+            loaded.loadFillSelectionIntoBuffer( group.selectedPolygons, group.selectedFillPrimitiveCount, 0 );
 
             // copy data from the host buffer into the device buffer
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, handle );
-            glHandleError( gl, "glBindBuffer Error  (Case 1)" );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, maxSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-            glHandleError( gl, "glBufferData Error" );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * 3 * GLUtils.BYTES_PER_FLOAT, xyTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
 
-            if ( fill )
-            {
-                loaded.glFillBufferInitialized = true;
-                loaded.glFillBufferCurrentSize = totalSize;
-                loaded.glFillBufferHandle = handle;
-                loaded.glFillBufferMaxSize = maxSize;
-            }
-            else
-            {
-                loaded.glLineBufferInitialized = true;
-                loaded.glLineBufferCurrentSize = totalSize;
-                loaded.glLineBufferHandle = handle;
-                loaded.glLineBufferMaxSize = maxSize;
-            }
+            loaded.glFillBufferInitialized = true;
+            loaded.glFillBufferCurrentSize = totalSize;
+            loaded.glFillBufferHandle = handle;
+            loaded.glFillBufferMaxSize = maxSize;
         }
         else
         {
@@ -788,122 +860,209 @@ public class PolygonPainter extends GlimpsePainter2D
             // copy all the new track data into a host buffer
             ensureDataBufferSize( insertSize );
 
-            if ( fill )
-            {
-                loaded.loadFillVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
-                loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
-            }
-            else
-            {
-                loaded.loadLineVerticesIntoBuffer( group, dataBuffer, currentSize, group.newPolygons );
-                loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
-            }
+            loaded.loadFillVerticesIntoBuffer( group.newPolygons, group, xyTempBuffer, currentSize );
+            loaded.loadFillSelectionIntoBuffer( group.newSelectedPolygons, group.selectedFillPrimitiveCount );
 
             // update the device buffer with the new data
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, handle );
-            glHandleError( gl, "glBindBuffer Error  (Case 2)" );
-            gl.glBufferSubData( GL2.GL_ARRAY_BUFFER, currentSize * 3 * BYTES_PER_FLOAT, insertSize * 3 * BYTES_PER_FLOAT, dataBuffer.rewind( ) );
-            glHandleError( gl, "glBufferSubData Error" );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, handle );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * 3 * GLUtils.BYTES_PER_FLOAT, insertSize * 3 * GLUtils.BYTES_PER_FLOAT, xyTempBuffer.rewind( ) );
 
-            if ( fill )
-            {
-                loaded.glFillBufferCurrentSize = sizeNeeded;
-            }
-            else
-            {
-                loaded.glLineBufferCurrentSize = sizeNeeded;
-            }
+            loaded.glFillBufferCurrentSize = sizeNeeded;
         }
     }
 
-    protected void drawGroup( GL2 gl, LoadedGroup loaded )
+    protected void updateVerticesLine( GlimpseContext context, LoadedGroup loaded, Group group, boolean ppvAspectRatioChanged )
+    {
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+        double ppvAspectRatio = LineUtils.ppvAspectRatio( axis );
+
+        boolean initialized = loaded.glLineBufferInitialized;
+        int maxSize = loaded.glLineBufferMaxSize;
+        int currentSize = loaded.glLineBufferCurrentSize;
+        int insertSize = group.lineInsertVertexCount;
+        int totalSize = group.totalLineVertexCount;
+        int xyHandle = loaded.glLineXyBufferHandle;
+        int flagHandle = loaded.glLineFlagBufferHandle;
+        int mileageHandle = loaded.glLineMileageBufferHandle;
+
+        // the size needed is the current buffer location plus new inserts (we cannot use
+        // group.totalLineVertexCount because that will be smaller than lineSizeNeeded if
+        // polygons have been deleted)
+        int sizeNeeded = currentSize + insertSize;
+
+        if ( !initialized || maxSize < sizeNeeded || ppvAspectRatioChanged )
+        {
+            // if we've deleted vertices, but are still close to the max buffer size, then
+            // go ahead and expand the max buffer size anyway
+            // if we're far below the max because of deletions, don't expand the array
+            if ( !initialized || maxSize < DELETE_EXPAND_FACTOR * totalSize )
+            {
+                // if the track doesn't have a gl buffer or it is too small we must
+                // copy all the track's data into a new, larger buffer
+
+                // if this is the first time we have allocated memory for this track
+                // don't allocate any extra, it may never get added to
+                // however, once a track has been updated once, we assume it is likely
+                // to be updated again and give it extra memory
+                if ( initialized )
+                {
+                    if ( xyHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { xyHandle }, 0 );
+                    if ( flagHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { flagHandle }, 0 );
+                    if ( mileageHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { mileageHandle }, 0 );
+                    maxSize = Math.max( ( int ) ( maxSize * 1.5 ), totalSize );
+                }
+                else
+                {
+                    maxSize = totalSize;
+                }
+
+                // create a new device buffer handle
+                int[] bufferHandle = new int[1];
+
+                gl.glGenBuffers( 1, bufferHandle, 0 );
+                xyHandle = bufferHandle[0];
+
+                gl.glGenBuffers( 1, bufferHandle, 0 );
+                flagHandle = bufferHandle[0];
+
+                gl.glGenBuffers( 1, bufferHandle, 0 );
+                mileageHandle = bufferHandle[0];
+            }
+
+            // copy all the track data into a host buffer
+            ensureDataBufferSize( maxSize );
+
+            loaded.loadLineVerticesIntoBuffer( group.polygonMap.values( ), group, xyTempBuffer, flagTempBuffer, mileageTempBuffer, 0, ppvAspectRatio );
+            loaded.loadLineSelectionIntoBuffer( group.selectedPolygons, group.selectedLinePrimitiveCount, 0 );
+
+            // copy data from the host buffer into the device buffer
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyHandle );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * FLOATS_PER_VERTEX * BYTES_PER_FLOAT, xyTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, flagHandle );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize, flagTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mileageHandle );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, maxSize * BYTES_PER_FLOAT, mileageTempBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
+
+            loaded.glLineBufferInitialized = true;
+            loaded.glLineBufferCurrentSize = totalSize;
+            loaded.glLineXyBufferHandle = xyHandle;
+            loaded.glLineFlagBufferHandle = flagHandle;
+            loaded.glLineMileageBufferHandle = mileageHandle;
+            loaded.glLineBufferMaxSize = maxSize;
+        }
+        else
+        {
+            // there is enough empty space in the device buffer to accommodate all the new data
+
+            // copy all the new track data into a host buffer
+            ensureDataBufferSize( insertSize );
+
+            loaded.loadLineVerticesIntoBuffer( group.newPolygons, group, xyTempBuffer, flagTempBuffer, mileageTempBuffer, currentSize, ppvAspectRatio );
+            loaded.loadLineSelectionIntoBuffer( group.newSelectedPolygons, group.selectedLinePrimitiveCount );
+
+            // update the device buffer with the new data
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyHandle );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * FLOATS_PER_VERTEX * BYTES_PER_FLOAT, insertSize * FLOATS_PER_VERTEX * BYTES_PER_FLOAT, xyTempBuffer.rewind( ) );
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, flagHandle );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize, insertSize, flagTempBuffer.rewind( ) );
+
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, mileageHandle );
+            gl.glBufferSubData( GL.GL_ARRAY_BUFFER, currentSize * BYTES_PER_FLOAT, insertSize * BYTES_PER_FLOAT, mileageTempBuffer.rewind( ) );
+
+            loaded.glLineBufferCurrentSize = sizeNeeded;
+        }
+    }
+
+    protected void drawGroup( GlimpseContext context, LoadedGroup loaded )
     {
         if ( !isGroupReady( loaded ) ) return;
 
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
         if ( loaded.fillOn )
         {
-            gl.glColor4fv( loaded.fillColor, 0 );
-
-            if ( loaded.polyStippleOn )
+            triangleFlatProg.begin( gl );
+            try
             {
-                gl.glEnable( GL2.GL_POLYGON_STIPPLE );
-                gl.glPolygonStipple( loaded.polyStipplePattern, 0 );
-            }
+                triangleFlatProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                triangleFlatProg.setColor( gl, loaded.fillColor );
 
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glFillBufferHandle );
-            gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
+                loaded.glFillOffsetBuffer.rewind( );
+                loaded.glFillCountBuffer.rewind( );
 
-            loaded.glFillOffsetBuffer.rewind( );
-            loaded.glFillCountBuffer.rewind( );
-
-            // A count > 65535 causes problems on some ATI cards, so we must loop through the
-            // groups of primitives and split them up where necessary.  An alternate way would be
-            // to construct the count and offset arrays so that groups are less then 65535 in size.
-            // There is some evidence on web forums that this may provide performance benefits as well
-            // when dynamic data is being used.
-            for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
-            {
-                int fillCountTotal = loaded.glFillCountBuffer.get( i );
-                int fillCountRemaining = fillCountTotal;
-                while ( fillCountRemaining > 0 )
+                // A count > 65535 causes problems on some ATI cards, so we must loop through the
+                // groups of primitives and split them up where necessary.  An alternate way would be
+                // to construct the count and offset arrays so that groups are less then 65535 in size.
+                // There is some evidence on web forums that this may provide performance benefits as well
+                // when dynamic data is being used.
+                for ( int i = 0; i < loaded.glTotalFillPrimitives; i++ )
                 {
-                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
-                    int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                    gl.glDrawArrays( GL2.GL_TRIANGLES, offset, fillCount );
-                    fillCountRemaining -= fillCount;
+                    int fillCountTotal = loaded.glFillCountBuffer.get( i );
+                    int fillCountRemaining = fillCountTotal;
+                    while ( fillCountRemaining > 0 )
+                    {
+                        int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 3
+                        int offset = loaded.glFillOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
+
+                        triangleFlatProg.draw( gl, GL.GL_TRIANGLES, loaded.glFillBufferHandle, offset, fillCount );
+
+                        fillCountRemaining -= fillCount;
+                    }
                 }
+
+                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+                // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
             }
-
-            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-            // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
-
-            if ( loaded.polyStippleOn )
+            finally
             {
-                gl.glDisable( GL2.GL_POLYGON_STIPPLE );
+                triangleFlatProg.end( gl );
             }
         }
 
         if ( loaded.linesOn )
         {
-            gl.glColor4fv( loaded.lineColor, 0 );
-            gl.glLineWidth( loaded.lineWidth );
-
-            if ( loaded.lineStippleOn )
+            lineProg.begin( gl );
+            try
             {
-                gl.glEnable( GL2.GL_LINE_STIPPLE );
-                gl.glLineStipple( loaded.lineStippleFactor, loaded.lineStipplePattern );
-            }
+                lineProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                lineProg.setViewport( gl, bounds );
+                lineProg.setStyle( gl, loaded.lineStyle );
 
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, loaded.glLineBufferHandle );
-            gl.glVertexPointer( 3, GL2.GL_FLOAT, 0, 0 );
+                loaded.glLineOffsetBuffer.rewind( );
+                loaded.glLineCountBuffer.rewind( );
 
-            loaded.glLineOffsetBuffer.rewind( );
-            loaded.glLineCountBuffer.rewind( );
-
-            // A count > 65535 causes problems on some ATI cards, so we must loop through the
-            // groups of primitives and split them up where necessary.  An alternate way would be
-            // to construct the count and offset arrays so that groups are less then 65535 in size.
-            // There is some evidence on web forums that this may provide performance benefits as well
-            // when dynamic data is being used.
-            for ( int i = 0; i < loaded.glTotalLinePrimitives; i++ )
-            {
-                int fillCountTotal = loaded.glLineCountBuffer.get( i );
-                int fillCountRemaining = fillCountTotal;
-                while ( fillCountRemaining > 0 )
+                // A count > 65535 causes problems on some ATI cards, so we must loop through the
+                // groups of primitives and split them up where necessary.  An alternate way would be
+                // to construct the count and offset arrays so that groups are less then 65535 in size.
+                // There is some evidence on web forums that this may provide performance benefits as well
+                // when dynamic data is being used.
+                for ( int i = 0; i < loaded.glTotalLinePrimitives; i++ )
                 {
-                    int fillCount = Math.min( 60000, fillCountRemaining ); // divisible by 2
-                    int offset = loaded.glLineOffsetBuffer.get( i ) + ( fillCountTotal - fillCountRemaining );
-                    gl.glDrawArrays( GL2.GL_LINE_LOOP, offset, fillCount );
-                    fillCountRemaining -= fillCount;
+                    int lineCountTotal = loaded.glLineCountBuffer.get( i );
+                    int lineCountRemaining = lineCountTotal;
+                    while ( lineCountRemaining > 0 )
+                    {
+                        int lineCount = Math.min( 60000, lineCountRemaining ); // divisible by 2
+                        int offset = loaded.glLineOffsetBuffer.get( i ) + ( lineCountTotal - lineCountRemaining );
+
+                        lineProg.draw( gl, loaded.glLineXyBufferHandle, loaded.glLineFlagBufferHandle, loaded.glLineMileageBufferHandle, offset, lineCount );
+
+                        lineCountRemaining -= lineCount;
+                    }
                 }
+
+                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
+                // gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
             }
-
-            // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-            // gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
-
-            if ( loaded.lineStippleOn )
+            finally
             {
-                gl.glDisable( GL2.GL_LINE_STIPPLE );
+                lineProg.end( gl );
             }
         }
     }
@@ -972,9 +1131,9 @@ public class PolygonPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        GL gl = context.getGL( );
+        GL3 gl = getGL3( context );
 
         this.updateLock.lock( );
         try
@@ -1058,7 +1217,9 @@ public class PolygonPainter extends GlimpsePainter2D
             {
                 Loop loop = iter.next( );
                 int size = loop.size( );
-                vertexCount += size;
+                // add 2 phantom vertices expected by LineProgram (see LinePathData)
+                // and 1 vertex to close the loop
+                vertexCount += size + 3;
                 primitiveCount += 1;
             }
 
@@ -1078,11 +1239,13 @@ public class PolygonPainter extends GlimpsePainter2D
          * the provided FloatBuffer.
          *
          * @param zCoord the z-value to use for this polygon
-         * @param vertexBuffer the buffer to load into
+         * @param xyBuffer the buffer to load xy coordinates into
+         * @param flagBuffer the buffer to load LinePathData flags into
+         * @param mileageBuffer the buffer to load mileage into for stippling
          * @param offsetVertex the offset of the Polygon vertices from the start of the vertexBuffer
          * @return the number of vertices added to the buffer
          */
-        public int loadLineVerticesIntoBuffer( float zCoord, FloatBuffer vertexBuffer, int offsetVertex )
+        public int loadLineVerticesIntoBuffer( FloatBuffer xyBuffer, ByteBuffer flagBuffer, FloatBuffer mileageBuffer, float zCoord, int offsetVertex, double ppvAspectRatio )
         {
             int totalSize = 0;
             int primitiveCount = 0;
@@ -1092,29 +1255,68 @@ public class PolygonPainter extends GlimpsePainter2D
                 Loop loop = iter.next( );
                 int size = loop.size( );
 
-                for ( int i = 0; i < size; i++ )
+                if ( size >= 2 )
                 {
-                    double[] vertex = loop.get( i );
-                    vertexBuffer.put( ( float ) vertex[0] ).put( ( float ) vertex[1] ).put( zCoord );
+                    // see LinePathData for explanation of phantom vertices in line loops
+                    // we add the last vertex, not the second to last, as indicated in LinePathData because
+                    // loop does not duplicate the first vertex in the last vertex (closing the loop is implied)
+                    double[] phantom = loop.get( size - 1 );
+                    xyBuffer.put( ( float ) phantom[0] ).put( ( float ) phantom[1] ).put( zCoord );
+                    mileageBuffer.put( 0 );
+                    flagBuffer.put( ( byte ) 0 );
+
+                    double[] priorVertex = loop.get( 0 );
+                    double distance = 0;
+
+                    for ( int i = 0; i < size; i++ )
+                    {
+                        double[] vertex = loop.get( i );
+                        distance += LineUtils.distance( priorVertex[0], priorVertex[1], vertex[0], vertex[1], ppvAspectRatio );
+
+                        xyBuffer.put( ( float ) vertex[0] ).put( ( float ) vertex[1] ).put( zCoord );
+                        mileageBuffer.put( ( float ) distance );
+                        flagBuffer.put( ( byte ) ( i == 0 ? FLAGS_JOIN : FLAGS_CONNECT | FLAGS_JOIN ) );
+
+                        priorVertex = vertex;
+                    }
+
+                    // close the loop by adding first vertex again
+                    double[] vertex = loop.get( 0 );
+                    distance += LineUtils.distance( priorVertex[0], priorVertex[1], vertex[0], vertex[1], ppvAspectRatio );
+                    xyBuffer.put( ( float ) vertex[0] ).put( ( float ) vertex[1] ).put( zCoord );
+                    mileageBuffer.put( ( float ) distance );
+                    flagBuffer.put( ( byte ) ( FLAGS_CONNECT | FLAGS_JOIN ) );
+
+                    // see LinePathData for explanation of phantom vertices in line loops
+                    phantom = loop.get( 1 );
+                    xyBuffer.put( ( float ) phantom[0] ).put( ( float ) phantom[1] ).put( zCoord );
+                    mileageBuffer.put( 0 );
+                    flagBuffer.put( ( byte ) 0 );
+
+                    lineOffsets[primitiveCount] = offsetVertex + totalSize;
+                    // add 2 to account for phantom vertices and 1 to account for the loop closing vertex
+                    lineSizes[primitiveCount] = size + 3;
+
+                    primitiveCount++;
+                    totalSize += size + 3;
                 }
-
-                lineOffsets[primitiveCount] = offsetVertex + totalSize;
-                lineSizes[primitiveCount] = size;
-
-                primitiveCount++;
-                totalSize += size;
             }
 
             return lineVertexCount;
         }
 
-        public void loadLineIntoBuffer( IntBuffer offsetBuffer, IntBuffer sizeBuffer )
+        public int loadLineIntoBuffer( IntBuffer offsetBuffer, IntBuffer sizeBuffer )
         {
+            int sum = 0;
+
             for ( int index = 0; index < linePrimitiveCount; index++ )
             {
                 offsetBuffer.put( lineOffsets[index] );
                 sizeBuffer.put( lineSizes[index] );
+                sum += lineSizes[index];
             }
+
+            return sum;
         }
 
         public int loadFillVerticesIntoBuffer( float zCoord, FloatBuffer vertexBuffer, int offsetVertex )
@@ -1209,13 +1411,8 @@ public class PolygonPainter extends GlimpsePainter2D
     private static class LoadedGroup
     {
         //// group display attributes ////
-        float[] lineColor = new float[4];
-        float lineWidth;
+        LineStyle lineStyle;
         boolean linesOn;
-
-        int lineStippleFactor;
-        short lineStipplePattern;
-        boolean lineStippleOn;
 
         byte[] polyStipplePattern = new byte[128];
         boolean polyStippleOn;
@@ -1232,7 +1429,11 @@ public class PolygonPainter extends GlimpsePainter2D
         // a reference to the device buffer holding tesselated geometry for this polygon
         int glFillBufferHandle;
         // a reference to the device buffer holding line outline geometry for this polygon
-        int glLineBufferHandle;
+        int glLineXyBufferHandle;
+        // a reference to the device buffer holding line flags for this group (see LinePath)
+        int glLineFlagBufferHandle;
+        // a reference to the device buffer holding line mileage for this group (see LinePath)
+        int glLineMileageBufferHandle;
 
         // the maximum allocated size of the device buffer for this track
         int glFillBufferMaxSize;
@@ -1254,6 +1455,8 @@ public class PolygonPainter extends GlimpsePainter2D
         // the number of elements in glFillOffsetBuffer and glFillCountBuffer
         int glTotalFillPrimitives;
 
+        double ppvAspectRatio = Double.NaN;
+
         public LoadedGroup( Group group )
         {
             this.loadSettings( group );
@@ -1264,25 +1467,16 @@ public class PolygonPainter extends GlimpsePainter2D
             this.glTotalLinePrimitives = group.selectedLinePrimitiveCount;
             this.glTotalFillPrimitives = group.selectedFillPrimitiveCount;
 
-            this.lineColor[0] = group.lineColor[0];
-            this.lineColor[1] = group.lineColor[1];
-            this.lineColor[2] = group.lineColor[2];
-            this.lineColor[3] = group.lineColor[3];
-
             this.fillColor[0] = group.fillColor[0];
             this.fillColor[1] = group.fillColor[1];
             this.fillColor[2] = group.fillColor[2];
             this.fillColor[3] = group.fillColor[3];
 
-            this.lineWidth = group.lineWidth;
-
             this.fillOn = group.fillOn;
             this.linesOn = group.linesOn;
-            this.lineStippleOn = group.lineStippleOn;
             this.polyStippleOn = group.polyStippleOn;
 
-            this.lineStippleFactor = group.lineStippleFactor;
-            this.lineStipplePattern = group.lineStipplePattern;
+            this.lineStyle = new LineStyle( group.lineStyle );
 
             System.arraycopy( group.polyStipplePattern, 0, this.polyStipplePattern, 0, this.polyStipplePattern.length );
         }
@@ -1343,15 +1537,15 @@ public class PolygonPainter extends GlimpsePainter2D
         /**
          * Loads polygon outlines from the group into the provided buffer.
          *
-         * @param vertexBuffer the buffer to place polygon vertices into
+         * @param xyBuffer the buffer to place polygon vertices into
          * @param offsetVertex the offset of the vertices from the start of the vertexBuffer
          */
-        public void loadLineVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
+        public void loadLineVerticesIntoBuffer( Collection<IdPolygon> polygons, Group group, FloatBuffer xyBuffer, ByteBuffer flagBuffer, FloatBuffer mileageBuffer, int offsetVertex, double ppvAspectRatio )
         {
             int vertexCount = 0;
             for ( IdPolygon polygon : polygons )
             {
-                vertexCount += polygon.loadLineVerticesIntoBuffer( polygon.depth, vertexBuffer, offsetVertex + vertexCount );
+                vertexCount += polygon.loadLineVerticesIntoBuffer( xyBuffer, flagBuffer, mileageBuffer, polygon.depth, offsetVertex + vertexCount, ppvAspectRatio );
             }
         }
 
@@ -1382,7 +1576,7 @@ public class PolygonPainter extends GlimpsePainter2D
             }
         }
 
-        public void loadFillVerticesIntoBuffer( Group group, FloatBuffer vertexBuffer, int offsetVertex, Collection<IdPolygon> polygons )
+        public void loadFillVerticesIntoBuffer( Collection<IdPolygon> polygons, Group group, FloatBuffer vertexBuffer, int offsetVertex )
         {
             int vertexCount = 0;
             for ( IdPolygon polygon : polygons )
@@ -1426,7 +1620,9 @@ public class PolygonPainter extends GlimpsePainter2D
             if ( glLineBufferInitialized )
             {
                 // zero is a reserved buffer object name and is never returned by glGenBuffers
-                if ( glLineBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineBufferHandle }, 0 );
+                if ( glLineXyBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineXyBufferHandle }, 0 );
+                if ( glLineFlagBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineFlagBufferHandle }, 0 );
+                if ( glLineMileageBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineMileageBufferHandle }, 0 );
                 if ( glFillBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glFillBufferHandle }, 0 );
             }
         }
@@ -1449,13 +1645,7 @@ public class PolygonPainter extends GlimpsePainter2D
      */
     private class Group
     {
-        float[] lineColor = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
-        float lineWidth = 1;
         boolean linesOn = true;
-
-        int lineStippleFactor = 1;
-        short lineStipplePattern = ( short ) 0x00FF;
-        boolean lineStippleOn = false;
 
         byte[] polyStipplePattern = halftone;
         boolean polyStippleOn = false;
@@ -1463,11 +1653,13 @@ public class PolygonPainter extends GlimpsePainter2D
         float[] fillColor = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
         boolean fillOn = false;
 
+        LineStyle lineStyle;
+
         Object groupId;
 
         // mapping from polygonId to IdPolygon object
         Map<Object, IdPolygon> polygonMap;
-        // polygons added since last display( ) call 
+        // polygons added since last display( ) call
         Set<IdPolygon> newPolygons;
         // polygons selected since the last display( ) call
         // (always a subset of newPolygons)
@@ -1505,6 +1697,14 @@ public class PolygonPainter extends GlimpsePainter2D
         public Group( Object groupId )
         {
             this.groupId = groupId;
+
+            this.lineStyle = new LineStyle( );
+            this.lineStyle.thickness_PX = 1.0f;
+            this.lineStyle.rgba = new float[] { 1.0f, 1.0f, 0.0f, 1.0f };
+            this.lineStyle.stippleEnable = false;
+            this.lineStyle.stipplePattern = ( short ) 0x00FF;
+            this.lineStyle.stippleScale = 1;
+
             this.selectedPolygons = new LinkedHashSet<IdPolygon>( );
             this.newSelectedPolygons = new LinkedHashSet<IdPolygon>( );
             this.newPolygons = new LinkedHashSet<IdPolygon>( );
@@ -1643,15 +1843,15 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void setLineColor( float[] rgba )
         {
-            this.lineColor = rgba;
+            this.lineStyle.rgba = rgba;
         }
 
         public void setLineColor( float r, float g, float b, float a )
         {
-            this.lineColor[0] = r;
-            this.lineColor[1] = g;
-            this.lineColor[2] = b;
-            this.lineColor[3] = a;
+            this.lineStyle.rgba[0] = r;
+            this.lineStyle.rgba[1] = g;
+            this.lineStyle.rgba[2] = b;
+            this.lineStyle.rgba[3] = a;
         }
 
         public void setFillColor( float[] rgba )
@@ -1669,7 +1869,7 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void setLineWidth( float width )
         {
-            this.lineWidth = width;
+            this.lineStyle.thickness_PX = width;
         }
 
         public void setShowLines( boolean show )
@@ -1694,13 +1894,18 @@ public class PolygonPainter extends GlimpsePainter2D
 
         public void setLineStipple( boolean activate )
         {
-            this.lineStippleOn = activate;
+            this.lineStyle.stippleEnable = activate;
         }
 
         public void setLineStipple( int stippleFactor, short stipplePattern )
         {
-            this.lineStippleFactor = stippleFactor;
-            this.lineStipplePattern = stipplePattern;
+            this.lineStyle.stippleScale = stippleFactor;
+            this.lineStyle.stipplePattern = stipplePattern;
+        }
+
+        public void setLineStyle( LineStyle style )
+        {
+            this.lineStyle = style;
         }
 
         public void reset( )
@@ -1715,5 +1920,394 @@ public class PolygonPainter extends GlimpsePainter2D
             this.groupCleared = false;
             this.groupDeleted = false;
         }
+
+        @Override
+        public int hashCode( )
+        {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType( ).hashCode( );
+            result = prime * result + ( ( groupId == null ) ? 0 : groupId.hashCode( ) );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            if ( this == obj ) return true;
+            if ( obj == null ) return false;
+            if ( getClass( ) != obj.getClass( ) ) return false;
+            Group other = ( Group ) obj;
+            if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
+            if ( groupId == null )
+            {
+                if ( other.groupId != null ) return false;
+            }
+            else if ( !groupId.equals( other.groupId ) ) return false;
+            return true;
+        }
+
+        private PolygonPainter getOuterType( )
+        {
+            return PolygonPainter.this;
+        }
+    }
+
+    public static class PolygonPainterFlatColorProgram
+    {
+        public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.vs" );
+        public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.fs" );
+
+        public static class ProgramHandles
+        {
+            public final int program;
+
+            // Uniforms
+
+            public final int NEAR_FAR;
+            public final int AXIS_RECT;
+            public final int RGBA;
+
+            // Vertex attributes
+
+            public final int inXy;
+
+            public ProgramHandles( GL2ES2 gl )
+            {
+                this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+
+                this.NEAR_FAR = gl.glGetUniformLocation( this.program, "NEAR_FAR" );
+                this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+                this.RGBA = gl.glGetUniformLocation( this.program, "RGBA" );
+
+                this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
+            }
+        }
+
+        protected ProgramHandles handles;
+
+        public PolygonPainterFlatColorProgram( )
+        {
+            this.handles = null;
+        }
+
+        public ProgramHandles handles( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new ProgramHandles( gl );
+            }
+
+            return this.handles;
+        }
+
+        public void begin( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new ProgramHandles( gl );
+            }
+
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
+            gl.glUseProgram( this.handles.program );
+            gl.glEnableVertexAttribArray( this.handles.inXy );
+        }
+
+        public void setColor( GL2ES2 gl, float r, float g, float b, float a )
+        {
+            gl.glUniform4f( this.handles.RGBA, r, g, b, a );
+        }
+
+        public void setColor( GL2ES2 gl, float[] vRGBA )
+        {
+            gl.glUniform4fv( this.handles.RGBA, 1, vRGBA, 0 );
+        }
+
+        public void setAxisOrtho( GL2ES2 gl, Axis2D axis, float near, float far )
+        {
+            setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), near, far );
+        }
+
+        public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds, float near, float far )
+        {
+            setOrtho( gl, 0, bounds.getWidth( ), 0, bounds.getHeight( ), near, far );
+        }
+
+        public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax, float near, float far )
+        {
+            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
+            gl.glUniform2f( this.handles.NEAR_FAR, near, far );
+        }
+
+        public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
+        {
+            draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
+        }
+
+        public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
+        {
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+            gl.glDrawArrays( mode, first, count );
+        }
+
+        public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
+        {
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, 0 );
+
+            gl.glDrawArrays( mode, first, count );
+        }
+
+        public void draw( GL2ES2 gl, GLEditableBuffer xyVertices, float[] color )
+        {
+            setColor( gl, color );
+
+            draw( gl, GL.GL_TRIANGLES, xyVertices.deviceBuffer( gl ), 0, xyVertices.sizeFloats( ) / 2 );
+        }
+
+        public void end( GL2ES2 gl )
+        {
+            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glUseProgram( 0 );
+            gl.getGL3( ).glBindVertexArray( 0 );
+        }
+
+        /**
+         * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
+         * was first called.
+         * <p>
+         * This object can be safely reused after being disposed, but in most cases there is no
+         * significant advantage to doing so.
+         */
+        public void dispose( GL2ES2 gl )
+        {
+            if ( this.handles != null )
+            {
+                gl.glDeleteProgram( this.handles.program );
+                this.handles = null;
+            }
+        }
+    }
+
+    public static class PolygonPainterLineProgram
+    {
+        public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/PolygonPainter/line.vs" );
+        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/PolygonPainter/line.gs" );
+        public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/PolygonPainter/line.fs" );
+
+        public static class LineProgramHandles
+        {
+            public final int program;
+
+            public final int NEAR_FAR;
+            public final int AXIS_RECT;
+            public final int VIEWPORT_SIZE_PX;
+
+            public final int LINE_THICKNESS_PX;
+            public final int FEATHER_THICKNESS_PX;
+            public final int JOIN_TYPE;
+            public final int MITER_LIMIT;
+
+            public final int RGBA;
+            public final int STIPPLE_ENABLE;
+            public final int STIPPLE_SCALE;
+            public final int STIPPLE_PATTERN;
+
+            public final int inXy;
+            public final int inFlags;
+            public final int inMileage;
+
+            public LineProgramHandles( GL2ES2 gl )
+            {
+                this.program = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
+
+                this.NEAR_FAR = gl.glGetUniformLocation( program, "NEAR_FAR" );
+                this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
+                this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
+
+                this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
+                this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( program, "FEATHER_THICKNESS_PX" );
+                this.JOIN_TYPE = gl.glGetUniformLocation( program, "JOIN_TYPE" );
+                this.MITER_LIMIT = gl.glGetUniformLocation( program, "MITER_LIMIT" );
+
+                this.RGBA = gl.glGetUniformLocation( program, "RGBA" );
+                this.STIPPLE_ENABLE = gl.glGetUniformLocation( program, "STIPPLE_ENABLE" );
+                this.STIPPLE_SCALE = gl.glGetUniformLocation( program, "STIPPLE_SCALE" );
+                this.STIPPLE_PATTERN = gl.glGetUniformLocation( program, "STIPPLE_PATTERN" );
+
+                this.inXy = gl.glGetAttribLocation( program, "inXy" );
+                this.inFlags = gl.glGetAttribLocation( program, "inFlags" );
+                this.inMileage = gl.glGetAttribLocation( program, "inMileage" );
+            }
+        }
+
+        protected LineProgramHandles handles;
+
+        public PolygonPainterLineProgram( )
+        {
+            this.handles = null;
+        }
+
+        /**
+         * Returns the raw GL handles for the shader program, uniforms, and attributes. Compiles and
+         * links the program, if necessary.
+         * <p>
+         * It is perfectly acceptable to use these handles directly, rather than calling the convenience
+         * methods in this class. However, the convenience methods are intended to be a fairly stable API,
+         * whereas the handles may change frequently.
+         */
+        public LineProgramHandles handles( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new LineProgramHandles( gl );
+            }
+
+            return this.handles;
+        }
+
+        public void begin( GL2ES2 gl )
+        {
+            if ( this.handles == null )
+            {
+                this.handles = new LineProgramHandles( gl );
+            }
+
+            gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
+            gl.glUseProgram( this.handles.program );
+            gl.glEnableVertexAttribArray( this.handles.inXy );
+            gl.glEnableVertexAttribArray( this.handles.inFlags );
+            gl.glEnableVertexAttribArray( this.handles.inMileage );
+        }
+
+        public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
+        {
+            this.setViewport( gl, bounds.getWidth( ), bounds.getHeight( ) );
+        }
+
+        public void setViewport( GL2ES2 gl, int viewportWidth, int viewportHeight )
+        {
+            gl.glUniform2f( this.handles.VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
+        }
+
+        public void setAxisOrtho( GL2ES2 gl, Axis2D axis, float near, float far )
+        {
+            this.setOrtho( gl, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ), near, far );
+        }
+
+        public void setPixelOrtho( GL2ES2 gl, GlimpseBounds bounds, float near, float far )
+        {
+            this.setOrtho( gl, 0, bounds.getWidth( ), 0, bounds.getHeight( ), near, far );
+        }
+
+        public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax, float near, float far )
+        {
+            gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
+            gl.glUniform2f( this.handles.NEAR_FAR, near, far );
+        }
+
+        public void setStyle( GL2ES2 gl, LineStyle style )
+        {
+            gl.glUniform1f( this.handles.LINE_THICKNESS_PX, style.thickness_PX );
+            gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
+            gl.glUniform1i( this.handles.JOIN_TYPE, style.joinType.value );
+            gl.glUniform1f( this.handles.MITER_LIMIT, style.miterLimit );
+
+            gl.glUniform4fv( this.handles.RGBA, 1, style.rgba, 0 );
+
+            if ( style.stippleEnable )
+            {
+                gl.glUniform1i( this.handles.STIPPLE_ENABLE, 1 );
+                gl.glUniform1f( this.handles.STIPPLE_SCALE, style.stippleScale );
+                gl.glUniform1i( this.handles.STIPPLE_PATTERN, style.stipplePattern );
+            }
+            else
+            {
+                gl.glUniform1i( this.handles.STIPPLE_ENABLE, 0 );
+            }
+        }
+
+        public void draw( GL2ES3 gl, LineStyle style, StreamingLinePath path )
+        {
+            this.setStyle( gl, style );
+            this.draw( gl, path );
+        }
+
+        public void draw( GL2ES3 gl, StreamingLinePath path )
+        {
+            this.draw( gl, path.xyVbo, path.flagsVbo, path.mileageVbo, 0, path.numVertices( ) );
+        }
+
+        public void draw( GL2ES3 gl, LineStyle style, LinePath path )
+        {
+            this.draw( gl, style, path, 1.0 );
+        }
+
+        public void draw( GL2ES3 gl, LineStyle style, LinePath path, double ppvAspectRatio )
+        {
+            this.setStyle( gl, style );
+
+            GLStreamingBuffer xyVbo = path.xyVbo( gl );
+            GLStreamingBuffer flagsVbo = path.flagsVbo( gl );
+            GLStreamingBuffer mileageVbo = ( style.stippleEnable ? path.mileageVbo( gl, ppvAspectRatio ) : path.rawMileageVbo( gl ) );
+
+            this.draw( gl, xyVbo, flagsVbo, mileageVbo, 0, path.numVertices( ) );
+        }
+
+        public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
+        {
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo.buffer( gl ) );
+            gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, mileageVbo.sealedOffset( ) );
+
+            gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
+        }
+
+        public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
+        {
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
+            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, 0 );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
+            gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
+            gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
+
+            gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
+        }
+
+        public void end( GL2ES2 gl )
+        {
+            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glDisableVertexAttribArray( this.handles.inFlags );
+            gl.glDisableVertexAttribArray( this.handles.inMileage );
+            gl.glUseProgram( 0 );
+            gl.getGL3( ).glBindVertexArray( 0 );
+        }
+
+        /**
+         * Deletes the program, and resets this object to the way it was before {@link #begin(GL2ES2)}
+         * was first called.
+         * <p>
+         * This object can be safely reused after being disposed, but in most cases there is no
+         * significant advantage to doing so.
+         */
+        public void dispose( GL2ES2 gl )
+        {
+            if ( this.handles != null )
+            {
+                gl.glDeleteProgram( this.handles.program );
+                this.handles = null;
+            }
+        }
+
     }
 }

@@ -144,7 +144,7 @@ public class MultiAxisPlotExample implements GlimpseLayoutProvider
 
         // alternatively, we can use info object we saved when we created the axis
         // here we set a text label and adjust the axis size for one of the left axes
-        axisInfoL1.getAxisPainter( ).setAxisLabel( "Left Axis 1" );
+        axisInfoL1.getTickHandler( ).setAxisLabel( "Left Axis 1" );
         axisInfoL1.getAxisPainter( ).setAxisLabelBufferSize( 10 );
         axisInfoL1.setSize( 60 );
 

@@ -1,0 +1,9 @@
+array_color
+
+Applies rgba colors to filled triangles.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.ArrayColorProgram
+ 
+Usage Examples:
+ * com.metsci.glimpse.painter.decoration.MapBorderPainter

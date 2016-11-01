@@ -113,7 +113,7 @@ public class TargetStackUtil
 
     /**
      * Returns true if the query target stack contains the provided target.
-     * 
+     *
      * @param query the GlimpseTargetStack to investigate
      * @param target the GlimpseTarget to look for in the query stack
      * @return true if the query stack contains the target
@@ -133,7 +133,7 @@ public class TargetStackUtil
     }
 
     /**
-     * 
+     *
      * @return true if either target stack contain a GlimpseTarget in common
      */
     public static boolean intersects( GlimpseTargetStack query1, GlimpseTargetStack query2 )

@@ -26,21 +26,20 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import java.nio.FloatBuffer;
+import javax.media.opengl.GL3;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
-
-import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.shader.line.LinePath;
+import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
  * @author ulman
  */
-public class ContourPainter extends GlimpsePainter2D
+public class ContourPainter extends GlimpsePainterBase
 {
     protected float[] lineColor = new float[] { 0.5f, 0.5f, 0.5f, 0.5f };
     protected float lineWidth = 1;
@@ -48,11 +47,9 @@ public class ContourPainter extends GlimpsePainter2D
     protected float[] coordsX;
     protected float[] coordsY;
 
-    protected boolean initialized;
-    protected int[] bufferHandle;
-
-    protected FloatBuffer dataBuffer;
-    protected int totalPointCount;
+    protected LinePath path;
+    protected LineStyle style;
+    protected LineProgram program;
 
     public ContourPainter( ContourData data )
     {
@@ -61,81 +58,63 @@ public class ContourPainter extends GlimpsePainter2D
 
     public ContourPainter( float[] coordsX, float[] coordsY )
     {
+        this.path = new LinePath( );
+        this.style = new LineStyle( );
+        this.program = new LineProgram( );
+
         this.coordsX = coordsX;
         this.coordsY = coordsY;
 
         int size = Math.min( coordsX.length, coordsY.length );
-        this.totalPointCount = size;
-        this.dataBuffer = Buffers.newDirectFloatBuffer( size * 2 );
 
-        for ( int i = 0; i < size; i++ )
+        for ( int i = 0; i < size - 1; i += 2 )
         {
-            this.dataBuffer.put( coordsX[i] ).put( coordsY[i] );
+            this.path.moveTo( coordsX[i], coordsY[i] );
+            this.path.lineTo( coordsX[i + 1], coordsY[i + 1] );
         }
     }
 
     @Override
-    public void paintTo( GlimpseContext context, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL3 gl = context.getGL( ).getGL3( );
+        Axis2D axis = requireAxis2D( context );
+        GlimpseBounds bounds = getBounds( context );
 
-        if ( !initialized )
+        this.program.begin( gl );
+        try
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
-
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-
-            // copy data from the host memory buffer to the device
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, totalPointCount * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_STATIC_DRAW );
-
-            glHandleError( gl );
-
-            initialized = true;
+            this.program.setAxisOrtho( gl, axis );
+            this.program.setViewport( gl, bounds );
+            this.program.draw( gl, style, path );
         }
-
-        gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-        gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-        gl.glMatrixMode( GL2.GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
-
-        gl.glColor4fv( lineColor, 0 );
-        gl.glLineWidth( lineWidth );
-
-        gl.glEnable( GL2.GL_LINE_SMOOTH );
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
-
-        gl.glDrawArrays( GL2.GL_LINES, 0, totalPointCount );
-
-        gl.glDisable( GL2.GL_BLEND );
-        gl.glDisable( GL2.GL_LINE_SMOOTH );
-
-        gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
+        finally
+        {
+            this.program.end( gl );
+        }
     }
 
     public void setLineColor( float r, float g, float b, float a )
     {
-        this.lineColor[0] = r;
-        this.lineColor[1] = g;
-        this.lineColor[2] = b;
-        this.lineColor[3] = a;
+        this.style.rgba = new float[] { r, g, b, a };
     }
 
     public void setLineWidth( float width )
     {
-        this.lineWidth = width;
+        this.style.thickness_PX = width;
+    }
+
+    public void setStyle( LineStyle style )
+    {
+        this.style = style;
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        if ( initialized )
-        {
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
-        }
+        GL3 gl = context.getGL( ).getGL3( );
+
+        this.program.dispose( gl );
+        this.path.dispose( gl );
     }
 }

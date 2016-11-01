@@ -26,9 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.event;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
-import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.plot.timeline.event.Event.TextRenderingMode.*;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -36,10 +35,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.plot.timeline.data.EventConstraint;
 import com.metsci.glimpse.plot.timeline.data.TimeSpan;
@@ -52,12 +51,12 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * Event represents an occurrence with a start and end time and is usually created
  * by an {@link com.metsci.glimpse.plot.timeline.event.EventPlotInfo} (which represents
  * a row or column of a {@link com.metsci.glimpse.plot.timeline.StackedTimePlot2D}.
- * 
+ *
  * In addition to time bounds, Events can have text labels, icons, and tool tips associated
  * with them. EventPlotInfo allows registering of listeners which report when the mouse
  * interacts with an Event. Events can also be adjusted by the user by click and
  * dragging on their bounds.
- * 
+ *
  * @author ulman
  */
 public class Event implements Iterable<Event>
@@ -105,7 +104,7 @@ public class Event implements Iterable<Event>
 
     /**
      * Indicates how text which is too large to fit in the Event box should be shortened.
-     * 
+     *
      * @author ulman
      */
     public enum TextRenderingMode
@@ -126,7 +125,7 @@ public class Event implements Iterable<Event>
 
     /**
      * Indicates what types of overlaps should be considered when determining whether to shorten Event box text.
-     * 
+     *
      * @author ulman
      */
     public enum OverlapRenderingMode
@@ -236,16 +235,16 @@ public class Event implements Iterable<Event>
     /**
      * @see EventPainter#paint(GL, Event, Event, EventPlotInfo, GlimpseBounds, Axis1D, int, int)
      */
-    public void paint( EventPainter defaultPainter, GL2 gl, Event nextEvent, EventPlotInfo info, GlimpseBounds bounds, Axis1D timeAxis, int posMin, int posMax )
+    public void paint( GlimpseContext context, EventPainter defaultPainter, Event nextEvent, EventPlotInfo info, int posMin, int posMax )
     {
         EventPainter eventPainter = painter != null ? painter : defaultPainter;
 
-        if ( eventPainter != null ) eventPainter.paint( gl, this, nextEvent, info, bounds, timeAxis, posMin, posMax );
+        if ( eventPainter != null ) eventPainter.paint( context, this, nextEvent, info, posMin, posMax );
     }
 
     /**
      * Sets the height of the Event's icon (for horizontal timeline layouts) or the width (for vertical timeline layouts).
-     * 
+     *
      * @param iconSize the icon size in pixels
      */
     public void setIconSize( int iconSize )
@@ -283,7 +282,7 @@ public class Event implements Iterable<Event>
     /**
      * Events can be aggregated when many Events are close together in time and the timeline view is zoomed out very far. This
      * method will return true for aggregate events.
-     * 
+     *
      * @return true if the event is an aggregate event, false otherwise
      */
     public boolean hasChildren( )
@@ -305,6 +304,7 @@ public class Event implements Iterable<Event>
      * The individual constituent Events can be accessed via this method.
      * User created Events never have children.
      */
+    @Override
     public Iterator<Event> iterator( )
     {
         return new Iterator<Event>( )
@@ -337,7 +337,7 @@ public class Event implements Iterable<Event>
      * {@code EventPlotInfo#setEventPainter(EventPainter)} can be used to modify the default
      * EventPainter used for all events in the EventPlotInfo. However, the EventPainter set
      * here takes precedence.
-     * 
+     *
      * @param painter the EventPainter to use to render this event on the timeline
      */
     public void setEventPainter( EventPainter painter )
@@ -356,11 +356,11 @@ public class Event implements Iterable<Event>
     /**
      * <p>Adds an EventConstraint which determines whether proposed changes to the min
      * and max time bounds of an Event are allowed.</p>
-     * 
+     *
      * <p>This method should be used for specialized constraints. Events support basic
      * constraints by default via setEditable, setResizeable, setEndTimeMoveable,
      * setStartTimeMoveable, setMinTimeSpan, and setMaxTimeSpan.</p>
-     * 
+     *
      * @param constraint the EventConstraint to add
      */
     public void addConstraint( EventConstraint constraint )
@@ -395,9 +395,9 @@ public class Event implements Iterable<Event>
 
     /**
      * Sets whether or not this Event can be selected via mouse clicks. Setting
-     * selectable to false does not prevent the event from being selected 
+     * selectable to false does not prevent the event from being selected
      * programmatically via {@link EventPlotInfo#setSelectedEvents(java.util.Set)}.
-     * 
+     *
      * @param isSelectable
      */
     public void setSelectable( boolean isSelectable )
@@ -417,7 +417,7 @@ public class Event implements Iterable<Event>
      * Sets whether or not the Event start and end times are modifiable by the user
      * via mouse interaction. This does not prevent programmatically changing the
      * mouse bounds.
-     * 
+     *
      * For finer control over what the user is allowed to do when modifying the
      * start and end time of an Event (without disallowing it completely) see
      * {@link #setStartTimeMoveable(boolean)}, {@link #setResizeable(boolean)},
@@ -464,7 +464,7 @@ public class Event implements Iterable<Event>
     }
 
     /**
-     * If true, the startTime of the Event cannot be adjusted by user mouse gestures. 
+     * If true, the startTime of the Event cannot be adjusted by user mouse gestures.
      */
     public void setStartTimeMoveable( boolean isStartTimeMoveable )
     {
@@ -483,7 +483,7 @@ public class Event implements Iterable<Event>
     /**
      * If true, the time span of the Event (the amount of time between the start and
      * end times) cannot be adjusted by user mouse gestures. However, the Event may
-     * still be dragged. 
+     * still be dragged.
      */
     public void setResizeable( boolean isResizeable )
     {
@@ -556,7 +556,7 @@ public class Event implements Iterable<Event>
      * Sets the icon displayed inside the Event box on the timeline. The iconId corresponds
      * to an icon loaded into the {@link TextureAtlas} associated with the {@link EventPlotInfo}
      * parent of this Event.
-     * 
+     *
      * @param iconId  the identifier for the icon displayed inside the Event box on the timeline.
      */
     public void setIconId( Object iconId )
@@ -634,11 +634,11 @@ public class Event implements Iterable<Event>
 
     /**
      * <p>Sets the start and end time for this Event.</p>
-     * 
+     *
      * <p>If force is false, then the constraints (see {@link #addConstraint(EventConstraint)})
      * are taken into account and the final Event bounds might not be equal to
      * the input arguments.</p>
-     * 
+     *
      * @param startTime
      * @param endTime
      * @param force
@@ -690,7 +690,7 @@ public class Event implements Iterable<Event>
     /**
      * Events may either be assigned a fixed row to be displayed on, or may float automatically between
      * rows to ensure that no Events overlap in time.
-     * 
+     *
      * @see #getRow()
      */
     public boolean isFixedRow( )
@@ -830,7 +830,7 @@ public class Event implements Iterable<Event>
     /**
      * Set what types of overlaps should be considered when determining whether to shorten Event box text
      * and whether to display the Event's icon.
-     * 
+     *
      * @param mode
      */
     public void setOverlapMode( OverlapRenderingMode mode )
@@ -849,7 +849,7 @@ public class Event implements Iterable<Event>
     /**
      * Sets how text and icons should be handled when this Event's box is too small or when it overlaps
      * with another Event's box.
-     * 
+     *
      * @param mode
      */
     public void setTextRenderingMode( TextRenderingMode mode )
@@ -917,9 +917,9 @@ public class Event implements Iterable<Event>
      * <p>An Event's id may be any Object, but its {@link #equals(Object)} and {@link #hashCode()}
      * methods should be properly implemented and it should be unique among the Events of an
      * {@link EventPlotInfo} timeline.</p>
-     * 
+     *
      * <p>{@link EventPlotListener} will use this id when reporting events occurring on this Event.</p>
-     * 
+     *
      * @return the unique id for this Event.
      */
     public Object getId( )
@@ -957,10 +957,10 @@ public class Event implements Iterable<Event>
      * <p>Returns whether the provided Timestamp is inside the bounds of this Event. The startTime
      * is treated as inclusive and the endTime is treated as exclusive. This means that instantaneous
      * events (with startTime equal to endTime) will always return false.</p>
-     * 
+     *
      * <p>This method is equivalent to
      * event.getStartTime().isBeforeOrEquals( time ) && event.getEndTime().isAfter( time )</p>
-     * 
+     *
      * @param time the TimeStamp to test
      * @return whether the TimeStamp is inside this Event's time bounds
      */
@@ -973,7 +973,7 @@ public class Event implements Iterable<Event>
      * The parent EventPlotInfo of an Event should be modified by
      * calling {@link EventPlotInfo#addEvent(Event)} and
      * {@link EventPlotInfo#removeEvent(Event)}.
-     * 
+     *
      * @param info
      */
     protected void setEventPlotInfo( EventPlotInfo info )

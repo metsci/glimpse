@@ -34,11 +34,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.support.settings.LookAndFeel;
@@ -130,24 +130,6 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         this.memberMap = new LinkedHashMap<GlimpsePainter, Member>( );
     }
 
-    protected GlimpseBounds getClippedBounds( GlimpseContext context )
-    {
-        int minX = Integer.MIN_VALUE;
-        int maxX = Integer.MAX_VALUE;
-        int minY = Integer.MIN_VALUE;
-        int maxY = Integer.MAX_VALUE;
-
-        for ( GlimpseBounds parentBounds : context.getTargetStack( ).getBoundsList( ) )
-        {
-            minX = Math.max( parentBounds.getX( ), minX );
-            maxX = Math.min( parentBounds.getX( ) + parentBounds.getWidth( ), maxX );
-            minY = Math.max( parentBounds.getY( ), minY );
-            maxY = Math.min( parentBounds.getY( ) + parentBounds.getHeight( ), maxY );
-        }
-
-        return new GlimpseBounds( minX, minY, maxX - minX, maxY - minY );
-    }
-
     public void paintTo( GlimpseContext context )
     {
         final int[] scale = context.getSurfaceScale( );
@@ -156,7 +138,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         GL gl = context.getGL( );
 
         GlimpseBounds bounds = context.getTargetStack( ).getBounds( );
-        GlimpseBounds clippedBounds = getClippedBounds( context );
+        GlimpseBounds clippedBounds = GLUtils.getClippedBounds( context );
 
         if ( !clippedBounds.isValid( ) ) return;
 
@@ -174,7 +156,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
                 if ( isVisible )
                 {
-                    gl.glEnable( GL2.GL_SCISSOR_TEST );
+                    gl.glEnable( GL.GL_SCISSOR_TEST );
 
                     gl.glViewport( bounds.getX( ) * scaleX, bounds.getY( ) * scaleY, bounds.getWidth( ) * scaleX, bounds.getHeight( ) * scaleY );
                     gl.glScissor( clippedBounds.getX( ) * scaleX, clippedBounds.getY( ) * scaleY, clippedBounds.getWidth( ) * scaleX, clippedBounds.getHeight( ) * scaleY );
@@ -190,7 +172,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
             }
             finally
             {
-                gl.glDisable( GL2.GL_SCISSOR_TEST );
+                gl.glDisable( GL.GL_SCISSOR_TEST );
             }
         }
     }

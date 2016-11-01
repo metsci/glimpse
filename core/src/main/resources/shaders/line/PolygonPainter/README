@@ -1,0 +1,6 @@
+PolygonPainter
+
+A version of line_flat_color which uses vec3 vertices
+
+Java Wrappers:
+ * com.metsci.glimpse.painter.shape.PolygonPainter.PolygonPainterLineProgram

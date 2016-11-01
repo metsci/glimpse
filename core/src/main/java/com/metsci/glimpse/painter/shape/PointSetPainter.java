@@ -28,16 +28,19 @@ package com.metsci.glimpse.painter.shape;
 
 import java.nio.FloatBuffer;
 import java.util.Collection;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.colormap.ColorMap;
+import com.metsci.glimpse.support.shader.point.PointArrayColorProgram;
+import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 import com.metsci.glimpse.util.quadtree.Xy;
 
@@ -48,26 +51,27 @@ import com.metsci.glimpse.util.quadtree.Xy;
  *
  * @author ulman
  */
-public class PointSetPainter extends GlimpseDataPainter2D
+public class PointSetPainter extends GlimpsePainterBase
 {
+    private static final Logger logger = Logger.getLogger( PointSetPainter.class.getName( ) );
+
     public static final int QUAD_TREE_BIN_MAX = 1000;
 
     public static final long SPATIAL_SELECTION_UPDATE_RATE = 50;
 
     protected float[] pointColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
     protected float pointSize = 2;
+    protected float featherSize = 0.8f;
 
     protected int dataSize = 0;
 
-    protected int[] colorHandle = null;
+    protected int[] rgbaHandle = null;
     protected FloatBuffer colorBuffer = null;
     protected boolean useColorDevice = false;
     protected boolean useColorHost = false;
 
-    protected int[] bufferHandle = null;
+    protected int[] xyHandle = null;
     protected FloatBuffer dataBuffer = null;
-
-    protected ReentrantLock dataBufferLock = null;
 
     protected volatile boolean newData = false;
     protected volatile boolean bufferInitialized = false;
@@ -76,10 +80,15 @@ public class PointSetPainter extends GlimpseDataPainter2D
     protected QuadTreeXys<IdXy> spatialIndex;
     protected boolean enableSpatialIndex;
 
+    protected PointArrayColorProgram arrayProg;
+    protected PointFlatColorProgram flatProg;
+
     public PointSetPainter( boolean enableSpatialIndex )
     {
-        this.dataBufferLock = new ReentrantLock( );
         this.enableSpatialIndex = enableSpatialIndex;
+        this.arrayProg = new PointArrayColorProgram( );
+        this.flatProg = new PointFlatColorProgram( );
+
     }
 
     public void setData( float[] dataX, float[] dataY )
@@ -95,7 +104,7 @@ public class PointSetPainter extends GlimpseDataPainter2D
             throw new IllegalArgumentException( "Illegal dataSize: dataSize = " + dataSize + ", dataX.length = " + dataX.length + ", dataY.length = " + dataY.length );
         }
 
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
             this.dataSize = dataSize;
@@ -125,13 +134,13 @@ public class PointSetPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setColor( float[] dataZ, ColorMap scale )
     {
-        this.dataBufferLock.lock( );
+        this.painterLock.lock( );
         try
         {
             if ( colorBuffer == null || colorBuffer.rewind( ).capacity( ) < dataSize * 4 )
@@ -153,7 +162,7 @@ public class PointSetPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            this.dataBufferLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
@@ -179,6 +188,14 @@ public class PointSetPainter extends GlimpseDataPainter2D
         return selectGeoRange( minX, maxX, minY, maxY );
     }
 
+    public void setPointColor( float[] rgba )
+    {
+        this.pointColor[0] = rgba[0];
+        this.pointColor[1] = rgba[1];
+        this.pointColor[2] = rgba[2];
+        this.pointColor[3] = rgba[3];
+    }
+
     public void setPointColor( float r, float g, float b, float a )
     {
         this.pointColor[0] = r;
@@ -187,19 +204,29 @@ public class PointSetPainter extends GlimpseDataPainter2D
         this.pointColor[3] = a;
     }
 
+    public void setFeatherSize( float featherSize )
+    {
+        this.featherSize = featherSize;
+    }
+
     public void setPointSize( float pointSize )
     {
         this.pointSize = pointSize;
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
+        GL3 gl = getGL3( context );
+
         if ( bufferInitialized )
         {
-            context.getGL( ).glDeleteBuffers( 1, colorHandle, 0 );
-            context.getGL( ).glDeleteBuffers( 1, bufferHandle, 0 );
+            gl.glDeleteBuffers( 1, rgbaHandle, 0 );
+            gl.glDeleteBuffers( 1, xyHandle, 0 );
         }
+
+        this.arrayProg.dispose( gl );
+        this.flatProg.dispose( gl );
     }
 
     public static class IdXy implements Xy
@@ -234,66 +261,79 @@ public class PointSetPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
+        GL3 gl = getGL3( context );
+        Axis2D axis = requireAxis2D( context );
+
         if ( dataSize == 0 ) return;
 
         if ( !bufferInitialized )
         {
-            bufferHandle = new int[1];
-            gl.glGenBuffers( 1, bufferHandle, 0 );
+            xyHandle = new int[1];
+            gl.glGenBuffers( 1, xyHandle, 0 );
 
-            colorHandle = new int[1];
-            gl.glGenBuffers( 1, colorHandle, 0 );
+            rgbaHandle = new int[1];
+            gl.glGenBuffers( 1, rgbaHandle, 0 );
 
             bufferInitialized = true;
         }
 
-        this.dataBufferLock.lock( );
-        try
+        if ( newData )
         {
-            if ( newData )
-            {
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, xyHandle[0] );
 
-                // copy data from the host memory buffer to the device
-                gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 2 * BYTES_PER_FLOAT, dataBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
+            // copy data from the host memory buffer to the device
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 2 * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
 
-                glHandleError( gl );
-
-                useColorDevice = useColorHost;
-                if ( useColorDevice )
-                {
-                    gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
-
-                    // copy data from the host memory buffer to the device
-                    gl.glBufferData( GL2.GL_ARRAY_BUFFER, dataSize * 4 * BYTES_PER_FLOAT, colorBuffer.rewind( ), GL2.GL_DYNAMIC_DRAW );
-
-                    glHandleError( gl );
-                }
-            }
-
-            newData = false;
-
+            useColorDevice = useColorHost;
             if ( useColorDevice )
             {
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, colorHandle[0] );
-                gl.glColorPointer( 4, GL2.GL_FLOAT, 0, 0 );
-                gl.glEnableClientState( GL2.GL_COLOR_ARRAY );
+                gl.glBindBuffer( GL.GL_ARRAY_BUFFER, rgbaHandle[0] );
+
+                // copy data from the host memory buffer to the device
+                gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSize * 4 * GLUtils.BYTES_PER_FLOAT, colorBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
             }
-
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, bufferHandle[0] );
-            gl.glVertexPointer( 2, GL2.GL_FLOAT, 0, 0 );
-            gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-
-            gl.glColor4fv( pointColor, 0 );
-            gl.glPointSize( pointSize );
-
-            gl.glDrawArrays( GL2.GL_POINTS, 0, dataSize );
         }
-        finally
+
+        newData = false;
+
+        if ( useColorDevice )
         {
-            this.dataBufferLock.unlock( );
+            GLUtils.enableStandardBlending( gl );
+            arrayProg.begin( gl );
+            try
+            {
+                arrayProg.setAxisOrtho( gl, axis );
+                arrayProg.setPointSize( gl, pointSize );
+                arrayProg.setFeatherThickness( gl, featherSize );
+
+                arrayProg.draw( gl, GL.GL_POINTS, xyHandle[0], rgbaHandle[0], 0, dataSize );
+            }
+            finally
+            {
+                arrayProg.end( gl );
+                GLUtils.disableBlending( gl );
+            }
+        }
+        else
+        {
+            GLUtils.enableStandardBlending( gl );
+            flatProg.begin( gl );
+            try
+            {
+                flatProg.setAxisOrtho( gl, axis );
+                flatProg.setPointSize( gl, pointSize );
+                flatProg.setFeatherThickness( gl, featherSize );
+                flatProg.setRgba( gl, pointColor );
+
+                flatProg.draw( gl, GL.GL_POINTS, xyHandle[0], 0, dataSize );
+            }
+            finally
+            {
+                flatProg.end( gl );
+                GLUtils.disableBlending( gl );
+            }
         }
     }
 }

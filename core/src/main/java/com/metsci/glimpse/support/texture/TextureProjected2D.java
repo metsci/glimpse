@@ -39,11 +39,16 @@ import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 import javax.media.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.gl.texture.Texture;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 import com.metsci.glimpse.support.projection.InvertibleProjection;
 import com.metsci.glimpse.support.projection.Projection;
@@ -51,7 +56,7 @@ import com.metsci.glimpse.support.projection.Projection;
 public abstract class TextureProjected2D implements DrawableTexture
 {
     public static final int NUM_DIMENSIONS = 2;
-    public static final int VERTICES_PER_QUAD = 4;
+    public static final int VERTICES_PER_QUAD = 6; // quads are made of two triangles
     public static final int BYTES_PER_FLOAT = 4;
 
     private static final Logger logger = Logger.getLogger( TextureProjected2D.class.getName( ) );
@@ -119,7 +124,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         this.data = newByteBuffer( );
     }
 
-    protected abstract void prepare_setData( GL2 gl );
+    protected abstract void prepare_setData( GL gl );
 
     protected abstract int getRequiredCapacityBytes( );
 
@@ -214,8 +219,10 @@ public abstract class TextureProjected2D implements DrawableTexture
     }
 
     @Override
-    public boolean prepare( GL2 gl, int texUnit )
+    public boolean prepare( GlimpseContext context, int texUnit )
     {
+        GL gl = context.getGL( );
+
         // should we check for dirtiness and allocation before lock to speed up?
         lock.lock( );
         try
@@ -250,16 +257,16 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
     }
 
-    public void draw( GL2 gl, int texUnit )
+    public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit )
     {
-        draw( gl, texUnit, Collections.<TextureUnit<Texture>> emptyList( ) );
+        draw( context, program, texUnit, Collections.<TextureUnit<Texture>> emptyList( ) );
     }
 
     @Override
-    public void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
         // prepare our texture
-        boolean ready = prepare( gl, texUnit );
+        boolean ready = prepare( context, texUnit );
         if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
@@ -269,7 +276,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         // prepare all the multitextures
         for ( TextureUnit<Texture> texture : multiTextureList )
         {
-            ready = texture.prepare( gl );
+            ready = texture.prepare( context );
 
             if ( !ready )
             {
@@ -278,12 +285,10 @@ public abstract class TextureProjected2D implements DrawableTexture
             }
         }
 
-        gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-        gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+        Axis2D axis = GlimpsePainterBase.requireAxis2D( context );
+        GL3 gl = GlimpsePainterBase.getGL3( context );
 
-        gl.glEnableClientState( GL2.GL_VERTEX_ARRAY );
-        gl.glEnableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
-
+        program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         try
         {
             for ( int i = 0; i < numTextures; i++ )
@@ -306,31 +311,21 @@ public abstract class TextureProjected2D implements DrawableTexture
                     //
                     // this doesn't attempt to catch cases where the two 2D grids don't line up -- undefined behavior will result in this case
                     gl.glBindTexture( type, texture.getHandles( )[i >= handles.length ? 0 : i] );
-
-                    gl.glEnable( type );
                 }
 
                 int type = getTextureType( );
 
                 gl.glActiveTexture( getGLTextureUnit( texUnit ) );
                 gl.glBindTexture( type, textureHandles[i] );
-                gl.glEnable( type );
-
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
-                gl.glVertexPointer( floatsPerVertex, GL2.GL_FLOAT, 0, 0 );
-
-                gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, texCoordHandles[i] );
-                gl.glTexCoordPointer( 2, GL2.GL_FLOAT, 0, 0 );
 
                 int vertexCount = VERTICES_PER_QUAD * texQuadCounts[i];
-                gl.glDrawArrays( GL2.GL_QUADS, 0, vertexCount );
+
+                program.draw( context, GL.GL_TRIANGLES, vertexCoordHandles[i], texCoordHandles[i], 0, vertexCount );
             }
         }
         finally
         {
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, 0 );
-            gl.glDisableClientState( GL2.GL_VERTEX_ARRAY );
-            gl.glDisableClientState( GL2.GL_TEXTURE_COORD_ARRAY );
+            program.end( context );
         }
     }
 
@@ -362,9 +357,9 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     protected void prepare_glState( GL gl )
     {
-        gl.glEnable( GL2.GL_TEXTURE_2D );
-        gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-        gl.glEnable( GL2.GL_BLEND );
+        // generally does nothing
+        // kept for backwards compatibility for Glimpse-World Wind support
+        // which still relies on GL2 functionality
     }
 
     protected void allocate_calcSizes( GL gl )
@@ -500,8 +495,13 @@ public abstract class TextureProjected2D implements DrawableTexture
                 double texFracY0 = y / ( double ) quadCountY;
                 double texFracY1 = ( y + 1 ) / ( double ) quadCountY;
 
+                // first triangle
                 putVertexCoords( texIndex, texFracX0, texFracY0, temp );
                 putVertexCoords( texIndex, texFracX1, texFracY0, temp );
+                putVertexCoords( texIndex, texFracX1, texFracY1, temp );
+
+                // second triangle
+                putVertexCoords( texIndex, texFracX0, texFracY0, temp );
                 putVertexCoords( texIndex, texFracX1, texFracY1, temp );
                 putVertexCoords( texIndex, texFracX0, texFracY1, temp );
             }
@@ -540,8 +540,13 @@ public abstract class TextureProjected2D implements DrawableTexture
                 double texFracY0 = y / ( double ) quadCountY;
                 double texFracY1 = ( y + 1 ) / ( double ) quadCountY;
 
+                // first triangle
                 putVertexTexCoords( texIndex, texFracX0, texFracY0 );
                 putVertexTexCoords( texIndex, texFracX1, texFracY0 );
+                putVertexTexCoords( texIndex, texFracX1, texFracY1 );
+
+                // second triangle
+                putVertexTexCoords( texIndex, texFracX0, texFracY0 );
                 putVertexTexCoords( texIndex, texFracX1, texFracY1 );
                 putVertexTexCoords( texIndex, texFracX0, texFracY1 );
             }

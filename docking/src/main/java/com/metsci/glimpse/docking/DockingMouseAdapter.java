@@ -80,6 +80,20 @@ public class DockingMouseAdapter extends MouseAdapter
                 this.draggedView = tile.view( viewNum );
                 this.draggedViewNum = viewNum;
                 this.dragging = false;
+
+                // double-click to toggle maximize view
+                if ( ev.getClickCount( ) == 2 )
+                {
+                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
+                    if ( docker.getMaximizedLeaf( ) == tile )
+                    {
+                        docker.unmaximizeLeaf( );
+                    }
+                    else
+                    {
+                        docker.maximizeLeaf( tile );
+                    }
+                }
             }
         }
     }

@@ -26,19 +26,19 @@
  */
 package com.metsci.glimpse.painter.treemap;
 
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static java.lang.Math.ceil;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 
@@ -54,7 +54,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
  *
  * @author borkholder
  */
-public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
+public abstract class AbstractTreeMapPainter extends GlimpsePainterBase
 {
     protected NestedTreeMap tree;
 
@@ -128,7 +128,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds layoutBounds, Axis2D axis )
+    protected void doPaintTo( GlimpseContext context )
     {
         flushChanges( );
 
@@ -137,20 +137,18 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
             return;
         }
 
-        gl.glEnable( GL2.GL_SCISSOR_TEST );
+        GL3 gl = getGL3( context );
+        Axis2D axis = requireAxis2D( context );
+
+        gl.glEnable( GL3.GL_SCISSOR_TEST );
+        enableStandardBlending( gl );
 
         updateLayoutCache( axis );
 
         double width = axis.getAxisX( ).getAbsoluteMax( ) - axis.getAxisY( ).getAbsoluteMin( );
         double height = axis.getAxisY( ).getAbsoluteMax( ) - axis.getAxisY( ).getAbsoluteMin( );
         Rectangle2D nodeBounds = new Rectangle2D.Double( 0, 0, width, height );
-        displayNode( gl, axis, layoutBounds, nodeBounds, tree.getRoot( ) );
-    }
-
-    @Override
-    public void dispose( GLContext context )
-    {
-        // nothing to dispose
+        displayNode( gl, axis, context.getTargetStack( ).getBounds( ), nodeBounds, tree.getRoot( ) );
     }
 
     protected void flushLayoutCache( )
@@ -253,7 +251,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
      * Recursively draws nodes. This should determine visibility, adjust the clip
      * and then delegate to draw the node/leaf itself.
      */
-    protected void displayNode( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
+    protected void displayNode( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
         // are the node bounds outside the viewport
         if ( axis.getMinX( ) >= nodeBounds.getMaxX( ) || axis.getMinY( ) >= nodeBounds.getMaxY( ) || nodeBounds.getMinX( ) >= axis.getMaxX( ) || nodeBounds.getMinY( ) >= axis.getMaxY( ) )
@@ -288,7 +286,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
      * Draw a node that is a parent of other nodes. Typically this will draw a
      * title and then just delegate to drawing the children.
      */
-    protected void drawParent( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
+    protected void drawParent( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId )
     {
         Rectangle2D newBoundary = drawTitle( gl, axis, layoutBounds, nodeBounds, nodeId );
         if ( newBoundary.getWidth( ) <= 0 || newBoundary.getHeight( ) <= 0 )
@@ -310,7 +308,7 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
     /**
      * Draws a leaf.
      */
-    protected void drawLeaf( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
+    protected void drawLeaf( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId )
     {
         drawLeafBackground( gl, axis, layoutBounds, nodeBounds, leafId );
 
@@ -340,23 +338,23 @@ public abstract class AbstractTreeMapPainter extends GlimpseDataPainter2D
      * leaf, the new rectangle determines the bounds for any other drawing inside
      * the leaf.
      */
-    protected abstract Rectangle2D drawTitle( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId );
+    protected abstract Rectangle2D drawTitle( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId );
 
     /**
      * Draws the interior of a leaf. Can be an icon, text or anything.
      */
-    protected abstract void drawLeafInterior( GL gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId );
+    protected abstract void drawLeafInterior( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId );
 
     /**
      * Draws the background of a leaf. Parent nodes don't normally have
      * backgrounds, because their children cover them.
      */
-    protected abstract void drawLeafBackground( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId );
+    protected abstract void drawLeafBackground( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int leafId );
 
     /**
      * Draws the border around a node, either a parent or leaf.
      */
-    protected abstract void drawBorder( GL2 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId );
+    protected abstract void drawBorder( GL3 gl, Axis2D axis, GlimpseBounds layoutBounds, Rectangle2D nodeBounds, int nodeId );
 
     @SuppressWarnings( "serial" )
     protected class LayoutCache extends Int2ObjectAVLTreeMap<Rectangle2D[]>

@@ -26,22 +26,20 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.List;
 
-import javax.media.opengl.GLContext;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.shader.TaggedColorScaleShader;
-import com.metsci.glimpse.gl.shader.Pipeline;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
+import com.metsci.glimpse.support.shader.colormap.ColorMapTaggedProgram;
 
 /**
  * A HeatMapPainter whose coloring is controlled via a
@@ -71,66 +69,67 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     @Override
     protected void loadDefaultPipeline( Axis1D axis ) throws IOException
     {
-        this.fragShader = new TaggedColorScaleShader( ( TaggedAxis1D ) axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, DEFAULT_DATA_COORD_UNIT, DEFAULT_TEX_COORD_UNIT );
+        this.program = new ColorMapTaggedProgram( ( TaggedAxis1D ) axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, DEFAULT_DATA_COORD_UNIT, DEFAULT_TEX_COORD_UNIT );
 
-        this.setPipeline( new Pipeline( "colormap", null, null, fragShader ) );
+        this.setProgram( this.program );
     }
 
-    public TaggedColorScaleShader getShader( )
+    private ColorMapTaggedProgram getProgram( )
     {
-        return ( TaggedColorScaleShader ) this.fragShader;
+        return ( ColorMapTaggedProgram ) this.program;
     }
 
     @Override
     public void setAlpha( float alpha )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            getShader( ).setAlpha( alpha );
+            getProgram( ).setAlpha( alpha );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
+    @Override
     public void setDiscardNaN( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            getShader( ).setDiscardNaN( discard );
+            getProgram( ).setDiscardNaN( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardAbove( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            getShader( ).setDiscardAbove( discard );
+            getProgram( ).setDiscardAbove( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardBelow( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            getShader( ).setDiscardBelow( discard );
+            getProgram( ).setDiscardBelow( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
@@ -204,9 +203,10 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
-        super.dispose( context );
+        super.doDispose( context );
+
         this.taggedAxis.removeAxisListener( this );
     }
 }

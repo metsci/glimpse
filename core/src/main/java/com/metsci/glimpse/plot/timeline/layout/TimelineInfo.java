@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.layout;
 
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
-import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
+import static com.metsci.glimpse.support.font.FontUtils.*;
 
 import java.awt.Font;
 import java.util.TimeZone;
@@ -35,7 +34,6 @@ import java.util.TimeZone;
 import com.metsci.glimpse.axis.painter.TimeAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeXAxisPainter;
 import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
-import com.metsci.glimpse.axis.painter.label.TimeAxisLabelHandler;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;

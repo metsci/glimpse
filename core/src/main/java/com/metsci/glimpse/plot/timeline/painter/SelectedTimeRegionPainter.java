@@ -29,11 +29,9 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
-
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -55,9 +53,10 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
         this.showLockedStatus = show;
     }
 
-    protected void paint( GL2 gl, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
+    @Override
+    protected void paint( GlimpseContext context, TaggedAxis1D taggedAxis, List<Tag> tags, float min, float max, float current, int width, int height )
     {
-        super.paint( gl, taggedAxis, tags, min, max, current, width, height );
+        super.paint( context, taggedAxis, tags, min, max, current, width, height );
 
         if ( plot.isLocked( ) && showLockedStatus )
         {
@@ -66,10 +65,11 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
             int value = taggedAxis.valueToScreenPixel( current );
             Rectangle2D textbounds = textRenderer.getBounds( text );
 
-            GlimpseColor.setColor( textRenderer, selectionBorderColor );
             textRenderer.beginRendering( width, height );
             try
             {
+                GlimpseColor.setColor( textRenderer, selectionBorderColor );
+
                 if ( orientation == Orientation.VERTICAL )
                 {
                     textRenderer.draw( text, ( int ) ( value - textbounds.getWidth( ) - 3 ), 3 );
@@ -84,11 +84,5 @@ public class SelectedTimeRegionPainter extends SimpleSelectedTimeRegionPainter
                 textRenderer.endRendering( );
             }
         }
-    }
-
-    @Override
-    public void dispose( GLContext context )
-    {
-        // nothing to dispose
     }
 }

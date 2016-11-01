@@ -28,12 +28,10 @@ package com.metsci.glimpse.painter.decoration;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
-
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterImpl;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.font.FontUtils;
 
 /**
@@ -41,7 +39,7 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author osborn
  */
-public class CopyrightPainter extends GlimpsePainterImpl
+public class CopyrightPainter extends GlimpsePainterBase
 {
     private static final String copyrightSymbol = "\u00A9";
 
@@ -65,16 +63,18 @@ public class CopyrightPainter extends GlimpsePainterImpl
     }
 
     @Override
-    public void dispose( GLContext context )
+    public void doDispose( GlimpseContext context )
     {
         if ( textRenderer != null ) textRenderer.dispose( );
         textRenderer = null;
     }
 
     @Override
-    protected void paintTo( GlimpseContext context, GlimpseBounds bounds )
+    protected void doPaintTo( GlimpseContext context )
     {
         if ( textRenderer == null ) return;
+
+        GlimpseBounds bounds = getBounds( context );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );

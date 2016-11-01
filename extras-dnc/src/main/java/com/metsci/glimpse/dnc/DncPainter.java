@@ -38,6 +38,8 @@ import static com.metsci.glimpse.dnc.DncLabelAtlases.createHostLabelAtlas;
 import static com.metsci.glimpse.dnc.DncLabelAtlases.xferLabelAtlasToDevice;
 import static com.metsci.glimpse.dnc.DncPainterUtils.coverageSignificanceComparator;
 import static com.metsci.glimpse.dnc.DncPainterUtils.groupRenderingOrder;
+import static com.metsci.glimpse.dnc.DncShaderUtils.setUniformAxisRect;
+import static com.metsci.glimpse.dnc.DncShaderUtils.setUniformViewport;
 import static com.metsci.glimpse.dnc.convert.Render.coordsPerRenderIconVertex;
 import static com.metsci.glimpse.dnc.convert.Render.coordsPerRenderLabelVertex;
 import static com.metsci.glimpse.dnc.convert.Render.coordsPerRenderLineVertex;
@@ -48,6 +50,8 @@ import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.newWorkerDaemon;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.timeSince_MILLIS;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getBounds;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -66,8 +70,6 @@ import static javax.media.opengl.GL.GL_POINTS;
 import static javax.media.opengl.GL.GL_TEXTURE0;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
 import static javax.media.opengl.GL.GL_TRIANGLES;
-import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
-import static javax.media.opengl.fixedfunc.GLPointerFunc.GL_VERTEX_ARRAY;
 
 import java.awt.Color;
 import java.nio.CharBuffer;
@@ -86,15 +88,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import javax.media.opengl.GL2ES2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.dnc.DncAreaShaders.DncAreaProgram;
+import com.metsci.glimpse.dnc.DncAreaProgram.DncAreaProgramHandles;
 import com.metsci.glimpse.dnc.DncAtlases.DncAtlasEntry;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncChunks.DncDeviceChunk;
@@ -102,11 +103,11 @@ import com.metsci.glimpse.dnc.DncChunks.DncGroup;
 import com.metsci.glimpse.dnc.DncChunks.DncHostChunk;
 import com.metsci.glimpse.dnc.DncIconAtlases.DncDeviceIconAtlas;
 import com.metsci.glimpse.dnc.DncIconAtlases.DncHostIconAtlas;
-import com.metsci.glimpse.dnc.DncIconShaders.DncIconProgram;
+import com.metsci.glimpse.dnc.DncIconProgram.DncIconProgramHandles;
 import com.metsci.glimpse.dnc.DncLabelAtlases.DncDeviceLabelAtlas;
 import com.metsci.glimpse.dnc.DncLabelAtlases.DncHostLabelAtlas;
-import com.metsci.glimpse.dnc.DncLabelShaders.DncLabelProgram;
-import com.metsci.glimpse.dnc.DncLineShaders.DncLineProgram;
+import com.metsci.glimpse.dnc.DncLabelProgram.DncLabelProgramHandles;
+import com.metsci.glimpse.dnc.DncLineProgram.DncLineProgramHandles;
 import com.metsci.glimpse.dnc.convert.Flat2Render.DncChunkPriority;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Render.RenderChunk;
@@ -115,13 +116,15 @@ import com.metsci.glimpse.dnc.geosym.DncGeosymLineAreaStyle;
 import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
-import com.metsci.glimpse.painter.base.GlimpsePainter2D;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 
-public class DncPainter extends GlimpsePainter2D
+public class DncPainter implements GlimpsePainter
 {
 
     protected static final Logger logger = getLogger( DncPainter.class );
@@ -188,10 +191,10 @@ public class DncPainter extends GlimpsePainter2D
     protected final Map<DncChunkKey,IndexSetTexture> highlightSets;
     protected final List<IndexSetTexture> highlightSetsToDispose;
 
-    protected DncAreaProgram areaProgram;
-    protected DncLineProgram lineProgram;
-    protected DncIconProgram iconProgram;
-    protected DncLabelProgram labelProgram;
+    protected final DncAreaProgram areaProgram;
+    protected final DncLineProgram lineProgram;
+    protected final DncIconProgram iconProgram;
+    protected final DncLabelProgram labelProgram;
 
     protected final Set<Axis2D> axes;
     protected final AxisListener1D axisListener;
@@ -200,7 +203,7 @@ public class DncPainter extends GlimpsePainter2D
     protected final CopyOnWriteArrayList<Runnable> activeChunksListeners;
     public final Function<DncChunkKey,DncChunkPriority> chunkPriorityFunc;
 
-    // Accessed while holding mutex
+    protected boolean visible;
     protected DncGeosymTheme theme;
     protected Map<String,DncGeosymLineAreaStyle> lineAreaStyles;
     protected RasterizeArgs rasterizeArgs;
@@ -242,10 +245,10 @@ public class DncPainter extends GlimpsePainter2D
         this.highlightSets = new HashMap<>( );
         this.highlightSetsToDispose = new ArrayList<>( );
 
-        this.areaProgram = null;
-        this.lineProgram = null;
-        this.iconProgram = null;
-        this.labelProgram = null;
+        this.areaProgram = new DncAreaProgram( );
+        this.lineProgram = new DncLineProgram( );
+        this.iconProgram = new DncIconProgram( );
+        this.labelProgram = new DncLabelProgram( );
 
         this.axes = new HashSet<>( );
         this.axisListener = new RateLimitedAxisLimitsListener1D( )
@@ -270,6 +273,7 @@ public class DncPainter extends GlimpsePainter2D
             }
         };
 
+        this.visible = true;
         this.theme = null;
         this.lineAreaStyles = emptyMap( );
         this.rasterizeArgs = null;
@@ -754,11 +758,14 @@ public class DncPainter extends GlimpsePainter2D
     }
 
     @Override
-    protected void dispose( GLContext context )
+    public void dispose( GlimpseContext context )
     {
-        GL2 gl = context.getGL( ).getGL2( );
+        GL2ES2 gl = context.getGL( ).getGL2ES2( );
         synchronized ( mutex )
         {
+            // Don't try to dispose again if already disposed
+            if ( asyncExec.isShutdown( ) ) return;
+
             // Chunks
             for ( DncDeviceChunk dChunk : dChunksToDispose ) dChunk.dispose( gl );
             for ( DncDeviceChunk dChunk : dChunks.values( ) ) dChunk.dispose( gl );
@@ -786,10 +793,10 @@ public class DncPainter extends GlimpsePainter2D
             highlightSets.clear( );
 
             // Shader programs
-            if ( areaProgram != null ) gl.glDeleteProgram( areaProgram.programHandle );
-            if ( lineProgram != null ) gl.glDeleteProgram( lineProgram.programHandle );
-            if ( iconProgram != null ) gl.glDeleteProgram( iconProgram.programHandle );
-            if ( labelProgram != null ) gl.glDeleteProgram( labelProgram.programHandle );
+            areaProgram.dispose( gl );
+            lineProgram.dispose( gl );
+            iconProgram.dispose( gl );
+            labelProgram.dispose( gl );
 
             // Axis listeners
             for ( Axis2D axis : axes )
@@ -820,21 +827,54 @@ public class DncPainter extends GlimpsePainter2D
     }
 
     @Override
-    public void paintTo( GlimpseContext glimpse, GlimpseBounds bounds, Axis2D axis )
+    public boolean isDisposed( )
     {
-        GL2 gl = glimpse.getGL( ).getGL2( );
+        synchronized ( mutex )
+        {
+            return asyncExec.isShutdown( );
+        }
+    }
 
-        gl.glMatrixMode( GL_PROJECTION );
-        gl.glLoadIdentity( );
-        gl.glOrtho( axis.getMinX( ), axis.getMaxX( ), axis.getMinY( ), axis.getMaxY( ), -1, 1 );
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    { }
+
+    @Override
+    public boolean isVisible( )
+    {
+        synchronized ( mutex )
+        {
+            return visible;
+        }
+    }
+
+    @Override
+    public void setVisible( boolean visible )
+    {
+        synchronized ( mutex )
+        {
+            this.visible = visible;
+        }
+    }
+
+    @Override
+    public void paintTo( GlimpseContext context )
+    {
+        GlimpseBounds bounds = getBounds( context );
+        Axis2D axis = requireAxis2D( context );
+        GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
         gl.glEnable( GL_BLEND );
 
         // Premultiplied alpha
         gl.glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+        
+        gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
 
         synchronized ( mutex )
         {
+            if ( !visible ) return;
+
             // Don't try to paint after disposal
             if ( asyncExec.isShutdown( ) ) return;
 
@@ -844,17 +884,10 @@ public class DncPainter extends GlimpsePainter2D
             {
                 int[] maxTextureDim = new int[ 1 ];
                 gl.glGetIntegerv( GL_MAX_TEXTURE_SIZE, maxTextureDim, 0 );
-                this.rasterizeArgs = new RasterizeArgs( maxTextureDim[ 0 ], glimpse.getDPI( ) );
+                this.rasterizeArgs = new RasterizeArgs( maxTextureDim[ 0 ], context.getDPI( ) );
                 logger.fine( "Rasterization args: max-texture-dim = " + rasterizeArgs.maxTextureDim + ", screen-dpi = " + rasterizeArgs.screenDpi );
                 mutex.notifyAll( );
             }
-
-
-            // Build shader programs
-            if ( areaProgram == null ) areaProgram = new DncAreaProgram( gl );
-            if ( lineProgram == null ) lineProgram = new DncLineProgram( gl );
-            if ( iconProgram == null ) iconProgram = new DncIconProgram( gl );
-            if ( labelProgram == null ) labelProgram = new DncLabelProgram( gl );
 
 
             // Dispose of deactivated chunks
@@ -1016,8 +1049,6 @@ public class DncPainter extends GlimpsePainter2D
                 float iconHighlightScale = ( float ) ( 1.0 + 0.75*pulsateScale );
                 float labelHighlightScale = ( float ) ( 1.0 + 0.75*pulsateScale );
 
-                gl.glEnableClientState( GL_VERTEX_ARRAY );
-
 
                 for ( DncGroup group : groupsToDraw )
                 {
@@ -1043,15 +1074,20 @@ public class DncPainter extends GlimpsePainter2D
                             DncGeosymLineAreaStyle style = lineAreaStyles.get( geosymAssignment.areaSymbolId );
                             if ( style != null && style.symbolType.equals( "AreaPlain" ) )
                             {
-                                gl.glUseProgram( areaProgram.programHandle );
+                                DncAreaProgramHandles handles = areaProgram.handles( gl );
+                                gl.glUseProgram( handles.program );
 
-                                gl.glUniform1i( areaProgram.HIGHLIGHT_SET, highlightSetTextureUnit );
-                                gl.glUniform4fv( areaProgram.RGBA, 1, style.fillRgba, 0 );
+                                setUniformAxisRect( gl, handles.AXIS_RECT, axis );
+                                gl.glUniform4fv( handles.RGBA, 1, style.fillRgba, 0 );
+                                gl.glUniform1i( handles.HIGHLIGHT_SET, highlightSetTextureUnit );
 
+                                gl.glEnableVertexAttribArray( handles.inAreaVertex );
                                 gl.glBindBuffer( GL_ARRAY_BUFFER, dChunk.verticesHandle );
-                                gl.glVertexPointer( coordsPerRenderTriangleVertex, GL_FLOAT, 0, group.trianglesCoordFirst * SIZEOF_FLOAT );
+                                gl.glVertexAttribPointer( handles.inAreaVertex, coordsPerRenderTriangleVertex, GL_FLOAT, false, 0, group.trianglesCoordFirst * SIZEOF_FLOAT );
 
                                 gl.glDrawArrays( GL_TRIANGLES, 0, group.trianglesCoordCount / coordsPerRenderTriangleVertex );
+
+                                gl.glDisableVertexAttribArray( handles.inAreaVertex );
                             }
                         }
 
@@ -1060,24 +1096,29 @@ public class DncPainter extends GlimpsePainter2D
                             DncGeosymLineAreaStyle style = lineAreaStyles.get( geosymAssignment.lineSymbolId );
                             if ( style != null )
                             {
-                                gl.glUseProgram( lineProgram.programHandle );
+                                DncLineProgramHandles handles = lineProgram.handles( gl );
+                                gl.glUseProgram( handles.program );
 
-                                gl.glUniform1i( lineProgram.HIGHLIGHT_SET, highlightSetTextureUnit );
-                                gl.glUniform2f( lineProgram.PPV, ( float ) axis.getAxisX( ).getPixelsPerValue( ), ( float ) axis.getAxisY( ).getPixelsPerValue( ) );
-                                gl.glUniform2f( lineProgram.VIEWPORT_SIZE_PX, bounds.getWidth( ), bounds.getHeight( ) );
-                                gl.glUniform1f( lineProgram.LINE_THICKNESS_PX, style.lineWidth );
-                                gl.glUniform1f( lineProgram.FEATHER_THICKNESS_PX, 1f );
-                                gl.glUniform1f( lineProgram.HIGHLIGHT_EXTRA_THICKNESS_PX, lineHighlightExtraThickness_PX );
-                                gl.glUniform4fv( lineProgram.RGBA, 1, style.lineRgba, 0 );
+                                setUniformAxisRect( gl, handles.AXIS_RECT, axis );
+                                setUniformViewport( gl, handles.VIEWPORT_SIZE_PX, bounds );
 
-                                gl.glUniform1i( lineProgram.STIPPLE_ENABLE, style.hasLineStipple ? 1 : 0 );
-                                gl.glUniform1f( lineProgram.STIPPLE_FACTOR, style.lineStippleFactor );
-                                gl.glUniform1i( lineProgram.STIPPLE_PATTERN, style.lineStipplePattern );
+                                gl.glUniform4fv( handles.RGBA, 1, style.lineRgba, 0 );
+                                gl.glUniform1i( handles.STIPPLE_ENABLE, style.hasLineStipple ? 1 : 0 );
+                                gl.glUniform1f( handles.STIPPLE_FACTOR, style.lineStippleFactor );
+                                gl.glUniform1i( handles.STIPPLE_PATTERN, style.lineStipplePattern );
+                                gl.glUniform1f( handles.LINE_THICKNESS_PX, style.lineWidth );
+                                gl.glUniform1f( handles.FEATHER_THICKNESS_PX, 1f );
 
+                                gl.glUniform1i( handles.HIGHLIGHT_SET, highlightSetTextureUnit );
+                                gl.glUniform1f( handles.HIGHLIGHT_EXTRA_THICKNESS_PX, lineHighlightExtraThickness_PX );
+
+                                gl.glEnableVertexAttribArray( handles.inLineVertex );
                                 gl.glBindBuffer( GL_ARRAY_BUFFER, dChunk.verticesHandle );
-                                gl.glVertexPointer( coordsPerRenderLineVertex, GL_FLOAT, 0, group.linesCoordFirst * SIZEOF_FLOAT );
+                                gl.glVertexAttribPointer( handles.inLineVertex, coordsPerRenderLineVertex, GL_FLOAT, false, 0, group.linesCoordFirst * SIZEOF_FLOAT );
 
                                 gl.glDrawArrays( GL_LINE_STRIP, 0, group.linesCoordCount / coordsPerRenderLineVertex );
+
+                                gl.glDisableVertexAttribArray( handles.inLineVertex );
                             }
                         }
 
@@ -1086,63 +1127,75 @@ public class DncPainter extends GlimpsePainter2D
                             DncAtlasEntry atlasEntry = dIconAtlas.entries.get( geosymAssignment.pointSymbolId );
                             if ( atlasEntry != null )
                             {
-                                gl.glUseProgram( iconProgram.programHandle );
+                                DncIconProgramHandles handles = iconProgram.handles( gl );
+                                gl.glUseProgram( handles.program );
 
-                                gl.glUniform1i( iconProgram.HIGHLIGHT_SET, highlightSetTextureUnit );
-                                gl.glUniform2f( iconProgram.VIEWPORT_SIZE_PX, bounds.getWidth( ), bounds.getHeight( ) );
-                                gl.glUniform2f( iconProgram.IMAGE_SIZE_PX, iconScale * atlasEntry.w, iconScale * atlasEntry.h );
-                                gl.glUniform2f( iconProgram.IMAGE_ALIGN, atlasEntry.xAlign, atlasEntry.yAlign );
-                                gl.glUniform4f( iconProgram.IMAGE_BOUNDS, atlasEntry.sMin, atlasEntry.tMin, atlasEntry.sMax, atlasEntry.tMax );
-                                gl.glUniform1f( iconProgram.HIGHLIGHT_SCALE, iconHighlightScale );
+                                setUniformAxisRect( gl, handles.AXIS_RECT, axis );
+                                setUniformViewport( gl, handles.VIEWPORT_SIZE_PX, bounds );
 
                                 int iconAtlasTextureUnit = 0;
                                 gl.glActiveTexture( GL_TEXTURE0 + iconAtlasTextureUnit );
                                 gl.glBindTexture( GL_TEXTURE_2D, dIconAtlas.textureHandle );
-                                gl.glUniform1i( iconProgram.ATLAS, iconAtlasTextureUnit );
+                                gl.glUniform1i( handles.ATLAS, iconAtlasTextureUnit );
+                                gl.glUniform4f( handles.IMAGE_BOUNDS, atlasEntry.sMin, atlasEntry.tMin, atlasEntry.sMax, atlasEntry.tMax );
+                                gl.glUniform2f( handles.IMAGE_SIZE_PX, iconScale * atlasEntry.w, iconScale * atlasEntry.h );
+                                gl.glUniform2f( handles.IMAGE_ALIGN, atlasEntry.xAlign, atlasEntry.yAlign );
 
+                                gl.glUniform1i( handles.HIGHLIGHT_SET, highlightSetTextureUnit );
+                                gl.glUniform1f( handles.HIGHLIGHT_SCALE, iconHighlightScale );
+
+                                gl.glEnableVertexAttribArray( handles.inIconVertex );
                                 gl.glBindBuffer( GL_ARRAY_BUFFER, dChunk.verticesHandle );
-                                gl.glVertexPointer( coordsPerRenderIconVertex, GL_FLOAT, 0, group.iconsCoordFirst * SIZEOF_FLOAT );
+                                gl.glVertexAttribPointer( handles.inIconVertex, coordsPerRenderIconVertex, GL_FLOAT, false, 0, group.iconsCoordFirst * SIZEOF_FLOAT );
 
                                 gl.glDrawArrays( GL_POINTS, 0, group.iconsCoordCount / coordsPerRenderIconVertex );
+
+                                gl.glDisableVertexAttribArray( handles.inIconVertex );
                             }
                         }
 
                         if ( drawGroupLabels )
                         {
-                            gl.glUseProgram( labelProgram.programHandle );
+                            DncLabelProgramHandles handles = labelProgram.handles( gl );
+                            gl.glUseProgram( handles.program );
 
-                            gl.glUniform1i( labelProgram.HIGHLIGHT_SET, highlightSetTextureUnit );
-                            gl.glUniform2f( labelProgram.VIEWPORT_SIZE_PX, bounds.getWidth( ), bounds.getHeight( ) );
-                            gl.glUniform2f( labelProgram.ATLAS_SIZE_PX, dLabelAtlas.textureWidth, dLabelAtlas.textureHeight );
-                            gl.glUniform1f( labelProgram.HIGHLIGHT_SCALE, labelHighlightScale );
+                            setUniformAxisRect( gl, handles.AXIS_RECT, axis );
+                            setUniformViewport( gl, handles.VIEWPORT_SIZE_PX, bounds );
 
                             int labelAtlasTextureUnit = 0;
                             gl.glActiveTexture( GL_TEXTURE0 + labelAtlasTextureUnit );
                             gl.glBindTexture( GL_TEXTURE_2D, dLabelAtlas.textureHandle );
-                            gl.glUniform1i( labelProgram.ATLAS, labelAtlasTextureUnit );
+                            gl.glUniform1i( handles.ATLAS, labelAtlasTextureUnit );
+                            gl.glUniform2f( handles.ATLAS_SIZE_PX, dLabelAtlas.textureWidth, dLabelAtlas.textureHeight );
 
-                            gl.glEnableVertexAttribArray( labelProgram.aImageAlign );
-                            gl.glBindBuffer( GL_ARRAY_BUFFER, dLabelAtlas.entriesAlignHandle );
-                            gl.glVertexAttribPointer( labelProgram.aImageAlign, coordsPerLabelAtlasAlign, GL_FLOAT, false, 0, group.labelFirst * coordsPerLabelAtlasAlign * SIZEOF_FLOAT );
+                            gl.glUniform1i( handles.HIGHLIGHT_SET, highlightSetTextureUnit );
+                            gl.glUniform1f( handles.HIGHLIGHT_SCALE, labelHighlightScale );
 
-                            gl.glEnableVertexAttribArray( labelProgram.aImageBounds );
-                            gl.glBindBuffer( GL_ARRAY_BUFFER, dLabelAtlas.entriesBoundsHandle );
-                            gl.glVertexAttribPointer( labelProgram.aImageBounds, coordsPerLabelAtlasBounds, GL_FLOAT, false, 0, group.labelFirst * coordsPerLabelAtlasBounds * SIZEOF_FLOAT );
-
+                            gl.glEnableVertexAttribArray( handles.inLabelVertex );
                             gl.glBindBuffer( GL_ARRAY_BUFFER, dChunk.verticesHandle );
-                            gl.glVertexPointer( coordsPerRenderLabelVertex, GL_FLOAT, 0, group.labelsCoordFirst * SIZEOF_FLOAT );
+                            gl.glVertexAttribPointer( handles.inLabelVertex, coordsPerRenderLabelVertex, GL_FLOAT, false, 0, group.labelsCoordFirst * SIZEOF_FLOAT );
+
+                            gl.glEnableVertexAttribArray( handles.inImageAlign );
+                            gl.glBindBuffer( GL_ARRAY_BUFFER, dLabelAtlas.entriesAlignHandle );
+                            gl.glVertexAttribPointer( handles.inImageAlign, coordsPerLabelAtlasAlign, GL_FLOAT, false, 0, group.labelFirst * coordsPerLabelAtlasAlign * SIZEOF_FLOAT );
+
+                            gl.glEnableVertexAttribArray( handles.inImageBounds );
+                            gl.glBindBuffer( GL_ARRAY_BUFFER, dLabelAtlas.entriesBoundsHandle );
+                            gl.glVertexAttribPointer( handles.inImageBounds, coordsPerLabelAtlasBounds, GL_FLOAT, false, 0, group.labelFirst * coordsPerLabelAtlasBounds * SIZEOF_FLOAT );
 
                             gl.glDrawArrays( GL_POINTS, 0, group.labelsCoordCount / coordsPerRenderLabelVertex );
 
-                            gl.glDisableVertexAttribArray( labelProgram.aImageAlign );
-                            gl.glDisableVertexAttribArray( labelProgram.aImageBounds );
+                            gl.glDisableVertexAttribArray( handles.inLabelVertex );
+                            gl.glDisableVertexAttribArray( handles.inImageAlign );
+                            gl.glDisableVertexAttribArray( handles.inImageBounds );
                         }
                     }
                 }
 
 
-                gl.glDisableClientState( GL_VERTEX_ARRAY );
                 gl.glUseProgram( 0 );
+                
+                gl.getGL3( ).glBindVertexArray( 0 );
             }
         }
     }

@@ -126,5 +126,4 @@ public interface GlimpseTarget
      * Sets the LookAndFeel for this GlimpseTarget and all child GlimpseTargets.
      */
     public void setLookAndFeel( LookAndFeel laf );
-
 }

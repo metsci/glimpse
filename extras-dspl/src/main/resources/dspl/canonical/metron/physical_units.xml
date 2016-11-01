@@ -54,6 +54,7 @@
             <property id="luminous_intensity_dimension" type="integer"></property>
             <property id="planar_angle_dimension" type="integer"></property>
             <property id="solid_angle_dimension" type="integer"></property>
+            <property id="temperature_dimension" type="integer"></property>
             <table ref="physical_properties"/>
         </concept>
 
@@ -103,6 +104,7 @@
 			<column id="luminous_intensity_dimension" type="integer" />
 			<column id="planar_angle_dimension" type="integer" />
 			<column id="solid_angle_dimension" type="integer" />
+            <column id="temperature_dimension" type="integer" />
 			<data>
 				<file format="csv" encoding="utf-8">physical_properties.csv</file>
 			</data>

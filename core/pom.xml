@@ -18,9 +18,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr-runtime</artifactId>
-			<version>3.4</version>
+			<groupId>com.metsci.glimpse</groupId>
+			<artifactId>glimpse-text</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 
 		<dependency>

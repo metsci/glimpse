@@ -1,0 +1,9 @@
+point_flat_color
+
+Draws 2D point with feathered edges and a constant pixel radius.
+
+Java Wrappers:
+ * com.metsci.glimpse.support.shader.point.PointFixedColorProgram
+
+Usage Examples:
+ * com.metsci.glimpse.painter.shape.PointSetPainter

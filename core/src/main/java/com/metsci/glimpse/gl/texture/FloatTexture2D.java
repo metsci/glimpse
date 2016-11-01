@@ -26,16 +26,21 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import static java.util.logging.Level.WARNING;
+import static java.util.logging.Level.*;
 
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.texture.TextureUnit;
 
 /**
@@ -48,7 +53,9 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     private static final Logger logger = Logger.getLogger( FloatTexture2D.class.getName( ) );
 
     protected FloatBuffer data;
-    protected boolean centers;
+    protected GLEditableBuffer xyBuffer;
+    protected GLEditableBuffer sBuffer;
+
     protected double[] min;
     protected double[] max;
 
@@ -58,49 +65,71 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
 
         this.data = Buffers.newDirectFloatBuffer( n0 * n1 );
 
-        this.min = min.clone( );
-        this.max = max.clone( );
-        this.centers = centers;
+        this.min = Arrays.copyOf( min, min.length );
+        this.max = Arrays.copyOf( max, max.length );
+
+        double tminmax[][] = computeDrawMinMax( min, max, centers );
+        double tmin[] = tminmax[0];
+        double tmax[] = tminmax[1];
+
+        this.xyBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 12 * Buffers.SIZEOF_FLOAT );
+        this.xyBuffer.growQuad2f( ( float ) tmin[0], ( float ) tmin[1], ( float ) tmax[0], ( float ) tmax[1] );
+
+        this.sBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 12 * Buffers.SIZEOF_FLOAT );
+        this.sBuffer.growQuad2f( 0, 0, 1, 1 );
+    }
+
+    public int xyVbo( GlimpseContext context )
+    {
+        GL gl = context.getGL( );
+        return this.xyBuffer.deviceBuffer( gl );
+    }
+
+    public int sVbo( GlimpseContext context )
+    {
+        GL gl = context.getGL( );
+        return this.sBuffer.deviceBuffer( gl );
+    }
+
+    public int getMode( )
+    {
+        return GL.GL_TRIANGLES;
     }
 
     @Override
-    // multiTextureList is ignored because this type of texture does not currently support
-    // multitexturing (but it would be easy to add)
-    public void draw( GL2 gl, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
+    public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
-        boolean ready = prepare( gl, texUnit );
+        boolean ready = true;
+
+        // prepare all the multitextures
+        for ( TextureUnit<Texture> texture : multiTextureList )
+        {
+            if ( !texture.prepare( context ) ) ready = false;
+        }
+
+        if ( !prepare( context, texUnit ) ) ready = false;
 
         if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
+
             return;
         }
 
-        gl.glTexEnvf( GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_REPLACE );
-        gl.glPolygonMode( GL2.GL_FRONT, GL2.GL_FILL );
+        Axis2D axis = GlimpsePainterBase.requireAxis2D( context );
 
-        double tminmax[][] = computeDrawMinMax( );
-        double tmin[] = tminmax[0];
-        double tmax[] = tminmax[1];
-
-        gl.glBegin( GL2.GL_QUADS );
+        program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+        try
         {
-            gl.glTexCoord2f( 0.0f, 0.0f );
-            gl.glVertex2d( tmin[0], tmin[1] );
-
-            gl.glTexCoord2f( 1.0f, 0.0f );
-            gl.glVertex2d( tmax[0], tmin[1] );
-
-            gl.glTexCoord2f( 1.0f, 1.0f );
-            gl.glVertex2d( tmax[0], tmax[1] );
-
-            gl.glTexCoord2f( 0.0f, 1.0f );
-            gl.glVertex2d( tmin[0], tmax[1] );
+            program.draw( context, getMode( ), xyVbo( context ), sVbo( context ), 0, this.xyBuffer.sizeFloats( ) / 2 );
         }
-        gl.glEnd( );
+        finally
+        {
+            program.end( context );
+        }
     }
 
-    private final double[][] computeDrawMinMax( )
+    private final double[][] computeDrawMinMax( double[] min, double[] max, boolean centers )
     {
         double[] texmin = new double[2];
         double[] texmax = new double[2];
@@ -128,23 +157,23 @@ public class FloatTexture2D extends AbstractTexture implements DrawableTexture
     @Override
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST );
 
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE );
+        gl.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_CLAMP_TO_EDGE );
     }
 
     @Override
-    protected void prepare_setData( GL2 gl )
+    protected void prepare_setData( GL gl )
     {
-        gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE32F, dim[0], dim[1], 0, GL2.GL_LUMINANCE, GL2.GL_FLOAT, data.rewind( ) );
+        gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_R32F, dim[0], dim[1], 0, GL3.GL_RED, GL3.GL_FLOAT, data.rewind( ) );
     }
 
     @Override
     protected void prepare_setPixelStore( GL gl )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
     }
 
     public void mutate( MutatorFloat2D mutator )

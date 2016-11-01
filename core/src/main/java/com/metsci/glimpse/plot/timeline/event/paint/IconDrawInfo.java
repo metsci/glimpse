@@ -35,10 +35,11 @@ public class IconDrawInfo
     public double scaleY;
     public int centerX;
     public int centerY;
+    public float[] color;
 
     public boolean isX;
 
-    public IconDrawInfo( Object id, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, boolean isX )
+    public IconDrawInfo( Object id, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, boolean isX, float[] color )
     {
         this.id = id;
         this.positionX = positionX;
@@ -48,6 +49,7 @@ public class IconDrawInfo
         this.centerX = centerX;
         this.centerY = centerY;
         this.isX = isX;
+        this.color = color;
     }
 
     public Object getId( )
@@ -88,5 +90,10 @@ public class IconDrawInfo
     public boolean isX( )
     {
         return isX;
+    }
+
+    public float[] getColor( )
+    {
+        return color;
     }
 }

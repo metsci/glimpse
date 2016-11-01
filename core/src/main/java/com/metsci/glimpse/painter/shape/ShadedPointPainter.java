@@ -27,24 +27,18 @@
 package com.metsci.glimpse.painter.shape;
 
 import java.io.IOException;
-import java.util.concurrent.locks.ReentrantLock;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer;
-import com.metsci.glimpse.gl.attribute.GLFloatBuffer2D;
-import com.metsci.glimpse.gl.attribute.GLVertexAttribute;
-import com.metsci.glimpse.gl.shader.Pipeline;
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
-import com.metsci.glimpse.painter.base.GlimpseDataPainter2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.SimplePointShader;
+import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.support.shader.point.PointAttributeColorSizeProgram;
 
 /**
  * A painter, similar to {@link PointSetPainter}, which allows visualization
@@ -54,94 +48,68 @@ import com.metsci.glimpse.support.shader.SimplePointShader;
  * @author ulman
  * @see com.metsci.glimpse.examples.basic.ScatterplotExample
  */
-public class ShadedPointPainter extends GlimpseDataPainter2D
+public class ShadedPointPainter extends GlimpsePainterBase
 {
-    protected ReentrantLock lock = new ReentrantLock( );
-
     protected FloatTexture1D sizeTexture;
     protected ColorTexture1D colorTexture;
 
-    protected GLFloatBuffer2D positionBuffer;
-    protected GLFloatBuffer colorAttributeBuffer;
-    protected GLFloatBuffer sizeAttributeBuffer;
-
-    protected Pipeline pipeline;
-    protected int colorAttributeIndex = 6;
-    protected int sizeAttributeIndex = 7;
-
-    protected SimplePointShader vertShader;
+    protected PointAttributeColorSizeProgram program;
 
     protected boolean constantSize = true;
     protected boolean constantColor = true;
 
-    protected float constantPointSize = 5.0f;
-    protected float[] constantPointColor = GlimpseColor.getBlack( );
-
-    protected boolean userPipeline = false;
-
-    public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis, Pipeline pipeline ) throws IOException
-    {
-        this.lock = new ReentrantLock( );
-        this.pipeline = pipeline;
-        this.userPipeline = true;
-    }
+    protected int vertexCount = 0;
 
     public ShadedPointPainter( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
     {
-        this.lock = new ReentrantLock( );
-        this.initShaderPipeline( colorAxis, sizeAxis );
+        this.program = newShader( colorAxis, sizeAxis );
     }
 
-    protected void initShaderPipeline( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    public void useVertexPositionData( FloatBuffer positionBuffer )
     {
-        vertShader = new SimplePointShader( 0, 1, colorAttributeIndex, sizeAttributeIndex, colorAxis, sizeAxis );
-        pipeline = new Pipeline( "pointshader", null, vertShader, null );
-    }
-
-    public void useVertexPositionData( GLFloatBuffer2D positionBuffer )
-    {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.positionBuffer = positionBuffer;
+            this.program.setVertexData( positionBuffer );
+            this.vertexCount = positionBuffer.limit( ) / 2;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
-    public void useColorAttribData( GLFloatBuffer attributeBuffer )
+    public void useColorAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.colorAttributeBuffer = attributeBuffer;
+            this.program.setColorData( attributeBuffer );
             this.setVariablePointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
-    public void useSizeAttribData( GLFloatBuffer attributeBuffer )
+    public void useSizeAttribData( FloatBuffer attributeBuffer )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.sizeAttributeBuffer = attributeBuffer;
-            this.setVariablePointSize0( );
+            this.program.setSizeData( attributeBuffer );
+            this.setVariablePointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useColorScale( ColorTexture1D colorTexture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.colorTexture = colorTexture;
@@ -149,13 +117,13 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useSizeScale( FloatTexture1D sizeTexture )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.sizeTexture = sizeTexture;
@@ -163,243 +131,204 @@ public class ShadedPointPainter extends GlimpseDataPainter2D
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardAboveSize( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.vertShader.setDiscardAboveSize( discard );
+            this.program.setDiscardAboveSize( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardBelowSize( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.vertShader.setDiscardBelowSize( discard );
+            this.program.setDiscardBelowSize( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardAboveColor( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.vertShader.setDiscardAboveColor( discard );
+            this.program.setDiscardAboveColor( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setDiscardBelowColor( boolean discard )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.vertShader.setDiscardBelowColor( discard );
+            this.program.setDiscardBelowColor( discard );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setConstantPointSize( float size )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.constantPointSize = size;
-            this.setConstantPointSize0( );
+            this.constantSize = true;
+            this.program.setContstantSize( size );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void setConstantPointColor( float[] color )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.constantPointColor = color;
-            this.setConstantPointColor0( );
+            this.constantColor = true;
+            this.program.setContstantColor( color );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useConstantColor( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.setConstantPointColor0( );
+            this.constantSize = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useConstantSize( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
-            this.setConstantPointSize0( );
+            this.constantColor = true;
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useVariableSize( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.setVariablePointSize0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
     }
 
     public void useVariableColor( )
     {
-        lock.lock( );
+        painterLock.lock( );
         try
         {
             this.setVariablePointColor0( );
         }
         finally
         {
-            lock.unlock( );
+            painterLock.unlock( );
         }
-    }
-
-    protected void setConstantPointColor0( )
-    {
-        this.constantColor = true;
-        this.vertShader.setConstantColor( true );
-    }
-
-    protected void setConstantPointSize0( )
-    {
-        this.constantSize = true;
-        this.vertShader.setConstantSize( true );
     }
 
     protected void setVariablePointColor0( )
     {
-        if ( this.colorTexture != null && this.colorAttributeBuffer != null )
-        {
-            this.constantColor = false;
-            this.vertShader.setConstantColor( false );
-        }
+        this.constantColor = false;
+        this.program.setConstantColor( false );
     }
 
     protected void setVariablePointSize0( )
     {
-        if ( this.sizeTexture != null && this.sizeAttributeBuffer != null )
-        {
-            this.constantSize = false;
-            this.vertShader.setConstantSize( false );
-        }
+        this.constantSize = false;
+        this.program.setConstantSize( false );
+    }
+
+    protected PointAttributeColorSizeProgram newShader( Axis1D colorAxis, Axis1D sizeAxis ) throws IOException
+    {
+        return new PointAttributeColorSizeProgram( 0, 1, colorAxis, sizeAxis );
     }
 
     @Override
-    public void paintTo( GL2 gl, GlimpseBounds bounds, Axis2D axis )
+    public void doPaintTo( GlimpseContext context )
     {
-        lock.lock( );
+        Axis2D axis = requireAxis2D( context );
+        GL gl = context.getGL( );
+
+        if ( vertexCount == 0 ) return;
+
+        if ( !constantSize && ( sizeTexture == null ) ) return;
+
+        if ( !constantColor && ( colorTexture == null ) ) return;
+
+        if ( !constantSize )
+        {
+            sizeTexture.prepare( context, 1 );
+        }
+
+        if ( !constantColor )
+        {
+            colorTexture.prepare( context, 0 );
+        }
+
+        program.setProjectionMatrix( axis );
+
+        GLUtils.enableStandardBlending( gl );
+        program.useProgram( gl, true );
         try
         {
-            if ( positionBuffer == null ) return;
-
-            if ( !constantSize && ( sizeTexture == null || sizeAttributeBuffer == null ) ) return;
-
-            if ( !constantColor && ( colorTexture == null || colorAttributeBuffer == null ) ) return;
-
-            if ( constantSize )
-            {
-                gl.glPointSize( constantPointSize );
-            }
-            else
-            {
-                sizeTexture.prepare( gl, 1 );
-                sizeAttributeBuffer.bind( sizeAttributeIndex, gl );
-
-                gl.glEnable( GL2.GL_VERTEX_PROGRAM_POINT_SIZE );
-            }
-
-            if ( constantColor )
-            {
-                GlimpseColor.glColor( gl, constantPointColor );
-            }
-            else
-            {
-                colorTexture.prepare( gl, 0 );
-                colorAttributeBuffer.bind( colorAttributeIndex, gl );
-            }
-
-            positionBuffer.bind( GLVertexAttribute.ATTRIB_POSITION_2D, gl );
-            pipeline.beginUse( gl );
-
-            gl.glEnable( GL2.GL_POINT_SMOOTH );
-            gl.glBlendFunc( GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA );
-            gl.glEnable( GL2.GL_BLEND );
-
             drawArrays( gl );
         }
         finally
         {
-            try
-            {
-                if ( pipeline != null ) pipeline.endUse( gl );
-                if ( positionBuffer != null ) positionBuffer.unbind( gl );
-                if ( !constantColor && colorAttributeBuffer != null ) colorAttributeBuffer.unbind( gl );
-                if ( !constantSize && sizeAttributeBuffer != null ) sizeAttributeBuffer.unbind( gl );
-            }
-            finally
-            {
-                lock.unlock( );
-            }
+            program.useProgram( gl, false );
+            GLUtils.disableBlending( gl );
         }
     }
 
     protected void drawArrays( GL gl )
     {
-        gl.glDrawArrays( GL2.GL_POINTS, 0, positionBuffer.getNumVertices( ) );
+        gl.glDrawArrays( GL.GL_POINTS, 0, vertexCount );
     }
 
     @Override
-    public void dispose( GLContext context )
+    protected void doDispose( GlimpseContext context )
     {
-        // if the user passed in a pipeline it is their responsibility to dispose of it
-        if ( !userPipeline && pipeline != null )
-        {
-            pipeline.dispose( context );
-        }
+        program.dispose( context.getGLContext( ) );
     }
 }
