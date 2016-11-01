@@ -185,6 +185,7 @@
                     <aggregate>true</aggregate>
                     <includes>
                         <include>src/main/java/**</include>
+                        <include>src/test/java/**</include>
                         <include>**/*.fs</include>
                         <include>**/*.vs</include>
                         <include>**/*.gs</include>
