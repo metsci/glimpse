@@ -10,7 +10,7 @@
 
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>3.0.0</version>
     <packaging>pom</packaging>
 
     <name>Glimpse</name>
