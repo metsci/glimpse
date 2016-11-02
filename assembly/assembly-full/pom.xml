@@ -45,12 +45,6 @@
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-extras-spacenav</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-swt</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
