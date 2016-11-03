@@ -117,12 +117,12 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler
 
             if ( orderDelta == 0 )
             {
-                s = format( "%,.0f + x", baseValue );
+                s = format( "%,.0f + __", baseValue );
             }
             else
             {
                 int precision = orderDelta < 0 ? -orderDelta : 1;
-                s = format( "%,." + precision + "f + x e%d", baseValue, orderDelta );
+                s = format( "%,." + precision + "f + __ e%d", baseValue, orderDelta );
             }
         }
         else if ( orderAxis == 0 )
@@ -131,7 +131,7 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler
         }
         else
         {
-            s = format( "x e%d", orderAxis );
+            s = format( "__ e%d", orderAxis );
         }
 
         if ( !prefix.isEmpty( ) || !suffix.isEmpty( ) )
