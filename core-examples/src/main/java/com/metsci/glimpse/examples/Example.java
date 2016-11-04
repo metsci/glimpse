@@ -143,14 +143,9 @@ public class Example
         // it should also be done after the frame has been made visible or
         // the GlimpseCanvas GLEventListener.reshape( ) may be called
         // with spurious sizes (possible NEWT bug)
-        SwingUtilities.invokeAndWait( new Runnable( )
-        {
-            @Override
-            public void run( )
-            {
-                frame.add( canvas );
-                frame.validate( );
-            }
+        SwingUtilities.invokeAndWait( ( ) -> {
+            frame.add( canvas );
+            frame.validate( );
         } );
 
         return new Example( canvas, frame, layout );
@@ -190,7 +185,7 @@ public class Example
             public void windowClosing( WindowEvent e )
             {
                 animator.stop( );
-                
+
                 leftPanel.disposeAttached( );
                 rightPanel.disposeAttached( );
                 leftPanel.destroy( );
