@@ -38,9 +38,10 @@ vec2 axisSize( vec4 axisRect )
     return axisRect.zw;
 }
 
-vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
+vec4 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 {
-    return ( ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect ) );
+    vec2 xy_FRAC = ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect );
+    return vec4( 2.0*xy_FRAC - 1.0, 0.0, 1.0 );
 }
 
 bool setContains( isampler2D setTexture, float index )
@@ -84,6 +85,5 @@ void main( )
     vCumulativeDistance_PX = cumulativeDistance * ppv.x;
 
     vec2 xy_AXIS = inLineVertex.xy;
-    gl_Position.xy = axisXyToNdc( xy_AXIS, AXIS_RECT );
-    gl_Position.zw = vec2( 0.0, 1.0 );
+    gl_Position = axisXyToNdc( xy_AXIS, AXIS_RECT );
 }
