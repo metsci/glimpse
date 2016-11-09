@@ -56,7 +56,7 @@ public class GLUtils
     {
         String prop = System.getProperty( name );
         if ( prop == null )
-            return !unsetValue;
+            return unsetValue;
         else if ( prop.equals( "1" ) || prop.equalsIgnoreCase( "true" ) )
             return true;
         else if ( prop.equals( "0" ) || prop.equalsIgnoreCase( "false" ) )
