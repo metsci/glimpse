@@ -31,8 +31,6 @@ import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 
 import java.awt.Component;
 
-import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
-
 public class DockingFrameTitlers
 {
 

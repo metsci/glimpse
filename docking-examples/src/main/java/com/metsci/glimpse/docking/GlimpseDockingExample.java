@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
-import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
@@ -41,7 +41,6 @@ import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.swing.UIManager;
 
-import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
