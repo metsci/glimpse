@@ -549,21 +549,21 @@ public class DockingGroup
         }
     }
 
-    protected static DockerArrangementNode findArrNodeSibling( GroupArrangement groupArr, DockerArrangementNode node )
+    protected static DockerArrangementSplit findArrNodeParent( GroupArrangement groupArr, DockerArrangementNode child )
     {
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            DockerArrangementNode sibling = findArrNodeSibling( frameArr.dockerArr, node );
-            if ( sibling != null )
+            DockerArrangementSplit parent = findArrNodeParent( frameArr.dockerArr, child );
+            if ( parent != null )
             {
-                return sibling;
+                return parent;
             }
         }
 
         return null;
     }
 
-    protected static DockerArrangementNode findArrNodeSibling( DockerArrangementNode root, DockerArrangementNode node )
+    protected static DockerArrangementSplit findArrNodeParent( DockerArrangementNode root, DockerArrangementNode child )
     {
         if ( root instanceof DockerArrangementTile )
         {
@@ -573,23 +573,18 @@ public class DockingGroup
         {
             DockerArrangementSplit split = ( DockerArrangementSplit ) root;
 
-            if ( split.childA == node )
+            if ( child == split.childA || child == split.childB )
             {
-                return split.childB;
+                return split;
             }
 
-            if ( split.childB == node )
-            {
-                return split.childA;
-            }
-
-            DockerArrangementNode resultA = findArrNodeSibling( split.childA, node );
+            DockerArrangementSplit resultA = findArrNodeParent( split.childA, child );
             if ( resultA != null )
             {
                 return resultA;
             }
 
-            DockerArrangementNode resultB = findArrNodeSibling( split.childB, node );
+            DockerArrangementSplit resultB = findArrNodeParent( split.childB, child );
             if ( resultB != null )
             {
                 return resultB;
@@ -666,14 +661,40 @@ public class DockingGroup
 
         DockerArrangementTile planTile = findArrTileContaining( this.plan, this.planSubtreeViewIds, view.viewId );
         Set<String> planTileViewIds = this.planSubtreeViewIds.get( planTile );
-        MultiSplitPane.Leaf guiTile = findSimilarGuiLeaf( guiSubtreeViewIds, planTileViewIds );
+        MultiSplitPane.Leaf guiLeaf = findSimilarGuiLeaf( guiSubtreeViewIds, planTileViewIds );
+        if ( guiLeaf != null )
+        {
+            Tile tile = ( Tile ) guiLeaf.component;
+            tile.addView( view, tile.numViews( ) );
+            return;
+        }
 
-        DockerArrangementNode planSibling = findArrNodeSibling( this.plan, planTile );
-        Set<String> planSiblingViewIds = this.planSubtreeViewIds.get( planSibling );
-        MultiSplitPane.Node guiSibling = findSimilarGuiNode( guiSubtreeViewIds, planSiblingViewIds );
+        DockerArrangementSplit planParent = findArrNodeParent( this.plan, planTile );
+        if ( planParent != null )
+        {
+            DockerArrangementNode planSibling = ( planTile == planParent.childA ? planParent.childB : planParent.childA );
+            Set<String> planSiblingViewIds = this.planSubtreeViewIds.get( planSibling );
+            MultiSplitPane.Node guiSibling = findSimilarGuiNode( guiSubtreeViewIds, planSiblingViewIds );
+            if ( guiSibling != null )
+            {
+                Tile newTile = tileFactory.newTile( );
+                newTile.addView( view, 0 );
+                MultiSplitPane.Leaf guiNewLeaf = new MultiSplitPane.Leaf( newTile, false );
 
+                MultiSplitPane.Node guiChildA = ( planTile == planParent.childA ? guiNewLeaf : guiSibling );
+                MultiSplitPane.Node guiChildB = ( planTile == planParent.childA ? guiSibling : guiNewLeaf );
+                MultiSplitPane.Split newSplit = new MultiSplitPane.Split( planParent.arrangeVertically, planParent.splitFrac, guiChildA, guiChildB );
 
+                // WIP: Replace guiSibling with newSplit
 
+                return;
+            }
+        }
+
+        Tile newTile = tileFactory.newTile( );
+        newTile.addView( view, 0 );
+        DockingFrame newFrame = this.addNewFrame( );
+        newFrame.docker.addInitialLeaf( newTile );
     }
 
 
