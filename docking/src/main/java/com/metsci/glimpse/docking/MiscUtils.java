@@ -32,8 +32,10 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -130,6 +132,25 @@ public class MiscUtils
     public static boolean areEqual( Object a, Object b )
     {
         return ( a == b || ( a != null && a.equals( b ) ) );
+    }
+
+    public static <T> Set<T> union( Set<? extends T> a, Set<? extends T> b )
+    {
+        Set<T> union = new LinkedHashSet<T>( );
+        if ( a != null ) union.addAll( a );
+        if ( b != null ) union.addAll( b );
+        return union;
+    }
+
+    public static <T> Set<T> intersection( Set<? extends T> a, Set<? extends T> b )
+    {
+        Set<T> intersection = new LinkedHashSet<T>( );
+        if ( a != null && b != null )
+        {
+            intersection.addAll( a );
+            intersection.retainAll( b );
+        }
+        return intersection;
     }
 
     public static <T> Iterable<T> reversed( final List<T> list )
