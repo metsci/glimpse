@@ -417,140 +417,6 @@ public class MultiSplitPane extends JPanel
     // Snapshots
     //
 
-    protected void attachSplitPaneListeners( Component c )
-    {
-        if ( c instanceof SplitPane )
-        {
-            final SplitPane splitPane = ( SplitPane ) c;
-            splitPane.addListener( new SplitPaneListener( )
-            {
-                @Override
-                public void movedDivider( )
-                {
-                    for ( MultiSplitPaneListener listener : listeners )
-                    {
-                        listener.movedDivider( splitPane );
-                    }
-                }
-            } );
-
-            attachSplitPaneListeners( splitPane.getChildA( ) );
-            attachSplitPaneListeners( splitPane.getChildB( ) );
-        }
-    }
-
-    public void restore( Node rootNode )
-    {
-        if ( allLeavesRoot != null || !leaves.isEmpty( ) ) throw new RuntimeException( "At least one leaf already exists" );
-
-        Component newRoot = toComponentTree( rootNode, this.leaves );
-        attachSplitPaneListeners( newRoot );
-
-        allLeavesCard.add( newRoot );
-        this.allLeavesRoot = newRoot;
-
-        Component toMaximize = findMaximized( rootNode );
-        if ( toMaximize != null )
-        {
-            maximizeLeaf( toMaximize );
-        }
-
-        validate( );
-        repaint( );
-
-        for ( MultiSplitPaneListener listener : listeners )
-        {
-            listener.restoredTree( );
-        }
-    }
-
-    protected Component findMaximized( Node node )
-    {
-        if ( node instanceof Split )
-        {
-            Split split = ( Split ) node;
-            Component maximizedA = findMaximized( split.childA );
-            Component maximizedB = findMaximized( split.childB );
-
-            if ( maximizedA != null && maximizedB != null )
-            {
-                throw new RuntimeException( "Cannot maximize more than one leaf" );
-            }
-            else if ( maximizedA != null )
-            {
-                return maximizedA;
-            }
-            else if ( maximizedB != null )
-            {
-                return maximizedB;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        else if ( node instanceof Leaf )
-        {
-            Leaf leaf = ( Leaf ) node;
-            return ( leaf.isMaximized ? leaf.component : null );
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
-        }
-    }
-
-    protected Component toComponentTree( Node node, Set<Component> leaves_OUT )
-    {
-        if ( node instanceof Split )
-        {
-            Split split = ( Split ) node;
-            Component childA = toComponentTree( split.childA, leaves_OUT );
-            Component childB = toComponentTree( split.childB, leaves_OUT );
-
-            if ( childA != null && childB != null )
-            {
-                SplitPane splitPane = new SplitPane( split.arrangeVertically, split.splitFrac, gapSize );
-                splitPane.add( childA, CHILD_A );
-                splitPane.add( childB, CHILD_B );
-                return splitPane;
-            }
-            else if ( childA != null )
-            {
-                return childA;
-            }
-            else if ( childB != null )
-            {
-                return childB;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        else if ( node instanceof Leaf )
-        {
-            Component c = ( ( Leaf ) node ).component;
-            if ( c != null )
-            {
-                leaves_OUT.add( c );
-            }
-            return c;
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
-        }
-    }
-
     public Node snapshot( )
     {
         return createSnapshot( allLeavesRoot );
@@ -561,7 +427,7 @@ public class MultiSplitPane extends JPanel
         if ( c instanceof SplitPane )
         {
             SplitPane s = ( SplitPane ) c;
-            return new Split( s.arrangeVertically, s.splitFrac, createSnapshot( s.getChildA( ) ), createSnapshot( s.getChildB( ) ) );
+            return new Split( s, s.arrangeVertically, s.splitFrac, createSnapshot( s.getChildA( ) ), createSnapshot( s.getChildB( ) ) );
         }
         else if ( c == maximizedPlaceholder )
         {
@@ -579,6 +445,12 @@ public class MultiSplitPane extends JPanel
 
     public static abstract class Node
     {
+        public final Component component;
+
+        public Node( Component component )
+        {
+            this.component = component;
+        }
     }
 
     public static class Split extends Node
@@ -588,8 +460,9 @@ public class MultiSplitPane extends JPanel
         public final Node childA;
         public final Node childB;
 
-        public Split( boolean arrangeVertically, double splitFrac, Node childA, Node childB )
+        public Split( Component component, boolean arrangeVertically, double splitFrac, Node childA, Node childB )
         {
+            super( component );
             this.arrangeVertically = arrangeVertically;
             this.splitFrac = splitFrac;
             this.childA = childA;
@@ -599,12 +472,11 @@ public class MultiSplitPane extends JPanel
 
     public static class Leaf extends Node
     {
-        public final Component component;
         public final boolean isMaximized;
 
         public Leaf( Component component, boolean isMaximized )
         {
-            this.component = component;
+            super( component );
             this.isMaximized = isMaximized;
         }
     }

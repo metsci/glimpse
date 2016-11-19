@@ -72,7 +72,7 @@ public abstract class Tile extends JComponent
 
     public abstract View selectedView( );
 
-    public abstract void addView( final View view, int viewNum );
+    public abstract void addView( View view, int viewNum );
 
     public abstract void updateView( View view );
 
