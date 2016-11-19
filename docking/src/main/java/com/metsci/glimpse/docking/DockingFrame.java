@@ -49,17 +49,29 @@ public class DockingFrame extends JFrame
         setContentPane( docker );
 
         this.normalBounds = getBounds( );
+
         addWindowStateListener( new WindowStateListener( )
         {
             @Override
-            public void windowStateChanged( WindowEvent ev ) { updateNormalBounds( ); }
+            public void windowStateChanged( WindowEvent ev )
+            {
+                updateNormalBounds( );
+            }
         } );
+
         addComponentListener( new ComponentAdapter( )
         {
             @Override
-            public void componentMoved( ComponentEvent ev ) { updateNormalBounds( ); }
+            public void componentMoved( ComponentEvent ev )
+            {
+                updateNormalBounds( );
+            }
+
             @Override
-            public void componentResized( ComponentEvent ev ) { updateNormalBounds( ); }
+            public void componentResized( ComponentEvent ev )
+            {
+                updateNormalBounds( );
+            }
         } );
     }
 
