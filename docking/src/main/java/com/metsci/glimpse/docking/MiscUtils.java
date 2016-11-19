@@ -27,14 +27,15 @@
 package com.metsci.glimpse.docking;
 
 import static java.lang.Math.round;
+import static java.util.Collections.reverse;
 
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -153,33 +154,11 @@ public class MiscUtils
         return intersection;
     }
 
-    public static <T> Iterable<T> reversed( final List<T> list )
+    public static <T> List<T> reversed( Collection<T> list )
     {
-        return new Iterable<T>( )
-        {
-            public Iterator<T> iterator( )
-            {
-                return new Iterator<T>( )
-                {
-                    final ListIterator<T> it = list.listIterator( list.size( ) );
-
-                    public boolean hasNext( )
-                    {
-                        return it.hasPrevious( );
-                    }
-
-                    public T next( )
-                    {
-                        return it.previous( );
-                    }
-
-                    public void remove( )
-                    {
-                        it.remove( );
-                    }
-                };
-            }
-        };
+        List<T> reversed = new ArrayList<>( list );
+        reverse( reversed );
+        return reversed;
     }
 
 }

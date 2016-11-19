@@ -31,6 +31,7 @@ import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.intersection;
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.MiscUtils.union;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -44,6 +45,7 @@ import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -383,14 +385,81 @@ public class DockingGroup
 
     public void addViews( View... views )
     {
-        // WIP: Can we add views in some order that puts the correct frame on top?
+        // Bookkeeping for frame order
+        Set<Window> preExistingFrames = new LinkedHashSet<>( this.frames );
+        Map<FrameArrangement,Window> plannedNewFrames = new LinkedHashMap<>( );
+        List<Window> unplannedNewFrames = new ArrayList<>( );
+
         for ( View view : views )
         {
-            this.addView( view );
+            DestinationFrameInfo frameInfo = this.doAddView( view );
+
+            // Bookkeeping for frame order
+            if ( !preExistingFrames.contains( frameInfo.window ) )
+            {
+                if ( frameInfo.frameArr != null )
+                {
+                    plannedNewFrames.put( frameInfo.frameArr, frameInfo.window );
+                }
+                else
+                {
+                    unplannedNewFrames.add( frameInfo.window );
+                }
+            }
+        }
+
+        // Order pre-existing frames
+        for ( Window w : reversed( preExistingFrames ) )
+        {
+            w.toFront( );
+        }
+
+        // Order planned new frames (in front of pre-existing)
+        for ( FrameArrangement frameArr : reversed( this.plan.frameArrs ) )
+        {
+            Window w = plannedNewFrames.get( frameArr );
+            if ( w != null )
+            {
+                w.toFront( );
+            }
+        }
+
+        // Order unplanned new frames (in front of planned)
+        for ( Window w : unplannedNewFrames )
+        {
+            w.toFront( );
         }
     }
 
     public void addView( View view )
+    {
+        this.doAddView( view );
+    }
+
+    /**
+     * Used to inform the caller of {@link DockingGroup#doAddView(View)}
+     * about which frame the view was added to.
+     */
+    protected static class DestinationFrameInfo
+    {
+        /**
+         * Null if the added view was not in the planned arrangement
+         */
+        public final FrameArrangement frameArr;
+
+        /**
+         * Always non-null
+         */
+        public final Window window;
+
+        public DestinationFrameInfo( FrameArrangement frameArr, Window window )
+        {
+            this.frameArr = frameArr;
+            this.window = window;
+        }
+    }
+
+    protected DestinationFrameInfo doAddView( View view )
     {
         Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildPlanSubtreeViewIdsMap( this.plan );
         Map<MultiSplitPane.Node,Set<String>> guiSubtreeViewIds = buildGuiSubtreeViewIdsMap( this.frames );
@@ -405,7 +474,7 @@ public class DockingGroup
             {
                 Tile tile = ( Tile ) guiLeaf.component;
                 tile.addView( view, tile.numViews( ) );
-                return;
+                return new DestinationFrameInfo( planFrame, getAncestorOfClass( Window.class, tile ) );
             }
 
             DockerArrangementSplit planParent = findArrNodeParent( planFrame.dockerArr, planTile );
@@ -426,7 +495,7 @@ public class DockingGroup
                     newTile.addView( view, 0 );
                     docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
 
-                    return;
+                    return new DestinationFrameInfo( planFrame, getAncestorOfClass( Window.class, docker ) );
                 }
             }
         }
@@ -447,6 +516,7 @@ public class DockingGroup
             newFrame.setSize( 1024, 768 );
         }
         newFrame.setVisible( true );
+        return new DestinationFrameInfo( planFrame, newFrame );
     }
 
     public void updateView( View view )
