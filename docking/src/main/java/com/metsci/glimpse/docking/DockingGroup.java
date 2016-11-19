@@ -435,9 +435,17 @@ public class DockingGroup
         newTile.addView( view, 0 );
         DockingFrame newFrame = this.addNewFrame( );
         newFrame.docker.addInitialLeaf( newTile );
-        newFrame.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
-        newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
-        newFrame.setExtendedState( getFrameExtendedState( planFrame ) );
+        if ( planFrame != null )
+        {
+            newFrame.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
+            newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
+            newFrame.setExtendedState( getFrameExtendedState( planFrame ) );
+        }
+        else
+        {
+            newFrame.setLocationByPlatform( true );
+            newFrame.setSize( 1024, 768 );
+        }
         newFrame.setVisible( true );
     }
 
