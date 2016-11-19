@@ -160,10 +160,7 @@ public class SimpleDockingExample
                     }
                 } );
 
-                for ( View view : views )
-                {
-                    dockingGroup.addView( view );
-                }
+                dockingGroup.addViews( views );
 
             }
         } );

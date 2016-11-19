@@ -358,6 +358,7 @@ public class DockingGroup
 
     public GroupArrangement captureArrangement( )
     {
+        // WIP: Need to include info that is in the plan only (not in the current frames)
         GroupArrangement groupArr = new GroupArrangement( );
         for ( DockingFrame frame : frames )
         {
@@ -378,6 +379,15 @@ public class DockingGroup
             groupArr.frameArrs.add( frameArr );
         }
         return groupArr;
+    }
+
+    public void addViews( View... views )
+    {
+        // WIP: Can we add views in some order that puts the correct frame on top?
+        for ( View view : views )
+        {
+            this.addView( view );
+        }
     }
 
     public void addView( View view )
