@@ -43,59 +43,11 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.docking.SplitPane.SplitPaneListener;
+import com.metsci.glimpse.docking.SplitPaneListener;
 
 @SuppressWarnings("serial")
 public class MultiSplitPane extends JPanel
 {
-
-    public static interface MultiSplitPaneListener
-    {
-        void addedLeaf( Component leaf );
-
-        void removedLeaf( Component leaf );
-
-        void movedDivider( SplitPane splitPane );
-
-        void maximizedLeaf( Component leaf );
-
-        void unmaximizedLeaf( Component leaf );
-
-        void restoredTree( );
-    }
-
-    public static class MultiSplitPaneAdapter implements MultiSplitPaneListener
-    {
-        @Override
-        public void addedLeaf( Component leaf )
-        {
-        }
-
-        @Override
-        public void removedLeaf( Component leaf )
-        {
-        }
-
-        @Override
-        public void movedDivider( SplitPane splitPane )
-        {
-        }
-
-        @Override
-        public void maximizedLeaf( Component leaf )
-        {
-        }
-
-        @Override
-        public void unmaximizedLeaf( Component leaf )
-        {
-        }
-
-        @Override
-        public void restoredTree( )
-        {
-        }
-    }
 
     protected static final String MAXIMIZED_LEAF_CARD = "maximizedLeaf";
     protected static final String ALL_LEAVES_CARD = "allLeaves";

@@ -58,8 +58,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.MultiSplitPane.MultiSplitPaneListener;
-import com.metsci.glimpse.docking.Tile.TileListener;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;

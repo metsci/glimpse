@@ -51,11 +51,6 @@ import javax.swing.JPanel;
 public class SplitPane extends JPanel
 {
 
-    public static interface SplitPaneListener
-    {
-        void movedDivider( );
-    }
-
     protected static final String CHILD_A = "A";
     protected static final String CHILD_B = "B";
 
