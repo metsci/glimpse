@@ -41,7 +41,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -270,30 +270,59 @@ public class DockingUtils
     {
         int largestArea = -1;
         Tile largestTile = null;
-        for ( Component c : docker.leaves( ) )
+        for ( Tile tile : findTiles( docker ) )
         {
-            int area = c.getWidth( ) * c.getHeight( );
-            if ( area > largestArea && c instanceof Tile )
+            int area = tile.getWidth( ) * tile.getHeight( );
+            if ( area > largestArea )
             {
-                largestTile = ( Tile ) c;
+                largestTile = tile;
                 largestArea = area;
             }
         }
         return largestTile;
     }
 
-    public static Set<View> findViews( MultiSplitPane docker )
+    public static Set<Tile> findTiles( Collection<? extends DockingFrame> frames )
     {
-        Set<View> views = new HashSet<>( );
+        Set<Tile> tiles = new LinkedHashSet<>( );
+        for ( DockingFrame frame : frames )
+        {
+            tiles.addAll( findTiles( frame.docker ) );
+        }
+        return tiles;
+    }
+
+    public static Set<Tile> findTiles( MultiSplitPane docker )
+    {
+        Set<Tile> tiles = new LinkedHashSet<>( );
         for ( Component c : docker.leaves( ) )
         {
             if ( c instanceof Tile )
             {
-                Tile tile = ( Tile ) c;
-                for ( int i = 0; i < tile.numViews( ); i++ )
-                {
-                    views.add( tile.view( i ) );
-                }
+                tiles.add( ( Tile ) c );
+            }
+        }
+        return tiles;
+    }
+
+    public static Set<View> findViews( Collection<? extends DockingFrame> frames )
+    {
+        Set<View> views = new LinkedHashSet<>( );
+        for ( DockingFrame frame : frames )
+        {
+            views.addAll( findViews( frame.docker ) );
+        }
+        return views;
+    }
+
+    public static Set<View> findViews( MultiSplitPane docker )
+    {
+        Set<View> views = new LinkedHashSet<>( );
+        for ( Tile tile : findTiles( docker ) )
+        {
+            for ( int i = 0; i < tile.numViews( ); i++ )
+            {
+                views.add( tile.view( i ) );
             }
         }
         return views;

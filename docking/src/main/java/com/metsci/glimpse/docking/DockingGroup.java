@@ -27,6 +27,7 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
+import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
@@ -39,6 +40,7 @@ import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -49,6 +51,7 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -351,9 +354,19 @@ public class DockingGroup
 
     public void setArrangement( GroupArrangement groupArr )
     {
-        // WIP: Rearrange existing stuff
+        Collection<View> views = findViews( this.frames );
 
+        // Remove existing views, pruning empty tiles and frames
+        for ( View view : views )
+        {
+            this.closeView( view );
+        }
+
+        // Set the arrangement plan
         this.plan = groupArr;
+
+        // Re-add views
+        this.addViews( views );
     }
 
     public GroupArrangement captureArrangement( )
@@ -382,6 +395,11 @@ public class DockingGroup
     }
 
     public void addViews( View... views )
+    {
+        this.addViews( asList( views ) );
+    }
+
+    public void addViews( Collection<View> views )
     {
         // Bookkeeping for frame order
         Set<Window> preExistingFrames = new LinkedHashSet<>( this.frames );
@@ -553,19 +571,6 @@ public class DockingGroup
         {
             listener.closedView( this, view );
         }
-    }
-
-    protected static Set<Tile> findTiles( MultiSplitPane docker )
-    {
-        Set<Tile> tiles = new LinkedHashSet<>( );
-        for ( Component c : docker.leaves( ) )
-        {
-            if ( c instanceof Tile )
-            {
-                tiles.add( ( Tile ) c );
-            }
-        }
-        return tiles;
     }
 
     protected static Map<DockerArrangementNode,Set<String>> buildPlanSubtreeViewIdsMap( GroupArrangement groupArr )
