@@ -392,18 +392,18 @@ public class DockingGroup
 
         for ( View view : views )
         {
-            DestinationFrameInfo frameInfo = this.doAddView( view );
+            ViewDestination viewDest = this.doAddView( view );
 
             // Bookkeeping for frame order
-            if ( !preExistingFrames.contains( frameInfo.window ) )
+            if ( !preExistingFrames.contains( viewDest.window ) )
             {
-                if ( frameInfo.frameArr != null )
+                if ( viewDest.frameArr != null )
                 {
-                    plannedNewFrames.put( frameInfo.frameArr, frameInfo.window );
+                    plannedNewFrames.put( viewDest.frameArr, viewDest.window );
                 }
                 else
                 {
-                    unplannedNewFrames.add( frameInfo.window );
+                    unplannedNewFrames.add( viewDest.window );
                 }
             }
         }
@@ -438,9 +438,9 @@ public class DockingGroup
 
     /**
      * Used to inform the caller of {@link DockingGroup#doAddView(View)}
-     * about which frame the view was added to.
+     * about where the view ended up (e.g. which frame).
      */
-    protected static class DestinationFrameInfo
+    protected static class ViewDestination
     {
         /**
          * Null if the added view was not in the planned arrangement
@@ -452,14 +452,14 @@ public class DockingGroup
          */
         public final Window window;
 
-        public DestinationFrameInfo( FrameArrangement frameArr, Window window )
+        public ViewDestination( FrameArrangement frameArr, Window window )
         {
             this.frameArr = frameArr;
             this.window = window;
         }
     }
 
-    protected DestinationFrameInfo doAddView( View view )
+    protected ViewDestination doAddView( View view )
     {
         Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildPlanSubtreeViewIdsMap( this.plan );
         Map<MultiSplitPane.Node,Set<String>> guiSubtreeViewIds = buildGuiSubtreeViewIdsMap( this.frames );
@@ -467,6 +467,7 @@ public class DockingGroup
         FrameArrangement planFrame = findFrameArrContaining( this.plan, view.viewId );
         if ( planFrame != null )
         {
+            // Add to an existing tile
             DockerArrangementTile planTile = findArrTileContaining( planFrame.dockerArr, planSubtreeViewIds, view.viewId );
             Set<String> planTileViewIds = planSubtreeViewIds.get( planTile );
             MultiSplitPane.Leaf guiLeaf = findSimilarGuiLeaf( guiSubtreeViewIds, planTileViewIds );
@@ -474,9 +475,10 @@ public class DockingGroup
             {
                 Tile tile = ( Tile ) guiLeaf.component;
                 tile.addView( view, tile.numViews( ) );
-                return new DestinationFrameInfo( planFrame, getAncestorOfClass( Window.class, tile ) );
+                return new ViewDestination( planFrame, getAncestorOfClass( Window.class, tile ) );
             }
 
+            // Create a new tile that neighbors an existing tile or split
             DockerArrangementSplit planParent = findArrNodeParent( planFrame.dockerArr, planTile );
             if ( planParent != null )
             {
@@ -495,28 +497,31 @@ public class DockingGroup
                     newTile.addView( view, 0 );
                     docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
 
-                    return new DestinationFrameInfo( planFrame, getAncestorOfClass( Window.class, docker ) );
+                    return new ViewDestination( planFrame, getAncestorOfClass( Window.class, docker ) );
                 }
             }
+
+            // Create a new frame, with size and position from the planned arrangement
+            Tile newTile = this.tileFactory.newTile( );
+            newTile.addView( view, 0 );
+            DockingFrame newFrame = this.addNewFrame( );
+            newFrame.docker.addInitialLeaf( newTile );
+            newFrame.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
+            newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
+            newFrame.setExtendedState( getFrameExtendedState( planFrame ) );
+            newFrame.setVisible( true );
+            return new ViewDestination( planFrame, newFrame );
         }
 
+        // Create a new frame, with default size and position
         Tile newTile = this.tileFactory.newTile( );
         newTile.addView( view, 0 );
         DockingFrame newFrame = this.addNewFrame( );
         newFrame.docker.addInitialLeaf( newTile );
-        if ( planFrame != null )
-        {
-            newFrame.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
-            newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
-            newFrame.setExtendedState( getFrameExtendedState( planFrame ) );
-        }
-        else
-        {
-            newFrame.setLocationByPlatform( true );
-            newFrame.setSize( 1024, 768 );
-        }
+        newFrame.setLocationByPlatform( true );
+        newFrame.setSize( 1024, 768 );
         newFrame.setVisible( true );
-        return new DestinationFrameInfo( planFrame, newFrame );
+        return new ViewDestination( planFrame, newFrame );
     }
 
     public void updateView( View view )
