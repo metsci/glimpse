@@ -102,7 +102,7 @@ public class DockingGroupUtils
             }
             else
             {
-                // XXX: Handle arbitrary components
+                // XXX: Handle non-Tile components
             }
 
             DockerArrangementTile arrTile = new DockerArrangementTile( );
@@ -110,7 +110,7 @@ public class DockingGroupUtils
             arrTile.selectedViewId = selectedViewId;
             arrTile.isMaximized = leaf.isMaximized;
 
-            // WIP: Only if c is a Tile?
+            // XXX: Handle non-Tile components
             components_INOUT.put( arrTile, c );
 
             return arrTile;
@@ -162,7 +162,7 @@ public class DockingGroupUtils
         @Override
         public void placeView( GroupRealization existing, View newView )
         {
-            // XXX: Existing component isn't guaranteed to be a Tile
+            // XXX: Handle non-Tile components
             Tile tile = ( Tile ) existing.components.get( this.existingTile );
             tile.addView( newView, tile.numViews( ) );
         }
@@ -184,11 +184,19 @@ public class DockingGroupUtils
         @Override
         public void placeView( GroupArrangement groupArr, String viewId )
         {
-            // WIP
+            DockerArrangementTile newTile = new DockerArrangementTile( );
+            newTile.viewIds.add( viewId );
+            newTile.selectedViewId = viewId;
+            newTile.isMaximized = false;
 
-            FrameArrangement frameArr = findFrameArrContaining( groupArr, neighborNode );
+            DockerArrangementSplit newSplit = new DockerArrangementSplit( );
+            newSplit.arrangeVertically = ( this.sideOfNeighbor == TOP || this.sideOfNeighbor == BOTTOM );
+            boolean newIsChildA = ( this.sideOfNeighbor == LEFT || this.sideOfNeighbor == TOP );
+            newSplit.childA = ( newIsChildA ? newTile : this.neighborNode );
+            newSplit.childB = ( newIsChildA ? this.neighborNode : newTile );
+            newSplit.splitFrac = ( newIsChildA ? this.extentFrac : 1.0 - this.extentFrac );
 
-            DockerArrangementSplit parentSplit = findArrNodeParent( root, neighborNode );
+            replaceArrNode( groupArr, this.neighborNode, newSplit );
         }
 
         @Override
@@ -231,21 +239,21 @@ public class DockingGroupUtils
         @Override
         public void placeView( GroupArrangement groupArr, String viewId )
         {
-            DockerArrangementTile arrTile = new DockerArrangementTile( );
-            arrTile.viewIds.add( viewId );
-            arrTile.selectedViewId = viewId;
-            arrTile.isMaximized = false;
+            DockerArrangementTile newTile = new DockerArrangementTile( );
+            newTile.viewIds.add( viewId );
+            newTile.selectedViewId = viewId;
+            newTile.isMaximized = false;
 
-            FrameArrangement frameArr = new FrameArrangement( );
-            frameArr.x = this.x;
-            frameArr.y = this.y;
-            frameArr.width = this.width;
-            frameArr.height = this.height;
-            frameArr.isMaximizedHoriz = this.isMaximizedHoriz;
-            frameArr.isMaximizedVert = this.isMaximizedVert;
-            frameArr.dockerArr = arrTile;
+            FrameArrangement newFrame = new FrameArrangement( );
+            newFrame.x = this.x;
+            newFrame.y = this.y;
+            newFrame.width = this.width;
+            newFrame.height = this.height;
+            newFrame.isMaximizedHoriz = this.isMaximizedHoriz;
+            newFrame.isMaximizedVert = this.isMaximizedVert;
+            newFrame.dockerArr = newTile;
 
-            groupArr.frameArrs.add( frameArr );
+            groupArr.frameArrs.add( newFrame );
         }
 
         @Override
@@ -264,26 +272,26 @@ public class DockingGroupUtils
         }
     }
 
-    public static class InFallbackLocation implements ViewPlacement
+    public static class InNewFallbackFrame implements ViewPlacement
     {
         @Override
         public void placeView( GroupArrangement groupArr, String viewId )
         {
-            DockerArrangementTile arrTile = new DockerArrangementTile( );
-            arrTile.viewIds.add( viewId );
-            arrTile.selectedViewId = viewId;
-            arrTile.isMaximized = false;
+            DockerArrangementTile newTile = new DockerArrangementTile( );
+            newTile.viewIds.add( viewId );
+            newTile.selectedViewId = viewId;
+            newTile.isMaximized = false;
 
-            FrameArrangement frameArr = new FrameArrangement( );
-            frameArr.x = asdf;
-            frameArr.y = asdf;
-            frameArr.width = 1024;
-            frameArr.height = 768;
-            frameArr.isMaximizedHoriz = false;
-            frameArr.isMaximizedVert = false;
-            frameArr.dockerArr = arrTile;
+            FrameArrangement newFrame = new FrameArrangement( );
+            newFrame.x = 0;
+            newFrame.y = 0;
+            newFrame.width = 1024;
+            newFrame.height = 768;
+            newFrame.isMaximizedHoriz = false;
+            newFrame.isMaximizedVert = false;
+            newFrame.dockerArr = newTile;
 
-            groupArr.frameArrs.add( frameArr );
+            groupArr.frameArrs.add( newFrame );
         }
 
         @Override
@@ -339,7 +347,7 @@ public class DockingGroupUtils
         }
 
         // Use fallback location
-        return new InFallbackLocation( );
+        return new InNewFallbackFrame( );
     }
 
     public static Set<String> findViewIds( GroupArrangement groupArr )
@@ -549,6 +557,78 @@ public class DockingGroupUtils
         else
         {
             throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + root.getClass( ).getName( ) );
+        }
+    }
+
+    protected static void replaceArrNode( GroupArrangement groupArr, DockerArrangementNode existingNode, DockerArrangementNode newNode )
+    {
+        FrameArrangement frameArr = findFrameArrContaining( groupArr, existingNode );
+        if ( frameArr == null )
+        {
+            throw new RuntimeException( "No such node in this docking arrangement" );
+        }
+
+        if ( existingNode == frameArr.dockerArr )
+        {
+            frameArr.dockerArr = newNode;
+        }
+        else
+        {
+            DockerArrangementSplit parentSplit = findArrNodeParent( frameArr.dockerArr, existingNode );
+            if ( parentSplit == null )
+            {
+                throw new RuntimeException( "Failed to find parent node" );
+            }
+
+            if ( existingNode == parentSplit.childA )
+            {
+                parentSplit.childA = newNode;
+            }
+            else
+            {
+                parentSplit.childB = newNode;
+            }
+        }
+    }
+
+    protected static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, DockerArrangementNode node )
+    {
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            if ( isDescendant( frameArr.dockerArr, node ) )
+            {
+                return frameArr;
+            }
+        }
+
+        return null;
+    }
+
+    protected static boolean isDescendant( DockerArrangementNode node, DockerArrangementNode descendant )
+    {
+        if ( node instanceof DockerArrangementTile )
+        {
+            return ( node == descendant );
+        }
+        else if ( node instanceof DockerArrangementSplit )
+        {
+            if ( node == descendant )
+            {
+                return true;
+            }
+            else
+            {
+                DockerArrangementSplit split = ( DockerArrangementSplit ) node;
+                return ( isDescendant( split.childA, descendant ) || isDescendant( split.childB, descendant ) );
+            }
+        }
+        else if ( node == null )
+        {
+            return false;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 
