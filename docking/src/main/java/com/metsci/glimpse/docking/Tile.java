@@ -31,7 +31,7 @@ import java.awt.event.MouseAdapter;
 
 import javax.swing.JComponent;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public abstract class Tile extends JComponent
 {
 

@@ -43,7 +43,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
 
 public class DockingMouseAdapter extends MouseAdapter
 {
@@ -153,7 +152,7 @@ public class DockingMouseAdapter extends MouseAdapter
             {
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, tileFactory );
-                pruneEmptyTileAndFrame( dockingGroup, tile );
+                pruneEmptyTileAndFrame( tile );
             }
 
             this.dragging = false;

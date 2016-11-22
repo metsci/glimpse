@@ -47,7 +47,7 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public class SplitPane extends JPanel
 {
 

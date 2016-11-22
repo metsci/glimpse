@@ -166,7 +166,7 @@ public class DockingUtils
         return popup;
     }
 
-    @SuppressWarnings("serial")
+    @SuppressWarnings( "serial" )
     public static JToolBar newToolbar( boolean anchorRight )
     {
         JToolBar toolbar;
@@ -214,9 +214,14 @@ public class DockingUtils
 
     public static int getFrameExtendedState( FrameArrangement frameArr )
     {
+        return getFrameExtendedState( frameArr.isMaximizedHoriz, frameArr.isMaximizedVert );
+    }
+
+    public static int getFrameExtendedState( boolean isMaximizedHoriz, boolean isMaximizedVert )
+    {
         int state = 0;
-        if ( frameArr.isMaximizedHoriz ) state |= MAXIMIZED_HORIZ;
-        if ( frameArr.isMaximizedVert ) state |= MAXIMIZED_VERT;
+        if ( isMaximizedHoriz ) state |= MAXIMIZED_HORIZ;
+        if ( isMaximizedVert ) state |= MAXIMIZED_VERT;
         return state;
     }
 

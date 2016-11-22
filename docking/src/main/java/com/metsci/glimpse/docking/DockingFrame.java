@@ -34,7 +34,7 @@ import java.awt.event.WindowStateListener;
 
 import javax.swing.JFrame;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public class DockingFrame extends JFrame
 {
 
