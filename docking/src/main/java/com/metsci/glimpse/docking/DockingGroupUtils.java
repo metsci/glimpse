@@ -10,6 +10,8 @@ import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
@@ -144,19 +146,21 @@ public class DockingGroupUtils
         void placeView( GroupRealization existing, View newView );
     }
 
-    public static class LastInExistingTile implements ViewPlacement
+    public static class InExistingTile implements ViewPlacement
     {
         public final DockerArrangementTile existingTile;
+        public final int viewNum;
 
-        public LastInExistingTile( DockerArrangementTile existingTile )
+        public InExistingTile( DockerArrangementTile existingTile, int viewNum )
         {
             this.existingTile = existingTile;
+            this.viewNum = viewNum;
         }
 
         @Override
         public void placeView( GroupArrangement groupArr, String viewId )
         {
-            existingTile.viewIds.add( viewId );
+            this.existingTile.viewIds.add( this.viewNum, viewId );
         }
 
         @Override
@@ -164,7 +168,7 @@ public class DockingGroupUtils
         {
             // XXX: Handle non-Tile components
             Tile tile = ( Tile ) existing.components.get( this.existingTile );
-            tile.addView( newView, tile.numViews( ) );
+            tile.addView( newView, viewNum );
         }
     }
 
@@ -323,7 +327,8 @@ public class DockingGroupUtils
             DockerArrangementTile existingTile = findSimilarArrTile( existingSubtreeViewIds, planTileViewIds );
             if ( existingTile != null )
             {
-                return new LastInExistingTile( existingTile );
+                int viewNum = chooseViewNum( planTile.viewIds, existingTile.viewIds, viewId );
+                return new InExistingTile( existingTile, viewNum );
             }
 
             // Create a new tile, beside an existing neighbor that is similar to the planned neighbor
@@ -360,6 +365,56 @@ public class DockingGroupUtils
 
         // Use fallback location
         return new InNewFallbackFrame( );
+    }
+
+    public static int chooseViewNum( List<String> planViewIds, List<String> existingViewIds, String newViewId )
+    {
+        Set<String> viewIdsBefore = new LinkedHashSet<>( );
+        Set<String> viewIdsAfter = new LinkedHashSet<>( );
+
+        boolean beforeNewViewId = true;
+        for ( String viewId : planViewIds )
+        {
+            if ( viewId.equals( newViewId ) )
+            {
+                beforeNewViewId = false;
+            }
+            else if ( beforeNewViewId )
+            {
+                viewIdsBefore.add( viewId );
+            }
+            else
+            {
+                viewIdsAfter.add( viewId );
+            }
+        }
+
+        int viewNumBefore = -1;
+        int viewNumAfter = existingViewIds.size( );
+
+        for ( int i = 0; i < existingViewIds.size( ); i++ )
+        {
+            String viewId = existingViewIds.get( i );
+
+            if ( viewIdsBefore.contains( viewId ) )
+            {
+                viewNumBefore = max( viewNumBefore, i );
+            }
+
+            if ( viewIdsAfter.contains( viewId ) )
+            {
+                viewNumAfter = min( viewNumAfter, i );
+            }
+        }
+
+        if ( viewNumBefore < viewNumAfter )
+        {
+            return ( viewNumBefore + 1 );
+        }
+        else
+        {
+            return existingViewIds.size( );
+        }
     }
 
     public static Set<String> findViewIds( GroupArrangement groupArr )
