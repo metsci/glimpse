@@ -317,7 +317,7 @@ public class DockingGroupUtils
         FrameArrangement planFrame = findFrameArrContaining( planArr, viewId );
         if ( planFrame != null )
         {
-            // Add to an existing tile
+            // Add to an existing tile that is similar to the planned tile
             DockerArrangementTile planTile = findArrTileContaining( planFrame.dockerArr, planSubtreeViewIds, viewId );
             Set<String> planTileViewIds = planSubtreeViewIds.get( planTile );
             DockerArrangementTile existingTile = findSimilarArrTile( existingSubtreeViewIds, planTileViewIds );
@@ -326,11 +326,20 @@ public class DockingGroupUtils
                 return new LastInExistingTile( existingTile );
             }
 
-            // Create a new tile that neighbors an existing tile or split
-            DockerArrangementSplit planParent = findArrNodeParent( planFrame.dockerArr, planTile );
-            if ( planParent != null )
+            // Create a new tile, beside an existing neighbor that is similar to the planned neighbor
+            //
+            // We look first for a good "sibling," then for a good "uncle" ... and so on up the tree
+            //
+            DockerArrangementNode planNode = planTile;
+            while ( true )
             {
-                boolean newIsChildA = ( planTile == planParent.childA );
+                DockerArrangementSplit planParent = findArrNodeParent( planFrame.dockerArr, planNode );
+                if ( planParent == null )
+                {
+                    break;
+                }
+
+                boolean newIsChildA = ( planNode == planParent.childA );
                 DockerArrangementNode planNeighbor = ( newIsChildA ? planParent.childB : planParent.childA );
                 Set<String> planNeighborViewIds = planSubtreeViewIds.get( planNeighbor );
                 DockerArrangementNode existingNeighbor = findSimilarArrNode( existingSubtreeViewIds, planNeighborViewIds );
@@ -340,6 +349,9 @@ public class DockingGroupUtils
                     double extentFrac = ( newIsChildA ? planParent.splitFrac : 1.0 - planParent.splitFrac );
                     return new BesideExistingNeighbor( existingNeighbor, sideOfNeighbor, extentFrac );
                 }
+
+                // Go one level up the tree and try again
+                planNode = planParent;
             }
 
             // Create a new frame, with size and position from the planned arrangement
