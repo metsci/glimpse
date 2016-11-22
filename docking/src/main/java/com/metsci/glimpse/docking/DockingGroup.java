@@ -360,6 +360,8 @@ public class DockingGroup
 
     public void addViews( Collection<View> views )
     {
+        // WIP: Set the selected view of each newly created tile
+
         // XXX: Restore frame stacking order
         for ( View view : views )
         {
