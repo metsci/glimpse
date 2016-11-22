@@ -31,9 +31,7 @@ import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
-import static com.metsci.glimpse.docking.MiscUtils.intersection;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
-import static com.metsci.glimpse.docking.MiscUtils.union;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.RIGHT;
@@ -42,7 +40,6 @@ import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableSet;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Component;
@@ -56,10 +53,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.metsci.glimpse.docking.DockingGroupUtils.Asdf;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileFactories.TileFactory;
 import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
@@ -97,7 +94,7 @@ public class DockingGroup
 
     protected final List<DockingFrame> framesMod;
     public final List<DockingFrame> frames;
-    protected GroupArrangement plan;
+    protected GroupArrangement planArr;
 
     protected final LandingIndicator landingIndicator;
 
@@ -111,7 +108,7 @@ public class DockingGroup
 
         this.framesMod = new ArrayList<>( );
         this.frames = unmodifiableList( framesMod );
-        this.plan = new GroupArrangement( );
+        this.planArr = new GroupArrangement( );
 
         this.landingIndicator = new LandingIndicator( theme );
 
@@ -363,7 +360,7 @@ public class DockingGroup
         }
 
         // Set the arrangement plan
-        this.plan = groupArr;
+        this.planArr = groupArr;
 
         // Re-add views
         this.addViews( views );
@@ -371,6 +368,19 @@ public class DockingGroup
 
     public GroupArrangement captureArrangement( )
     {
+
+        // Find all viewIds in plan
+
+        // Remove viewIds in gui
+
+        // Add dummy views for remaining viewIds?
+
+        // Capture
+
+        // Remove dummy views
+
+
+
         // WIP: Need to include info that is in the plan only (not in the current frames)
         GroupArrangement groupArr = new GroupArrangement( );
         for ( DockingFrame frame : frames )
@@ -449,30 +459,14 @@ public class DockingGroup
 
     public void addView( View view )
     {
+
+        Asdf asdf = DockingGroupUtils.asdf( this.frames );
+
+        DockingGroupUtils.chooseViewPlacement( existingArr, this.planArr, view.viewId );
+
+
+
         this.doAddView( view );
-    }
-
-    /**
-     * Used to inform the caller of {@link DockingGroup#doAddView(View)}
-     * about where the view ended up (e.g. which frame).
-     */
-    protected static class ViewDestination
-    {
-        /**
-         * Null if the added view was not in the planned arrangement
-         */
-        public final FrameArrangement frameArr;
-
-        /**
-         * Always non-null
-         */
-        public final Window window;
-
-        public ViewDestination( FrameArrangement frameArr, Window window )
-        {
-            this.frameArr = frameArr;
-            this.window = window;
-        }
     }
 
     protected ViewDestination doAddView( View view )
@@ -570,299 +564,6 @@ public class DockingGroup
         for ( DockingGroupListener listener : listeners )
         {
             listener.closedView( this, view );
-        }
-    }
-
-    protected static Map<DockerArrangementNode,Set<String>> buildPlanSubtreeViewIdsMap( GroupArrangement groupArr )
-    {
-        Map<DockerArrangementNode,Set<String>> result = new LinkedHashMap<>( );
-        for ( FrameArrangement frameArr : groupArr.frameArrs )
-        {
-            putPlanSubtreeViewIds( frameArr.dockerArr, result );
-        }
-        return result;
-    }
-
-    protected static Set<String> putPlanSubtreeViewIds( DockerArrangementNode arrNode, Map<DockerArrangementNode,Set<String>> viewIds_INOUT )
-    {
-        if ( arrNode instanceof DockerArrangementTile )
-        {
-            DockerArrangementTile arrTile = ( DockerArrangementTile ) arrNode;
-            Set<String> result = unmodifiableSet( new LinkedHashSet<>( arrTile.viewIds ) );
-            viewIds_INOUT.put( arrTile, result );
-            return result;
-        }
-        else if ( arrNode instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
-            Set<String> resultA = putPlanSubtreeViewIds( arrSplit.childA, viewIds_INOUT );
-            Set<String> resultB = putPlanSubtreeViewIds( arrSplit.childB, viewIds_INOUT );
-            Set<String> result = unmodifiableSet( union( resultA, resultB ) );
-            viewIds_INOUT.put( arrSplit, result );
-            return result;
-        }
-        else if ( arrNode == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
-        }
-    }
-
-    protected static Map<MultiSplitPane.Node,Set<String>> buildGuiSubtreeViewIdsMap( List<DockingFrame> frames )
-    {
-        Map<MultiSplitPane.Node,Set<String>> result = new LinkedHashMap<>( );
-        for ( DockingFrame frame : frames )
-        {
-            putGuiSubtreeViewIds( frame.docker.snapshot( ), result );
-        }
-        return result;
-    }
-
-    protected static Set<String> putGuiSubtreeViewIds( MultiSplitPane.Node node, Map<MultiSplitPane.Node,Set<String>> viewIds_INOUT )
-    {
-        if ( node instanceof MultiSplitPane.Leaf )
-        {
-            MultiSplitPane.Leaf leaf = ( MultiSplitPane.Leaf ) node;
-
-            Set<String> viewIds = new LinkedHashSet<>( );
-            Component c = leaf.component;
-            if ( c instanceof Tile )
-            {
-                Tile tile = ( Tile ) c;
-                for ( int i = 0; i < tile.numViews( ); i++ )
-                {
-                    String viewId = tile.view( i ).viewId;
-                    viewIds.add( viewId );
-                }
-            }
-
-            Set<String> result = unmodifiableSet( viewIds );
-            viewIds_INOUT.put( leaf, result );
-            return result;
-        }
-        else if ( node instanceof MultiSplitPane.Split )
-        {
-            MultiSplitPane.Split split = ( MultiSplitPane.Split ) node;
-            Set<String> resultA = putGuiSubtreeViewIds( split.childA, viewIds_INOUT );
-            Set<String> resultB = putGuiSubtreeViewIds( split.childB, viewIds_INOUT );
-            Set<String> result = unmodifiableSet( union( resultA, resultB ) );
-            viewIds_INOUT.put( split, result );
-            return result;
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + MultiSplitPane.Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
-        }
-    }
-
-    protected static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, String viewId )
-    {
-        for ( FrameArrangement frameArr : groupArr.frameArrs )
-        {
-            if ( containsView( frameArr.dockerArr, viewId ) )
-            {
-                return frameArr;
-            }
-        }
-
-        return null;
-    }
-
-    protected static boolean containsView( DockerArrangementNode node, String viewId )
-    {
-        if ( node instanceof DockerArrangementTile )
-        {
-            DockerArrangementTile tile = ( DockerArrangementTile ) node;
-            return tile.viewIds.contains( viewId );
-        }
-        else if ( node instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit split = ( DockerArrangementSplit ) node;
-            return ( containsView( split.childA, viewId ) || containsView( split.childB, viewId ) );
-        }
-        else if ( node == null )
-        {
-            return false;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
-        }
-    }
-
-    protected static DockerArrangementTile findArrTileContaining( DockerArrangementNode node, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
-    {
-        if ( node instanceof DockerArrangementTile )
-        {
-            DockerArrangementTile tile = ( DockerArrangementTile ) node;
-            if ( subtreeViewIds.get( tile ).contains( viewId ) )
-            {
-                return tile;
-            }
-
-            return null;
-        }
-        else if ( node instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit split = ( DockerArrangementSplit ) node;
-            if ( subtreeViewIds.get( split ).contains( viewId ) )
-            {
-                DockerArrangementTile resultA = findArrTileContaining( split.childA, subtreeViewIds, viewId );
-                if ( resultA != null )
-                {
-                    return resultA;
-                }
-
-                DockerArrangementTile resultB = findArrTileContaining( split.childB, subtreeViewIds, viewId );
-                if ( resultB != null )
-                {
-                    return resultB;
-                }
-            }
-
-            return null;
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
-        }
-    }
-
-    protected static DockerArrangementSplit findArrNodeParent( DockerArrangementNode root, DockerArrangementNode child )
-    {
-        if ( root instanceof DockerArrangementTile )
-        {
-            return null;
-        }
-        else if ( root instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit split = ( DockerArrangementSplit ) root;
-
-            if ( child == split.childA || child == split.childB )
-            {
-                return split;
-            }
-
-            DockerArrangementSplit resultA = findArrNodeParent( split.childA, child );
-            if ( resultA != null )
-            {
-                return resultA;
-            }
-
-            DockerArrangementSplit resultB = findArrNodeParent( split.childB, child );
-            if ( resultB != null )
-            {
-                return resultB;
-            }
-
-            return null;
-        }
-        else if ( root == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + root.getClass( ).getName( ) );
-        }
-    }
-
-    protected static MultiSplitPane.Leaf findSimilarGuiLeaf( Map<MultiSplitPane.Node,Set<String>> subtreeViewIds, Set<String> viewIds )
-    {
-        return ( MultiSplitPane.Leaf ) findSimilarGuiNode( subtreeViewIds, viewIds, true );
-    }
-
-    protected static MultiSplitPane.Node findSimilarGuiNode( Map<MultiSplitPane.Node,Set<String>> subtreeViewIds, Set<String> viewIds )
-    {
-        return findSimilarGuiNode( subtreeViewIds, viewIds, false );
-    }
-
-    protected static MultiSplitPane.Node findSimilarGuiNode( Map<MultiSplitPane.Node,Set<String>> subtreeViewIds, Set<String> viewIds, boolean requireLeaf )
-    {
-        MultiSplitPane.Node bestNode = null;
-        int bestCommonCount = 0;
-        int bestExtraneousCount = 0;
-
-        for ( Entry<MultiSplitPane.Node,Set<String>> en : subtreeViewIds.entrySet( ) )
-        {
-            MultiSplitPane.Node node = en.getKey( );
-            Set<String> nodeViewIds = en.getValue( );
-
-            if ( !requireLeaf || node instanceof MultiSplitPane.Leaf )
-            {
-                int commonCount = intersection( nodeViewIds, viewIds ).size( );
-                int extraneousCount = nodeViewIds.size( ) - commonCount;
-                if ( commonCount > bestCommonCount || ( commonCount == bestCommonCount && extraneousCount < bestExtraneousCount ) )
-                {
-                    bestNode = node;
-                    bestCommonCount = commonCount;
-                    bestExtraneousCount = extraneousCount;
-                }
-            }
-        }
-
-        return bestNode;
-    }
-
-    protected static DockerArrangementNode toDockerArrNode( MultiSplitPane.Node node )
-    {
-        if ( node instanceof MultiSplitPane.Leaf )
-        {
-            MultiSplitPane.Leaf leaf = ( MultiSplitPane.Leaf ) node;
-
-            List<String> viewIds = new ArrayList<>( );
-            String selectedViewId = null;
-            Component c = leaf.component;
-            if ( c instanceof Tile )
-            {
-                Tile tile = ( Tile ) c;
-                for ( int i = 0; i < tile.numViews( ); i++ )
-                {
-                    String viewId = tile.view( i ).viewId;
-                    viewIds.add( viewId );
-                }
-                View selectedView = tile.selectedView( );
-                selectedViewId = ( selectedView == null ? null : selectedView.viewId );
-            }
-            else
-            {
-                // XXX: Handle arbitrary components
-            }
-
-            DockerArrangementTile arrTile = new DockerArrangementTile( );
-            arrTile.viewIds = viewIds;
-            arrTile.selectedViewId = selectedViewId;
-            arrTile.isMaximized = leaf.isMaximized;
-            return arrTile;
-        }
-        else if ( node instanceof MultiSplitPane.Split )
-        {
-            MultiSplitPane.Split split = ( MultiSplitPane.Split ) node;
-            DockerArrangementSplit arrSplit = new DockerArrangementSplit( );
-            arrSplit.arrangeVertically = split.arrangeVertically;
-            arrSplit.splitFrac = split.splitFrac;
-            arrSplit.childA = toDockerArrNode( split.childA );
-            arrSplit.childB = toDockerArrNode( split.childB );
-            return arrSplit;
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + MultiSplitPane.Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 
