@@ -50,6 +50,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
+import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
@@ -360,12 +361,29 @@ public class DockingGroup
 
     public void addViews( Collection<View> views )
     {
-        // WIP: Set the selected view of each newly created tile
-
         // XXX: Restore frame stacking order
+
+        Collection<ViewDestination> viewDestinations = new ArrayList<>( );
+
         for ( View view : views )
         {
-            this.addView( view );
+            GroupRealization existing = toGroupRealization( this );
+            ViewPlacement placement = chooseViewPlacement( existing.groupArr, this.planArr, view.viewId );
+            ViewDestination destination = placement.placeView( existing, view );
+
+            viewDestinations.add( destination );
+        }
+
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile )
+            {
+                if ( dest.planTile != null )
+                {
+                    View view = dest.tile.view( dest.planTile.selectedViewId );
+                    dest.tile.selectView( view );
+                }
+            }
         }
     }
 

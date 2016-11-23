@@ -10,8 +10,10 @@ import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.Math.round;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
@@ -143,16 +145,36 @@ public class DockingGroupUtils
     public static interface ViewPlacement
     {
         void placeView( GroupArrangement groupArr, String viewId );
-        void placeView( GroupRealization existing, View newView );
+        ViewDestination placeView( GroupRealization existing, View newView );
+    }
+
+    public static class ViewDestination
+    {
+        public final DockerArrangementTile planTile;
+        public final boolean isNewTile;
+        public final Tile tile;
+
+        public ViewDestination( DockerArrangementTile planTile,
+                                boolean isNewTile,
+                                Tile tile )
+        {
+            this.planTile = planTile;
+            this.isNewTile = isNewTile;
+            this.tile = tile;
+        }
     }
 
     public static class InExistingTile implements ViewPlacement
     {
+        public final FrameArrangement planFrame;
+        public final DockerArrangementTile planTile;
         public final DockerArrangementTile existingTile;
         public final int viewNum;
 
-        public InExistingTile( DockerArrangementTile existingTile, int viewNum )
+        public InExistingTile( FrameArrangement planFrame, DockerArrangementTile planTile, DockerArrangementTile existingTile, int viewNum )
         {
+            this.planFrame = planFrame;
+            this.planTile = planTile;
             this.existingTile = existingTile;
             this.viewNum = viewNum;
         }
@@ -164,22 +186,28 @@ public class DockingGroupUtils
         }
 
         @Override
-        public void placeView( GroupRealization existing, View newView )
+        public ViewDestination placeView( GroupRealization existing, View newView )
         {
             // XXX: Handle non-Tile components
             Tile tile = ( Tile ) existing.components.get( this.existingTile );
             tile.addView( newView, viewNum );
+
+            return new ViewDestination( this.planTile, false, tile );
         }
     }
 
     public static class BesideExistingNeighbor implements ViewPlacement
     {
+        public final FrameArrangement planFrame;
+        public final DockerArrangementTile planTile;
         public final DockerArrangementNode neighborNode;
         public final Side sideOfNeighbor;
         public final double extentFrac;
 
-        public BesideExistingNeighbor( DockerArrangementNode neighborNode, Side sideOfNeighbor, double extentFrac )
+        public BesideExistingNeighbor( FrameArrangement planFrame, DockerArrangementTile planTile, DockerArrangementNode neighborNode, Side sideOfNeighbor, double extentFrac )
         {
+            this.planFrame = planFrame;
+            this.planTile = planTile;
             this.neighborNode = neighborNode;
             this.sideOfNeighbor = sideOfNeighbor;
             this.extentFrac = extentFrac;
@@ -204,7 +232,7 @@ public class DockingGroupUtils
         }
 
         @Override
-        public void placeView( GroupRealization existing, View newView )
+        public ViewDestination placeView( GroupRealization existing, View newView )
         {
             Tile newTile = existing.group.tileFactory.newTile( );
             newTile.addView( newView, 0 );
@@ -213,31 +241,20 @@ public class DockingGroupUtils
 
             MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, neighbor );
             docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
+
+            return new ViewDestination( this.planTile, true, newTile );
         }
     }
 
     public static class InNewFrame implements ViewPlacement
     {
-        public final int x;
-        public final int y;
-        public final int width;
-        public final int height;
-        public final boolean isMaximizedHoriz;
-        public final boolean isMaximizedVert;
+        public final FrameArrangement planFrame;
+        public final DockerArrangementTile planTile;
 
-        public InNewFrame( int x,
-                           int y,
-                           int width,
-                           int height,
-                           boolean isMaximizedHoriz,
-                           boolean isMaximizedVert )
+        public InNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
         {
-            this.x = x;
-            this.y = y;
-            this.width = width;
-            this.height = height;
-            this.isMaximizedHoriz = isMaximizedHoriz;
-            this.isMaximizedVert = isMaximizedVert;
+            this.planFrame = planFrame;
+            this.planTile = planTile;
         }
 
         @Override
@@ -249,19 +266,20 @@ public class DockingGroupUtils
             newTile.isMaximized = false;
 
             FrameArrangement newFrame = new FrameArrangement( );
-            newFrame.x = this.x;
-            newFrame.y = this.y;
-            newFrame.width = this.width;
-            newFrame.height = this.height;
-            newFrame.isMaximizedHoriz = this.isMaximizedHoriz;
-            newFrame.isMaximizedVert = this.isMaximizedVert;
             newFrame.dockerArr = newTile;
+
+            newFrame.x = this.planFrame.x;
+            newFrame.y = this.planFrame.y;
+            newFrame.width = this.planFrame.width;
+            newFrame.height = this.planFrame.height;
+            newFrame.isMaximizedHoriz = this.planFrame.isMaximizedHoriz;
+            newFrame.isMaximizedVert = this.planFrame.isMaximizedVert;
 
             groupArr.frameArrs.add( newFrame );
         }
 
         @Override
-        public void placeView( GroupRealization existing, View newView )
+        public ViewDestination placeView( GroupRealization existing, View newView )
         {
             Tile newTile = existing.group.tileFactory.newTile( );
             newTile.addView( newView, 0 );
@@ -269,10 +287,12 @@ public class DockingGroupUtils
             DockingFrame newFrame = existing.group.addNewFrame( );
             newFrame.docker.addInitialLeaf( newTile );
 
-            newFrame.setBounds( this.x, this.y, this.width, this.height );
-            newFrame.setNormalBounds( this.x, this.y, this.width, this.height );
-            newFrame.setExtendedState( getFrameExtendedState( this.isMaximizedHoriz, this.isMaximizedVert ) );
+            newFrame.setBounds( this.planFrame.x, this.planFrame.y, this.planFrame.width, this.planFrame.height );
+            newFrame.setNormalBounds( this.planFrame.x, this.planFrame.y, this.planFrame.width, this.planFrame.height );
+            newFrame.setExtendedState( getFrameExtendedState( this.planFrame.isMaximizedHoriz, this.planFrame.isMaximizedVert ) );
             newFrame.setVisible( true );
+
+            return new ViewDestination( this.planTile, true, newTile );
         }
     }
 
@@ -287,19 +307,21 @@ public class DockingGroupUtils
             newTile.isMaximized = false;
 
             FrameArrangement newFrame = new FrameArrangement( );
-            newFrame.x = 0;
-            newFrame.y = 0;
-            newFrame.width = 1024;
-            newFrame.height = 768;
+            newFrame.dockerArr = newTile;
+
+            Rectangle newFrameBounds = getNewFallbackFrameBounds( );
+            newFrame.x = newFrameBounds.x;
+            newFrame.y = newFrameBounds.y;
+            newFrame.width = newFrameBounds.width;
+            newFrame.height = newFrameBounds.height;
             newFrame.isMaximizedHoriz = false;
             newFrame.isMaximizedVert = false;
-            newFrame.dockerArr = newTile;
 
             groupArr.frameArrs.add( newFrame );
         }
 
         @Override
-        public void placeView( GroupRealization existing, View newView )
+        public ViewDestination placeView( GroupRealization existing, View newView )
         {
             Tile newTile = existing.group.tileFactory.newTile( );
             newTile.addView( newView, 0 );
@@ -307,10 +329,26 @@ public class DockingGroupUtils
             DockingFrame newFrame = existing.group.addNewFrame( );
             newFrame.docker.addInitialLeaf( newTile );
 
-            newFrame.setLocationByPlatform( true );
-            newFrame.setSize( 1024, 768 );
+            Rectangle newFrameBounds = getNewFallbackFrameBounds( );
+            newFrame.setBounds( newFrameBounds );
+            newFrame.setNormalBounds( newFrameBounds );
+            newFrame.setExtendedState( getFrameExtendedState( false, false ) );
             newFrame.setVisible( true );
+
+            return new ViewDestination( null, true, newTile );
         }
+    }
+
+    public static Rectangle getNewFallbackFrameBounds( )
+    {
+        Rectangle screenBounds = getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
+        float fracOfScreen = 0.85f;
+        int width = round( fracOfScreen * screenBounds.width );
+        int height = round( fracOfScreen * screenBounds.height );
+        int x = screenBounds.x + ( ( screenBounds.width - width ) / 2 );
+        int y = screenBounds.y + ( ( screenBounds.height - height ) / 2 );
+
+        return new Rectangle( x, y, width, height );
     }
 
     public static ViewPlacement chooseViewPlacement( GroupArrangement existingArr, GroupArrangement planArr, String viewId )
@@ -328,7 +366,7 @@ public class DockingGroupUtils
             if ( existingTile != null )
             {
                 int viewNum = chooseViewNum( planTile.viewIds, existingTile.viewIds, viewId );
-                return new InExistingTile( existingTile, viewNum );
+                return new InExistingTile( planFrame, planTile, existingTile, viewNum );
             }
 
             // Create a new tile, beside an existing neighbor that is similar to the planned neighbor
@@ -352,7 +390,7 @@ public class DockingGroupUtils
                 {
                     Side sideOfNeighbor = ( planParent.arrangeVertically ? ( newIsChildA ? TOP : BOTTOM ) : ( newIsChildA ? LEFT : RIGHT ) );
                     double extentFrac = ( newIsChildA ? planParent.splitFrac : 1.0 - planParent.splitFrac );
-                    return new BesideExistingNeighbor( existingNeighbor, sideOfNeighbor, extentFrac );
+                    return new BesideExistingNeighbor( planFrame, planTile, existingNeighbor, sideOfNeighbor, extentFrac );
                 }
 
                 // Go one level up the tree and try again
@@ -360,7 +398,7 @@ public class DockingGroupUtils
             }
 
             // Create a new frame, with size and position from the planned arrangement
-            return new InNewFrame( planFrame.x, planFrame.y, planFrame.width, planFrame.height, planFrame.isMaximizedHoriz, planFrame.isMaximizedVert );
+            return new InNewFrame( planFrame, planTile );
         }
 
         // Use fallback location
