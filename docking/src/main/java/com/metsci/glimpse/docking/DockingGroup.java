@@ -414,6 +414,27 @@ public class DockingGroup
                 dest.frame.toFront( );
             }
         }
+
+        // Restore maximized tiles -- but only in newly created frames
+        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
+            {
+                maximizedTiles.put( dest.frame, dest.tile );
+            }
+        }
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame )
+            {
+                Tile tile = maximizedTiles.get( dest.frame );
+                if ( tile != null )
+                {
+                    dest.frame.docker.maximizeLeaf( tile );
+                }
+            }
+        }
     }
 
     public void addView( View view )
