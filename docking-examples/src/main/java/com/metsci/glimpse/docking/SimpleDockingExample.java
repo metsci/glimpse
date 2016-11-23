@@ -56,8 +56,6 @@ import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
-import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 import net.sf.tinylaf.Theme;
@@ -151,10 +149,9 @@ public class SimpleDockingExample
                 final String appName = "simple-docking-example";
                 final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
-                TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
                 GroupArrangement groupArr = loadDockingArrangement( appName, SimpleDockingExample.class.getClassLoader( ).getResource( "docking/simple-arrangement-default.xml" ) );
-                dockingGroup.restoreArrangement( groupArr, tileFactory, views );
+                dockingGroup.setArrangement( groupArr );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
                     public void disposingAllFrames( DockingGroup group )
@@ -162,6 +159,8 @@ public class SimpleDockingExample
                         saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                     }
                 } );
+
+                dockingGroup.addViews( views );
 
             }
         } );

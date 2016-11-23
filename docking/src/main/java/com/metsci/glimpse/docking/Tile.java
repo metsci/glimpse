@@ -31,36 +31,9 @@ import java.awt.event.MouseAdapter;
 
 import javax.swing.JComponent;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public abstract class Tile extends JComponent
 {
-
-    public static interface TileListener
-    {
-        void addedView( View view );
-
-        void removedView( View view );
-
-        void selectedView( View view );
-    }
-
-    public static class TileAdapter implements TileListener
-    {
-        @Override
-        public void addedView( View view )
-        {
-        }
-
-        @Override
-        public void removedView( View view )
-        {
-        }
-
-        @Override
-        public void selectedView( View view )
-        {
-        }
-    }
 
     public abstract void addListener( TileListener listener );
 
@@ -70,9 +43,11 @@ public abstract class Tile extends JComponent
 
     public abstract View view( int viewNum );
 
+    public abstract View view( String viewId );
+
     public abstract View selectedView( );
 
-    public abstract void addView( final View view, int viewNum );
+    public abstract void addView( View view, int viewNum );
 
     public abstract void updateView( View view );
 

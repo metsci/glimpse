@@ -42,8 +42,6 @@ import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
-import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
@@ -98,10 +96,9 @@ public class GlimpseDockingExample
                 final String appName = "glimpse-docking-example";
                 final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
-                TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
                 GroupArrangement groupArr = loadDockingArrangement( appName, GlimpseDockingExample.class.getClassLoader( ).getResource( "docking/glimpse-arrangement-default.xml" ) );
-                dockingGroup.restoreArrangement( groupArr, tileFactory, views );
+                dockingGroup.setArrangement( groupArr );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
                     public void disposingAllFrames( DockingGroup group )
@@ -110,6 +107,8 @@ public class GlimpseDockingExample
                         glAnimator.stop( );
                     }
                 } );
+
+                dockingGroup.addViews( views );
 
             }
         } );

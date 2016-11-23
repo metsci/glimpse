@@ -47,14 +47,9 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public class SplitPane extends JPanel
 {
-
-    public static interface SplitPaneListener
-    {
-        void movedDivider( );
-    }
 
     protected static final String CHILD_A = "A";
     protected static final String CHILD_B = "B";

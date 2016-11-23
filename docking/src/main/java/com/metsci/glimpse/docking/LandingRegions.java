@@ -44,7 +44,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
 
 public class LandingRegions
 {

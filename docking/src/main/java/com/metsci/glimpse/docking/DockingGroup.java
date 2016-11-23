@@ -26,17 +26,15 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
+import static com.metsci.glimpse.docking.DockingGroupUtils.containsView;
+import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
+import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
-import static com.metsci.glimpse.docking.DockingUtils.appendViewsToTile;
-import static com.metsci.glimpse.docking.DockingUtils.findLargestComponent;
-import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
+import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
-import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
-import static com.metsci.glimpse.docking.Side.LEFT;
-import static java.awt.Frame.MAXIMIZED_HORIZ;
-import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -54,13 +52,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
+import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
+import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.MultiSplitPane.MultiSplitPaneListener;
-import com.metsci.glimpse.docking.Tile.TileListener;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
-import com.metsci.glimpse.docking.xml.DockerArrangementNode;
-import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
-import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
@@ -68,29 +63,13 @@ public class DockingGroup
 {
     private static final Logger logger = Logger.getLogger( DockingGroup.class.getName( ) );
 
-    public static void pruneEmptyTileAndFrame( DockingGroup dockingGroup, Tile tile )
-    {
-        if ( tile.numViews( ) == 0 )
-        {
-            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-            docker.removeLeaf( tile );
-
-            if ( docker.numLeaves( ) == 0 )
-            {
-                DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
-                if ( frame != null && frame.getContentPane( ) == docker )
-                {
-                    frame.dispose( );
-                }
-            }
-        }
-    }
-
     public final DockingTheme theme;
     public final DockingFrameCloseOperation frameCloseOperation;
+    public final TileFactory tileFactory;
 
     protected final List<DockingFrame> framesMod;
     public final List<DockingFrame> frames;
+    protected GroupArrangement planArr;
 
     protected final LandingIndicator landingIndicator;
 
@@ -100,9 +79,11 @@ public class DockingGroup
     {
         this.theme = theme;
         this.frameCloseOperation = frameCloseOperation;
+        this.tileFactory = new TileFactoryStandard( this );
 
         this.framesMod = new ArrayList<>( );
         this.frames = unmodifiableList( framesMod );
+        this.planArr = new GroupArrangement( );
 
         this.landingIndicator = new LandingIndicator( theme );
 
@@ -333,7 +314,10 @@ public class DockingGroup
     public void bringFrameToFront( DockingFrame frame )
     {
         boolean found = framesMod.remove( frame );
-        if ( !found ) throw new RuntimeException( "Frame does not belong to this docking-group" );
+        if ( !found )
+        {
+            throw new RuntimeException( "Frame does not belong to this docking-group" );
+        }
 
         framesMod.add( 0, frame );
     }
@@ -343,27 +327,123 @@ public class DockingGroup
         landingIndicator.setBounds( bounds );
     }
 
-    public void closeView( View view )
+    public void setArrangement( GroupArrangement groupArr )
     {
-        Tile tile = getAncestorOfClass( Tile.class, view.component );
-        if ( tile == null ) throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
+        Collection<View> views = findViews( this.frames );
 
-        for ( DockingGroupListener listener : listeners )
+        // Remove existing views, pruning empty tiles and frames
+        for ( View view : views )
         {
-            listener.closingView( this, view );
+            this.closeView( view );
         }
 
-        tile.removeView( view );
-        pruneEmptyTileAndFrame( this, tile );
+        // Set the arrangement plan
+        this.planArr = groupArr;
 
-        for ( DockingGroupListener listener : listeners )
+        // Re-add views
+        this.addViews( views );
+    }
+
+    public GroupArrangement captureArrangement( )
+    {
+        GroupArrangement groupArr = toGroupRealization( this ).groupArr;
+        for ( String viewId : findViewIds( this.planArr ) )
         {
-            listener.closedView( this, view );
+            if ( !containsView( groupArr, viewId ) )
+            {
+                ViewPlacement viewPlacement = chooseViewPlacement( groupArr, this.planArr, viewId );
+                viewPlacement.placeView( groupArr, viewId );
+            }
+        }
+        return groupArr;
+    }
+
+    public void addViews( View... views )
+    {
+        this.addViews( asList( views ) );
+    }
+
+    public void addViews( Collection<View> views )
+    {
+        // Remember view destinations, for operations that happen after adding all views
+        Collection<ViewDestination> viewDestinations = new ArrayList<>( );
+
+        // Add views, and remember destinations
+        for ( View view : views )
+        {
+            GroupRealization existing = toGroupRealization( this );
+            ViewPlacement placement = chooseViewPlacement( existing.groupArr, this.planArr, view.viewId );
+            ViewDestination destination = placement.placeView( existing, view );
+
+            viewDestinations.add( destination );
+        }
+
+        // Restore selected views in newly created tiles
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile && dest.planTile != null )
+            {
+                View view = dest.tile.view( dest.planTile.selectedViewId );
+                dest.tile.selectView( view );
+            }
+        }
+
+        // Stack planned new frames in front of existing frames, in plan order
+        Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame && dest.planFrame != null )
+            {
+                plannedNewFrames.put( dest.planFrame, dest.frame );
+            }
+        }
+        for ( FrameArrangement frameArr : reversed( this.planArr.frameArrs ) )
+        {
+            DockingFrame frame = plannedNewFrames.get( frameArr );
+            if ( frame != null )
+            {
+                frame.toFront( );
+            }
+        }
+
+        // Stack unplanned new frames in front of existing frames
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame && dest.planFrame == null )
+            {
+                dest.frame.toFront( );
+            }
+        }
+
+        // Restore maximized tiles -- but only in newly created frames
+        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
+            {
+                maximizedTiles.put( dest.frame, dest.tile );
+            }
+        }
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame )
+            {
+                Tile tile = maximizedTiles.get( dest.frame );
+                if ( tile != null )
+                {
+                    dest.frame.docker.maximizeLeaf( tile );
+                }
+            }
         }
     }
 
-    // update all Tiles containing a View with view.viewId to
-    // reflect the content of the provided view
+    public void addView( View view )
+    {
+        GroupRealization existing = toGroupRealization( this );
+        ViewPlacement placement = chooseViewPlacement( existing.groupArr, this.planArr, view.viewId );
+        placement.placeView( existing, view );
+    }
+
     public void updateView( View view )
     {
         for ( DockingFrame frame : frames )
@@ -378,230 +458,43 @@ public class DockingGroup
         }
     }
 
-    // find all Tiles in the provied MultiSplitPane
-    // helper function for {@code #updateView( View )}
-    protected static Set<Tile> findTiles( MultiSplitPane docker )
+    public void closeView( View view )
     {
-        Set<Tile> tiles = new LinkedHashSet<>( );
-        for ( Component c : docker.leaves( ) )
+        Tile tile = getAncestorOfClass( Tile.class, view.component );
+        if ( tile == null )
         {
-            if ( c instanceof Tile )
-            {
-                Tile tile = ( Tile ) c;
-                tiles.add( tile );
-            }
-        }
-        return tiles;
-    }
-
-    // Snapshots
-    //
-
-    public void restoreArrangement( GroupArrangement groupArr, TileFactory tileFactory, View... views )
-    {
-        restoreArrangement( groupArr, tileFactory, asList( views ) );
-    }
-
-    public void restoreArrangement( GroupArrangement groupArr, TileFactory tileFactory, Collection<View> views )
-    {
-        if ( !frames.isEmpty( ) ) throw new RuntimeException( "At least one frame already exists" );
-
-        Map<String,View> remainingViews = new LinkedHashMap<>( );
-        for ( View view : views )
-        {
-            remainingViews.put( view.viewId, view );
+            throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
         }
 
-        if ( groupArr != null )
+        for ( DockingGroupListener listener : listeners )
         {
-            for ( FrameArrangement frameArr : reversed( groupArr.frameArrs ) )
-            {
-                MultiSplitPane.Node dockerRoot = toDockingPaneNode( frameArr.dockerArr, remainingViews, tileFactory );
-                if ( dockerRoot != null )
-                {
-                    DockingFrame frame = addNewFrame( );
-                    frame.setBounds( frameArr.x, frameArr.y, frameArr.width, frameArr.height );
-                    frame.setNormalBounds( frameArr.x, frameArr.y, frameArr.width, frameArr.height );
-                    frame.setExtendedState( getFrameExtendedState( frameArr ) );
-                    frame.setVisible( true );
-
-                    frame.docker.restore( dockerRoot );
-                }
-            }
+            listener.closingView( this, view );
         }
 
-        if ( !remainingViews.isEmpty( ) )
+        tile.removeView( view );
+        pruneEmptyTileAndFrame( tile );
+
+        for ( DockingGroupListener listener : listeners )
         {
-            DockingFrame frame;
-            if ( frames.isEmpty( ) )
-            {
-                Tile tile = tileFactory.newTile( );
-                appendViewsToTile( tile, remainingViews.values( ) );
-                frame = addNewFrame( );
-                frame.docker.addInitialLeaf( tile );
-                frame.setLocationByPlatform( true );
-                frame.setSize( 1024, 768 );
-                frame.setVisible( true );
-            }
-            else
-            {
-                frame = findLargestComponent( frames );
-                Tile tile = findLargestTile( frame.docker );
-                if ( tile == null )
-                {
-                    tile = tileFactory.newTile( );
-                    appendViewsToTile( tile, remainingViews.values( ) );
-                    frame.docker.addEdgeLeaf( tile, LEFT );
-                }
-                else
-                {
-                    appendViewsToTile( tile, remainingViews.values( ) );
-                }
-            }
+            listener.closedView( this, view );
         }
     }
 
-    public GroupArrangement captureArrangement( )
+    public static void pruneEmptyTileAndFrame( Tile tile )
     {
-        GroupArrangement groupArr = new GroupArrangement( );
-        for ( DockingFrame frame : frames )
+        if ( tile.numViews( ) == 0 )
         {
-            FrameArrangement frameArr = new FrameArrangement( );
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
+            docker.removeLeaf( tile );
 
-            Rectangle bounds = frame.getNormalBounds( );
-            frameArr.x = bounds.x;
-            frameArr.y = bounds.y;
-            frameArr.width = bounds.width;
-            frameArr.height = bounds.height;
-
-            int state = frame.getExtendedState( );
-            frameArr.isMaximizedHoriz = ( ( state & MAXIMIZED_HORIZ ) != 0 );
-            frameArr.isMaximizedVert = ( ( state & MAXIMIZED_VERT ) != 0 );
-
-            frameArr.dockerArr = toDockerArrNode( frame.docker.snapshot( ) );
-
-            groupArr.frameArrs.add( frameArr );
-        }
-        return groupArr;
-    }
-
-    protected static MultiSplitPane.Node toDockingPaneNode( DockerArrangementNode arrNode, Map<String,View> remainingViews_INOUT, TileFactory tileFactory )
-    {
-        if ( arrNode instanceof DockerArrangementTile )
-        {
-            DockerArrangementTile arrTile = ( DockerArrangementTile ) arrNode;
-
-            Map<String,View> views = new LinkedHashMap<>( );
-            for ( String viewId : arrTile.viewIds )
+            if ( docker.numLeaves( ) == 0 )
             {
-                View view = remainingViews_INOUT.remove( viewId );
-                if ( view != null ) views.put( viewId, view );
-            }
-
-            if ( views.isEmpty( ) )
-            {
-                return null;
-            }
-            else
-            {
-                Tile tile = tileFactory.newTile( );
-
-                for ( View view : views.values( ) )
+                DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
+                if ( frame != null && frame.getContentPane( ) == docker )
                 {
-                    int viewNum = tile.numViews( );
-                    tile.addView( view, viewNum );
+                    frame.dispose( );
                 }
-
-                View selectedView = views.get( arrTile.selectedViewId );
-                if ( selectedView != null )
-                {
-                    tile.selectView( selectedView );
-                }
-
-                return new MultiSplitPane.Leaf( tile, arrTile.isMaximized );
             }
-        }
-        else if ( arrNode instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
-            MultiSplitPane.Node childA = toDockingPaneNode( arrSplit.childA, remainingViews_INOUT, tileFactory );
-            MultiSplitPane.Node childB = toDockingPaneNode( arrSplit.childB, remainingViews_INOUT, tileFactory );
-
-            if ( childA != null && childB != null )
-            {
-                return new MultiSplitPane.Split( arrSplit.arrangeVertically, arrSplit.splitFrac, childA, childB );
-            }
-            else if ( childA != null )
-            {
-                return childA;
-            }
-            else if ( childB != null )
-            {
-                return childB;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        else if ( arrNode == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
-        }
-    }
-
-    protected static DockerArrangementNode toDockerArrNode( MultiSplitPane.Node node )
-    {
-        if ( node instanceof MultiSplitPane.Leaf )
-        {
-            MultiSplitPane.Leaf leaf = ( MultiSplitPane.Leaf ) node;
-
-            List<String> viewIds = new ArrayList<>( );
-            String selectedViewId = null;
-            Component c = leaf.component;
-            if ( c instanceof Tile )
-            {
-                Tile tile = ( Tile ) c;
-                for ( int i = 0; i < tile.numViews( ); i++ )
-                {
-                    String viewId = tile.view( i ).viewId;
-                    viewIds.add( viewId );
-                }
-                View selectedView = tile.selectedView( );
-                selectedViewId = ( selectedView == null ? null : selectedView.viewId );
-            }
-            else
-            {
-                // XXX: Handle arbitrary components
-            }
-
-            DockerArrangementTile arrTile = new DockerArrangementTile( );
-            arrTile.viewIds = viewIds;
-            arrTile.selectedViewId = selectedViewId;
-            arrTile.isMaximized = leaf.isMaximized;
-            return arrTile;
-        }
-        else if ( node instanceof MultiSplitPane.Split )
-        {
-            MultiSplitPane.Split split = ( MultiSplitPane.Split ) node;
-            DockerArrangementSplit arrSplit = new DockerArrangementSplit( );
-            arrSplit.arrangeVertically = split.arrangeVertically;
-            arrSplit.splitFrac = split.splitFrac;
-            arrSplit.childA = toDockerArrNode( split.childA );
-            arrSplit.childB = toDockerArrNode( split.childB );
-            return arrSplit;
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + MultiSplitPane.Node.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 

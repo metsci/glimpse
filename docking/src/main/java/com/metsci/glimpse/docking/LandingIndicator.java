@@ -127,7 +127,7 @@ public class LandingIndicator
 
                 JFrame frame = new JFrame( ".", config );
 
-                @SuppressWarnings("serial")
+                @SuppressWarnings( "serial" )
                 JPanel content = new JPanel( )
                 {
                     // Custom paint seems to reduce flickering

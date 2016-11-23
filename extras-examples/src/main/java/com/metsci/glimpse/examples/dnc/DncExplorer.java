@@ -85,8 +85,6 @@ import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
-import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -328,10 +326,8 @@ public class DncExplorer
             DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
 
-            TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
-
             GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
-            dockingGroup.restoreArrangement( groupArr, tileFactory, views );
+            dockingGroup.setArrangement( groupArr );
             dockingGroup.addListener( new DockingGroupAdapter( )
             {
                 public void disposingAllFrames( DockingGroup group )
@@ -341,6 +337,8 @@ public class DncExplorer
                     animator.stop( );
                 }
             } );
+
+            dockingGroup.addViews( views );
         } );
     }
 

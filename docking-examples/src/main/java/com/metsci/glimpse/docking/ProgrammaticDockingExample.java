@@ -57,8 +57,6 @@ import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
-import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;

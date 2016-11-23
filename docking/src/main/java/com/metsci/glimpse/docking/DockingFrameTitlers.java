@@ -27,104 +27,27 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
-
-import java.awt.Component;
 
 public class DockingFrameTitlers
 {
 
-    public static DockingFrameTitler createDefaultFrameTitler( final String titleRoot )
+    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot )
     {
-        return new DockingFrameTitler( )
-        {
-            public String getTitle( DockingFrame frame )
-            {
-                Tile tile = findLargestTile( frame.docker );
-                if ( tile != null )
-                {
-                    View view = tile.selectedView( );
-                    if ( view != null )
-                    {
-                        return view.title + " - " + titleRoot;
-                    }
-                }
-                return titleRoot;
-            }
-        };
+        return new DockingFrameTitler( ( f ) -> getDefaultFrameTitle( titleRoot, f ) );
     }
 
-    public static abstract class DockingFrameTitler extends DockingGroupAdapter
+    public static String getDefaultFrameTitle( String titleRoot, DockingFrame frame )
     {
-        public abstract String getTitle( DockingFrame frame );
-
-        public void updateFrameTitle( DockingFrame frame )
+        Tile tile = findLargestTile( frame.docker );
+        if ( tile != null )
         {
-            if ( frame != null )
+            View view = tile.selectedView( );
+            if ( view != null )
             {
-                frame.setTitle( getTitle( frame ) );
+                return view.title + " - " + titleRoot;
             }
         }
-
-        @Override
-        public void addedView( Tile tile, View view )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, tile ) );
-        }
-
-        @Override
-        public void removedView( Tile tile, View view )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, tile ) );
-        }
-
-        @Override
-        public void selectedView( Tile tile, View view )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, tile ) );
-        }
-
-        @Override
-        public void addedLeaf( MultiSplitPane docker, Component leaf )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
-        }
-
-        @Override
-        public void removedLeaf( MultiSplitPane docker, Component leaf )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
-        }
-
-        @Override
-        public void movedDivider( MultiSplitPane docker, SplitPane splitPane )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
-        }
-
-        @Override
-        public void maximizedLeaf( MultiSplitPane docker, Component leaf )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
-        }
-
-        @Override
-        public void unmaximizedLeaf( MultiSplitPane docker, Component leaf )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
-        }
-
-        @Override
-        public void restoredTree( MultiSplitPane docker )
-        {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
-        }
-
-        @Override
-        public void addedFrame( DockingGroup group, DockingFrame frame )
-        {
-            updateFrameTitle( frame );
-        }
+        return titleRoot;
     }
 
 }
