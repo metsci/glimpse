@@ -150,14 +150,26 @@ public class DockingGroupUtils
 
     public static class ViewDestination
     {
+        public final FrameArrangement planFrame;
+        public final boolean isNewFrame;
+        public final DockingFrame frame;
+
         public final DockerArrangementTile planTile;
         public final boolean isNewTile;
         public final Tile tile;
 
-        public ViewDestination( DockerArrangementTile planTile,
+        public ViewDestination( FrameArrangement planFrame,
+                                boolean isNewFrame,
+                                DockingFrame frame,
+
+                                DockerArrangementTile planTile,
                                 boolean isNewTile,
                                 Tile tile )
         {
+            this.planFrame = planFrame;
+            this.isNewFrame = isNewFrame;
+            this.frame = frame;
+
             this.planTile = planTile;
             this.isNewTile = isNewTile;
             this.tile = tile;
@@ -192,7 +204,9 @@ public class DockingGroupUtils
             Tile tile = ( Tile ) existing.components.get( this.existingTile );
             tile.addView( newView, viewNum );
 
-            return new ViewDestination( this.planTile, false, tile );
+            DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
+
+            return new ViewDestination( this.planFrame, false, frame, this.planTile, false, tile );
         }
     }
 
@@ -239,10 +253,10 @@ public class DockingGroupUtils
 
             Component neighbor = existing.components.get( this.neighborNode );
 
-            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, neighbor );
-            docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
+            DockingFrame frame = getAncestorOfClass( DockingFrame.class, neighbor );
+            frame.docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
 
-            return new ViewDestination( this.planTile, true, newTile );
+            return new ViewDestination( this.planFrame, false, frame, this.planTile, true, newTile );
         }
     }
 
@@ -292,7 +306,7 @@ public class DockingGroupUtils
             newFrame.setExtendedState( getFrameExtendedState( this.planFrame.isMaximizedHoriz, this.planFrame.isMaximizedVert ) );
             newFrame.setVisible( true );
 
-            return new ViewDestination( this.planTile, true, newTile );
+            return new ViewDestination( this.planFrame, true, newFrame, this.planTile, true, newTile );
         }
     }
 
@@ -335,7 +349,7 @@ public class DockingGroupUtils
             newFrame.setExtendedState( getFrameExtendedState( false, false ) );
             newFrame.setVisible( true );
 
-            return new ViewDestination( null, true, newTile );
+            return new ViewDestination( null, true, newFrame, null, true, newTile );
         }
     }
 

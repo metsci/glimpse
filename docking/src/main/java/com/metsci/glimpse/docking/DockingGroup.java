@@ -34,6 +34,7 @@ import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -44,8 +45,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -53,6 +56,7 @@ import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
+import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroup
@@ -361,10 +365,10 @@ public class DockingGroup
 
     public void addViews( Collection<View> views )
     {
-        // XXX: Restore frame stacking order
-
+        // Remember view destinations, for operations that happen after adding all views
         Collection<ViewDestination> viewDestinations = new ArrayList<>( );
 
+        // Add views, and remember destinations
         for ( View view : views )
         {
             GroupRealization existing = toGroupRealization( this );
@@ -374,15 +378,40 @@ public class DockingGroup
             viewDestinations.add( destination );
         }
 
+        // Restore selected views in newly created tiles
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewTile )
+            if ( dest.isNewTile && dest.planTile != null )
             {
-                if ( dest.planTile != null )
-                {
-                    View view = dest.tile.view( dest.planTile.selectedViewId );
-                    dest.tile.selectView( view );
-                }
+                View view = dest.tile.view( dest.planTile.selectedViewId );
+                dest.tile.selectView( view );
+            }
+        }
+
+        // Stack planned new frames in front of existing frames, in plan order
+        Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame && dest.planFrame != null )
+            {
+                plannedNewFrames.put( dest.planFrame, dest.frame );
+            }
+        }
+        for ( FrameArrangement frameArr : reversed( this.planArr.frameArrs ) )
+        {
+            DockingFrame frame = plannedNewFrames.get( frameArr );
+            if ( frame != null )
+            {
+                frame.toFront( );
+            }
+        }
+
+        // Stack unplanned new frames in front of existing frames
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame && dest.planFrame == null )
+            {
+                dest.frame.toFront( );
             }
         }
     }
