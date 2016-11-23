@@ -60,6 +60,8 @@
         <module>core</module>
         <module>core-examples</module>
 
+        <module>layers</module>
+
         <module>docking</module>
         <module>docking-examples</module>
 

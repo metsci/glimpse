@@ -1,0 +1,291 @@
+#################################################################
+#################################################################
+#######                                                   #######
+#######               Open Icon Library                   #######
+#######                  License File                     #######
+#######                                                   #######
+#################################################################
+#################################################################
+
+Table of Contents:
+	* Description
+	* Sources
+	* Licenses
+	* File List
+	* Icons from Wikicommons
+		* Icons under Creative Commons licenses
+		* Icons under GPL and LGPL licenses
+		* Icons under Public Domain
+		* Icons under MIT license
+		* Icons under BSD license
+	* Icons from app-install-data
+#################################################################
+## Description:
+
+The Open Icon Library contains icons from various sources.  This file list 
+the license and source of each file in this package.  In the rare
+occasion where there is two files with the same name, you will have to check
+the developers package.  If you wish to use these icons in your project,
+include this file in your projects documentation.
+
+
+#################################################################
+## Sources:
+
+AEM Pictorial Database (aem) 
+	link: http://www.aem.org/Technical/PictorialDatabase/index.asp
+	license: PD
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	format: eps -> svg, png
+	subdirectory: open_icon_library-devel/icons/aem
+
+app-install-data (app-install)
+	link: http://packages.debian.org/lenny/app-install-data
+	licenses: Various, see docs/AUTHORS_app-install
+	license link: see docs/AUTHORS_app-install
+	format: xpm, svg, png
+	subdirectory:  open_icon_library-devel/icons/app-install
+
+Creative Commons (cc)
+	link: http://creativecommons.org/about/downloads
+	license: CC-BY 3.0 
+	license link: http://creativecommons.org/licenses/by/3.0/
+	formats: svg, png
+	subdirectories: open_icon_library-devel/icons/cc
+					open_icon_library-devel/icons_by_subject/cc
+
+Crystal Clear (crystal_clear)
+	link: http://commons.wikimedia.org/wiki/Crystal_Clear
+	license: LGPL-2.1
+	license link: http://creativecommons.org/licenses/LGPL/2.1/
+	formats: png
+	subdirectories: open_icon_library-devel/icons/crystal_clear
+					open_icon_library-devel/icons_by_subject/crystal_clear
+
+Crystal Project (crystal)
+	link: http://everaldo.com/crystal/, CrystalXp.net
+	license: LGPL-2.1
+	license link: http://creativecommons.org/licenses/LGPL/2.1/
+	formats: png, ico
+	subdirectory: open_icon_library-devel/icons/crystal
+
+Technische Regeln für Arbeitsstätten (DIN Standard) (din)
+	link: http://www.baua.de/nn_56926/de/Themen-von-A-Z/Arbeitsstaetten/ASR/pdf/ASR-A1-3.pdf
+	license: Public Domain
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	format: pdf -> svg, png
+	subdirectory: open_icon_library-devel/icons/din
+ 
+FAMFAMFAM Flag Icons (famfamfam-flag)
+	link: http://www.famfamfam.com/lab/icons/flags/
+	license: Public Domain
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	formats: png
+	subdirectory: open_icon_library-devel/icons/famfamfam-flag
+
+FAMFAMFAM Silk Icons 1.3 (famfamfam-silk)
+	link: http://www.famfamfam.com/lab/icons/silk/
+	license: CC-BY-2.5 or CC-BY-3.0
+	license link: http://creativecommons.org/licenses/by/3.0/
+			http://creativecommons.org/licenses/by/2.5/
+	formats: png
+	subdirectory: open_icon_library-devel/icons/famfamfam-silk
+
+fineicons (fineicons)
+	link: http://www.fineicons.com/en/free-icons/credit-cards/
+	license: CC-BY-SA-2.0-UK
+	license link: http://creativecommons.org/licenses/by-sa/2.0/uk/
+	formats: gif -> png
+	subdirectory: open_icon_library-devel/icons_by_subject/webpage/fineicons
+
+UNECE GHS of Classification and Labeling of Chemicals (ghs)
+	link: http://www.unece.org/trans/danger/publi/ghs/pictograms.html
+	license: PD
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	format: eps -> svg, png
+	subdirectory: open_icon_library-devel/icons/ghs
+
+Gimp 2.6 (gimp)
+	link: http://www.gimp.org/
+	license: GPLv2
+	license link: http://creativecommons.org/licenses/GPL/2.0/
+	formats: png
+	subdirectories: open_icon_library-devel/icons_by_subject/gnome
+
+
+GNOME Icon Theme 2.26.0 (gnome)
+	link: http://art.gnome.org/
+	license: GPLv2 
+	license link: http://creativecommons.org/licenses/GPL/2.0/
+	formats: svg, png
+	subdirectories: open_icon_library-devel/icons/gnome
+					open_icon_library-devel/icons_by_subject/gnome
+
+GNOME-Colors (gnome_colors)
+	link: http://code.google.com/p/gnome-colors/
+	license: GPLv2
+	license link: http://creativecommons.org/licenses/GPL/2.0/
+	formats: svg, png
+	subdirectories: open_icon_library-devel/icons/gnome-colors
+					open_icon_library-devel/icons_by_subject/gnome-colors
+
+Inkscape (inkscape)
+	link: http://www.inkscape.org/
+	license: GPLv2
+	license link: http://creativecommons.org/licenses/GPL/2.0/
+	format: svg 
+	subdirectories: open_icon_library-devel/icons_by_subject/inkscape
+	
+Intrigue Icon Set 0.6.2 [Green] (intrigue)
+	link: http://simpleinnovation.net/index.php?page=22&source=2&id=2
+	license: GPLv2
+	license link: http://creativecommons.org/licenses/GPL/2.0/
+	formats: png
+	subdirectory: open_icon_library-devel/icons/intrigue
+
+Nuvola 1.0 (KDE 3.x icon set) (nuvola)
+	link: http://www.icon-king.com/projects/nuvola/
+	license: LGPL 2.1
+	license link: http://creativecommons.org/licenses/LGPL/2.1/
+	formats: png
+	subdirectory: open_icon_library-devel/icons/nuvola
+
+Map Symbols & Patterns for NPS Maps (nps)
+	link: http://www.nps.gov/hfc/carto/map-symbols.htm
+	aquired: 27 Dec 2009
+	license: Public Domain
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	format: pdf -> png, svg
+	subdirectory:  open_icon_library-devel/icons/nps
+
+Open Clip Art Library (open_clip_art_library)
+	link: http://openclipart.org
+	license: Public Domain
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	format: svg -> png
+	subdirectory: open_icon_library-devel/icons/open_clip_art_library
+
+Open Icon Library (homemade)
+	link: http://openiconlibrary.sourceforge.net/
+	license: Public Domain
+	license link: http://en.wikipedia.org/wiki/Public_domain
+	format: svg -> png
+	subdirectories: open_icon_library-devel/icons/homemade
+					open_icon_library-devel/icons_by_subject/homemade
+
+OpenOffice.org default theme 3.2 (openoffice)
+	link: http://www.openoffice.org/
+	license: GPLv3
+	license link: http://creativecommons.org/licenses/GPL/3.0/
+	format: png 
+	subdirectories: open_icon_library-devel/icons_by_subject/openoffice
+
+Oxygen Icons 4.3.1 (KDE) (oxygen)
+	link: http://www.oxygen-icons.org/
+	license: Dual: CC-BY-SA 3.0 or LGPL
+	License link: http://creativecommons.org/licenses/by-sa/3.0/
+			http://creativecommons.org/licenses/LGPL/2.1/
+	formats: svg, png
+	subdirectory: open_icon_library-devel/icons/oxygen
+
+Tango Icon Library 0.8.90 (tango)
+	link: http://tango.freedesktop.org/Tango_Icon_Library
+	license: Public Domain 
+	License link: http://en.wikipedia.org/wiki/Public_domain
+	formats: svg, png
+	subdirectory: open_icon_library-devel/icons/tango
+
+Tango harm-on-icons (tango-harm)
+	link: http://gnome-look.org/content/show.php/Tango+mine?content=76316
+	license: CC-BY 3.0 
+	License link: http://creativecommons.org/licenses/by/3.0/
+	formats: svg->png 
+	subdirectory: open_icon_library-devel/icons/tango-harm
+
+Warthan's Stuff: Sovereign State Flags of the World (warthan)
+	link: http://warthan.org/nation_flags.html
+	license: GPL
+	License link: http://creativecommons.org/licenses/GPL/2.0/
+	formats: png
+	subdirectory: open_icon_library-devel/icons/warthan
+
+Wikimedia Commons
+	link: http://commons.wikimedia.org/wiki/Main_Page
+	license: CC, GPL, PD, MIT, BSD (in separate directories)
+	License link: 
+	format: svg, png
+	subdirectory: open_icon_library-devel/icons/wiki_commons_bsd
+	subdirectory: open_icon_library-devel/icons/wiki_commons_mit
+	subdirectories: open_icon_library-devel/icons/wiki_commons_cc
+				open_icon_library-devel/icons_by_subject/wiki_commons_cc
+	subdirectories: open_icon_library-devel/icons/wiki_commons_gpl
+				open_icon_library-devel/icons_by_subject/wiki_commons_gpl
+	subdirectories: open_icon_library-devel/icons/wiki_commons_pd
+				open_icon_library-devel/icons_by_subject/wiki_commons_pd
+	See AUTHORS_wiki_commons* for details on each image with license info
+
+WPClipart (wpclipart)
+	link: http://www.wpclipart.com/
+	license: PD
+
+
+##################################################################
+## Licenses:
+
+Creative Commons Attribution 1.0 Generic (CC-BY 1.0)
+	link: http://creativecommons.org/licenses/by/1.0/
+
+Creative Commons Attribution 2.0 Generic (CC-BY 2.0)
+	link: http://creativecommons.org/licenses/by/2.0/
+
+Creative Commons Attribution 2.5 Generic (CC-BY 2.5)
+	link: http://creativecommons.org/licenses/by/2.5/
+
+Creative Commons Attribution 3.0 Unported (CC-BY 3.0)
+	link: http://creativecommons.org/licenses/by/3.0/
+
+Creative Commons Attribution-Share Alike 1.0 Generic (CC-BY-SA 1.0)
+	link: http://creativecommons.org/licenses/by-sa/1.0/
+
+Creative Commons Attribution-Share Alike 2.0 Generic (CC-BY-SA 2.0)
+	link: http://creativecommons.org/licenses/by-sa/2.0/
+
+Creative Commons Attribution-Share Alike 2.5 Generic (CC-BY-SA 2.5)
+	link: http://creativecommons.org/licenses/by-sa/2.5/
+
+Creative Commons Attribution-Share Alike 3.0 Unported (CC-BY-SA 3.0)
+	link: http://creativecommons.org/licenses/by-sa/3.0/
+
+GNU General Public License 2 (GPLv2)
+	link: http://creativecommons.org/licenses/GPL/2.0/
+
+GNU General Public License 3 (GPLv3)
+	link: http://creativecommons.org/licenses/GPL/3.0/
+
+GNU Lesser General Public License 2.1 (LGPL)
+	link: http://creativecommons.org/licenses/LGPL/2.1/
+
+GNU Lesser General Public License 3.0 (LGPLv3)
+	link: http://www.gnu.org/licenses/lgpl-3.0.txt
+
+MIT License (MIT)
+	link: http://creativecommons.org/licenses/MIT/
+
+BSD License (BSD)
+	link: http://creativecommons.org/licenses/BSD/
+
+Public Domain (PD)
+	link: http://en.wikipedia.org/wiki/Public_domain
+
+List of other Free/Open licenses (not used)
+	link: http://www.gnu.org/philosophy/license-list.html
+
+
+
+
+
+###################################################
+## File List:
+##
+
+File Name   /    Source    /
