@@ -46,11 +46,11 @@ public class DockingFrame extends JFrame
     public DockingFrame( MultiSplitPane docker )
     {
         this.docker = docker;
-        setContentPane( docker );
+        this.setContentPane( docker );
 
         this.normalBounds = getBounds( );
 
-        addWindowStateListener( new WindowStateListener( )
+        this.addWindowStateListener( new WindowStateListener( )
         {
             @Override
             public void windowStateChanged( WindowEvent ev )
@@ -59,7 +59,7 @@ public class DockingFrame extends JFrame
             }
         } );
 
-        addComponentListener( new ComponentAdapter( )
+        this.addComponentListener( new ComponentAdapter( )
         {
             @Override
             public void componentMoved( ComponentEvent ev )
@@ -77,10 +77,15 @@ public class DockingFrame extends JFrame
 
     protected void updateNormalBounds( )
     {
-        if ( getExtendedState( ) == NORMAL )
+        if ( this.getExtendedState( ) == NORMAL )
         {
-            this.normalBounds = getBounds( );
+            this.normalBounds = this.getBounds( );
         }
+    }
+
+    public void setNormalBounds( Rectangle bounds )
+    {
+        this.setNormalBounds( bounds.x, bounds.y, bounds.width, bounds.height );
     }
 
     public void setNormalBounds( int x, int y, int width, int height )
