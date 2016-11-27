@@ -8,22 +8,12 @@ import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.LayeredGeo;
 import com.metsci.glimpse.layers.LayeredTimeline;
 import com.metsci.glimpse.layers.TimelineLayer;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 {
 
-    public static class ExampleLayerModel
-    {
-        // WIP: Implement example model
-    }
-
-
-    protected final ExampleLayerModel model;
-
-    protected GlimpsePainter geoPainter;
+    protected ExampleGeoPainter geoPainter;
 
     protected EventPlotInfo timelineRow;
     protected TaggedAxisListener1D timeAxisListener;
@@ -31,29 +21,27 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 
     public ExampleLayer( )
     {
-        this.model = new ExampleLayerModel( );
-
         this.geoPainter = null;
 
         this.timelineRow = null;
         this.timeAxisListener = null;
     }
 
+    public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float depth_SU )
+    {
+        this.geoPainter.addPoint( time_PMILLIS, x_SU, y_SU, depth_SU );
+    }
+
     @Override
     public void installToGeo( LayeredGeo geo )
     {
-        // WIP: Implement example painter
-        this.geoPainter = new GlimpsePainter( );
+        this.geoPainter = new ExampleGeoPainter( );
         geo.dataPainter.addPainter( this.geoPainter );
-
-        // WIP: Add model listeners
     }
 
     @Override
     public void uninstallFromGeo( LayeredGeo geo, GlimpseContext context )
     {
-        // WIP: Remove model listeners
-
         geo.dataPainter.removePainter( this.geoPainter );
         this.geoPainter.dispose( context );
         this.geoPainter = null;
@@ -71,24 +59,23 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
             @Override
             public void tagsUpdated( TaggedAxis1D axis )
             {
-                // WIP: Update model
+                long tMin_PMILLIS = timeline.plot.getTimeSelectionMin( ).toPosixMillis( );
+                long tMax_PMILLIS = timeline.plot.getTimeSelectionMax( ).toPosixMillis( );
+                long tCursor_PMILLIS = timeline.plot.getTimeSelection( ).toPosixMillis( );
+                geoPainter.setTimeSelection( tMin_PMILLIS, tMax_PMILLIS, tCursor_PMILLIS );
             }
         };
         timeline.plot.getTimeAxis( ).addAxisListener( this.timeAxisListener );
-
-        // WIP: Add model listeners
     }
 
     @Override
     public void uninstallFromTimeline( LayeredTimeline timeline, GlimpseContext context )
     {
-        // WIP: Remove model listeners
+        timeline.plot.getTimeAxis( ).removeAxisListener( this.timeAxisListener );
+        this.timeAxisListener = null;
 
         timeline.plot.removePlot( this.timelineRow.getId( ) );
         this.timelineRow = null;
-
-        timeline.plot.getTimeAxis( ).removeAxisListener( this.timeAxisListener );
-        this.timeAxisListener = null;
     }
 
 }
