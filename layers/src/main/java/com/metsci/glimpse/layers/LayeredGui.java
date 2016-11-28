@@ -63,7 +63,12 @@ public class LayeredGui
     public void arrange( Class<?> mainClass, String defaultArrResource )
     {
         String appName = mainClass.getSimpleName( );
-        URL defaultArrUrl = getResource( mainClass, defaultArrResource );
+        this.arrange( appName, defaultArrResource );
+    }
+
+    public void arrange( String appName, String defaultArrResource )
+    {
+        URL defaultArrUrl = getResource( defaultArrResource );
         this.arrange( appName, defaultArrUrl );
     }
 
