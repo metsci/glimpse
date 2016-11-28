@@ -50,6 +50,7 @@ public class LayeredGui
                 animator.stop( );
             }
         } );
+        this.animator.start( );
 
         this.dockingArrSaver = null;
 
