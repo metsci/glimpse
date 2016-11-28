@@ -28,12 +28,12 @@ public class ExampleGeoPainter extends GlimpsePainterBase
         this.prog = new ExampleProgram( );
     }
 
-    public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float depth_SU )
+    public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
     {
         // WIP: Need a time epoch
-        float t = asdf;
+        float t = 0;
 
-        this.txyzBuffer.grow3f( t, x_SU, y_SU );
+        this.txyzBuffer.grow4f( t, x_SU, y_SU, z_SU );
     }
 
     public void setGeoSelection( float xMin_SU, float xMax_SU, float yMin_SU, float yMax_SU )

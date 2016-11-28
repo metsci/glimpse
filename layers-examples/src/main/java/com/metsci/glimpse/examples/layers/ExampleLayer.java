@@ -27,9 +27,9 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.timeAxisListener = null;
     }
 
-    public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float depth_SU )
+    public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
     {
-        this.geoPainter.addPoint( time_PMILLIS, x_SU, y_SU, depth_SU );
+        this.geoPainter.addPoint( time_PMILLIS, x_SU, y_SU, z_SU );
     }
 
     @Override

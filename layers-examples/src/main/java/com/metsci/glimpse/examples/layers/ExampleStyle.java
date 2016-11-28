@@ -7,7 +7,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 public class ExampleStyle
 {
 
-    public float pointSize_PX = 5.0f;
+    public float pointSize_PX = 7.0f;
 
     public float feather_PX = 0.9f;
 

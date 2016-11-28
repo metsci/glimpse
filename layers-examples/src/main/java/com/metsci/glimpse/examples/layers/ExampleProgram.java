@@ -17,8 +17,9 @@ import com.metsci.glimpse.gl.GLEditableBuffer;
 public class ExampleProgram
 {
 
-    public static final String exampleVertShader_GLSL = requireResourceText( "asdf/example.vs" );
-    public static final String exampleFragShader_GLSL = requireResourceText( "asdf/example.fs" );
+    public static final String exampleVertShader_GLSL = requireResourceText( "ExampleProgram/example.vs" );
+    public static final String exampleGeomShader_GLSL = requireResourceText( "ExampleProgram/example.gs" );
+    public static final String exampleFragShader_GLSL = requireResourceText( "ExampleProgram/example.fs" );
 
 
     public static class ExampleProgramHandles
@@ -36,7 +37,7 @@ public class ExampleProgram
 
         public ExampleProgramHandles( GL2ES2 gl )
         {
-            this.program = createProgram( gl, exampleVertShader_GLSL, null, exampleFragShader_GLSL );
+            this.program = createProgram( gl, exampleVertShader_GLSL, exampleGeomShader_GLSL, exampleFragShader_GLSL );
 
             this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
             this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
