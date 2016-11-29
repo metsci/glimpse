@@ -12,17 +12,25 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 public class ExampleGeoPainter extends GlimpsePainterBase
 {
+
+    protected final GeoProjection geoProj;
+    protected final Epoch timelineEpoch;
 
     protected final GLEditableBuffer txyzBuffer;
     protected final ExampleStyle style;
     protected final ExampleProgram prog;
 
 
-    public ExampleGeoPainter( )
+    public ExampleGeoPainter( GeoProjection geoProj, Epoch timelineEpoch )
     {
+        this.geoProj = geoProj;
+        this.timelineEpoch = timelineEpoch;
+
         this.txyzBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 0 );
         this.style = new ExampleStyle( );
         this.prog = new ExampleProgram( );
@@ -30,9 +38,7 @@ public class ExampleGeoPainter extends GlimpsePainterBase
 
     public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
     {
-        // WIP: Need a time epoch
-        float t = 0;
-
+        float t = ( float ) timelineEpoch.fromPosixMillis( time_PMILLIS );
         this.txyzBuffer.grow4f( t, x_SU, y_SU, z_SU );
     }
 

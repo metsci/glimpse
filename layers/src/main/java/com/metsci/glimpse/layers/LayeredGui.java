@@ -6,6 +6,7 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameT
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
 
 import java.net.URL;
 
@@ -17,15 +18,16 @@ import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.util.var.Var;
 
 public class LayeredGui
 {
 
     protected final DockingGroup dockingGroup;
-
     protected final GLAnimatorControl animator;
-
     protected DockingGroupListener dockingArrSaver;
+
+    protected final Var<LayeredScenario> scenario;
 
     protected LayeredGeo geo;
     protected LayeredTimeline timeline;
@@ -54,16 +56,13 @@ public class LayeredGui
 
         this.dockingArrSaver = null;
 
+        LayeredScenario emptyScenario = ( new LayeredScenario.Builder( ) ).build( );
+        this.scenario = new Var<>( emptyScenario, notNull );
+
         this.geo = null;
         this.timeline = null;
 
         // WIP: Add layer-tree view
-    }
-
-    public void arrange( Class<?> mainClass, String defaultArrResource )
-    {
-        String appName = mainClass.getSimpleName( );
-        this.arrange( appName, defaultArrResource );
     }
 
     public void arrange( String appName, String defaultArrResource )
@@ -98,7 +97,7 @@ public class LayeredGui
     {
         if ( this.geo == null )
         {
-            this.geo = new LayeredGeo( );
+            this.geo = new LayeredGeo( this.scenario );
             this.animator.add( this.geo.canvas.getGLDrawable( ) );
             this.dockingGroup.addView( this.geo.view );
         }
@@ -109,15 +108,26 @@ public class LayeredGui
     {
         if ( this.timeline == null )
         {
-            this.timeline = new LayeredTimeline( );
+            this.timeline = new LayeredTimeline( this.scenario );
             this.animator.add( this.timeline.canvas.getGLDrawable( ) );
             this.dockingGroup.addView( this.timeline.view );
         }
         return this.timeline;
     }
 
+    public void setScenario( LayeredScenario newScenario )
+    {
+        // WIP: Remove layers
+
+        this.scenario.set( newScenario );
+
+        // WIP: Add layers back in
+    }
+
     public void addLayer( Layer layer )
     {
+        layer.init( this.scenario.v( ) );
+
         if ( layer instanceof GeoLayer )
         {
             GeoLayer geoLayer = ( GeoLayer ) layer;
@@ -131,6 +141,11 @@ public class LayeredGui
         }
 
         // WIP: Add to layer-tree model
+    }
+
+    public void removeLayer( Layer layer )
+    {
+        // WIP: Need active GL context
     }
 
 }

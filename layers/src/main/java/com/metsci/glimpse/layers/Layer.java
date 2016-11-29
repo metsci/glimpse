@@ -10,4 +10,6 @@ public interface Layer
     //Layer parent( );
     //List<Layer> children( );
 
+    void init( LayeredScenario scenario );
+
 }

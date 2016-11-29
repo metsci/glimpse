@@ -15,6 +15,7 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.util.var.Var;
 
 public class LayeredGeo
 {
@@ -30,7 +31,7 @@ public class LayeredGeo
     public final BorderPainter borderPainter;
 
 
-    public LayeredGeo( )
+    public LayeredGeo( Var<LayeredScenario> scenario )
     {
         this.plot = new MultiAxisPlot2D( );
         Axis1D xAxis = plot.getCenterAxisX( );
