@@ -53,11 +53,20 @@ vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
 // AXIS_RECT is (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
+uniform vec4 RGBA_INSIDE_TIME_WINDOW;
+uniform vec4 RGBA_OUTSIDE_TIME_WINDOW;
+uniform float TIME_WINDOW_MIN;
+uniform float TIME_WINDOW_MAX;
 
 in vec4 inTxyz;
 
+out vec4 vColor;
+
 void main( )
 {
+    float t = inTxyz.x;
+    vColor = ( TIME_WINDOW_MIN <= t && t <= TIME_WINDOW_MAX ? RGBA_INSIDE_TIME_WINDOW : RGBA_OUTSIDE_TIME_WINDOW );
+
     vec2 xy_AXIS = inTxyz.yz;
     gl_Position.xy = axisXyToPx( xy_AXIS, AXIS_RECT, VIEWPORT_SIZE_PX );
 }

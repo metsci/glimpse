@@ -36,7 +36,7 @@ public class LayeredExample
             for ( int i = 0; i < 1000; i++ )
             {
                 long t_PMILLIS = t0_PMILLIS + i*1000;
-                float x_SU = -10 + 20*r.nextFloat( );
+                float x_SU = -10 + 0.02f*i + 4*r.nextFloat( );
                 float y_SU = -10 + 20*r.nextFloat( );
                 float z_SU = -10 + 20*r.nextFloat( );
                 exampleLayer.addPoint( t_PMILLIS, x_SU, y_SU, z_SU );

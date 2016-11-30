@@ -21,9 +21,11 @@ public class ExampleGeoPainter extends GlimpsePainterBase
     protected final GeoProjection geoProj;
     protected final Epoch timelineEpoch;
 
-    protected final GLEditableBuffer txyzBuffer;
-    protected final ExampleStyle style;
     protected final ExampleProgram prog;
+    protected final ExampleStyle style;
+    protected float timeWindowMin;
+    protected float timeWindowMax;
+    protected final GLEditableBuffer txyzBuffer;
 
 
     public ExampleGeoPainter( GeoProjection geoProj, Epoch timelineEpoch )
@@ -31,14 +33,16 @@ public class ExampleGeoPainter extends GlimpsePainterBase
         this.geoProj = geoProj;
         this.timelineEpoch = timelineEpoch;
 
-        this.txyzBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 0 );
-        this.style = new ExampleStyle( );
         this.prog = new ExampleProgram( );
+        this.style = new ExampleStyle( );
+        this.timeWindowMin = 0;
+        this.timeWindowMax = 0;
+        this.txyzBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 0 );
     }
 
     public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
     {
-        float t = ( float ) timelineEpoch.fromPosixMillis( time_PMILLIS );
+        float t = ( float ) this.timelineEpoch.fromPosixMillis( time_PMILLIS );
         this.txyzBuffer.grow4f( t, x_SU, y_SU, z_SU );
     }
 
@@ -49,7 +53,8 @@ public class ExampleGeoPainter extends GlimpsePainterBase
 
     public void setTimeSelection( long tMin_PMILLIS, long tMax_PMILLIS, long tCursor_PMILLIS )
     {
-        // WIP
+        this.timeWindowMin = ( float ) this.timelineEpoch.fromPosixMillis( tMin_PMILLIS );
+        this.timeWindowMax = ( float ) this.timelineEpoch.fromPosixMillis( tMax_PMILLIS );
     }
 
     @Override
@@ -65,7 +70,11 @@ public class ExampleGeoPainter extends GlimpsePainterBase
         {
             this.prog.setViewport( gl, bounds );
             this.prog.setAxisOrtho( gl, axis );
+
             this.prog.setStyle( gl, this.style );
+
+            this.prog.setTimeWindow( gl, this.timeWindowMin, this.timeWindowMax );
+
             this.prog.draw( gl, this.txyzBuffer );
         }
         finally

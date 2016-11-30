@@ -36,7 +36,11 @@ uniform float POINT_SIZE_PX;
 uniform float FEATHER_THICKNESS_PX;
 
 
+in vec4[] vColor;
+
+
 out vec2 gXy_PX;
+out vec4 gColor;
 
 
 void main( )
@@ -52,20 +56,26 @@ void main( )
     float right_NDC = center_NDC.x + offset_NDC.x;
     float bottom_NDC = center_NDC.y - offset_NDC.y;
 
+    vec4 color = vColor[ 0 ];
+
     gl_Position = vec4( left_NDC, bottom_NDC, 0.0, 1.0 );
     gXy_PX = vec2( -offset_PX, -offset_PX );
+    gColor = color;
     EmitVertex( );
 
     gl_Position = vec4( left_NDC, top_NDC, 0.0, 1.0 );
     gXy_PX = vec2( -offset_PX, +offset_PX );
+    gColor = color;
     EmitVertex( );
 
     gl_Position = vec4( right_NDC, bottom_NDC, 0.0, 1.0 );
     gXy_PX = vec2( +offset_PX, -offset_PX );
+    gColor = color;
     EmitVertex( );
 
     gl_Position = vec4( right_NDC, top_NDC, 0.0, 1.0 );
     gXy_PX = vec2( +offset_PX, +offset_PX );
+    gColor = color;
     EmitVertex( );
 
     EndPrimitive( );

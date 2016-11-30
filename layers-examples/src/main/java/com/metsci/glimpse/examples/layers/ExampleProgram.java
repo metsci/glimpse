@@ -31,7 +31,11 @@ public class ExampleProgram
 
         public final int POINT_SIZE_PX;
         public final int FEATHER_THICKNESS_PX;
-        public final int RGBA;
+        public final int RGBA_INSIDE_TIME_WINDOW;
+        public final int RGBA_OUTSIDE_TIME_WINDOW;
+
+        public final int TIME_WINDOW_MIN;
+        public final int TIME_WINDOW_MAX;
 
         public final int inTxyz;
 
@@ -44,7 +48,11 @@ public class ExampleProgram
 
             this.POINT_SIZE_PX = gl.glGetUniformLocation( program, "POINT_SIZE_PX" );
             this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( program, "FEATHER_THICKNESS_PX" );
-            this.RGBA = gl.glGetUniformLocation( program, "RGBA" );
+            this.RGBA_INSIDE_TIME_WINDOW = gl.glGetUniformLocation( program, "RGBA_INSIDE_TIME_WINDOW" );
+            this.RGBA_OUTSIDE_TIME_WINDOW = gl.glGetUniformLocation( program, "RGBA_OUTSIDE_TIME_WINDOW" );
+
+            this.TIME_WINDOW_MIN = gl.glGetUniformLocation( program, "TIME_WINDOW_MIN" );
+            this.TIME_WINDOW_MAX = gl.glGetUniformLocation( program, "TIME_WINDOW_MAX" );
 
             this.inTxyz = gl.glGetAttribLocation( program, "inTxyz" );
         }
@@ -112,7 +120,14 @@ public class ExampleProgram
     {
         gl.glUniform1f( this.handles.POINT_SIZE_PX, style.pointSize_PX );
         gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
-        gl.glUniform4fv( this.handles.RGBA, 1, style.rgba, 0 );
+        gl.glUniform4fv( this.handles.RGBA_INSIDE_TIME_WINDOW, 1, style.rgbaInsideTimeWindow, 0 );
+        gl.glUniform4fv( this.handles.RGBA_OUTSIDE_TIME_WINDOW, 1, style.rgbaOutsideTimeWindow, 0 );
+    }
+
+    public void setTimeWindow( GL2ES2 gl, float tMin, float tMax )
+    {
+        gl.glUniform1f( this.handles.TIME_WINDOW_MIN, tMin );
+        gl.glUniform1f( this.handles.TIME_WINDOW_MAX, tMax );
     }
 
     public void draw( GL2ES3 gl, GLEditableBuffer txyzBuffer )
